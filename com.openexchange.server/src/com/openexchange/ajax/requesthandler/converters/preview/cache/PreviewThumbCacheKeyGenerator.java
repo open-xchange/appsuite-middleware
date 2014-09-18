@@ -47,66 +47,57 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
-import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
-import java.util.Date;
-import com.dropbox.client2.DropboxAPI.Entry;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageFolder;
+import static com.google.common.net.HttpHeaders.ETAG;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.java.Strings;
-import com.openexchange.mime.MimeTypeMap;
 
 /**
- * {@link DropboxFile}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link PreviewThumbCacheKeyGenerator} - A cache key generator for preview thumbnails considering specified width and height parameters
+ * used during creation.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public final class DropboxFile extends DefaultFile {
+public class PreviewThumbCacheKeyGenerator implements CacheKeyGenerator {
 
-    private final long sequenceNumber;
+    private static final Logger LOG = LoggerFactory.getLogger(PreviewThumbCacheKeyGenerator.class);
 
-    /**
-     * Initializes a new {@link DropboxFile}.
-     *
-     * @param entry The dropbox entry representing the file
-     * @param userID The identifier of the user to use as created-/modified-by information
-     * @throws OXException
-     */
-    public DropboxFile(Entry entry, int userID) throws OXException {
-        super();
-        if (entry.isDir) {
-            throw DropboxExceptionCodes.NOT_A_FILE.create(entry.path);
+    private AJAXRequestResult result;
+
+    private String width;
+
+    private String height;
+
+    private String scaleType;
+
+    private AJAXRequestData requestData;
+
+    private String cachedCacheKey = null;
+
+    public PreviewThumbCacheKeyGenerator(AJAXRequestResult result, AJAXRequestData requestData) {
+        this.result = result;
+        this.requestData = requestData;
+        this.width = requestData.getParameter("width");
+        this.height = requestData.getParameter("height");
+        this.scaleType = requestData.getParameter("scaleType");
+    }
+
+    @Override
+    public String generateCacheKey() {
+        if (cachedCacheKey == null) {
+            final String eTag = result.getHeader(ETAG);
+            if (!Strings.isEmpty(eTag)) {
+                cachedCacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, width, height, scaleType);
+                LOG.debug("Generated cacheKey {} based on etag {}, width {}, height {} and scaleType {}", cachedCacheKey, eTag, width, height, scaleType);
+            }
         }
-        String parentPath = entry.parentPath();
-        setId(entry.fileName());
-        setFolderId("/".equals(parentPath) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(parentPath));
-        setCreatedBy(userID);
-        setModifiedBy(userID);
-        Date modified = Utils.parseDate(entry.modified);
-        Date clientModified = Utils.parseDate(entry.clientMtime);
-        setCreated(null == clientModified ? modified : clientModified);
-        setLastModified(null == clientModified ? modified : clientModified);
-        sequenceNumber = null != modified ? modified.getTime() : 0;
-        setVersion(entry.rev);
-        setIsCurrentVersion(true);
-        setFileSize(entry.bytes);
-        setFileMIMEType(Strings.isEmpty(entry.mimeType) ?
-            DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
-        setFileName(entry.fileName());
-        setTitle(entry.fileName());
-    }
-
-    @Override
-    public long getSequenceNumber() {
-        return 0 != this.sequenceNumber ? sequenceNumber : super.getSequenceNumber();
-    }
-
-    @Override
-    public String toString() {
-        String folder = normalizeFolderId(getFolderId());
-        return null == folder ? '/' + getId() : folder + '/' + getId();
+        return cachedCacheKey;
     }
 
 }

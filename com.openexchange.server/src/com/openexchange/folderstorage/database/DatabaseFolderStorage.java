@@ -511,7 +511,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * Prepare
                  */
-                final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con);
+                final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con, storageParameters);
                 final int userId = storageParameters.getUserId();
                 final boolean isShared = parent.isShared(userId);
                 final boolean isSystem = (SYSTEM_MODULE == parent.getModule());
@@ -619,7 +619,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
         try {
             final Connection con = provider.getConnection();
-            final FolderObject fo = getFolderObject(Integer.parseInt(folderId), storageParameters.getContext(), con);
+            final FolderObject fo = getFolderObject(Integer.parseInt(folderId), storageParameters.getContext(), con, storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -790,7 +790,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  * A non-virtual database folder
                  */
                 final OXFolderAccess folderAccess = getFolderAccess(ctx, con);
-                return folderAccess.containsForeignObjects(getFolderObject(folderId, ctx, con), storageParameters.getSession(), ctx);
+                return folderAccess.containsForeignObjects(getFolderObject(folderId, ctx, con, storageParameters), storageParameters.getSession(), ctx);
             }
         } finally {
             provider.close();
@@ -842,7 +842,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  * A non-virtual database folder
                  */
                 final OXFolderAccess folderAccess = getFolderAccess(ctx, con);
-                return folderAccess.isEmpty(getFolderObject(folderId, ctx, con), storageParameters.getSession(), ctx);
+                return folderAccess.isEmpty(getFolderObject(folderId, ctx, con, storageParameters), storageParameters.getSession(), ctx);
             }
         } finally {
             provider.close();
@@ -920,7 +920,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                         /*
                          * A non-virtual database folder
                          */
-                        final FolderObject fo = getFolderObject(folderId, ctx, con);
+                        final FolderObject fo = getFolderObject(folderId, ctx, con, storageParameters);
                         final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                         retval = DatabaseFolderConverter.convert(fo, user, userPermissionBits, ctx, storageParameters.getSession(), altNames, con);
                     }
@@ -1029,7 +1029,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final Connection con = provider.getConnection();
                 if (!map.isEmpty()) {
                     final Session session = storageParameters.getSession();
-                    for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
+                    for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con, storageParameters)) {
                         if (null != folderObject) {
                             final int index = map.get(folderObject.getObjectID());
                             ret[index] = DatabaseFolderConverter.convert(folderObject, user, userPermissionBits, ctx, session, altNames, con);
@@ -1154,7 +1154,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                      */
                     final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
                     if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
-                        final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
+                        final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con, storageParameters);
                         if (gab.isVisible(userId, userPermissionBits)) {
                             gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                             list.add(gab);
@@ -1467,7 +1467,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 for (int i = 0; i < arr.length; i++) {
                     arr[i] = subfolderIds.get(i).intValue();
                 }
-                subfolders = getFolderObjects(arr, storageParameters.getContext(), con);
+                subfolders = getFolderObjects(arr, storageParameters.getContext(), con, storageParameters);
             }
             final ServerSession session;
             {
@@ -1640,10 +1640,10 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             {
                 final String parentId = folder.getParentID();
                 if (null == parentId) {
-                    updateMe.setParentFolderID(getFolderObject(folderId, context, con).getParentFolderID());
+                    updateMe.setParentFolderID(getFolderObject(folderId, context, con, storageParameters).getParentFolderID());
                 } else {
                     if (DatabaseFolderStorageUtility.hasSharedPrefix(parentId)) {
-                        updateMe.setParentFolderID(getFolderObject(folderId, context, con).getParentFolderID());
+                        updateMe.setParentFolderID(getFolderObject(folderId, context, con, storageParameters).getParentFolderID());
                     } else {
                         updateMe.setParentFolderID(Integer.parseInt(parentId));
                     }
@@ -1866,11 +1866,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
      * ############################# HELPER METHODS #############################
      */
 
-    private static FolderObject getFolderObject(final int folderId, final Context ctx, final Connection con) throws OXException {
+    private static FolderObject getFolderObject(final int folderId, final Context ctx, final Connection con, StorageParameters storageParameters) throws OXException {
+        Boolean ignoreCache = storageParameters.getIgnoreCache();
         if (!FolderCacheManager.isEnabled()) {
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
         }
-        final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+
+        FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+        if (Boolean.TRUE.equals(ignoreCache)) {
+            FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
+            cacheManager.putFolderObject(fo, ctx, true, null);
+            return fo;
+        }
+
         FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
         if (null == fo) {
             fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
@@ -1879,20 +1887,28 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         return fo;
     }
 
-    private static List<FolderObject> getFolderObjects(final int[] folderIds, final Context ctx, final Connection con) throws OXException {
+    private static List<FolderObject> getFolderObjects(final int[] folderIds, final Context ctx, final Connection con, StorageParameters storageParameters) throws OXException {
+        Boolean ignoreCache = storageParameters.getIgnoreCache();
         if (!FolderCacheManager.isEnabled()) {
             /*
              * OX folder cache not enabled
              */
             return OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con, true, true);
         }
-        /*
-         * Load them either from cache or from database
-         */
+
+        FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+        if (Boolean.TRUE.equals(ignoreCache)) {
+            List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con, true, true);
+            for (FolderObject fo : folders) {
+                cacheManager.putFolderObject(fo, ctx, true, null);
+            }
+            return folders;
+        }
+
+        // Load them either from cache or from database
         final int length = folderIds.length;
         final FolderObject[] ret = new FolderObject[length];
         final TIntIntMap toLoad = new TIntIntHashMap(length);
-        final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
         for (int index = 0; index < length; index++) {
             final int folderId = folderIds[index];
             final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);

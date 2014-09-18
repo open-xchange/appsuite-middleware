@@ -47,66 +47,65 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.global.osgi;
 
-import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
-import java.util.Date;
-import com.dropbox.client2.DropboxAPI.Entry;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Strings;
-import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link DropboxFile}
+ * {@link ServerInitialization} - The {@link Initialization initialization} for server.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxFile extends DefaultFile {
+final class ServerInitialization implements Initialization {
 
-    private final long sequenceNumber;
+    private volatile String previousTTL;
+    private volatile String previousNegativeTTL;
 
     /**
-     * Initializes a new {@link DropboxFile}.
-     *
-     * @param entry The dropbox entry representing the file
-     * @param userID The identifier of the user to use as created-/modified-by information
-     * @throws OXException
+     * Initializes a new {@link ServerInitialization}.
      */
-    public DropboxFile(Entry entry, int userID) throws OXException {
+    ServerInitialization() {
         super();
-        if (entry.isDir) {
-            throw DropboxExceptionCodes.NOT_A_FILE.create(entry.path);
+    }
+
+    @Override
+    public void start() throws OXException {
+        /*
+         * Remember previous settings
+         */
+        previousTTL = java.security.Security.getProperty("networkaddress.cache.ttl");
+        previousNegativeTTL = java.security.Security.getProperty("networkaddress.cache.negative.ttl");
+        /*
+         * The number of seconds to cache the successful lookup
+         */
+        java.security.Security.setProperty("networkaddress.cache.ttl", Integer.toString(3600));
+        System.setProperty("sun.net.inetaddr.ttl", Integer.toString(3600));
+        /*
+         * The number of seconds to cache the failure for un-successful lookups
+         */
+        java.security.Security.setProperty("networkaddress.cache.negative.ttl", Integer.toString(10));
+    }
+
+    @Override
+    public void stop() throws OXException {
+        String previousTTL = this.previousTTL;
+        if (null == previousTTL) {
+            java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
+        } else {
+            /*
+             * Restore previous settings
+             */
+            java.security.Security.setProperty("networkaddress.cache.ttl", previousTTL);
+            this.previousTTL = null;
         }
-        String parentPath = entry.parentPath();
-        setId(entry.fileName());
-        setFolderId("/".equals(parentPath) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(parentPath));
-        setCreatedBy(userID);
-        setModifiedBy(userID);
-        Date modified = Utils.parseDate(entry.modified);
-        Date clientModified = Utils.parseDate(entry.clientMtime);
-        setCreated(null == clientModified ? modified : clientModified);
-        setLastModified(null == clientModified ? modified : clientModified);
-        sequenceNumber = null != modified ? modified.getTime() : 0;
-        setVersion(entry.rev);
-        setIsCurrentVersion(true);
-        setFileSize(entry.bytes);
-        setFileMIMEType(Strings.isEmpty(entry.mimeType) ?
-            DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
-        setFileName(entry.fileName());
-        setTitle(entry.fileName());
-    }
-
-    @Override
-    public long getSequenceNumber() {
-        return 0 != this.sequenceNumber ? sequenceNumber : super.getSequenceNumber();
-    }
-
-    @Override
-    public String toString() {
-        String folder = normalizeFolderId(getFolderId());
-        return null == folder ? '/' + getId() : folder + '/' + getId();
+        String previousNegativeTTL = this.previousNegativeTTL;
+        if (null == previousNegativeTTL) {
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl", "10");
+        } else {
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl", previousNegativeTTL);
+            this.previousNegativeTTL = null;
+        }
     }
 
 }

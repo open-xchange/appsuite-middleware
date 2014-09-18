@@ -47,30 +47,17 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
 
 /**
- * {@link UnitTests}
+ * {@link CacheKeyGenerator} - A cache key generator
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class UnitTests {
+public interface CacheKeyGenerator {
 
-    public UnitTests() {
-        super();
-    }
+    String generateCacheKey();
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        return tests;
-    }
 }

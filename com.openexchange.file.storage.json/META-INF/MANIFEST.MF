@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.file.storage.json
 Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax,
+Import-Package: com.google.common.net,
+ com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.helper,
  com.openexchange.ajax.requesthandler,

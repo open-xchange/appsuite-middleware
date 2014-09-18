@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.global.osgi;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,9 +63,14 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.meta.internal.MetaContributorTracker;
+import com.openexchange.exception.interception.OXExceptionInterceptor;
+import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
+import com.openexchange.exception.interception.internal.OXExceptionInterceptorTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceHolderInit;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -97,7 +102,7 @@ public final class GlobalActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
-            final Initialization initialization = new com.openexchange.server.ServerInitialization();
+            final Initialization initialization = new ServerInitialization();
             this.initialization = initialization;
             initialization.start();
             ServiceHolderInit.getInstance().start();
@@ -106,6 +111,9 @@ public final class GlobalActivator implements BundleActivator {
             final List<ServiceTracker<?, ?>> trackers = new ArrayList<ServiceTracker<?, ?>>(4);
             this.trackers = trackers;
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
+
+            OXExceptionInterceptorRegistration.initInstance();
+            trackers.add(new ServiceTracker<OXExceptionInterceptor, OXExceptionInterceptor>(context, OXExceptionInterceptor.class, new OXExceptionInterceptorTracker(context)));
 
             final MetaContributorTracker metaContributors = new MetaContributorTracker(context);
             trackers.add(metaContributors);
@@ -225,6 +233,8 @@ public final class GlobalActivator implements BundleActivator {
                 metaContributorsRegistration.unregister();
                 this.metaContributorsRegistration = null;
             }
+
+            OXExceptionInterceptorRegistration.dropInstance();
 
             logger.debug("Global bundle successfully stopped");
         } catch (final Exception e) {

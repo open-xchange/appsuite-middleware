@@ -47,66 +47,81 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.exception.interception;
 
-import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
-import java.util.Date;
-import com.dropbox.client2.DropboxAPI.Entry;
+import java.util.Collection;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Strings;
-import com.openexchange.mime.MimeTypeMap;
+
 
 /**
- * {@link DropboxFile}
+ * Abstract implementation of {@link OXExceptionInterceptor} that should be used to create custom {@link OXExceptionInterceptor}s.<br>
+ * <br>
+ * With that you only have to define responsibilities and implement what should be do while intercepting by overriding {@link
+ * AbstractOXExceptionInterceptor.intercept(OXException)}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public final class DropboxFile extends DefaultFile {
+public abstract class AbstractOXExceptionInterceptor implements OXExceptionInterceptor {
 
-    private final long sequenceNumber;
+    /** List of {@link Responsibility} the extending {@link OXExceptionInterceptor} is responsible for **/
+    protected final Queue<Responsibility> responsibilitites = new ConcurrentLinkedQueue<Responsibility>();
+
+    /** The service ranking */
+    protected final int ranking;
 
     /**
-     * Initializes a new {@link DropboxFile}.
+     * Initializes a new {@link AbstractOXExceptionInterceptor}.
      *
-     * @param entry The dropbox entry representing the file
-     * @param userID The identifier of the user to use as created-/modified-by information
-     * @throws OXException
+     * @param ranking The ranking of this {@link OXExceptionInterceptor} compared to other ones
      */
-    public DropboxFile(Entry entry, int userID) throws OXException {
+    protected AbstractOXExceptionInterceptor(int ranking) {
         super();
-        if (entry.isDir) {
-            throw DropboxExceptionCodes.NOT_A_FILE.create(entry.path);
+        this.ranking = ranking;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public abstract OXException intercept(OXException oxException);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<Responsibility> getResponsibilities() {
+        return responsibilitites;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addResponsibility(Responsibility responsibility) {
+        this.responsibilitites.add(responsibility);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isResponsible(String module, String action) {
+        for (Responsibility responsibility : responsibilitites) {
+            if (responsibility.equals(new Responsibility(module, action))) {
+                return true;
+            }
         }
-        String parentPath = entry.parentPath();
-        setId(entry.fileName());
-        setFolderId("/".equals(parentPath) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(parentPath));
-        setCreatedBy(userID);
-        setModifiedBy(userID);
-        Date modified = Utils.parseDate(entry.modified);
-        Date clientModified = Utils.parseDate(entry.clientMtime);
-        setCreated(null == clientModified ? modified : clientModified);
-        setLastModified(null == clientModified ? modified : clientModified);
-        sequenceNumber = null != modified ? modified.getTime() : 0;
-        setVersion(entry.rev);
-        setIsCurrentVersion(true);
-        setFileSize(entry.bytes);
-        setFileMIMEType(Strings.isEmpty(entry.mimeType) ?
-            DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
-        setFileName(entry.fileName());
-        setTitle(entry.fileName());
+        return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public long getSequenceNumber() {
-        return 0 != this.sequenceNumber ? sequenceNumber : super.getSequenceNumber();
+    public int getRanking() {
+        return ranking;
     }
-
-    @Override
-    public String toString() {
-        String folder = normalizeFolderId(getFolderId());
-        return null == folder ? '/' + getId() : folder + '/' + getId();
-    }
-
 }

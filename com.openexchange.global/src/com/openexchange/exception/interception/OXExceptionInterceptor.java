@@ -47,66 +47,59 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.exception.interception;
 
-import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
-import java.util.Date;
-import com.dropbox.client2.DropboxAPI.Entry;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Strings;
-import com.openexchange.mime.MimeTypeMap;
 
 /**
- * {@link DropboxFile}
+ * {@link OXExceptionInterceptor} interface that might be implemented to register a new interceptor for exception handling.
+ * <p>
+ * Have a look at {@link AbstractOXExceptionInterceptor} that defines a default implementation.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @since 7.6.1
  */
-public final class DropboxFile extends DefaultFile {
-
-    private final long sequenceNumber;
+public interface OXExceptionInterceptor {
 
     /**
-     * Initializes a new {@link DropboxFile}.
+     * Gets the module / action combinations this interceptor is responsible for.
      *
-     * @param entry The dropbox entry representing the file
-     * @param userID The identifier of the user to use as created-/modified-by information
-     * @throws OXException
+     * @return The responsibilities for this interceptor
      */
-    public DropboxFile(Entry entry, int userID) throws OXException {
-        super();
-        if (entry.isDir) {
-            throw DropboxExceptionCodes.NOT_A_FILE.create(entry.path);
-        }
-        String parentPath = entry.parentPath();
-        setId(entry.fileName());
-        setFolderId("/".equals(parentPath) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(parentPath));
-        setCreatedBy(userID);
-        setModifiedBy(userID);
-        Date modified = Utils.parseDate(entry.modified);
-        Date clientModified = Utils.parseDate(entry.clientMtime);
-        setCreated(null == clientModified ? modified : clientModified);
-        setLastModified(null == clientModified ? modified : clientModified);
-        sequenceNumber = null != modified ? modified.getTime() : 0;
-        setVersion(entry.rev);
-        setIsCurrentVersion(true);
-        setFileSize(entry.bytes);
-        setFileMIMEType(Strings.isEmpty(entry.mimeType) ?
-            DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
-        setFileName(entry.fileName());
-        setTitle(entry.fileName());
-    }
+    Collection<Responsibility> getResponsibilities();
 
-    @Override
-    public long getSequenceNumber() {
-        return 0 != this.sequenceNumber ? sequenceNumber : super.getSequenceNumber();
-    }
+    /**
+     * Adds a new {@link Responsibility} to the interceptor
+     *
+     * @param responsibility The module/action combination the interceptor should be responsible for
+     */
+    void addResponsibility(Responsibility responsibility);
 
-    @Override
-    public String toString() {
-        String folder = normalizeFolderId(getFolderId());
-        return null == folder ? '/' + getId() : folder + '/' + getId();
-    }
+    /**
+     * Intercepts the given {@link OXException} for the defined module / action. Previously check if the given
+     * {@link OXExceptionInterceptor} is responsible for the module / action combination by using {@link #isResponsible(String, String)}
+     *
+     * @param oxException The {@link OXException} to intercept
+     * @return {@link OXException} that was processed by the interceptor
+     */
+    OXException intercept(OXException oxException);
+
+    /**
+     * Checks if the interceptor is responsible for the given module and action combination
+     *
+     * @param module The module that should be tested
+     * @param action The action that should be tested
+     * @return <code>true</code> if the interceptor is responsible (means that {@link #intercept(OXException)} will be executed); otherwise <code>false</code>
+     */
+    boolean isResponsible(String module, String action);
+
+    /**
+     * Returns the ranking of this {@link OXExceptionInterceptor}
+     *
+     * @return An <code>int</code> value representing the interceptor's ranking
+     */
+    int getRanking();
 
 }

@@ -51,7 +51,9 @@ package com.openexchange.ajax.requesthandler;
 
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -69,7 +71,16 @@ public class Dispatchers {
         super();
     }
 
-    private static final String CALLBACK = "callback";
+    /**
+     * Gets the action associated with given HTTP request
+     *
+     * @param req The HTTP request
+     * @return The associated action string
+     */
+    public static String getActionFrom(HttpServletRequest req) {
+        String action = req.getParameter(AJAXServlet.PARAMETER_ACTION);
+        return null == action ? Strings.toUpperCase(req.getMethod()) : action;
+    }
 
     /**
      * Check if common API response is expected for specified HTTP request
@@ -78,9 +89,6 @@ public class Dispatchers {
      * @return <code>true</code> if common API response is expected; otherwise <code>false</code>
      */
     public static boolean isApiOutputExpectedFor(HttpServletRequest req) {
-        if (null != req.getParameter(CALLBACK)) {
-            return true;
-        }
         String prefix = DispatcherServlet.getPrefix();
         if (req.getRequestURI().startsWith(prefix)) {
             // Common dispatcher action - Try to determine if JSON is expected or not

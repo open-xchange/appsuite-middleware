@@ -47,66 +47,80 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.exception.interception;
 
-import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
-import java.util.Date;
-import com.dropbox.client2.DropboxAPI.Entry;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Strings;
-import com.openexchange.mime.MimeTypeMap;
 
 /**
- * {@link DropboxFile}
+ * Module / action combination to define one responsibility of an {@link OXExceptionInterceptor}. An {@link OXExceptionInterceptor} is able
+ * to deal with (almost) unlimited {@link Responsibility}s
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public final class DropboxFile extends DefaultFile {
+public class Responsibility {
 
-    private final long sequenceNumber;
+    private final String module;
+    private final String action;
+    private final int hash;
 
     /**
-     * Initializes a new {@link DropboxFile}.
+     * Initializes a new {@link Responsibility}.
      *
-     * @param entry The dropbox entry representing the file
-     * @param userID The identifier of the user to use as created-/modified-by information
-     * @throws OXException
+     * @param module - the module the {@link OXExceptionInterceptor} is responsible for
+     * @param action - the module the {@link OXExceptionInterceptor} is responsible for.
      */
-    public DropboxFile(Entry entry, int userID) throws OXException {
-        super();
-        if (entry.isDir) {
-            throw DropboxExceptionCodes.NOT_A_FILE.create(entry.path);
+    public Responsibility(String module, String action) {
+        if (module == null) {
+            throw new IllegalArgumentException("Module might not be null");
         }
-        String parentPath = entry.parentPath();
-        setId(entry.fileName());
-        setFolderId("/".equals(parentPath) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(parentPath));
-        setCreatedBy(userID);
-        setModifiedBy(userID);
-        Date modified = Utils.parseDate(entry.modified);
-        Date clientModified = Utils.parseDate(entry.clientMtime);
-        setCreated(null == clientModified ? modified : clientModified);
-        setLastModified(null == clientModified ? modified : clientModified);
-        sequenceNumber = null != modified ? modified.getTime() : 0;
-        setVersion(entry.rev);
-        setIsCurrentVersion(true);
-        setFileSize(entry.bytes);
-        setFileMIMEType(Strings.isEmpty(entry.mimeType) ?
-            DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
-        setFileName(entry.fileName());
-        setTitle(entry.fileName());
+        if (action == null) {
+            throw new IllegalArgumentException("Action might not be null");
+        }
+
+        this.module = module;
+        this.action = action;
+        hash = module.hashCode() ^ action.hashCode();
     }
 
-    @Override
-    public long getSequenceNumber() {
-        return 0 != this.sequenceNumber ? sequenceNumber : super.getSequenceNumber();
+    /**
+     * Gets the module
+     *
+     * @return The module
+     */
+    public String getModule() {
+        return module;
     }
 
+    /**
+     * Gets the action
+     *
+     * @return The action
+     */
+    public String getAction() {
+        return action;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String toString() {
-        String folder = normalizeFolderId(getFolderId());
-        return null == folder ? '/' + getId() : folder + '/' + getId();
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof Responsibility)) {
+            return false;
+        }
+        Responsibility pairo = (Responsibility) o;
+        return this.module.equals(pairo.getModule()) && this.action.equals(pairo.getAction());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return hash;
     }
 
 }
