@@ -51,6 +51,7 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import java.util.Locale;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
@@ -138,6 +139,13 @@ public final class SubjectTerm extends SearchTerm<String> {
     @Override
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return new javax.mail.search.SubjectTerm(getNonWildcardPart(unicodeSubject));
+    }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        if (!fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
+            fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        }
     }
 
     @Override

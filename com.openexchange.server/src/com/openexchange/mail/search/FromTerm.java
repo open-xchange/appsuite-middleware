@@ -52,6 +52,7 @@ package com.openexchange.mail.search;
 import static com.openexchange.mail.utils.StorageUtility.getAllAddresses;
 import java.util.Collection;
 import java.util.Locale;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -144,6 +145,13 @@ public final class FromTerm extends SearchTerm<String> {
     @Override
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return new FromStringTerm(getNonWildcardPart(addr));
+    }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        if (!fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
+            fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        }
     }
 
     @Override

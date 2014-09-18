@@ -50,6 +50,7 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
+import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -130,4 +131,12 @@ public final class FlagTerm extends SearchTerm<Integer> {
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return getJavaMailSearchTerm();
     }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        if (!fetchProfile.contains(FetchProfile.Item.FLAGS)) {
+            fetchProfile.add(FetchProfile.Item.FLAGS);
+        }
+    }
+
 }
