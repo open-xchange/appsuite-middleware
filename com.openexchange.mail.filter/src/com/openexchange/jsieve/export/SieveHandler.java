@@ -88,8 +88,6 @@ public class SieveHandler {
 
     private static final Pattern LITERAL_S2C_PATTERN = Pattern.compile("^.*\\{([^\\}]*)\\}.*$");
 
-    private static final Pattern STRING_PATTERN = Pattern.compile("^.*\"([^\"]*)\".*$");
-
 	/**
      * The logger.
      */
@@ -522,7 +520,7 @@ public class SieveHandler {
                     sb.append((char) ch);
                 }
                 break;
-            case '#': 
+            case '#':
                 {
                     inComment = true;
                     sb.append((char) ch);
@@ -1151,7 +1149,6 @@ public class SieveHandler {
         final StringBuilder sb = new StringBuilder();
         final String answer = actualline.substring(3);
         final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
-        final Matcher stringMatcher = STRING_PATTERN.matcher(answer);
         if (matcher.matches()) {
             final String group = matcher.group(1);
             final int octetsToRead = Integer.parseInt(group);
@@ -1162,12 +1159,62 @@ public class SieveHandler {
             } else {
                 sb.append(buf, 0, octetsRead);
             }
-        } else if (stringMatcher.matches()) {
-            sb.append(stringMatcher.group(1));
+            return sb.toString();
         } else {
-            throw new OXSieveHandlerException("Unable to parse server answer", sieve_host, sieve_host_port, null);
+            return parseQuotedErrorMessage(answer);
         }
-        return sb.toString();
+    }
+
+    private String parseQuotedErrorMessage(final String answer) throws IOException, OXSieveHandlerException {
+        StringBuilder inputBuilder = new StringBuilder();
+        String line = answer;
+        while (line != null) {
+            inputBuilder.append("\n").append(line);
+            line = bis_sieve.readLine();
+        }
+
+        char[] msgChars = inputBuilder.toString().toCharArray();
+        boolean inQuotes = false;
+        boolean inEscape = false;
+        StringBuilder errMsgBuilder = new StringBuilder();
+        loop: for (char c : msgChars) {
+            switch (c) {
+            case '"':
+                if (inQuotes) {
+                    if (inEscape) {
+                        errMsgBuilder.append(c);
+                        inEscape = false;
+                    } else {
+                        inQuotes = false;
+                        break loop;
+                    }
+                } else {
+                    inQuotes = true;
+                }
+                break;
+
+            case '\\':
+                if (inEscape) {
+                    errMsgBuilder.append(c);
+                    inEscape = false;
+                } else {
+                    inEscape = true;
+                }
+                break;
+
+            default:
+                if (inEscape) {
+                    inEscape = false;
+                }
+
+                if (inQuotes) {
+                    errMsgBuilder.append(c);
+                }
+                break;
+            }
+        }
+
+        return errMsgBuilder.toString();
     }
 
     /**

@@ -1,5 +1,9 @@
 * 2014-09-18 - steffen.templin@open-xchange.com
 
+ - Fix for bug 34495: Implemented more sophisticated parsing of SIEVE response errors
+
+* 2014-09-18 - steffen.templin@open-xchange.com
+
  - Fix for bug 34470: Use the client-provided time zone for conversion of mail dates
 
  * 2014-09-18 - jan.bauerdick@open-xchange.com
