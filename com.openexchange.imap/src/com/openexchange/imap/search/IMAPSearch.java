@@ -161,6 +161,9 @@ public final class IMAPSearch {
         final Message[] allMsgs;
         if (mailFields.contains(MailField.BODY) || mailFields.contains(MailField.FULL)) {
             allMsgs = imapFolder.getMessages();
+            FetchProfile fp = new FetchProfile();
+            searchTerm.contributeTo(fp);
+            imapFolder.fetch(allMsgs, fp);
         } else {
             mailFields.add(MailField.CONTENT_TYPE); // Possibly checked by search term
             final long start = System.currentTimeMillis();
