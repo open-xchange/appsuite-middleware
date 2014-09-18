@@ -64,15 +64,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
@@ -336,8 +338,6 @@ public class DispatcherServlet extends SessionServlet {
         return false;
     }
 
-    private static final Pattern PATTERN_SINGLE_QUOTE = Pattern.compile("(^|[^\\\\])'");
-
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
      *
@@ -435,6 +435,7 @@ public class DispatcherServlet extends SessionServlet {
             }
 
             // Handle other OXExceptions
+
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
                 LOG.error("Unexpected error", e);
             } else {
@@ -445,7 +446,22 @@ public class DispatcherServlet extends SessionServlet {
                     logException(e);
                 }
             }
-            handleOXException(e, httpRequest, httpResponse);
+
+            if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
+                try {
+                    // As API response
+                    APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);
+                } catch (JSONException je) {
+                    LOG.error("", e);
+                    try {
+                        httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
+                    } catch (final IOException ioe) {
+                        LOG.error("", ioe);
+                    }
+                }
+            } else {
+                handleOXException(e, httpRequest, httpResponse);
+            }
         } catch (final RuntimeException e) {
             logException(e);
             handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);

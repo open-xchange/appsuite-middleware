@@ -66,7 +66,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
@@ -178,9 +177,7 @@ public class APIResponseRenderer implements ResponseRenderer {
         writeResponse(response, action, req, resp, false);
     }
 
-    private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE HTML PUBLIC "
-        + "\"-//W3C//DTD HTML 4.01//EN\" "
-        + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
+    private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE html><html><head>"
         + "<META http-equiv=\"Content-Type\" "
         + "content=\"text/html; charset=UTF-8\">"
         + "<script type=\"text/javascript\">"
@@ -191,70 +188,15 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final char[] JS_FRAGMENT_PART3 = ")</script></head></html>".toCharArray();
 
     private static final Pattern PATTERN_QUOTE = Pattern.compile("(^|[^\\\\])\"");
-    private static final Pattern PATTERN_SINGLE_QUOTE = Pattern.compile("(^|[^\\\\])'");
+    // private static final Pattern PATTERN_SINGLE_QUOTE = Pattern.compile("(^|[^\\\\])'");
 
     private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
             if (plainJson) {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
-            } else if (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
-                String callback = req.getParameter(CALLBACK);
-                if ("yell".equalsIgnoreCase(callback)) {
-                    OXException exception = response.getException();
-                    if (exception != null) {
-                        String yellCb = exception.getDisplayMessage(localeFrom(req));
-                        if (null != yellCb) {
-                            resp.setStatus(HttpServletResponse.SC_OK);
-                            resp.setContentType(CONTENTTYPE_HTML);
-                            resp.setHeader("Content-Disposition", "inline");
-                            if (yellCb.indexOf('"') >= 0) {
-                                yellCb = PATTERN_SINGLE_QUOTE.matcher(yellCb).replaceAll("$1\\\\'");
-                            }
-                            PrintWriter writer = resp.getWriter();
-
-                            StringBuilder sb = new StringBuilder(512).append("<!DOCTYPE html>");
-                            sb.append("<head><META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><script type=\"text/javascript\">");
-                            sb.append("(window.parent || window.opener).require(['io.ox/core/yell'], function (yell) { yell('error', '");
-                            sb.append(yellCb).append("'); });");
-                            sb.append("</script></head></html>");
-
-                            writer.write(sb.toString());
-                            writer.flush();
-                            return;
-                        }
-                    }
-                }
-
+            } else if (expectsJsCallback(req)) {
                 // Regular HTML call-back...
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.setContentType(CONTENTTYPE_HTML);
-                resp.setHeader("Content-Disposition", "inline");
-
-                if (callback == null) {
-                    callback = action;
-                } else {
-                    if (callback.indexOf('"') >= 0) {
-                        callback = PATTERN_QUOTE.matcher(callback).replaceAll("$1\\\\\"");
-                    }
-                }
-                callback = AJAXUtility.sanitizeParam(callback);
-
-                final PrintWriter writer = resp.getWriter();
-                writer.write(JS_FRAGMENT_PART1);
-                writer.write(callback);
-                writer.write(JS_FRAGMENT_PART2);
-                writer.write(callback);
-                writer.write("\"])(");
-                ResponseWriter.write(response, new EscapingWriter(writer), localeFrom(req));
-                writer.write(JS_FRAGMENT_PART3);
-                /*-
-                 * Previous code:
-                 *
-                final Writer w = new AllocatingStringWriter();
-                ResponseWriter.write(response, w, localeFrom(getSession(req)));
-                resp.getWriter().print(substituteJS(w.toString(), callback));
-                 *
-                 */
+                writeJsCallback(response, action, req, resp);
             } else if (req.getParameter(JSONP) != null) {
                 resp.setContentType("text/javascript");
                 final String call = AJAXUtility.sanitizeParam(req.getParameter(JSONP));
@@ -282,6 +224,51 @@ public class APIResponseRenderer implements ResponseRenderer {
     }
 
     /**
+     * Checks if a JavaScript call-back is expected for given HTTP request
+     *
+     * @param req The HTTP request to check
+     * @return <code>true</code> if a JavaScript call-back is expected; otherwise <code>false</code>
+     */
+    public static boolean expectsJsCallback(HttpServletRequest req) {
+        return (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null);
+    }
+
+    /**
+     * Writes common JavaScript call-back for given response.
+     *
+     * @param response The response to output JavaScript call-back for
+     * @param action The associated action
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @throws IOException If an I/O error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void writeJsCallback(Response response, String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(CONTENTTYPE_HTML);
+        resp.setHeader("Content-Disposition", "inline");
+
+        String callback = req.getParameter(CALLBACK);
+        if (callback == null) {
+            callback = action;
+        } else {
+            if (callback.indexOf('"') >= 0) {
+                callback = PATTERN_QUOTE.matcher(callback).replaceAll("$1\\\\\"");
+            }
+        }
+        callback = AJAXUtility.sanitizeParam(callback);
+
+        final PrintWriter writer = resp.getWriter();
+        writer.write(JS_FRAGMENT_PART1);
+        writer.write(callback);
+        writer.write(JS_FRAGMENT_PART2);
+        writer.write(callback);
+        writer.write("\"])(");
+        ResponseWriter.write(response, new EscapingWriter(writer), localeFrom(req));
+        writer.write(JS_FRAGMENT_PART3);
+    }
+
+    /**
      * Part of HTTP content type header.
      */
     private static final String MULTIPART = "multipart/";
@@ -292,7 +279,7 @@ public class APIResponseRenderer implements ResponseRenderer {
      * @param request The request to be evaluated.
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
-    private static final boolean isMultipartContent(final HttpServletRequest request) {
+    private static final boolean isMultipartContent(HttpServletRequest request) {
         final String contentType = request.getContentType();
         if (contentType == null) {
             return false;

@@ -215,4 +215,18 @@ public interface StorageParameters {
      */
     String getCommittedTrace();
 
+    /**
+     * Gets the optional ignoreCache value.
+     *
+     * @return The ignoreCache value or <code>null</code>
+     */
+    Boolean getIgnoreCache();
+
+    /**
+     * Sets the optional ignoreCache.
+     *
+     * @param ignoreCache The value indicating if underlaying storages should ignore the cache
+     */
+    void setIgnoreCache(Boolean ignoreCache);
+
 }

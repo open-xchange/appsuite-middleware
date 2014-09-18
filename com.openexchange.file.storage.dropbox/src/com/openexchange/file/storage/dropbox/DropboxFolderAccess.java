@@ -49,13 +49,13 @@
 
 package com.openexchange.file.storage.dropbox;
 
+import static com.openexchange.file.storage.dropbox.Utils.handle;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import com.dropbox.client2.DropboxAPI.Account;
 import com.dropbox.client2.DropboxAPI.Entry;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxServerException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -64,6 +64,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -73,51 +74,49 @@ import com.openexchange.session.Session;
  */
 public final class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess {
 
-    private final DropboxAccountAccess accountAccess;
     private final String accountDisplayName;
     private final int userId;
 
     /**
      * Initializes a new {@link DropboxFolderAccess}.
+     *
+     * @param dropboxOAuthAccess The underlying OAuth access
+     * @param account The associated account
+     * @param session The session
+     * @param accountAccess The account access
      */
-    public DropboxFolderAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) {
+    public DropboxFolderAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) {
         super(dropboxOAuthAccess, account, session);
-        this.accountAccess = accountAccess;
         userId = session.getUserId();
-        accountDisplayName = accountAccess.getAccount().getDisplayName();
+        accountDisplayName = account.getDisplayName();
     }
 
     @Override
     public boolean exists(final String folderId) throws OXException {
+        String path = toPath(folderId);
         try {
-            final Entry entry = dropboxAPI.metadata(toPath(folderId), 1, null, false, null);
-            return entry.isDir && !entry.isDeleted;
-        } catch (final DropboxServerException e) {
-            if (404 == e.error) {
+            Entry entry = dropboxAPI.metadata(path, 1, null, false, null);
+            return entry.isDir && false == entry.isDeleted;
+        } catch (Exception e) {
+            OXException x = handle(e, path);
+            if (DropboxExceptionCodes.NOT_FOUND.equals(x)) {
                 return false;
             }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw x;
         }
     }
 
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
+        String path = toPath(folderId);
         try {
-            final Entry entry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
-            if (!entry.isDir || entry.isDeleted) {
+            Entry entry = dropboxAPI.metadata(path, 0, null, true, null);
+            if (false == entry.isDir || entry.isDeleted) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(folderId);
             }
-            return new DropboxFolder(userId).parseDirEntry(entry, accountDisplayName);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            return new DropboxFolder(entry, userId, accountDisplayName);
+        } catch (Exception e) {
+            throw handle(e, path);
         }
     }
 
@@ -138,25 +137,21 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
+        String path = toPath(parentIdentifier);
         try {
-            final Entry entry = dropboxAPI.metadata(toPath(parentIdentifier), 0, null, true, null);
-            if (!entry.isDir || entry.isDeleted) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(parentIdentifier);
+            Entry entry = dropboxAPI.metadata(path, 0, null, true, null);
+            if (false == entry.isDir || entry.isDeleted) {
+                throw DropboxExceptionCodes.NOT_FOUND.create(path);
             }
-            final List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
-            String accDisplayName = accountAccess.getAccount().getDisplayName();
-            for (final Entry childEntry : entry.contents) {
-                if (childEntry.isDir && !childEntry.isDeleted) {
-                    list.add(new DropboxFolder(userId).parseDirEntry(childEntry, accDisplayName));
+            List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
+            for (Entry childEntry : entry.contents) {
+                if (childEntry.isDir && false == childEntry.isDeleted) {
+                    list.add(new DropboxFolder(childEntry, userId, accountDisplayName));
                 }
             }
             return list.toArray(new FileStorageFolder[0]);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(parentIdentifier, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (Exception e) {
+            throw handle(e, path);
         }
     }
 
@@ -174,17 +169,13 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
+        String parentPath = toPath(toCreate.getParentId());
         try {
-            final String parentPath = toPath(toCreate.getParentId());
             final Entry entry =
                 dropboxAPI.createFolder(new StringBuilder("/".equals(parentPath) ? "" : parentPath).append('/').append(toCreate.getName()).toString());
             return toId(entry.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (Exception e) {
+            throw handle(e, parentPath);
         }
     }
 
@@ -201,8 +192,8 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
+        final String path = toPath(folderId);
         try {
-            final String path = toPath(folderId);
             final int pos = path.lastIndexOf('/');
             final String newParentPath = toPath(newParentId);
             final Entry moved =
@@ -211,49 +202,41 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                     new StringBuilder("/".equals(newParentPath) ? "" : newParentPath).append('/').append(
                         null != newName ? newName : (pos < 0 ? path : path.substring(pos + 1))).toString());
             return toId(moved.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (Exception e) {
+            throw handle(e, path);
         }
     }
 
     @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
+        String path = toPath(folderId);
+        int pos = path.lastIndexOf('/');
+        String parentPath = 0 >= pos ? "/" : path.subSequence(0, pos) + "/";
+        String toPath = parentPath + newName;
         try {
-            final String path = toPath(folderId);
-            final int pos = path.lastIndexOf('/');
-            final Entry moved =
-                dropboxAPI.move(
-                    path,
-                    pos <= 0 ? newName : new StringBuilder(path.substring(0, pos)).append('/').append(newName).toString());
-            return toId(moved.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
+                Entry temp = dropboxAPI.move(path, parentPath + UUID.randomUUID().toString() + ' ' + newName);
+                path = temp.path;
+            }
+            Entry entry = dropboxAPI.move(path, toPath);
+            return toId(entry.path);
+        } catch (Exception e) {
+            throw handle(e, path);
         }
     }
 
     @Override
     public String deleteFolder(final String folderId) throws OXException {
+        final String path = toPath(folderId);
         try {
-            final String path = toPath(folderId);
             dropboxAPI.delete(path);
             return folderId;
-        } catch (final DropboxServerException e) {
-            if (404 == e.error) {
+        } catch (Exception e) {
+            OXException x = handle(e, path);
+            if (DropboxExceptionCodes.NOT_FOUND.equals(x)) {
                 return folderId;
             }
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw x;
         }
     }
 
@@ -264,8 +247,9 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public void clearFolder(final String folderId) throws OXException {
+        String path = toPath(folderId);
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
+            final Entry directoryEntry = dropboxAPI.metadata(path, 0, null, true, null);
             if (!directoryEntry.isDir) {
                 throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
@@ -275,12 +259,8 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                     dropboxAPI.delete(childEntry.path);
                 }
             }
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (Exception e) {
+            throw handle(e, path);
         }
     }
 
@@ -291,13 +271,14 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
+        String path = toPath(folderId);
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
+            final Entry directoryEntry = dropboxAPI.metadata(path, 0, null, false, null);
             if (!directoryEntry.isDir) {
                 throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
-            FileStorageFolder f = new DropboxFolder(userId).parseDirEntry(directoryEntry, accountAccess.getAccount().getDisplayName());
+            FileStorageFolder f = new DropboxFolder(directoryEntry, userId, accountDisplayName);
             list.add(f);
             String parentId;
             while (null != (parentId = f.getParentId())) {
@@ -305,14 +286,9 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                 list.add(f);
             }
             return list.toArray(new FileStorageFolder[list.size()]);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (Exception e) {
+            throw handle(e, path);
         }
-
     }
 
     @Override
@@ -325,12 +301,8 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
         try {
             Account accountInfo = dropboxAPI.accountInfo();
             return new Quota(accountInfo.quota, accountInfo.quotaNormal + accountInfo.quotaShared, Type.STORAGE);
-        } catch (DropboxServerException e) {
-            throw handleServerError(toPath(folderId), e);
-        } catch (DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (Exception e) {
+            throw handle(e, toPath(folderId));
         }
     }
 

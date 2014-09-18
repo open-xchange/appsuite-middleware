@@ -47,45 +47,57 @@
  *
  */
 
-package com.openexchange.mail.autoconfig;
+package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
-import java.io.IOException;
-import org.xmlpull.v1.XmlPullParserException;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionStrings;
-import com.openexchange.i18n.LocalizableStrings;
+import static com.google.common.net.HttpHeaders.ETAG;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
+import com.openexchange.java.Strings;
 
 /**
- * {@link AutoconfigException}
- *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * {@link PreviewThumbCacheKeyGenerator} - A cache key generator for preview thumbnails considering specified width and height parameters
+ * used during creation.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class AutoconfigException extends OXException implements LocalizableStrings {
+public class PreviewThumbCacheKeyGenerator implements CacheKeyGenerator {
 
-    private static final long serialVersionUID = 4909345337720686173L;
+    private static final Logger LOG = LoggerFactory.getLogger(PreviewThumbCacheKeyGenerator.class);
 
-    private static final String PREFIX = "MAIL-AUTOCONFIG";
+    private AJAXRequestResult result;
 
-    public static final String INVALID_MAIL = "The E-Mail address %1$s is invalid.";
+    private String width;
 
-    public static OXException unexpected(String logMessage) {
-        return new OXException(1).setPrefix(PREFIX).setLogMessage(logMessage);
+    private String height;
+
+    private String scaleType;
+
+    private AJAXRequestData requestData;
+
+    private String cachedCacheKey = null;
+
+    public PreviewThumbCacheKeyGenerator(AJAXRequestResult result, AJAXRequestData requestData) {
+        this.result = result;
+        this.requestData = requestData;
+        this.width = requestData.getParameter("width");
+        this.height = requestData.getParameter("height");
+        this.scaleType = requestData.getParameter("scaleType");
     }
 
-    public static OXException unexpected(String logMessage, Throwable cause) {
-        return new OXException(1, OXExceptionStrings.DEFAULT_MESSAGE, cause, new Object[0]).setPrefix(PREFIX).setLogMessage(logMessage);
-    }
-
-    public static OXException invalidMail(String mail) {
-        return new OXException(2, INVALID_MAIL, mail).setPrefix(PREFIX);
-    }
-
-    public static OXException xml(XmlPullParserException e) {
-        return new OXException(3, null, e).setPrefix(PREFIX);
-    }
-
-    public static OXException io(IOException e) {
-        return new OXException(4, null, e).setPrefix(PREFIX);
+    @Override
+    public String generateCacheKey() {
+        if (cachedCacheKey == null) {
+            final String eTag = result.getHeader(ETAG);
+            if (!Strings.isEmpty(eTag)) {
+                cachedCacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, width, height, scaleType);
+                LOG.debug("Generated cacheKey {} based on etag {}, width {}, height {} and scaleType {}", cachedCacheKey, eTag, width, height, scaleType);
+            }
+        }
+        return cachedCacheKey;
     }
 
 }

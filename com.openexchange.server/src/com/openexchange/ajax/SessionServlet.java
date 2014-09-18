@@ -64,7 +64,6 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -229,8 +228,7 @@ public abstract class SessionServlet extends AJAXServlet {
             // Check expected output format
             if (Dispatchers.isApiOutputExpectedFor(req)) {
                 // API response
-                String action = req.getParameter(PARAMETER_ACTION);
-                APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? Strings.toUpperCase(req.getMethod()) : action, req, resp);
+                APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
             } else {
                 // No JSON response
                 String desc = e.getMessage();
@@ -243,8 +241,7 @@ public abstract class SessionServlet extends AJAXServlet {
             // Check expected output format
             if (Dispatchers.isApiOutputExpectedFor(req)) {
                 // API response
-                String action = req.getParameter(PARAMETER_ACTION);
-                APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? Strings.toUpperCase(req.getMethod()) : action, req, resp);
+                APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
             } else {
                 // No JSON response
                 String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
@@ -293,7 +290,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
         StringBuilder sb = new StringBuilder(512);
         String lineSep = System.getProperty("line.separator");
-        sb.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">").append(lineSep);
+        sb.append("<!DOCTYPE html>").append(lineSep);
         sb.append("<html><head>").append(lineSep);
         {
             sb.append("<title>").append(sc);
@@ -302,8 +299,6 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             sb.append("</title>").append(lineSep);
         }
-        sb.append("<html><head>").append(lineSep);
-
 
         sb.append("</head><body>").append(lineSep);
 
