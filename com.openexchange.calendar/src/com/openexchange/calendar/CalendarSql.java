@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -122,9 +123,9 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private static volatile CalendarSqlImp cimp;
 
-    private Session session;
+    private final Session session;
 
-    private CalendarCollection calendarCollection;
+    private final CalendarCollection calendarCollection;
 
     private boolean includePrivateAppointments;
 
@@ -968,7 +969,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     cdao.removeUntil();
                 }
 
-                ArrayList<UserParticipant> users = new ArrayList<UserParticipant>();
+                List<UserParticipant> users = new LinkedList<UserParticipant>();
                 for (final UserParticipant cur : edao.getUsers()) {
 
                     if (cur.getIdentifier() == userId) {
@@ -1098,7 +1099,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     cdao.removeUntil();
                 }
 
-                ArrayList<Participant> users = new ArrayList<Participant>();
+                List<Participant> users = new LinkedList<Participant>();
                 for (final Participant cur : edao.getParticipants()) {
 
                     if (cur instanceof ExternalUserParticipant) {
@@ -1574,7 +1575,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(final String email, int[] cols, final Date start, final Date end, final int orderBy, final Order order) throws OXException {
-        final List<Appointment> appointments = new ArrayList<Appointment>();
+        final List<Appointment> appointments = new LinkedList<Appointment>();
         cols = addColumnIfNecessary(cols, CalendarObject.PARTICIPANTS, CalendarObject.RECURRENCE_TYPE, CalendarObject.RECURRENCE_POSITION, CalendarObject.RECURRENCE_ID);
         SearchIterator<Appointment> searchIterator;
         try {
@@ -1585,10 +1586,12 @@ public class CalendarSql implements AppointmentSQLInterface {
         while (searchIterator.hasNext()) {
             final Appointment app = searchIterator.next();
             final Participant[] participants = app.getParticipants();
-            for (final Participant participant : participants) {
-                if (participant.getType() == Participant.EXTERNAL_USER && participant.getEmailAddress().equals(email)) {
-                    appointments.add(app);
-                    break;
+            if (null != participants) {
+                for (final Participant participant : participants) {
+                    if (participant.getType() == Participant.EXTERNAL_USER && participant.getEmailAddress().equals(email)) {
+                        appointments.add(app);
+                        break;
+                    }
                 }
             }
         }
@@ -1598,7 +1601,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     @Override
     public List<Appointment> getAppointmentsWithUserBetween(final User user, int[] cols, final Date start, final Date end, final int orderBy, final Order order) throws OXException {
-        final List<Appointment> appointments = new ArrayList<Appointment>();
+        final List<Appointment> appointments = new LinkedList<Appointment>();
         cols = addColumnIfNecessary(cols, CalendarObject.USERS, CalendarObject.RECURRENCE_TYPE, CalendarObject.RECURRENCE_POSITION, CalendarObject.RECURRENCE_ID, Appointment.TIMEZONE);
         SearchIterator<Appointment> searchIterator;
         try {
@@ -1636,7 +1639,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private int[] addColumnIfNecessary(final int[] cols, final int... columnsToAdd) {
 
-        final ArrayList<Integer> columns = new ArrayList<Integer>();
+        final ArrayList<Integer> columns = new LinkedList<Integer>();
         for (final int c : cols) {
             columns.add(c);
         }
@@ -1650,7 +1653,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     private List<Appointment> extractOccurrences(List<Appointment> appointments, Date start, Date end) throws OXException {
-        List<Appointment> retval = new ArrayList<Appointment>();
+        List<Appointment> retval = new LinkedList<Appointment>();
 
         for (Appointment appointment : appointments) {
             if (appointment.getRecurrenceType() == Appointment.NO_RECURRENCE || appointment.getRecurrencePosition() != 0) {
