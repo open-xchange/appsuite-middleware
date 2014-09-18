@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.global.osgi;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,6 +69,8 @@ import com.openexchange.exception.interception.internal.OXExceptionInterceptorTr
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceHolderInit;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -100,7 +102,7 @@ public final class GlobalActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
-            final Initialization initialization = new com.openexchange.server.ServerInitialization();
+            final Initialization initialization = new ServerInitialization();
             this.initialization = initialization;
             initialization.start();
             ServiceHolderInit.getInstance().start();

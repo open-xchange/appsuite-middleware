@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.global.osgi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.Initialization;
 
 /**
  * {@link ServerInitialization} - The {@link Initialization initialization} for server.
@@ -59,25 +59,18 @@ import com.openexchange.exception.OXException;
  */
 final class ServerInitialization implements Initialization {
 
-    private final AtomicBoolean started;
-
-    private String previousTTL;
-
-    private String previousNegativeTTL;
+    private volatile String previousTTL;
+    private volatile String previousNegativeTTL;
 
     /**
      * Initializes a new {@link ServerInitialization}.
      */
     ServerInitialization() {
         super();
-        started = new AtomicBoolean();
     }
 
     @Override
     public void start() throws OXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
-        }
         /*
          * Remember previous settings
          */
@@ -96,9 +89,7 @@ final class ServerInitialization implements Initialization {
 
     @Override
     public void stop() throws OXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
-        }
+        String previousTTL = this.previousTTL;
         if (null == previousTTL) {
             java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
         } else {
@@ -106,11 +97,14 @@ final class ServerInitialization implements Initialization {
              * Restore previous settings
              */
             java.security.Security.setProperty("networkaddress.cache.ttl", previousTTL);
+            this.previousTTL = null;
         }
+        String previousNegativeTTL = this.previousNegativeTTL;
         if (null == previousNegativeTTL) {
             java.security.Security.setProperty("networkaddress.cache.negative.ttl", "10");
         } else {
             java.security.Security.setProperty("networkaddress.cache.negative.ttl", previousNegativeTTL);
+            this.previousNegativeTTL = null;
         }
     }
 

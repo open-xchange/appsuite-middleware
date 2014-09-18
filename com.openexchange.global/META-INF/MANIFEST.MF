@@ -143,7 +143,7 @@ Import-Package: ch.qos.logback.classic,
  org.osgi.util.tracker,
  org.slf4j,
  org.slf4j.spi
-Bundle-Activator: com.openexchange.server.GlobalActivator
+Bundle-Activator: com.openexchange.global.osgi.GlobalActivator
 Bundle-ClassPath: lib/stringsearch-2.jar,
  lib/stringsearch-1.0.0.jar,
  .
