@@ -47,59 +47,89 @@
  *
  */
 
-package com.openexchange.exception.interception;
+package com.openexchange.mail.compose;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 
 /**
- * {@link OXExceptionInterceptor} interface that might be implemented to register a new interceptor for exception handling.
- * <p>
- * Have a look at {@link AbstractOXExceptionInterceptor} that defines a default implementation.
+ * {@link CompositionSpaceRegistry}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
- * @since 7.6.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OXExceptionInterceptor {
+class CompositionSpaceRegistry {
+
+    private final ConcurrentMap<String, CompositionSpace> spaces;
 
     /**
-     * Gets the module / action combinations this interceptor is responsible for.
-     *
-     * @return The responsibilities for this interceptor
+     * Initializes a new {@link CompositionSpaceRegistry}.
      */
-    Collection<Responsibility> getResponsibilities();
+    CompositionSpaceRegistry() {
+        super();
+        spaces = new ConcurrentHashMap<String, CompositionSpace>(8);
+    }
 
     /**
-     * Adds a new {@link Responsibility} to the interceptor
+     * Gets the composition spaces.
      *
-     * @param responsibility The module/action combination the interceptor should be responsible for
+     * @return The composition spaces
      */
-    void addResponsibility(Responsibility responsibility);
+    ConcurrentMap<String, CompositionSpace> getCompositionSpaces() {
+        return spaces;
+    }
 
     /**
-     * Intercepts the given {@link OXException} for the defined module / action. Previously check if the given
-     * {@link OXExceptionInterceptor} is responsible for the module / action combination by using {@link #isResponsible(String, String)}
+     * Clears the composition spaces.
      *
-     * @param oxException The {@link OXException} to intercept
-     * @return {@link OXExceptionArguments} that was processed by the interceptor
+     * @return The cleared composition spaces
      */
-    OXExceptionArguments intercept(OXException oxException);
+    List<CompositionSpace> clearCompositionSpaces() {
+        List<CompositionSpace> l = new LinkedList<CompositionSpace>(spaces.values());
+        spaces.clear();
+        return l;
+    }
 
     /**
-     * Checks if the interceptor is responsible for the given module and action combination
+     * Gets the composition space associated with given identifier.
+     * <p>
+     * A new composition space is created if absent.
      *
-     * @param module The module that should be tested
-     * @param action The action that should be tested
-     * @return <code>true</code> if the interceptor is responsible (means that {@link #intercept(OXException)} will be executed); otherwise <code>false</code>
+     * @param csid The composition space identifier
+     * @return The associated composition space
      */
-    boolean isResponsible(String module, String action);
+    CompositionSpace getCompositionSpace(String csid) {
+        CompositionSpace space = spaces.get(csid);
+        if (null == space) {
+            CompositionSpace newSpace = new CompositionSpace(csid);
+            space = spaces.putIfAbsent(csid, newSpace);
+            if (null == space) {
+                space = newSpace;
+            }
+        }
+        return space;
+    }
 
     /**
-     * Returns the ranking of this {@link OXExceptionInterceptor}
+     * Optionally gets the composition space associated with given identifier.
      *
-     * @return An <code>int</code> value representing the interceptor's ranking
+     * @param csid The composition space identifier
+     * @return The associated composition space or <code>null</code>
      */
-    int getRanking();
+    CompositionSpace optCompositionSpace(String csid) {
+        return spaces.get(csid);
+    }
+
+    /**
+     * Removes the composition space associated with given identifier.
+     *
+     * @param csid The composition space identifier
+     * @return The removed composition space or <code>null</code> if no such composition space was available
+     */
+    CompositionSpace removeCompositionSpace(String csid) {
+        return spaces.remove(csid);
+    }
 
 }
