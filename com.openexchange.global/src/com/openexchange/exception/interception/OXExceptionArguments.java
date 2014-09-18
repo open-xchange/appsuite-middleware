@@ -67,6 +67,11 @@ public class OXExceptionArguments {
 
     /**
      * Initializes a new {@link OXExceptionArguments}.
+     *
+     * @param code The exception code
+     * @param category The optional category to use
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
      */
     public OXExceptionArguments(OXExceptionCode code, Category category, Throwable cause, Object... args) {
         super();
