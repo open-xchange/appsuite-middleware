@@ -47,67 +47,63 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j;
+package com.openexchange.share.handler.ical.osgi;
 
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.property.XProperty;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ZoneInfo;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.handler.ical.ICalHandler;
+import com.openexchange.share.handler.ical.Services;
+import com.openexchange.share.servlet.handler.ShareHandler;
+import com.openexchange.user.UserService;
 
 /**
+ * {@link ICalHandlerActivator}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class ICal4jSession implements ICalSession {
-
-    private Calendar calendar = new Calendar();
-    private final Mode mode;
-    private int index;
+public class ICalHandlerActivator extends HousekeepingActivator {
 
     /**
-     * Default constructor.
-     * @param mode
+     * Initializes a new {@link ICalHandlerActivator}.
      */
-    public ICal4jSession(Mode mode) {
+    public ICalHandlerActivator() {
         super();
-        this.mode = mode;
     }
 
     @Override
-    public Mode getMode() {
-        return mode;
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { AppointmentSqlFactoryService.class, ConfigurationService.class, FolderService.class,
+            CalendarCollectionService.class, ICalEmitter.class, UserService.class };
     }
 
     @Override
-    public ZoneInfo getZoneInfo() {
-        return mode.getZoneInfo();
+    protected void startBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(ICalHandlerActivator.class).info(
+            "Starting bundle: \"com.openexchange.share.handler.ical.osgi\"");
+        /*
+         * set references
+         */
+        Services.set(this);
+        /*
+         * register handler
+         */
+        Dictionary<String, String> properties = new Hashtable<String, String>(1);
+        properties.put(Constants.SERVICE_RANKING, String.valueOf(100));
+        registerService(ShareHandler.class, new ICalHandler(), properties);
     }
 
     @Override
-    public void setName(String name) {
-        calendar.getProperties().add(new XProperty("X-WR-CALNAME", name));
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(ICalHandlerActivator.class).info("Stopping bundle: \"com.openexchange.share.handler.ical.osgi\"");
+        Services.set(null);
+        super.stopBundle();
     }
-
-    /**
-     * @return the calendar
-     */
-    public Calendar getCalendar() {
-        return calendar;
-    }
-
-    public void setCalendar(Calendar cal) {
-        calendar = cal;
-        index = 0;
-    }
-
-    /**
-     * Counts the number of elements already parsed for error messages
-     * @return
-     */
-    public int getAndIncreaseIndex() {
-        return index++;
-    }
-
 
 }

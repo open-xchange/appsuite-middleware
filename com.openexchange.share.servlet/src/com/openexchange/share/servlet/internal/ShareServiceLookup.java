@@ -59,7 +59,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class ShareServiceLookup {
+public class ShareServiceLookup {
 
     /**
      * Initializes a new {@link ShareServiceLookup}.

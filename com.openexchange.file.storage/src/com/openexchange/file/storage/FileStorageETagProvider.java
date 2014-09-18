@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,37 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j;
+package com.openexchange.file.storage;
 
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.property.XProperty;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ZoneInfo;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+
 
 /**
+ * {@link FileStorageETagProvider}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class ICal4jSession implements ICalSession {
-
-    private Calendar calendar = new Calendar();
-    private final Mode mode;
-    private int index;
+public interface FileStorageETagProvider {
 
     /**
-     * Default constructor.
-     * @param mode
+     * Gets a value indicating whether the ETags delivered by this storage can be assumed to be recursive or not. When being "recursive",
+     * a changed ETag of a subfolder will result in changed ETags of all parent folders recursively.
+     *
+     * @return <code>true</code> if ETags delivered by this storage are recursive, <code>false</code>, otherwise.
      */
-    public ICal4jSession(Mode mode) {
-        super();
-        this.mode = mode;
-    }
-
-    @Override
-    public Mode getMode() {
-        return mode;
-    }
-
-    @Override
-    public ZoneInfo getZoneInfo() {
-        return mode.getZoneInfo();
-    }
-
-    @Override
-    public void setName(String name) {
-        calendar.getProperties().add(new XProperty("X-WR-CALNAME", name));
-    }
+    boolean isRecursive();
 
     /**
-     * @return the calendar
+     * Gets the ETags for the supplied folders to quickly determine which folders contain changes. An updated ETag in a folder indicates a
+     * change, for example a new, modified or deleted file. If {@link FileStorageETagProvider#isRecursive()} is <code>true</code>, an
+     * updated ETag may also indicate a change in one of the folder's subfolders.
+     *
+     * @param folderIds A list of folder IDs to get the ETags for
+     * @return A map holding the resulting ETags to each requested folder ID
+     * @throws OXException
      */
-    public Calendar getCalendar() {
-        return calendar;
-    }
-
-    public void setCalendar(Calendar cal) {
-        calendar = cal;
-        index = 0;
-    }
-
-    /**
-     * Counts the number of elements already parsed for error messages
-     * @return
-     */
-    public int getAndIncreaseIndex() {
-        return index++;
-    }
-
+    Map<String, String> getETags(List<String> folderIds) throws OXException;
 
 }

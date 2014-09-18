@@ -62,18 +62,20 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.session.Session;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
+import com.openexchange.share.servlet.handler.ResolvedShare;
+import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.user.UserService;
@@ -91,15 +93,18 @@ public class ShareServlet extends HttpServlet {
     private static final Pattern PATH_PATTERN = Pattern.compile("/+([a-f0-9]{32})(?:/+items(?:/+([0-9]+))?)?/*", Pattern.CASE_INSENSITIVE);
 
     private final ShareLoginConfiguration shareLoginConfig;
+    private final RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry;
 
     /**
      * Initializes a new {@link ShareServlet}.
      *
      * @param shareLoginConfig The share login configuration to use
+     * @param shareHandlerRegistry The handler registry
      */
-    public ShareServlet(ShareLoginConfiguration shareLoginConfig) {
+    public ShareServlet(ShareLoginConfiguration shareLoginConfig, RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry) {
         super();
         this.shareLoginConfig = shareLoginConfig;
+        this.shareHandlerRegistry = shareHandlerRegistry;
     }
 
     @Override
@@ -128,27 +133,43 @@ public class ShareServlet extends HttpServlet {
             if (null == loginResult) {
                 return;
             }
-            Session session = loginResult.getSession();
-            User guestUser = loginResult.getUser();
+            ResolvedShare resolvedShare = new ResolvedShareImpl(share, loginResult, loginConfig, request, response);
             /*
              * prepare response
              */
             Tools.disableCaching(response);
             LoginServlet.addHeadersAndCookies(loginResult, response);
-            LoginServlet.writeSecretCookie(
-                request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
+            LoginServlet.writeSecretCookie(request, response, resolvedShare.getSession(), resolvedShare.getSession().getHash(),
+                request.isSecure(), request.getServerName(), loginConfig);
             /*
-             * construct redirect URL
+             * handle
              */
-            String url = getRedirectURL(session, guestUser, share, loginConfig);
-            LOG.info("Redirecting share {} to {}...", share.getToken(), url);
-            response.sendRedirect(url);
+            ShareHandler handler = getHandler(resolvedShare);
+            handler.handle(resolvedShare);
+            if (false == handler.keepSession()) {
+                logout(resolvedShare.getSession());
+            }
         } catch (RateLimitedException e) {
             response.sendError(429, e.getMessage());
         } catch (OXException e) {
             LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the share handler feeling responsible to handle the supplied share request.
+     *
+     * @param share The resolved share
+     * @return The handler
+     */
+    private ShareHandler getHandler(ResolvedShare share) throws OXException {
+        for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
+            if (handler.handles(share)) {
+                return handler;
+            }
+        }
+        throw ShareExceptionCodes.UNEXPECTED_ERROR.create("no share handler found");
     }
 
     /**
@@ -187,23 +208,13 @@ public class ShareServlet extends HttpServlet {
     }
 
     /**
-     * Extracts the token from a HTTP request's path info and looks up the referenced share.
+     * Performs a logout for the supplied session
      *
-     * @param pathInfo The path info
-     * @return The share, or <code>null</code> if no share was found or the share is expired
+     * @param session The session
      * @throws OXException
      */
-    private static Share resolveShare(String pathInfo) throws OXException {
-        if (false == Strings.isEmpty(pathInfo)) {
-            /*
-             * extract & resolve token
-             */
-            Matcher matcher = PATH_PATTERN.matcher(pathInfo);
-            if (matcher.matches()) {
-                return ShareServiceLookup.getService(ShareService.class, true).resolveToken(matcher.group(1));
-            }
-        }
-        return null;
+    private static void logout(Session session) throws OXException {
+        LoginPerformer.getInstance().doLogout(session.getSessionID());
     }
 
     /**
@@ -223,68 +234,21 @@ public class ShareServlet extends HttpServlet {
         return null;
     }
 
-    /**
-     * Constructs the redirect URL pointing to the share in the web interface.
-     *
-     * @param session The session
-     * @param user The user
-     * @param share The share
-     * @param loginConfig The login configuration to use
-     * @return The redirect URL
-     */
-    private static String getRedirectURL(Session session, User user, Share share, LoginConfiguration loginConfig) {
-        ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-        String redirectLink;
-        if (share.isFolder()) {
-            redirectLink = configService.getProperty("com.openexchange.share.redirectLinkFolder",
-                "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]" +
-                "&m=[module]&f=[folder]");
-        } else {
-            redirectLink = configService.getProperty("com.openexchange.share.redirectLinkItem",
-                "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]" +
-                "&m=[module]&f=[folder]&i=[item]");
-        }
-        String uiWebPath = loginConfig.getUiWebPath();
-        return redirectLink
-            .replaceAll("\\[uiwebpath\\]", trimSlashes(uiWebPath))
-            .replaceAll("\\[session\\]", session.getSessionID())
-            .replaceAll("\\[user\\]", user.getMail())
-            .replaceAll("\\[user_id\\]", String.valueOf(user.getId()))
-            .replaceAll("\\[language\\]", String.valueOf(user.getLocale()))
-            .replaceAll("\\[module\\]", Module.getForFolderConstant(share.getModule()).getName())
-            .replaceAll("\\[folder\\]", share.getFolder())
-            .replaceAll("\\[item\\]", share.getItem())
-            .replaceAll("\\[store\\]", String.valueOf(loginConfig.isSessiondAutoLogin()))
-        ;
-    }
-
-    /**
-     * Constructs the redirect URL pointing to the share in the web interface.
-     *
-     * @param session The session
-     * @param user The user
-     * @param share The share
-     * @return The redirect URL
-     */
-    private static String getDriveRedirectURL(Session session, User user, Share share) {
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("/ajax/drive?action=syncfolders")
-            .append("&root=").append(share.getFolder())
-            .append("&session=").append(session.getSessionID())
-        ;
-        return stringBuilder.toString();
-    }
-
-    private static String trimSlashes(String path) {
-        if (null != path && 0 < path.length()) {
-            if ('/' == path.charAt(0)) {
-                path = path.substring(1);
-            }
-            if (0 < path.length() && '/' == path.charAt(path.length() - 1)) {
-                path = path.substring(0, path.length() - 1);
-            }
-        }
-        return path;
-    }
+//    /**
+//     * Constructs the redirect URL pointing to the share in the web interface.
+//     *
+//     * @param session The session
+//     * @param user The user
+//     * @param share The share
+//     * @return The redirect URL
+//     */
+//    private static String getDriveRedirectURL(Session session, User user, Share share) {
+//        StringBuilder stringBuilder = new StringBuilder()
+//            .append("/ajax/drive?action=syncfolders")
+//            .append("&root=").append(share.getFolder())
+//            .append("&session=").append(session.getSessionID())
+//        ;
+//        return stringBuilder.toString();
+//    }
 
 }

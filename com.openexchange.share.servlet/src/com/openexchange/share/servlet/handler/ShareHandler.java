@@ -47,67 +47,39 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j;
+package com.openexchange.share.servlet.handler;
 
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.property.XProperty;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ZoneInfo;
+import java.io.IOException;
+import com.openexchange.exception.OXException;
 
 /**
+ * {@link ShareHandler}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class ICal4jSession implements ICalSession {
-
-    private Calendar calendar = new Calendar();
-    private final Mode mode;
-    private int index;
+public interface ShareHandler {
 
     /**
-     * Default constructor.
-     * @param mode
+     * Gets a value indicating whether the guest's session should be kept alive, or if an implicit logout should be performed afterwards.
+     *
+     * @return <code>true</code> if the session should be kept, <code>false</code>, otherwise
      */
-    public ICal4jSession(Mode mode) {
-        super();
-        this.mode = mode;
-    }
-
-    @Override
-    public Mode getMode() {
-        return mode;
-    }
-
-    @Override
-    public ZoneInfo getZoneInfo() {
-        return mode.getZoneInfo();
-    }
-
-    @Override
-    public void setName(String name) {
-        calendar.getProperties().add(new XProperty("X-WR-CALNAME", name));
-    }
+    boolean keepSession();
 
     /**
-     * @return the calendar
+     * Gets a value indicating whether this handler feels responsible for serving the supplied share request.
+     *
+     * @param share The resolved share
+     * @return <code>true</code>, if the request can be handled, <code>false</code>, otherwise
      */
-    public Calendar getCalendar() {
-        return calendar;
-    }
-
-    public void setCalendar(Calendar cal) {
-        calendar = cal;
-        index = 0;
-    }
+    boolean handles(ResolvedShare share);
 
     /**
-     * Counts the number of elements already parsed for error messages
-     * @return
+     * Performs the share request.
+     *
+     * @param share The resolved share
+     * @throws OXException
      */
-    public int getAndIncreaseIndex() {
-        return index++;
-    }
-
+    void handle(ResolvedShare share) throws IOException, OXException;
 
 }

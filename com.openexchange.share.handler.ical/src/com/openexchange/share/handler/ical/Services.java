@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,65 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j;
+package com.openexchange.share.handler.ical;
 
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.property.XProperty;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ZoneInfo;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
+ * {@link Services}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class ICal4jSession implements ICalSession {
-
-    private Calendar calendar = new Calendar();
-    private final Mode mode;
-    private int index;
+public final class Services {
 
     /**
-     * Default constructor.
-     * @param mode
+     * Initializes a new {@link Services}.
      */
-    public ICal4jSession(Mode mode) {
+    private Services() {
         super();
-        this.mode = mode;
     }
 
-    @Override
-    public Mode getMode() {
-        return mode;
-    }
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-    @Override
-    public ZoneInfo getZoneInfo() {
-        return mode.getZoneInfo();
-    }
-
-    @Override
-    public void setName(String name) {
-        calendar.getProperties().add(new XProperty("X-WR-CALNAME", name));
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
     /**
-     * @return the calendar
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
      */
-    public Calendar getCalendar() {
-        return calendar;
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
-    public void setCalendar(Calendar cal) {
-        calendar = cal;
-        index = 0;
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
     }
 
-    /**
-     * Counts the number of elements already parsed for error messages
-     * @return
-     */
-    public int getAndIncreaseIndex() {
-        return index++;
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
     }
 
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
+    }
 
 }

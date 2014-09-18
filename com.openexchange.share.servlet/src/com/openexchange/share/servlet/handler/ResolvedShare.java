@@ -47,67 +47,35 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j;
+package com.openexchange.share.servlet.handler;
 
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.property.XProperty;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ZoneInfo;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
+import com.openexchange.share.Share;
 
 /**
+ * {@link ResolvedShare}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class ICal4jSession implements ICalSession {
+public interface ResolvedShare {
 
-    private Calendar calendar = new Calendar();
-    private final Mode mode;
-    private int index;
+    Share getShare();
 
-    /**
-     * Default constructor.
-     * @param mode
-     */
-    public ICal4jSession(Mode mode) {
-        super();
-        this.mode = mode;
-    }
+    Session getSession();
 
-    @Override
-    public Mode getMode() {
-        return mode;
-    }
+    User getUser();
 
-    @Override
-    public ZoneInfo getZoneInfo() {
-        return mode.getZoneInfo();
-    }
+    Context getContext();
 
-    @Override
-    public void setName(String name) {
-        calendar.getProperties().add(new XProperty("X-WR-CALNAME", name));
-    }
+    LoginConfiguration getLoginConfig();
 
-    /**
-     * @return the calendar
-     */
-    public Calendar getCalendar() {
-        return calendar;
-    }
+    HttpServletRequest getRequest();
 
-    public void setCalendar(Calendar cal) {
-        calendar = cal;
-        index = 0;
-    }
-
-    /**
-     * Counts the number of elements already parsed for error messages
-     * @return
-     */
-    public int getAndIncreaseIndex() {
-        return index++;
-    }
-
+    HttpServletResponse getResponse();
 
 }
