@@ -55,6 +55,7 @@ import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
 import com.openexchange.test.mock.MockUtils;
 
 
@@ -85,7 +86,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
         interceptors.add(oxExceptionInterceptor);
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);
 
@@ -97,7 +98,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        testInterceptor.addResponsibility(new Responsibility("module", "action"));
 
         boolean responsibleInterceptorRegistered = OXExceptionInterceptorRegistration.getInstance().isResponsibleInterceptorRegistered(testInterceptor);
 
@@ -115,7 +116,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
         interceptors.add(oxExceptionInterceptor);
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);
 
@@ -127,7 +128,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        testInterceptor.addResponsibility(new Responsibility("module", "action"));
 
         boolean responsibleInterceptorRegistered = OXExceptionInterceptorRegistration.getInstance().isResponsibleInterceptorRegistered(testInterceptor);
 
@@ -145,7 +146,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
         interceptors.add(oxExceptionInterceptor);
 
         AbstractOXExceptionInterceptor registeredInterceptor1 = new AbstractOXExceptionInterceptor(1) {
@@ -154,27 +155,27 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul2", "textAction2"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul2", "textAction2"));
         AbstractOXExceptionInterceptor registeredInterceptor2 = new AbstractOXExceptionInterceptor(2) {
             @Override
             public OXException intercept(OXException oxException) {
                 return null;
             }
         };
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul2", "textAction2"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul2", "textAction2"));
         AbstractOXExceptionInterceptor registeredInterceptor3 = new AbstractOXExceptionInterceptor(3) {
             @Override
             public OXException intercept(OXException oxException) {
                 return null;
             }
         };
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("testModul2", "textAction2"));
+        registeredInterceptor3.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor3.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor3.addResponsibility(new Responsibility("testModul2", "textAction2"));
         interceptors.add(registeredInterceptor1);
         interceptors.add(registeredInterceptor2);
         interceptors.add(registeredInterceptor3);
@@ -189,7 +190,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("moduleNotAvailable", "actionNotAvailable"));
+        testInterceptor.addResponsibility(new Responsibility("moduleNotAvailable", "actionNotAvailable"));
 
         boolean responsibleInterceptorRegistered = OXExceptionInterceptorRegistration.getInstance().isResponsibleInterceptorRegistered(testInterceptor);
 
@@ -207,7 +208,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
         interceptors.add(oxExceptionInterceptor);
 
         AbstractOXExceptionInterceptor registeredInterceptor1 = new AbstractOXExceptionInterceptor(1) {
@@ -217,9 +218,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul2", "textAction2"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul2", "textAction2"));
         AbstractOXExceptionInterceptor registeredInterceptor2 = new AbstractOXExceptionInterceptor(2) {
 
             @Override
@@ -227,9 +228,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul2", "textAction2"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul2", "textAction2"));
         AbstractOXExceptionInterceptor registeredInterceptor3 = new AbstractOXExceptionInterceptor(3) {
 
             @Override
@@ -237,9 +238,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("testModul2", "textAction2"));
+        registeredInterceptor3.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor3.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor3.addResponsibility(new Responsibility("testModul2", "textAction2"));
 
         interceptors.add(registeredInterceptor1);
         interceptors.add(registeredInterceptor2);
@@ -254,10 +255,10 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("moduleNotAvailable", "actionNotAvailable"));
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("moduleNotAvailable1", "actionNotAvailable1"));
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("moduleNotAvailable2", "actionNotAvailable2"));
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("moduleNotAvailable3", "actionNotAvailable3"));
+        testInterceptor.addResponsibility(new Responsibility("moduleNotAvailable", "actionNotAvailable"));
+        testInterceptor.addResponsibility(new Responsibility("moduleNotAvailable1", "actionNotAvailable1"));
+        testInterceptor.addResponsibility(new Responsibility("moduleNotAvailable2", "actionNotAvailable2"));
+        testInterceptor.addResponsibility(new Responsibility("moduleNotAvailable3", "actionNotAvailable3"));
 
         boolean responsibleInterceptorRegistered = OXExceptionInterceptorRegistration.getInstance().isResponsibleInterceptorRegistered(testInterceptor);
 
@@ -275,7 +276,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
         interceptors.add(oxExceptionInterceptor);
 
         AbstractOXExceptionInterceptor registeredInterceptor1 = new AbstractOXExceptionInterceptor(1) {
@@ -285,9 +286,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("testModul2", "textAction2"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor1.addResponsibility(new Responsibility("testModul2", "textAction2"));
         AbstractOXExceptionInterceptor registeredInterceptor2 = new AbstractOXExceptionInterceptor(2) {
 
             @Override
@@ -295,9 +296,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("testModul2", "textAction2"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor2.addResponsibility(new Responsibility("testModul2", "textAction2"));
         AbstractOXExceptionInterceptor registeredInterceptor3 = new AbstractOXExceptionInterceptor(3) {
 
             @Override
@@ -305,9 +306,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("testModul", "textAction"));
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("testModul1", "textAction1"));
-        registeredInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        registeredInterceptor3.addResponsibility(new Responsibility("testModul", "textAction"));
+        registeredInterceptor3.addResponsibility(new Responsibility("testModul1", "textAction1"));
+        registeredInterceptor3.addResponsibility(new Responsibility("module", "action"));
 
         interceptors.add(registeredInterceptor1);
         interceptors.add(registeredInterceptor2);
@@ -322,10 +323,10 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("moduleNotAvailable", "actionNotAvailable"));
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("moduleNotAvailable1", "actionNotAvailable1"));
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("moduleNotAvailable2", "actionNotAvailable2"));
-        testInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
+        testInterceptor.addResponsibility(new Responsibility("moduleNotAvailable", "actionNotAvailable"));
+        testInterceptor.addResponsibility(new Responsibility("moduleNotAvailable1", "actionNotAvailable1"));
+        testInterceptor.addResponsibility(new Responsibility("moduleNotAvailable2", "actionNotAvailable2"));
+        testInterceptor.addResponsibility(new Responsibility("module", "action"));
 
         boolean responsibleInterceptorRegistered = OXExceptionInterceptorRegistration.getInstance().isResponsibleInterceptorRegistered(testInterceptor);
 
@@ -350,9 +351,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module2", "action2"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module2", "action2"));
         interceptors.add(oxExceptionInterceptor);
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);
 
@@ -373,9 +374,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module2", "action2"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module2", "action2"));
         interceptors.add(oxExceptionInterceptor);
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);
 
@@ -396,9 +397,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module2", "action2"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module2", "action2"));
         interceptors.add(oxExceptionInterceptor);
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);
 
@@ -419,9 +420,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module2", "action2"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module2", "action2"));
         interceptors.add(oxExceptionInterceptor);
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);
 
@@ -442,9 +443,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module2", "action2"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module2", "action2"));
         interceptors.add(oxExceptionInterceptor);
 
         AbstractOXExceptionInterceptor oxExceptionInterceptor1 = new AbstractOXExceptionInterceptor(1) {
@@ -454,9 +455,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module7", "action7"));
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module8", "action8"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module7", "action7"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module8", "action8"));
         interceptors.add(oxExceptionInterceptor1);
 
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);
@@ -478,9 +479,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module11", "action12"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module2", "action2"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module11", "action12"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module2", "action2"));
         interceptors.add(oxExceptionInterceptor);
 
         AbstractOXExceptionInterceptor oxExceptionInterceptor1 = new AbstractOXExceptionInterceptor(1) {
@@ -490,9 +491,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module7", "action7"));
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module8", "action8"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module7", "action7"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module8", "action8"));
         interceptors.add(oxExceptionInterceptor1);
 
         AbstractOXExceptionInterceptor oxExceptionInterceptor2 = new AbstractOXExceptionInterceptor(1) {
@@ -502,9 +503,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("module7", "action7"));
-        oxExceptionInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("module8", "action8"));
+        oxExceptionInterceptor2.addResponsibility(new Responsibility("module7", "action7"));
+        oxExceptionInterceptor2.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor2.addResponsibility(new Responsibility("module8", "action8"));
         interceptors.add(oxExceptionInterceptor2);
 
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);
@@ -527,9 +528,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module", "action"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module11", "action12"));
-        oxExceptionInterceptor.addResponsibility(new OXExceptionInterceptorResponsibility("module2", "action2"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module", "action"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module11", "action12"));
+        oxExceptionInterceptor.addResponsibility(new Responsibility("module2", "action2"));
         interceptors.add(oxExceptionInterceptor);
 
         AbstractOXExceptionInterceptor oxExceptionInterceptor1 = new AbstractOXExceptionInterceptor(Integer.MAX_VALUE) {
@@ -539,9 +540,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module7", "action7"));
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor1.addResponsibility(new OXExceptionInterceptorResponsibility("module8", "action8"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module7", "action7"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor1.addResponsibility(new Responsibility("module8", "action8"));
         interceptors.add(oxExceptionInterceptor1);
 
         AbstractOXExceptionInterceptor oxExceptionInterceptor2 = new AbstractOXExceptionInterceptor(1111) {
@@ -551,9 +552,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("module7", "action7"));
-        oxExceptionInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor2.addResponsibility(new OXExceptionInterceptorResponsibility("module8", "action8"));
+        oxExceptionInterceptor2.addResponsibility(new Responsibility("module7", "action7"));
+        oxExceptionInterceptor2.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor2.addResponsibility(new Responsibility("module8", "action8"));
         interceptors.add(oxExceptionInterceptor2);
 
         AbstractOXExceptionInterceptor oxExceptionInterceptor3 = new AbstractOXExceptionInterceptor(444) {
@@ -563,9 +564,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("module7", "action7"));
-        oxExceptionInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("module1ignore", "action1ignore"));
-        oxExceptionInterceptor3.addResponsibility(new OXExceptionInterceptorResponsibility("module8", "action8"));
+        oxExceptionInterceptor3.addResponsibility(new Responsibility("module7", "action7"));
+        oxExceptionInterceptor3.addResponsibility(new Responsibility("module1ignore", "action1ignore"));
+        oxExceptionInterceptor3.addResponsibility(new Responsibility("module8", "action8"));
         interceptors.add(oxExceptionInterceptor3);
 
         AbstractOXExceptionInterceptor oxExceptionInterceptor4 = new AbstractOXExceptionInterceptor(55) {
@@ -575,9 +576,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor4.addResponsibility(new OXExceptionInterceptorResponsibility("module7", "action7"));
-        oxExceptionInterceptor4.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor4.addResponsibility(new OXExceptionInterceptorResponsibility("module8", "action8"));
+        oxExceptionInterceptor4.addResponsibility(new Responsibility("module7", "action7"));
+        oxExceptionInterceptor4.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor4.addResponsibility(new Responsibility("module8", "action8"));
         interceptors.add(oxExceptionInterceptor4);
 
         AbstractOXExceptionInterceptor oxExceptionInterceptor5 = new AbstractOXExceptionInterceptor(333) {
@@ -587,9 +588,9 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
                 return null;
             }
         };
-        oxExceptionInterceptor5.addResponsibility(new OXExceptionInterceptorResponsibility("module7", "action7"));
-        oxExceptionInterceptor5.addResponsibility(new OXExceptionInterceptorResponsibility("module1", "action1"));
-        oxExceptionInterceptor5.addResponsibility(new OXExceptionInterceptorResponsibility("module8", "action8"));
+        oxExceptionInterceptor5.addResponsibility(new Responsibility("module7", "action7"));
+        oxExceptionInterceptor5.addResponsibility(new Responsibility("module1", "action1"));
+        oxExceptionInterceptor5.addResponsibility(new Responsibility("module8", "action8"));
         interceptors.add(oxExceptionInterceptor5);
 
         MockUtils.injectValueIntoPrivateField(OXExceptionInterceptorRegistration.getInstance(), "interceptors", interceptors);

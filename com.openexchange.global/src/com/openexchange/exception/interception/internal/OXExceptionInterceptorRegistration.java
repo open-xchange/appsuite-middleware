@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.exception.interception;
+package com.openexchange.exception.interception.internal;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -55,11 +55,14 @@ import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.interception.OXExceptionInterceptor;
+import com.openexchange.exception.interception.Responsibility;
 
 /**
  * Registry that handles all registered {@link OXExceptionInterceptor} for processing within {@link OXException} creation
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Thread-safe collection
  * @since 7.6.1
  */
 public class OXExceptionInterceptorRegistration {
@@ -77,6 +80,7 @@ public class OXExceptionInterceptorRegistration {
     private volatile List<OXExceptionInterceptor> interceptors;
 
     private OXExceptionInterceptorRegistration() {
+        super();
         this.interceptors = new LinkedList<OXExceptionInterceptor>();
 
         comparator = new Comparator<OXExceptionInterceptor>() {
@@ -143,15 +147,14 @@ public class OXExceptionInterceptorRegistration {
      *         otherwise false
      */
     protected boolean isResponsibleInterceptorRegistered(OXExceptionInterceptor interceptorCandidate) {
-        final List<OXExceptionInterceptor> interceptors2 = this.interceptors;
+        final List<OXExceptionInterceptor> interceptors = this.interceptors;
 
-        for (OXExceptionInterceptor interceptor : interceptors2) {
+        for (OXExceptionInterceptor interceptor : interceptors) {
             if (interceptor.getRanking() != interceptorCandidate.getRanking()) {
                 continue;
             }
-            List<OXExceptionInterceptorResponsibility> responsibilities = interceptor.getResponsibilities();
-            for (OXExceptionInterceptorResponsibility responsibility : responsibilities) {
-                for (OXExceptionInterceptorResponsibility candidateResponsibility : interceptorCandidate.getResponsibilities()) {
+            for (Responsibility responsibility : interceptor.getResponsibilities()) {
+                for (Responsibility candidateResponsibility : interceptorCandidate.getResponsibilities()) {
                     if (responsibility.equals(candidateResponsibility)) {
                         return true;
                     }
@@ -182,11 +185,7 @@ public class OXExceptionInterceptorRegistration {
         lInterceptors.addAll(this.interceptors);
 
         // Now order them according to service ranking
-        if (null != comparator) {
-            Collections.sort(lInterceptors, comparator);
-        } else {
-            LOG.error("Missing comparator, unable to sort exception interceptors properly!");
-        }
+        Collections.sort(lInterceptors, comparator);
 
         return lInterceptors;
     }
@@ -208,11 +207,7 @@ public class OXExceptionInterceptorRegistration {
             }
         }
 
-        if (null != comparator) {
-            Collections.sort(lInterceptors, comparator);
-        } else {
-            LOG.error("Missing comparator, unable to sort exception interceptors properly!");
-        }
+        Collections.sort(lInterceptors, comparator);
 
         return lInterceptors;
     }

@@ -49,55 +49,57 @@
 
 package com.openexchange.exception.interception;
 
-import java.util.List;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link OXExceptionInterceptor} interface that might be implemented to register a new interceptor for exception handling.<br>
- * <br>
+ * {@link OXExceptionInterceptor} interface that might be implemented to register a new interceptor for exception handling.
+ * <p>
  * Have a look at {@link AbstractOXExceptionInterceptor} that defines a default implementation.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @since 7.6.1
  */
 public interface OXExceptionInterceptor {
 
     /**
-     * Returns the module / action combination the interceptor is responsible for.
+     * Gets the module / action combinations this interceptor is responsible for.
      *
-     * @return List with the responsibilities the interceptor is responsible for
+     * @return The responsibilities for this interceptor
      */
-    public List<OXExceptionInterceptorResponsibility> getResponsibilities();
+    Collection<Responsibility> getResponsibilities();
 
     /**
-     * Adds a new {@link OXExceptionInterceptorResponsibility} to the interceptor
+     * Adds a new {@link Responsibility} to the interceptor
      *
-     * @param responsibility - the module/action combination the interceptor should be responsible for
+     * @param responsibility The module/action combination the interceptor should be responsible for
      */
-    public void addResponsibility(OXExceptionInterceptorResponsibility responsibility);
+    void addResponsibility(Responsibility responsibility);
 
     /**
      * Intercepts the given {@link OXException} for the defined module / action. Previously check if the given
      * {@link OXExceptionInterceptor} is responsible for the module / action combination by using {@link #isResponsible(String, String)}
      *
-     * @param oxException - the {@link OXException} to intercept
+     * @param oxException The {@link OXException} to intercept
      * @return {@link OXException} that was processed by the interceptor
      */
-    public OXException intercept(OXException oxException);
+    OXException intercept(OXException oxException);
 
     /**
-     * Returns if the interceptor is responsible for the given module and action combination
+     * Checks if the interceptor is responsible for the given module and action combination
      *
-     * @param module - the module that should be tested
-     * @param action - the action that should be tested
-     * @return true if the interceptor is responsible (means that {@link #intercept(OXException)} will be executed)
+     * @param module The module that should be tested
+     * @param action The action that should be tested
+     * @return <code>true</code> if the interceptor is responsible (means that {@link #intercept(OXException)} will be executed); otherwise <code>false</code>
      */
-    public boolean isResponsible(String module, String action);
+    boolean isResponsible(String module, String action);
 
     /**
-     * Returns the ranking of the {@link OXExceptionInterceptor}
+     * Returns the ranking of this {@link OXExceptionInterceptor}
      *
-     * @return int with the interceptor ranking
+     * @return An <code>int</code> value representing the interceptor's ranking
      */
-    public int getRanking();
+    int getRanking();
+
 }

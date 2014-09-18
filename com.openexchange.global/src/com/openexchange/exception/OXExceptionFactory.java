@@ -54,7 +54,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.interception.OXExceptionInterceptor;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistration;
+import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
 import com.openexchange.log.LogProperties;
 
 /**

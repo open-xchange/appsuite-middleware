@@ -52,24 +52,24 @@ package com.openexchange.exception.interception;
 
 /**
  * Module / action combination to define one responsibility of an {@link OXExceptionInterceptor}. An {@link OXExceptionInterceptor} is able
- * to deal with (almost) unlimited {@link OXExceptionInterceptorResponsibility}s
+ * to deal with (almost) unlimited {@link Responsibility}s
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class OXExceptionInterceptorResponsibility {
+public class Responsibility {
 
     private final String module;
-
     private final String action;
+    private final int hash;
 
     /**
-     * Initializes a new {@link OXExceptionInterceptorResponsibility}.
+     * Initializes a new {@link Responsibility}.
      *
      * @param module - the module the {@link OXExceptionInterceptor} is responsible for
      * @param action - the module the {@link OXExceptionInterceptor} is responsible for.
      */
-    public OXExceptionInterceptorResponsibility(String module, String action) {
+    public Responsibility(String module, String action) {
         if (module == null) {
             throw new IllegalArgumentException("Module might not be null");
         }
@@ -79,6 +79,7 @@ public class OXExceptionInterceptorResponsibility {
 
         this.module = module;
         this.action = action;
+        hash = module.hashCode() ^ action.hashCode();
     }
 
     /**
@@ -107,10 +108,10 @@ public class OXExceptionInterceptorResponsibility {
         if (o == null) {
             return false;
         }
-        if (!(o instanceof OXExceptionInterceptorResponsibility)) {
+        if (!(o instanceof Responsibility)) {
             return false;
         }
-        OXExceptionInterceptorResponsibility pairo = (OXExceptionInterceptorResponsibility) o;
+        Responsibility pairo = (Responsibility) o;
         return this.module.equals(pairo.getModule()) && this.action.equals(pairo.getAction());
     }
 
@@ -119,6 +120,7 @@ public class OXExceptionInterceptorResponsibility {
      */
     @Override
     public int hashCode() {
-        return module.hashCode() ^ action.hashCode();
+        return hash;
     }
+
 }

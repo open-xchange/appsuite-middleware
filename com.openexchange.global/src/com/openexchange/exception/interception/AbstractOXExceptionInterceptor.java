@@ -49,8 +49,9 @@
 
 package com.openexchange.exception.interception;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 
 
@@ -65,18 +66,18 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractOXExceptionInterceptor implements OXExceptionInterceptor {
 
-    /** List of {@link OXExceptionInterceptorResponsibility} the extending {@link OXExceptionInterceptor} is responsible for **/
-    protected List<OXExceptionInterceptorResponsibility> responsibilitites = new LinkedList<OXExceptionInterceptorResponsibility>();
+    /** List of {@link Responsibility} the extending {@link OXExceptionInterceptor} is responsible for **/
+    protected final Queue<Responsibility> responsibilitites = new ConcurrentLinkedQueue<Responsibility>();
 
     /** The service ranking */
-    private final int ranking;
+    protected final int ranking;
 
     /**
      * Initializes a new {@link AbstractOXExceptionInterceptor}.
      *
-     * @param ranking - ranking of this {@link OXExceptionInterceptor} compared to other ones
+     * @param ranking The ranking of this {@link OXExceptionInterceptor} compared to other ones
      */
-    public AbstractOXExceptionInterceptor(int ranking) {
+    protected AbstractOXExceptionInterceptor(int ranking) {
         super();
         this.ranking = ranking;
     }
@@ -91,7 +92,7 @@ public abstract class AbstractOXExceptionInterceptor implements OXExceptionInter
      * {@inheritDoc}
      */
     @Override
-    public List<OXExceptionInterceptorResponsibility> getResponsibilities() {
+    public Collection<Responsibility> getResponsibilities() {
         return responsibilitites;
     }
 
@@ -99,7 +100,7 @@ public abstract class AbstractOXExceptionInterceptor implements OXExceptionInter
      * {@inheritDoc}
      */
     @Override
-    public void addResponsibility(OXExceptionInterceptorResponsibility responsibility) {
+    public void addResponsibility(Responsibility responsibility) {
         this.responsibilitites.add(responsibility);
     }
 
@@ -108,8 +109,8 @@ public abstract class AbstractOXExceptionInterceptor implements OXExceptionInter
      */
     @Override
     public boolean isResponsible(String module, String action) {
-        for (OXExceptionInterceptorResponsibility responsibility : responsibilitites) {
-            if (responsibility.equals(new OXExceptionInterceptorResponsibility(module, action))) {
+        for (Responsibility responsibility : responsibilitites) {
+            if (responsibility.equals(new Responsibility(module, action))) {
                 return true;
             }
         }
