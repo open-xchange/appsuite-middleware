@@ -49,10 +49,10 @@
 
 package com.openexchange.mail.compose;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -139,9 +139,10 @@ public final class CompositionSpaces {
     public static void destroyFor(Session session) {
         Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
 
-        CompositionSpaceRegistry registry = CompositionSpace.getRegistry(session);
-        ConcurrentMap<String, CompositionSpace> spaces = registry.getCompositionSpaces();
-        for
+        List<CompositionSpace> spaces = CompositionSpace.getRegistry(session).clearCompositionSpaces();
+        for (CompositionSpace space : spaces) {
+
+        }
     }
 
 }
