@@ -79,6 +79,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -149,8 +150,9 @@ public final class NewAction extends AbstractMailAction {
     }
 
     private AJAXRequestResult performWithUploads(final MailRequest req, final AJAXRequestData request, final List<OXException> warnings) throws OXException, JSONException {
-        final ServerSession session = req.getSession();
-        final UploadEvent uploadEvent = request.getUploadEvent();
+        ServerSession session = req.getSession();
+        String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
+        UploadEvent uploadEvent = request.getUploadEvent();
         String msgIdentifier = null;
         UserSettingMail userSettingMail = null;
         {
@@ -200,6 +202,9 @@ public final class NewAction extends AbstractMailAction {
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
                 }
+
+                CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+
                 warnings.addAll(mailInterface.getWarnings());
             } else {
                 /*
@@ -210,9 +215,16 @@ public final class NewAction extends AbstractMailAction {
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
                 if (null != folder) {
-                    final MailTransport mailTransport = MailTransport.getInstance(session, accountId);
-                    final MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
-                    final String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
+                    // Do the transport
+                    MailTransport mailTransport = MailTransport.getInstance(session, accountId);
+                    MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
+
+                    // Apply composition space state(s)
+                    mailInterface.openFor(folder);
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+
+                    // Append messages
+                    String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
                     msgIdentifier = ids[0];
                     mailInterface.updateMessageFlags(folder, ids, MailMessage.FLAG_SEEN, true);
                     final JSONObject responseObj = new JSONObject(2);
@@ -291,6 +303,10 @@ public final class NewAction extends AbstractMailAction {
                         mailInterface.sendMessage(cm, sendType, accountId, usm);
                     }
                 }
+
+                // Apply composition space state(s)
+                CompositionSpaces.applyCompositionSpace(csid, session, null);
+
                 warnings.addAll(mailInterface.getWarnings());
                 /*
                  * Trigger contact collector

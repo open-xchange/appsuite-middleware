@@ -2331,6 +2331,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return retval;
     }
 
+    @Override
+    public void openFor(String folder) throws OXException {
+        FullnameArgument argument = prepareMailFolderParam(folder);
+        int accountId = argument.getAccountId();
+        initConnection(accountId);
+    }
+
     private void initConnection(final int accountId) throws OXException {
         if (!init) {
             mailAccess = initMailAccess(accountId);

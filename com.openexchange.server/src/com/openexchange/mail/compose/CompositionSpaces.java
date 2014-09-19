@@ -58,6 +58,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 
@@ -221,6 +222,97 @@ public final class CompositionSpaces {
                     }
                 }
             }
+        } finally {
+            for (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access : accesses.values()) {
+                access.close(false);
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Applies denoted composition space's state
+     *
+     * @param csid The composition space identifier
+     * @param session The associated session
+     * @throws OXException If operation fails
+     */
+    public static void applyCompositionSpace(String csid, Session session) throws OXException {
+        applyCompositionSpace(csid, session, null);
+    }
+
+    /**
+     * Applies denoted composition space's state
+     *
+     * @param csid The composition space identifier
+     * @param session The associated session
+     * @param optMailAccess The optional pre-initialized mail access
+     * @throws OXException If operation fails
+     */
+    public static void applyCompositionSpace(String csid, Session session, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess) throws OXException {
+        CompositionSpace space = CompositionSpace.optCompositionSpace(csid, session);
+        if (null == space) {
+            return;
+        }
+
+        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        try {
+            {
+                MailPath replyFor = space.getReplyFor();
+                if (null != replyFor) {
+                    if (null != optMailAccess && replyFor.getAccountId() == optMailAccess.getAccountId()) {
+                        optMailAccess.getMessageStorage().updateMessageFlags(replyFor.getFolder(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, true);
+                    } else {
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(replyFor.getAccountId()));
+                        if (null == access) {
+                            access = MailAccess.getNewInstance(session, replyFor.getAccountId());
+                            access.connect(false);
+                            accesses.put(Integer.valueOf(replyFor.getAccountId()), access);
+                        }
+                        access.getMessageStorage().updateMessageFlags(replyFor.getFolder(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, true);
+                    }
+                }
+            }
+
+            {
+                Queue<MailPath> forwardsFor = space.getForwardsFor();
+                if (null != forwardsFor && !forwardsFor.isEmpty()) {
+                    for (MailPath mailPath : forwardsFor) {
+                        if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
+                            optMailAccess.getMessageStorage().updateMessageFlags(mailPath.getFolder(), new String[] { mailPath.getMailID() }, MailMessage.FLAG_FORWARDED, true);
+                        } else {
+                            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(mailPath.getAccountId()));
+                            if (null == access) {
+                                access = MailAccess.getNewInstance(session, mailPath.getAccountId());
+                                access.connect(false);
+                                accesses.put(Integer.valueOf(mailPath.getAccountId()), access);
+                            }
+                            access.getMessageStorage().updateMessageFlags(mailPath.getFolder(), new String[] { mailPath.getMailID() }, MailMessage.FLAG_FORWARDED, true);
+                        }
+                    }
+                }
+            }
+
+            {
+                Queue<MailPath> draftEditsFor = space.getDraftEditsFor();
+                if (null != draftEditsFor && !draftEditsFor.isEmpty()) {
+                    for (MailPath mailPath : draftEditsFor) {
+                        if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
+                            optMailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                        } else {
+                            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(mailPath.getAccountId()));
+                            if (null == access) {
+                                access = MailAccess.getNewInstance(session, mailPath.getAccountId());
+                                access.connect(false);
+                                accesses.put(Integer.valueOf(mailPath.getAccountId()), access);
+                            }
+                            access.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                        }
+                    }
+                }
+            }
+
         } finally {
             for (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access : accesses.values()) {
                 access.close(false);
