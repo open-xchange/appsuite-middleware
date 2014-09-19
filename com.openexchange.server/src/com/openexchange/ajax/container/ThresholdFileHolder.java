@@ -179,7 +179,7 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @return <code>true</code> if in memory; otherwise <code>false</code>
      */
     public boolean isInMemory() {
-        return (null == tempFile);
+        return (null == tempFile) && (buf != null);
     }
 
     /**

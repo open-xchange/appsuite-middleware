@@ -47,38 +47,76 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.mail.mime.datasource;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.activation.DataSource;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.exception.OXException;
 
 /**
- * This suite is meant to be used with a running OX.
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link FileHolderDataSource} - A data source backed by a file holder.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ImportExportServerSuite {
+public class FileHolderDataSource implements DataSource {
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.importexport.ImportExportServerSuite");
-        tests.addTest(ICalTestSuite.suite());
+    private final ThresholdFileHolder fh;
+    private final String contentType;
 
-        //VCARD
-        tests.addTest(VCardTestSuite.suite());
-        tests.addTestSuite(Bug9475Test.class);
-        tests.addTestSuite(VCardImportLosingAddressInfoTest.class);
-
-        //CSV
-        tests.addTestSuite(CSVImportExportServletTest.class);
-        tests.addTestSuite(Bug18482Test_ByteOrderMarkOnUtf8.class);
-        tests.addTestSuite(Bug20516Test.class);
-        tests.addTestSuite(Bug32200Test.class);
-        tests.addTestSuite(Bug33748Test.class);
-        tests.addTestSuite(Bug32994Test.class);
-        tests.addTestSuite(Bug34499Test.class);
-
-        // Overall bug tests.
-        tests.addTestSuite(Bug9209Test.class);
-        tests.addTestSuite(DistributionListExportTest.class);
-        return tests;
+    /**
+     * Initializes a new {@link FileHolderDataSource}.
+     *
+     * @param fh The file holder
+     * @param contentType The associated MIME type
+     */
+    public FileHolderDataSource(ThresholdFileHolder fh, String contentType) {
+        super();
+        this.fh = fh;
+        this.contentType = contentType;
     }
+
+    @Override
+    public String getContentType() {
+        return contentType;
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        try {
+            return fh.getStream();
+        } catch (final OXException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            throw new IOException(e);
+        }
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        ThresholdFileHolder tmp = fh;
+        if (null != tmp) {
+            try {
+                tmp.close();
+            } catch (final Exception ignore) {
+                // Ignore
+            }
+        }
+    }
+
 }

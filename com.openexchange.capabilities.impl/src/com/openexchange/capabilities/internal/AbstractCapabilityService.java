@@ -85,6 +85,7 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.ConcurrentEnumMap;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -371,10 +372,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     capabilities.remove("pim");
                 }
                 // Spam
-                if (userPermissionBits.hasWebMail() && serverSession.getUserSettingMail().isSpamEnabled()) {
-                    capabilities.add(getCapability("spam"));
-                } else {
-                    capabilities.remove("spam");
+                if (userPermissionBits.hasWebMail()) {
+                    UserSettingMail mailSettings = serverSession.getUserSettingMail();
+                    if (null != mailSettings && mailSettings.isSpamEnabled()) {
+                        capabilities.add(getCapability("spam"));
+                    } else {
+                        capabilities.remove("spam");
+                    }
                 }
                 // Global Address Book
                 if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
