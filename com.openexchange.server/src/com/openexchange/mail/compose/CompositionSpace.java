@@ -136,7 +136,7 @@ public class CompositionSpace {
         this.session = session;
         this.id = id;
         cleanUps = new ConcurrentLinkedQueue<MailPath>();
-        idleTime = TimeUnit.MINUTES.toMillis(10); // 10 minutes idle time
+        idleTime = TimeUnit.MINUTES.toMillis(15); // 15 minutes idle time
         lastAccessed = System.currentTimeMillis();
     }
 
