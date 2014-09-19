@@ -108,6 +108,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class CalendarSql implements AppointmentSQLInterface {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarSql.class);
+
     public static final String default_class = "com.openexchange.calendar.CalendarMySQL";
 
     public static final String ERROR_PUSHING_DATABASE = "error pushing readable connection";
@@ -119,16 +121,6 @@ public class CalendarSql implements AppointmentSQLInterface {
     public static final String VIEW_TABLE_NAME = "prg_date_rights";
 
     public static final String PARTICIPANT_TABLE_NAME = "prg_dates_members";
-
-    private static volatile CalendarSqlImp cimp;
-
-    private final Session session;
-
-    private final CalendarCollection calendarCollection;
-
-    private boolean includePrivateAppointments;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarSql.class);
 
     protected final static int EXCEPTION_NOT_FOUND = -1;
 
@@ -147,7 +139,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public static final int[] EXCEPTION_FIELDS = new int[Appointment.ALL_COLUMNS.length - EXEMPT.size()];
 
-    private static int MAX_SEARCH_FOLDER = 100;
+    private static volatile int MAX_SEARCH_FOLDER = 100;
 
     static {
         int i = 0;
@@ -157,6 +149,14 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
         }
     }
+
+    private static volatile CalendarSqlImp cimp;
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+    private final Session session;
+    private CalendarCollection calendarCollection;
+    private boolean includePrivateAppointments;
 
     /**
      * Initializes a new {@link CalendarSql}.
@@ -1303,7 +1303,8 @@ public class CalendarSql implements AppointmentSQLInterface {
         readableFolder += cfo.getPublicReadableAll() == null ? 0 : cfo.getPublicReadableAll().size();
         readableFolder += cfo.getSharedReadableOwn() == null ? 0 : cfo.getSharedReadableOwn().size();
         readableFolder += cfo.getSharedReadableAll() == null ? 0 : cfo.getSharedReadableAll().size();
-        if (MAX_SEARCH_FOLDER >= 0 && readableFolder > MAX_SEARCH_FOLDER) {
+        int maxSearchFolder = MAX_SEARCH_FOLDER;
+        if (maxSearchFolder >= 0 && readableFolder > maxSearchFolder) {
             return true;
         }
 
