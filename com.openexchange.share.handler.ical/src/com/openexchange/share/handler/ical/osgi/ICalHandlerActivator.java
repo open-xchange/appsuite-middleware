@@ -49,9 +49,6 @@
 
 package com.openexchange.share.handler.ical.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.folderstorage.FolderService;
@@ -94,9 +91,7 @@ public class ICalHandlerActivator extends HousekeepingActivator {
         /*
          * register handler
          */
-        Dictionary<String, String> properties = new Hashtable<String, String>(1);
-        properties.put(Constants.SERVICE_RANKING, String.valueOf(100));
-        registerService(ShareHandler.class, new ICalHandler(), properties);
+        registerService(ShareHandler.class, new ICalHandler(), 100);
     }
 
     @Override
