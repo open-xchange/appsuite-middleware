@@ -209,7 +209,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             }
             final ManagedFile mf;
             try {
-                mf = mfm.createManagedFile(in);
+                mf = mfm.createManagedFile(in, false);
             } catch (final OXException e) {
                 final IOException ioerr = new IOException();
                 ioerr.initCause(e);

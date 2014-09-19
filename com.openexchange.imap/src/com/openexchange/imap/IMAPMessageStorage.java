@@ -1304,6 +1304,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     setSeenFlag(fullName, mail, msg);
                 }
             }
+            clearCache(imapFolder);
             return setAccountInfo(mail);
         } catch (final MessagingException e) {
             if (ImapUtility.isInvalidMessageset(e)) {

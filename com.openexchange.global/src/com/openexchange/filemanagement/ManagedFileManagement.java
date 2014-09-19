@@ -71,7 +71,7 @@ public interface ManagedFileManagement {
     /**
      * Clears all files kept by this file management.
      */
-    public void clear();
+    void clear();
 
     /**
      * Creates a new temporary file.
@@ -86,7 +86,7 @@ public interface ManagedFileManagement {
      * @return A new temporary file
      * @throws OXException If a temporary file could not be created
      */
-    public File newTempFile() throws OXException;
+    File newTempFile() throws OXException;
 
     /**
      * Creates a new temporary file.
@@ -103,7 +103,7 @@ public interface ManagedFileManagement {
      * @return A new temporary file
      * @throws OXException If a temporary file could not be created
      */
-    public File newTempFile(String prefix, String suffix) throws OXException;
+    File newTempFile(String prefix, String suffix) throws OXException;
 
     /**
      * Creates a new managed file from specified temporary file.
@@ -112,7 +112,7 @@ public interface ManagedFileManagement {
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified temporary file
      */
-    public ManagedFile createManagedFile(final File temporaryFile) throws OXException;
+    ManagedFile createManagedFile(File temporaryFile) throws OXException;
 
     /**
      * Creates a new managed file from specified input stream.
@@ -123,7 +123,19 @@ public interface ManagedFileManagement {
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified content
      */
-    public ManagedFile createManagedFile(InputStream inputStream) throws OXException;
+    ManagedFile createManagedFile(InputStream inputStream) throws OXException;
+
+    /**
+     * Creates a new managed file from specified input stream.
+     * <p>
+     * Size attribute is already set in returned managed file.
+     *
+     * @param inputStream The input stream whose content is filled into newly created file
+     * @param distribute <code>true</code> to attempt to have created file remotely accessible for other cluster nodes, too; otherwise <code>false</code> for local-only
+     * @return A new managed file
+     * @throws OXException If a new managed file cannot be created from specified content
+     */
+    ManagedFile createManagedFile(InputStream inputStream, boolean distribute) throws OXException;
 
     /**
      * Creates a new managed file from specified input stream.
@@ -135,7 +147,20 @@ public interface ManagedFileManagement {
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified content
      */
-    public ManagedFile createManagedFile(String id, InputStream inputStream) throws OXException;
+    ManagedFile createManagedFile(String id, InputStream inputStream) throws OXException;
+
+    /**
+     * Creates a new managed file from specified input stream.
+     * <p>
+     * Forces the ManagedFile to have the specified id (if not <code>null</code>).
+     *
+     * @param id The id or <code>null</code> to use a newly generated one
+     * @param inputStream input stream whose content is filled into newly created file
+     * @param distribute <code>true</code> to attempt to have created file remotely accessible for other cluster nodes, too; otherwise <code>false</code> for local-only
+     * @return A new managed file
+     * @throws OXException If a new managed file cannot be created from specified content
+     */
+    ManagedFile createManagedFile(String id, InputStream inputStream, boolean distribute) throws OXException;
 
     /**
      * Creates a new managed file from specified input stream with custom time-to-live.
@@ -148,7 +173,7 @@ public interface ManagedFileManagement {
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified content
      */
-    public ManagedFile createManagedFile(String id, InputStream inputStream, int ttl) throws OXException;
+    ManagedFile createManagedFile(String id, InputStream inputStream, int ttl) throws OXException;
 
     /**
      * Creates a new managed file from specified input stream.
@@ -160,7 +185,7 @@ public interface ManagedFileManagement {
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified content
      */
-    public ManagedFile createManagedFile(InputStream inputStream, String optExtension) throws OXException;
+    ManagedFile createManagedFile(InputStream inputStream, String optExtension) throws OXException;
 
     /**
      * Creates a new managed file from specified bytes.
@@ -171,7 +196,19 @@ public interface ManagedFileManagement {
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified content
      */
-    public ManagedFile createManagedFile(byte[] bytes) throws OXException;
+    ManagedFile createManagedFile(byte[] bytes) throws OXException;
+
+    /**
+     * Creates a new managed file from specified bytes.
+     * <p>
+     * Size attribute is already set in returned managed file.
+     *
+     * @param bytes The bytes which are filled into newly created file
+     * @param distribute <code>true</code> to attempt to have created file remotely accessible for other cluster nodes, too; otherwise <code>false</code> for local-only
+     * @return A new managed file
+     * @throws OXException If a new managed file cannot be created from specified content
+     */
+    ManagedFile createManagedFile(byte[] bytes, boolean distribute) throws OXException;
 
     /**
      * Gets all currently (<i>locally</i>) stored managed files.
@@ -181,7 +218,7 @@ public interface ManagedFileManagement {
      * @return All managed files
      * @throws OXException If listing all managed files fails
      */
-    public List<ManagedFile> getManagedFiles() throws OXException;
+    List<ManagedFile> getManagedFiles() throws OXException;
 
     /**
      * Gets those currently (<i>locally</i>) stored managed files that satisfy specified filter (if not <code>null</code>)
@@ -192,7 +229,7 @@ public interface ManagedFileManagement {
      * @return The filtered managed files
      * @throws OXException If returning managed files fails
      */
-    public List<ManagedFile> getManagedFiles(ManagedFileFilter filter) throws OXException;
+    List<ManagedFile> getManagedFiles(ManagedFileFilter filter) throws OXException;
 
     /**
      * Gets an existing managed file by its unique ID and updates its last-accessed time stamp if found.
@@ -201,7 +238,7 @@ public interface ManagedFileManagement {
      * @return The managed file associated with specified unique ID.
      * @throws OXException If no such managed file exists or cannot be returned
      */
-    public ManagedFile getByID(String id) throws OXException;
+    ManagedFile getByID(String id) throws OXException;
 
     /**
      * Checks for an existing managed file of which unique ID matches given unique ID. If such a managed file is found, its last-accessed
@@ -210,7 +247,7 @@ public interface ManagedFileManagement {
      * @param id The managed file's unique ID
      * @return <code>true</code> if such a managed file is found; otherwise <code>false</code>
      */
-    public boolean contains(String id);
+    boolean contains(String id);
 
     /**
      * Checks for an existing managed file of which unique ID matches given unique ID. If such a managed file is found, its last-accessed
@@ -227,7 +264,7 @@ public interface ManagedFileManagement {
      * @param id The managed file's unique ID
      * @throws OXException If managed file exists and cannot be removed
      */
-    public void removeByID(String id) throws OXException;
+    void removeByID(String id) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified bytes with default capacity.
@@ -238,7 +275,7 @@ public interface ManagedFileManagement {
      * @param bytes The bytes held by this input stream
      * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final byte[] bytes) throws OXException;
+    InputStream createInputStream(final byte[] bytes) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified bytes.
@@ -250,7 +287,7 @@ public interface ManagedFileManagement {
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final byte[] bytes, final int capacity) throws OXException;
+    InputStream createInputStream(final byte[] bytes, final int capacity) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified input stream with default capacity and unknown stream size.
@@ -261,7 +298,7 @@ public interface ManagedFileManagement {
      * @param in The input stream to manage
      * @throws OXException If an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final InputStream in) throws OXException;
+    InputStream createInputStream(final InputStream in) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified input stream with unknown stream size.
@@ -273,7 +310,7 @@ public interface ManagedFileManagement {
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @throws OXException If an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final InputStream in, final int capacity) throws OXException;
+    InputStream createInputStream(final InputStream in, final int capacity) throws OXException;
 
     /**
      * Creates a possibly managed input stream from specified input stream.
@@ -286,5 +323,5 @@ public interface ManagedFileManagement {
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
-    public InputStream createInputStream(final InputStream in, final int size, final int capacity) throws OXException;
+    InputStream createInputStream(final InputStream in, final int size, final int capacity) throws OXException;
 }

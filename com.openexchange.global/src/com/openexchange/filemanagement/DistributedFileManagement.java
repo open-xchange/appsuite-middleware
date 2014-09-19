@@ -50,6 +50,8 @@
 package com.openexchange.filemanagement;
 
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -92,6 +94,18 @@ public interface DistributedFileManagement {
      * @throws OXException If existence check fails
      */
     public boolean exists(String id) throws OXException;
+
+    /**
+     * Checks if there is such a distributed file associated with given identifier.
+     *
+     * @param id The identifier
+     * @param timeout The time-out for this operation
+     * @param unit The time unit for time-out value
+     * @return <code>true</code> if there is such a distributed file; otherwise <code>false</code>
+     * @throws OXException If existence check fails
+     * @throws TimeoutException If time-out is exceeded
+     */
+    public boolean exists(String id, long timeout, TimeUnit unit) throws OXException, TimeoutException;
 
     /**
      * Touches/resets the time stamp of the file associated with given identifier.

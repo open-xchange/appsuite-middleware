@@ -382,6 +382,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
              */
             synchronized (imapFolder) {
                 IMAPCommandsCollection.forceNoopCommand(imapFolder);
+                clearCache(imapFolder);
                 try {
                     /*
                      * This call also checks if folder is opened
@@ -391,9 +392,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         /*
                          * Identical folder is already opened in an appropriate mode.
                          */
-                        // IMAPCommandsCollection.updateIMAPFolder(imapFolder,
-                        // mode);
-                        clearCache(imapFolder);
                         return imapFolder;
                     }
                     /*
@@ -524,24 +522,23 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected static volatile Field messageCacheField;
     protected static volatile Field uidTableField;
 
-    /** Clears the cache */
-    protected static void clearCache(final IMAPFolder imapFolder) {
+    /**
+     * Clears given IMAP folder's {@link com.sun.mail.imap.MessageCache message cache} and UID table.
+     *
+     * @param imapFolder The IMAP folder
+     */
+    public static void clearCache(final IMAPFolder imapFolder) {
         if (null == imapFolder) {
             return;
         }
-        final Field messageCacheField = IMAPFolderWorker.messageCacheField;
+        Field messageCacheField = IMAPFolderWorker.messageCacheField;
         if (null == messageCacheField) {
             return;
         }
-        final Field messagesField = IMAPFolderWorker.messagesField;
+        Field messagesField = IMAPFolderWorker.messagesField;
         if (null == messagesField) {
             return;
         }
-        final Field uidTableField = IMAPFolderWorker.uidTableField;
-        if (null == uidTableField) {
-            return;
-        }
-
         try {
             final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
             if (null != mc) {
@@ -551,9 +548,12 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 }
             }
 
-            final Hashtable<?, ?> uidTable = (Hashtable<?, ?>) uidTableField.get(imapFolder);
-            if (null != uidTable) {
-                uidTable.clear();
+            Field uidTableField = IMAPFolderWorker.uidTableField;
+            if (null != uidTableField) {
+                final Hashtable<?, ?> uidTable = (Hashtable<?, ?>) uidTableField.get(imapFolder);
+                if (null != uidTable) {
+                    uidTable.clear();
+                }
             }
         } catch (final IllegalArgumentException e) {
             LOG.error("", e);
