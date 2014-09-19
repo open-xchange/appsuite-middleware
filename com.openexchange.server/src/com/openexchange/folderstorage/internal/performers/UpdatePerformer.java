@@ -164,19 +164,21 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              * Load storage folder
              */
             final Folder storageFolder = storage.getFolder(treeId, folderId, storageParameters);
-            if (null == folder.getName()) {
-                folder.setName(storageFolder.getName());
-            }
+            final String oldParentId = storageFolder.getParentID();
 
             final boolean move;
-            final String oldParentId = storageFolder.getParentID();
             {
                 final String newParentId = folder.getParentID();
                 move = (null != newParentId && !newParentId.equals(oldParentId));
                 if (move) {
+                    if (null == folder.getName()) {
+                        folder.setName(storageFolder.getName());
+                    }
+
                     checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
                 }
             }
+
             final boolean rename;
             {
                 final String newName = folder.getName();
