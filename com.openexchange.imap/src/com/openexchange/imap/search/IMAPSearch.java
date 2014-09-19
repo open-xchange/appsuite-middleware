@@ -333,6 +333,7 @@ public final class IMAPSearch {
                     results.add(msgnum);
                 }
             }
+            IMAPFolderWorker.clearCache(imapFolder);
             return results.toArray();
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
