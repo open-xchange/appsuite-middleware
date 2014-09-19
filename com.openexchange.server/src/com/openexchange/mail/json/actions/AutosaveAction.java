@@ -107,38 +107,37 @@ public final class AutosaveAction extends AbstractMailAction {
                     LOG.debug("Missing \\Draft flag on action=autosave in JSON message object");
                     composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
                 }
-                if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
-                    /*
-                     * ... and autosave draft
-                     */
-                    int accountId;
-                    if (composedMail.containsFrom()) {
-                        accountId = resolveFrom2Account(session, composedMail.getFrom()[0], false, true);
-                    } else {
-                        accountId = MailAccount.DEFAULT_ID;
-                    }
-                    /*
-                     * Check if detected account has a drafts folder
-                     */
-                    if (mailInterface.getDraftsFolder(accountId) == null) {
-                        if (MailAccount.DEFAULT_ID == accountId) {
-                            // Huh... No drafts folder in default account
-                            throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
-                        }
-                        LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", accountId, session.getUserId(), session.getContextId());
-                        // No drafts folder in detected mail account; auto-save to default account
-                        accountId = MailAccount.DEFAULT_ID;
-                        composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
-                    }
-                    msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
-
-                    if (null != csid) {
-                        CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
-                        space.addCleanUp(msgIdentifier);
-                    }
-
-                } else {
+                if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) != MailMessage.FLAG_DRAFT) {
                     throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
+                }
+                MailPath msgref = composedMail.getMsgref();
+                /*
+                 * ... and autosave draft
+                 */
+                int accountId;
+                if (composedMail.containsFrom()) {
+                    accountId = resolveFrom2Account(session, composedMail.getFrom()[0], false, true);
+                } else {
+                    accountId = MailAccount.DEFAULT_ID;
+                }
+                /*
+                 * Check if detected account has a drafts folder
+                 */
+                if (mailInterface.getDraftsFolder(accountId) == null) {
+                    if (MailAccount.DEFAULT_ID == accountId) {
+                        // Huh... No drafts folder in default account
+                        throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
+                    }
+                    LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", accountId, session.getUserId(), session.getContextId());
+                    // No drafts folder in detected mail account; auto-save to default account
+                    accountId = MailAccount.DEFAULT_ID;
+                    composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
+                }
+                msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
+
+                if (null != csid && null != msgref) {
+                    CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                    space.addCleanUp(msgref);
                 }
             }
             if (msgIdentifier == null) {
