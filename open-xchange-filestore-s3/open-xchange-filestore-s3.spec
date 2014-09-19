@@ -62,6 +62,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Sep 18 2014 Markus Wagner <markus.wagner@open-xchange.com>
+Build for patch 2014-09-23
 * Wed Sep 17 2014 Markus Wagner <markus.wagner@open-xchange.com>
 prepare for 7.6.2 release
 * Tue Sep 16 2014 Markus Wagner <markus.wagner@open-xchange.com>
