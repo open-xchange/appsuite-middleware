@@ -299,7 +299,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      * @throws IOException If an I/O error occurred
      */
     protected void performRampUp(HttpServletRequest req, JSONObject json, ServerSession session, boolean force) throws OXException, IOException {
-        if (force || Boolean.parseBoolean(req.getParameter("rampup"))) {
+        if (null != session && (force || Boolean.parseBoolean(req.getParameter("rampup")))) {
             final Set<LoginRampUpService> rampUpServices = this.rampUpServices;
             if (rampUpServices != null) {
                 try {

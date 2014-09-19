@@ -50,14 +50,15 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
-import java.util.Locale;
 import java.util.regex.Pattern;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link HeaderTerm}
@@ -110,7 +111,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
         if (containsWildcard()) {
             return toRegex(hdr[1]).matcher(val).find();
         }
-        return (val.toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
+        return (Strings.asciiLowerCase(val).contains(Strings.asciiLowerCase(hdr[1])));
     }
 
     @Override
@@ -135,7 +136,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
         }
         boolean found = false;
         for (int i = 0; i < val.length && !found; i++) {
-            found = (val[i].toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
+            found = (Strings.asciiLowerCase(val[i]).contains(Strings.asciiLowerCase(hdr[1])));
         }
         return found;
     }
@@ -159,4 +160,12 @@ public final class HeaderTerm extends SearchTerm<String[]> {
     public boolean containsWildcard() {
         return null == hdr || null == hdr[1] ? false : hdr[1].indexOf('*') >= 0 || hdr[1].indexOf('?') >= 0;
     }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        if (!fetchProfile.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
+            fetchProfile.add(IMAPFolder.FetchProfileItem.HEADERS);
+        }
+    }
+
 }

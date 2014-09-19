@@ -55,7 +55,6 @@ import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -136,6 +135,7 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.datasource.FileHolderDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -1535,7 +1535,12 @@ public class MimeMessageFiller {
         }
         final boolean bInline = null != inline ? inline.booleanValue() : (Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
         if (sink.isInMemory()) {
-            addNestedMessage(primaryMultipart, new DataHandler(new ByteArrayDataSource(sink.getBuffer().toByteArray(), MIME_MESSAGE_RFC822)), fn, bInline);
+            ByteArrayOutputStream buffer = sink.getBuffer();
+            if (null == buffer) {
+                addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
+            } else {
+                addNestedMessage(primaryMultipart, new DataHandler(new ByteArrayDataSource(buffer.toByteArray(), MIME_MESSAGE_RFC822)), fn, bInline);
+            }
         } else {
             addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
         }
@@ -2129,60 +2134,6 @@ public class MimeMessageFiller {
             return false;
         }
         return ((MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) || (MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.equals(e)) || ("IMAP".equals(e.getPrefix()) && (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() == e.getCode())));
-    }
-
-    private static final class FileHolderDataSource implements DataSource {
-
-        private final ThresholdFileHolder is;
-        private final String contentType;
-
-        FileHolderDataSource(ThresholdFileHolder is, String contentType) {
-            super();
-            this.is = is;
-            this.contentType = contentType;
-        }
-
-        @Override
-        public String getContentType() {
-            return contentType;
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            try {
-                return is.getStream();
-            } catch (final OXException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof IOException) {
-                    throw (IOException) cause;
-                }
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public String getName() {
-            return null;
-        }
-
-        @Override
-        public OutputStream getOutputStream() throws IOException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            super.finalize();
-            final ThresholdFileHolder tmp = is;
-            if (null != tmp) {
-                try {
-                    tmp.close();
-                } catch (final Exception ignore) {
-                    // Ignore
-                }
-            }
-        }
-
     }
 
 }

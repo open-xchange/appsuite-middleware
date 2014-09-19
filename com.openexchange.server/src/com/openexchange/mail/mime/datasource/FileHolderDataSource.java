@@ -47,107 +47,76 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openexchange.mail.mime.datasource;
 
-import java.util.Collection;
-import javax.mail.FetchProfile;
-import javax.mail.Message;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.activation.DataSource;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link BooleanTerm}
+ * {@link FileHolderDataSource} - A data source backed by a file holder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BooleanTerm extends SearchTerm<Boolean> {
+public class FileHolderDataSource implements DataSource {
 
-    private static final long serialVersionUID = 5351872902045670432L;
-
-    private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
-
-        private static final BooleanSearchTerm _TRUE = new BooleanSearchTerm(true);
-
-        private static final BooleanSearchTerm _FALSE = new BooleanSearchTerm(false);
-
-        public static BooleanSearchTerm getInstance(final boolean value) {
-            return value ? _TRUE : _FALSE;
-        }
-
-        private static final long serialVersionUID = -8073302646525000957L;
-
-        private final boolean value;
-
-        private BooleanSearchTerm(final boolean value) {
-            super();
-            this.value = value;
-        }
-
-        @Override
-        public boolean match(final Message msg) {
-            return value;
-        }
-
-    }
+    private final ThresholdFileHolder fh;
+    private final String contentType;
 
     /**
-     * The boolean term for <code>true</code>
+     * Initializes a new {@link FileHolderDataSource}.
+     *
+     * @param fh The file holder
+     * @param contentType The associated MIME type
      */
-    public static final BooleanTerm TRUE = new BooleanTerm(true);
-
-    /**
-     * The boolean term for <code>false</code>
-     */
-    public static final BooleanTerm FALSE = new BooleanTerm(false);
-
-    private final boolean value;
-
-    /**
-     * Initializes a new {@link BooleanTerm}
-     */
-    private BooleanTerm(final boolean value) {
+    public FileHolderDataSource(ThresholdFileHolder fh, String contentType) {
         super();
-        this.value = value;
+        this.fh = fh;
+        this.contentType = contentType;
     }
 
     @Override
-    public void accept(SearchTermVisitor visitor) {
-        visitor.visit(this);
+    public String getContentType() {
+        return contentType;
     }
 
     @Override
-    public Boolean getPattern() {
-        return Boolean.valueOf(value);
+    public InputStream getInputStream() throws IOException {
+        try {
+            return fh.getStream();
+        } catch (final OXException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            throw new IOException(e);
+        }
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
-        // Nothing
+    public String getName() {
+        return null;
     }
 
     @Override
-    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        return BooleanSearchTerm.getInstance(value);
+    public OutputStream getOutputStream() throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
-        return getJavaMailSearchTerm();
+    protected void finalize() throws Throwable {
+        super.finalize();
+        ThresholdFileHolder tmp = fh;
+        if (null != tmp) {
+            try {
+                tmp.close();
+            } catch (final Exception ignore) {
+                // Ignore
+            }
+        }
     }
 
-    @Override
-    public void contributeTo(FetchProfile fetchProfile) {
-        // Nothing
-    }
-
-    @Override
-    public boolean matches(final Message msg) throws OXException {
-        return value;
-    }
-
-    @Override
-    public boolean matches(final MailMessage mailMessage) {
-        return value;
-    }
 }
