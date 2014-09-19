@@ -168,6 +168,10 @@ public final class GetReplyAction extends AbstractMailAction {
             if (null != csid) {
                 CompositionSpace compositionSpace = CompositionSpace.getCompositionSpace(csid, session);
                 compositionSpace.setReplyFor(new MailPath(folderPath, uid));
+
+                AJAXRequestResult result = new AJAXRequestResult(mail, "mail");
+                result.setParameter("csid", csid);
+                return result;
             }
 
             return new AJAXRequestResult(mail, "mail");

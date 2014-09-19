@@ -142,6 +142,11 @@ public final class GetForwardAction extends AbstractMailAction {
             if (null != csid) {
                 CompositionSpace compositionSpace = CompositionSpace.getCompositionSpace(csid, session);
                 compositionSpace.addForwardFor(new MailPath(folderPath, uid));
+
+
+                AJAXRequestResult result = new AJAXRequestResult(mailMessage, "mail");
+                result.setParameter("csid", csid);
+                return result;
             }
 
             return new AJAXRequestResult(mailMessage, "mail");
@@ -201,6 +206,11 @@ public final class GetForwardAction extends AbstractMailAction {
                 for (MailPath forwardFor : forwardFors) {
                     compositionSpace.addForwardFor(forwardFor);
                 }
+
+
+                AJAXRequestResult result = new AJAXRequestResult(mail, "mail");
+                result.setParameter("csid", csid);
+                return result;
             }
 
             return new AJAXRequestResult(mail, "mail");
