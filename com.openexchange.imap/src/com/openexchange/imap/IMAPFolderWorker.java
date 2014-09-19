@@ -376,13 +376,13 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             isIdenticalFolder = (imapFolder == null ? false : fullName.equals(imapFolder.getFullName()));
         }
         if (imapFolder != null) {
-            clearCache(imapFolder);
             final String imapFolderFullname = imapFolder.getFullName();
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
             synchronized (imapFolder) {
                 IMAPCommandsCollection.forceNoopCommand(imapFolder);
+                clearCache(imapFolder);
                 try {
                     /*
                      * This call also checks if folder is opened
@@ -531,19 +531,14 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == imapFolder) {
             return;
         }
-        final Field messageCacheField = IMAPFolderWorker.messageCacheField;
+        Field messageCacheField = IMAPFolderWorker.messageCacheField;
         if (null == messageCacheField) {
             return;
         }
-        final Field messagesField = IMAPFolderWorker.messagesField;
+        Field messagesField = IMAPFolderWorker.messagesField;
         if (null == messagesField) {
             return;
         }
-        final Field uidTableField = IMAPFolderWorker.uidTableField;
-        if (null == uidTableField) {
-            return;
-        }
-
         try {
             final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
             if (null != mc) {
@@ -553,9 +548,12 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 }
             }
 
-            final Hashtable<?, ?> uidTable = (Hashtable<?, ?>) uidTableField.get(imapFolder);
-            if (null != uidTable) {
-                uidTable.clear();
+            Field uidTableField = IMAPFolderWorker.uidTableField;
+            if (null != uidTableField) {
+                final Hashtable<?, ?> uidTable = (Hashtable<?, ?>) uidTableField.get(imapFolder);
+                if (null != uidTable) {
+                    uidTable.clear();
+                }
             }
         } catch (final IllegalArgumentException e) {
             LOG.error("", e);
