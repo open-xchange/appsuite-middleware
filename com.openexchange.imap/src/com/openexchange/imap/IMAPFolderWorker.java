@@ -376,6 +376,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             isIdenticalFolder = (imapFolder == null ? false : fullName.equals(imapFolder.getFullName()));
         }
         if (imapFolder != null) {
+            clearCache(imapFolder);
             final String imapFolderFullname = imapFolder.getFullName();
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
@@ -391,9 +392,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         /*
                          * Identical folder is already opened in an appropriate mode.
                          */
-                        // IMAPCommandsCollection.updateIMAPFolder(imapFolder,
-                        // mode);
-                        clearCache(imapFolder);
                         return imapFolder;
                     }
                     /*
