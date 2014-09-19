@@ -50,8 +50,6 @@
 package com.openexchange.groupware.container;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * {@link DataObject} - The root-level data object.
@@ -236,34 +234,6 @@ public abstract class DataObject extends SystemObject {
         b_creationDate = false;
         b_lastModified = false;
         b_topic = false;
-    }
-
-    public Set<Integer> findDifferingFields(DataObject other) {
-        Set<Integer> differingFields = new HashSet<Integer>();
-
-        if ((!containsCreatedBy() && other.containsCreatedBy()) || (containsCreatedBy() && other.containsCreatedBy() && getCreatedBy() != other.getCreatedBy())) {
-            differingFields.add(Integer.valueOf(CREATED_BY));
-        }
-
-        if ((!containsCreationDate() && other.containsCreationDate()) || (containsCreationDate() && other.containsCreationDate() && getCreationDate() != other.getCreationDate() && (getCreationDate() == null || !getCreationDate().equals(
-            other.getCreationDate())))) {
-            differingFields.add(Integer.valueOf(CREATION_DATE));
-        }
-
-        if ((!containsLastModified() && other.containsLastModified()) || (containsLastModified() && other.containsLastModified() && getLastModified() != other.getLastModified() && (getLastModified() == null || !getLastModified().equals(
-            other.getLastModified())))) {
-            differingFields.add(Integer.valueOf(LAST_MODIFIED));
-        }
-
-        if ((!containsModifiedBy() && other.containsModifiedBy()) || (containsModifiedBy() && other.containsModifiedBy() && getModifiedBy() != other.getModifiedBy())) {
-            differingFields.add(Integer.valueOf(MODIFIED_BY));
-        }
-
-        if ((!containsObjectID() && other.containsObjectID()) || (containsObjectID() && other.containsObjectID() && getObjectID() != other.getObjectID())) {
-            differingFields.add(Integer.valueOf(OBJECT_ID));
-        }
-
-        return differingFields;
     }
 
     public void set(int field, Object value) {

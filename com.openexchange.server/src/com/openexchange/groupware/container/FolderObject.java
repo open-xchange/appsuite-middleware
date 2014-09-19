@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -1551,32 +1550,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             super.remove(field);
             break;
         }
-    }
-
-    @Override
-    public Set<Integer> findDifferingFields(final DataObject dataObject) {
-        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
-
-        if (!getClass().isAssignableFrom(dataObject.getClass())) {
-            return differingFields;
-        }
-
-        final FolderObject other = (FolderObject) dataObject;
-
-        if ((!containsFolderName() && other.containsFolderName()) || (containsFolderName() && other.containsFolderName() && getFolderName() != other.getFolderName() && (getFolderName() == null || !getFolderName().equals(
-            other.getFolderName())))) {
-            differingFields.add(Integer.valueOf(FOLDER_NAME));
-        }
-
-        if ((!containsModule() && other.containsModule()) || (containsModule() && other.containsModule() && getModule() != other.getModule())) {
-            differingFields.add(Integer.valueOf(MODULE));
-        }
-
-        if ((!containsType() && other.containsType()) || (containsType() && other.containsType() && getType() != other.getType())) {
-            differingFields.add(Integer.valueOf(TYPE));
-        }
-
-        return differingFields;
     }
 
     private static final <T extends OXCloneable<T>> ArrayList<T> copyArrayList(final ArrayList<T> original) {
