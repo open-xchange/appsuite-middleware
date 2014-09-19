@@ -87,7 +87,7 @@ public class CSVContactImporterTest {
     @Mock
     private ServiceLookup serviceLookup;
 
-    private List<String> fields = new LinkedList<String>(Arrays.asList(new String[] {
+    private final List<String> fields = new LinkedList<String>(Arrays.asList(new String[] {
         "Titel", "Voornaam", "Middelste naam", "Achternaam", "Achtervoegsel", "Bedrijf", "Afdeling", "Functie", "Werkadres, straat",
         "Werkadres 2, straat", "Werkadres 3, straat", "Werkadres, plaats", "Werkadres, provincie", "Werkadres, postcode",
         "Land/regio (werk)", "Huisadres, straat", "Huisadres, straat 2", "Huisadres, straat 3", "Huisadres, plaats",
@@ -104,14 +104,14 @@ public class CSVContactImporterTest {
         "Taal", "Trefwoorden", "Verjaardag", "Webpagina", "Werkadres, postbusnummer" }));
 
 
-    private List<String> emptyEntry = new LinkedList<String>(Arrays.asList(new String[] {
+    private final List<String> emptyEntry = new LinkedList<String>(Arrays.asList(new String[] {
         "", "Hans", "", "Wurst", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
         "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
         "", "", "", "", "Niet-gespecificeerd", "Normaal", "", "", "H.W.", "", "", "", "", "", "", "", "", "", "Normaal", "Onwaar", "", "",
         "", "0.0.00", "", "", "0-0-00", "", ""
     }));
 
-    private List<String> midEntry = new LinkedList<String>(Arrays.asList(new String[] {
+    private final List<String> midEntry = new LinkedList<String>(Arrays.asList(new String[] {
         "Dr.", "Hans", "Jocachim", "Wurst", "Achtervoegsel", "Betreff", "afdeling", "Funktion", "Arbeitsstrasse",
         "Arbeitsstrasse2", "Arbeitsstrasse3", "Platz", "Province", "PLZ",
         "NRW-NL", "Hausstrasse", "Hausstrasse2", "Hausstrasse3", "Hausstrasse Platz",
@@ -127,15 +127,15 @@ public class CSVContactImporterTest {
         "Notizen: nett", "Id der organisation", "Partner: keine", "Prioritaet: hoch", "Priv: ja", "Referentie van", "Reisafstand", "Sofinummer", "29.02.2000",
         "Taal", "Trefwoorden", "00-00-0000", "webpagina", "postbusnummer" }));
 
-    private int lineNumber = 1;
+    private final int lineNumber = 1;
 
     private ImportResult result;
 
-    private boolean[] atLeastOneFieldInserted = new boolean[10];
+    private final boolean[] atLeastOneFieldInserted = new boolean[10];
 
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
 
-    private String propertiesString = "encoding=UTF-8\n" +
+    private final String propertiesString = "encoding=UTF-8\n" +
         "first_name=Voornaam\n" +
         "last_name=Achternaam\n" +
         "second_name=Middelste naam\n" +
@@ -206,104 +206,6 @@ public class CSVContactImporterTest {
         properties.load(new StringReader(propertiesString));
 
         MockUtils.injectValueIntoPrivateField(csvContactImporter, "currentMapper", new PropertyDrivenMapper(properties));
-    }
-
-    @Test
-    public void testisValid_emptyWithHyphen_returnFalse() {
-        boolean validDate = csvContactImporter.isValid("0-0-00");
-
-        Assert.assertFalse(validDate);
-    }
-
-    @Test
-    public void testisValid_emptyWithHyphenAndTwoNumbers_returnFalse() {
-        boolean validDate = csvContactImporter.isValid("00-00-00");
-
-        Assert.assertFalse(validDate);
-    }
-
-    @Test
-    public void testisValid_emptyWithDot_returnFalse() {
-        boolean validDate = csvContactImporter.isValid("0.0.00");
-
-        Assert.assertFalse(validDate);
-    }
-
-    @Test
-    public void testisValid_emptyWithDotAndTwoNumbers_returnFalse() {
-        boolean validDate = csvContactImporter.isValid("00.00.00");
-
-        Assert.assertFalse(validDate);
-    }
-
-    @Test
-    public void testisValid_validDateFormatTwoYearCharacters_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("1.1.88");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testisValid_validDateFormatFourYearCharacters_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("1.1.1988");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testisValid_validDateFormatFullDate_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("11.11.1988");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testisValid_validDateFormatTwoNumbersAll_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("01.01.88");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testisValid_validUsDateFormatTwoNumbersAll_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("1988-11-11");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testisValid_validUsDateFormatOneNumber_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("1988-1-1");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testisValid_validSlashDateFormatTwoNumbersAll4_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("11/11/88");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testisValid_validSlashDateFormatOneNumber_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("1/1/1988");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testisValid_validSlashDateFormat_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("1/1/88");
-
-        Assert.assertTrue(validDate);
-    }
-
-    @Test
-    public void testIsValid_validString_returnTrue() {
-        boolean validDate = csvContactImporter.isValid("Evaluate this value to be imported");
-
-        Assert.assertTrue(validDate);
     }
 
     @Test
