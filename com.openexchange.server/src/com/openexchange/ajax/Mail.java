@@ -2789,7 +2789,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             accountId = MailAccount.DEFAULT_ID;
                             composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
                         }
-                        msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
+                        msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId).toString();
                     } else {
                         throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
                     }
@@ -4887,7 +4887,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 session,
                                 accountId,
                                 warnings);
-                            msgIdentifier = mailServletInterface.saveDraft(composedMail, false, accountId);
+                            msgIdentifier = mailServletInterface.saveDraft(composedMail, false, accountId).toString();
                         } else {
                             /*
                              * ... and send message
@@ -4992,7 +4992,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             /*
                              * ... and edit draft
                              */
-                            msgIdentifier = msi.saveDraft(composedMail, false, accountId);
+                            msgIdentifier = msi.saveDraft(composedMail, false, accountId).toString();
                         } else {
                             throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
                         }

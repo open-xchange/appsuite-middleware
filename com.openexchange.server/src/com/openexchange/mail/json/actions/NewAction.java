@@ -202,7 +202,7 @@ public final class NewAction extends AbstractMailAction {
                 if (null != sendType) {
                     composedMail.setSendType(sendType);
                 }
-                msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
+                msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId).toString();
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
                 }

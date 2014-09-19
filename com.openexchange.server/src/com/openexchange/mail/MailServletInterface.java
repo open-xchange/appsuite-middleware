@@ -350,7 +350,7 @@ public abstract class MailServletInterface implements Closeable {
      * @return The stored draft's mail path
      * @throws OXException
      */
-    public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException;
+    public abstract MailPath saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException;
 
     /**
      * Sends a read acknowledgment to given message

@@ -52,11 +52,14 @@ package com.openexchange.mail.json.actions;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -87,16 +90,19 @@ public final class AutosaveAction extends AbstractMailAction {
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
+            String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
             final MailServletInterface mailInterface = getMailInterface(req);
-            String msgIdentifier = null;
+            MailPath msgIdentifier = null;
             final List<OXException> warnings = new ArrayList<OXException>();
             {
                 final JSONObject jsonMailObj = (JSONObject) req.getRequest().requireData();
+                if (null == csid) {
+                    csid = jsonMailObj.optString("csid", null);
+                }
                 /*
                  * Parse with default account's transport provider
                  */
-                final ComposedMailMessage composedMail =
-                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
                 if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
                     LOG.debug("Missing \\Draft flag on action=autosave in JSON message object");
                     composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
@@ -125,6 +131,12 @@ public final class AutosaveAction extends AbstractMailAction {
                         composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
                     }
                     msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
+
+                    if (null != csid) {
+                        CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                        space.addCleanUp(msgIdentifier);
+                    }
+
                 } else {
                     throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
                 }
