@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.search;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -67,10 +65,8 @@ import javax.mail.search.SearchTerm;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderWorker;
-import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
