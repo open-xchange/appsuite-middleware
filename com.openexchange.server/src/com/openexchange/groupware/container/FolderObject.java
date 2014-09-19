@@ -1717,27 +1717,18 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @return A folder instance representing a virtual folder
      */
     public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission... virtualPerms) {
-        final List<OCLPermission> permissions;
-        if (virtualPerms == null || virtualPerms.length == 0) {
-            permissions = Collections.singletonList(VIRTUAL_FOLDER_PERMISSION.deepClone());
-        } else {
-            permissions = new ArrayList<OCLPermission>(virtualPerms.length);
-            for (OCLPermission permission : virtualPerms) {
-                if (permission != null) {
-                    permissions.add(permission);
-                }
-            }
-        }
-
         final FolderObject virtualFolder = new FolderObject(objectID);
         virtualFolder.setFolderName(name);
         virtualFolder.setModule(module);
         virtualFolder.setSubfolderFlag(hasSubfolders);
         virtualFolder.setType(type);
+
+        final List<OCLPermission> permissions = prepareVirtualPermissions(virtualPerms);
         for (OCLPermission permission : permissions) {
             permission.setFuid(objectID);
             virtualFolder.addPermission(permission);
         }
+
         return virtualFolder;
     }
 
@@ -1767,27 +1758,18 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @return A folder instance representing a virtual folder
      */
     public static final FolderObject createVirtualFolderObject(final String fullName, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission... virtualPerms) {
-        final List<OCLPermission> permissions;
-        if (virtualPerms == null || virtualPerms.length == 0) {
-            permissions = Collections.singletonList(VIRTUAL_FOLDER_PERMISSION.deepClone());
-        } else {
-            permissions = new ArrayList<OCLPermission>(virtualPerms.length);
-            for (OCLPermission permission : virtualPerms) {
-                if (permission != null) {
-                    permissions.add(permission);
-                }
-            }
-        }
-
         final FolderObject virtualFolder = new FolderObject();
         virtualFolder.setFullName(fullName);
         virtualFolder.setFolderName(name);
         virtualFolder.setModule(module);
         virtualFolder.setSubfolderFlag(hasSubfolders);
         virtualFolder.setType(type);
+
+        final List<OCLPermission> permissions = prepareVirtualPermissions(virtualPerms);
         for (OCLPermission permission : permissions) {
             virtualFolder.addPermission(permission);
         }
+
         return virtualFolder;
     }
 
@@ -1840,6 +1822,25 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public boolean containsMeta() {
         return containsMap();
+    }
+
+    private static List<OCLPermission> prepareVirtualPermissions(final OCLPermission[] virtualPerms) {
+        if (virtualPerms == null) {
+            return Collections.singletonList(VIRTUAL_FOLDER_PERMISSION.deepClone());
+        }
+
+        final List<OCLPermission> permissions = new ArrayList<OCLPermission>(virtualPerms.length);
+        for (OCLPermission permission : virtualPerms) {
+            if (permission != null) {
+                permissions.add(permission);
+            }
+        }
+
+        if (permissions.isEmpty()) {
+            permissions.add(VIRTUAL_FOLDER_PERMISSION.deepClone());
+        }
+
+        return permissions;
     }
 
 }
