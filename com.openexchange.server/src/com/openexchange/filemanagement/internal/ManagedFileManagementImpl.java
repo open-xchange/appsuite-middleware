@@ -263,13 +263,28 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
 
     @Override
+    public ManagedFile createManagedFile(byte[] bytes, boolean distribute) throws OXException {
+        return createManagedFile0(null, new UnsynchronizedByteArrayInputStream(bytes), false, null, -1, distribute);
+    }
+
+    @Override
     public ManagedFile createManagedFile(final InputStream inputStream) throws OXException {
         return createManagedFile(null, inputStream);
     }
 
     @Override
+    public ManagedFile createManagedFile(InputStream inputStream, boolean distribute) throws OXException {
+        return createManagedFile(null, inputStream, distribute);
+    }
+
+    @Override
     public ManagedFile createManagedFile(final String id, final InputStream inputStream) throws OXException {
         return createManagedFile0(id, inputStream, true, null, -1);
+    }
+
+    @Override
+    public ManagedFile createManagedFile(final String id, final InputStream inputStream, boolean distribute) throws OXException {
+        return createManagedFile0(id, inputStream, true, null, -1, distribute);
     }
 
     @Override
@@ -282,7 +297,11 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         return createManagedFile0(null, inputStream, true, optExtension, -1);
     }
 
-    private ManagedFile createManagedFile0(final String identifier, final InputStream inputStream, final boolean closeStream, final String optExtension, final int optTtl) throws OXException {
+    private ManagedFile createManagedFile0(String identifier, InputStream inputStream, boolean closeStream, String optExtension, int optTtl) throws OXException {
+        return createManagedFile0(identifier, inputStream, closeStream, optExtension, optTtl, true);
+    }
+
+    private ManagedFile createManagedFile0(String identifier, InputStream inputStream, boolean closeStream, String optExtension, int optTtl, boolean distribute) throws OXException {
         if (null == inputStream) {
             throw new IllegalArgumentException("Missing input stream.");
         }
@@ -297,9 +316,9 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     // Flush input stream's content via output stream to newly created file
                     tmpFile = File.createTempFile(PREFIX, null == optExtension ? SUFFIX : optExtension, directory);
                     tmpFile.deleteOnExit();
-                    final OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
+                    OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
                     try {
-                        final byte[] buf = new byte[8192];
+                        byte[] buf = new byte[8192];
                         int len = -1;
                         while ((len = inputStream.read(buf, 0, buf.length)) > 0) {
                             out.write(buf, 0, len);
@@ -310,7 +329,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     }
                 } else {
                     // Copy content of previous file to newly created file
-                    final File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
+                    File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
                     copyFile(tmpFile, tmp);
                     if (!tmpFile.delete()) {
                         LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
@@ -318,7 +337,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     tmpFile = tmp;
                     tmpFile.deleteOnExit();
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if (tmpFile != null && !tmpFile.delete()) {
                     LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
                 }
@@ -336,9 +355,11 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
 
-        final DistributedFileManagement distributed = getDistributed();
-        if (distributed != null && !distributed.exists(id)) {
-            distributed.register(id);
+        if (distribute) {
+            DistributedFileManagement distributed = getDistributed();
+            if (distributed != null && !distributed.exists(id)) {
+                distributed.register(id);
+            }
         }
 
         return mf;
