@@ -72,9 +72,9 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.AddedGuest;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.AddedGuest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
@@ -110,19 +110,7 @@ public class DefaultShareService implements ShareService {
     public Share resolveToken(String token) throws OXException {
         int contextID = ShareTool.extractContextId(token);
         Share share = services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
-        if (null != share && share.isExpired()) {
-            LOG.info("Detected expired share ({}): {}", share.getExpires(), share);
-            ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
-            try {
-                connectionHelper.start();
-                removeShares(connectionHelper, Collections.singletonList(share));
-                connectionHelper.commit();
-            } finally {
-                connectionHelper.finish();
-            }
-            return null;
-        }
-        return share;
+        return removeExpired(share);
     }
 
     @Override
@@ -450,6 +438,29 @@ public class DefaultShareService implements ShareService {
             }
         }
         return shares;
+    }
+
+    /**
+     * Removes the share in case it is expired.
+     *
+     * @param share The share
+     * @return The share, if it is not expired, or <code>null</code>, otherwise
+     * @throws OXException
+     */
+    private Share removeExpired(Share share) throws OXException {
+        if (null != share && share.isExpired()) {
+            LOG.info("Detected expired share ({}): {}", share.getExpires(), share);
+            ConnectionHelper connectionHelper = new ConnectionHelper(share.getContextID(), services, true);
+            try {
+                connectionHelper.start();
+                removeShares(connectionHelper, Collections.singletonList(share));
+                connectionHelper.commit();
+            } finally {
+                connectionHelper.finish();
+            }
+            return null;
+        }
+        return share;
     }
 
     /**
