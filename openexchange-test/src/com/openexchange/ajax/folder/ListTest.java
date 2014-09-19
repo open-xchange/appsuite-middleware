@@ -50,7 +50,6 @@
 package com.openexchange.ajax.folder;
 
 import java.util.Iterator;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -96,28 +95,36 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListRoot() throws Throwable {
         // List root's subfolders
-        ListRequest request = new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID);
+        ListRequest request = new ListRequest(EnumAPI.OX_NEW, Integer.toString(FolderObject.SYSTEM_ROOT_FOLDER_ID), new int[] { FolderObject.OBJECT_ID, FolderObject.SUBFOLDERS }, true);
         ListResponse response = client.execute(request);
 
+        boolean privateFolder = false;
+        boolean publicFolder = false;
+        boolean sharedFolder = false;
+        boolean infostoreFolder = false;
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
-        assertEquals("Unexpected number of subfolders below root folder.", 4, length);
-
         for (int i = 0; i < length; i++) {
             final JSONArray jsonSubArray = jsonArray.getJSONArray(i);
-            if (0 == i) {
-                assertEquals("Private folder expected at first position, but isn't.", "1", jsonSubArray.get(0));
-                assertTrue("Subfolders expected below private folder.", jsonSubArray.getBoolean(response.getColumnPos(FolderObject.SUBFOLDERS)));
-            } else if (1 == i) {
-                assertEquals("Public folder expected at second position, but isn't.", "2", jsonSubArray.get(0));
-                assertTrue("Subfolders expected below public folder.", jsonSubArray.getBoolean(response.getColumnPos(FolderObject.SUBFOLDERS)));
-            } else if (2 == i) {
-                assertEquals("Shared folder expected at third position, but isn't.", "3", jsonSubArray.get(0));
-            } else {
-                assertEquals("InfoStore folder expected at fourth position, but isn't.", "9", jsonSubArray.get(0));
-                assertTrue("Subfolders expected below infostore folder.", jsonSubArray.getBoolean(response.getColumnPos(FolderObject.SUBFOLDERS)));
+            int folderId = jsonSubArray.getInt(0);
+            if (folderId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID) {
+                assertTrue("Subfolders expected below private folder.", jsonSubArray.getBoolean(1));
+                privateFolder = true;
+            } else if (folderId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+                assertTrue("Subfolders expected below public folder.", jsonSubArray.getBoolean(1));
+                publicFolder = true;
+            } else if (folderId == FolderObject.SYSTEM_SHARED_FOLDER_ID) {
+                sharedFolder = true;
+            } else if (folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+                assertTrue("Subfolders expected below infostore folder.", jsonSubArray.getBoolean(1));
+                infostoreFolder = true;
             }
         }
+
+        assertTrue("Private folder not found", privateFolder);
+        assertTrue("Public folder not found", publicFolder);
+        assertTrue("Shared folder not found", sharedFolder);
+        assertTrue("Infostore folder not found", infostoreFolder);
 
         request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         response = client.execute(request);
