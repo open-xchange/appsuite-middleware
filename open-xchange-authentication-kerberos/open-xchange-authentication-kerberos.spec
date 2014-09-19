@@ -66,6 +66,8 @@ sed -i 's/debug=true/debug=false/g' /opt/open-xchange/etc/kerberosLogin.conf
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Sep 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-23
 * Tue Sep 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
