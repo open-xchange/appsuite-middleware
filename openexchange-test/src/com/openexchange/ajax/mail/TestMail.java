@@ -52,6 +52,7 @@ package com.openexchange.ajax.mail;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -67,8 +68,10 @@ import com.openexchange.ajax.mail.contenttypes.MailTypeStrategy;
 import com.openexchange.ajax.mail.contenttypes.PlainTextStrategy;
 import com.openexchange.java.JSON;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
+import com.openexchange.mail.utils.DateUtils;
 
 /**
  * {@link TestMail} - simulates a mail object, but without the necessary session and whatnot needed that makes for a complicated setup.
@@ -76,7 +79,7 @@ import com.openexchange.mail.MailListField;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestMail implements IdentitySource<TestMail> {
-    
+
     private String from;
 
     private List<String> to, cc, bcc;
@@ -549,6 +552,48 @@ public class TestMail implements IdentitySource<TestMail> {
         result.put(MailJSONField.PRIORITY.getKey(), getPriority());
         result.put(MailJSONField.CONTENT.getKey(), getBody() != null ? getBody() : "");
         return result;
+    }
+
+    public String toRFC822String() {
+        StringBuilder sb = new StringBuilder();
+        putHeader(sb, "From", getFrom());
+        putHeader(sb, "To", getTo());
+        putHeader(sb, "CC", getCc());
+        putHeader(sb, "BCC", getBcc());
+        putHeader(sb, "Received", "from ox.open-xchange.com;" + DateUtils.toStringRFC822(new Date(), TimeZones.UTC));
+        putHeader(sb, "Date", DateUtils.toStringRFC822(new Date(), TimeZones.UTC));
+        putHeader(sb, "Subject", getSubject());
+        String ct = getContentType();
+        if (ct == null) {
+            ct = "text/plain; charset=\"UTF-8\"";
+        }
+        putHeader(sb, "Content-Type", ct);
+        putHeader(sb, "Content-Transfer-Encoding", "8bit");
+        sb.append("\n");
+        sb.append(getBody());
+
+        return sb.toString();
+    }
+
+    private void putHeader(StringBuilder sb, String header, Object value) {
+        if (value != null) {
+            sb.append(header).append(": ");
+            if (value instanceof String) {
+                sb.append(value);
+            } else if (value instanceof Iterable<?>) {
+                boolean first = true;
+                for (Object o : (Iterable<?>) value) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(o.toString());
+                }
+            }
+
+            sb.append("\n");
+        }
     }
 
     public JSONArray correctMailAddresses(final List<String> list) {
