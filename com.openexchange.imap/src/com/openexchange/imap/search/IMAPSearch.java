@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.search;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -67,9 +65,8 @@ import javax.mail.search.SearchTerm;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.command.MessageFetchIMAPCommand;
+import com.openexchange.imap.IMAPFolderWorker;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
@@ -110,73 +107,84 @@ public final class IMAPSearch {
      * @throws OXException If a searching fails
      */
     public static int[] searchMessages(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm, final IMAPConfig imapConfig) throws MessagingException, OXException {
-        final int msgCount = imapFolder.getMessageCount();
+        int msgCount = imapFolder.getMessageCount();
         if (msgCount <= 0) {
             return new int[0];
         }
-        final MailFields mailFields = new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm));
-        final boolean hasSearchCapability;
-        {
-            final IMAPCapabilities imapCapabilities = (IMAPCapabilities) imapConfig.getCapabilities();
-            hasSearchCapability = imapCapabilities.hasIMAP4() || imapCapabilities.hasIMAP4rev1();
-        }
+
+        MailFields mailFields = new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm));
         if (mailFields.contains(MailField.BODY) || mailFields.contains(MailField.FULL)) {
-            if (hasSearchCapability && (imapConfig.forceImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit()))) {
-                /*
-                 * Too many messages in IMAP folder or IMAP-based search should be forced.
-                 * Fall-back to IMAP-based search and accept a non-type-sensitive search.
-                 */
-                final int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
+            if (imapConfig.forceImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit())) {
+                // Too many messages in IMAP folder or IMAP-based search should be forced.
+                // Fall-back to IMAP-based search and accept a non-type-sensitive search.
+                int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
                 if (null != seqNums) {
                     return seqNums;
                 }
             }
-            /*
-             * Manual search needed in case of body search since IMAP's SEARCH command does not perform type-sensitive search; e.g. extract
-             * plain-text out of HTML content.
-             */
-            final Message[] allMsgs = imapFolder.getMessages();
-            {
-                FetchProfile fp = new FetchProfile();
-                searchTerm.contributeTo(fp);
-                imapFolder.fetch(allMsgs, fp);
-            }
-            final TIntList list = new TIntArrayList(msgCount);
-            for (int i = 0; i < allMsgs.length; i++) {
-                if (searchTerm.matches(allMsgs[i])) {
-                    list.add(allMsgs[i].getMessageNumber());
-                }
-            }
-            return list.toArray();
+
+            // In-application search needed in case of body search since IMAP's SEARCH command does not perform type-sensitive search;
+            // e.g. extract plain-text out of HTML content.
+            return searchByTerm(imapFolder, searchTerm, 100, msgCount);
         }
-        /*
-         * Perform an IMAP-based search if IMAP search is forces through configuration or is enabled and number of messages exceeds limit.
-         */
-        if (imapConfig.forceImapSearch() || (imapConfig.isImapSearch() || (hasSearchCapability && (msgCount >= MailProperties.getInstance().getMailFetchLimit())))) {
-            final int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
+
+        // Perform an IMAP-based search if IMAP search is forces through configuration or is enabled and number of messages exceeds limit.
+        if (imapConfig.isImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit())) {
+            int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
             if (null != seqNums) {
                 return seqNums;
             }
         }
-        final Message[] allMsgs;
-        if (mailFields.contains(MailField.BODY) || mailFields.contains(MailField.FULL)) {
-            allMsgs = imapFolder.getMessages();
-            FetchProfile fp = new FetchProfile();
-            searchTerm.contributeTo(fp);
+
+        // Search in application
+        return searchByTerm(imapFolder, searchTerm, -1, msgCount);
+    }
+
+    /**
+     * Search in given IMAP folder using specified search term
+     *
+     * @param imapFolder The IMAP folder to search in
+     * @param searchTerm The search term to fulfill
+     * @param chunkSize The chunk size or <code>-1</code> to fetch all messages at once
+     * @param msgCount The total message count in IMAP folder
+     * @return The sequence numbers of matching messages
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    private static int[] searchByTerm(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, int chunkSize, int msgCount) throws MessagingException, OXException {
+        TIntList list = new TIntArrayList(msgCount);
+        FetchProfile fp = new FetchProfile();
+        searchTerm.contributeTo(fp);
+        if (chunkSize <= 0 || msgCount <= chunkSize) {
+            Message[] allMsgs = imapFolder.getMessages();
             imapFolder.fetch(allMsgs, fp);
+            for (int i = 0; i < allMsgs.length; i++) {
+                Message msg = allMsgs[i];
+                if (searchTerm.matches(msg)) {
+                    list.add(msg.getMessageNumber());
+                }
+            }
+            IMAPFolderWorker.clearCache(imapFolder);
         } else {
-            mailFields.add(MailField.CONTENT_TYPE); // Possibly checked by search term
-            final long start = System.currentTimeMillis();
-            allMsgs =
-                new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), getFetchProfile(
-                    mailFields.toArray(),
-                    imapConfig.getIMAPProperties().isFastFetch()), msgCount).doCommand();
-            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-        }
-        final TIntList list = new TIntArrayList(msgCount);
-        for (int i = 0; i < allMsgs.length; i++) {
-            if (searchTerm.matches(allMsgs[i])) {
-                list.add(allMsgs[i].getMessageNumber());
+            // Chunk-wise retrieval
+            int start = 1;
+            while (start < msgCount) {
+                int end = start + chunkSize - 1;
+                if (end > msgCount) {
+                    end = msgCount;
+                }
+
+                Message[] msgs = imapFolder.getMessages(start, end);
+                imapFolder.fetch(msgs, fp);
+                for (int i = 0; i < msgs.length; i++) {
+                    Message msg = msgs[i];
+                    if (searchTerm.matches(msg)) {
+                        list.add(msg.getMessageNumber());
+                    }
+                }
+
+                IMAPFolderWorker.clearCache(imapFolder);
+                start = end + 1;
             }
         }
         return list.toArray();
@@ -318,13 +326,22 @@ public final class IMAPSearch {
      */
     private static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm, final int[] seqNums, final IMAPFolder imapFolder) throws OXException {
         try {
-            final TIntList results = new TIntArrayList(seqNums.length);
-            for (int i = 0; i < seqNums.length; i++) {
-                final int msgnum = seqNums[i];
-                if (searchTerm.matches(imapFolder.getMessage(msgnum))) {
-                    results.add(msgnum);
+            IMAPFolderWorker.clearCache(imapFolder);
+
+            TIntList results = new TIntArrayList(seqNums.length);
+            Message[] messages = imapFolder.getMessages(seqNums);
+
+            FetchProfile fp = new FetchProfile();
+            searchTerm.contributeTo(fp);
+            imapFolder.fetch(messages, fp);
+
+            for (Message message : messages) {
+                if (searchTerm.matches(message)) {
+                    results.add(message.getMessageNumber());
                 }
             }
+
+            IMAPFolderWorker.clearCache(imapFolder);
             return results.toArray();
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);

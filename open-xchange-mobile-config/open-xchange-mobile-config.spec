@@ -68,6 +68,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Thu Sep 18 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-09-23
 * Tue Sep 16 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>

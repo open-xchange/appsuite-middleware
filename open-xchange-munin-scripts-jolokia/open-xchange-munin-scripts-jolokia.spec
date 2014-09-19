@@ -68,6 +68,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Thu Sep 18 2014 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2014-09-23
 * Tue Sep 16 2014 Felix Marx <felix.marx@open-xchange.com>
 Second release candidate for 7.6.1
 * Mon Sep 08 2014 Felix Marx <felix.marx@open-xchange.com>
