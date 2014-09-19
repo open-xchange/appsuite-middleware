@@ -137,7 +137,7 @@ public abstract class SearchTerm<T> implements Serializable {
     public abstract javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm();
 
     /**
-     * Contributes this search terms target fetch item to given fetch profile
+     * Contributes this search term's target fetch item to given fetch profile
      *
      * @param fetchProfile The fetch profile
      */

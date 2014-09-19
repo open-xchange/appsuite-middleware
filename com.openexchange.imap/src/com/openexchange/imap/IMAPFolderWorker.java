@@ -524,8 +524,12 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected static volatile Field messageCacheField;
     protected static volatile Field uidTableField;
 
-    /** Clears the cache */
-    protected static void clearCache(final IMAPFolder imapFolder) {
+    /**
+     * Clears given IMAP folder's {@link com.sun.mail.imap.MessageCache message cache} and UID table.
+     *
+     * @param imapFolder The IMAP folder
+     */
+    public static void clearCache(final IMAPFolder imapFolder) {
         if (null == imapFolder) {
             return;
         }
