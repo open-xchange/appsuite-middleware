@@ -326,13 +326,21 @@ public final class IMAPSearch {
      */
     private static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm, final int[] seqNums, final IMAPFolder imapFolder) throws OXException {
         try {
-            final TIntList results = new TIntArrayList(seqNums.length);
-            for (int i = 0; i < seqNums.length; i++) {
-                final int msgnum = seqNums[i];
-                if (searchTerm.matches(imapFolder.getMessage(msgnum))) {
-                    results.add(msgnum);
+            IMAPFolderWorker.clearCache(imapFolder);
+
+            TIntList results = new TIntArrayList(seqNums.length);
+            Message[] messages = imapFolder.getMessages(seqNums);
+
+            FetchProfile fp = new FetchProfile();
+            searchTerm.contributeTo(fp);
+            imapFolder.fetch(messages, fp);
+
+            for (Message message : messages) {
+                if (searchTerm.matches(message)) {
+                    results.add(message.getMessageNumber());
                 }
             }
+
             IMAPFolderWorker.clearCache(imapFolder);
             return results.toArray();
         } catch (final MessagingException e) {
