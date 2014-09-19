@@ -163,6 +163,10 @@ public final class NewAction extends AbstractMailAction {
                     throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL), new Object[0]);
                 }
                 jMail = new JSONObject(json0);
+
+                if (null == csid) {
+                    csid = jMail.optString("csid", null);
+                }
             }
             /*-
              * Parse
@@ -203,7 +207,10 @@ public final class NewAction extends AbstractMailAction {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
                 }
 
-                CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+                if (null != csid) {
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+                    CompositionSpaces.destroy(csid, session);
+                }
 
                 warnings.addAll(mailInterface.getWarnings());
             } else {
@@ -221,7 +228,10 @@ public final class NewAction extends AbstractMailAction {
 
                     // Apply composition space state(s)
                     mailInterface.openFor(folder);
-                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+                    if (null != csid) {
+                        CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+                        CompositionSpaces.destroy(csid, session);
+                    }
 
                     // Append messages
                     String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
@@ -305,7 +315,10 @@ public final class NewAction extends AbstractMailAction {
                 }
 
                 // Apply composition space state(s)
-                CompositionSpaces.applyCompositionSpace(csid, session, null);
+                if (null != csid) {
+                    CompositionSpaces.applyCompositionSpace(csid, session, null);
+                    CompositionSpaces.destroy(csid, session);
+                }
 
                 warnings.addAll(mailInterface.getWarnings());
                 /*
