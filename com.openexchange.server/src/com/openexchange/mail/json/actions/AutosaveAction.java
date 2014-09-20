@@ -135,9 +135,12 @@ public final class AutosaveAction extends AbstractMailAction {
                 }
                 msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
 
-                if (null != csid && null != msgref) {
+                if (null != csid) {
                     CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
-                    space.addCleanUp(msgref);
+                    if (null != msgref) {
+                        space.addCleanUp(msgref);
+                    }
+                    space.addDraftEditFor(msgIdentifier);
                 }
             }
             if (msgIdentifier == null) {

@@ -239,7 +239,7 @@ public final class CompositionSpaces {
      * @param optMailAccess The optional pre-initialized mail access
      * @throws OXException If operation fails
      */
-    public static void applyCompositionSpace(String csid, Session session, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess) throws OXException {
+    public static void applyCompositionSpace(String csid, Session session, final MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess) throws OXException {
         CompositionSpace space = CompositionSpace.optCompositionSpace(csid, session);
         if (null == space) {
             return;
@@ -248,10 +248,17 @@ public final class CompositionSpaces {
         Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
         try {
             {
-                MailPath replyFor = space.getReplyFor();
+                final MailPath replyFor = space.getReplyFor();
                 if (null != replyFor) {
                     if (null != optMailAccess && replyFor.getAccountId() == optMailAccess.getAccountId()) {
-                        optMailAccess.getMessageStorage().updateMessageFlags(replyFor.getFolder(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, true);
+                        new SafeAction<Void>() {
+
+                            @Override
+                            Void doPerform() throws Exception {
+                                optMailAccess.getMessageStorage().updateMessageFlags(replyFor.getFolder(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, true);
+                                return null;
+                            }
+                        }.performSafe();
                     } else {
                         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(replyFor.getAccountId()));
                         if (null == access) {
@@ -259,7 +266,15 @@ public final class CompositionSpaces {
                             access.connect(false);
                             accesses.put(Integer.valueOf(replyFor.getAccountId()), access);
                         }
-                        access.getMessageStorage().updateMessageFlags(replyFor.getFolder(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, true);
+                        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = access;
+                        new SafeAction<Void>() {
+
+                            @Override
+                            Void doPerform() throws Exception {
+                                mailAccess.getMessageStorage().updateMessageFlags(replyFor.getFolder(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, true);
+                                return null;
+                            }
+                        }.performSafe();
                     }
                 }
             }
@@ -267,9 +282,16 @@ public final class CompositionSpaces {
             {
                 Queue<MailPath> forwardsFor = space.getForwardsFor();
                 if (null != forwardsFor && !forwardsFor.isEmpty()) {
-                    for (MailPath mailPath : forwardsFor) {
+                    for (final MailPath mailPath : forwardsFor) {
                         if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
-                            optMailAccess.getMessageStorage().updateMessageFlags(mailPath.getFolder(), new String[] { mailPath.getMailID() }, MailMessage.FLAG_FORWARDED, true);
+                            new SafeAction<Void>() {
+
+                                @Override
+                                Void doPerform() throws Exception {
+                                    optMailAccess.getMessageStorage().updateMessageFlags(mailPath.getFolder(), new String[] { mailPath.getMailID() }, MailMessage.FLAG_FORWARDED, true);
+                                    return null;
+                                }
+                            }.performSafe();
                         } else {
                             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(mailPath.getAccountId()));
                             if (null == access) {
@@ -277,7 +299,15 @@ public final class CompositionSpaces {
                                 access.connect(false);
                                 accesses.put(Integer.valueOf(mailPath.getAccountId()), access);
                             }
-                            access.getMessageStorage().updateMessageFlags(mailPath.getFolder(), new String[] { mailPath.getMailID() }, MailMessage.FLAG_FORWARDED, true);
+                            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = access;
+                            new SafeAction<Void>() {
+
+                                @Override
+                                Void doPerform() throws Exception {
+                                    mailAccess.getMessageStorage().updateMessageFlags(mailPath.getFolder(), new String[] { mailPath.getMailID() }, MailMessage.FLAG_FORWARDED, true);
+                                    return null;
+                                }
+                            }.performSafe();
                         }
                     }
                 }
@@ -286,9 +316,16 @@ public final class CompositionSpaces {
             {
                 Queue<MailPath> draftEditsFor = space.getDraftEditsFor();
                 if (null != draftEditsFor && !draftEditsFor.isEmpty()) {
-                    for (MailPath mailPath : draftEditsFor) {
+                    for (final MailPath mailPath : draftEditsFor) {
                         if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
-                            optMailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                            new SafeAction<Void>() {
+
+                                @Override
+                                Void doPerform() throws Exception {
+                                    optMailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                                    return null;
+                                }
+                            }.performSafe();
                         } else {
                             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(mailPath.getAccountId()));
                             if (null == access) {
@@ -296,7 +333,15 @@ public final class CompositionSpaces {
                                 access.connect(false);
                                 accesses.put(Integer.valueOf(mailPath.getAccountId()), access);
                             }
-                            access.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = access;
+                            new SafeAction<Void>() {
+
+                                @Override
+                                Void doPerform() throws Exception {
+                                    mailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                                    return null;
+                                }
+                            }.performSafe();
                         }
                     }
                 }
@@ -307,6 +352,26 @@ public final class CompositionSpaces {
                 access.close(false);
             }
         }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------- //
+
+    private static abstract class SafeAction<V> {
+
+        SafeAction() {
+            super();
+        }
+
+        V performSafe() {
+            try {
+                return doPerform();
+            } catch (Exception e) {
+                // Ignore
+                return null;
+            }
+        }
+
+        abstract V doPerform() throws Exception;
     }
 
 }
