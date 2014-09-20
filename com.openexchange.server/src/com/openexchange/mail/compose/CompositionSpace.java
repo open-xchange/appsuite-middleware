@@ -234,9 +234,9 @@ public class CompositionSpace {
     }
 
     /**
-     * Gets the <code>draftEditFor</code> reference
+     * Gets the <code>draftEditFor</code> references
      *
-     * @return The <code>draftEditFor</code> reference
+     * @return The <code>draftEditFor</code> references
      */
     public Queue<MailPath> getDraftEditsFor() {
         return draftEditsFor;
