@@ -54,6 +54,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.io.Serializable;
 import java.util.Comparator;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
  * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the account ID followed by the folder full name followed
@@ -184,6 +185,21 @@ public final class MailPath implements Cloneable, Serializable {
         super();
         this.accountId = accountId;
         this.folder = folder;
+        mailID = uid;
+        str = getMailPath(accountId, folder, mailID);
+    }
+
+    /**
+     * Initializes a new {@link MailPath}
+     *
+     * @param folderArgument The full name argument; e.g. &quot;default123/INBOX&quot;
+     * @param uid The mail's unique ID
+     */
+    public MailPath(final String folderArgument, final String uid) {
+        super();
+        FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderArgument);
+        this.accountId = fa.getAccountId();
+        this.folder = fa.getFullName();
         mailID = uid;
         str = getMailPath(accountId, folder, mailID);
     }

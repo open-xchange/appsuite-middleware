@@ -2331,6 +2331,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return retval;
     }
 
+    @Override
+    public void openFor(String folder) throws OXException {
+        FullnameArgument argument = prepareMailFolderParam(folder);
+        int accountId = argument.getAccountId();
+        initConnection(accountId);
+    }
+
     private void initConnection(final int accountId) throws OXException {
         if (!init) {
             mailAccess = initMailAccess(accountId);
@@ -2378,7 +2385,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String saveDraft(final ComposedMailMessage draftMail, final boolean autosave, final int accountId) throws OXException {
+    public MailPath saveDraft(final ComposedMailMessage draftMail, final boolean autosave, final int accountId) throws OXException {
         if (autosave) {
             return autosaveDraft(draftMail, accountId);
         }
@@ -2392,12 +2399,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == mailPath) {
             return null;
         }
-        final String retval = mailPath.toString();
         postEvent(accountId, draftFullname, true);
-        return retval;
+        return mailPath;
     }
 
-    private String autosaveDraft(final ComposedMailMessage draftMail, final int accountId) throws OXException {
+    private MailPath autosaveDraft(final ComposedMailMessage draftMail, final int accountId) throws OXException {
         initConnection(accountId);
         final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         /*
@@ -2471,7 +2477,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(uid), draftFullname);
             }
             postEvent(accountId, draftFullname, true);
-            return m.getMailPath().toString();
+            return m.getMailPath();
         } finally {
             if (null != otherAccess) {
                 otherAccess.close(true);

@@ -98,6 +98,22 @@ public class CompositionSpace {
     }
 
     /**
+     * Optionally gets the composition space for given identifier
+     *
+     * @param csid The composition space identifier
+     * @param session The associated session
+     * @return The composition space or <code>null</code>
+     */
+    public static CompositionSpace optCompositionSpace(String csid, Session session) {
+        CompositionSpaceRegistry registry = (CompositionSpaceRegistry) session.getParameter(PARAM_REGISTRY);
+        if (null == registry) {
+            return null;
+        }
+
+        return registry.optCompositionSpace(csid);
+    }
+
+    /**
      * Drops composition spaces from given session
      *
      * @param session The associated session
@@ -117,10 +133,10 @@ public class CompositionSpace {
 
     final String id;
     private volatile MailPath replyFor;
-    private volatile MailPath forwardFor;
-    private volatile MailPath draftEditFor;
-    volatile long lastAccessed;
+    private final Queue<MailPath> forwardsFor;
+    private final Queue<MailPath> draftEditsFor;
     private final Queue<MailPath> cleanUps;
+    volatile long lastAccessed;
     final long idleTime;
     final Session session;
     private volatile ScheduledTimerTask scheduledTimerTask;
@@ -136,7 +152,9 @@ public class CompositionSpace {
         this.session = session;
         this.id = id;
         cleanUps = new ConcurrentLinkedQueue<MailPath>();
-        idleTime = TimeUnit.MINUTES.toMillis(10); // 10 minutes idle time
+        forwardsFor = new ConcurrentLinkedQueue<MailPath>();
+        draftEditsFor = new ConcurrentLinkedQueue<MailPath>();
+        idleTime = TimeUnit.MINUTES.toMillis(15); // 15 minutes idle time
         lastAccessed = System.currentTimeMillis();
     }
 
@@ -202,8 +220,8 @@ public class CompositionSpace {
      *
      * @return The <code>draftEditFor</code> reference
      */
-    public MailPath getDraftEditFor() {
-        return draftEditFor;
+    public Queue<MailPath> getDraftEditsFor() {
+        return draftEditsFor;
     }
 
     /**
@@ -211,8 +229,8 @@ public class CompositionSpace {
      *
      * @param draftEditFor The <code>draftEditFor</code> reference to set
      */
-    public void setDraftEditFor(MailPath draftEditFor) {
-        this.draftEditFor = draftEditFor;
+    public void addDraftEditFor(MailPath draftEditFor) {
+        this.draftEditsFor.offer(draftEditFor);
         lastAccessed = System.currentTimeMillis();
     }
 
@@ -236,12 +254,12 @@ public class CompositionSpace {
     }
 
     /**
-     * Gets the <code>forwardFor</code> reference
+     * Gets the <code>forwardFor</code> references
      *
-     * @return The <code>forwardFor</code> reference
+     * @return The <code>forwardFor</code> references
      */
-    public MailPath getForwardFor() {
-        return forwardFor;
+    public Queue<MailPath> getForwardsFor() {
+        return forwardsFor;
     }
 
     /**
@@ -249,18 +267,8 @@ public class CompositionSpace {
      *
      * @param forwardFor The <code>forwardFor</code> reference to set
      */
-    public void setForwardFor(MailPath forwardFor) {
-        this.forwardFor = forwardFor;
-        lastAccessed = System.currentTimeMillis();
-    }
-
-    /**
-     * Adds given mail path to clean-ups.
-     *
-     * @param mailPath The mail path to add
-     */
-    public void addCleanUp(MailPath mailPath) {
-        cleanUps.offer(mailPath);
+    public void addForwardFor(MailPath forwardFor) {
+        this.forwardsFor.offer(forwardFor);
         lastAccessed = System.currentTimeMillis();
     }
 
@@ -271,6 +279,16 @@ public class CompositionSpace {
      */
     public Queue<MailPath> getCleanUps() {
         return cleanUps;
+    }
+
+    /**
+     * Adds given mail path to clean-ups.
+     *
+     * @param mailPath The mail path to add
+     */
+    public void addCleanUp(MailPath mailPath) {
+        cleanUps.offer(mailPath);
+        lastAccessed = System.currentTimeMillis();
     }
 
 }

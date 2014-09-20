@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +63,9 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -107,10 +111,11 @@ public final class GetForwardAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
+            String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
+            String view = req.getParameter(Mail.PARAMETER_VIEW);
+            String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
+            UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -128,11 +133,22 @@ public final class GetForwardAction extends AbstractMailAction {
             /*
              * Get mail interface
              */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            final MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave);
+            MailServletInterface mailInterface = getMailInterface(req);
+            MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave);
             if (!mailMessage.containsAccountId()) {
                 mailMessage.setAccountId(mailInterface.getAccountID());
             }
+
+            if (null != csid) {
+                CompositionSpace compositionSpace = CompositionSpace.getCompositionSpace(csid, session);
+                compositionSpace.addForwardFor(new MailPath(folderPath, uid));
+
+
+                AJAXRequestResult result = new AJAXRequestResult(mailMessage, "mail");
+                result.setParameter("csid", csid);
+                return result;
+            }
+
             return new AJAXRequestResult(mailMessage, "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -141,20 +157,23 @@ public final class GetForwardAction extends AbstractMailAction {
 
     private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {
         try {
-            final ServerSession session = req.getSession();
+            ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
-            final int length = paths.length();
-            final String[] folders = new String[length];
-            final String[] ids = new String[length];
+            int length = paths.length();
+            List<MailPath> forwardFors = new LinkedList<MailPath>();
+            String[] folders = new String[length];
+            String[] ids = new String[length];
             for (int i = 0; i < length; i++) {
-                final JSONObject folderAndID = paths.getJSONObject(i);
+                JSONObject folderAndID = paths.getJSONObject(i);
                 folders[i] = folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID);
                 ids[i] = folderAndID.getString(AJAXServlet.PARAMETER_ID);
+                forwardFors.add(new MailPath(folders[i], ids[i]));
             }
-            final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
+            String view = req.getParameter(Mail.PARAMETER_VIEW);
+            String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
+            UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -175,11 +194,25 @@ public final class GetForwardAction extends AbstractMailAction {
                     LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", Mail.PARAMETER_VIEW, view);
                 }
             }
-            final MailServletInterface mailInterface = getMailInterface(req);
-            final MailMessage mail = mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave);
+
+            MailServletInterface mailInterface = getMailInterface(req);
+            MailMessage mail = mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave);
             if (!mail.containsAccountId()) {
                 mail.setAccountId(mailInterface.getAccountID());
             }
+
+            if (null != csid) {
+                CompositionSpace compositionSpace = CompositionSpace.getCompositionSpace(csid, session);
+                for (MailPath forwardFor : forwardFors) {
+                    compositionSpace.addForwardFor(forwardFor);
+                }
+
+
+                AJAXRequestResult result = new AJAXRequestResult(mail, "mail");
+                result.setParameter("csid", csid);
+                return result;
+            }
+
             return new AJAXRequestResult(mail, "mail");
         } catch (final OXException e) {
             final Object[] args = e.getDisplayArgs();
