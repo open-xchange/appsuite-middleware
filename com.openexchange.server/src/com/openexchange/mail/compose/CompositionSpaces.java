@@ -69,7 +69,8 @@ import com.openexchange.session.Session;
  */
 public final class CompositionSpaces {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CompositionSpaces.class);
+    /** The logger constant */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CompositionSpaces.class);
 
     /**
      * Initializes a new {@link CompositionSpaces}.
@@ -364,6 +365,7 @@ public final class CompositionSpaces {
                 return doPerform(mailAccess);
             } catch (Exception e) {
                 // Ignore
+                LOGGER.warn("Failed to perform action.", e);
                 return null;
             }
         }
