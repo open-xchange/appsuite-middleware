@@ -110,7 +110,7 @@ public final class AutosaveAction extends AbstractMailAction {
                 if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) != MailMessage.FLAG_DRAFT) {
                     throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
                 }
-                MailPath msgref = composedMail.getMsgref();
+                // MailPath msgref = composedMail.getMsgref();
                 /*
                  * ... and autosave draft
                  */
@@ -137,9 +137,6 @@ public final class AutosaveAction extends AbstractMailAction {
 
                 if (null != csid) {
                     CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
-                    if (null != msgref) {
-                        space.addCleanUp(msgref);
-                    }
                     space.addDraftEditFor(msgIdentifier);
                 }
             }
