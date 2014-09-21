@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -109,7 +110,19 @@ public class FacebookServiceImpl implements FacebookService {
             final Token accessToken = new Token(checkToken(account.getToken()), account.getSecret());
             final OAuthRequest ownProfileRequest = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
             service.signRequest(accessToken, ownProfileRequest);
-            final Response ownProfileResponse = ownProfileRequest.send(FacebookRequestTuner.getInstance());
+            Response ownProfileResponse;
+            try {
+                ownProfileResponse = ownProfileRequest.send(FacebookRequestTuner.getInstance());
+            } catch (org.scribe.exceptions.OAuthException e) {
+                // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+                Throwable cause = e.getCause();
+                if (cause instanceof java.net.SocketTimeoutException) {
+                    // A socket timeout
+                    throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+                }
+
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
+            }
 
             String myuid = "";
             try {

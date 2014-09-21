@@ -131,10 +131,22 @@ public class YahooServiceImpl implements YahooService {
         // Get the GUID of the current user from yahoo. This is needed for later requests
         final String guid;
         {
-            final OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
+            OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
             service.signRequest(accessToken, guidRequest);
-            final Response guidResponse = guidRequest.send(YahooRequestTuner.getInstance());
-            final String contentType = guidResponse.getHeader("Content-Type");
+            Response guidResponse;
+            try {
+                guidResponse = guidRequest.send(YahooRequestTuner.getInstance());
+            } catch (org.scribe.exceptions.OAuthException e) {
+                // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+                Throwable cause = e.getCause();
+                if (cause instanceof java.net.SocketTimeoutException) {
+                    // A socket timeout
+                    throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+                }
+
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
+            }
+            String contentType = guidResponse.getHeader("Content-Type");
             if (null == contentType || false == contentType.toLowerCase().contains("application/xml")) {
                 throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
             }
@@ -205,6 +217,8 @@ public class YahooServiceImpl implements YahooService {
             LOG.error("", e);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
+            LOG.error("", e);
+        } catch (final RuntimeException e) {
             LOG.error("", e);
         }
         return Collections.emptyList();

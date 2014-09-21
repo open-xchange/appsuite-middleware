@@ -53,6 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.MsLiveConnectApi;
 import org.scribe.model.OAuthRequest;
@@ -79,7 +80,7 @@ public class MSLiveApiClient {
 
     /**
      * Get the default MS Live OAuth account
-     * 
+     *
      * @return the default MS Live OAuth account
      * @throws OXException If the account cannot be returned
      */
@@ -90,7 +91,7 @@ public class MSLiveApiClient {
 
     /**
      * Get the access token
-     * 
+     *
      * @param oauthAccount the OAuth account
      * @param session The session
      * @return a new access token
@@ -122,22 +123,35 @@ public class MSLiveApiClient {
 
         return token;
     }
-    
-    private static boolean isExpired(String accessToken) throws OXException {
-        String encodedToken;
-        try {
-            encodedToken = URLEncoder.encode(accessToken, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e);
-        }
-        OAuthRequest request = new OAuthRequest(Verb.GET, "https://apis.live.net/v5.0/me?access_token=" + encodedToken);
-        Response response = request.send();
-        if (response.getCode() == 401 || response.getCode() == 400) {
-            // 401 unauthorized
-            return true;
-        }
 
-        return false;
+    private static boolean isExpired(String accessToken) throws OXException {
+        try {
+            String encodedToken;
+            try {
+                encodedToken = URLEncoder.encode(accessToken, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e);
+            }
+            OAuthRequest request = new OAuthRequest(Verb.GET, "https://apis.live.net/v5.0/me?access_token=" + encodedToken);
+            request.setConnectTimeout(5, TimeUnit.SECONDS);
+            request.setReadTimeout(15, TimeUnit.SECONDS);
+            Response response = request.send();
+            if (response.getCode() == 401 || response.getCode() == 400) {
+                // 401 unauthorized
+                return true;
+            }
+
+            return false;
+        } catch (org.scribe.exceptions.OAuthException e) {
+            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+            Throwable cause = e.getCause();
+            if (cause instanceof java.net.SocketTimeoutException) {
+                // A socket timeout
+                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+            }
+
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
+        }
     }
 
 }
