@@ -29,6 +29,7 @@ Import-Package: com.openexchange.context,
  org.osgi.util.tracker,
  org.scribe.builder,
  org.scribe.builder.api,
+ org.scribe.exceptions;version="1.3.7",
  org.scribe.model,
  org.scribe.oauth,
  org.slf4j

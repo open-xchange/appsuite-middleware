@@ -117,29 +117,40 @@ public class LinkedInServiceImpl implements LinkedInService {
     }
 
     public Response performRequest(final Session session, final int user, final int contextId, final int accountId, final Verb method, final String url) throws OXException {
-        final OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(services);
-
-        final OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey(session)).apiSecret(
-            linkedInMetaData.getAPISecret(session)).build();
-
-        OAuthAccount account = null;
         try {
-            final com.openexchange.oauth.OAuthService oAuthService = services.getService(com.openexchange.oauth.OAuthService.class);
-            if (null == oAuthService) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
-            }
-            account = oAuthService.getAccount(accountId, session, user, contextId);
-        } catch (final OXException e) {
-            LOG.error("", e);
-            return null;
-        }
+            final OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(services);
 
-        final Token accessToken = new Token(account.getToken(), account.getSecret());
-        final OAuthRequest request = new OAuthRequest(method, url);
-        request.setConnectTimeout(5, TimeUnit.SECONDS);
-        request.setReadTimeout(30, TimeUnit.SECONDS);
-        service.signRequest(accessToken, request);
-        return request.send();
+            final OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey(session)).apiSecret(
+                linkedInMetaData.getAPISecret(session)).build();
+
+            OAuthAccount account = null;
+            try {
+                final com.openexchange.oauth.OAuthService oAuthService = services.getService(com.openexchange.oauth.OAuthService.class);
+                if (null == oAuthService) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
+                }
+                account = oAuthService.getAccount(accountId, session, user, contextId);
+            } catch (final OXException e) {
+                LOG.error("", e);
+                return null;
+            }
+
+            final Token accessToken = new Token(account.getToken(), account.getSecret());
+            final OAuthRequest request = new OAuthRequest(method, url);
+            request.setConnectTimeout(5, TimeUnit.SECONDS);
+            request.setReadTimeout(30, TimeUnit.SECONDS);
+            service.signRequest(accessToken, request);
+            return request.send();
+        } catch (org.scribe.exceptions.OAuthException e) {
+            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+            Throwable cause = e.getCause();
+            if (cause instanceof java.net.SocketTimeoutException) {
+                // A socket timeout
+                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+            }
+
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
+        }
     }
 
     private JSONObject extractJson(final Response response) throws OXException {
