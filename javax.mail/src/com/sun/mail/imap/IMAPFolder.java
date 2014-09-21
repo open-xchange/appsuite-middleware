@@ -43,6 +43,7 @@ package com.sun.mail.imap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -284,7 +285,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     private boolean hasMessageCountListener = false;	// optimize notification
 
     protected MailLogger logger;
-    private final MailLogger connectionPoolLogger;
+    private MailLogger connectionPoolLogger;
 
     /**
      * A fetch profile item for fetching headers.
@@ -326,8 +327,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 *
 	 * @deprecated
 	 */
-	@Deprecated
-    public static final FetchProfileItem SIZE =
+	public static final FetchProfileItem SIZE =
 		new FetchProfileItem("SIZE");
 
 	/**
@@ -367,14 +367,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     protected IMAPFolder(String fullName, char separator, IMAPStore store,
 				Boolean isNamespace) {
 	super(store);
-	if (fullName == null) {
-        throw new NullPointerException("Folder name is null");
-    }
+	if (fullName == null)
+	    throw new NullPointerException("Folder name is null");
 	this.fullName = fullName;
 	this.separator = separator;
 	logger = new MailLogger(this.getClass(),
 				"DEBUG IMAP", store.getSession());
-	connectionPoolLogger = store.getConnectionPoolLogger();
+	connectionPoolLogger = ((IMAPStore)store).getConnectionPoolLogger();
 
 	/*
 	 * Work around apparent bug in Exchange.  Exchange
@@ -397,9 +396,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	}
 
 	// if we were given a value, override default chosen above
-	if (isNamespace != null) {
-        this.isNamespace = isNamespace.booleanValue();
-    }
+	if (isNamespace != null)
+	    this.isNamespace = isNamespace.booleanValue();
     }
 
     /**
@@ -411,12 +409,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     protected IMAPFolder(ListInfo li, IMAPStore store) {
 	this(li.name, li.separator, store, null);
 
-	if (li.hasInferiors) {
-        type |= HOLDS_FOLDERS;
-    }
-	if (li.canOpen) {
-        type |= HOLDS_MESSAGES;
-    }
+	if (li.hasInferiors)
+	    type |= HOLDS_FOLDERS;
+	if (li.canOpen)
+	    type |= HOLDS_MESSAGES;
 	exists = true;
 	attributes = li.attrs;
     }
@@ -430,10 +426,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     protected void checkExists() throws MessagingException {
 	// If the boolean field 'exists' is false, check with the
 	// server by invoking exists() ..
-	if (!exists && !exists()) {
-        throw new FolderNotFoundException(
+	if (!exists && !exists())
+	    throw new FolderNotFoundException(
 		this, fullName + " not found");
-    }
     }
 
     /*
@@ -441,11 +436,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * ASSERT: Must be called with this folder's synchronization lock held.
      */
     protected void checkClosed() {
-	if (opened) {
-        throw new IllegalStateException(
+	if (opened)
+	    throw new IllegalStateException(
 		"This operation is not allowed on an open folder"
 		);
-    }
     }
 
     /*
@@ -455,15 +449,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     protected void checkOpened() throws FolderClosedException {
 	assert Thread.holdsLock(this);
 	if (!opened) {
-	    if (reallyClosed) {
-            throw new IllegalStateException(
-                "This operation is not allowed on a closed folder"
-            	);
-        } else {
-            throw new FolderClosedException(this,
-                "Lost folder connection to server"
-            );
-        }
+	    if (reallyClosed)
+		throw new IllegalStateException(
+		    "This operation is not allowed on a closed folder"
+	    	);
+	    else // Folder was closed "implicitly"
+		throw new FolderClosedException(this,
+		    "Lost folder connection to server"
+		);
 	}
     }
 
@@ -474,13 +467,11 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * pending new message notifications from the server.
      */
     protected void checkRange(int msgno) throws MessagingException {
-	if (msgno < 1) {
-        throw new IndexOutOfBoundsException("message number < 1");
-    }
+	if (msgno < 1) // message-numbers start at 1
+	    throw new IndexOutOfBoundsException("message number < 1");
 
-	if (msgno <= total) {
-        return;
-    }
+	if (msgno <= total)
+	    return;
 
 	// Out of range, let's ping the server and see if
 	// the server has more messages for us.
@@ -496,9 +487,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	} // Release lock
 
-	if (msgno > total) {
-        throw new IndexOutOfBoundsException(msgno + " > " + total);
-    }
+	if (msgno > total) // Still out of range ? Throw up ...
+	    throw new IndexOutOfBoundsException(msgno + " > " + total);
     }
 
     /*
@@ -507,8 +497,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     private void checkFlags(Flags flags) throws MessagingException {
 	assert Thread.holdsLock(this);
-	if (mode != READ_WRITE) {
-        throw new IllegalStateException(
+	if (mode != READ_WRITE)
+	    throw new IllegalStateException(
 		"Cannot change flags on READ_ONLY folder: " + fullName
 		);
 	/*
@@ -517,7 +507,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		"These flags are not supported by this implementation"
 		);
 	*/
-    }
     }
 
     /**
@@ -553,12 +542,11 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     public synchronized Folder getParent() throws MessagingException {
 	char c = getSeparator();
 	int index;
-	if ((index = fullName.lastIndexOf(c)) != -1) {
-        return ((IMAPStore)store).newIMAPFolder(
+	if ((index = fullName.lastIndexOf(c)) != -1)
+	    return ((IMAPStore)store).newIMAPFolder(
 			    fullName.substring(0, index), c);
-    } else {
-        return new DefaultFolder((IMAPStore)store);
-    }
+	else
+	    return new DefaultFolder((IMAPStore)store);
     }
 
     /**
@@ -569,11 +557,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// Check whether this folder exists ..
 	ListInfo[] li = null;
 	final String lname;
-	if (isNamespace && separator != '\0') {
-        lname = fullName + separator;
-    } else {
-        lname = fullName;
-    }
+	if (isNamespace && separator != '\0')
+	    lname = fullName + separator;
+	else
+	    lname = fullName;
 
 	li = (ListInfo[])doCommand(new ProtocolCommand() {
 	    @Override
@@ -592,12 +579,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		fullName = fullName.substring(0, len - 1);
 	    }
 	    type = 0;
-	    if (li[i].hasInferiors) {
-            type |= HOLDS_FOLDERS;
-        }
-	    if (li[i].canOpen) {
-            type |= HOLDS_MESSAGES;
-        }
+	    if (li[i].hasInferiors)
+		type |= HOLDS_FOLDERS;
+	    if (li[i].canOpen)
+		type |= HOLDS_MESSAGES;
 	    exists = true;
 	    attributes = li[i].attrs;
 	} else {
@@ -617,9 +602,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	int i;
 	// if the name contains a wildcard, there might be more than one
 	for (i = 0; i < li.length; i++) {
-	    if (li[i].name.equals(lname)) {
-            break;
-        }
+	    if (li[i].name.equals(lname))
+		break;
 	}
 	if (i >= li.length) {	// nothing matched exactly
 	    // XXX - possibly should fail?  But what if server
@@ -651,9 +635,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	checkExists(); // insure that this folder does exist.
 
 	// Why waste a roundtrip to the server?
-	if (attributes != null && !isDirectory()) {
-        return new Folder[0];
-    }
+	if (attributes != null && !isDirectory())
+	    return new Folder[0];
 
 	final char c = getSeparator();
 
@@ -662,17 +645,15 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		@Override
         public Object doCommand(IMAPProtocol p)
 			throws ProtocolException {
-		    if (subscribed) {
-                return p.lsub("", fullName + c + pattern);
-            } else {
-                return p.list("", fullName + c + pattern);
-            }
+		    if (subscribed)
+			return p.lsub("", fullName + c + pattern);
+		    else
+			return p.list("", fullName + c + pattern);
 		}
 	    });
 
-	if (li == null) {
-        return new Folder[0];
-    }
+	if (li == null)
+	    return new Folder[0];
 
 	/*
 	 * The UW based IMAP4 servers (e.g. SIMS2.0) include
@@ -688,15 +669,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	int start = 0;
 	// Check the first LIST response.
 	if (li.length > 0 && li[0].name.equals(fullName + c))
-     {
-        start = 1; // start from index = 1
-    }
+	    start = 1; // start from index = 1
 
 	IMAPFolder[] folders = new IMAPFolder[li.length - start];
 	IMAPStore st = (IMAPStore)store;
-	for (int i = start; i < li.length; i++) {
-        folders[i-start] = st.newIMAPFolder(li[i]);
-    }
+	for (int i = start; i < li.length; i++)
+	    folders[i-start] = st.newIMAPFolder(li[i]);
 	return folders;
     }
 
@@ -714,21 +692,18 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			throws ProtocolException {
 		    // REV1 allows the following LIST format to obtain
 		    // the hierarchy delimiter of non-existent folders
-		    if (p.isREV1()) {
-                return p.list(fullName, "");
-            } else {
-                // to work :(
+		    if (p.isREV1()) // IMAP4rev1
+		        return p.list(fullName, "");
+		    else // IMAP4, note that this folder must exist for this
+		        // to work :(
 		        return p.list("", fullName);
-            }
 		}
 	    });
 
-	    if (li != null) {
-            separator = li[0].separator;
-        }
-        else {
-            separator = '/'; // punt !
-        }
+	    if (li != null)
+		separator = li[0].separator;
+	    else
+		separator = '/'; // punt !
 	}
 	return separator;
     }
@@ -741,9 +716,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	if (opened) {
 	    // never throw FolderNotFoundException if folder is open
 	    if (attributes == null)
-         {
-            exists();	// try to fetch attributes
-        }
+		exists();	// try to fetch attributes
 	} else {
 	    checkExists();
 	}
@@ -757,11 +730,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     public synchronized boolean isSubscribed() {
 	ListInfo[] li = null;
 	final String lname;
-	if (isNamespace && separator != '\0') {
-        lname = fullName + separator;
-    } else {
-        lname = fullName;
-    }
+	if (isNamespace && separator != '\0')
+	    lname = fullName + separator;
+	else
+	    lname = fullName;
 
 	try {
 	    li = (ListInfo[])doProtocolCommand(new ProtocolCommand() {
@@ -777,9 +749,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	if (li != null) {
 	    int i = findName(li, lname);
 	    return li[i].canOpen;
-	} else {
-        return false;
-    }
+	} else
+	    return false;
     }
 
     /**
@@ -791,11 +762,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	doCommandIgnoreFailure(new ProtocolCommand() {
 	    @Override
         public Object doCommand(IMAPProtocol p) throws ProtocolException {
-		if (subscribe) {
-            p.subscribe(fullName);
-        } else {
-            p.unsubscribe(fullName);
-        }
+		if (subscribe)
+		    p.subscribe(fullName);
+		else
+		    p.unsubscribe(fullName);
 		return null;
 	    }
 	});
@@ -809,17 +779,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 				throws MessagingException {
 
 	char c = 0;
-	if ((type & HOLDS_MESSAGES) == 0) {
-        c = getSeparator();
-    }
+	if ((type & HOLDS_MESSAGES) == 0)	// only holds folders
+	    c = getSeparator();
 	final char sep = c;
 	Object ret = doCommandIgnoreFailure(new ProtocolCommand() {
 		@Override
         public Object doCommand(IMAPProtocol p)
 			throws ProtocolException {
-		    if ((type & HOLDS_MESSAGES) == 0) {
-                p.create(fullName + sep);
-            } else {
+		    if ((type & HOLDS_MESSAGES) == 0)	// only holds folders
+			p.create(fullName + sep);
+		    else {
 			p.create(fullName);
 
 			// Certain IMAP servers do not allow creation of folders
@@ -843,17 +812,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    });
 
 	if (ret == null)
-     {
-        return false; // CREATE failure, maybe this
+	    return false; // CREATE failure, maybe this
 			  // folder already exists ?
-    }
 
 	// exists = true;
 	// this.type = type;
 	boolean retb = exists();	// set exists, type, and attributes
-	if (retb) {
-        notifyFolderListeners(FolderEvent.CREATED);
-    }
+	if (retb)		// Notify listeners on self and our Store
+	    notifyFolderListeners(FolderEvent.CREATED);
 	return retb;
     }
 
@@ -882,11 +848,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	ListInfo[] li = null;
 	final String lname;
-	if (isNamespace && separator != '\0') {
-        lname = fullName + separator;
-    } else {
-        lname = fullName;
-    }
+	if (isNamespace && separator != '\0')
+	    lname = fullName + separator;
+	else
+	    lname = fullName;
 	li = (ListInfo[])doCommandIgnoreFailure(new ProtocolCommand() {
 	    @Override
         public Object doCommand(IMAPProtocol p) throws ProtocolException {
@@ -895,25 +860,22 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	});
 
 	// if folder doesn't exist, throw exception
-	if (li == null) {
-        throw new FolderNotFoundException(this, fullName + " not found");
-    }
+	if (li == null)
+	    throw new FolderNotFoundException(this, fullName + " not found");
 
 	int i = findName(li, lname);
-	if (li[i].changeState == ListInfo.CHANGED) {
-        return true;
-    } else if (li[i].changeState == ListInfo.UNCHANGED) {
-        return false;
-    }
+	if (li[i].changeState == ListInfo.CHANGED)
+	    return true;
+	else if (li[i].changeState == ListInfo.UNCHANGED)
+	    return false;
 
 	// LIST didn't work. Try the hard way, using STATUS
 	try {
 	    Status status = getStatus();
-	    if (status.recent > 0) {
-            return true;
-        } else {
-            return false;
-        }
+	    if (status.recent > 0)
+		return true;
+	    else
+		return false;
 	} catch (BadCommandException bex) {
 	    // Probably doesn't support STATUS, tough luck.
 	    return false;
@@ -932,9 +894,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 				throws MessagingException {
 	// If we know that this folder is *not* a directory, don't
 	// send the request to the server at all ...
-	if (attributes != null && !isDirectory()) {
-        throw new MessagingException("Cannot contain subfolders");
-    }
+	if (attributes != null && !isDirectory())
+	    throw new MessagingException("Cannot contain subfolders");
 
 	char c = getSeparator();
 	return ((IMAPStore)store).newIMAPFolder(fullName + c + name, c);
@@ -952,9 +913,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // Delete all subfolders.
 	    Folder[] f = list();
 	    for (int i = 0; i < f.length; i++)
-         {
-            f[i].delete(recurse); // ignore intermediate failures
-        }
+		f[i].delete(recurse); // ignore intermediate failures
 	}
 
 	// Attempt to delete this folder
@@ -967,10 +926,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	});
 
-	if (ret == null) {
-        // Non-existent folder/No permission ??
+	if (ret == null)
+	    // Non-existent folder/No permission ??
 	    return false;
-    }
 
 	// DELETE succeeded.
 	exists = false;
@@ -989,9 +947,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 				throws MessagingException {
 	checkClosed(); // insure that we are closed.
 	checkExists();
-	if (f.getStore() != store) {
-        throw new MessagingException("Can't rename across Stores");
-    }
+	if (f.getStore() != store)
+	    throw new MessagingException("Can't rename across Stores");
 
 
 	Object ret = doCommandIgnoreFailure(new ProtocolCommand() {
@@ -1002,9 +959,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	});
 
-	if (ret == null) {
-        return false;
-    }
+	if (ret == null)
+	    return false;
 
 	exists = false;
 	attributes = null;
@@ -1060,24 +1016,21 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    if (rd == ResyncData.CONDSTORE) {
 			if (!protocol.isEnabled("CONDSTORE") &&
 			    !protocol.isEnabled("QRESYNC")) {
-			    if (protocol.hasCapability("CONDSTORE")) {
-                    protocol.enable("CONDSTORE");
-                } else {
-                    protocol.enable("QRESYNC");
-                }
+			    if (protocol.hasCapability("CONDSTORE"))
+				protocol.enable("CONDSTORE");
+			    else
+				protocol.enable("QRESYNC");
 			}
 		    } else {
-			if (!protocol.isEnabled("QRESYNC")) {
-                protocol.enable("QRESYNC");
-            }
+			if (!protocol.isEnabled("QRESYNC"))
+			    protocol.enable("QRESYNC");
 		    }
 		}
 
-		if (mode == READ_ONLY) {
-            mi = protocol.examine(fullName, rd);
-        } else {
-            mi = protocol.select(fullName, rd);
-        }
+		if (mode == READ_ONLY)
+		    mi = protocol.examine(fullName, rd);
+		else
+		    mi = protocol.select(fullName, rd);
 	    } catch (CommandFailedException cex) {
 		/*
 		 * Handle SELECT or EXAMINE failure.
@@ -1089,10 +1042,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		try {
 		    checkExists(); // throw exception if folder doesn't exist
 
-		    if ((type & HOLDS_MESSAGES) == 0) {
-                throw new MessagingException(
-                    "folder cannot contain messages");
-            }
+		    if ((type & HOLDS_MESSAGES) == 0)
+			throw new MessagingException(
+			    "folder cannot contain messages");
 		    throw new MessagingException(cex.getMessage(), cex);
 
 		} finally {
@@ -1167,24 +1119,20 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			// check that it really is "EARLIER"
 			if (s == null || s.length != 1 ||
 					    !s[0].equalsIgnoreCase("EARLIER"))
-             {
-                continue;	// it's not, what to do with it here?
-            }
+			    continue;	// it's not, what to do with it here?
 			String uids = ir.readAtom();
 			UIDSet[] uidset = UIDSet.parseUIDSets(uids);
 			long[] luid = UIDSet.toArray(uidset, uidnext);
-			if (luid != null && luid.length > 0) {
-                openEvents.add(
+			if (luid != null && luid.length > 0)
+			    openEvents.add(
 				new MessageVanishedEvent(this, luid));
-            }
 		    } else if (ir.keyEquals("FETCH")) {
 			assert ir instanceof FetchResponse :
 				"!ir instanceof FetchResponse";
 			Message msg = processFetchResponse((FetchResponse)ir);
-			if (msg != null) {
-                openEvents.add(new MessageChangedEvent(this,
+			if (msg != null)
+			    openEvents.add(new MessageChangedEvent(this,
 				    MessageChangedEvent.FLAGS_CHANGED, msg));
-            }
 		    }
 		}
 	    }
@@ -1238,21 +1186,19 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	}
 	if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
 	    allHeaders = true;
-	    if (protocol.isREV1()) {
-            command.append(first ?
-            	    "BODY.PEEK[HEADER]" : " BODY.PEEK[HEADER]");
-        } else {
-            command.append(first ? "RFC822.HEADER" : " RFC822.HEADER");
-        }
+	    if (protocol.isREV1())
+		command.append(first ?
+			    "BODY.PEEK[HEADER]" : " BODY.PEEK[HEADER]");
+	    else
+		command.append(first ? "RFC822.HEADER" : " RFC822.HEADER");
 	    first = false;
 	}
 	if (fp.contains(IMAPFolder.FetchProfileItem.MESSAGE)) {
 	    allHeaders = true;
-	    if (protocol.isREV1()) {
-            command.append(first ? "BODY.PEEK[]" : " BODY.PEEK[]");
-        } else {
-            command.append(first ? "RFC822" : " RFC822");
-        }
+	    if (protocol.isREV1())
+		command.append(first ? "BODY.PEEK[]" : " BODY.PEEK[]");
+	    else
+		command.append(first ? "RFC822" : " RFC822");
 	    first = false;
 	}
 	if (fp.contains(FetchProfile.Item.SIZE) ||
@@ -1266,9 +1212,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	if (!allHeaders) {
 	    hdrs = fp.getHeaderNames();
 	    if (hdrs.length > 0) {
-		if (!first) {
-            command.append(" ");
-        }
+		if (!first)
+		    command.append(" ");
 		command.append(createHeaderCommand(hdrs));
 	    }
 	}
@@ -1279,9 +1224,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	FetchItem[] fitems = protocol.getFetchItems();
 	for (int i = 0; i < fitems.length; i++) {
 	    if (fp.contains(fitems[i].getFetchProfileItem())) {
-		if (command.length() != 0) {
-            command.append(" ");
-        }
+		if (command.length() != 0)
+		    command.append(" ");
 		command.append(fitems[i].getName());
 	    }
 	}
@@ -1310,10 +1254,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // the messages that need to be prefetched.
 	    MessageSet[] msgsets = Utility.toMessageSet(msgs, condition);
 
-	    if (msgsets == null) {
-            // We already have what we need.
-            return;
-        }
+	    if (msgsets == null)
+		// We already have what we need.
+		return;
 
 	    Response[] r = null;
 	    Vector v = new Vector(); // to collect non-FETCH responses &
@@ -1328,14 +1271,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
 
-	    if (r == null) {
-            return;
-        }
+	    if (r == null)
+		return;
 
 	    for (int i = 0; i < r.length; i++) {
-		if (r[i] == null) {
-            continue;
-        }
+		if (r[i] == null)
+		    continue;
 		if (!(r[i] instanceof FetchResponse)) {
 		    v.addElement(r[i]); // Unsolicited Non-FETCH response
 		    continue;
@@ -1357,19 +1298,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 				msg == null)) {
 			// Ok, Unsolicited FLAGS update.
 			unsolicitedFlags = true;
-		    } else if (msg != null) {
-                msg.handleFetchItem(item, hdrs, allHeaders);
-            }
+		    } else if (msg != null)
+			msg.handleFetchItem(item, hdrs, allHeaders);
 		}
-		if (msg != null) {
-            msg.handleExtensionFetchItems(f.getExtensionItems());
-        }
+		if (msg != null)
+		    msg.handleExtensionFetchItems(f.getExtensionItems());
 
 		// If this response contains any unsolicited FLAGS
 		// add it to the unsolicited response vector
-		if (unsolicitedFlags) {
-            v.addElement(f);
-        }
+		if (unsolicitedFlags)
+		    v.addElement(f);
 	    }
 
 	    // Dispatch any unsolicited responses
@@ -1416,24 +1354,21 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     private String createHeaderCommand(String[] hdrs) {
 	StringBuffer sb;
 
-	if (protocol.isREV1()) {
-        sb = new StringBuffer("BODY.PEEK[HEADER.FIELDS (");
-    } else {
-        sb = new StringBuffer("RFC822.HEADER.LINES (");
-    }
+	if (protocol.isREV1())
+	    sb = new StringBuffer("BODY.PEEK[HEADER.FIELDS (");
+	else
+	    sb = new StringBuffer("RFC822.HEADER.LINES (");
 
 	for (int i = 0; i < hdrs.length; i++) {
-	    if (i > 0) {
-            sb.append(" ");
-        }
+	    if (i > 0)
+		sb.append(" ");
 	    sb.append(hdrs[i]);
 	}
 
-	if (protocol.isREV1()) {
-        sb.append(")]");
-    } else {
-        sb.append(")");
-    }
+	if (protocol.isREV1())
+	    sb.append(")]");
+	else
+	    sb.append(")");
 
 	return sb.toString();
     }
@@ -1447,18 +1382,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	checkOpened();
 	checkFlags(flag); // validate flags
 
-	if (msgs.length == 0) {
-        return;
-    }
+	if (msgs.length == 0) // boundary condition
+	    return;
 
 	synchronized(messageCacheLock) {
 	    try {
 		IMAPProtocol p = getProtocol();
 		MessageSet[] ms = Utility.toMessageSet(msgs, null);
-		if (ms == null) {
-            throw new MessageRemovedException(
+		if (ms == null)
+		    throw new MessageRemovedException(
 					"Messages have been removed");
-        }
 		p.storeFlags(ms, flag, value);
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(this, cex.getMessage());
@@ -1477,9 +1410,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	checkOpened();
 	Message[] msgs = new Message[end - start + 1];
 	int i = 0;
-	for (int n = start; n <= end; n++) {
-        msgs[i++] = getMessage(n);
-    }
+	for (int n = start; n <= end; n++)
+	    msgs[i++] = getMessage(n);
 	setFlags(msgs, flag, value);
     }
 
@@ -1491,9 +1423,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			throws MessagingException {
 	checkOpened();
 	Message[] msgs = new Message[msgnums.length];
-	for (int i = 0; i < msgnums.length; i++) {
-        msgs[i] = getMessage(msgnums[i]);
-    }
+	for (int i = 0; i < msgnums.length; i++)
+	    msgs[i] = getMessage(msgnums[i]);
 	setFlags(msgs, flag, value);
     }
 
@@ -1527,11 +1458,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	     * closed asynchronously we just want to complete the
 	     * closing here.
 	     */
-	    if (!opened && reallyClosed) {
-            throw new IllegalStateException(
-                "This operation is not allowed on a closed folder"
-            );
-        }
+	    if (!opened && reallyClosed)
+		throw new IllegalStateException(
+		    "This operation is not allowed on a closed folder"
+		);
 
 	    reallyClosed = true; // Ok, lets reset
 
@@ -1539,9 +1469,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // thread which had the messageCacheLock earlier, found
 	    // that our server connection is dead and cleaned up
 	    // everything ..
-	    if (!opened) {
-            return;
-        }
+	    if (!opened)
+		return;
 
 	    boolean reuseProtocol = true;
 	    try {
@@ -1549,22 +1478,19 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		if (force) {
 		    logger.log(Level.FINE, "forcing folder {0} to close",
 								    fullName);
-		    if (protocol != null) {
-                protocol.disconnect();
-            }
+		    if (protocol != null)
+			protocol.disconnect();
                 } else if (((IMAPStore)store).isConnectionPoolFull()) {
 		    // If the connection pool is full, logout the connection
 		    logger.fine(
 			"pool is full, not adding an Authenticated connection");
 
 		    // If the expunge flag is set, close the folder first.
-		    if (expunge && protocol != null) {
-                protocol.close();
-            }
+		    if (expunge && protocol != null)
+			protocol.close();
 
-		    if (protocol != null) {
-                protocol.logout();
-            }
+		    if (protocol != null)
+			protocol.logout();
                 } else {
 		    // If the expunge flag is set or we're open read-only we
 		    // can just close the folder, otherwise open it read-only
@@ -1572,9 +1498,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     if (!expunge && mode == READ_WRITE) {
                         try {
 			    if (protocol != null &&
-				    protocol.hasCapability("UNSELECT")) {
-                    protocol.unselect();
-                } else {
+				    protocol.hasCapability("UNSELECT"))
+				protocol.unselect();
+			    else {
 				// Unselect isn't supported so we need to
 				// select a folder to cause this one to be
 				// deselected without expunging messages.
@@ -1593,27 +1519,24 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 					// longer selected
 					selected = false;
 				    }
-				    if (selected && protocol != null) {
-                        protocol.close();
-                    }
+				    if (selected && protocol != null)
+					protocol.close();
 				}
 			    }
                         } catch (ProtocolException pex2) {
 			    reuseProtocol = false;	// something went wrong
                         }
                     } else {
-			if (protocol != null) {
-                protocol.close();
-            }
+			if (protocol != null)
+			    protocol.close();
 		    }
                 }
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    } finally {
 		// cleanup if we haven't already
-		if (opened) {
-            cleanup(reuseProtocol);
-        }
+		if (opened)
+		    cleanup(reuseProtocol);
 	    }
 	}
     }
@@ -1664,9 +1587,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     @Override
     public synchronized Flags getPermanentFlags() {
-	if (permanentFlags == null) {
-        return null;
-    }
+	if (permanentFlags == null)
+	    return null;
 	return (Flags)(permanentFlags.clone());
     }
 
@@ -1674,9 +1596,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * Return the available flags for this IMAP folder.
      */
     public synchronized Flags getAvailableFlags() {
-    if (availableFlags == null) {
+    if (availableFlags == null)
         return null;
-    }
     return (Flags)(availableFlags.clone());
     }
 
@@ -1860,9 +1781,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	// if allowed to cache and our cache is still valid, return it
 	if (statusCacheTimeout > 0 && cachedStatus != null &&
-	    System.currentTimeMillis() - cachedStatusTime < statusCacheTimeout) {
-        return cachedStatus;
-    }
+	    System.currentTimeMillis() - cachedStatusTime < statusCacheTimeout)
+	    return cachedStatus;
 
         IMAPProtocol p = null;
 
@@ -1910,9 +1830,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	for (int i = 0; i < msgs.length; i++) {
 	    final Message m = msgs[i];
 	    Date d = m.getReceivedDate(); // retain dates
-	    if (d == null) {
-            d = m.getSentDate();
-        }
+	    if (d == null)
+		d = m.getSentDate();
 	    final Date dd = d;
 	    final Flags f = m.getFlags();
 
@@ -1985,9 +1904,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 
 	    Date d = m.getReceivedDate(); // retain dates
-	    if (d == null) {
-            d = m.getSentDate();
-        }
+	    if (d == null)
+		d = m.getSentDate();
 	    final Date dd = d;
 	    final Flags f = m.getFlags();
 	    AppendUID auid = (AppendUID)doCommand(new ProtocolCommand() {
@@ -2050,9 +1968,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			throws MessagingException {
 	checkOpened();
 
-	if (msgs.length == 0) {
-        return;
-    }
+	if (msgs.length == 0) // boundary condition
+	    return;
 
 	// If the destination belongs to our same store, optimize
 	if (folder.getStore() == store) {
@@ -2060,29 +1977,26 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		try {
 		    IMAPProtocol p = getProtocol();
 		    MessageSet[] ms = Utility.toMessageSet(msgs, null);
-		    if (ms == null) {
-                throw new MessageRemovedException(
-                		"Messages have been removed");
-            }
+		    if (ms == null)
+			throw new MessageRemovedException(
+					"Messages have been removed");
 		    p.copy(ms, folder.getFullName());
 		} catch (CommandFailedException cfx) {
-		    if (cfx.getMessage().indexOf("TRYCREATE") != -1) {
-                throw new FolderNotFoundException(
-                                folder,
-                    folder.getFullName() + " does not exist"
-                   );
-            } else {
-                throw new MessagingException(cfx.getMessage(), cfx);
-            }
+		    if (cfx.getMessage().indexOf("TRYCREATE") != -1)
+			throw new FolderNotFoundException(
+                            folder,
+			    folder.getFullName() + " does not exist"
+			   );
+		    else
+			throw new MessagingException(cfx.getMessage(), cfx);
 		} catch (ConnectionException cex) {
 		    throw new FolderClosedException(this, cex.getMessage());
 		} catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
 	    	}
 	    }
-	} else {
-        super.copyMessages(msgs, folder);
-    }
+	} else // destination is a different store.
+	    super.copyMessages(msgs, folder);
     }
 
     /**
@@ -2109,9 +2023,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			Folder folder) throws MessagingException {
 	checkOpened();
 
-	if (msgs.length == 0) {
-        return null;
-    }
+	if (msgs.length == 0) // boundary condition
+	    return null;
 
 	// the destination must belong to our same store
 	if (folder.getStore() == store) {
@@ -2120,10 +2033,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    IMAPProtocol p = getProtocol();
 		    // XXX - messages have to be from this Folder, who checks?
 		    MessageSet[] ms = Utility.toMessageSet(msgs, null);
-		    if (ms == null) {
-                throw new MessageRemovedException(
-                		"Messages have been removed");
-            }
+		    if (ms == null)
+			throw new MessageRemovedException(
+					"Messages have been removed");
 		    CopyUID cuid = p.copyuid(ms, folder.getFullName());
 
 		    /*
@@ -2166,9 +2078,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 				break;
 			    }
 			    j++;
-			    if (j >= msgs.length) {
-                    j = 0;
-                }
+			    if (j >= msgs.length)
+				j = 0;
 			} while (j != i);
 		    }
 		    for (int i = 0; i < msgs.length; i++) {
@@ -2180,31 +2091,28 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 				break;
 			    }
 			    j++;
-			    if (j >= msgs.length) {
-                    j = 0;
-                }
+			    if (j >= msgs.length)
+				j = 0;
 			} while (j != i);
 		    }
 		    return result;
 		} catch (CommandFailedException cfx) {
-		    if (cfx.getMessage().indexOf("TRYCREATE") != -1) {
-                throw new FolderNotFoundException(
-                                folder,
-                    folder.getFullName() + " does not exist"
-                   );
-            } else {
-                throw new MessagingException(cfx.getMessage(), cfx);
-            }
+		    if (cfx.getMessage().indexOf("TRYCREATE") != -1)
+			throw new FolderNotFoundException(
+                            folder,
+			    folder.getFullName() + " does not exist"
+			   );
+		    else
+			throw new MessagingException(cfx.getMessage(), cfx);
 		} catch (ConnectionException cex) {
 		    throw new FolderClosedException(this, cex.getMessage());
 		} catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
 	    	}
 	    }
-	} else {
-        throw new MessagingException(
+	} else // destination is a different store.
+	    throw new MessagingException(
 			"can't copyUIDMessages to a different store");
-    }
     }
 
     /**
@@ -2241,19 +2149,17 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    doExpungeNotification = false; // We do this ourselves later
 	    try {
 		IMAPProtocol p = getProtocol();
-		if (msgs != null) {
-            p.uidexpunge(Utility.toUIDSet(msgs));
-        } else {
-            p.expunge();
-        }
+		if (msgs != null)
+		    p.uidexpunge(Utility.toUIDSet(msgs));
+		else
+		    p.expunge();
 	    } catch (CommandFailedException cfx) {
 		// expunge not allowed, perhaps due to a permission problem?
-		if (mode != READ_WRITE) {
-            throw new IllegalStateException(
+		if (mode != READ_WRITE)
+		    throw new IllegalStateException(
 			"Cannot expunge READ_ONLY folder: " + fullName);
-        } else {
-            throw new MessagingException(cfx.getMessage(), cfx);
-        }
+		else
+		    throw new MessagingException(cfx.getMessage(), cfx);
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(this, cex.getMessage());
 	    } catch (ProtocolException pex) {
@@ -2264,19 +2170,17 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 
 	    // Cleanup expunged messages and sync messageCache with reality.
-	    if (msgs != null) {
-            rmsgs = messageCache.removeExpungedMessages(msgs);
-        } else {
-            rmsgs = messageCache.removeExpungedMessages();
-        }
+	    if (msgs != null)
+		rmsgs = messageCache.removeExpungedMessages(msgs);
+	    else
+		rmsgs = messageCache.removeExpungedMessages();
 	    if (uidTable != null) {
 		for (int i = 0; i < rmsgs.length; i++) {
 		    IMAPMessage m = rmsgs[i];
 		    /* remove this message from the UIDTable */
 		    long uid = m.getUID();
-		    if (uid != -1) {
-                uidTable.remove(Long.valueOf(uid));
-            }
+		    if (uid != -1)
+			uidTable.remove(Long.valueOf(uid));
 		}
 	    }
 
@@ -2285,9 +2189,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	}
 
 	// Notify listeners. This time its for real, guys.
-	if (rmsgs.length > 0) {
-        notifyMessageRemovedListeners(true, rmsgs);
-    }
+	if (rmsgs.length > 0)
+	    notifyMessageRemovedListeners(true, rmsgs);
 	return rmsgs;
     }
 
@@ -2324,14 +2227,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			// numbers that it has not yet notified the client
 			// about via EXISTS; ignore those messages here.
 			if (matches[i] > size) {
-			    if (logger.isLoggable(Level.FINE)) {
-                    logger.fine("ignoring message number " +
-                        matches[i] + " in search results, " +
-                        "outside range " + size);
-                }
-			} else {
-                matchMsgs[i] = getMessageBySeqNumber(matches[i]);
-            }
+			    if (logger.isLoggable(Level.FINE))
+				logger.fine("ignoring message number " +
+				    matches[i] + " in search results, " +
+				    "outside range " + size);
+			} else
+			    matchMsgs[i] = getMessageBySeqNumber(matches[i]);
 		    }
 		}
 	    }
@@ -2342,9 +2243,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    return super.search(term);
 	} catch (SearchException sex) {
 	    // too complex for IMAP
-	    if (((IMAPStore)store).throwSearchException()) {
-            throw sex;
-        }
+	    if (((IMAPStore)store).throwSearchException())
+		throw sex;
 	    return super.search(term);
 	} catch (ConnectionException cex) {
 	    throw new FolderClosedException(this, cex.getMessage());
@@ -2364,10 +2264,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			throws MessagingException {
 	checkOpened();
 
-	if (msgs.length == 0) {
-        // need to return an empty array (not null!)
+	if (msgs.length == 0)
+	    // need to return an empty array (not null!)
 	    return msgs;
-    }
 
 	try {
 	    Message[] matchMsgs = null;
@@ -2375,16 +2274,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    synchronized(messageCacheLock) {
 		IMAPProtocol p = getProtocol();
 		MessageSet[] ms = Utility.toMessageSet(msgs, null);
-		if (ms == null) {
-            throw new MessageRemovedException(
+		if (ms == null)
+		    throw new MessageRemovedException(
 					"Messages have been removed");
-        }
 		int[] matches = p.search(ms, term);
 		if (matches != null) {
 		    matchMsgs = new IMAPMessage[matches.length];
-		    for (int i = 0; i < matches.length; i++) {
-                matchMsgs[i] = getMessageBySeqNumber(matches[i]);
-            }
+		    for (int i = 0; i < matches.length; i++)
+			matchMsgs[i] = getMessageBySeqNumber(matches[i]);
 		}
 	    }
 	    return matchMsgs;
@@ -2448,9 +2345,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		if (matches != null) {
 		    matchMsgs = new IMAPMessage[matches.length];
 		    // Map seq-numbers into actual Messages.
-		    for (int i = 0; i < matches.length; i++) {
-                matchMsgs[i] = getMessageBySeqNumber(matches[i]);
-            }
+		    for (int i = 0; i < matches.length; i++)
+			matchMsgs[i] = getMessageBySeqNumber(matches[i]);
 		}
 	    }
 	    return matchMsgs;
@@ -2491,9 +2387,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     @Override
     public synchronized long getUIDValidity() throws MessagingException {
-	if (opened) {
-        return uidvalidity;
-    }
+	if (opened) // we already have this information
+	    return uidvalidity;
 
         IMAPProtocol p = null;
         Status status = null;
@@ -2537,9 +2432,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     // Not a UIDFolder method, but still useful
     public synchronized long getUIDNext() throws MessagingException {
-	if (opened) {
-        return uidnext;
-    }
+	if (opened) // we already have this information
+	    return uidnext;
 
         IMAPProtocol p = null;
         Status status = null;
@@ -2581,12 +2475,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		if (uidTable != null) {
 		    // Check in uidTable
 		    m = (IMAPMessage)uidTable.get(l);
-		    if (m != null) {
-                return m;
-            }
-		} else {
-            uidTable = new Hashtable();
-        }
+		    if (m != null) // found it
+			return m;
+		} else
+		    uidTable = new Hashtable();
 
 		// Check with the server
 		// Issue UID FETCH command
@@ -2624,9 +2516,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	try {
 	    synchronized(messageCacheLock) {
-		if (uidTable == null) {
-            uidTable = new Hashtable();
-        }
+		if (uidTable == null)
+		    uidTable = new Hashtable();
 
 		// Issue UID FETCH for given range
 		UID[] ua = getProtocol().fetchSequenceNumbers(start, end);
@@ -2671,20 +2562,17 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    Vector v = new Vector(); // to collect unavailable UIDs
 		    Long l;
 		    for (int i = 0; i < uids.length; i++) {
-			if (!uidTable.containsKey(l = Long.valueOf(uids[i]))) {
-                // This UID has not been loaded yet.
+			if (!uidTable.containsKey(l = Long.valueOf(uids[i])))
+			    // This UID has not been loaded yet.
 			    v.addElement(l);
-            }
 		    }
 
 		    int vsize = v.size();
 		    unavailUids = new long[vsize];
-		    for (int i = 0; i < vsize; i++) {
-                unavailUids[i] = ((Long)v.elementAt(i)).longValue();
-            }
-		} else {
-            uidTable = new Hashtable();
-        }
+		    for (int i = 0; i < vsize; i++)
+			unavailUids[i] = ((Long)v.elementAt(i)).longValue();
+		} else
+		    uidTable = new Hashtable();
 
 		if (unavailUids.length > 0) {
 		    // Issue UID FETCH request for given uids
@@ -2701,9 +2589,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 		// Return array of size = uids.length
 		Message[] msgs = new Message[uids.length];
-		for (int i = 0; i < uids.length; i++) {
-            msgs[i] = (Message)uidTable.get(Long.valueOf(uids[i]));
-        }
+		for (int i = 0; i < uids.length; i++)
+		    msgs[i] = (Message)uidTable.get(Long.valueOf(uids[i]));
 		return msgs;
 	    }
 	} catch(ConnectionException cex) {
@@ -2719,22 +2606,19 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     @Override
     public synchronized long getUID(Message message)
 			throws MessagingException {
-	if (message.getFolder() != this) {
-        throw new NoSuchElementException(
+	if (message.getFolder() != this)
+	    throw new NoSuchElementException(
 		"Message does not belong to this folder");
-    }
 
 	checkOpened(); // insure that folder is open
 
-	if (!(message instanceof IMAPMessage)) {
-        throw new MessagingException("message is not an IMAPMessage");
-    }
+	if (!(message instanceof IMAPMessage))
+	    throw new MessagingException("message is not an IMAPMessage");
 	IMAPMessage m = (IMAPMessage)message;
 	// If the message already knows its UID, great ..
 	long uid;
-	if ((uid = m.getUID()) != -1) {
-        return uid;
-    }
+	if ((uid = m.getUID()) != -1)
+	    return uid;
 
 	synchronized(messageCacheLock) { // Acquire Lock
 	    try {
@@ -2747,9 +2631,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    m.setUID(uid); // set message's UID
 
 		    // insert this message into uidTable
-		    if (uidTable == null) {
-                uidTable = new Hashtable();
-            }
+		    if (uidTable == null)
+			uidTable = new Hashtable();
 		    uidTable.put(Long.valueOf(uid), m);
 		}
 	    } catch (ConnectionException cex) {
@@ -2769,9 +2652,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	IMAPMessage[] msgs = new IMAPMessage[uids.length];
 	for (int i = 0; i < uids.length; i++) {
 	    IMAPMessage m = null;
-	    if (uidTable != null) {
-            m = (IMAPMessage)uidTable.get(Long.valueOf(uids[i]));
-        }
+	    if (uidTable != null)
+		m = (IMAPMessage)uidTable.get(Long.valueOf(uids[i]));
 	    if (m == null) {
 		// fake it, we don't know what message this really is
 		m = newIMAPMessage(-1);	// no sequence number
@@ -2792,18 +2674,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * @since	JavaMail 1.5.1
      */
     public synchronized long getHighestModSeq() throws MessagingException {
-	if (opened) {
-        return highestmodseq;
-    }
+	if (opened) // we already have this information
+	    return highestmodseq;
 
         IMAPProtocol p = null;
         Status status = null;
 
 	try {
 	    p = getStoreProtocol();	// XXX
-	    if (!p.hasCapability("CONDSTORE")) {
-            throw new BadCommandException("CONDSTORE not supported");
-        }
+	    if (!p.hasCapability("CONDSTORE"))
+		throw new BadCommandException("CONDSTORE not supported");
 	    String[] item = { "HIGHESTMODSEQ" };
 	    status = p.status(fullName, item);
 	} catch (BadCommandException bex) {
@@ -2845,17 +2725,15 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	try {
 	    synchronized (messageCacheLock) {
 		IMAPProtocol p = getProtocol();
-		if (!p.hasCapability("CONDSTORE")) {
-            throw new BadCommandException("CONDSTORE not supported");
-        }
+		if (!p.hasCapability("CONDSTORE"))
+		    throw new BadCommandException("CONDSTORE not supported");
 
 		// Issue FETCH for given range
 		int[] nums = p.uidfetchChangedSince(start, end, modseq);
 
 		msgs = new Message[nums.length];
-		for (int i = 0; i < nums.length; i++) {
-            msgs[i] = getMessageBySeqNumber(nums[i]);
-        }
+		for (int i = 0; i < nums.length; i++)
+		    msgs[i] = getMessageBySeqNumber(nums[i]);
 	    }
 	} catch(ConnectionException cex) {
 	    throw new FolderClosedException(this, cex.getMessage());
@@ -3063,9 +2941,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     public synchronized String[] getAttributes() throws MessagingException {
 	checkExists();
 	if (attributes == null)
-     {
-        exists();		// do a LIST to set the attributes
-    }
+	    exists();		// do a LIST to set the attributes
 	return attributes == null ? new String[0] :
 		(String[])(attributes.clone());
     }
@@ -3119,10 +2995,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	     * XXX - We could do select here too, like IdleManager, instead
 	     * of blocking in read, but that's more complicated.
 	     */
-	    if (protocol != null && protocol.getChannel() != null) {
-            throw new MessagingException(
-            	    "idle method not supported with SocketChannels");
-        }
+	    if (protocol != null && protocol.getChannel() != null)
+		throw new MessagingException(
+			    "idle method not supported with SocketChannels");
 	}
 	startIdle(null);
 
@@ -3142,9 +3017,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 * in the folder (for example).
 	 */
 	for (;;) {
-	    if (!handleIdle(once)) {
-            break;
-        }
+	    if (!handleIdle(once))
+		break;
 	}
 
 	/*
@@ -3179,8 +3053,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    checkOpened();
 	    Boolean started = (Boolean)doOptionalCommand("IDLE not supported",
 		new ProtocolCommand() {
-		    @Override
-            public Object doCommand(IMAPProtocol p)
+		    public Object doCommand(IMAPProtocol p)
 			    throws ProtocolException {
 			if (idleState == RUNNING) {
 			    p.idleStart();
@@ -3198,9 +3071,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			}
 		    }
 		});
-	    if (!started.booleanValue()) {
-            return;
-        }
+	    if (!started.booleanValue())
+		return;
 	}
     }
 
@@ -3258,11 +3130,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	while (idleState != RUNNING) {
 	    if (idleState == IDLE) {
 		IdleManager im = idleManager;
-		if (im != null) {
-            im.requestAbort(this);
-        } else {
-            protocol.idleAbort();
-        }
+		if (im != null)
+		    im.requestAbort(this);
+		else
+		    protocol.idleAbort();
 		idleState = ABORTING;
 	    }
 	    try {
@@ -3277,9 +3148,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     void idleAbort() {
 	idleManager = null;	// don't need it anymore
-	if (protocol != null) {
-        protocol.idleAbort();
-    }
+	if (protocol != null)	// should always be true
+	    protocol.idleAbort();
     }
 
     /**
@@ -3308,8 +3178,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	checkOpened();
 	return (Map<String,String>)doOptionalCommand("ID not supported",
 	    new ProtocolCommand() {
-		@Override
-        public Object doCommand(IMAPProtocol p)
+		public Object doCommand(IMAPProtocol p)
 			throws ProtocolException {
 		    return p.id(clientParams);
 		}
@@ -3360,11 +3229,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     public void clearMessageCache() {
         synchronized(messageCacheLock) {
-            MessageCache messageCache = this.messageCache;
             if (null != messageCache) {
                 messageCache.freeCache();
             }
-            Hashtable uidTable = this.uidTable;
             if (null != uidTable) {
                 uidTable.clear();
             }
@@ -3390,27 +3257,24 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	/*
 	 * First, delegate possible ALERT or notification to the Store.
 	 */
-	if (r.isOK() || r.isNO() || r.isBAD() || r.isBYE()) {
-        ((IMAPStore)store).handleResponseCode(r);
-    }
+	if (r.isOK() || r.isNO() || r.isBAD() || r.isBYE())
+	    ((IMAPStore)store).handleResponseCode(r);
 
 	/*
 	 * Now check whether this is a BYE or OK response and
 	 * handle appropriately.
 	 */
 	if (r.isBYE()) {
-	    if (opened) {
-            cleanup(false);
-        }
+	    if (opened)		// XXX - accessed without holding folder lock
+		cleanup(false);
 	    return;
 	} else if (r.isOK()) {
 	    // HIGHESTMODSEQ can be updated on any OK response
 	    r.skipSpaces();
 	    if (r.readByte() == '[') {
 		String s = r.readAtom();
-		if (s.equalsIgnoreCase("HIGHESTMODSEQ")) {
-            highestmodseq = r.readLong();
-        }
+		if (s.equalsIgnoreCase("HIGHESTMODSEQ"))
+		    highestmodseq = r.readLong();
 	    }
 	    r.reset();
 	    return;
@@ -3430,10 +3294,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	if (ir.keyEquals("EXISTS")) { // EXISTS
 	    int exists = ir.getNumber();
-	    if (exists <= realTotal) {
-            // Could be the EXISTS following EXPUNGE, ignore 'em
-            return;
-        }
+	    if (exists <= realTotal)
+		// Could be the EXISTS following EXPUNGE, ignore 'em
+		return;
 
 	    int count = exists - realTotal; // number of new messages
 	    Message[] msgs = new Message[count];
@@ -3446,9 +3309,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	    // avoid instantiating Message objects if no listeners.
 	    if (hasMessageCountListener) {
-		for (int i = 0; i < count; i++) {
-            msgs[i] = messageCache.getMessage(++oldtotal);
-        }
+		for (int i = 0; i < count; i++)
+		    msgs[i] = messageCache.getMessage(++oldtotal);
 
 		// Notify listeners.
 		notifyMessageAddedListeners(msgs);
@@ -3470,9 +3332,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // decrement 'realTotal'; but leave 'total' unchanged
 	    realTotal--;
 
-	    if (msgs != null) {
-            notifyMessageRemovedListeners(false, msgs);
-        }
+	    if (msgs != null)	// Do the notification here.
+		notifyMessageRemovedListeners(false, msgs);
 
 	} else if (ir.keyEquals("VANISHED")) {
 	    // after the folder is opened with QRESYNC, a VANISHED response
@@ -3489,9 +3350,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		long[] luid = UIDSet.toArray(uidset);
 		Message[] msgs = createMessagesForUIDs(luid);
 		for (Message m : msgs) {
-		    if (m.getMessageNumber() > 0) {
-                messageCache.expungeMessage(m.getMessageNumber());
-            }
+		    if (m.getMessageNumber() > 0)
+			messageCache.expungeMessage(m.getMessageNumber());
 		}
 		if (doExpungeNotification && hasMessageCountListener) {
 		    notifyMessageRemovedListeners(true, msgs);
@@ -3501,10 +3361,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	} else if (ir.keyEquals("FETCH")) {
 	    assert ir instanceof FetchResponse : "!ir instanceof FetchResponse";
 	    Message msg = processFetchResponse((FetchResponse)ir);
-	    if (msg != null) {
-            notifyMessageChangedListeners(
-            	MessageChangedEvent.FLAGS_CHANGED, msg);
-        }
+	    if (msg != null)
+		notifyMessageChangedListeners(
+			MessageChangedEvent.FLAGS_CHANGED, msg);
 
 	} else if (ir.keyEquals("RECENT")) {
 	    // update 'recent'
@@ -3530,9 +3389,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    UID uid = fr.getItem(UID.class);
 	    if (uid != null && msg.getUID() != uid.uid) {
 		msg.setUID(uid.uid);
-		if (uidTable == null) {
-            uidTable = new Hashtable();
-        }
+		if (uidTable == null)
+		    uidTable = new Hashtable();
 		uidTable.put(Long.valueOf(uid.uid), msg);
 		notify = true;
 	    }
@@ -3556,9 +3414,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		notify = true;
 	    }
 
-	    if (!notify) {
-            msg = null;
-        }
+	    if (!notify)
+		msg = null;
 	}
 	return msg;
     }
@@ -3571,9 +3428,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     void handleResponses(Response[] r) {
 	for (int i = 0; i < r.length; i++) {
-	    if (r[i] != null) {
-            handleResponse(r[i]);
-        }
+	    if (r[i] != null)
+		handleResponse(r[i]);
 	}
     }
 
@@ -3621,11 +3477,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// released, so if we no longer have a protocol object we base
 	// this decision on whether we *think* the folder is open.
 	if ((protocol != null && cex.getProtocol() == protocol) ||
-		(protocol == null && !reallyClosed)) {
-        throw new FolderClosedException(this, cex.getMessage(), cex);
-    } else {
-        throw new StoreClosedException(store, cex.getMessage(), cex);
-    }
+		(protocol == null && !reallyClosed))
+            throw new FolderClosedException(this, cex.getMessage(), cex);
+        else
+            throw new StoreClosedException(store, cex.getMessage(), cex);
     }
 
     /**
@@ -3825,9 +3680,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * @param	p	the IMAPProtocol object
      */
     protected synchronized void releaseStoreProtocol(IMAPProtocol p) {
-        if (p != protocol) {
+        if (p != protocol)
             ((IMAPStore)store).releaseFolderStoreProtocol(p);
-        } else {
+	else {
 	    // XXX - should never happen
 	    logger.fine("releasing our protocol as store protocol?");
 	}
@@ -3845,9 +3700,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
         if (protocol != null) {
             protocol.removeResponseHandler(this);
 
-            if (returnToPool) {
+            if (returnToPool)
                 ((IMAPStore)store).releaseProtocol(this, protocol);
-            } else {
+            else {
 		protocol.disconnect();	// make sure it's disconnected
                 ((IMAPStore)store).releaseProtocol(this, null);
 	    }
@@ -3871,18 +3726,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
         if (System.currentTimeMillis() - protocol.getTimestamp() > 1000) {
 	    waitIfIdle();
-	    if (protocol != null) {
-            protocol.noop();
-        }
+	    if (protocol != null)
+		protocol.noop();
 	}
 
         if (keepStoreAlive && ((IMAPStore)store).hasSeparateStoreConnection()) {
             IMAPProtocol p = null;
 	    try {
 		p = ((IMAPStore)store).getFolderStoreProtocol();
-		if (System.currentTimeMillis() - p.getTimestamp() > 1000) {
-            p.noop();
-        }
+		if (System.currentTimeMillis() - p.getTimestamp() > 1000)
+		    p.noop();
 	    } finally {
 		((IMAPStore)store).releaseFolderStoreProtocol(p);
 	    }
@@ -3916,9 +3769,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
  * before sending it to the server.
  */
 class MessageLiteral implements Literal {
-    private final Message msg;
+    private Message msg;
     private int msgSize = -1;
-    private final byte[] buf;		// the buffered message, if not null
+    private byte[] buf;		// the buffered message, if not null
 
     public MessageLiteral(Message msg, int maxsize)
 				throws MessagingException, IOException {
@@ -3941,9 +3794,9 @@ class MessageLiteral implements Literal {
     public void writeTo(OutputStream os) throws IOException {
 	// the message should not change between the constructor and this call
 	try {
-	    if (buf != null) {
-            os.write(buf, 0, msgSize);
-        } else {
+	    if (buf != null)
+		os.write(buf, 0, msgSize);
+	    else {
 		os = new CRLFOutputStream(os);
 		msg.writeTo(os);
 	    }
@@ -3963,7 +3816,7 @@ class MessageLiteral implements Literal {
 class LengthCounter extends OutputStream {
     private int size = 0;
     private byte[] buf;
-    private final int maxsize;
+    private int maxsize;
 
     public LengthCounter(int maxsize) {
 	buf = new byte[8192];
