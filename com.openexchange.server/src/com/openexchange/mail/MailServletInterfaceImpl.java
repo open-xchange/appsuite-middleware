@@ -79,6 +79,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -1481,7 +1482,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 return mfm.createManagedFile(tempFile);
             } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -1605,7 +1606,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 return mfm.createManagedFile(tempFile);
             } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.MessageRemovedException;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -195,7 +196,7 @@ public abstract class MimeFileMailPart extends MailPart {
             } catch (final FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

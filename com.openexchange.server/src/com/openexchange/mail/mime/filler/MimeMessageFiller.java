@@ -74,6 +74,7 @@ import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Message.RecipientType;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -1249,7 +1250,7 @@ public class MimeMessageFiller {
         } catch (final ConverterException e) {
             throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -2116,7 +2117,7 @@ public class MimeMessageFiller {
             try {
                 return new MessageDataSource(data.getData(), contentType);
             } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
