@@ -1,6 +1,7 @@
 * 2014-09-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 34447: Fixed typo in error message
+ - Fix for bug 34285: Handle possible "java.net.SocketTimeoutException" when executing an HTTP OAuth request
 
 * 2014-09-20 - thorben.betten@open-xchange.com
 
