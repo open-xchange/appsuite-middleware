@@ -3230,6 +3230,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     public void clearMessageCache() {
         synchronized(messageCacheLock) {
             messageCache.freeCache();
+            uidTable.clear();
         }
     }
 
