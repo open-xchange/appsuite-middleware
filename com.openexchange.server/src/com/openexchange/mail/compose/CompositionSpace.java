@@ -87,6 +87,24 @@ public class CompositionSpace {
     }
 
     /**
+     * Destroys the composition space denoted by given identifier
+     *
+     * @param csid The composition space identifier
+     * @param session The associated session
+     */
+    public static void destroyCompositionSpace(String csid, boolean apply, Session session) {
+        if (apply) {
+            try {
+                CompositionSpaces.applyCompositionSpace(csid, session);
+            } catch (Exception e) {
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CompositionSpace.class);
+                logger.warn("Failed to apply composition space", e);
+            }
+        }
+        CompositionSpaces.destroy(csid, session);
+    }
+
+    /**
      * Gets the composition space for given identifier
      *
      * @param csid The composition space identifier
@@ -216,9 +234,9 @@ public class CompositionSpace {
     }
 
     /**
-     * Gets the <code>draftEditFor</code> reference
+     * Gets the <code>draftEditFor</code> references
      *
-     * @return The <code>draftEditFor</code> reference
+     * @return The <code>draftEditFor</code> references
      */
     public Queue<MailPath> getDraftEditsFor() {
         return draftEditsFor;

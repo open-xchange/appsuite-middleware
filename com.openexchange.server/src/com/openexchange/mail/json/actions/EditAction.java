@@ -64,6 +64,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -85,9 +86,6 @@ public final class EditAction extends AbstractMailAction {
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(EditAction.class);
 
-    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
-    private static final String CONTENT = MailJSONField.CONTENT.getKey();
-
     /**
      * Initializes a new {@link EditAction}.
      * @param services
@@ -98,29 +96,29 @@ public final class EditAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
-        final AJAXRequestData request = req.getRequest();
-        final List<OXException> warnings = new ArrayList<OXException>();
+        AJAXRequestData request = req.getRequest();
+        List<OXException> warnings = new ArrayList<OXException>();
 
         try {
             if (!request.hasUploads()) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create("edit");
             }
-            final ServerSession session = req.getSession();
+            ServerSession session = req.getSession();
             String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
-            final UploadEvent uploadEvent = request.getUploadEvent();
+            UploadEvent uploadEvent = request.getUploadEvent();
             /*
              * Edit draft
              */
             MailPath msgIdentifier = null;
             {
-                final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL));
+                JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL));
                 if (null == csid) {
                     csid = jsonMailObj.optString("csid", null);
                 }
                 /*
                  * Resolve "From" to proper mail account
                  */
-                final InternetAddress from;
+                InternetAddress from;
                 try {
                     from = MessageParser.getFromField(jsonMailObj)[0];
                 } catch (final AddressException e) {
@@ -130,7 +128,7 @@ public final class EditAction extends AbstractMailAction {
                 /*
                  * Check if detected account has drafts
                  */
-                final MailServletInterface msi = getMailInterface(req);
+                MailServletInterface msi = getMailInterface(req);
                 if (msi.getDraftsFolder(accountId) == null) {
                     if (MailAccount.DEFAULT_ID == accountId) {
                         // Huh... No drafts folder in default account
@@ -140,18 +138,24 @@ public final class EditAction extends AbstractMailAction {
                     // No drafts folder in detected mail account; auto-save to default account
                     accountId = MailAccount.DEFAULT_ID;
                 }
+
+                if (!jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) || (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) <= 0) {
+                    throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
+                }
+
                 /*
                  * Parse with default account's transport provider
                  */
-                if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
-                    ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings);
-                    // MailPath msgref = composedMail.getMsgref();
-                    /*
-                     * ... and edit draft
-                     */
-                    msgIdentifier = msi.saveDraft(composedMail, false, accountId);
-                } else {
-                    throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings);
+                MailPath msgref = composedMail.getMsgref();
+                /*
+                 * ... and edit draft
+                 */
+                msgIdentifier = msi.saveDraft(composedMail, false, accountId);
+
+                if (null != csid && null != msgref) {
+                    CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                    space.addCleanUp(msgref);
                 }
             }
             if (msgIdentifier == null) {
@@ -160,7 +164,7 @@ public final class EditAction extends AbstractMailAction {
             /*
              * Create JSON response object
              */
-            final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+            AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
             result.addWarnings(warnings);
             return result;
         } catch (final OXException e) {
