@@ -2,6 +2,10 @@
 
  - Fix for bug 34447: Fixed typo in error message
 
+* 2014-09-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33434: Introduced composition space concept to track information and data associated with a mail compose
+
 * 2014-09-19 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34499: Don't fail on invalid e-mail addresses, instead add a warning to the import result
