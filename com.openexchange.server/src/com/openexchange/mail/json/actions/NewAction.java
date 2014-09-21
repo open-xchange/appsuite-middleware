@@ -74,11 +74,13 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -197,8 +199,9 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * ... and save draft
                  */
-                final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
-                final ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
+                MailPath msgref = composedMail.getMsgref();
+                ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
                 if (null != sendType) {
                     composedMail.setSendType(sendType);
                 }
@@ -208,6 +211,10 @@ public final class NewAction extends AbstractMailAction {
                 }
 
                 if (null != csid) {
+                    if (null != msgref) {
+                        CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                        space.addCleanUp(msgref);
+                    }
                     CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
                     CompositionSpaces.destroy(csid, session);
                 }
