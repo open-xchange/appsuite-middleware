@@ -156,13 +156,13 @@ public class WrappingFilter implements Filter {
             String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
             String protocol = httpRequest.getHeader(protocolHeader);
 
-            if(!isValidProtocol(protocol)) {
+            if (!isValidProtocol(protocol)) {
                 LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
                  protocol = httpRequest.getScheme();
             }
 
             if (remoteIP.isEmpty()) {
-                LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
+                LOG.debug("Could not detect a valid remote IP address in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
                 remoteIP = httpRequest.getRemoteAddr();
             }
 
