@@ -49,42 +49,20 @@
 
 package com.openexchange.ajax.jslob;
 
-import java.io.IOException;
-import org.json.JSONException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.exception.OXException;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 /**
- * {@link AbstractJSloblTest}
+ * {@link JSlobTestSuite}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractJSloblTest extends AbstractAJAXSession {
-
-    /**
-     * Default constructor.
-     *
-     * @param name name of the test.
-     */
-    protected AbstractJSloblTest(final String name) {
-        super(name);
+public class JSlobTestSuite {
+    public static Test suite() {
+        final TestSuite tests = new TestSuite(JSlobTestSuite.class.getName());
+        tests.addTestSuite(Bug28821Test.class);
+        tests.addTestSuite(Bug34552Test.class);
+        return tests;
     }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    /**
-     * @return User's default send address
-     */
-    protected String getSendAddress() throws OXException, IOException, JSONException {
-        return getSendAddress(getClient());
-    }
-
-    protected static String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
-        return client.getValues().getSendAddress();
-    }
-
 }
