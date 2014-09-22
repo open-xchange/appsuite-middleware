@@ -65,7 +65,7 @@ import com.openexchange.jslob.JSlob;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Bug28821Test extends AbstractJSloblTest {
+public final class Bug28821Test extends AbstractJSlobTest {
 
     private static final int NUM_THREADS = 4;
 
