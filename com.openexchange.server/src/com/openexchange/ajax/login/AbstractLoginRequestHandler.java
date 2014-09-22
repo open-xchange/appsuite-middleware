@@ -50,17 +50,21 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.SessionUtility;
@@ -304,6 +308,10 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             if (rampUpServices != null) {
                 try {
                     String client = session.getClient();
+                    String clientOverride = req.getParameter("rampUpFor");
+                    if (clientOverride != null) {
+                    	client = clientOverride;
+                    }
                     for (LoginRampUpService rampUpService : rampUpServices) {
                         if (rampUpService.contributesTo(client)) {
                             JSONObject contribution = rampUpService.getContribution(session, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, session, ""));
