@@ -168,9 +168,9 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      */
     MISSING_FIELD("Missing the following field in JSON data: %1$s", AjaxExceptionMessages.MISSING_FIELD_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
     /**
-     * No such conversion path from "%1$s" to "%2$s" in mode "%3$s" for action "%4$s".
+     * No such conversion path from "%1$s" to "%2$s" in module "%3$s" for action "%4$s".
      */
-    NO_SUCH_CONVERSION_PATH("No such conversion path from \"%1$s\" to \"%2$s\" in mode \"%3$s\" for action \"%4$s\".", null, Category.CATEGORY_ERROR, 26),
+    NO_SUCH_CONVERSION_PATH("No such conversion path from \"%1$s\" to \"%2$s\" in module \"%3$s\" for action \"%4$s\".", null, Category.CATEGORY_ERROR, 26),
 
     ;
 
