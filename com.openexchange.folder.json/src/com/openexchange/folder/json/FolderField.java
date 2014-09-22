@@ -153,6 +153,10 @@ public enum FolderField {
      */
     SUPPORTED_CAPABILITIES(317, "supported_capabilities"),
     /**
+     * The folder's size or NULL if not available
+     */
+    SIZE(318, "size"),
+    /**
      * The permissions bits
      */
     BITS(-1, "bits"),

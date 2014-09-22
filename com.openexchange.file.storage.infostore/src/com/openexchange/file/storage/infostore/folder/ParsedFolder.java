@@ -117,6 +117,8 @@ public final class ParsedFolder implements Folder {
 
     protected Set<String> supportedCapbilitites;
 
+    protected long size;
+
     /**
      * Initializes an empty {@link ParsedFolder}.
      */
@@ -124,6 +126,7 @@ public final class ParsedFolder implements Folder {
         super();
         createdBy = -1;
         modifiedBy = -1;
+        size = -1L;
         total = -1;
         nu = -1;
         unread = -1;
@@ -327,6 +330,16 @@ public final class ParsedFolder implements Folder {
     @Override
     public void setSummary(final String summary) {
         this.summary = summary;
+    }
+
+    @Override
+    public long getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(long size) {
+        this.size = size;
     }
 
     @Override

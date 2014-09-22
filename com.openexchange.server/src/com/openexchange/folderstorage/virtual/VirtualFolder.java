@@ -369,6 +369,11 @@ public final class VirtualFolder implements ParameterizedFolder {
     }
 
     @Override
+    public long getSize() {
+        return realFolder.getSize();
+    }
+
+    @Override
     public int getTotal() {
         return realFolder.getTotal();
     }
@@ -405,6 +410,11 @@ public final class VirtualFolder implements ParameterizedFolder {
 
     @Override
     public void setSummary(final String summary) {
+        // Nothing to do
+    }
+
+    @Override
+    public void setSize(long size) {
         // Nothing to do
     }
 

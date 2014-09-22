@@ -137,34 +137,25 @@ public class IMAPCapabilities extends MailCapabilities {
      */
 
     private boolean hasACL;
-
     private boolean hasQuota;
-
     private boolean hasThreadReferences;
-
     private boolean hasThreadOrderedSubject;
-
     private boolean hasSort;
-
     private boolean hasIMAP4;
-
     private boolean hasIMAP4rev1;
-
     private boolean hasUIDPlus;
-
     private boolean hasSubscription;
-
     private boolean hasNamespace;
-
     private boolean hasIdle;
-
     private boolean hasChildren;
+    private boolean hasMailboxSize;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
      */
     public IMAPCapabilities() {
         super();
+        hasMailboxSize = false;
     }
 
     @Override
@@ -199,6 +190,20 @@ public class IMAPCapabilities extends MailCapabilities {
 
     public void setQuota(final boolean hasQuota) {
         this.hasQuota = hasQuota;
+    }
+
+    @Override
+    public boolean hasMailboxSize() {
+        return hasMailboxSize;
+    }
+
+    /**
+     * Sets the <code>hasMailboxSize</code> flag
+     *
+     * @param hasMailboxSize The <code>hasMailboxSize</code> flag to set
+     */
+    public void setHasMailboxSize(boolean hasMailboxSize) {
+        this.hasMailboxSize = hasMailboxSize;
     }
 
     @Override
@@ -276,6 +281,7 @@ public class IMAPCapabilities extends MailCapabilities {
         retval |= hasIMAP4rev1 ? BIT_IMAP4_REV1 : 0;
         retval |= hasQuota ? BIT_QUOTA : 0;
         retval |= hasSort ? BIT_SORT : 0;
+        retval |= hasMailboxSize ? BIT_MAILBOX_SIZE : 0;
         retval |= hasThreadOrderedSubject ? BIT_THREAD_ORDEREDSUBJECT : 0;
         retval |= hasThreadReferences ? BIT_THREAD_REFERENCES : 0;
         retval |= hasUIDPlus ? BIT_UIDPLUS : 0;
@@ -292,7 +298,7 @@ public class IMAPCapabilities extends MailCapabilities {
             ", hasQuota=").append(hasQuota()).append(", hasSort=").append(hasSort()).append(", hasSubscription=").append(hasSubscription()).append(
             ", hasThreadReferences=").append(hasThreadReferences()).append(", hasChildren=").append(hasChildren()).append(", hasIMAP4=").append(
             hasIMAP4()).append(", hasIMAP4rev1=").append(hasIMAP4rev1()).append(", hasNamespace=").append(hasNamespace()).append(
-            ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).toString();
+            ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).append(", hasMailboxSize=").append(hasMailboxSize()).toString();
     }
 
 }

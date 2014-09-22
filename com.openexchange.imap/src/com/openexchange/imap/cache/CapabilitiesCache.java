@@ -202,6 +202,7 @@ public final class CapabilitiesCache {
             imapCaps.setIdle(map.containsKey(IMAPCapabilities.CAP_IDLE));
             imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
             imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
+            imapCaps.setHasMailboxSize(MailProperties.getInstance().supportsMailboxSize());
             /*
              * ACL extension
              */
