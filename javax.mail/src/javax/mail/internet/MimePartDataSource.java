@@ -44,6 +44,7 @@ import javax.mail.*;
 import javax.activation.*;
 import java.io.*;
 import java.net.UnknownServiceException;
+import com.sun.mail.util.MessageRemovedIOException;
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.FolderClosedIOException;
 
@@ -111,7 +112,9 @@ public class MimePartDataSource implements DataSource, MessageAware {
 	} catch (FolderClosedException fex) {
 	    throw new FolderClosedIOException(fex.getFolder(),
 						fex.getMessage());
-	} catch (MessagingException mex) {
+	} catch (MessageRemovedException mex) {
+        throw new MessageRemovedIOException(mex.getMessage(), mex);
+    } catch (MessagingException mex) {
 	    throw new IOException(mex.getMessage(), mex);
 	}
     }

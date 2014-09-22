@@ -57,6 +57,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.MessageRemovedException;
 import javax.mail.Part;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
@@ -151,7 +152,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             fis = file.getInputStream();
             cachedContent = readStream(fis, charset);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -319,7 +320,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             }
             copy2File(inputStream);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
