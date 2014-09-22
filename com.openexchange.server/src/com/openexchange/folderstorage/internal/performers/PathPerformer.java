@@ -59,7 +59,9 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -81,6 +83,16 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
      */
     public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
+    }
+
+    /**
+     * Initializes a new {@link PathPerformer}.
+     * @param storageParameters
+     * @param registry
+     * @throws OXException
+     */
+    public PathPerformer(StorageParameters storageParameters, CacheFolderStorageRegistry registry) throws OXException {
+        super(storageParameters, registry);
     }
 
     /**
