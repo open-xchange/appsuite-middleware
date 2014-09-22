@@ -61,6 +61,7 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.find.AbstractFindTest;
@@ -75,6 +76,7 @@ import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
+import com.openexchange.find.RequestOptions;
 import com.openexchange.find.common.CommonConstants;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.facet.ActiveFacet;
@@ -89,6 +91,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.utils.DateUtils;
 import com.openexchange.test.ContactTestManager;
@@ -523,6 +526,34 @@ public class BasicMailTest extends AbstractFindTest {
         assertTrue("document found", 0 == documents.size());
     }
 
+    public void testTimeConversion() throws Exception {
+        /*
+         * The users time zone is used internally for date conversion, if no other
+         * time zone is specified in the requests. We override explicitly with a
+         * different one to compare the date conversion between get and search responses.
+         */
+        TimeZone userTimeZone = client.getValues().getTimeZone();
+        TimeZone clientTimeZone = TimeZones.UTC;
+        if (userTimeZone.equals(clientTimeZone)) {
+            clientTimeZone = TimeZones.PST;
+        }
+
+        String subject = randomUID();
+        String[][] mailIDs = importMail(defaultAddress, subject, subject);
+        com.openexchange.ajax.mail.actions.GetRequest getMailReq = new com.openexchange.ajax.mail.actions.GetRequest(mailIDs[0][0], mailIDs[0][1]);
+        getMailReq.setTimeZone(clientTimeZone);
+        com.openexchange.ajax.mail.actions.GetResponse getMailResp = client.execute(getMailReq);
+        long origReceivedDate = getMailResp.getMail(clientTimeZone).getReceivedDate().getTime();
+
+        List<Facet> possibleFacets = autocomplete(subject);
+        Facet subjectFacet = findByType(MailFacetType.SUBJECT, possibleFacets);
+        List<ActiveFacet> facets = prepareFacets();
+        facets.add(createActiveFacet((SimpleFacet) subjectFacet));
+        List<PropDocument> searchResults = query(facets, Collections.singletonMap(RequestOptions.CLIENT_TIMEZONE, clientTimeZone.getID()));
+        long foundReceivedDate = ((Long) searchResults.get(0).getProps().get(MailJSONField.RECEIVED_DATE.getKey())).longValue();
+        assertEquals("Wrong date conversion", origReceivedDate, foundReceivedDate);
+    }
+
     private void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
         for (Contact contact : contacts) {
             boolean found = false;
@@ -560,6 +591,11 @@ public class BasicMailTest extends AbstractFindTest {
     private List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
         return query(Module.MAIL, facets);
     }
+
+    private List<PropDocument> query(List<ActiveFacet> facets, Map<String, String> options) throws Exception {
+        return query(Module.MAIL, facets, options);
+    }
+
 
     private List<PropDocument> query(List<ActiveFacet> facets, int[] columns) throws Exception {
         return query(Module.MAIL, facets, columns);

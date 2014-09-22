@@ -144,7 +144,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
 
     private boolean authenticated(HttpServletRequest req) {
         if (doFail) {
-            LOGGER.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. Please set properties 'com.openexchange.rest.services.basic-auth.login' annd 'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
+            LOGGER.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. Please set properties 'com.openexchange.rest.services.basic-auth.login' and 'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
             return false;
         }
 

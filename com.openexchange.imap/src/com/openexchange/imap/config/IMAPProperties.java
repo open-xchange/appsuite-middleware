@@ -201,7 +201,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String imapSearchStr = configuration.getProperty("com.openexchange.imap.imapSearch", "imap").trim();
             forceImapSearch = "force-imap".equalsIgnoreCase(imapSearchStr);
             imapSearch = forceImapSearch || "imap".equalsIgnoreCase(imapSearchStr);
-            logBuilder.append("\tIMAP-Search: ").append(imapSearch).append(forceImapSearch ? " (forced)\n" : '\n');
+            logBuilder.append("\tIMAP-Search: ").append(imapSearch).append(forceImapSearch ? " (forced)\n" : "\n");
         }
 
         {

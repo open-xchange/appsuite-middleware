@@ -623,11 +623,22 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Overwrite settings with request's parameters
          */
-        final DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
-        final int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
-        final List<OXException> warnings = new ArrayList<OXException>(2);
-        final JSONObject jsonObject =
-            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize);
+        DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
+        int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
+        List<OXException> warnings = new ArrayList<OXException>(2);
+        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize);
+
+        {
+            String csid = (String) result.getParameter("csid");
+            if (null != csid) {
+                try {
+                    jsonObject.put("csid", csid);
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+
         result.addWarnings(warnings);
         result.setResultObject(jsonObject, "json");
     }

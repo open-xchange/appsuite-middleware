@@ -444,15 +444,15 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 final Map<String, Object> primaryCompany = (Map<String, Object>) m.get("primary_company");
                 if (null != primaryCompany && !primaryCompany.isEmpty()) {
                     // Name
-                    String s = (String) primaryCompany.get("name");
+                    Object s = primaryCompany.get("name");
                     if (isNotNull(s)) {
-                        oxContact.setCompany(Strings.abbreviate(s, 512));
+                        oxContact.setCompany(Strings.abbreviate(s.toString(), 512));
                     }
 
                     // Title
-                    s = (String) primaryCompany.get("title");
+                    s = primaryCompany.get("title");
                     if (isNotNull(s)) {
-                        oxContact.setPosition(Strings.abbreviate(s, 128));
+                        oxContact.setPosition(Strings.abbreviate(s.toString(), 128));
                     }
                 }
             }
@@ -600,7 +600,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         return oxContact;
     }
 
-    protected boolean isNotNull(final String s) {
-        return null != s && !"null".equals(s);
+    protected boolean isNotNull(Object s) {
+        return null != s && !"null".equals(s.toString());
     }
 }

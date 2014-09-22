@@ -50,6 +50,7 @@ package com.openexchange.find.json.converters;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -101,26 +102,33 @@ public class JSONResponseVisitor implements DocumentVisitor {
     private final List<OXException> errors;
     private final JSONArray json;
     private final ResultConverterRegistry converterRegistry;
-    private QueryResult queryResult;
+    private final QueryResult queryResult;
+    private final TimeZone timeZone;
 
     /**
      * @param session The session; never <code>null</code>.
      * @param converterRegistry The converter registry; never <code>null</code>.
      * @param queryResult The query result; never <code>null</code>.
      */
-    public JSONResponseVisitor(final ServerSession session, final ResultConverterRegistry converterRegistry, QueryResult queryResult) {
+    public JSONResponseVisitor(ServerSession session, ResultConverterRegistry converterRegistry, QueryResult queryResult) {
         super();
         this.converterRegistry = converterRegistry;
         this.session = session;
         this.queryResult = queryResult;
         errors = new LinkedList<OXException>();
         json = new JSONArray();
+        String timeZoneStr = queryResult.getSearchRequest().getOptions().getTimeZone();
+        if (timeZoneStr != null) {
+            timeZone = TimeZoneUtils.getTimeZone(timeZoneStr);
+        } else {
+            timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        }
     }
 
     private MailFieldWriter[] mailFieldWriters = null;
 
     @Override
-    public void visit(final MailDocument mailDocument) {
+    public void visit(MailDocument mailDocument) {
         if (mailFieldWriters == null) {
             int[] columns = queryResult.getSearchRequest().getColumns();
             if (columns == null) {
@@ -132,10 +140,10 @@ public class JSONResponseVisitor implements DocumentVisitor {
 
         final MailMessage mailMessage = mailDocument.getMailMessage();
         try {
-            final JSONObject jsonMessage = new JSONObject(mailFieldWriters.length);
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
-            for (final MailFieldWriter writer : mailFieldWriters) {
+            JSONObject jsonMessage = new JSONObject(mailFieldWriters.length);
+            int contextId = session.getContextId();
+            int userId = session.getUserId();
+            for (MailFieldWriter writer : mailFieldWriters) {
                 writer.writeField(
                     jsonMessage,
                     mailMessage,
@@ -144,26 +152,30 @@ public class JSONResponseVisitor implements DocumentVisitor {
                     mailMessage.getAccountId(),
                     userId,
                     contextId,
-                    TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()));
+                    timeZone);
             }
             json.put(jsonMessage);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
     }
 
     @Override
-    public void visit(final FileDocument fileDocument) {
+    public void visit(FileDocument fileDocument) {
         try {
-            final ResultConverter converter = converterRegistry.getConverter("infostore");
+            ResultConverter converter = converterRegistry.getConverter("infostore");
             if (null != converter) {
-                final AJAXRequestData requestData = new AJAXRequestData();
-                final AJAXRequestResult requestResult = new AJAXRequestResult(fileDocument.getFile());
+                AJAXRequestData requestData = new AJAXRequestData();
+                if (timeZone != null) {
+                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
+                }
+
+                AJAXRequestResult requestResult = new AJAXRequestResult(fileDocument.getFile());
                 converter.convert(requestData, requestResult, session, null);
                 json.put(requestResult.getResultObject());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
@@ -172,19 +184,18 @@ public class JSONResponseVisitor implements DocumentVisitor {
     @Override
     public void visit(TasksDocument taskDocument) {
         try {
-            final ResultConverter converter = converterRegistry.getConverter("task");
+            ResultConverter converter = converterRegistry.getConverter("task");
             if (null != converter) {
-                String timeZone = queryResult.getSearchRequest().getOptions().getTimeZone();
                 AJAXRequestData requestData = new AJAXRequestData();
                 if (timeZone != null) {
-                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone);
+                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
                 }
 
-                final AJAXRequestResult requestResult = new AJAXRequestResult(taskDocument.getTask());
+                AJAXRequestResult requestResult = new AJAXRequestResult(taskDocument.getTask());
                 converter.convert(requestData, requestResult, session, null);
                 json.put(requestResult.getResultObject());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
@@ -193,14 +204,18 @@ public class JSONResponseVisitor implements DocumentVisitor {
     @Override
     public void visit(ContactsDocument contactDocument) {
         try {
-            final ResultConverter converter = converterRegistry.getConverter("contact");
+            ResultConverter converter = converterRegistry.getConverter("contact");
             if (null != converter) {
-                final AJAXRequestData requestData = new AJAXRequestData();
-                final AJAXRequestResult requestResult = new AJAXRequestResult(contactDocument.getContact());
+                AJAXRequestData requestData = new AJAXRequestData();
+                if (timeZone != null) {
+                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
+                }
+
+                AJAXRequestResult requestResult = new AJAXRequestResult(contactDocument.getContact());
                 converter.convert(requestData, requestResult, session, null);
                 json.put(requestResult.getResultObject());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
@@ -211,10 +226,9 @@ public class JSONResponseVisitor implements DocumentVisitor {
         try {
             ResultConverter calendarConverter = converterRegistry.getConverter("appointment");
             if (calendarConverter != null) {
-                String timeZone = queryResult.getSearchRequest().getOptions().getTimeZone();
                 AJAXRequestData requestData = new AJAXRequestData();
                 if (timeZone != null) {
-                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone);
+                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
                 }
 
                 AJAXRequestResult requestResult = new AJAXRequestResult(calendarDocument.getAppointment());

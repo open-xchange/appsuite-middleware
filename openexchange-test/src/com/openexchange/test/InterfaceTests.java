@@ -53,6 +53,7 @@ import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.find.FindTestSuite;
+import com.openexchange.ajax.jslob.JSlobTestSuite;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -128,6 +129,7 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.test.resourcecache.ResourceCacheTest.class);
         tests.addTest(FindTestSuite.suite());
         tests.addTest(com.openexchange.ajax.quota.QuotaTestSuite.suite());
+        tests.addTest(JSlobTestSuite.suite());
         // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
         // tests.addTest(ManifestsTestSuite.suite());
         return tests;

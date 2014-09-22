@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.MessageRemovedException;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -130,7 +131,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         try {
             handleReferencedPart(referencedPart, session);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -153,7 +154,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         try {
             handleReferencedPart(referencedMail, session);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -209,7 +210,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             }
             final ManagedFile mf;
             try {
-                mf = mfm.createManagedFile(in);
+                mf = mfm.createManagedFile(in, false);
             } catch (final OXException e) {
                 final IOException ioerr = new IOException();
                 ioerr.initCause(e);
@@ -350,7 +351,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             fis = file.getInputStream();
             cachedContent = readStream(fis, charset);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

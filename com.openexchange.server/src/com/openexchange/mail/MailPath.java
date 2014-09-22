@@ -54,6 +54,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.io.Serializable;
 import java.util.Comparator;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
  * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the account ID followed by the folder full name followed
@@ -147,15 +148,12 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     /*-
-     * Fields
+     * --------------------------------------------------------- Fields ---------------------------------------------------------
      */
 
     private int accountId;
-
     private String folder;
-
     private String str;
-
     private String mailID;
 
     /**
@@ -192,6 +190,21 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     /**
+     * Initializes a new {@link MailPath}
+     *
+     * @param folderArgument The full name argument; e.g. &quot;default123/INBOX&quot;
+     * @param uid The mail's unique ID
+     */
+    public MailPath(final String folderArgument, final String uid) {
+        super();
+        FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderArgument);
+        this.accountId = fa.getAccountId();
+        this.folder = fa.getFullName();
+        mailID = uid;
+        str = getMailPath(accountId, folder, mailID);
+    }
+
+    /**
      * Sets specified arguments.
      *
      * @param accountId The account ID
@@ -207,7 +220,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
+        int prime = 31;
         int result = 1;
         result = prime * result + accountId;
         result = prime * result + ((folder == null) ? 0 : folder.hashCode());
@@ -216,25 +229,15 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (!(obj instanceof MailPath)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final MailPath other = (MailPath) obj;
+        MailPath other = (MailPath) obj;
         if (accountId != other.accountId) {
-            return false;
-        }
-        if (folder == null) {
-            if (other.folder != null) {
-                return false;
-            }
-        } else if (!folder.equals(other.folder)) {
             return false;
         }
         if (mailID == null) {
@@ -242,6 +245,13 @@ public final class MailPath implements Cloneable, Serializable {
                 return false;
             }
         } else if (!mailID.equals(other.mailID)) {
+            return false;
+        }
+        if (folder == null) {
+            if (other.folder != null) {
+                return false;
+            }
+        } else if (!folder.equals(other.folder)) {
             return false;
         }
         return true;

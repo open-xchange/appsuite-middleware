@@ -230,12 +230,6 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
                 payload.addCustomAlertActionLocKey("OK");
                 payload.addCustomDictionary("root", subscription.getRootFolderID());
                 payload.addCustomDictionary("action", "sync");
-                JSONObject apsObject = payload.getPayload().getJSONObject("aps");
-                if (null == apsObject) {
-                    apsObject = new JSONObject();
-                    payload.getPayload().put("aps", apsObject);
-                }
-                apsObject.put("content-available", 1);
                 payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);

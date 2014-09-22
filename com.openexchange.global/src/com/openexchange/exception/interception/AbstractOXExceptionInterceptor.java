@@ -86,7 +86,7 @@ public abstract class AbstractOXExceptionInterceptor implements OXExceptionInter
      * {@inheritDoc}
      */
     @Override
-    public abstract OXException intercept(OXException oxException);
+    public abstract OXExceptionArguments intercept(OXException oxException);
 
     /**
      * {@inheritDoc}

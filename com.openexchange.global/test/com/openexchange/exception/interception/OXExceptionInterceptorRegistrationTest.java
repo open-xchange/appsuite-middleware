@@ -82,7 +82,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -94,7 +94,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor testInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -112,7 +112,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -124,7 +124,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor testInterceptor = new AbstractOXExceptionInterceptor(11) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -142,7 +142,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -151,7 +151,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
 
         AbstractOXExceptionInterceptor registeredInterceptor1 = new AbstractOXExceptionInterceptor(1) {
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -160,7 +160,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         registeredInterceptor1.addResponsibility(new Responsibility("testModul2", "textAction2"));
         AbstractOXExceptionInterceptor registeredInterceptor2 = new AbstractOXExceptionInterceptor(2) {
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -169,7 +169,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         registeredInterceptor2.addResponsibility(new Responsibility("testModul2", "textAction2"));
         AbstractOXExceptionInterceptor registeredInterceptor3 = new AbstractOXExceptionInterceptor(3) {
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -186,7 +186,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor testInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -204,7 +204,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -214,7 +214,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor registeredInterceptor1 = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -224,7 +224,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor registeredInterceptor2 = new AbstractOXExceptionInterceptor(2) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -234,7 +234,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor registeredInterceptor3 = new AbstractOXExceptionInterceptor(3) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -251,7 +251,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor testInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -272,7 +272,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -282,7 +282,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor registeredInterceptor1 = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -292,7 +292,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor registeredInterceptor2 = new AbstractOXExceptionInterceptor(2) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -302,7 +302,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor registeredInterceptor3 = new AbstractOXExceptionInterceptor(3) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -319,7 +319,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor testInterceptor = new AbstractOXExceptionInterceptor(3) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -347,7 +347,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -370,7 +370,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -393,7 +393,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -416,7 +416,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -439,7 +439,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -451,7 +451,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor1 = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -475,7 +475,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -487,7 +487,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor1 = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -499,7 +499,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor2 = new AbstractOXExceptionInterceptor(1) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -524,7 +524,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(Integer.MIN_VALUE) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -536,7 +536,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor1 = new AbstractOXExceptionInterceptor(Integer.MAX_VALUE) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -548,7 +548,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor2 = new AbstractOXExceptionInterceptor(1111) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -560,7 +560,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor3 = new AbstractOXExceptionInterceptor(444) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -572,7 +572,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor4 = new AbstractOXExceptionInterceptor(55) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };
@@ -584,7 +584,7 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         AbstractOXExceptionInterceptor oxExceptionInterceptor5 = new AbstractOXExceptionInterceptor(333) {
 
             @Override
-            public OXException intercept(OXException oxException) {
+            public OXExceptionArguments intercept(OXException oxException) {
                 return null;
             }
         };

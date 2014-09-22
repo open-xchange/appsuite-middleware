@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
@@ -83,6 +84,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
@@ -392,7 +394,7 @@ public class DispatcherServlet extends SessionServlet {
                     return;
                 }
                 case HTTP_ERROR: {
-                    httpResponse.sendError(result.getHttpStatusCode());
+                    handleError(result, httpResponse);
                     return;
                 }
                 case DIRECT: {
@@ -470,6 +472,30 @@ public class DispatcherServlet extends SessionServlet {
                 dispatcher.end(state);
             }
         }
+    }
+
+    /**
+     * Do "error" handling in case the response status is != 200. Like writing Retry-After header for a successful 202 response or removing
+     * the default Content-Type: text/javascript we assume in {@link AJAXServlet#service()}.
+     * 
+     * @param result The current {@link AJAXRequestResult}
+     * @param httpServletResponse The current {@link HttpServletResponse}
+     * @throws IOException If sending the error fails
+     */
+    private void handleError(AJAXRequestResult result, HttpServletResponse httpServletResponse) throws IOException {
+        int httpStatusCode = result.getHttpStatusCode();
+        switch (httpStatusCode) {
+        case 202: {
+            httpServletResponse.setContentType(null);
+            String retry_after = result.getHeader(RETRY_AFTER);
+            if (!Strings.isEmpty(retry_after)) {
+                httpServletResponse.addHeader(RETRY_AFTER, retry_after);
+            }
+        }
+        default:
+            break;
+        }
+        httpServletResponse.sendError(result.getHttpStatusCode());
     }
 
     private void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {

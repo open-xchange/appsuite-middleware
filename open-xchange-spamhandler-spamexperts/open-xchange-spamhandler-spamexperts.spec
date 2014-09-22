@@ -64,6 +64,8 @@ ox_add_property com.openexchange.custom.spamexperts.trainhamfolder "Not Spam" /o
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Thu Sep 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-23
 * Tue Sep 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>

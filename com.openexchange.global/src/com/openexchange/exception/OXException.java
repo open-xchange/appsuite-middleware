@@ -236,6 +236,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     private Object[] logArgs;
     private String exceptionId;
     private String prefix;
+    private boolean interceptable;
     private Generic generic;
     private OXExceptionCode exceptionCode;
 
@@ -244,6 +245,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException() {
         super();
+        interceptable = true;
         generic = Generic.NONE;
         code = CODE_DEFAULT;
         count = COUNTER.incrementAndGet();
@@ -264,6 +266,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final Throwable cause) {
         super(cause);
+        interceptable = true;
         generic = Generic.NONE;
         code = CODE_DEFAULT;
         count = COUNTER.incrementAndGet();
@@ -284,6 +287,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final OXException cloneMe) {
         super();
+        interceptable = true;
         setStackTrace(cloneMe.getStackTrace());
         this.generic = cloneMe.generic;
         this.count = cloneMe.count;
@@ -307,6 +311,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final int code) {
         super();
+        interceptable = true;
         generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(4);
@@ -328,6 +333,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final int code, final String displayMessage, final Object... displayArgs) {
         super();
+        interceptable = true;
         generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(4);
@@ -350,6 +356,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
         super(cause);
+        interceptable = true;
         generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
         properties = new HashMap<String, String>(4);
@@ -368,6 +375,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param e The {@link OXException} to copy from
      */
     public void copyFrom(final OXException e) {
+        this.interceptable = e.interceptable;
         this.code = e.code;
         this.generic = e.generic;
         this.categories.clear();
@@ -866,6 +874,25 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException setPrefix(final String prefix) {
         this.prefix = prefix;
+        return this;
+    }
+
+    /**
+     * Gets the interceptable
+     *
+     * @return The interceptable
+     */
+    public boolean isInterceptable() {
+        return interceptable;
+    }
+
+    /**
+     * Sets the interceptable
+     *
+     * @param interceptable The interceptable to set
+     */
+    public OXException setInterceptable(boolean interceptable) {
+        this.interceptable = interceptable;
         return this;
     }
 

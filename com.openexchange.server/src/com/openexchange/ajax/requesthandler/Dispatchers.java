@@ -89,7 +89,7 @@ public class Dispatchers {
      * @return <code>true</code> if common API response is expected; otherwise <code>false</code>
      */
     public static boolean isApiOutputExpectedFor(HttpServletRequest req) {
-        String prefix = DispatcherServlet.getPrefix();
+        String prefix = getPrefix();
         if (req.getRequestURI().startsWith(prefix)) {
             // Common dispatcher action - Try to determine if JSON is expected or not
             AJAXRequestDataTools requestDataTools = AJAXRequestDataTools.getInstance();
@@ -100,6 +100,16 @@ public class Dispatchers {
             }
         }
         return true;
+    }
+
+    /**
+     * Gets the dispatcher's path prefix
+     *
+     * @return The prefix
+     */
+    public static String getPrefix() {
+        String prefix = DispatcherServlet.getPrefix();
+        return prefix == null ? DefaultDispatcherPrefixService.DEFAULT_PREFIX : prefix;
     }
 
     private static AJAXActionService optActionFor(String sAction, final AJAXActionServiceFactory factory) {

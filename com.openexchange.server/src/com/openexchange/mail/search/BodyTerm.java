@@ -51,24 +51,25 @@ package com.openexchange.mail.search;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Locale;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
-
-
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link BodyTerm}
@@ -119,7 +120,7 @@ public final class BodyTerm extends SearchTerm<String> {
         if (containsWildcard()) {
             return toRegex(pattern).matcher(text).find();
         }
-        return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
+        return (Strings.asciiLowerCase(text).indexOf(Strings.asciiLowerCase(pattern)) > -1);
     }
 
     @Override
@@ -138,7 +139,7 @@ public final class BodyTerm extends SearchTerm<String> {
             if (containsWildcard()) {
                 return toRegex(pattern).matcher(text).find();
             }
-            return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
+            return (Strings.asciiLowerCase(text).indexOf(Strings.asciiLowerCase(pattern)) > -1);
         } catch (final OXException e) {
             org.slf4j.LoggerFactory.getLogger(FromTerm.class).warn("Error during search.", e);
             return false;
@@ -156,6 +157,13 @@ public final class BodyTerm extends SearchTerm<String> {
     @Override
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return new javax.mail.search.BodyTerm(getNonWildcardPart(pattern));
+    }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        if (!fetchProfile.contains(IMAPFolder.FetchProfileItem.MESSAGE)) {
+            fetchProfile.add(IMAPFolder.FetchProfileItem.MESSAGE);
+        }
     }
 
     @Override
@@ -189,7 +197,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return getPartTextContent(part);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -239,7 +247,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -272,7 +280,7 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return MessageUtility.readMimePart(part, charset);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

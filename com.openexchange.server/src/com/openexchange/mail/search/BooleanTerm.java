@@ -50,6 +50,7 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
@@ -66,12 +67,12 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
 
     private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
 
-        private static final BooleanSearchTerm TRUE = new BooleanSearchTerm(true);
+        private static final BooleanSearchTerm _TRUE = new BooleanSearchTerm(true);
 
-        private static final BooleanSearchTerm FALSE = new BooleanSearchTerm(false);
+        private static final BooleanSearchTerm _FALSE = new BooleanSearchTerm(false);
 
         public static BooleanSearchTerm getInstance(final boolean value) {
-            return value ? TRUE : FALSE;
+            return value ? _TRUE : _FALSE;
         }
 
         private static final long serialVersionUID = -8073302646525000957L;
@@ -115,10 +116,6 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
         visitor.visit(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.search.SearchTerm#getPattern()
-     */
     @Override
     public Boolean getPattern() {
         return Boolean.valueOf(value);
@@ -126,6 +123,7 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
 
     @Override
     public void addMailField(final Collection<MailField> col) {
+        // Nothing
     }
 
     @Override
@@ -136,6 +134,11 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
     @Override
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return getJavaMailSearchTerm();
+    }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        // Nothing
     }
 
     @Override
