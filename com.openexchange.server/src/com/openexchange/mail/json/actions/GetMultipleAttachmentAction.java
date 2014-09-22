@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import javax.mail.MessageRemovedException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.ajax.AJAXServlet;
@@ -174,7 +175,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         } catch (final OXException e) {
             if (e.getCause() instanceof IOException) {
                 final IOException ioe = (IOException) e.getCause();
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(ioe.getClass().getName())) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(ioe.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(ioe);
                 }
             }

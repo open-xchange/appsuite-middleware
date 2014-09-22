@@ -52,6 +52,7 @@ package com.openexchange.mail.text;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.activation.DataHandler;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import net.freeutils.tnef.Attr;
@@ -181,7 +182,7 @@ public final class TextPartFinder {
             }
             return null;
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -292,7 +293,7 @@ public final class TextPartFinder {
             }
             return getTextRecursive(MimeMessageConverter.convertPart(rtfPart));
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
