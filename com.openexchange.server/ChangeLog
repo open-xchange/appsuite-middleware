@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 * 2014-09-11 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34281: Facebook made access to permissions more restrictive since April 30th 2014. Removed these permissions, because they
