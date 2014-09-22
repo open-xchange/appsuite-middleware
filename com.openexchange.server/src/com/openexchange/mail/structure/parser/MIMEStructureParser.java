@@ -59,6 +59,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.activation.DataHandler;
 import javax.mail.Flags;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -181,7 +182,7 @@ public final class MIMEStructureParser {
             mimeMessage.writeTo(out);
             return out.toByteArray();
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

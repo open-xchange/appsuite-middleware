@@ -52,27 +52,48 @@ package com.openexchange.oauth.httpclient;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.scribe.model.OAuthRequest;
-import org.scribe.model.Response;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
+import com.openexchange.oauth.OAuthExceptionCodes;
 
+/**
+ * {@link OAuthHTTPRequest} - The HTTP OAuth request.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Error handling
+ */
 public class OAuthHTTPRequest implements HTTPRequest {
 
 	private final OAuthRequest delegate;
 	private final Map<String, String> parameters;
 
-	public OAuthHTTPRequest(final OAuthRequest req, final Map<String, String> parameters) {
+	/**
+	 * Initializes a new {@link OAuthHTTPRequest}.
+	 */
+	public OAuthHTTPRequest(OAuthRequest req, Map<String, String> parameters) {
+	    super();
 		delegate = req;
 		this.parameters = parameters;
 	}
 
 	@Override
 	public HTTPResponse execute() throws OXException {
-	    delegate.setConnectTimeout(5, TimeUnit.SECONDS);
-	    delegate.setReadTimeout(15, TimeUnit.SECONDS);
-		final Response response = delegate.send();
-		return new HttpOauthResponse(response);
+	    try {
+            delegate.setConnectTimeout(5, TimeUnit.SECONDS);
+            delegate.setReadTimeout(15, TimeUnit.SECONDS);
+
+            // Wrap response & return
+            return new HttpOauthResponse(delegate.send());
+        } catch (org.scribe.exceptions.OAuthException e) {
+            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+            Throwable cause = e.getCause();
+            if (cause instanceof java.net.SocketTimeoutException) {
+                // A socket timeout
+                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+            }
+
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
+        }
 	}
 
 	@Override

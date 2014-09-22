@@ -350,7 +350,7 @@ public abstract class MailServletInterface implements Closeable {
      * @return The stored draft's mail path
      * @throws OXException
      */
-    public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException;
+    public abstract MailPath saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException;
 
     /**
      * Sends a read acknowledgment to given message
@@ -567,6 +567,14 @@ public abstract class MailServletInterface implements Closeable {
      * Returns user-specific mail access
      */
     public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException;
+
+    /**
+     * Prepares this {@link MailServletInterface} instance to perform operations on denoted folder
+     *
+     * @param folder The folder identifier
+     * @throws OXException If opening the folder fails
+     */
+    public abstract void openFor(String folder) throws OXException;
 
     /**
      * Gets the account ID to which the (primary) mail access is connected

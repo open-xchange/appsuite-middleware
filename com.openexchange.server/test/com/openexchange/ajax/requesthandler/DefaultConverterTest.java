@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import junit.framework.TestCase;
+import com.openexchange.ajax.requesthandler.DefaultConverter.NoSuchPath;
 import com.openexchange.ajax.requesthandler.DefaultConverter.Step;
 import com.openexchange.ajax.requesthandler.ResultConverter.Quality;
 import com.openexchange.exception.OXException;
@@ -65,70 +66,90 @@ public class DefaultConverterTest extends TestCase {
     private final DefaultConverter converter = new DefaultConverter();
 
     public void testSingleStepConversion() {
-        TestConverter tc = new TestConverter("A", "B", Quality.GOOD);
-        converter.addConverter(tc);
-        Step shortestPath = converter.getShortestPath("A", "B");
+        try {
+            TestConverter tc = new TestConverter("A", "B", Quality.GOOD);
+            converter.addConverter(tc);
+            Step shortestPath = converter.getShortestPath("A", "B");
 
-        assertTrue(shortestPath.next == null);
-        assertEquals(tc, shortestPath.converter);
+            assertTrue(shortestPath.next == null);
+            assertEquals(tc, shortestPath.converter);
+        } catch (NoSuchPath e) {
+            fail(e.getMessage());
+        }
     }
 
     public void testMultiStepConversion() {
-        TestConverter a = new TestConverter("A", "B", Quality.GOOD);
-        TestConverter b = new TestConverter("B", "C", Quality.GOOD);
-        TestConverter c = new TestConverter("C", "D", Quality.GOOD);
-        converter.addConverter(a);
-        converter.addConverter(b);
-        converter.addConverter(c);
+        try {
+            TestConverter a = new TestConverter("A", "B", Quality.GOOD);
+            TestConverter b = new TestConverter("B", "C", Quality.GOOD);
+            TestConverter c = new TestConverter("C", "D", Quality.GOOD);
+            converter.addConverter(a);
+            converter.addConverter(b);
+            converter.addConverter(c);
 
-        Step shortestPath = converter.getShortestPath("A", "D");
+            Step shortestPath = converter.getShortestPath("A", "D");
 
-        assertPath(shortestPath, a, b, c);
+            assertPath(shortestPath, a, b, c);
+        } catch (NoSuchPath e) {
+            fail(e.getMessage());
+        }
     }
 
     public void testRetrace() {
-        TestConverter a = new TestConverter("A", "B", Quality.GOOD);
-        TestConverter b = new TestConverter("B", "C", Quality.GOOD);
-        TestConverter b2 = new TestConverter("B", "E", Quality.GOOD);
-        TestConverter c = new TestConverter("C", "D", Quality.GOOD);
-        converter.addConverter(a);
-        converter.addConverter(b);
-        converter.addConverter(b2);
-        converter.addConverter(c);
+        try {
+            TestConverter a = new TestConverter("A", "B", Quality.GOOD);
+            TestConverter b = new TestConverter("B", "C", Quality.GOOD);
+            TestConverter b2 = new TestConverter("B", "E", Quality.GOOD);
+            TestConverter c = new TestConverter("C", "D", Quality.GOOD);
+            converter.addConverter(a);
+            converter.addConverter(b);
+            converter.addConverter(b2);
+            converter.addConverter(c);
 
-        Step shortestPath = converter.getShortestPath("A", "D");
+            Step shortestPath = converter.getShortestPath("A", "D");
 
-        assertPath(shortestPath, a, b, c);
+            assertPath(shortestPath, a, b, c);
+        } catch (NoSuchPath e) {
+            fail(e.getMessage());
+        }
     }
 
     public void testPreferHighQuality() {
-        TestConverter a = new TestConverter("A", "B", Quality.GOOD);
-        TestConverter b = new TestConverter("B", "C", Quality.GOOD);
-        TestConverter b2 = new TestConverter("B", "C", Quality.BAD);
-        TestConverter c = new TestConverter("C", "D", Quality.GOOD);
-        converter.addConverter(a);
-        converter.addConverter(b);
-        converter.addConverter(b2);
-        converter.addConverter(c);
+        try {
+            TestConverter a = new TestConverter("A", "B", Quality.GOOD);
+            TestConverter b = new TestConverter("B", "C", Quality.GOOD);
+            TestConverter b2 = new TestConverter("B", "C", Quality.BAD);
+            TestConverter c = new TestConverter("C", "D", Quality.GOOD);
+            converter.addConverter(a);
+            converter.addConverter(b);
+            converter.addConverter(b2);
+            converter.addConverter(c);
 
-        Step shortestPath = converter.getShortestPath("A", "D");
+            Step shortestPath = converter.getShortestPath("A", "D");
 
-        assertPath(shortestPath, a, b, c);
+            assertPath(shortestPath, a, b, c);
+        } catch (NoSuchPath e) {
+            fail(e.getMessage());
+        }
     }
 
     public void testImpossible() {
-        TestConverter a = new TestConverter("A", "B", Quality.GOOD);
-        TestConverter b = new TestConverter("B", "C", Quality.GOOD);
-        TestConverter c = new TestConverter("C", "D", Quality.GOOD);
-        converter.addConverter(a);
-        converter.addConverter(b);
-        converter.addConverter(c);
-
         try {
-            converter.getShortestPath("A", "E");
-            fail("Huh?!");
-        } catch (IllegalArgumentException x) {
-            assertTrue(true);
+            TestConverter a = new TestConverter("A", "B", Quality.GOOD);
+            TestConverter b = new TestConverter("B", "C", Quality.GOOD);
+            TestConverter c = new TestConverter("C", "D", Quality.GOOD);
+            converter.addConverter(a);
+            converter.addConverter(b);
+            converter.addConverter(c);
+
+            try {
+                converter.getShortestPath("A", "E");
+                fail("Huh?!");
+            } catch (IllegalArgumentException x) {
+                assertTrue(true);
+            }
+        } catch (NoSuchPath e) {
+            fail(e.getMessage());
         }
 
     }

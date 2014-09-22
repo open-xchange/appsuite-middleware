@@ -63,7 +63,9 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -130,14 +132,15 @@ public final class GetReplyAction extends AbstractMailAction {
 
     private AJAXRequestResult performGet(final MailRequest req) throws OXException {
         try {
-            final ServerSession session = req.getSession();
+            ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
+            String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
+            String view = req.getParameter(Mail.PARAMETER_VIEW);
+            String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
+            UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -152,15 +155,25 @@ public final class GetReplyAction extends AbstractMailAction {
             if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("attachOriginalMessage"))) {
                 usmNoSave.setAttachOriginalMessage(true);
             }
-            final boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
+            boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
             /*
              * Get mail interface
              */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            final MailMessage mail = mailInterface.getReplyMessageForDisplay(folderPath, uid, false, usmNoSave, setFrom);
+            MailServletInterface mailInterface = getMailInterface(req);
+            MailMessage mail = mailInterface.getReplyMessageForDisplay(folderPath, uid, false, usmNoSave, setFrom);
             if (!mail.containsAccountId()) {
                 mail.setAccountId(mailInterface.getAccountID());
             }
+
+            if (null != csid) {
+                CompositionSpace compositionSpace = CompositionSpace.getCompositionSpace(csid, session);
+                compositionSpace.setReplyFor(new MailPath(folderPath, uid));
+
+                AJAXRequestResult result = new AJAXRequestResult(mail, "mail");
+                result.setParameter("csid", csid);
+                return result;
+            }
+
             return new AJAXRequestResult(mail, "mail");
         } catch (final OXException e) {
             final Object[] args = e.getDisplayArgs();

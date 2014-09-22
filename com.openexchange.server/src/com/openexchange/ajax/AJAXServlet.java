@@ -339,7 +339,15 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_HARDDELETE = "harddelete";
 
+    /**
+     * The "action" parameter.
+     */
     public static final String PARAMETER_ACTION = "action";
+
+    /**
+     * The "csid" parameter providing the composition space identifier
+     */
+    public static final String PARAMETER_CSID = "csid";
 
     /**
      * The parameter 'columns' delivers a comma-sparated list of numbers which encode the fields of a certain object (Mail, Task,

@@ -50,6 +50,7 @@
 package com.openexchange.mail.text;
 
 import java.io.IOException;
+import javax.mail.MessageRemovedException;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
@@ -272,7 +273,7 @@ public final class TextProcessing {
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             return htmlService.html2text(html, true);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
