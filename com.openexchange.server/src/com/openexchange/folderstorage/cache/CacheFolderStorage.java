@@ -456,7 +456,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         if (null == session) {
             return new PathPerformer(storageParameters.getUser(), storageParameters.getContext(), null, registry);
         }
-        return new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry);
+        return new PathPerformer(storageParameters, registry);
     }
 
     @Override
