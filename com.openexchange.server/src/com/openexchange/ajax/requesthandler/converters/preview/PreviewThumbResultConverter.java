@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
-import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import java.io.IOException;
 import java.io.InputStream;
 import org.slf4j.Logger;
@@ -91,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
  *     <li>If false: Fail with PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE</li>
  *   </ol>
  * </ol>
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -116,7 +115,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
 
     /**
      * Initializes a new {@link PreviewThumbResultConverter}.
-     * 
+     *
      * @param configService The {@link ConfigurationService} to use for initialization, if null the defaults will be used.
      */
     public PreviewThumbResultConverter(ConfigurationService configService) {
@@ -152,7 +151,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
 
         try {
             // do we have a usable resource cache and are we allowed to use it?
-            if (isResourceCacheEnabled(contextId, userId) && useCache(requestData)) {
+            if (useCache(requestData)) {
                 ResourceCache resourceCache = getResourceCache(contextId, userId);
                 if (resourceCache != null) {
                     CachedResource cachedPreview = getCachedResourceForContext(session, cacheKeyGenerator.generateCacheKey(), resourceCache);
@@ -168,19 +167,15 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                             contextId);
                     } else {
                         // generate async and put to cache
-                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(
-                            result,
-                            requestData,
-                            session,
-                            previewService,
-                            THRESHOLD,
-                            false,
-                            cacheKeyGenerator);
+                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(result, requestData, session, previewService, THRESHOLD, false, cacheKeyGenerator);
                         ThreadPools.getExecutorService().submit(previewAndCache);
                         indicateRequestAccepted(result);
                     }
+                    return;
                 }
-            } else if (isBlockingWorkerAllowed) {
+            }
+
+            if (isBlockingWorkerAllowed) {
                 // there is no cached resource but we are allowed to wait for thumbnail generation
                 // do as callable anyway
                 PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(
@@ -218,7 +213,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
     /**
      * Applies the cached preview image to the {@link AJAXRequestData} and {@link AJAXRequestResult}.
      * This sets the format of the requestData to <cod>file</code>
-     * 
+     *
      * @param cachedPreview
      */
     protected void applyCachedPreview(AJAXRequestData requestData, AJAXRequestResult result, CachedResource cachedPreview) {
@@ -257,7 +252,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
      * <li>Set default thumbnail dimensions if width and height are missing from the request</li>
      * <li>...</li>
      * </ul>
-     * 
+     *
      * @param requestData The incoming {@link AJAXRequestData}
      */
     protected void validateRequest(AJAXRequestData requestData) {
@@ -268,7 +263,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
             requestData.putParameter(HEIGHT, String.valueOf(DEFAULT_THUMB_HEIGHT));
         }
     }
-    
+
     /**
      * Indicate that the request has been accepted for processing, but the processing has not been completed
      * @param result The current {@link AJAXRequestResult}
