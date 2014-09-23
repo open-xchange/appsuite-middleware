@@ -1,3 +1,7 @@
+* 2014-09-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34454: Fixed dependencies on open-xchange-system package to ensure smooth upgrade.
+
 * 2014-09-22 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34341: Added service tracker and fixed broken userId-check in UserConfigProvider
@@ -8,7 +12,7 @@
 
 * 2014-09-22 - ioannis.chouklis@open-xchange.com
 
- - Fix for bug 34551: Correctly remove the XING subscriptions when the OAuth account is removed 
+ - Fix for bug 34551: Correctly remove the XING subscriptions when the OAuth account is removed
 
 * 2014-09-21 - thorben.betten@open-xchange.com
 

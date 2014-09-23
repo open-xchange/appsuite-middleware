@@ -30,7 +30,6 @@ Requires:      java >= 1.6.0
 # ibm java only on sles11, please
 Conflicts:     java-ibm
 %endif
-Requires:      open-xchange-system
 
 %description
 This package installes 3rd party OSGi bundles for the Open-Xchange backend. This includes the Equinox OSGi framework and the servlet API.
