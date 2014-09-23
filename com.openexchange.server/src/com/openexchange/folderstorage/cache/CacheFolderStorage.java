@@ -107,6 +107,7 @@ import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -1180,7 +1181,12 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         /*
          * Try global cache key
          */
-        Folder folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+        Folder folder;
+        if (folderId.length() <= 0 || Strings.isDigit(folderId.charAt(0))) {
+            folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+        } else {
+            folder = null;
+        }
         if (null != folder) {
             /*
              * Return a cloned version from global cache
