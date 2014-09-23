@@ -546,7 +546,11 @@ public class GroupDispatcher implements ComponentHandle {
      * @throws OXException
      */
     protected void onDispose(ID id, Stanza stanza) throws OXException {
-        onDispose(id);
+        try {
+            onDispose(id);
+        } catch (Exception e) {
+            LOG.info("Caught exception during onDispose, trying to continue.", e);
+        }
     }
     
     protected void onDispose(ID id) throws OXException {
@@ -614,7 +618,6 @@ public class GroupDispatcher implements ComponentHandle {
 
     @Override
     public void dispose() {
-        try {
           if (!isDisposed) {
               isDisposed = true;
               // Find any valid member identifier
@@ -624,7 +627,11 @@ public class GroupDispatcher implements ComponentHandle {
               if (memberId == null) {
                   LOG.info("No member left in GroupDispatcher {}, skipping onDispose", groupId);
               } else {
-                  onDispose(memberId);
+                  try {
+                      onDispose(memberId);
+                  } catch (Exception e) {
+                      LOG.info("Caught exception during onDispose, trying to continue.", e);
+                  }
               }
               idsRef.set(null);
               stamps.clear();
@@ -638,9 +645,6 @@ public class GroupDispatcher implements ComponentHandle {
                  */
               doGlobalCleanup(groupId);
           }
-      } catch (OXException e) {
-          LOG.error("Failed to dispose GroupDispatcher {}", groupId, e);
-      }
     }
 
     /**

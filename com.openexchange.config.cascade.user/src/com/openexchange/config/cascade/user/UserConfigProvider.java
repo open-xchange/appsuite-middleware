@@ -128,7 +128,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     @Override
     public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
-        if (contextId == NO_CONTEXT && userId == NO_USER) {
+        if (userId == NO_USER) {
             return NO_PROPERTY;
         }
         final PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
@@ -149,7 +149,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     @Override
     public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
-        if (contextId == NO_CONTEXT && userId == NO_CONTEXT) {
+        if (userId == NO_CONTEXT) {
             return Collections.emptyList();
         }
         final User user = getUser(userId, services.getService(ContextService.class).getContext(contextId));

@@ -114,6 +114,8 @@ public abstract class AbstractFolder implements Folder, Serializable {
 
     protected int defaultType;
 
+    protected long size;
+
     protected Set<String> supportedCapabilities;
 
     protected Map<String, Object> meta = new HashMap<String, Object>();
@@ -132,6 +134,7 @@ public abstract class AbstractFolder implements Folder, Serializable {
         capabilities = -1;
         bits = -1;
         defaultType = 0;
+        size = -1L;
     }
 
     @Override
@@ -354,6 +357,16 @@ public abstract class AbstractFolder implements Folder, Serializable {
     @Override
     public void setSummary(final String summary) {
         this.summary = summary;
+    }
+
+    @Override
+    public long getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(long size) {
+        this.size = size;
     }
 
     @Override

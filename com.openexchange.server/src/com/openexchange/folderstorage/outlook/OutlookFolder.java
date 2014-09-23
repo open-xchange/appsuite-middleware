@@ -378,6 +378,11 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
     }
 
     @Override
+    public long getSize() {
+        return realFolder.getSize();
+    }
+
+    @Override
     public int getTotal() {
         return realFolder.getTotal();
     }
@@ -419,6 +424,11 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
 
     @Override
     public void setTotal(final int total) {
+        // Nothing to do
+    }
+
+    @Override
+    public void setSize(long size) {
         // Nothing to do
     }
 

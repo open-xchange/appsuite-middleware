@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-17 14:02+0100\n"
+"PO-Revision-Date: 2014-09-22 16:34+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -8777,6 +8777,10 @@ msgstr ""
 "Die administrativen Rechte des Benutzers \"%1$s\" im Ordner \"%2$s\" wurden "
 "wiederhergestellt."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Sie müssen einen Ordnernamen eingeben."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr ""
@@ -11856,9 +11860,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "Der Link ist bereits vorhanden."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Ungültiger Ordnername."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Es konnte keine Verbindung zum Mailserver hergestellt werden."

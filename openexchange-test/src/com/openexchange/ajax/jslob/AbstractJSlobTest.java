@@ -47,33 +47,44 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.ajax.jslob;
 
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IMailFolderStorageEnhanced2}
+ * {@link AbstractJSlobTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMailFolderStorageEnhanced2 extends IMailFolderStorageEnhanced {
+public abstract class AbstractJSlobTest extends AbstractAJAXSession {
 
     /**
-     * Gets the number of total and unread mails for specified folder.
+     * Default constructor.
      *
-     * @param fullName The folder's full name
-     * @return The total and unread counters
-     * @throws OXException If an error occurs
+     * @param name name of the test.
      */
-    int[] getTotalAndUnreadCounter(final String fullName) throws OXException;
+    protected AbstractJSlobTest(final String name) {
+        super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
 
     /**
-     * Gets the size of the denoted folder in bytes
-     *
-     * @param fullName The full name
-     * @return The size in bytes or <code>-1L</code> if unknown
-     * @throws OXException
+     * @return User's default send address
      */
-    long getSize(String fullName) throws OXException;
+    protected String getSendAddress() throws OXException, IOException, JSONException {
+        return getSendAddress(getClient());
+    }
+
+    protected static String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
+        return client.getValues().getSendAddress();
+    }
 
 }
