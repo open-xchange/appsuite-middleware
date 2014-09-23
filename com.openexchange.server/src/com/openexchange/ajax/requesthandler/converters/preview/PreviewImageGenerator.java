@@ -81,7 +81,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
     private static final Logger LOG = LoggerFactory.getLogger(PreviewImageGenerator.class);
 
     /** Used to prevent multiple requests from generating and cachin the same preview */
-    private static Set<String> currentlyRunning = Sets.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    private static final Set<String> currentlyRunning = Sets.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     /** Does the actual work */
     private final PreviewDocumentCallable callable;
