@@ -49,8 +49,8 @@
 
 package com.openexchange.folderstorage.osgi;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import org.json.JSONObject;
@@ -59,6 +59,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
@@ -185,13 +186,11 @@ public final class FolderStorageActivator implements BundleActivator {
 
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderStorageActivator.class);
+    // ----------------------------------------------------------------------------------------------------------------------------------------- //
 
-    private List<ServiceRegistration<?>> serviceRegistrations;
-
-    private List<ServiceTracker<?, ?>> serviceTrackers;
-
-    private List<BundleActivator> activators;
+	private volatile List<ServiceRegistration<?>> serviceRegistrations;
+	private volatile List<ServiceTracker<?, ?>> serviceTrackers;
+	private volatile List<BundleActivator> activators;
 
     /**
      * Initializes a new {@link FolderStorageActivator}.
@@ -202,41 +201,27 @@ public final class FolderStorageActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
+	    Logger logger = org.slf4j.LoggerFactory.getLogger(FolderStorageActivator.class);
         try {
             // Register error component
             // Register services
-            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(4);
+            List<ServiceRegistration<?>> serviceRegistrations = new LinkedList<ServiceRegistration<?>>();
+            this.serviceRegistrations = serviceRegistrations;
             // Register folder service
-            serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
-            serviceRegistrations.add(context.registerService(
-                ContentTypeDiscoveryService.class.getName(),
-                ContentTypeRegistry.getInstance(),
-                null));
-            serviceRegistrations.add(context.registerService(AdditionalFolderField.class.getName(), new DisplayNameFolderField(), null));
+            serviceRegistrations.add(context.registerService(FolderService.class, new FolderServiceImpl(), null));
+            serviceRegistrations.add(context.registerService(ContentTypeDiscoveryService.class, ContentTypeRegistry.getInstance(), null));
+            serviceRegistrations.add(context.registerService(AdditionalFolderField.class, new DisplayNameFolderField(), null));
             // Register service trackers
-            serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(4);
-            serviceTrackers.add(new ServiceTracker<FolderStorage, FolderStorage>(
-                context,
-                FolderStorage.class.getName(),
-                new FolderStorageTracker(context)));
-            serviceTrackers.add(new ServiceTracker<ShareService, ShareService>(
-                context,
-                ShareService.class.getName(),
-                new ShareServiceHolder(context)));
-            serviceTrackers.add(new ServiceTracker<UserService, UserService>(
-                context,
-                UserService.class,
-                new UserServiceHolder(context)));
-            serviceTrackers.add(new ServiceTracker<DatabaseService, DatabaseService>(
-                context,
-                DatabaseService.class,
-                new DatabaseServiceHolder(context)));
+            List<ServiceTracker<?, ?>> serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
+            this.serviceTrackers = serviceTrackers;
+            serviceTrackers.add(new ServiceTracker<FolderStorage, FolderStorage>(context, FolderStorage.class.getName(), new FolderStorageTracker(context)));
             for (final ServiceTracker<?, ?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }
 
             // Start other activators
-            activators = new ArrayList<BundleActivator>(8);
+            List<BundleActivator> activators = new LinkedList<BundleActivator>();
+            this.activators = activators;
             activators.add(new DatabaseFolderStorageActivator()); // Database impl
             activators.add(new MailFolderStorageActivator()); // Mail impl
             activators.add(new MessagingFolderStorageActivator()); // Messaging impl
@@ -249,13 +234,13 @@ public final class FolderStorageActivator implements BundleActivator {
                 try {
                     if (isBundleResolved(context)) {
                         if (null != activator) {
-                            logFailedStartup(activator);
+                            logFailedStartup(activator, logger);
                         }
                         return;
                     }
                 } catch (final IllegalStateException e) {
                     if (null != activator) {
-                        logFailedStartup(activator);
+                        logFailedStartup(activator, logger);
                     }
                     return;
                 }
@@ -263,59 +248,60 @@ public final class FolderStorageActivator implements BundleActivator {
                 activator.start(context);
             }
 
-            LOG.info("Bundle \"com.openexchange.folderstorage\" successfully started!");
+            logger.info("Bundle \"com.openexchange.folderstorage\" successfully started!");
         } catch (final Exception e) {
-            LOG.error("", e);
+            logger.error("", e);
             throw e;
         }
     }
 
-    private static boolean isBundleResolved(final BundleContext context) {
-        return Bundle.RESOLVED == context.getBundle().getState();
-    }
+	private static boolean isBundleResolved(final BundleContext context) {
+		return Bundle.RESOLVED == context.getBundle().getState();
+	}
 
-    private static void logFailedStartup(final BundleActivator activator) {
-        final StringBuilder sb = new StringBuilder(32);
-        sb.append("Failed start of folder storage bundle \"");
-        sb.append(activator.getClass().getName());
-        sb.append("\"!");
-        LOG.error(sb.toString(), new Throwable());
-    }
+	private static void logFailedStartup(BundleActivator activator, Logger logger) {
+		logger.error("Failed start of folder storage bundle \"{}\"", activator.getClass().getName(), new Throwable());
+	}
 
-    @Override
+	@Override
     public void stop(final BundleContext context) throws Exception {
-        try {
-            // Drop activators
-            if (null != activators) {
-                for (final BundleActivator activator : activators) {
-                    activator.stop(context);
-                }
-                activators.clear();
-                activators = null;
-            }
-            // Drop service trackers
-            if (null != serviceTrackers) {
-                for (final ServiceTracker<?, ?> serviceTracker : serviceTrackers) {
-                    serviceTracker.close();
-                }
-                serviceTrackers.clear();
-                serviceTrackers = null;
-            }
-            // Unregister previously registered services
-            if (null != serviceRegistrations) {
-                for (final ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
-                    serviceRegistration.unregister();
-                }
-                serviceRegistrations.clear();
-                serviceRegistrations = null;
-            }
-            // Unregister previously registered component
+	    Logger logger = org.slf4j.LoggerFactory.getLogger(FolderStorageActivator.class);
+		try {
+			// Drop activators
+		    List<BundleActivator> activators = this.activators;
+			if (null != activators) {
+				for (final BundleActivator activator : activators) {
+					activator.stop(context);
+				}
+				activators.clear();
+				this.activators = null;
+			}
+			// Drop service trackers
+			List<ServiceTracker<?, ?>> serviceTrackers = this.serviceTrackers;
+			if (null != serviceTrackers) {
+				for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
+					serviceTracker.close();
+				}
+				serviceTrackers.clear();
+				this.serviceTrackers = null;
+			}
+			// Unregister previously registered services
+			List<ServiceRegistration<?>> serviceRegistrations = this.serviceRegistrations;
+			if (null != serviceRegistrations) {
+				for (final ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
+					serviceRegistration.unregister();
+				}
+				serviceRegistrations.clear();
+				this.serviceRegistrations = null;
+			}
+			// Unregister previously registered component
 
-            LOG.info("Bundle \"com.openexchange.folderstorage\" successfully stopped!");
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
-    }
+
+			logger.info("Bundle \"com.openexchange.folderstorage\" successfully stopped!");
+		} catch (final Exception e) {
+		    logger.error("", e);
+			throw e;
+		}
+	}
 
 }

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -150,11 +151,15 @@ public class DefaultConverter implements Converter {
         if (result == AJAXRequestResult.EMPTY_REQUEST_RESULT) {
         	return;
         }
-    	Step path = getShortestPath(fromFormat, toFormat);
-        while (path != null) {
-            path.converter.convert(requestData, result, session, this);
-            result.setFormat(path.converter.getOutputFormat());
-            path = path.next;
+    	try {
+            Step path = getShortestPath(fromFormat, toFormat);
+            while (path != null) {
+                path.converter.convert(requestData, result, session, this);
+                result.setFormat(path.converter.getOutputFormat());
+                path = path.next;
+            }
+        } catch (NoSuchPath e) {
+            throw AjaxExceptionCodes.NO_SUCH_CONVERSION_PATH.create(e, fromFormat, toFormat, requestData.getModule(), requestData.getAction());
         }
     }
 
@@ -165,7 +170,7 @@ public class DefaultConverter implements Converter {
      * @param to The target format
      * @return The calculated path
      */
-    public Step getShortestPath(final String from, final String to) {
+    public Step getShortestPath(final String from, final String to) throws NoSuchPath {
         final Conversion conversion = new Conversion(from, to);
         final Step step = cachedSteps.get(conversion);
         if (step != null) {
@@ -177,7 +182,7 @@ public class DefaultConverter implements Converter {
         currentMark.weight = 0;
         Node currentNode = new Node();
         currentNode.edges = edges;
-        
+
         while (true) {
             Mark nextMark = null;
             Node nextNode = null;
@@ -213,7 +218,7 @@ public class DefaultConverter implements Converter {
                 currentMark.weight = 100;
                 while (nextMark == null) {
                     if (currentMark == null || currentMark.previous == null) {
-                        throw new IllegalArgumentException("Can't find path from " + from + " to " + to);
+                        throw new NoSuchPath(from , to);
                     }
                     currentNode = currentMark.previous;
                     currentMark = markings.get(currentNode);
@@ -251,11 +256,11 @@ public class DefaultConverter implements Converter {
     }
 
     // Synthetic edges for entry
-    private List<Edge> getInitialEdges(final String format) {
+    private List<Edge> getInitialEdges(final String format) throws NoSuchPath {
         final List<Node> list = understandsFormat.get(format);
 
         if (list == null || list.isEmpty()) {
-            throw new IllegalArgumentException("Can't convert from " + format);
+            throw new NoSuchPath(format);
         }
         final List<Edge> edges = new ArrayList<Edge>(list.size());
         for (final Node node : list) {
@@ -356,6 +361,24 @@ public class DefaultConverter implements Converter {
             return true;
         }
 
+    }
+
+    // ----------------------------------------------------------------------------- //
+
+    static final class NoSuchPath extends Throwable {
+
+        NoSuchPath(String format) {
+            super("Can't convert from " + format);
+        }
+
+        NoSuchPath(String from, String to) {
+            super("Can't find path from " + from + " to " + to);
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
     }
 
 }
