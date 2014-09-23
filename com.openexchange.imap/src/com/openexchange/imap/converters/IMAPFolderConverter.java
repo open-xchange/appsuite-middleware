@@ -245,7 +245,6 @@ public final class IMAPFolderConverter {
                 final long st = System.currentTimeMillis();
                 // Convert non-root folder
                 final IMAPMailFolder mailFolder = new IMAPMailFolder();
-                mailFolder.setSize(0L);
                 mailFolder.setRootFolder(false);
                 // Get appropriate entries
                 final int accountId = imapConfig.getAccountId();
@@ -649,7 +648,6 @@ public final class IMAPFolderConverter {
             mailFolder.setNewMessageCount(-1);
             mailFolder.setUnreadMessageCount(-1);
             mailFolder.setDeletedMessageCount(-1);
-            mailFolder.setSize(-1L);
             /*
              * Root folder is always subscribed
              */

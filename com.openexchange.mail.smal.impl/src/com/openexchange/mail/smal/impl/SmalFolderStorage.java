@@ -426,14 +426,4 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         return new int[] { total, unread };
     }
 
-    @Override
-    public long getSize(String fullName) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = smalMailAccess.getDelegateMailAccess();
-        IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
-        if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-            return ((IMailFolderStorageEnhanced2) folderStorage).getSize(ensureFullName(fullName));
-        }
-        return -1L;
-    }
-
 }

@@ -444,14 +444,4 @@ public final class ParsedFolder implements Folder {
         this.supportedCapbilitites = capabilities;
     }
 
-    @Override
-    public void setSize(long size) {
-        // Nothing to do
-    }
-
-    @Override
-    public long getSize() {
-        return -1L;
-    }
-
 }

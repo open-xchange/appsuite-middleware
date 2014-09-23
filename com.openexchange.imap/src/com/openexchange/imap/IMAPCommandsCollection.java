@@ -939,69 +939,6 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Gets the <code>"X-SIZE"</code> STATUS item.
-     *
-     * @param imapStore The IMAP store
-     * @param fullName The full name
-     * @return The size or <code>-1L</code>
-     * @throws MessagingException If a messaging error occurred
-     */
-    public static long getMailboxSize(final IMAPStore imapStore, final String fullName) throws MessagingException {
-        DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
-        return ((Long) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            @Override
-            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
-                if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
-                    /*
-                     * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
-                     */
-                    throw new com.sun.mail.iap.BadCommandException("STATUS not supported");
-                }
-                /*
-                 * Encode the mbox as per RFC2060
-                 */
-                Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(fullName));
-                /*
-                 * Item arguments
-                 */
-                final Argument itemArgs = new Argument();
-                final String[] items = { "X-SIZE" };
-                for (int i = 0, len = items.length; i < len; i++) {
-                    itemArgs.writeAtom(items[i]);
-                }
-                args.writeArgument(itemArgs);
-                /*
-                 * Perform command
-                 */
-                Response[] r = performCommand(protocol, "STATUS", args);
-                Response response = r[r.length - 1];
-                /*
-                 * Look for STATUS responses
-                 */
-                long[] ret = new long[] { -1L };
-                if (response.isOK()) {
-                    for (int i = 0, len = r.length; i < len; i++) {
-                        if (!(r[i] instanceof IMAPResponse)) {
-                            continue;
-                        }
-                        IMAPResponse ir = (IMAPResponse) r[i];
-                        if (ir.keyEquals("STATUS")) {
-                            ret = parseStatusResponseLong(ir, "X-SIZE");
-                            r[i] = null;
-                        }
-                    }
-                }
-                notifyResponseHandlers(r, protocol);
-                protocol.handleResult(response);
-                return Long.valueOf(ret[0]);
-            }
-
-        })).longValue();
-    }
-
-    /**
      * Gets total/unread message count from given IMAP folder
      *
      * @param imapFolder The IMAP folder
@@ -1121,65 +1058,6 @@ public final class IMAPCommandsCollection {
             }
         } while (statusResponse.readByte() != ')');
         return new int[] { total, recent, unseen };
-    }
-
-    /**
-     * Parses number of total messages from specified IMAP response whose key is equal to <code>&quot;STATUS&quot;</code>
-     * .
-     *
-     * @param statusResponse The <code>&quot;STATUS&quot;</code> IMAP response to parse.
-     * @param counterTypes The counter types; either <code>MESSAGES</code>, <code>RECENT</code> or <code>UNSEEN</code>
-     * @return The  number of total messages
-     * @throws ParsingException If parsing STATUS response fails
-     */
-    protected static long[] parseStatusResponseLong(final Response statusResponse, final String... counterTypes) throws ParsingException {
-        if (null == counterTypes || counterTypes.length == 0) {
-            return new long[0];
-        }
-        if (null == statusResponse) {
-            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
-        }
-        int cnt = 0;
-        {
-            final String resp = statusResponse.toString();
-            if (isEmpty(resp)) {
-                throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
-            }
-            int pos = -1;
-            while ((pos = resp.indexOf('(', pos+1)) > 0) {
-                cnt++;
-            }
-        }
-        if (cnt <= 0) {
-            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
-        }
-        /*
-         * Read until opening parenthesis or EOF
-         */
-        byte b = 0;
-        do {
-            b = statusResponse.readByte();
-            if (b == '(' && --cnt > 0) {
-                b = statusResponse.readByte();
-            }
-        } while (b != 0 && b != '(');
-        if (0 == b || cnt > 0) {
-            // EOF
-            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
-        }
-        /*
-         * Parse parenthesized list
-         */
-        final long[] arr = new long[counterTypes.length];
-        Arrays.fill(arr, -1);
-        do {
-            final String attr = statusResponse.readAtom();
-            final int pos = find(attr, counterTypes);
-            if (pos >= 0) {
-                arr[pos] = statusResponse.readLong();
-            }
-        } while (statusResponse.readByte() != ')');
-        return arr;
     }
 
     /**

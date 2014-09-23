@@ -160,9 +160,6 @@ public class MailFolder implements Serializable, Cloneable {
     private boolean isPublic;
     private boolean b_public;
 
-    private long size;
-    private boolean b_size;
-
     private boolean liveAccess;
 
     private final ConcurrentMap<String, Object> properties;
@@ -189,7 +186,6 @@ public class MailFolder implements Serializable, Cloneable {
         defaulFolderType = DefaultFolderType.NONE;
         properties = new ConcurrentHashMap<String, Object>(4);
         liveAccess = true;
-        size = -1L;
     }
 
     /**
@@ -1276,43 +1272,6 @@ public class MailFolder implements Serializable, Cloneable {
     public void setOwner(String owner) {
         this.owner = owner;
         b_owner = true;
-    }
-
-
-    /**
-     * Gets the size
-     *
-     * @return The size or <code>-1L</code> if unknown
-     */
-    public long getSize() {
-        return size;
-    }
-
-    /**
-     * Checks whether size has been set for this mail folder
-     *
-     * @return <code>true</code> if set; otherwise <code>false</code>
-     */
-    public boolean containsSize() {
-        return b_size;
-    }
-
-    /**
-     * Removes the size attribute from this mail folder
-     */
-    public void removeSize() {
-        this.size = -1L;
-        b_size = false;
-    }
-
-    /**
-     * Sets the size
-     *
-     * @param size The size to set
-     */
-    public void setSize(long size) {
-        this.size = size;
-        b_size = true;
     }
 
 }
