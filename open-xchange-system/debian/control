@@ -10,5 +10,6 @@ Package: open-xchange-system
 Architecture: all
 Depends: ${misc:Depends}, adduser
 Pre-Depends: ${dist:Pre-Depends}
-Breaks: open-xchange-core (<< 7.6.0)
+Breaks: open-xchange-core (<< 7.6.1)
+Replaces: open-xchange-core (<< 7.6.1)
 Description: system integration specific infrastructure

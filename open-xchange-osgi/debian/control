@@ -9,7 +9,6 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-osgi
 Architecture: all
 Pre-Depends: ${dist:Pre-Depends}
-Depends: open-xchange-system
 Replaces: open-xchange-common, open-xchange-activation
 Conflicts: open-xchange-common, open-xchange-activation
 Provides: open-xchange-common, open-xchange-activation

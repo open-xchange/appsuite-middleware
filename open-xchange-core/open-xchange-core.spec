@@ -20,6 +20,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
+Requires:      open-xchange-system
 Provides:      open-xchange-cache = %{version}
 Obsoletes:     open-xchange-cache < %{version}
 Provides:      open-xchange-calendar = %{version}
