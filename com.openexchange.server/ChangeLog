@@ -6,6 +6,10 @@
 
  - Fix for bug 34511: Catch possible exception while calling onDispose of subclass and continue with cleanup.
 
+* 2014-09-22 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 34551: Correctly remove the XING subscriptions when the OAuth account is removed 
+
 * 2014-09-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 34447: Fixed typo in error message
