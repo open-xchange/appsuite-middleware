@@ -82,7 +82,7 @@ public class AdminAuthRESTService extends OXRESTService<Authenticator> {
      *
      */
     @PUT("/adminAuth")
-    public Object getSanitizedHtmlContent() throws OXException {
+    public Object doAdminAuth() throws OXException {
         Object data = request.getData();
 
         JSONObject jRequest;
