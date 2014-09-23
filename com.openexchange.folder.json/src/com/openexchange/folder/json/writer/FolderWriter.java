@@ -89,7 +89,6 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -132,25 +131,17 @@ public final class FolderWriter {
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-            FolderObject fo = new FolderObject();
-
-            // Set identifier
-            {
-                String id = folder.getID();
-                int numFolderId = Strings.isDigit(id.charAt(0)) ? getUnsignedInteger(id) : -1;
-                if (numFolderId < 0) {
-                    fo.setFullName(id);
-                } else {
-                    fo.setObjectID(numFolderId);
-                }
+            final FolderObject fo = new FolderObject();
+            final int numFolderId = getUnsignedInteger(folder.getID());
+            if (numFolderId < 0) {
+                fo.setFullName(folder.getID());
+            } else {
+                fo.setObjectID(numFolderId);
             }
-
-            // Set others
             fo.setFolderName(folder.getName());
             fo.setModule(folder.getContentType().getModule());
-            Type type = folder.getType();
-            if (null != type) {
-                fo.setType(type.getType());
+            if (null != folder.getType()) {
+                fo.setType(folder.getType().getType());
             }
             fo.setCreatedBy(folder.getCreatedBy());
             jsonPutter.put(aff.getColumnName(), aff.renderJSON(aff.getValue(fo, serverSession)));
@@ -480,14 +471,6 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 jsonPutter.put(FolderField.STANDARD_FOLDER_TYPE.getName(), Integer.valueOf(folder.getDefaultType()));
-            }
-        });
-        m.put(FolderField.SIZE.getColumn(), new FolderFieldWriter() {
-
-            @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                final long size = folder.getSize();
-                jsonPutter.put(FolderField.SIZE.getName(), size < 0 ? JSONObject.NULL : Long.valueOf(size));
             }
         });
         m.put(FolderField.TOTAL.getColumn(), new FolderFieldWriter() {

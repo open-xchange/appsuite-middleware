@@ -263,11 +263,6 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
     }
 
     @Override
-    public void setSize(long size) {
-        folder.setSize(size);
-    }
-
-    @Override
     public void setTotal(final int total) {
         folder.setTotal(total);
     }
@@ -330,11 +325,6 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
     @Override
     public int getUnread() {
         return folder.getUnread();
-    }
-
-    @Override
-    public long getSize() {
-        return folder.getSize();
     }
 
     @Override

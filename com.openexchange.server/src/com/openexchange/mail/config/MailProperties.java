@@ -121,37 +121,67 @@ public final class MailProperties implements IMailProperties {
      */
 
     private LoginSource loginSource;
+
     private PasswordSource passwordSource;
+
     private ServerSource mailServerSource;
+
     private ServerSource transportServerSource;
+
     private String mailServer;
+
     private String transportServer;
+
     private String masterPassword;
+
     private int mailFetchLimit;
+
     private int attachDisplaySize;
+
     private boolean userFlagsEnabled;
+
     private boolean allowNestedDefaultFolderOnAltNamespace;
+
     private String defaultMimeCharset;
+
     private boolean ignoreSubscription;
-    private boolean supportsMailboxSize;
+
     private boolean hidePOP3StorageFolders;
+
     private char defaultSeparator;
+
     private String[] quoteLineColors;
+
     private Properties javaMailProperties;
+
     private boolean watcherEnabled;
+
     private int watcherTime;
+
     private int watcherFrequency;
+
     private boolean watcherShallClose;
+
     private boolean supportSubscription;
+
     private String[] phishingHeaders;
+
     private String defaultMailProvider;
+
     private boolean adminMailLoginEnabled;
+
     private int mailAccessCacheShrinkerSeconds;
+
     private int mailAccessCacheIdleSeconds;
+
     private boolean addClientIPAddress;
+
     private boolean rateLimitPrimaryOnly;
+
     private int rateLimit;
+
     private int maxToCcBcc;
+
     private String authProxyDelimiter;
 
     /** Indicates whether MSISDN addresses should be supported or not. */
@@ -161,6 +191,7 @@ public final class MailProperties implements IMailProperties {
     private List<IPRange> accountBlacklistRanges;
 
     private boolean enforceSecureConnection;
+
     private int defaultArchiveDays;
 
     /**
@@ -255,7 +286,6 @@ public final class MailProperties implements IMailProperties {
         supportMsisdnAddresses = false;
         accountBlacklistRanges = null;
         enforceSecureConnection = false;
-        supportsMailboxSize = false;
         defaultArchiveDays = 90;
     }
 
@@ -464,12 +494,6 @@ public final class MailProperties implements IMailProperties {
             final String tmp = configuration.getProperty("com.openexchange.mail.enforceSecureConnection", "false").trim();
             enforceSecureConnection = Boolean.parseBoolean(tmp);
             logBuilder.append("\tEnforced secure connections to external accounts: ").append(enforceSecureConnection).append('\n');
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.mail.supportsMailboxSize", "false").trim();
-            supportsMailboxSize = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tMailbox size support for primary account: ").append(supportsMailboxSize).append('\n');
         }
 
         {
@@ -772,15 +796,6 @@ public final class MailProperties implements IMailProperties {
     @Override
     public boolean isIgnoreSubscription() {
         return ignoreSubscription;
-    }
-
-    /**
-     * Whether mailbox size is supported for primary account
-     *
-     * @return <code>true</code> if supported; otherwise <code>false</code>
-     */
-    public boolean supportsMailboxSize() {
-        return supportsMailboxSize;
     }
 
     public boolean isHidePOP3StorageFolders() {
