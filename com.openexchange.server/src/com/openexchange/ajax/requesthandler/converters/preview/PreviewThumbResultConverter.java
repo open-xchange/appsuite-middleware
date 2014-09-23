@@ -111,7 +111,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
 
     private static final int DEFAULT_THUMB_HEIGHT = 160;
 
-    private boolean isBlockingWorkerAllowed = false;
+    private final boolean isBlockingWorkerAllowed;
 
     /**
      * Initializes a new {@link PreviewThumbResultConverter}.
