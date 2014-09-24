@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-09 17:53+0200\n"
+"PO-Revision-Date: 2014-09-24 10:07+0200\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -2357,6 +2357,11 @@ msgstr ""
 "Pārsniegta atļautā kvota. Lūdzu izdzēsiet dažas vienības lai varētu izveidot "
 "jaunas."
 
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "Pārsniegts ZIP arhīvam atļautais maksimālais izmērs %1$s"
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3633,11 +3638,11 @@ msgstr ""
 "Norādītais JSlob %1$s nevar tikt iestatīts servisam %2$s. Nekas netiks "
 "izpildīts."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "PASTS-AUTOKONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "E-pasta adrese %1$s nav pareiza."
 
@@ -7012,6 +7017,37 @@ msgstr ""
 "%1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Ievadītā pašreizējā parole nav pareiza. Lūdzu ievadiet pareizu pašreizējo "
+"paroli un mēģiniet vēlreiz."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Nav norādīta pašreizējā parole. Lūdzu ievadiet pašreizējo paroli un mēģiniet "
+"vēlreiz."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"Nav norādīta jaunā parole. Lūdzu ievadiet jauno paroli un mēģiniet vēlreiz."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -8389,6 +8425,10 @@ msgid ""
 "restored."
 msgstr ""
 "Īpašnieka \"%1$s\" administrēšanas tiesības mapei \"%2$s\" ir atjaunotas."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Jums ir jānorāda mapes vārds."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11401,9 +11441,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "Šī saite jau eksistē."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Nederīgs mapes vārds."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Nevar pieslēgties pasta serverim."
@@ -15561,9 +15598,6 @@ msgstr "Zulu"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "Ievadītie dati \"%1$s\" nav skaitlis."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr "Pārsniegta atļautā maksimālā vesela skaitļa vērtība (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Nepareiza satura tipa hedera vērtība: %1$s"

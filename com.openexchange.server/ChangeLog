@@ -1,3 +1,11 @@
+* 2014-09-24 - martin.schneider@open-xchange.com
+
+ - Fix for bug 34579: Do not validate account if primary mail account is provided
+
+* 2014-09-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34571: Fixed logging arguments for IMAP-IDLE
+
 * 2014-09-23 - marcus.klein@open-xchange.com
 
  - Fix for bug 34454: Fixed dependencies on open-xchange-system package to ensure smooth upgrade.
