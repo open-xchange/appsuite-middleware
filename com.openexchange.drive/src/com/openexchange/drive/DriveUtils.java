@@ -50,12 +50,17 @@
 package com.openexchange.drive;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.actions.ErrorFileAction;
 import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.DriveStorage;
@@ -268,6 +273,45 @@ public class DriveUtils {
             DriveExceptionCodes.QUOTA_REACHED.equals(e) || "SMARTDRIVEFILE_STORAGE-0008".equals(e.getErrorCode()) ||
             QuotaExceptionCodes.QUOTA_EXCEEDED.equals(e) || QuotaExceptionCodes.QUOTA_EXCEEDED_FILES.equals(e)
         ;
+    }
+
+    /**
+     * Gets a set of the normalized names of all supplied folders.
+     *
+     * @param folders The subfolders to get the names for
+     * @return The normalied folder names
+     */
+    public static Set<String> getNormalizedFolderNames(Collection<FileStorageFolder> folders) {
+        if (null == folders || 0 == folders.size()) {
+            return Collections.emptySet();
+        }
+        Set<String> folderNames = new HashSet<String>(folders.size());
+        for (FileStorageFolder folder : folders) {
+            folderNames.add(PathNormalizer.normalize(folder.getName()));
+        }
+        return folderNames;
+    }
+
+    /**
+     * Gets a set of the normalized names of all supplied files.
+     *
+     * @param file The files to get the names for
+     * @param lowercase <code>true</code> to make them lowercase, <code>false</code>, otherwise
+     * @return The normalized file names
+     */
+    public static Set<String> getNormalizedFileNames(Collection<File> files, boolean lowercase) {
+        if (null == files || 0 == files.size()) {
+            return Collections.emptySet();
+        }
+        Set<String> fileNames = new HashSet<String>(files.size());
+        for (File file : files) {
+            String normalizedName = PathNormalizer.normalize(file.getFileName());
+            if (lowercase) {
+                normalizedName = normalizedName.toLowerCase();
+            }
+            fileNames.add(normalizedName);
+        }
+        return fileNames;
     }
 
     private DriveUtils() {

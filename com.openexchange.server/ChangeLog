@@ -1,3 +1,8 @@
+* 2014-09-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34561: Introduced various checks to prevent synchronization of equally named files and folders at the same level of the 
+                      folder hierarchy
+
 * 2014-09-24 - martin.schneider@open-xchange.com
 
  - Fix for bug 34579: Do not validate account if primary mail account is provided
@@ -5,6 +10,7 @@
 * 2014-09-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 34571: Fixed logging arguments for IMAP-IDLE
+ - Fix for bug 34581: Stick to v2.0 of the Facebook Graph API
 
 * 2014-09-23 - marcus.klein@open-xchange.com
 
