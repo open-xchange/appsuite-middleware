@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveStrings;
@@ -573,12 +574,14 @@ public class DriveStorage {
             filter = FileNameFilter.ACCEPT_ALL;
         } else {
             final String path = getPath(folderID);
+            final Set<String> existingNames = DriveUtils.getNormalizedFolderNames(session.getStorage().getSubfolders(path).values());
             filter = new FileNameFilter() {
 
                 @Override
                 protected boolean accept(String fileName) throws OXException {
                     return false == DriveUtils.isInvalidFileName(fileName) &&
-                        false == DriveUtils.isIgnoredFileName(session.getDriveSession(), path, fileName);
+                        false == DriveUtils.isIgnoredFileName(session.getDriveSession(), path, fileName) &&
+                        false == existingNames.contains(PathNormalizer.normalize(fileName));
                 }
             };
         }
@@ -745,14 +748,28 @@ public class DriveStorage {
      * Gets all folders in the storage recursively. The "temp" folder, as well as the trash folder including all subfolders are ignored
      * implicitly.
      *
-     * @return The folders, each one mapped to its corresponsing relative path
+     * @return The folders, each one mapped to its corresponding relative path
      * @throws OXException
      */
     public Map<String, FileStorageFolder> getFolders() throws OXException {
         Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
         FileStorageFolder rootFolder = getRootFolder();
         folders.put(ROOT_PATH, rootFolder);
-        addSubfolders(folders, rootFolder, ROOT_PATH);
+        addSubfolders(folders, rootFolder, ROOT_PATH, true);
+        return folders;
+    }
+
+    /**
+     * Gets all (direct) subfolders in the supplied path. The "temp" folder, as well as the trash folder are ignored implicitly.
+     *
+     * @param path The path to get the direct subfolders for
+     * @return The subfolders, each one mapped to its corresponding relative path, or an empty map if there are none
+     * @throws OXException
+     */
+    public Map<String, FileStorageFolder> getSubfolders(String path) throws OXException {
+        Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
+        FileStorageFolder folder = getFolder(path);
+        addSubfolders(folders, folder, path, false);
         return folders;
     }
 
@@ -844,22 +861,26 @@ public class DriveStorage {
     }
 
     /**
-     * Adds all found subfolders of the supplied parent folder recursively. The "temp" folder, as well as the trash folder(s) including
-     * all subfolders are ignored implicitly.
+     * Adds all found subfolders of the supplied parent folder. The "temp" folder, as well as the trash folder(s) including all subfolders
+     * are ignored implicitly.
      *
      * @param folders The map to add the subfolders
      * @param parent The parent folder
      * @param path The path of the parent folder
+     * @param recursive <code>true</code> to add the subfolders recursively, <code>false</code> to only add the direct subfolders
      * @throws OXException
      */
-    private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path) throws OXException {
+    private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path, boolean recursive) throws OXException {
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(parent.getId(), false);
         for (FileStorageFolder subfolder : subfolders) {
-            String subPath = path + PathNormalizer.normalize(subfolder.getName());
+            String name = PathNormalizer.normalize(subfolder.getName());
+            String subPath = DriveConstants.ROOT_PATH.equals(path) ? path + name : path + DriveConstants.PATH_SEPARATOR + name;
             knownFolders.remember(subPath, subfolder);
             if (false == isExcludedSubfolder(subfolder, subPath)) {
                 folders.put(subPath, subfolder);
-                addSubfolders(folders, subfolder, subPath + PATH_SEPARATOR);
+                if (recursive) {
+                    addSubfolders(folders, subfolder, subPath, true);
+                }
             }
         }
     }
