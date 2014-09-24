@@ -758,6 +758,9 @@ public final class InternalList {
         // Adds the 'full_time' column to the tasks tables
         list.add(new com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask());
 
+        // Create table for object permissions
+        list.add(new com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

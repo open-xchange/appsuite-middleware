@@ -47,58 +47,66 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.groupware.update.tasks.objectpermission;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableService;
-import com.openexchange.osgi.HousekeepingActivator;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
- * to start up the bundle.
+ * {@link ObjectPermissionCreateTableTask} - Inserts necessary tables.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends HousekeepingActivator {
+public class ObjectPermissionCreateTableTask extends UpdateTaskAdapter {
 
-    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
-
-    public Activator() {
+    /**
+     * Initializes a new {@link ObjectPermissionCreateTableTask}.
+     */
+    public ObjectPermissionCreateTableTask() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    public String[] getDependencies() {
+        return new String[] {};
     }
 
     @Override
-    public void startBundle() {
-        final ConfigurationService configService = getService(ConfigurationService.class);
+    public void perform(final PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        Connection writeCon = dbService.getForUpdateTask(contextId);
+        PreparedStatement stmt = null;
+        try {
+            String createStmt;
+            String tableName;
+            {
+                ObjectPermissionCreateTableService tmp = new ObjectPermissionCreateTableService();
+                createStmt = tmp.getCreateStatements()[0];
+                tableName = tmp.tablesToCreate()[0];
+            }
 
-        ExcludedList.getInstance().configure(configService);
-        InternalList.getInstance().start();
-
-        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
-        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
-        openTrackers();
-
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
-        registerService(CreateTableService.class, new ObjectPermissionCreateTableService());
+            if (tableExists(writeCon, tableName)) {
+                return;
+            }
+            stmt = writeCon.prepareStatement(createStmt);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
+        }
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        InternalList.getInstance().stop();
-        super.stopBundle();
-    }
-
 }

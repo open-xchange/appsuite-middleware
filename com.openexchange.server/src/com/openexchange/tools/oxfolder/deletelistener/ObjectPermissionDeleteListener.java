@@ -47,58 +47,59 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.tools.oxfolder.deletelistener;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
- * to start up the bundle.
+ * {@link ObjectPermissionDeleteListener}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends HousekeepingActivator {
+public final class ObjectPermissionDeleteListener implements DeleteListener {
 
-    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
-
-    public Activator() {
+    /**
+     * Initializes a new {@link ObjectPermissionDeleteListener}.
+     */
+    public ObjectPermissionDeleteListener() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    public void startBundle() {
-        final ConfigurationService configService = getService(ConfigurationService.class);
-
-        ExcludedList.getInstance().configure(configService);
-        InternalList.getInstance().start();
-
-        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
-        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
-        openTrackers();
-
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
-        registerService(CreateTableService.class, new ObjectPermissionCreateTableService());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        InternalList.getInstance().stop();
-        super.stopBundle();
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (DeleteEvent.TYPE_USER != event.getType()) {
+            return;
+        }
+        /*
+         * Writable connection
+         */
+        final int contextId = event.getContext().getContextId();
+        PreparedStatement stmt = null;
+        try {
+            final int userId = event.getId();
+            /*
+             * Delete account data
+             */
+            stmt = writeCon.prepareStatement("DELETE FROM object_permission WHERE cid = ? AND (created_by = ? OR shared_by = ?)");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos, userId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
 }

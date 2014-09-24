@@ -79,8 +79,6 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ShareActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
-
     /**
      * Initializes a new {@link ShareActivator}.
      */
@@ -97,7 +95,8 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.share.impl\"");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
+        logger.info("starting bundle: \"com.openexchange.share.impl\"");
         /*
          * set references
          */
@@ -154,7 +153,8 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.share.impl\"");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
+        logger.info("stopping bundle: \"com.openexchange.share.impl\"");
         ShareServiceLookup.set(null);
         super.stopBundle();
     }
