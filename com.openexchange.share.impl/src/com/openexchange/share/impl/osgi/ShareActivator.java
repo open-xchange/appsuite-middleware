@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -104,8 +105,8 @@ public class ShareActivator extends HousekeepingActivator {
         /*
          * register share crypto service based on underyling crypto service
          */
-        final ShareActivator serviceLookup = this;
-        final DefaultShareService shareService = new DefaultShareService(serviceLookup);
+        final DefaultShareService shareService = new DefaultShareService(this);
+        final BundleContext context = this.context;
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
             private volatile ServiceRegistration<ShareCryptoService> cryptoRegistration;
@@ -117,7 +118,7 @@ public class ShareActivator extends HousekeepingActivator {
                     "com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
                 ShareCryptoServiceImpl shareCryptoService = new ShareCryptoServiceImpl(service, cryptKey);
-                serviceLookup.addService(ShareCryptoService.class, shareCryptoService);
+                addService(ShareCryptoService.class, shareCryptoService);
                 cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;
@@ -149,6 +150,11 @@ public class ShareActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(ShareNotificationService.class, new DefaultNotificationService());
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
     }
 
     @Override
