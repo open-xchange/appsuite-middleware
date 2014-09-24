@@ -75,7 +75,6 @@ public final class ObjectPermissionCreateTableService extends AbstractCreateTabl
             + "`created_by` INT4 UNSIGNED NOT NULL,"
             + "`shared_by` INT4 UNSIGNED NOT NULL,"
             + "`bits` INT4 UNSIGNED NOT NULL,"
-            + "`bits` INT4 UNSIGNED NOT NULL,"
             + "`last_modified` BIGINT(64) NOT NULL,"
             + "`group_flag` TINYINT UNSIGNED NOT NULL,"
             + "PRIMARY KEY (`cid`,`permission_id`,`module`,`folder_id`,`object_id`),"
