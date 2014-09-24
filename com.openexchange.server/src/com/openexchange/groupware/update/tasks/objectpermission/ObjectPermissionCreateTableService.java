@@ -75,10 +75,13 @@ public final class ObjectPermissionCreateTableService extends AbstractCreateTabl
             + "`created_by` INT4 UNSIGNED NOT NULL,"
             + "`shared_by` INT4 UNSIGNED NOT NULL,"
             + "`bits` INT4 UNSIGNED NOT NULL,"
+            + "`bits` INT4 UNSIGNED NOT NULL,"
+            + "`last_modified` BIGINT(64) NOT NULL,"
             + "`group_flag` TINYINT UNSIGNED NOT NULL,"
             + "PRIMARY KEY (`cid`,`permission_id`,`module`,`folder_id`,`object_id`),"
             + "INDEX `created_by_index` (`cid`, `created_by`),"
-            + "INDEX `shared_by_index` (`cid`, `shared_by`)"
+            + "INDEX `shared_by_index` (`cid`, `shared_by`),"
+            + "INDEX `last_modified_index` (`cid`, `permission_id`, `module`, `last_modified`)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"),
 
             ("CREATE TABLE `del_object_permission` ("
@@ -90,10 +93,12 @@ public final class ObjectPermissionCreateTableService extends AbstractCreateTabl
             + "`created_by` INT4 UNSIGNED NOT NULL,"
             + "`shared_by` INT4 UNSIGNED NOT NULL,"
             + "`bits` INT4 UNSIGNED NOT NULL,"
+            + "`last_modified` BIGINT(64) NOT NULL,"
             + "`group_flag` TINYINT UNSIGNED NOT NULL,"
             + "PRIMARY KEY (`cid`,`permission_id`,`module`,`folder_id`,`object_id`),"
             + "INDEX `created_by_index` (`cid`, `created_by`),"
-            + "INDEX `shared_by_index` (`cid`, `shared_by`)"
+            + "INDEX `shared_by_index` (`cid`, `shared_by`),"
+            + "INDEX `last_modified_index` (`cid`, `permission_id`, `module`, `last_modified`)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci")
         };
     }
