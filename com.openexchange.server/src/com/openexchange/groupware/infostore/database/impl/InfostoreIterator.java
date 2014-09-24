@@ -71,6 +71,7 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -152,6 +153,11 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins(), filename);
     }
 
+    public static InfostoreIterator sharedDocumentsForUser(final Context ctx, final User user, final int leastPermission, final Metadata[] metadata, final DBProvider provider) {
+        final String query = QUERIES.getSharedDocumentsForUserQuery(ctx.getContextId(), user.getId(), user.getGroups(), leastPermission, metadata, new InfostoreQueryCatalog.DocumentWins());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
     private final Object[] args;
     private final DBProvider provider;
     private final String query;
@@ -167,6 +173,8 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     private final Metadata[] fields;
 
     private final FieldChooser chooser;
+
+    private DocumentCustomizer cutomizer;
 
 
     protected InfostoreIterator(final String query,final DBProvider provider, final Context ctx, final Metadata[] fields, final FieldChooser chooser, final Object...args){
@@ -236,6 +244,9 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return !warnings.isEmpty();
     }
 
+    public void setCustomizer(DocumentCustomizer customizer) {
+        this.cutomizer = customizer;
+    }
 
     private void query() {
         queried = true;
@@ -326,6 +337,10 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
             }
             m.doSwitch(set);
+        }
+
+        if (cutomizer != null) {
+            return cutomizer.handle(dm);
         }
         return dm;
     }

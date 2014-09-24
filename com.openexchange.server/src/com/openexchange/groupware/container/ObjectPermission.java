@@ -47,35 +47,68 @@
  *
  */
 
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.groupware.container;
 
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.ObjectPermission;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.tools.collections.Injector;
 
-public interface InfostoreSecurity {
+/**
+ * {@link ObjectPermission}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
+ */
+public class ObjectPermission {
 
-    EffectiveInfostorePermission getInfostorePermission(int id, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+    public static final int NONE = 0;
 
-    EffectiveInfostorePermission getInfostorePermission(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+    public static final int READ = 1;
 
-    EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+    public static final int WRITE = 2;
 
-    EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions, Connection readConArg) throws OXException;
+    public static final int DELETE = 4;
 
-    ObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id) throws OXException;
+    private final int folderId;
 
-    ObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id, Connection readConArg) throws OXException;
+    private final int objectId;
 
-    <L> L injectInfostorePermissions(int[] ids, Context ctx, User user, UserPermissionBits userPermissions, L list, Injector<L, EffectiveInfostorePermission> injector) throws OXException;
+    private final int bits;
 
-    void checkFolderId(long folderId, Context ctx) throws OXException;
+    public ObjectPermission(int folderId, int objectId, int bits) {
+        super();
+        this.folderId = folderId;
+        this.objectId = objectId;
+        this.bits = bits;
+    }
+
+    public boolean canRead() {
+        return bits >= READ;
+    }
+
+    public boolean canNotRead() {
+        return !canRead();
+    }
+
+    public boolean canWrite() {
+        return bits >= WRITE;
+    }
+
+    public boolean canNotWrite() {
+        return !canWrite();
+    }
+
+    public boolean canDelete() {
+        return bits >= DELETE;
+    }
+
+    public boolean canNotDelete() {
+        return !canDelete();
+    }
+
+    public int getFolderId() {
+        return folderId;
+    }
+
+    public int getObjectId() {
+        return objectId;
+    }
 
 }

@@ -51,13 +51,18 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -88,19 +93,11 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         try {
             con = getReadConnection(ctx);
             final EffectivePermission isperm = new OXFolderAccess(con, ctx).getFolderPermission((int)document.getFolderId(), user.getId(), userPermissions);
+            final ObjectPermission objectPermission = getObjectPermission(ctx, user, document.getFolderId(), document.getId(), con);
             //final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
-            return new EffectiveInfostorePermission(isperm, document,user);
+            return new EffectiveInfostorePermission(isperm, objectPermission, document,user);
         } finally {
             releaseReadConnection(ctx, con);
-        }
-    }
-
-    private List<DocumentMetadata> getFolderIdAndCreatorForDocuments(final int[] is, final Context ctx) throws OXException {
-        final InfostoreIterator iter = InfostoreIterator.list(is, new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.CREATED_BY_LITERAL}, getProvider(), ctx);
-        try {
-            return iter.asList();
-        } catch (final SearchIteratorException e) {
-            throw InfostoreExceptionCodes.COULD_NOT_LOAD.create(e);
         }
     }
 
@@ -125,7 +122,8 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
 
     @Override
     public <L> L injectInfostorePermissions(final int[] ids, final Context ctx, final User user, final UserPermissionBits userPermissions, final L list, final Injector<L, EffectiveInfostorePermission> injector) throws OXException {
-        final Map<Integer, EffectivePermission> cache = new HashMap<Integer,EffectivePermission>();
+        final Map<Integer, EffectivePermission> fpCache = new HashMap<Integer, EffectivePermission>();
+        final Map<Integer, ObjectPermission> opCache = new HashMap<Integer, ObjectPermission>();
         final List<EffectiveInfostorePermission> permissions = new ArrayList<EffectiveInfostorePermission>();
         Connection con = null;
         final List<DocumentMetadata> metadata = getFolderIdAndCreatorForDocuments(ids, ctx);
@@ -134,13 +132,22 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             final OXFolderAccess access = new OXFolderAccess(con, ctx);
             for(final DocumentMetadata m : metadata) {
                 final EffectivePermission isperm;
-                if(cache.containsKey(Integer.valueOf((int) m.getFolderId()))) {
-                    isperm = cache.get(Integer.valueOf((int) m.getFolderId()));
+                if(fpCache.containsKey(Integer.valueOf((int) m.getFolderId()))) {
+                    isperm = fpCache.get(Integer.valueOf((int) m.getFolderId()));
                 } else {
                     isperm = access.getFolderPermission((int) m.getFolderId(), user.getId(), userPermissions);
-                    cache.put(Integer.valueOf((int) m.getFolderId()), isperm);
+                    fpCache.put(Integer.valueOf((int) m.getFolderId()), isperm);
                 }
-                permissions.add(new EffectiveInfostorePermission(isperm, m,user));
+
+                final ObjectPermission objectPermission;
+                if (opCache.containsKey(m.getId())) {
+                    objectPermission = opCache.get(m.getId());
+                } else {
+                    objectPermission = getObjectPermission(ctx, user, m.getFolderId(), m.getId(), con);
+                    opCache.put(m.getId(), objectPermission);
+                }
+
+                permissions.add(new EffectiveInfostorePermission(isperm, objectPermission, m,user));
             }
 
         } finally {
@@ -164,6 +171,69 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         }
         if(fo.getModule() != FolderObject.INFOSTORE) {
             throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
+        }
+    }
+
+    @Override
+    public ObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id) throws OXException {
+        Connection readCon = null;
+        try {
+            readCon = getReadConnection(ctx);
+            return getObjectPermission(ctx, user, folderId, id);
+        } finally {
+            if (readCon != null) {
+                releaseReadConnection(ctx, readCon);
+            }
+        }
+    }
+
+    @Override
+    public ObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id, Connection con) throws OXException {
+        int[] groups = user.getGroups();
+        boolean hasGroups = groups != null && groups.length > 0;
+        StringBuilder sb = new StringBuilder(128).append("SELECT bits FROM object_permission WHERE cid = ").append(ctx.getContextId()).append(" AND module = 8");
+        sb.append(" AND folder_id = ").append(folderId).append(" AND object_id = ").append(id);
+        if (hasGroups) {
+            sb.append(" AND ((group_flag <> 1 AND permission_id = ").append(user.getId()).append(") OR (group_flag = 1 AND permission_id IN (");
+            boolean first = true;
+            for (int group : groups) {
+                if (first) {
+                    sb.append(group);
+                    first = false;
+                } else {
+                    sb.append(", ").append(group);
+                }
+            }
+            sb.append(")))");
+        } else {
+            sb.append(" AND (group_flag <> 1 AND permission_id = ").append(user.getId()).append(")");
+        }
+
+        int bits = 0;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(sb.toString());
+            if (rs.next()) {
+                bits = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+
+        return new ObjectPermission((int) folderId, id, bits);
+    }
+
+
+    private List<DocumentMetadata> getFolderIdAndCreatorForDocuments(final int[] is, final Context ctx) throws OXException {
+        final InfostoreIterator iter = InfostoreIterator.list(is, new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.CREATED_BY_LITERAL}, getProvider(), ctx);
+        try {
+            return iter.asList();
+        } catch (final SearchIteratorException e) {
+            throw InfostoreExceptionCodes.COULD_NOT_LOAD.create(e);
         }
     }
 }

@@ -49,33 +49,26 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.ObjectPermission;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.tools.collections.Injector;
+import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl.InfostoreSearchIterator;
 
-public interface InfostoreSecurity {
 
-    EffectiveInfostorePermission getInfostorePermission(int id, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+/**
+ * A {@link DocumentCustomizer} can be used to modify {@link DocumentMetadata} instances
+ * just after they have been created from a result set by an {@link InfostoreSearchIterator}.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
+ */
+public interface DocumentCustomizer {
 
-    EffectiveInfostorePermission getInfostorePermission(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
-
-    EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
-
-    EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions, Connection readConArg) throws OXException;
-
-    ObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id) throws OXException;
-
-    ObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id, Connection readConArg) throws OXException;
-
-    <L> L injectInfostorePermissions(int[] ids, Context ctx, User user, UserPermissionBits userPermissions, L list, Injector<L, EffectiveInfostorePermission> injector) throws OXException;
-
-    void checkFolderId(long folderId, Context ctx) throws OXException;
+    /**
+     * Allows to modify the given document.
+     *
+     * @param document The document to modify.
+     * @return The modified document. Its allowed to return a different instance
+     * than the input document.
+     */
+    DocumentMetadata handle(DocumentMetadata document);
 
 }

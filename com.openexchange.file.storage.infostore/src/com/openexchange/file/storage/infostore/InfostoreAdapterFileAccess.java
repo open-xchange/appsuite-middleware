@@ -97,7 +97,6 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
         set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
         set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
         set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
         VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
     }
 

@@ -671,6 +671,31 @@ public class InfostoreQueryCatalog {
         return allocator.toString();
     }
 
+    public String getSharedDocumentsForUserQuery(final int contextId, final int userId, final int[] groups, int leastPermission, final Metadata[] metadata, final DocumentWins wins) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
+        builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
+        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
+        builder.append(" WHERE");
+        if (groups != null && groups.length > 0) {
+            builder.append(" ((object_permission.group_flag <> 1 AND object_permission.permission_id = ").append(userId).append(") OR (object_permission.group_flag = 1 AND object_permission.permission_id IN (");
+            boolean first = true;
+            for (int group : groups) {
+                if (first) {
+                    builder.append(group);
+                    first = false;
+                } else {
+                    builder.append(", ").append(group);
+                }
+            }
+            builder.append(")))");
+        } else {
+            builder.append(" (object_permission.group_flag <> 1 AND object_permission.permission_id = ").append(userId).append(")");
+        }
+
+        builder.append(" AND object_permission.bits >=").append(leastPermission);
+        return builder.toString();
+    }
+
     private String order(final int order) {
         if (order == InfostoreFacade.DESC) {
             return "DESC";

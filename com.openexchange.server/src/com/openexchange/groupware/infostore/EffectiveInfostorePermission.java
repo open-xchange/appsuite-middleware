@@ -49,193 +49,220 @@
 
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 
 public class EffectiveInfostorePermission {
-	private final EffectivePermission permission;
 
-	private final User user;
+    private final ObjectPermission objectPermission;
 
-	private final DocumentMetadata document;
+    private final EffectivePermission permission;
 
-	public EffectiveInfostorePermission(final EffectivePermission permission, final DocumentMetadata document,
-			final User user) {
-		this.document = document;
-		this.user = user;
-		this.permission = permission;
-	}
+    private final User user;
 
-	public boolean canReadObject() {
-		return permission.canReadAllObjects()
-				|| (permission.canReadOwnObjects() && document.getCreatedBy() == user.getId());
-	}
+    private final DocumentMetadata document;
 
-	public boolean canDeleteObject() {
-		return permission.canDeleteAllObjects()
-				|| (permission.canDeleteOwnObjects() && document.getCreatedBy() == user.getId());
-	}
+    public EffectiveInfostorePermission(final EffectivePermission permission, final DocumentMetadata document, final User user) {
+        this.document = document;
+        this.user = user;
+        this.permission = permission;
+        objectPermission = new ObjectPermission((int) document.getFolderId(), document.getId(), ObjectPermission.NONE);
+    }
 
-	public boolean canWriteObject() {
-		return permission.canWriteAllObjects()
-				|| (permission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());
-	}
+    public EffectiveInfostorePermission(final EffectivePermission permission, final ObjectPermission objectPermission, final DocumentMetadata document, final User user) {
+        this.document = document;
+        this.user = user;
+        this.permission = permission;
+        this.objectPermission = objectPermission;
+    }
 
-	public boolean canCreateObjects() {
-		return permission.canCreateObjects();
-	}
+    public boolean canReadObject() {
+        return canReadObjectInFolder() || objectPermission.canRead();
+    }
 
-	public boolean canCreateSubfolders() {
-		return permission.canCreateSubfolders();
-	}
+    public boolean canReadObjectInFolder() {
+        return permission.canReadAllObjects() || (permission.canReadOwnObjects() && document.getCreatedBy() == user.getId());
+    }
 
-	public boolean canDeleteAllObjects() {
-		return permission.canDeleteAllObjects();
-	}
+    public boolean canDeleteObject() {
+        return canDeleteObjectInFolder() || objectPermission.canDelete();
+    }
 
-	public boolean canDeleteOwnObjects() {
-		return permission.canDeleteOwnObjects();
-	}
+    public boolean canDeleteObjectInFolder() {
+        return permission.canDeleteAllObjects() || (permission.canDeleteOwnObjects() && document.getCreatedBy() == user.getId());
+    }
 
-	public boolean canReadAllObjects() {
-		return permission.canReadAllObjects();
-	}
+    public boolean canWriteObject() {
+        return canWriteObjectInFolder() || objectPermission.canWrite();
+    }
 
-	public boolean canReadOwnObjects() {
-		return permission.canReadOwnObjects();
-	}
+    public boolean canWriteObjectInFolder() {
+        return permission.canWriteAllObjects() || (permission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());
+    }
 
-	public boolean canWriteAllObjects() {
-		return permission.canWriteAllObjects();
-	}
+    public boolean canCreateObjects() {
+        return permission.canCreateObjects();
+    }
 
-	public boolean canWriteOwnObjects() {
-		return permission.canWriteOwnObjects();
-	}
+    public boolean canCreateSubfolders() {
+        return permission.canCreateSubfolders();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(final Object obj) {
-		return permission.equals(obj);
-	}
+    public boolean canDeleteAllObjects() {
+        return permission.canDeleteAllObjects();
+    }
 
-	public int getDeletePermission() {
-		return permission.getDeletePermission();
-	}
+    public boolean canDeleteOwnObjects() {
+        return permission.canDeleteOwnObjects();
+    }
 
-	public int getEntity() {
-		return permission.getEntity();
-	}
+    public boolean canReadAllObjects() {
+        return permission.canReadAllObjects();
+    }
 
-	public int getFolderPermission() {
-		return permission.getFolderPermission();
-	}
+    public boolean canReadOwnObjects() {
+        return permission.canReadOwnObjects();
+    }
 
-	public int getFuid() {
-		return permission.getFuid();
-	}
+    public boolean canWriteAllObjects() {
+        return permission.canWriteAllObjects();
+    }
 
-	public String getName() {
-		return permission.getName();
-	}
+    public boolean canWriteOwnObjects() {
+        return permission.canWriteOwnObjects();
+    }
 
-	public int getReadPermission() {
-		return permission.getReadPermission();
-	}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        return permission.equals(obj);
+    }
 
-	public OCLPermission getUnderlyingPermission() {
-		return permission.getUnderlyingPermission();
-	}
+    public int getDeletePermission() {
+        return permission.getDeletePermission();
+    }
 
-	public int getWritePermission() {
-		return permission.getWritePermission();
-	}
+    public int getEntity() {
+        return permission.getEntity();
+    }
 
-	@Override
-	public int hashCode() {
-		return permission.hashCode();
-	}
+    public int getFolderPermission() {
+        return permission.getFolderPermission();
+    }
 
-	public boolean hasModuleAccess(final int folderModule) {
-		return permission.hasModuleAccess(folderModule);
-	}
+    public int getFuid() {
+        return permission.getFuid();
+    }
 
-	public boolean isFolderAdmin() {
-		return permission.isFolderAdmin();
-	}
+    public String getName() {
+        return permission.getName();
+    }
 
-	public boolean isFolderVisible() {
-		return permission.isFolderVisible();
-	}
+    public int getReadPermission() {
+        return permission.getReadPermission();
+    }
 
-	public boolean isGroupPermission() {
-		return permission.isGroupPermission();
-	}
+    public OCLPermission getUnderlyingPermission() {
+        return permission.getUnderlyingPermission();
+    }
 
-	public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
-		return permission.setAllObjectPermission(pr, pw, pd);
-	}
+    public int getWritePermission() {
+        return permission.getWritePermission();
+    }
 
-	public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
-		return permission.setAllPermission(fp, opr, opw, opd);
-	}
+    @Override
+    public int hashCode() {
+        return permission.hashCode();
+    }
 
-	public boolean setDeleteObjectPermission(final int p) {
-		return permission.setDeleteObjectPermission(p);
-	}
+    public boolean hasModuleAccess(final int folderModule) {
+        return permission.hasModuleAccess(folderModule);
+    }
 
-	public void setEntity(final int entity) {
-		permission.setEntity(entity);
-	}
+    public boolean isFolderAdmin() {
+        return permission.isFolderAdmin();
+    }
 
-	public void setFolderAdmin(final boolean folderAdmin) {
-		permission.setFolderAdmin(folderAdmin);
-	}
+    public boolean isFolderVisible() {
+        return permission.isFolderVisible();
+    }
 
-	public boolean setFolderPermission(final int p) {
-		return permission.setFolderPermission(p);
-	}
+    public boolean isGroupPermission() {
+        return permission.isGroupPermission();
+    }
 
-	public void setFuid(final int pid) {
-		permission.setFuid(pid);
-	}
+    public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
+        return permission.setAllObjectPermission(pr, pw, pd);
+    }
 
-	public void setGroupPermission(final boolean groupPermission) {
-		permission.setGroupPermission(groupPermission);
-	}
+    public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
+        return permission.setAllPermission(fp, opr, opw, opd);
+    }
 
-	public void setName(final String name) {
-		permission.setName(name);
-	}
+    public boolean setDeleteObjectPermission(final int p) {
+        return permission.setDeleteObjectPermission(p);
+    }
 
-	public boolean setReadObjectPermission(final int p) {
-		return permission.setReadObjectPermission(p);
-	}
+    public void setEntity(final int entity) {
+        permission.setEntity(entity);
+    }
 
-	public boolean setWriteObjectPermission(final int p) {
-		return permission.setWriteObjectPermission(p);
-	}
+    public void setFolderAdmin(final boolean folderAdmin) {
+        permission.setFolderAdmin(folderAdmin);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return permission.toString();
-	}
+    public boolean setFolderPermission(final int p) {
+        return permission.setFolderPermission(p);
+    }
 
-	public int getObjectID() {
-		return document.getId();
-	}
+    public void setFuid(final int pid) {
+        permission.setFuid(pid);
+    }
 
-	public DocumentMetadata getObject() {
-		return document;
-	}
+    public void setGroupPermission(final boolean groupPermission) {
+        permission.setGroupPermission(groupPermission);
+    }
+
+    public void setName(final String name) {
+        permission.setName(name);
+    }
+
+    public boolean setReadObjectPermission(final int p) {
+        return permission.setReadObjectPermission(p);
+    }
+
+    public boolean setWriteObjectPermission(final int p) {
+        return permission.setWriteObjectPermission(p);
+    }
+
+    public EffectivePermission getEffectivePermission() {
+        return permission;
+    }
+
+    public ObjectPermission getObjectPermission() {
+        return objectPermission;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return permission.toString();
+    }
+
+    public int getObjectID() {
+        return document.getId();
+    }
+
+    public DocumentMetadata getObject() {
+        return document;
+    }
+
 }
