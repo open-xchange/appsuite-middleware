@@ -93,6 +93,15 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
+            DBUtils.closeSQLStuff(stmt);
+            stmt = null;
+
+            stmt = writeCon.prepareStatement("DELETE FROM del_object_permission WHERE cid = ? AND (created_by = ? OR shared_by = ?)");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos, userId);
+            stmt.executeUpdate();
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {

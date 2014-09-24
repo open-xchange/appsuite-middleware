@@ -87,19 +87,27 @@ public class ObjectPermissionCreateTableTask extends UpdateTaskAdapter {
         Connection writeCon = dbService.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
         try {
-            String createStmt;
-            String tableName;
-            {
-                ObjectPermissionCreateTableService tmp = new ObjectPermissionCreateTableService();
-                createStmt = tmp.getCreateStatements()[0];
-                tableName = tmp.tablesToCreate()[0];
+            ObjectPermissionCreateTableService tmp = new ObjectPermissionCreateTableService();
+            String createStmt = tmp.getCreateStatements()[0];
+            String tableName = tmp.tablesToCreate()[0];
+
+            if (!tableExists(writeCon, tableName)) {
+                stmt = writeCon.prepareStatement(createStmt);
+                stmt.executeUpdate();
+                closeSQLStuff(null, stmt);
+                stmt = null;
             }
 
-            if (tableExists(writeCon, tableName)) {
-                return;
+            createStmt = tmp.getCreateStatements()[1];
+            tableName = tmp.tablesToCreate()[1];
+            tmp = null;
+
+            if (!tableExists(writeCon, tableName)) {
+                stmt = writeCon.prepareStatement(createStmt);
+                stmt.executeUpdate();
+                closeSQLStuff(null, stmt);
+                stmt = null;
             }
-            stmt = writeCon.prepareStatement(createStmt);
-            stmt.executeUpdate();
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {

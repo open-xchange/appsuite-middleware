@@ -64,7 +64,9 @@ public final class ObjectPermissionCreateTableService extends AbstractCreateTabl
 
     @Override
     public String[] getCreateStatements() {
-        return new String[] { ("CREATE TABLE `object_permission` ("
+        return new String[] {
+
+            ("CREATE TABLE `object_permission` ("
             + "`cid` INT4 UNSIGNED NOT NULL,"
             + "`permission_id` INT4 UNSIGNED NOT NULL,"
             + "`module` INT4 UNSIGNED NOT NULL,"
@@ -77,7 +79,23 @@ public final class ObjectPermissionCreateTableService extends AbstractCreateTabl
             + "PRIMARY KEY (`cid`,`permission_id`,`module`,`folder_id`,`object_id`),"
             + "INDEX `created_by_index` (`cid`, `created_by`),"
             + "INDEX `shared_by_index` (`cid`, `shared_by`)"
-          + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci") };
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"),
+
+            ("CREATE TABLE `del_object_permission` ("
+            + "`cid` INT4 UNSIGNED NOT NULL,"
+            + "`permission_id` INT4 UNSIGNED NOT NULL,"
+            + "`module` INT4 UNSIGNED NOT NULL,"
+            + "`folder_id` INT4 UNSIGNED NOT NULL,"
+            + "`object_id` INT4 UNSIGNED NOT NULL,"
+            + "`created_by` INT4 UNSIGNED NOT NULL,"
+            + "`shared_by` INT4 UNSIGNED NOT NULL,"
+            + "`bits` INT4 UNSIGNED NOT NULL,"
+            + "`group_flag` TINYINT UNSIGNED NOT NULL,"
+            + "PRIMARY KEY (`cid`,`permission_id`,`module`,`folder_id`,`object_id`),"
+            + "INDEX `created_by_index` (`cid`, `created_by`),"
+            + "INDEX `shared_by_index` (`cid`, `shared_by`)"
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci")
+        };
     }
 
     @Override
@@ -87,7 +105,7 @@ public final class ObjectPermissionCreateTableService extends AbstractCreateTabl
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { "object_permission" };
+        return new String[] { "object_permission", "del_object_permission" };
     }
 
 }
