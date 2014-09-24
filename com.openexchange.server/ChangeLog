@@ -5,6 +5,7 @@
 * 2014-09-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 34571: Fixed logging arguments for IMAP-IDLE
+ - Fix for bug 34581: Stick to v2.0 of the Facebook Graph API
 
 * 2014-09-23 - marcus.klein@open-xchange.com
 
