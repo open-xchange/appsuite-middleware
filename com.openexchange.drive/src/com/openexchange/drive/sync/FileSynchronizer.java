@@ -67,6 +67,7 @@ import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
 import com.openexchange.drive.management.DriveConfig;
@@ -86,6 +87,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     private List<UploadFileAction> uploadActions;
     private final String path;
     private FileStoragePermission folderPermission;
+    private Set<String> normalizedDirectoryNames;
 
     public FileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
         super(session, mapper);
@@ -302,6 +304,17 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     return 1;
                 } else {
                     /*
+                     * new on client, check for potential directory name collisions
+                     */
+                    if (getNormalizedDirectoryNames().contains(PathNormalizer.normalize(comparison.getClientVersion().getName()))) {
+                        /*
+                         * collision with directory on same level, indicate as error with quarantine flag
+                         */
+                        result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
+                            DriveExceptionCodes.LEVEL_CONFLICTING_FILENAME.create(comparison.getClientVersion().getName(), path), true));
+                        return 1;
+                    }
+                    /*
                      * let client upload the file
                      */
                     UploadFileAction uploadAction = new UploadFileAction(
@@ -455,6 +468,19 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             folderPermission = session.getStorage().getOwnPermission(path);
         }
         return folderPermission;
+    }
+
+    /**
+     * Gets a set of the normalized directory names contained in the synchronized folder.
+     *
+     * @return The normalized folder names
+     * @throws OXException
+     */
+    private Set<String> getNormalizedDirectoryNames() throws OXException {
+        if (null == normalizedDirectoryNames) {
+            normalizedDirectoryNames = DriveUtils.getNormalizedFolderNames(session.getStorage().getSubfolders(path).values());
+        }
+        return normalizedDirectoryNames;
     }
 
 }
