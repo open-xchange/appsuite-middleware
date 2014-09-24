@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -61,7 +61,11 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.TransactionManager;
+import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -120,6 +124,16 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
     }
 
     /**
+     * Initializes a new {@link DeletePerformer}.
+     * @param storageParameters
+     * @param registry
+     * @throws OXException
+     */
+    public DeletePerformer(StorageParameters storageParameters, CacheFolderStorageRegistry registry) throws OXException {
+        super(storageParameters, registry);
+    }
+
+    /**
      * Performs the <code>DELETE</code> request.
      *
      * @param treeId The tree identifier
@@ -135,17 +149,24 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        checkOpenedStorage(folderStorage, openedStorages);
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
+
+        TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+        /*
+         * Throws an exception if someone tries to add an element. If this happens, you found a bug.
+         * As long as a TransactionManager is present, every storage has to add itself to the
+         * TransactionManager in FolderStorage.startTransaction() and must return false.
+         */
+        final List<FolderStorage> openedStorages = Collections.emptyList();
+        checkOpenedStorage(folderStorage, openedStorages);
         try {
             if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 /*
                  * Real delete
                  */
-                folderStorage.deleteFolder(treeId, folderId, storageParameters);
+                deleteRealFolder(folderId, folderStorage, transactionManager);
             } else {
                 /*-
                  * Virtual delete:
@@ -158,34 +179,28 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
                 }
                 if (folderStorage.equals(realStorage)) {
-                    folderStorage.deleteFolder(treeId, folderId, storageParameters);
+                    deleteRealFolder(folderId, realStorage, transactionManager);
                 } else {
                     /*
                      * Delete from virtual storage
                      */
-                    deleteVirtualFolder(folderId, treeId, folderStorage, openedStorages);
+                    deleteVirtualFolder(folderId, treeId, folderStorage, openedStorages, transactionManager);
                 }
             }
             /*
              * Commit
              */
-            for (final FolderStorage fs : openedStorages) {
-                fs.commitTransaction(storageParameters);
-            }
+            transactionManager.commit();
         } catch (final OXException e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
+            transactionManager.rollback();
             throw e;
         } catch (final Exception e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
+            transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void deleteVirtualFolder(final String folderId, final String treeId, final FolderStorage folderStorage, final List<FolderStorage> openedStorages) throws OXException {
+    private void deleteVirtualFolder(final String folderId, final String treeId, final FolderStorage folderStorage, final List<FolderStorage> openedStorages, TransactionManager transactionManager) throws OXException {
         final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
         storageParameters.putParameter(FolderType.GLOBAL, "global", Boolean.valueOf(folder.isGlobalID()));
         {
@@ -228,7 +243,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Delete subfolder
              */
-            deleteVirtualFolder(id, treeId, subfolderStorage, openedStorages);
+            deleteVirtualFolder(id, treeId, subfolderStorage, openedStorages, transactionManager);
         }
         /*
          * Delete from real storage
@@ -238,11 +253,33 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
         }
         checkOpenedStorage(realStorage, openedStorages);
-        realStorage.deleteFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+        deleteRealFolder(folder, realStorage, transactionManager);
         /*
          * And now from virtual storage
          */
         folderStorage.deleteFolder(treeId, folderId, storageParameters);
+    }
+
+    private void deleteRealFolder(String id, FolderStorage storage, TransactionManager transactionManager) throws OXException {
+        deleteRealFolder(storage.getFolder(FolderStorage.REAL_TREE_ID, id, storageParameters), storage, transactionManager);
+    }
+
+    private void deleteRealFolder(Folder folder, FolderStorage storage, TransactionManager transactionManager) throws OXException {
+        /*
+         * check for any present guest permissions
+         */
+        ComparedPermissions comparedPermissions = new ComparedPermissions(
+            session.getContext(), new Permission[0], folder.getPermissions(), UserServiceHolder.requireUserService(), transactionManager.getConnection());
+        /*
+         * delete folder
+         */
+        storage.deleteFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
+        /*
+         * process removed guest permissions
+         */
+        if (comparedPermissions.hasRemovedGuests()) {
+            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuests(), transactionManager.getConnection());
+        }
     }
 
     private boolean canDeleteAllObjects(final Permission permission, final String folderId, final String treeId, final FolderStorage folderStorage) throws OXException {

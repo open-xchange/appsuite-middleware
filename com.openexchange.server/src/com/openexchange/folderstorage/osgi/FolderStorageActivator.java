@@ -64,6 +64,7 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
@@ -80,61 +81,62 @@ import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
- * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder
- * storage framework.
+ * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder storage framework.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageActivator implements BundleActivator {
 
-	private static final class Key {
+    private static final class Key {
 
-		public static Key valueOf(final int userId, final int cid) {
-			return new Key(userId, cid);
-		}
+        public static Key valueOf(final int userId, final int cid) {
+            return new Key(userId, cid);
+        }
 
-		private final int userId;
+        private final int userId;
 
-		private final int cid;
+        private final int cid;
 
-		private final int hash;
+        private final int hash;
 
-		public Key(final int userId, final int cid) {
-			super();
-			this.userId = userId;
-			this.cid = cid;
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + cid;
-			result = prime * result + userId;
-			hash = result;
-		}
+        public Key(final int userId, final int cid) {
+            super();
+            this.userId = userId;
+            this.cid = cid;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + cid;
+            result = prime * result + userId;
+            hash = result;
+        }
 
-		@Override
-		public int hashCode() {
-			return hash;
-		}
+        @Override
+        public int hashCode() {
+            return hash;
+        }
 
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (!(obj instanceof Key)) {
-				return false;
-			}
-			final Key other = (Key) obj;
-			if (cid != other.cid) {
-				return false;
-			}
-			if (userId != other.userId) {
-				return false;
-			}
-			return true;
-		}
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (cid != other.cid) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
 
     }
 
@@ -190,14 +192,14 @@ public final class FolderStorageActivator implements BundleActivator {
 	private volatile List<ServiceTracker<?, ?>> serviceTrackers;
 	private volatile List<BundleActivator> activators;
 
-	/**
-	 * Initializes a new {@link FolderStorageActivator}.
-	 */
-	public FolderStorageActivator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link FolderStorageActivator}.
+     */
+    public FolderStorageActivator() {
+        super();
+    }
 
-	@Override
+    @Override
     public void start(final BundleContext context) throws Exception {
 	    Logger logger = org.slf4j.LoggerFactory.getLogger(FolderStorageActivator.class);
         try {

@@ -58,11 +58,9 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -125,12 +123,12 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                     final ToDoPermission toDoPermission = it.value();
                     final int[] users = toDoPermission.getUsers();
                     for (int j = 0; j < users.length; j++) {
-                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", UserStorage.getInstance().getUser(users[j], ctx).getDisplayName(), folderId);
+                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", users[j], folderId);
                         addSystemFolderReadPermission(folderId, users[j], false);
                     }
                     final int[] groups = toDoPermission.getGroups();
                     for (int j = 0; j < groups.length; j++) {
-                        LOG.debug("Auto-Insert system-folder-read permission for group {} to folder {}", GroupStorage.getInstance().getGroup(groups[j], ctx).getDisplayName(), folderId);
+                        LOG.debug("Auto-Insert system-folder-read permission for group {} to folder {}", groups[j], folderId);
                         addSystemFolderReadPermission(folderId, groups[j], true);
                     }
                     /*

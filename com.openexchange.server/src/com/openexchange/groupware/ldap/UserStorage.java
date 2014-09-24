@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -106,6 +107,15 @@ public abstract class UserStorage {
         return getUser(userId, ContextStorage.getInstance().getContext(contextId));
     }
 
+    public User getUser(final int userId, final int contextId, Connection con) throws OXException {
+        if (con == null) {
+            return getUser(userId, contextId);
+        }
+
+        // TODO: re-use connection for context storage
+        return getUser(ContextStorage.getInstance().getContext(contextId), userId, con);
+    }
+
     /**
      * Reads the data from a user from the underlying persistent data storage.
      * @param uid User identifier.
@@ -125,6 +135,14 @@ public abstract class UserStorage {
      */
     public abstract User getUser(Context ctx, int userId, Connection con) throws OXException;
 
+    /**
+     * Reads out the data from multiple users from the underlying persistent data storage.
+     *
+     * @param ctx The context
+     * @param userIds The identifiers of the users to get
+     * @return The users
+     * @throws OXException if an error occurs while reading from the persistent storage or one of the users doesn't exist
+     */
     public abstract User[] getUser(Context ctx, int[] userIds) throws OXException;
 
     /**
@@ -134,7 +152,22 @@ public abstract class UserStorage {
      * @return an array with all user objects from a context.
      * @throws OXException if all user objects can not be loaded from the persistent storage.
      */
-    public abstract User[] getUser(Context ctx) throws OXException;
+    public User[] getUser(Context ctx) throws OXException {
+        return getUser(ctx, false, false);
+    }
+
+    /**
+     * Reads the data of all users from the persistent data storage, optionally including/excluding guest- and regular users. This method
+     * is faster than getting each user information with the {@link #getUser(int, Context)} method if nearly all users are needed from a
+     * context.
+     *
+     * @param ctx the context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user objects from a context.
+     * @throws OXException if all user objects can not be loaded from the persistent storage.
+     */
+    public abstract User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
@@ -208,7 +241,9 @@ public abstract class UserStorage {
      * <code>null</code> if no user could be found.
      * @throws OXException if an error occurs.
      */
-    public abstract User searchUser(String email, Context context) throws OXException;
+    public User searchUser(String email, Context context) throws OXException {
+        return searchUser(email, context, true);
+    }
 
     /**
      * Searches a user by its email address. This is used for converting iCal to
@@ -219,7 +254,24 @@ public abstract class UserStorage {
      * <code>null</code> if no user could be found.
      * @throws OXException if an error occurs.
      */
-    public abstract User searchUser(String email, Context context, boolean considerAliases) throws OXException;
+    public User searchUser(String email, Context context, boolean considerAliases) throws OXException {
+        return searchUser(email, context, considerAliases, false, false);
+    }
+
+    /**
+     * Searches a user by its email address. This is used for converting iCal to
+     * appointments.
+     *
+     * @param email the email address of the user.
+     * @param context The context.
+     * @param considerAliases <code>true</code> to consider a user's aliases, <code>false</code>, otherwise
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return a User object if the user was found by its email address or
+     * <code>null</code> if no user could be found.
+     * @throws OXException if an error occurs.
+     */
+    public abstract User searchUser(String email, Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * Searches user(s) by mail login.
@@ -260,7 +312,20 @@ public abstract class UserStorage {
      * @return an array with all user identifier of the context.
      * @throws OXException if generating this list fails.
      */
-    public abstract int[] listAllUser(Context context) throws OXException;
+    public int[] listAllUser(Context context) throws OXException {
+        return listAllUser(context, false, false);
+    }
+
+    /**
+     * Returns an array with all user identifier of the context.
+     *
+     * @param context The context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user identifier of the context.
+     * @throws OXException if generating this list fails.
+     */
+    public abstract int[] listAllUser(Context context, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
@@ -304,14 +369,22 @@ public abstract class UserStorage {
     /**
      * Creates a user within the database.
      *
-     * @param con The connection.
      * @param context The context.
      * @param user The user.
      * @return The ID of the created user.
      */
-    public abstract int createUser(final Context context, final User user) throws OXException;
+    public int createUser(final Context context, final User user) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickupWriteable(context);
+            return createUser(con, context, user);
+        } finally {
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
 
     /**
+     * Creates a user within the database.
      *
      * @param con The database connection.
      * @param context The context.
@@ -319,6 +392,23 @@ public abstract class UserStorage {
      * @return The ID of the created user.
      */
     public abstract int createUser(final Connection con, final Context context, final User user) throws OXException;
+
+    /**
+     * Deletes a user from the database.
+     *
+     * @param context The context
+     * @param userId The identifier of the user to delete
+     */
+    public abstract void deleteUser(Context context, int userId) throws OXException;
+
+    /**
+     * Deletes a user from the database.
+     *
+     * @param con A (writable) database connection
+     * @param context The context
+     * @param userId The identifier of the user to delete
+     */
+    public abstract void deleteUser(Connection con, Context context, int userId) throws OXException;
 
     public final void invalidateUser(final Context ctx, final int[] userIds) throws OXException {
         for (final int member : userIds) {

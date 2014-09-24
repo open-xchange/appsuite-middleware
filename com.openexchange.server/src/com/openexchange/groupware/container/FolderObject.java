@@ -53,11 +53,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -684,7 +684,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     /**
      * Applies given permissions to this folder.
      * <p>
-     * <b>NOTE</b>: A <b><small>DEEP</small></b> copy of specified permissions is passed to this folder not a reference.
+     * <b>NOTE</b>: A <b><small>DEEP</small></b> copy of specified permissions is passed to this folder, not a reference.
      *
      * @param permissions The permissions to set
      */
@@ -705,6 +705,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     /**
      * Adds given permission to this folder object.
+     * <p>
+     * <b>NOTE</b>: A <b><small>DEEP</small></b> copy of the permission is passed to this folder, not a reference.
      *
      * @param permission The permission to add
      */
@@ -1550,32 +1552,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         }
     }
 
-    @Override
-    public Set<Integer> findDifferingFields(final DataObject dataObject) {
-        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
-
-        if (!getClass().isAssignableFrom(dataObject.getClass())) {
-            return differingFields;
-        }
-
-        final FolderObject other = (FolderObject) dataObject;
-
-        if ((!containsFolderName() && other.containsFolderName()) || (containsFolderName() && other.containsFolderName() && getFolderName() != other.getFolderName() && (getFolderName() == null || !getFolderName().equals(
-            other.getFolderName())))) {
-            differingFields.add(Integer.valueOf(FOLDER_NAME));
-        }
-
-        if ((!containsModule() && other.containsModule()) || (containsModule() && other.containsModule() && getModule() != other.getModule())) {
-            differingFields.add(Integer.valueOf(MODULE));
-        }
-
-        if ((!containsType() && other.containsType()) || (containsType() && other.containsType() && getType() != other.getType())) {
-            differingFields.add(Integer.valueOf(TYPE));
-        }
-
-        return differingFields;
-    }
-
     private static final <T extends OXCloneable<T>> ArrayList<T> copyArrayList(final ArrayList<T> original) {
         final int size = original.size();
         final ArrayList<T> copy = new ArrayList<T>(original.size());
@@ -1693,13 +1669,22 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         return OXFolderLoader.getSubfolderIds(folderId, ctx, readConArg, table);
     }
 
-    private static final OCLPermission VIRTUAL_FOLDER_PERMISSION = new OCLPermission();
-
+    public static final OCLPermission VIRTUAL_FOLDER_PERMISSION = new OCLPermission();
+    public static final OCLPermission VIRTUAL_GUEST_PERMISSION = new OCLPermission();
     static {
         VIRTUAL_FOLDER_PERMISSION.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         VIRTUAL_FOLDER_PERMISSION.setFolderAdmin(false);
         VIRTUAL_FOLDER_PERMISSION.setGroupPermission(true);
         VIRTUAL_FOLDER_PERMISSION.setAllPermission(
+            OCLPermission.READ_FOLDER,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS);
+
+        VIRTUAL_GUEST_PERMISSION.setEntity(OCLPermission.ALL_GUESTS);
+        VIRTUAL_GUEST_PERMISSION.setFolderAdmin(false);
+        VIRTUAL_GUEST_PERMISSION.setGroupPermission(true);
+        VIRTUAL_GUEST_PERMISSION.setAllPermission(
             OCLPermission.READ_FOLDER,
             OCLPermission.NO_PERMISSIONS,
             OCLPermission.NO_PERMISSIONS,
@@ -1717,7 +1702,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @return A folder instance representing a virtual folder
      */
     public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type) {
-        return createVirtualFolderObject(objectID, name, module, hasSubfolders, type, null);
+        return createVirtualFolderObject(objectID, name, module, hasSubfolders, type, (OCLPermission) null);
     }
 
     /**
@@ -1728,18 +1713,22 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @param module The module
      * @param hasSubfolders Whether the folder is supposed to contain subfolders
      * @param type The type
-     * @param virtualPerm The folder's permission
+     * @param virtualPerms The folder's permissions
      * @return A folder instance representing a virtual folder
      */
-    public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission virtualPerm) {
-        final OCLPermission p = virtualPerm == null ? VIRTUAL_FOLDER_PERMISSION : virtualPerm;
+    public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission... virtualPerms) {
         final FolderObject virtualFolder = new FolderObject(objectID);
         virtualFolder.setFolderName(name);
         virtualFolder.setModule(module);
         virtualFolder.setSubfolderFlag(hasSubfolders);
         virtualFolder.setType(type);
-        p.setFuid(objectID);
-        virtualFolder.setPermissionsAsArray(new OCLPermission[] { p });
+
+        final List<OCLPermission> permissions = prepareVirtualPermissions(virtualPerms);
+        for (OCLPermission permission : permissions) {
+            permission.setFuid(objectID);
+            virtualFolder.addPermission(permission);
+        }
+
         return virtualFolder;
     }
 
@@ -1754,14 +1743,33 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @return A folder instance representing a virtual folder
      */
     public static final FolderObject createVirtualFolderObject(final String fullName, final String name, final int module, final boolean hasSubfolders, final int type) {
-        final OCLPermission p = VIRTUAL_FOLDER_PERMISSION;
+        return createVirtualFolderObject(fullName, name, module, hasSubfolders, type, VIRTUAL_FOLDER_PERMISSION);
+    }
+
+    /**
+     * Creates a folder instance representing a virtual folder.
+     *
+     * @param fullName The folder's fullname
+     * @param name The name
+     * @param module The module
+     * @param hasSubfolders Whether the folder is supposed to contain subfolders
+     * @param type The type
+     * @param virtualPerms The folder's permissions
+     * @return A folder instance representing a virtual folder
+     */
+    public static final FolderObject createVirtualFolderObject(final String fullName, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission... virtualPerms) {
         final FolderObject virtualFolder = new FolderObject();
         virtualFolder.setFullName(fullName);
         virtualFolder.setFolderName(name);
         virtualFolder.setModule(module);
         virtualFolder.setSubfolderFlag(hasSubfolders);
         virtualFolder.setType(type);
-        virtualFolder.setPermissionsAsArray(new OCLPermission[] { p });
+
+        final List<OCLPermission> permissions = prepareVirtualPermissions(virtualPerms);
+        for (OCLPermission permission : permissions) {
+            virtualFolder.addPermission(permission);
+        }
+
         return virtualFolder;
     }
 
@@ -1778,7 +1786,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             creatorDisplayName,
             FolderObject.SYSTEM_MODULE,
             true,
-            FolderObject.SYSTEM_TYPE);
+            FolderObject.SYSTEM_TYPE,
+            VIRTUAL_FOLDER_PERMISSION,
+            VIRTUAL_GUEST_PERMISSION);
     }
 
     /**
@@ -1812,6 +1822,25 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public boolean containsMeta() {
         return containsMap();
+    }
+
+    private static List<OCLPermission> prepareVirtualPermissions(final OCLPermission[] virtualPerms) {
+        if (virtualPerms == null) {
+            return Collections.singletonList(VIRTUAL_FOLDER_PERMISSION.deepClone());
+        }
+
+        final List<OCLPermission> permissions = new ArrayList<OCLPermission>(virtualPerms.length);
+        for (OCLPermission permission : virtualPerms) {
+            if (permission != null) {
+                permissions.add(permission);
+            }
+        }
+
+        if (permissions.isEmpty()) {
+            permissions.add(VIRTUAL_FOLDER_PERMISSION.deepClone());
+        }
+
+        return permissions;
     }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.data.conversion.ical.ical4j;
 
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.property.XProperty;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
@@ -81,6 +82,11 @@ public final class ICal4jSession implements ICalSession {
     @Override
     public ZoneInfo getZoneInfo() {
         return mode.getZoneInfo();
+    }
+
+    @Override
+    public void setName(String name) {
+        calendar.getProperties().add(new XProperty("X-WR-CALNAME", name));
     }
 
     /**

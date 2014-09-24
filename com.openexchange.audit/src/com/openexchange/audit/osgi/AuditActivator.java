@@ -58,6 +58,7 @@ import com.openexchange.audit.services.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
  * @author Benjamin Otterbach
@@ -72,7 +73,7 @@ public class AuditActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { UserService.class, ConfigurationService.class };
     }
 
     @Override
@@ -91,7 +92,7 @@ public class AuditActivator extends HousekeepingActivator {
             Services.setServiceLookup(this);
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*", FileStorageEventConstants.ALL_TOPICS });
-            registerService(EventHandler.class, new AuditEventHandler(), serviceProperties);
+            registerService(EventHandler.class, new AuditEventHandler(getService(UserService.class)), serviceProperties);
         } catch (final Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

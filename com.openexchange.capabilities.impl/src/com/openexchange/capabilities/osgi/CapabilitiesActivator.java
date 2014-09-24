@@ -78,6 +78,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 public class CapabilitiesActivator extends HousekeepingActivator {
@@ -87,7 +88,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, UserPermissionService.class, DatabaseService.class, TimerService.class, CacheService.class, SessiondService.class };
+        return new Class<?>[] { UserService.class, ConfigurationService.class, ConfigViewFactory.class, UserPermissionService.class, DatabaseService.class, TimerService.class, CacheService.class, SessiondService.class };
     }
 
     @Override

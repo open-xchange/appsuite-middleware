@@ -569,4 +569,14 @@ public class MockUser implements User {
     public void setLocale(final Locale locale) {
         this.locale = locale;
     }
+
+    @Override
+    public int getCreatedBy() {
+        return 0;
+    }
+
+    @Override
+    public boolean isGuest() {
+        return false;
+    }
 }

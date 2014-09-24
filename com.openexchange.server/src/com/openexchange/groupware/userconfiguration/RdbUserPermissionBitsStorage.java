@@ -66,10 +66,11 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * {@link RdbUserPermissionBitsStorage}
+ * {@inheritDoc}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -102,6 +103,14 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
         }
     }
 
+    @Override
+    public UserPermissionBits getUserPermissionBits(Connection con, int userId, Context ctx) throws OXException {
+        try {
+            return loadUserPermissionBits(userId, ctx, con);
+        } catch (final SQLException e) {
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
 
     @Override
     public UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException {
@@ -139,7 +148,12 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
 
     @Override
     public void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException {
-        saveUserPermissionBits0(permissionBits, userId, ctx);
+        saveUserPermissionBits0(null, permissionBits, userId, ctx);
+    }
+
+    @Override
+    public void saveUserPermissionBits(final Connection con, final int permissionBits, final int userId, final Context ctx) throws OXException {
+        saveUserPermissionBits0(con, permissionBits, userId, ctx);
     }
 
     /*-
@@ -174,23 +188,30 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @param ctx The context the user belongs to.
      * @throws OXException - if saving fails
      */
-    private static void saveUserPermissionBits0(final int permissionBits, final int userId, final Context ctx) throws OXException {
+    private static void saveUserPermissionBits0(final Connection con, final int permissionBits, final int userId, final Context ctx) throws OXException {
+        boolean closeCon = con == null;
         boolean insert = false;
         try {
-            Connection readCon = null;
+            Connection readCon = con;
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                readCon = DBPool.pickup(ctx);
+                if (readCon == null) {
+                    readCon = DBPool.pickup(ctx);
+                }
+
                 stmt = readCon.prepareStatement(SQL_SELECT);
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, userId);
                 rs = stmt.executeQuery();
                 insert = !rs.next();
             } finally {
-                closeResources(rs, stmt, readCon, true, ctx);
+                DBUtils.closeSQLStuff(rs, stmt);
+                if (closeCon) {
+                    DBPool.closeReaderSilent(ctx, readCon);
+                }
             }
-            saveUserPermissionBits(permissionBits, userId, insert, ctx.getContextId(), null);
+            saveUserPermissionBits(permissionBits, userId, insert, ctx.getContextId(), con);
         } catch (final SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -369,6 +390,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             if (!rs.next()) {
                 throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
+
             return new UserPermissionBits(rs.getInt(1), userId, ctx.getContextId());
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);

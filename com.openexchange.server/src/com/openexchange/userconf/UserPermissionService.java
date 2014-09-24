@@ -49,6 +49,7 @@
 
 package com.openexchange.userconf;
 
+import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -63,46 +64,79 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface UserPermissionService {
+
     /**
      * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
      *
-     * @param userId - the user ID
-     * @param ctx - the context
+     * @param userId The user ID
+     * @param context The context
      * @return the instance of <code>UserPermissionBits</code>
-     * @throws OXException If user's configuration could not be determined
+     * @throws OXException If users configuration could not be determined
      * @see #getUserPermissionBits(int, int[], Context)
      */
-    public UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException;
+    public UserPermissionBits getUserPermissionBits(int userId, Context context) throws OXException;
 
     /**
-     * This method reads several user module access permissions. This method is faster than reading separately the {@link UserPermissionBits}
-     * for every given user.
-     * @param ctx the context
-     * @param users user objects that module access permission should be loaded.
-     * @return an array with the module access permissions of the given users.
+     * Gets the {@link UserPermissionBits} for a bunch of users.
+     *
+     * @param context The context
+     * @param users User objects that module access permission should be loaded.
+     * @return An array with the module access permissions of the given users.
      * @throws OXException if users configuration could not be loaded.
      */
-    public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException;
+    public UserPermissionBits[] getUserPermissionBits(Context context, User[] users) throws OXException;
 
     /**
-     * <p>
-     * Clears the whole storage. All kept instances of <code>UserPermissionBits</code> are going to be removed from storage.
-     * <p>
-     * <b>NOTE:</b> Only the instances are going to be removed from storage; underlying database is not affected
+     * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
      *
-     * @throws OXException If clearing fails
+     * @param connection The database connection to use. May be read only.
+     * @param userId The user ID
+     * @param context The context
+     * @return the instance of <code>UserPermissionBits</code>
+     * @throws OXException If users configuration could not be determined
+     * @see #getUserPermissionBits(int, int[], Context)
      */
-    public void clearStorage() throws OXException;
+    UserPermissionBits getUserPermissionBits(Connection connection, int userId, Context context) throws OXException;
 
     /**
-     * <p>
-     * Removes the instance of <code>UserPermissionBits</code> that corresponds to given user ID from storage.
-     * <p>
-     * <b>NOTE:</b> Only the instance is going to be removed from storage; underlying database is not affected
+     * Saves the given permission bits.
      *
-     * @param userId - the user ID
-     * @param ctx - the context
-     * @throws OXException If removal fails
+     * @param permissionBits The permission bits.
+     * @throws OXException if users configuration could not be saved.
      */
-    public void removeUserPermissionBits(int userId, Context ctx) throws OXException;
+    public void saveUserPermissionBits(UserPermissionBits permissionBits) throws OXException;
+
+    /**
+     * Saves the given permission bits.
+     *
+     * @param connection The database connection to use. Must not be read only.
+     *    No transaction handling is performed, you probably want to commit or rollback
+     *    afterwards, depending on the success of this call.
+     * @param permissionBits The permission bits.
+     * @throws OXException if users configuration could not be saved.
+     */
+    public void saveUserPermissionBits(Connection connection, UserPermissionBits permissionBits) throws OXException;
+
+    /**
+     * Deletes the permission bits of the given user.
+     *
+     * @param context The context
+     * @param userId The user ID
+     * @throws OXException if users configuration could not be deleted.
+     */
+    public void deleteUserPermissionBits(Context context, int userId) throws OXException;
+
+    /**
+     * Deletes the permission bits of the given user.
+     *
+     * @param connection The database connection to use. Must not be read only.
+     *    No transaction handling is performed, you probably want to commit or rollback
+     *    afterwards, depending on the success of this call.
+     * @param context The context
+     * @param userId The user ID
+     * @throws OXException if users configuration could not be deleted.
+     */
+    public void deleteUserPermissionBits(Connection connection, Context context, int userId) throws OXException;
+
+
 }

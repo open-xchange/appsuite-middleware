@@ -276,8 +276,6 @@ public class AppointmentState extends LinkableState {
 
     @Override
     public boolean onlyIrrelevantFieldsChanged(final CalendarObject oldObj, final CalendarObject newObj) {
-        final Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
-        differingFields.removeAll(FIELDS_TO_IGNORE);
-        return differingFields.isEmpty();
+        return false; // no longer used
     }
 }

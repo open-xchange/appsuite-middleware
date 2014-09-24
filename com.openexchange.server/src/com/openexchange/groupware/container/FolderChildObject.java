@@ -50,7 +50,6 @@
 package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.i;
-import java.util.Set;
 
 /**
  * DataObject
@@ -98,24 +97,6 @@ public abstract class FolderChildObject extends DataObject {
         super.reset();
         parentFolderId = 0;
         b_parent_folder_id = false;
-    }
-
-    @Override
-    public Set<Integer> findDifferingFields(DataObject otherDataObject) {
-        Set<Integer> differingFields = super.findDifferingFields(otherDataObject);
-
-        FolderChildObject other = null;
-        if (getClass().isAssignableFrom(otherDataObject.getClass())) {
-            other = (FolderChildObject) otherDataObject;
-        } else {
-            return differingFields;
-        }
-
-        if ((!containsParentFolderID() && other.containsParentFolderID()) || (containsParentFolderID() && other.containsParentFolderID() && getParentFolderID() != other.getParentFolderID())) {
-            differingFields.add(FOLDER_ID);
-        }
-
-        return differingFields;
     }
 
     @Override

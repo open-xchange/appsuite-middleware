@@ -61,11 +61,16 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.type.PublicType;
@@ -75,6 +80,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
+import com.openexchange.share.Share;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -132,6 +138,17 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
     }
 
     /**
+     * Initializes a new {@link CreatePerformer}.
+     * @param storageParameters
+     * @param decorator
+     * @param registry
+     * @throws OXException
+     */
+    public CreatePerformer(StorageParameters storageParameters, CacheFolderStorageRegistry registry) throws OXException {
+        super(storageParameters, registry);
+    }
+
+    /**
      * Performs the <code>CREATE</code> request.
      *
      * @param toCreate The object describing the folder to create
@@ -153,7 +170,14 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         if (null == parentStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
-        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+
+        TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+        /*
+         * Throws an exception if someone tries to add an element. If this happens, you found a bug.
+         * As long as a TransactionManager is present, every storage has to add itself to the
+         * TransactionManager in FolderStorage.startTransaction() and must return false.
+         */
+        final List<FolderStorage> openedStorages = Collections.emptyList();
         checkOpenedStorage(parentStorage, openedStorages);
         try {
             final Folder parent = parentStorage.getFolder(treeId, parentId, storageParameters);
@@ -255,13 +279,12 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              */
             final String newId;
             if (FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
-                newId = doCreateReal(toCreate, parentId, treeId, parentStorage);
+                newId = doCreateReal(toCreate, parentId, treeId, parentStorage, transactionManager);
             } else {
-                newId = doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages);
+                newId = doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages, transactionManager);
             }
-            for (final FolderStorage folderStorage : openedStorages) {
-                folderStorage.commitTransaction(storageParameters);
-            }
+
+            transactionManager.commit();
             /*
              * Sanity check
              */
@@ -282,19 +305,15 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
             return newId;
         } catch (final OXException e) {
-            for (final FolderStorage folderStorage : openedStorages) {
-                folderStorage.rollback(storageParameters);
-            }
+            transactionManager.rollback();
             throw e;
         } catch (final Exception e) {
-            for (final FolderStorage folderStorage : openedStorages) {
-                folderStorage.rollback(storageParameters);
-            }
+            transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage) throws OXException {
+    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage, final TransactionManager transactionManager) throws OXException {
         final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();
         boolean supported = false;
         final ContentType folderContentType = toCreate.getContentType();
@@ -323,15 +342,54 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 Integer.valueOf(user.getId()),
                 Integer.valueOf(context.getContextId()));
         }
-        parentStorage.createFolder(toCreate, storageParameters);
+        /*
+         * check for any present guest permissions
+         */
+        ComparedPermissions comparedPermissions = new ComparedPermissions(
+            session.getContext(), toCreate.getPermissions(), new Permission[0], UserServiceHolder.requireUserService(), transactionManager.getConnection());
+        if (comparedPermissions.hasNewGuests()) {
+            /*
+             * create "plain" folder without guests first...
+             */
+            List<GuestPermission> addedGuests = comparedPermissions.getAddedGuests();
+            List<Permission> plainPermissions = new ArrayList<Permission>();
+            for (Permission permission : toCreate.getPermissions()) {
+                if (false == addedGuests.contains(permission)) {
+                    plainPermissions.add(permission);
+                }
+            }
+            Folder plainFolder = (Folder) toCreate.clone();
+            plainFolder.setPermissions(plainPermissions.toArray(new Permission[plainPermissions.size()]));
+            parentStorage.createFolder(plainFolder, storageParameters);
+            String folderID = plainFolder.getID();
+            /*
+             * setup shares and guest users
+             */
+            List<Share> addedShares = processAddedGuestPermissions(
+                folderID, plainFolder.getContentType(), addedGuests, transactionManager.getConnection());
+            /*
+             * enrich previously skipped guest permissions with real entities
+             */
+            for (int i = 0; i < addedShares.size(); i++) {
+                addedGuests.get(i).setEntity(addedShares.get(i).getGuest());
+            }
+            /*
+             * update with re-added guest permissions
+             */
+            toCreate.setID(folderID);
+            toCreate.setLastModified(plainFolder.getLastModified());
+            parentStorage.updateFolder(toCreate, storageParameters);
+        } else {
+            parentStorage.createFolder(toCreate, storageParameters);
+        }
         return toCreate.getID();
     }
 
-    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws OXException {
+    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages, final TransactionManager transactionManager) throws OXException {
         final ContentType folderContentType = toCreate.getContentType();
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
         if (realStorage.equals(virtualStorage)) {
-            virtualStorage.createFolder(toCreate, storageParameters);
+            doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage, transactionManager);
         } else {
             /*
              * Check if real storage supports folder's content types
@@ -341,7 +399,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * 1. Create in real storage
                  */
-                realStorage.createFolder(toCreate, storageParameters);
+                doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage, transactionManager);
                 /*
                  * 2. Create in virtual storage
                  */
@@ -448,7 +506,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             }
                         }
                     }
-                    capStorage.createFolder(clone4Real, storageParameters);
+                    doCreateReal(clone4Real, realParentId, FolderStorage.REAL_TREE_ID, capStorage, transactionManager);
                     toCreate.setID(clone4Real.getID());
                 }
                 /*

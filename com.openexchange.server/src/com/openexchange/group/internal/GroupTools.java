@@ -49,7 +49,9 @@
 
 package com.openexchange.group.internal;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -71,6 +73,8 @@ public final class GroupTools {
      * Cloneable object for group 0.
      */
     static final Group GROUP_ZERO;
+
+    static final Group GUEST_GROUP;
 
     /**
      * Prevent instantiation
@@ -95,8 +99,40 @@ public final class GroupTools {
         return retval;
     }
 
+    public static Group getGuestGroup(final Context ctx) throws OXException {
+        final Group retval;
+        try {
+            retval = (Group) GUEST_GROUP.clone();
+        } catch (final CloneNotSupportedException e) {
+            throw UserExceptionCode.NOT_CLONEABLE.create(e, Group.class.getName());
+        }
+
+        final UserStorage ustor = UserStorage.getInstance();
+        // FIXME
+        User[] users = ustor.getUser(ctx);
+        List<Integer> guestIds = new ArrayList<Integer>(users.length);
+        for (User user : users) {
+            if (user.isGuest()) {
+                guestIds.add(user.getId());
+            }
+        }
+
+        int[] tmp = new int[guestIds.size()];
+        for (int i = 0; i < tmp.length; i++) {
+            tmp[i] = guestIds.get(i);
+        }
+        retval.setMember(tmp);
+        retval.setLastModified(new Date());
+        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
+        final StringHelper helper = StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage()));
+        retval.setDisplayName(helper.getString(Groups.GUEST_GROUP));
+        return retval;
+    }
+
     static {
         GROUP_ZERO = new Group();
         GROUP_ZERO.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
+        GUEST_GROUP = new Group();
+        GUEST_GROUP.setIdentifier(GroupStorage.GUEST_GROUP_IDENTIFIER);
     }
 }

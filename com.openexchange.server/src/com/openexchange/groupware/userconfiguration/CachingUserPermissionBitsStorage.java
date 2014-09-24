@@ -53,6 +53,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import java.sql.Connection;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
@@ -67,7 +68,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
- * {@link CachingUserPermissionBitsStorage}
+ * {@inheritDoc}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -211,6 +212,15 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
+    public UserPermissionBits getUserPermissionBits(Connection con, int userId, Context ctx) throws OXException {
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return getFallback().getUserPermissionBits(con, userId, ctx);
+        }
+        return get(con, cache, ctx, userId);
+    }
+
+    @Override
     public UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
@@ -261,6 +271,12 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         removeUserPermissionBits(userId, ctx);
     }
 
+    @Override
+    public void saveUserPermissionBits(Connection con, int permissionBits, int userId, Context ctx) throws OXException {
+        delegateStorage.saveUserPermissionBits(con, permissionBits, userId, ctx);
+        removeUserPermissionBits(userId, ctx);
+    }
+
     private UserPermissionBits get(final Cache cache, final int contextId, final int userId) throws OXException {
         final CacheKey key = getKey(userId, contextId, cache);
         final Object object = cache.get(key);
@@ -285,8 +301,24 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         return load(cache, ctx, userId);
     }
 
+    private UserPermissionBits get(final Connection con, final Cache cache, final Context ctx, final int userId) throws OXException {
+        final CacheKey key = getKey(userId, ctx, cache);
+        final Object object = cache.get(key);
+        if (object != null) {
+            return ((UserPermissionBits) object).clone();
+        }
+
+        return load(con, cache, ctx, userId);
+    }
+
     private UserPermissionBits load(final Cache cache, final Context ctx, final int userId) throws OXException {
         final UserPermissionBits perm = delegateStorage.getUserPermissionBits(userId, ctx);
+        cache.put(getKey(userId, ctx, cache), perm.clone(), false);
+        return perm;
+    }
+
+    private UserPermissionBits load(final Connection con, final Cache cache, final Context ctx, final int userId) throws OXException {
+        final UserPermissionBits perm = delegateStorage.getUserPermissionBits(con, userId, ctx);
         cache.put(getKey(userId, ctx, cache), perm.clone(), false);
         return perm;
     }
@@ -302,7 +334,9 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
             final CacheKey key = getKey(id, ctx, cache);
             final Object object = cache.get(key);
             if (object == null) {
-                toLoad.add(id);
+                if (false == toLoad.contains(id)) {
+                    toLoad.add(id);
+                }
             } else {
                 map.put(id, ((UserPermissionBits) object).clone());
             }

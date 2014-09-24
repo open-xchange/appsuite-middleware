@@ -82,6 +82,7 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.event.impl.EventClient;
@@ -92,6 +93,7 @@ import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.DataObject;
@@ -99,6 +101,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
@@ -431,17 +434,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Get new folder ID
          */
-        int fuid = -1;
-        try {
-            fuid = OXFolderSQL.getNextSerial(ctx, writeCon);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
-        if (fuid < FolderObject.MIN_FOLDER_ID) {
-            throw OXFolderExceptionCode.INVALID_SEQUENCE_ID.create(Integer.valueOf(fuid),
-                Integer.valueOf(FolderObject.MIN_FOLDER_ID),
-                Integer.valueOf(ctx.getContextId()));
-        }
+        int fuid = generateFolderID();
+
         /*
          * Call SQL insert
          */
@@ -506,6 +500,52 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
             }
         }
+    }
+
+    private int generateFolderID() throws OXException {
+        int fuid = -1;
+        boolean created = false;
+        boolean transactionStarted = false;
+        Connection wc = writeCon;
+        if (wc == null) {
+            wc = DBPool.pickupWriteable(ctx);
+            created = true;
+        }
+
+        try {
+            if (created) {
+                Databases.startTransaction(wc);
+            } else if (wc.getAutoCommit()) {
+                Databases.startTransaction(wc);
+                transactionStarted = true;
+            }
+
+            fuid = IDGenerator.getId(ctx, Types.FOLDER, wc);
+
+            if (created || transactionStarted) {
+                wc.commit();
+            }
+        } catch (final SQLException e) {
+            if (created) {
+                Databases.rollback(wc);
+            }
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (created) {
+                Databases.autocommit(wc);
+                DBPool.closeWriterSilent(ctx, wc);
+            } else if (transactionStarted) {
+                Databases.autocommit(wc);
+            }
+        }
+
+        if (fuid < FolderObject.MIN_FOLDER_ID) {
+            throw OXFolderExceptionCode.INVALID_SEQUENCE_ID.create(Integer.valueOf(fuid),
+                Integer.valueOf(FolderObject.MIN_FOLDER_ID),
+                Integer.valueOf(ctx.getContextId()));
+        }
+
+        return fuid;
     }
 
     @Override
@@ -721,7 +761,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         fo.setDefaultFolder(storageObj.isDefaultFolder());
         OXFolderUtility.checkPermissionsAgainstSessionUserConfig(fo, userPerms, ctx);
         OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
-        OXFolderUtility.checkPermissionsAgainstUserConfigs(fo, ctx);
+        OXFolderUtility.checkPermissionsAgainstUserConfigs(readCon, fo, ctx);
         OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), fo.getNonSystemPermissionsAsArray(), user, ctx);
         if (FolderObject.PUBLIC == fo.getType()) {
             {

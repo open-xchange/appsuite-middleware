@@ -71,6 +71,7 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
+import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -124,6 +125,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
@@ -153,6 +155,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.util.ServiceCallWrapperModifier;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -164,6 +167,9 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
+import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.share.storage.internal.RdbShareStorage;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -350,6 +356,8 @@ public final class Init {
             init.start();
             started.add(init);
         }
+
+        ServiceCallWrapperModifier.initTestRun(services);
     }
 
     private static void injectTestServices() throws Exception {
@@ -376,7 +384,6 @@ public final class Init {
         startAndInjectSessiondBundle();
         startAndInjectEventBundle();
         startAndInjectContextService();
-        startAndInjectUserService();
         startAndInjectGroupService();
         startAndInjectFolderService();
         startAndInjectResourceService();
@@ -392,6 +399,7 @@ public final class Init {
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
         startAndInjectCapabilitiesServices();
+        startAndInjectDefaultShareService();
     }
 
     /**
@@ -470,6 +478,16 @@ public final class Init {
     }
 
     private static void startAndInjectBasicServices() throws OXException {
+        if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
+            final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
+                @Override
+                public synchronized List<UserServiceInterceptor> getInterceptors() {
+                    return Collections.emptyList();
+                }
+            });
+            services.put(UserService.class, us);
+            TestServiceRegistry.getInstance().addService(UserService.class, us);
+        }
         /*
          * Check for one service which is initialized below
          */
@@ -530,6 +548,7 @@ public final class Init {
             TestServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
             TestServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
             TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
+            TestServiceRegistry.getInstance().addService(CalendarAdministrationService.class, new CalendarAdministration());
 
             if (null == CalendarVolatileCache.getInstance()) {
                 try {
@@ -794,19 +813,6 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectUserService() {
-        if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
-            final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
-                @Override
-                public synchronized List<UserServiceInterceptor> getInterceptors() {
-                    return Collections.emptyList();
-                }
-            });
-            services.put(UserService.class, us);
-            TestServiceRegistry.getInstance().addService(UserService.class, us);
-        }
-    }
-
     private static void startAndInjectGroupService() {
         if (null == TestServiceRegistry.getInstance().getService(GroupService.class)) {
             final GroupService us = new GroupServiceImpl();
@@ -904,6 +910,18 @@ public final class Init {
             final ConversionService conversionService = new ConversionServiceImpl();
             services.put(ConversionService.class, conversionService);
             TestServiceRegistry.getInstance().addService(ConversionService.class, conversionService);
+        }
+    }
+
+    public static void startAndInjectDefaultShareService() {
+        if (null == TestServiceRegistry.getInstance().getService(DefaultShareService.class)) {
+            DatabaseService dbService = TestServiceRegistry.getInstance().getService(DatabaseService.class);
+            ShareStorage storage = new RdbShareStorage(dbService);
+            services.put(ShareStorage.class, storage);
+            TestServiceRegistry.getInstance().addService(ShareStorage.class, storage);
+            DefaultShareService service = new DefaultShareService(LOOKUP);
+            services.put(DefaultShareService.class, service);
+            TestServiceRegistry.getInstance().addService(DefaultShareService.class, service);
         }
     }
 

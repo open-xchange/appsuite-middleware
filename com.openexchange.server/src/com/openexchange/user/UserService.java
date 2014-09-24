@@ -165,6 +165,40 @@ public interface UserService {
     int createUser(Connection con, Context context, User user) throws OXException;
 
     /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param context The context
+     * @param user The user to delete
+     */
+    void deleteUser(Context context, User user) throws OXException;
+
+    /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param con A (writable) database connection
+     * @param context The context
+     * @param user The user to delete
+     */
+    void deleteUser(Connection con, Context context, User user) throws OXException;
+
+    /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param context The context
+     * @param user The id of the user to delete
+     */
+    void deleteUser(Context context, int userId) throws OXException;
+
+    /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param con A (writable) database connection
+     * @param context The context
+     * @param user The id of the user to delete
+     */
+    void deleteUser(Connection con, Context context, int userId) throws OXException;
+
+    /**
      * Writes a new user into the database.
      *
      * @param context The context.
@@ -223,7 +257,6 @@ public interface UserService {
      * @param context The context.
      * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
      * @throws OXException If an error occurs.
-     * @see #getContext(int)
      */
     User searchUser(String email, Context context) throws OXException;
 
@@ -231,13 +264,25 @@ public interface UserService {
      * Searches a user by its email address. This is used for converting iCal to appointments.
      *
      * @param email The email address of the user.
+     * @param considerAliases <code>true</code> to consider a user's aliases, <code>false</code>, otherwise
      * @param context The context.
      * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
-     * @return considerAliases
      * @throws OXException If an error occurs.
-     * @see #getContext(int)
      */
     User searchUser(String email, Context context, boolean considerAliases) throws OXException;
+
+    /**
+     * Searches a user by its email address. This is used for converting iCal to appointments.
+     *
+     * @param email The email address of the user.
+     * @param context The context.
+     * @param considerAliases <code>true</code> to consider a user's aliases, <code>false</code>, otherwise
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
+     * @throws OXException If an error occurs.
+     */
+    User searchUser(String email, Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * Search for matching login name.
@@ -273,6 +318,18 @@ public interface UserService {
      * @see #getContext(int)
      */
     int[] listAllUser(Context context) throws OXException;
+
+    /**
+     * Returns an array with all user identifier of the context.
+     *
+     * @param context The context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user identifier of the context.
+     * @throws OXException If generating this list fails.
+     * @see #getContext(int)
+     */
+    int[] listAllUser(Context context, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * Searches for users whose IMAP login name matches the given login name.

@@ -49,20 +49,25 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -76,11 +81,15 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
+import com.openexchange.folderstorage.osgi.ShareServiceHolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.AddedGuest;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
@@ -154,6 +163,17 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         super(user, context, folderStorageDiscoverer);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
+    }
+
+    /**
+     * Initializes a new {@link AbstractUserizedFolderPerformer}.
+     * @param storageParameters
+     * @param folderStorageDiscoverer
+     * @throws OXException
+     */
+    public AbstractUserizedFolderPerformer(StorageParameters storageParameters, FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
+        super(storageParameters, folderStorageDiscoverer);
+        this.decorator = storageParameters.getDecorator();
     }
 
     /**
@@ -396,6 +416,80 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             }
         }
         return userizedFolder;
+    }
+
+    /**
+     * Deletes shares that are no longer valid as a consequence of removed guest permission entities. This also includes deleting the
+     * corresponding guest user.
+     *
+     * @param folderID The ID of the parent folder
+     * @param contentType The content type / module of the parent folder
+     * @param removedPermissions The removed permissions
+     * @param connection The database connection to use or <code>null</code>
+     * @return The identifiers of the guest users that have been removed through the removal of a share
+     */
+    protected int[] processRemovedGuestPermissions(String folderID, ContentType contentType, List<Permission> removedPermissions, Connection connection) throws OXException {
+        int[] guests = new int[removedPermissions.size()];
+        for (int i = 0; i < removedPermissions.size(); i++) {
+            guests[i] = removedPermissions.get(i).getEntity();
+        }
+        try {
+            ShareService shareService = ShareServiceHolder.requireShareService();
+            session.setParameter(Connection.class.getName(), connection);
+            return shareService.deleteSharesForFolder(session, folderID, contentType.getModule(), guests);
+        } finally {
+            session.setParameter(Connection.class.getName(), null);
+        }
+    }
+
+    /**
+     * Adds shares as a consequence of added guest permission entities. This also includes creating the corresponding guest user.
+     *
+     * @param folderID The ID of the parent folder
+     * @param contentType The content type / module of the parent folder
+     * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
+     *                         upon share creation
+     * @param connection The database connection to use or <code>null</code>
+     * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
+     *         in the same order as the supplied guest permissions list
+     */
+    protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
+        List<AddedGuest> guests = new ArrayList<AddedGuest>(addedPermissions.size());
+        for (GuestPermission permission : addedPermissions) {
+            guests.add(createGuest(permission));
+        }
+        try {
+            ShareService shareService = ShareServiceHolder.requireShareService();
+            session.setParameter(Connection.class.getName(), connection);
+            List<Share> shares = shareService.createShares(session, folderID, contentType.getModule(), guests);
+            if (null == shares || shares.size() != addedPermissions.size()) {
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
+            }
+            for (int i = 0; i < shares.size(); i++) {
+                addedPermissions.get(i).setEntity(shares.get(i).getGuest());
+            }
+            return shares;
+        } finally {
+            session.setParameter(Connection.class.getName(), null);
+        }
+    }
+
+    /**
+     * Creates a guest using the properties found in the supplied guest permissions.
+     *
+     * @param permission The guest permissions to create the guest for
+     * @return The guest
+     */
+    private static AddedGuest createGuest(GuestPermission permission) {
+        AddedGuest guest = new AddedGuest();
+        guest.setAuthenticationMode(permission.getAuthenticationMode());
+        guest.setContactFolderID(permission.getContactFolderID());
+        guest.setContactID(permission.getContactID());
+        guest.setDisplayName(permission.getDisplayName());
+        guest.setExpires(permission.getExpires());
+        guest.setMailAddress(permission.getEmailAddress());
+        guest.setPassword(permission.getPassword());
+        return guest;
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {

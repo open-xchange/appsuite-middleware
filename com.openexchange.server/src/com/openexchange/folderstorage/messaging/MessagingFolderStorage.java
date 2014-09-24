@@ -77,6 +77,7 @@ import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.messaging.contentType.DraftsContentType;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
 import com.openexchange.folderstorage.messaging.contentType.SentContentType;
@@ -862,10 +863,17 @@ public final class MessagingFolderStorage implements FolderStorage {
         /*
          * Put map
          */
-        return parameters.putParameterIfAbsent(
+        boolean started = parameters.putParameterIfAbsent(
             MessagingFolderType.getInstance(),
             PARAM,
             new ConcurrentHashMap<Key, MessagingAccountAccess>());
+
+        if (started && TransactionManager.isManagedTransaction(parameters)) {
+            TransactionManager.getTransactionManager(parameters).transactionStarted(this);
+            return false;
+        }
+
+        return started;
     }
 
     @Override

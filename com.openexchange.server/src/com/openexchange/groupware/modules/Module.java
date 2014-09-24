@@ -53,7 +53,10 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.userconfiguration.Permission;
 
 /**
  * {@link Module} - A module known to Open-Xchange Server.
@@ -62,34 +65,40 @@ import com.openexchange.groupware.container.FolderObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Module {
-    TASK("tasks", FolderObject.TASK),
-    CALENDAR("calendar", FolderObject.CALENDAR),
-    CONTACTS("contacts", FolderObject.CONTACT),
-    UNBOUND("unbound", FolderObject.UNBOUND),
-    MAIL("mail", FolderObject.MAIL),
-    INFOSTORE("infostore", FolderObject.INFOSTORE),
-    SYSTEM("system", FolderObject.SYSTEM_MODULE);
+    TASK("tasks", FolderObject.TASK, Permission.TASKS),
+    CALENDAR("calendar", FolderObject.CALENDAR, Permission.CALENDAR),
+    CONTACTS("contacts", FolderObject.CONTACT, Permission.CONTACTS),
+    UNBOUND("unbound", FolderObject.UNBOUND, null),
+    MAIL("mail", FolderObject.MAIL, Permission.WEBMAIL),
+    INFOSTORE("infostore", FolderObject.INFOSTORE, Permission.INFOSTORE),
+    SYSTEM("system", FolderObject.SYSTEM_MODULE, null);
 
     private final String name;
     private final int folderConstant;
+    private final Permission permission;
 
-    Module(String name, int folderConstant) {
+    Module(String name, int folderConstant, Permission permission) {
         this.name = name;
         this.folderConstant = folderConstant;
+        this.permission = permission;
     }
 
     private static final TIntObjectMap<Module> folderConstant2Module;
     private static final TObjectIntMap<String> string2FolderConstant;
+    private static final Map<String, Module> name2Module;
     static {
         final Module[] values = values();
         final TIntObjectMap<Module> map1 = new TIntObjectHashMap<Module>(values.length);
         final TObjectIntMap<String> map2 = new TObjectIntHashMap<String>(values.length, 0.5f, -1);
+        Map<String, Module> map3 = new HashMap<String, Module>();
         for (final Module module : values) {
             map1.put(module.folderConstant, module);
             map2.put(module.name, module.folderConstant);
+            map3.put(module.name, module);
         }
         folderConstant2Module = map1;
         string2FolderConstant = map2;
+        name2Module = map3;
     }
 
     /**
@@ -100,6 +109,16 @@ public enum Module {
      */
     public static Module getForFolderConstant(int constant) {
         return folderConstant2Module.get(constant);
+    }
+
+    /**
+     * Gets the module for the given name.
+     *
+     * @param name The name, never <code>null</code>
+     * @return The module or <code>null</code>, if unknown
+     */
+    public static Module getForName(String name) {
+        return name2Module.get(name);
     }
 
     /**
@@ -118,6 +137,15 @@ public enum Module {
      */
     public int getFolderConstant() {
         return folderConstant;
+    }
+
+    /**
+     * Gets the {@link Permission} according to this module
+     *
+     * @return The permission or <code>null</code> if there is none for this module
+     */
+    public Permission getPermission() {
+        return permission;
     }
 
     /**

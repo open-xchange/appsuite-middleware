@@ -372,7 +372,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     capabilities.remove("pim");
                 }
                 // Spam
-                {
+                if (userPermissionBits.hasWebMail()) {
                     UserSettingMail mailSettings = serverSession.getUserSettingMail();
                     if (null != mailSettings && mailSettings.isSpamEnabled()) {
                         capabilities.add(getCapability("spam"));

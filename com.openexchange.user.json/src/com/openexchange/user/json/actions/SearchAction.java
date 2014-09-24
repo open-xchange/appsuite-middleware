@@ -210,7 +210,7 @@ public final class SearchAction extends AbstractUserAction {
                  * Get corresponding user & apply censorship if needed
                  */
                 User user;
-                if (needsUserData) {
+                if (needsUserData && 0 < contact.getInternalUserId()) {
                     user = userService.getUser(contact.getInternalUserId(), session.getContext());
                     if (null != censorship && session.getUserId() != user.getId()) {
                         user = censorship.censor(user);

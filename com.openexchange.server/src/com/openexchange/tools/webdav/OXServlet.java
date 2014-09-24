@@ -219,11 +219,6 @@ public abstract class OXServlet extends WebDavServlet {
 
     protected static final String COOKIE_SESSIONID = "sessionid";
 
-    /**
-     * Digest type for authorization.
-     */
-    private static final String DIGEST_AUTH = "digest";
-
     private static final LoginPerformer loginPerformer = LoginPerformer.getInstance();
 
     protected OXServlet() {
@@ -414,25 +409,6 @@ public abstract class OXServlet extends WebDavServlet {
     }
 
     /**
-     * Checks if the client sends a correct digest authorization header.
-     *
-     * @param auth Authorization header.
-     * @return <code>true</code> if the client sent a correct authorization header.
-     */
-    private static boolean checkForDigestAuthorization(final String auth) {
-        if (null == auth) {
-            return false;
-        }
-        if (auth.length() <= DIGEST_AUTH.length()) {
-            return false;
-        }
-        if (!auth.substring(0, DIGEST_AUTH.length()).equalsIgnoreCase(DIGEST_AUTH)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Adds the header to the response message for authorization. Only add this header if the authorization of the user failed.
      *
      * @param resp the response to that the header should be added.
@@ -471,7 +447,7 @@ public abstract class OXServlet extends WebDavServlet {
             }
             return new LoginRequestImpl(creds.getLogin(), creds.getPassword(), face, req);
         }
-        if (checkForDigestAuthorization(auth)) {
+        if (com.openexchange.tools.servlet.http.Authorization.checkForDigestAuthorization(auth)) {
             /*
              * Digest auth
              */
@@ -521,7 +497,15 @@ public abstract class OXServlet extends WebDavServlet {
         return loginPerformer.doLogin(request, properties).getSession();
     }
 
-    private static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
+    /**
+     * Tries to find an already existing session on the server based on the cookies found in the supplied HTTP request.
+     *
+     * @param req The request
+     * @param resp The response
+     * @return The session, or <code>null</code> if no matching session could be looked up
+     * @throws OXException
+     */
+    public static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         String sessionId = null;
         if (null != cookies) {

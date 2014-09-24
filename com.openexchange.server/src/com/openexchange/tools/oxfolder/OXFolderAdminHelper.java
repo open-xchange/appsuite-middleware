@@ -606,6 +606,13 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        final OCLPermission guestPermission = new OCLPermission();
+        guestPermission.setEntity(OCLPermission.ALL_GUESTS);
+        guestPermission.setGroupPermission(true);
+        guestPermission.setFolderAdmin(false);
+        guestPermission.setAllPermission(
+            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        createSinglePermission(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, guestPermission, cid, writeCon);
         /*
          * Insert system public folder
          */
@@ -633,6 +640,9 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        guestPermission.setAllPermission(
+            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        createSinglePermission(FolderObject.SYSTEM_SHARED_FOLDER_ID, guestPermission, cid, writeCon);
         /*
          * Insert system system folder
          */
@@ -741,6 +751,9 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        guestPermission.setAllPermission(
+            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        createSinglePermission(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
         /*
          * Insert system public infostore folder
          */
@@ -857,6 +870,14 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        final OCLPermission guestPermission = new OCLPermission();
+        guestPermission.setEntity(OCLPermission.ALL_GUESTS);
+        guestPermission.setGroupPermission(true);
+        guestPermission.setFolderAdmin(false);
+        guestPermission.setAllPermission(
+            OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        createSinglePermission(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, guestPermission, cid, writeCon);
+
     }
 
     /**
@@ -890,6 +911,13 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        final OCLPermission guestPermission = new OCLPermission();
+        guestPermission.setEntity(OCLPermission.ALL_GUESTS);
+        guestPermission.setGroupPermission(true);
+        guestPermission.setFolderAdmin(false);
+        guestPermission.setAllPermission(
+            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        createSinglePermission(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
     }
 
     /**
@@ -923,6 +951,13 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        final OCLPermission guestPermission = new OCLPermission();
+        guestPermission.setEntity(OCLPermission.ALL_GUESTS);
+        guestPermission.setGroupPermission(true);
+        guestPermission.setFolderAdmin(false);
+        guestPermission.setAllPermission(
+            OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        createSinglePermission(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
     }
 
     /**
@@ -1124,7 +1159,7 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private void createSinglePermission(final int fuid, final OCLPermission addMe, final int cid, final Connection writeCon) throws SQLException {
+    private static void createSinglePermission(final int fuid, final OCLPermission addMe, final int cid, final Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_PERMISSION);

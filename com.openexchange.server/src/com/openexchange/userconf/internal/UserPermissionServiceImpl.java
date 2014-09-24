@@ -49,9 +49,13 @@
 
 package com.openexchange.userconf.internal;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.userconf.UserPermissionService;
@@ -75,13 +79,36 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     }
 
     @Override
-    public void clearStorage() throws OXException {
-        UserPermissionBitsStorage.getInstance().clearStorage();
+    public UserPermissionBits getUserPermissionBits(Connection connection, int userId, Context ctx) throws OXException {
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(connection, userId, ctx);
     }
 
     @Override
-    public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
-        UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
+    public void saveUserPermissionBits(UserPermissionBits permissionBits) throws OXException {
+        UserPermissionBitsStorage.getInstance().saveUserPermissionBits(permissionBits.getPermissionBits(), permissionBits.getUserId(), permissionBits.getContext());
+    }
+
+    @Override
+    public void saveUserPermissionBits(Connection connection, UserPermissionBits permissionBits) throws OXException {
+        UserPermissionBitsStorage.getInstance().saveUserPermissionBits(connection, permissionBits.getPermissionBits(), permissionBits.getUserId(), permissionBits.getContext());
+    }
+
+    @Override
+    public void deleteUserPermissionBits(Context context, int userId) throws OXException {
+        try {
+            RdbUserPermissionBitsStorage.deleteUserPermissionBits(userId, context);
+        } catch (SQLException e) {
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteUserPermissionBits(Connection connection, Context context, int userId) throws OXException {
+        try {
+            RdbUserPermissionBitsStorage.deleteUserPermissionBits(userId, connection, context);
+        } catch (SQLException e) {
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

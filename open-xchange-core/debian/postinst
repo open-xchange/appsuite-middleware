@@ -17,10 +17,6 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-if dpkg-divert --list | grep oxfunctions.sh; then
-   dpkg-divert --package open-xchange-system --rename --remove /opt/open-xchange/lib/oxfunctions.sh
-fi
-
 DIVERTFILES="outlook2003.de_DE.properties outlook2003.en_EN.properties outlook2003.fr_FR.properties outlook2003.nl_NL.properties"
 
 for FILE in ${DIVERTFILES}; do

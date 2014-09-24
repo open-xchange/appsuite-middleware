@@ -78,6 +78,18 @@ public interface User extends Serializable {
     int getId();
 
     /**
+     * Gets the creators user id if this user is a guest.
+     * @return The user id of the creator or <code>0</code> if this instance is a fully fledged user.
+     */
+    int getCreatedBy();
+
+    /**
+     * Returns if this user is a guest.
+     * @return <code>true</code> if so, otherwise <code>false</code>.
+     */
+    boolean isGuest();
+
+    /**
      * Getter for mailEnabled.
      * @return <code>true</code> if user is enabled.
      */

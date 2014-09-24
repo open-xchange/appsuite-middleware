@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal;
 
+import static com.openexchange.osgi.util.ServiceCallWrapper.doServiceCall;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -58,6 +59,7 @@ import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.internal.performers.AbstractPerformer;
@@ -65,10 +67,12 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link CalculatePermission} - Utility class to obtain an effective permission.
@@ -76,6 +80,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CalculatePermission {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalculatePermission.class);
 
     /**
      * Initializes a new {@link CalculatePermission}.
@@ -95,7 +101,8 @@ public final class CalculatePermission {
         if (null == staticPermissions || 0 == staticPermissions.length) {
             return;
         }
-        final UserPermissionBitsStorage userConfStorage = UserPermissionBitsStorage.getInstance();
+
+
         final String id = folder.getID();
         final Type type = folder.getType();
         final ContentType contentType = folder.getContentType();
@@ -120,16 +127,12 @@ public final class CalculatePermission {
         if (!toLoad.isEmpty()) {
             final int[] userIds = toLoad.keys();
             try {
-                final UserPermissionBits[] configurations =
-                    userConfStorage.getUserPermissionBits(context, UserStorage.getInstance().getUser(context, userIds));
+                final UserPermissionBits[] configurations = getUserPermissionBits(context, getUsers(userIds, context));
                 for (int i = 0; i < configurations.length; i++) {
                     final int userId = userIds[i];
                     if (toLoad.containsKey(userId)) {
                         final int index = toLoad.get(userId);
                         UserPermissionBits userPermissionBits = configurations[i];
-                        if (null == userPermissionBits) {
-                            userPermissionBits = userConfStorage.getUserPermissionBits(userId, context);
-                        }
                         userizedPermissions[index] = new EffectivePermission(
                             staticPermissions[index],
                             id,
@@ -140,8 +143,7 @@ public final class CalculatePermission {
                     }
                 }
             } catch (final OXException e) {
-                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CalculatePermission.class);
-                logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
+                LOG.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             }
         }
         /*
@@ -185,32 +187,15 @@ public final class CalculatePermission {
      * @throws OXException If calculating the effective permission fails
      */
     public static Permission calculate(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
-        final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), context);
-        final Permission underlyingPermission;
-        {
-            final int bits = -1; // folder.getBits();
-            if (bits >= 0) {
-                /*
-                 * Get permission from bits
-                 */
-                final DummyPermission p = new DummyPermission();
-                p.setNoPermissions();
-                final int[] permissionBits = parsePermissionBits(bits);
-                p.setFolderPermission(permissionBits[0]);
-                p.setReadPermission(permissionBits[1]);
-                p.setWritePermission(permissionBits[2]);
-                p.setDeletePermission(permissionBits[3]);
-                p.setAdmin(permissionBits[4] > 0 ? true : false);
-                underlyingPermission = p;
-            } else {
-                /*
-                 * Compute permission from all folder permissions
-                 */
-                underlyingPermission = getMaxPermission(folder.getPermissions(), userPermissionBits);
-            }
+        final UserPermissionBits userPermissionBits;
+        try {
+            userPermissionBits = getUserPermissionBits(user.getId(), context);
+        } catch (OXException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
+
         return new EffectivePermission(
-            underlyingPermission,
+            getMaxPermission(folder.getPermissions(), userPermissionBits),
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
@@ -219,42 +204,36 @@ public final class CalculatePermission {
     }
 
     public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
-        final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), context);
-        final Permission underlyingPermission;
+        final UserPermissionBits userPermissionBits;
+        try {
+            userPermissionBits = getUserPermissionBits(user.getId(), context);
+        } catch (OXException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
+
+
+        /*
+         * Check visibility by folder
+         */
         final Type type = folder.getType();
         final ContentType contentType = folder.getContentType();
-        {
-            final int bits = -1; // folder.getBits();
-            if (bits >= 0) {
-                /*
-                 * Get permission from bits
-                 */
-                final DummyPermission p = new DummyPermission();
-                p.setNoPermissions();
-                final int[] permissionBits = parsePermissionBits(bits);
-                p.setFolderPermission(permissionBits[0]);
-                p.setReadPermission(permissionBits[1]);
-                p.setWritePermission(permissionBits[2]);
-                p.setDeletePermission(permissionBits[3]);
-                p.setAdmin(permissionBits[4] > 0 ? true : false);
-                underlyingPermission = p;
-            } else {
-                /*
-                 * Check visibility by folder
-                 */
-                if (PrivateType.getInstance().equals(type)) {
-                    final int createdBy = folder.getCreatedBy();
-                    if (createdBy <= 0 || createdBy == user.getId()) {
-                        return hasAccess(contentType, userPermissionBits, allowedContentTypes);
-                    }
-                }
-                /*
-                 * Check visibility by effective permission
-                 */
-                underlyingPermission = getMaxPermission(folder.getPermissions(), userPermissionBits);
+        if (PrivateType.getInstance().equals(type)) {
+            final int createdBy = folder.getCreatedBy();
+            if (createdBy <= 0 || createdBy == user.getId()) {
+                return hasAccess(contentType, userPermissionBits, allowedContentTypes);
             }
         }
-        return new EffectivePermission(underlyingPermission, folder.getID(), type, contentType, userPermissionBits, allowedContentTypes).isVisible();
+
+        /*
+         * Check visibility by effective permission
+         */
+        return new EffectivePermission(
+            getMaxPermission(folder.getPermissions(), userPermissionBits),
+            folder.getID(),
+            type,
+            contentType,
+            userPermissionBits,
+            allowedContentTypes).isVisible();
     }
 
     private static boolean hasAccess(final ContentType contentType, final UserPermissionBits permissionBits, final java.util.List<ContentType> allowedContentTypes) {
@@ -310,36 +289,55 @@ public final class CalculatePermission {
      */
     public static Permission calculate(final Folder folder, final ServerSession session, final java.util.List<ContentType> allowedContentTypes) {
         final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
-        final Permission underlyingPermission;
-        {
-            final int bits = -1;// folder.getBits();
-            if (bits >= 0) {
-                /*
-                 * Get permission from bits
-                 */
-                final DummyPermission p = new DummyPermission();
-                p.setNoPermissions();
-                final int[] permissionBits = parsePermissionBits(bits);
-                p.setFolderPermission(permissionBits[0]);
-                p.setReadPermission(permissionBits[1]);
-                p.setWritePermission(permissionBits[2]);
-                p.setDeletePermission(permissionBits[3]);
-                p.setAdmin(permissionBits[4] > 0 ? true : false);
-                underlyingPermission = p;
-            } else {
-                /*
-                 * Compute permission from all folder permissions
-                 */
-                underlyingPermission = getMaxPermission(folder.getPermissions(), userPermissionBits);
-            }
-        }
         return new EffectivePermission(
-            underlyingPermission,
+            getMaxPermission(folder.getPermissions(), userPermissionBits),
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
             userPermissionBits,
             allowedContentTypes);
+    }
+
+    private static User[] getUsers(final int[] userIds, final Context context) throws OXException {
+        try {
+            return doServiceCall(CalculatePermission.class, UserService.class,
+                new ServiceUser<UserService, User[]>() {
+                    @Override
+                    public User[] call(UserService service) throws Exception {
+                        return service.getUser(context, userIds);
+                    }
+                });
+        } catch (ServiceException e) {
+            throw e.toOXException();
+        }
+    }
+
+    private static UserPermissionBits getUserPermissionBits(final int userId, final Context context) throws OXException {
+        try {
+            return doServiceCall(CalculatePermission.class, UserPermissionService.class,
+                new ServiceUser<UserPermissionService, UserPermissionBits>() {
+                    @Override
+                    public UserPermissionBits call(UserPermissionService service) throws Exception {
+                        return service.getUserPermissionBits(userId, context);
+                    }
+                });
+        } catch (ServiceException e) {
+            throw e.toOXException();
+        }
+    }
+
+    private static UserPermissionBits[] getUserPermissionBits(final Context context, final User[] users) throws OXException {
+        try {
+            return doServiceCall(CalculatePermission.class, UserPermissionService.class,
+                new ServiceUser<UserPermissionService, UserPermissionBits[]>() {
+                    @Override
+                    public UserPermissionBits[] call(UserPermissionService service) throws Exception {
+                        return service.getUserPermissionBits(context, users);
+                    }
+                });
+        } catch (ServiceException e) {
+            throw e.toOXException();
+        }
     }
 
     private static Permission getMaxPermission(final Permission[] permissions, final UserPermissionBits userPermissionBits) {

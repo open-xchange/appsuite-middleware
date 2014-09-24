@@ -592,17 +592,23 @@ public class DefaultNotificationParticipantResolver implements
 				.getInstance();
 		final UserSettingMail usm = usmStorage.getUserSettingMail(user.getId(), ctx);
 
-		config.setInterestedInChanges(usm.isNotifyAppointments());
-		if (isOrganizer) {
-			config.setInterestedInStateChanges(usm
-					.isNotifyAppointmentsConfirmOwner());
-		} else {
-			config.setInterestedInStateChanges(usm
-					.isNotifyAppointmentsConfirmParticipant());
-		}
+		if (null != usm) {
+    		config.setInterestedInChanges(usm.isNotifyAppointments());
+    		if (isOrganizer) {
+    			config.setInterestedInStateChanges(usm
+    					.isNotifyAppointmentsConfirmOwner());
+    		} else {
+    			config.setInterestedInStateChanges(usm
+    					.isNotifyAppointmentsConfirmParticipant());
+    		}
 
-		config.setSendITIP(this.config.getBoolProperty("imipForInternalUsers",
-				false));
+    		config.setSendITIP(this.config.getBoolProperty("imipForInternalUsers",
+    				false));
+        } else {
+            config.setInterestedInChanges(false);
+            config.setInterestedInStateChanges(false);
+            config.setSendITIP(false);
+        }
 
 	}
 

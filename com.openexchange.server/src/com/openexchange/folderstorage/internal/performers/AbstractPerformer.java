@@ -74,8 +74,8 @@ import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractPerformer} - Abstract action.
@@ -123,6 +123,17 @@ public abstract class AbstractPerformer {
     }
 
     /**
+     * Initializes a new {@link AbstractPerformer} from given {@link StorageParameters}.
+     *
+     * @param storageParameters The {@link StorageParameters}. Must not be <code>null</code> and must contain a valid session.
+     * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed parameters are invalid
+     */
+    protected AbstractPerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
+        this(ServerSessionAdapter.valueOf(storageParameters.getSession()), storageParameters, folderStorageDiscoverer);
+    }
+
+    /**
      * Initializes a new {@link AbstractPerformer} from given session.
      *
      * @param session The session
@@ -130,6 +141,18 @@ public abstract class AbstractPerformer {
      * @throws OXException If passed session is invalid
      */
     protected AbstractPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
+        this(session, null, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link AbstractPerformer} from given session.
+     *
+     * @param session The session
+     * @param storageParameters The {@link StorageParameters}. Must not be <code>null</code> and must contain a valid session.
+     * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
+     */
+    protected AbstractPerformer(final ServerSession session, final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super();
         this.folderStorageDiscoverer = folderStorageDiscoverer;
         this.session = session;
@@ -139,11 +162,6 @@ public abstract class AbstractPerformer {
         if (session.getUserId() <= 0 || (session.getContextId() <= 0)) {
             throw FolderExceptionErrorMessage.INVALID_SESSION.create("Either user and/or context identifier is invalid.");
         }
-        // Pre-Initialize session
-        final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
-        if (null != userPermissionBits) {
-            userPermissionBits.isMultipleMailAccounts();
-        }
         context = session.getContext();
         if (null == context) {
             throw FolderExceptionErrorMessage.INVALID_SESSION.create("Context is null.");
@@ -152,7 +170,12 @@ public abstract class AbstractPerformer {
         if (null == user) {
             throw FolderExceptionErrorMessage.INVALID_SESSION.create("User is null.");
         }
-        storageParameters = new StorageParametersImpl(session, user, context);
+
+        if (storageParameters == null) {
+            this.storageParameters = new StorageParametersImpl(session, user, context);
+        } else {
+            this.storageParameters = storageParameters;
+        }
         warnings = new ConcurrentHashMap<OXException, Object>(2);
         check4Duplicates = true;
     }

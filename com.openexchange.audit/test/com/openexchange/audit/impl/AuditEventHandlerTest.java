@@ -75,6 +75,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
 import com.openexchange.test.mock.MockUtils;
+import com.openexchange.user.UserService;
 
 /**
  * Unit tests for {@link AuditEventHandler}
@@ -128,6 +129,8 @@ public class AuditEventHandlerTest {
 
     private Contact contact;
 
+    private UserService userService;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -136,11 +139,10 @@ public class AuditEventHandlerTest {
         PowerMockito.mockStatic(UserStorage.class);
         PowerMockito.mockStatic(ContextStorage.class);
 
-        UserStorage userStorage = PowerMockito.mock(UserStorage.class);
-        PowerMockito.when(UserStorage.getInstance()).thenReturn(userStorage);
+        userService = PowerMockito.mock(UserService.class);
         User user = PowerMockito.mock(com.openexchange.groupware.ldap.User.class);
         PowerMockito.when(user.getDisplayName()).thenReturn(this.objectTitle);
-        PowerMockito.when(userStorage.getUser(Matchers.anyInt(), (Context) Matchers.any())).thenReturn(user);
+        PowerMockito.when(userService.getUser(Matchers.anyInt(), (Context) Matchers.any())).thenReturn(user);
 
         this.contact = PowerMockito.mock(Contact.class);
         this.event = PowerMockito.mock(Event.class);
@@ -153,14 +155,14 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testGetInstance_Fine_ReturnInstance() {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         Assert.assertNotNull(this.auditEventHandler);
     }
 
     @Test
     public void testHandleEvent_InfoLoggingDisabled_Return() {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         PowerMockito.when(log.isInfoEnabled()).thenReturn(false);
         MockUtils.injectValueIntoPrivateField(AuditEventHandler.class, "LOG", log);
@@ -172,7 +174,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleEvent_InfoLoggingEnabledButWrongEvent_NothingToWrite() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
         MockUtils.injectValueIntoPrivateField(AuditEventHandler.class, "LOG", log);
@@ -185,7 +187,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleEvent_IsInfoStoreEventButLogEmpty_NotLogged() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleInfostoreEvent(Event event, StringBuilder log) {
@@ -204,7 +206,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleEvent_IsGroupwareEventButLogEmpty_NotLogged() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleGroupwareEvent(Event event, StringBuilder log) {
@@ -223,7 +225,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleEvent_IsInfoStoreEventAndLogNotEmpty_Logged() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleInfostoreEvent(Event event, StringBuilder log) {
@@ -243,7 +245,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleEvent_IsGroupwareEventAndLogNotEmpty_Logged() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleGroupwareEvent(Event event, StringBuilder log) {
@@ -263,21 +265,21 @@ public class AuditEventHandlerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleMainCommmonEvent_CommonEventNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleMainCommmonEvent(null, stringBuilder);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleMainCommmonEvent_StringBuilderNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleMainCommmonEvent(commonEvent, null);
     }
 
     @Test
     public void testHandleMainCommmonEvent_EventInsert_AddInsertToLog() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT);
 
@@ -288,7 +290,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleMainCommmonEvent_EventDelete_AddDeleteToLog() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.DELETE);
 
@@ -299,7 +301,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleMainCommmonEvent_EventUpdate_AddUpdateToLog() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.UPDATE);
 
@@ -310,21 +312,21 @@ public class AuditEventHandlerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleAppointmentCommmonEvent_CommonEventNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleAppointmentCommonEvent(null, context, stringBuilder);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleAppointmentCommmonEvent_StringBuilderNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleAppointmentCommonEvent(commonEvent, context, null);
     }
 
     @Test
     public void testHandleAppointmentCommonEvent_EverythingFine_LogStartWithCorrect() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -350,7 +352,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleAppointmentCommonEvent_EverythingFine_ContainsAllInformation() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -377,21 +379,21 @@ public class AuditEventHandlerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleContactCommmonEvent_CommonEventNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleContactCommonEvent(null, context, stringBuilder);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleContactCommmonEvent_StringBuilderNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleContactCommonEvent(commonEvent, context, null);
     }
 
     @Test
     public void testHandleContactCommonEvent_EverythingFine_LogStartWithCorrect() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -414,7 +416,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleContactCommonEvent_EverythingFine_ContainsDesiredInformation() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -439,7 +441,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleContactCommonEvent_EverythingFine_ContainsAllInformation() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -467,21 +469,21 @@ public class AuditEventHandlerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleTaskCommmonEvent_CommonEventNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleTaskCommonEvent(null, context, stringBuilder);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleTaskCommmonEvent_StringBuilderNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleTaskCommonEvent(commonEvent, context, null);
     }
 
     @Test
     public void testHandleTaskCommonEvent_EverythingFine_LogStartWithCorrect() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -505,7 +507,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleTaskCommonEvent_EverythingFine_ContainsAllInformation() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -531,21 +533,21 @@ public class AuditEventHandlerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleInfostoreCommmonEvent_CommonEventNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleInfostoreCommonEvent(null, context, stringBuilder);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleInfostoreCommmonEvent_StringBuilderNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleInfostoreCommonEvent(commonEvent, context, null);
     }
 
     @Test
     public void testHandleInfostoreCommonEvent_EverythingFine_LogStartWithCorrect() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -568,7 +570,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleInfostoreCommonEvent_EverythingFine_ContainsAllInformation() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected String getPathToRoot(int folderId, Session sessionObj) {
@@ -594,21 +596,21 @@ public class AuditEventHandlerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleInfostoreEvent_EventNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleInfostoreEvent(null, stringBuilder);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleInfostoreEvent_StringBuilderNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleInfostoreEvent(event, null);
     }
 
     @Test
     public void testHandleInfostoreEvent_TopicNotRelevant_OnlyAppendDefault() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         PowerMockito.when(event.getTopic()).thenReturn(this.objectTitle);
         Session session = PowerMockito.mock(Session.class);
@@ -630,7 +632,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleInfostoreEvent_TopicRelevantAndPublication_AppendLocalIp() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         PowerMockito.when(event.getTopic()).thenReturn(FileStorageEventConstants.UPDATE_TOPIC);
         Session session = PowerMockito.mock(Session.class);
@@ -650,7 +652,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleInfostoreEvent_AccessTopic_AppendLocalIp() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         PowerMockito.when(AuditConfiguration.getFileAccessLogging()).thenReturn(Boolean.TRUE);
 
@@ -672,21 +674,21 @@ public class AuditEventHandlerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleGroupwareEvent_EventNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleGroupwareEvent(null, stringBuilder);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandleGroupwareEvent_StringBuilderNull_ThrowException() throws Exception {
-        this.auditEventHandler = new AuditEventHandler();
+        this.auditEventHandler = new AuditEventHandler(userService);
 
         this.auditEventHandler.handleGroupwareEvent(event, null);
     }
 
     @Test
     public void testHandleGroupwareEvent_CommonEventNull_Return() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleMainCommmonEvent(CommonEvent commonEvent, StringBuilder log) {
@@ -701,7 +703,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleGroupwareEvent_TypeAppointment_InvokeAppointment() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleMainCommmonEvent(CommonEvent commonEvent, StringBuilder log) {
@@ -727,7 +729,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleGroupwareEvent_TypeContact_InvokeContact() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleMainCommmonEvent(CommonEvent commonEvent, StringBuilder log) {
@@ -753,7 +755,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleGroupwareEvent_TypeTask_InvokeTask() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleMainCommmonEvent(CommonEvent commonEvent, StringBuilder log) {
@@ -779,7 +781,7 @@ public class AuditEventHandlerTest {
 
     @Test
     public void testHandleGroupwareEvent_TypeInfostore_InvokeInfostore() throws Exception {
-        this.auditEventHandler = new AuditEventHandler() {
+        this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
             protected void handleMainCommmonEvent(CommonEvent commonEvent, StringBuilder log) {
