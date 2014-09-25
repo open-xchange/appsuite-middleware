@@ -130,6 +130,7 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
 
         // Invoke...
         try {
+            System.out.println("Dumping heap snapshot...");
             mbsc.invoke(name, "dumpHeap", new Object[] { fileName, Boolean.TRUE }, new String[]{ String.class.getCanonicalName(), "boolean"});
             System.out.println("Heap snapshot successfully dumped to file " + fileName);
         } catch (Exception e) {
