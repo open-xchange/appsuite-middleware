@@ -698,6 +698,48 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
+    public String getNewSharedDocumentsSince(final int contextId, final int userId, final int[] groups, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
+        builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
+        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
+        builder.append(" WHERE");
+        appendEntityConstraint(builder, "object_permission", userId, groups);
+
+        builder.append(" AND object_permission.last_modified > ").append(since);
+        if (sort != null) {
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        return builder.toString();
+    }
+
+    public String getModifiedSharedDocumentsSince(final int contextId, final int userId, final int[] groups, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
+        builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
+        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
+        builder.append(" WHERE");
+        appendEntityConstraint(builder, "object_permission", userId, groups);
+
+        builder.append(" AND infostore.last_modified > ").append(since);
+        if (sort != null) {
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        return builder.toString();
+    }
+
+    public String getDeletedSharedDocumentsSince(final int contextId, final int userId, final int[] groups, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
+        builder.append(" FROM del_object_permission AS object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
+        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
+        builder.append(" WHERE");
+        appendEntityConstraint(builder, "object_permission", userId, groups);
+
+        builder.append(" AND object_permission.last_modified > ").append(since);
+        if (sort != null) {
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        return builder.toString();
+    }
+
     private static void appendEntityConstraint(StringBuilder builder, String tablePrefix, int userId, int[] groups) {
         if (groups != null && groups.length > 0) {
             builder.append(" ((").append(tablePrefix).append(".group_flag <> 1 AND ").append(tablePrefix).append(".permission_id = ").append(userId).append(") OR (").append(tablePrefix).append(".group_flag = 1 AND ").append(tablePrefix).append(".permission_id IN (");

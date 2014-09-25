@@ -78,8 +78,8 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.AttachmentUUID;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.EffectiveObjectPermission;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -1653,14 +1653,54 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final ServerSession session) throws OXException {
-        boolean onlyOwn = false;
-        User user = session.getUser();
-        final EffectivePermission isperm = security.getFolderPermission(folderId, session.getContext(), user, session.getUserPermissionBits());
-        if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
-            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-        } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
-            onlyOwn = true;
+        final Context context = session.getContext();
+        final User user = session.getUser();
+        final DBProvider reuse = new ReuseReadConProvider(getProvider());
+
+        InfostoreIterator newIter = null;
+        InfostoreIterator modIter = null;
+        InfostoreIterator delIter = null;
+        Metadata[] cols = addLastModifiedIfNeeded(columns);
+        if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+            DocumentCustomizer customizer = new DocumentCustomizer() {
+                @Override
+                public DocumentMetadata handle(DocumentMetadata document) {
+                    document.setFolderId(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+                    return document;
+                }
+            };
+            newIter = InfostoreIterator.newSharedDocumentsForUser(context, user, columns, sort, order, updateSince, reuse);
+            newIter.setCustomizer(customizer);
+            modIter = InfostoreIterator.modifiedSharedDocumentsForUser(context, user, columns, sort, order, updateSince, reuse);
+            modIter.setCustomizer(customizer);
+            if (!ignoreDeleted) {
+                delIter = InfostoreIterator.deletedSharedDocumentsForUser(context, user, columns, sort, order, updateSince, reuse);
+                delIter.setCustomizer(customizer);
+            }
+        } else {
+            boolean onlyOwn = false;
+            final EffectivePermission isperm = security.getFolderPermission(folderId, context, user, session.getUserPermissionBits());
+            if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
+                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+            } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
+                onlyOwn = true;
+            }
+
+            if (onlyOwn) {
+                newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, reuse, context);
+                modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, reuse, context);
+                if (!ignoreDeleted) {
+                    delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, user.getId(), sort, order, updateSince, reuse, context);
+                }
+            } else {
+                newIter = InfostoreIterator.newDocuments(folderId, cols, sort, order, updateSince, reuse, context);
+                modIter = InfostoreIterator.modifiedDocuments(folderId, cols, sort, order, updateSince, reuse, context);
+                if (!ignoreDeleted) {
+                    delIter = InfostoreIterator.deletedDocuments(folderId, sort, order, updateSince, reuse, context);
+                }
+            }
         }
+
         boolean addLocked = false;
         boolean addNumberOfVersions = false;
         for (final Metadata m : columns) {
@@ -1674,43 +1714,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         }
 
-        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session);
-
-        final DBProvider reuse = new ReuseReadConProvider(getProvider());
-
-        InfostoreIterator newIter = null;
-        InfostoreIterator modIter = null;
-        InfostoreIterator delIter = null;
-
-        Metadata[] cols = addLastModifiedIfNeeded(columns);
-
-        if (onlyOwn) {
-            newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, reuse, session.getContext());
-            modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, reuse, session.getContext());
-            if (!ignoreDeleted) {
-                delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, user.getId(), sort, order, updateSince, reuse, session.getContext());
-            }
-        } else {
-            newIter = InfostoreIterator.newDocuments(folderId, cols, sort, order, updateSince, reuse, session.getContext());
-            modIter = InfostoreIterator.modifiedDocuments(folderId, cols, sort, order, updateSince, reuse, session.getContext());
-            if (!ignoreDeleted) {
-                delIter = InfostoreIterator.deletedDocuments(folderId, sort, order, updateSince, reuse, session.getContext());
-            }
-        }
-
         final SearchIterator<DocumentMetadata> it;
         if (ignoreDeleted) {
             it = SearchIteratorAdapter.emptyIterator();
         } else {
             it = delIter;
         }
-        Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
 
+        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session);
+        Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
         if (addLocked) {
             delta = addLocked(delta, locks, session);
         }
         if (addNumberOfVersions) {
-            delta = addNumberOfVersions(delta, session.getContext());
+            delta = addNumberOfVersions(delta, context);
         }
         return delta;
     }

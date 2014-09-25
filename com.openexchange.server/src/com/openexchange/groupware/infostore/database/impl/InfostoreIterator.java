@@ -158,6 +158,21 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 
+    public static InfostoreIterator newSharedDocumentsForUser(final Context ctx, final User user, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider) {
+        final String query = QUERIES.getNewSharedDocumentsSince(ctx.getContextId(), user.getId(), user.getGroups(), since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
+    public static InfostoreIterator modifiedSharedDocumentsForUser(final Context ctx, final User user, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider) {
+        final String query = QUERIES.getModifiedSharedDocumentsSince(ctx.getContextId(), user.getId(), user.getGroups(), since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
+    public static InfostoreIterator deletedSharedDocumentsForUser(final Context ctx, final User user, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider) {
+        final String query = QUERIES.getDeletedSharedDocumentsSince(ctx.getContextId(), user.getId(), user.getGroups(), since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
     private final Object[] args;
     private final DBProvider provider;
     private final String query;
