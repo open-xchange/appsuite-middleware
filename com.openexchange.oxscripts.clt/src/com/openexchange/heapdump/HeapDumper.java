@@ -64,6 +64,13 @@ import com.openexchange.cli.AbstractMBeanCLI;
 public class HeapDumper extends AbstractMBeanCLI<Void> {
 
     /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        new HeapDumper().execute(args);
+    }
+
+    /**
      * Initializes a new {@link HeapDumper}.
      */
     public HeapDumper() {
