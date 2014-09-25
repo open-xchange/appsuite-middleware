@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.MBeanServerInvocationHandler;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
@@ -70,7 +69,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.heapdump.HeapDumpMBean;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.sun.management.HotSpotDiagnosticMXBean;
 
 
 /**
@@ -119,24 +117,21 @@ public class HeapDumpMBeanImpl extends StandardMBean implements HeapDumpMBean {
             jmxConnector = JMXConnectorFactory.connect(url, environment);
 
             MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-
             ObjectName name = new ObjectName(HOTSPOT_BEAN_NAME);
-            Class<HotSpotDiagnosticMXBean> clazz = com.sun.management.HotSpotDiagnosticMXBean.class;
-            com.sun.management.HotSpotDiagnosticMXBean hotspotMBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, name, clazz, false);
 
             String fn = fileName;
             if (Strings.isEmpty(fn)) {
                 fn = "heap.bin";
             }
-            hotspotMBean.dumpHeap(fn, live);
+            mbsc.invoke(name, "dumpHeap", new Object[] { fn, Boolean.valueOf(live) }, new String[]{ String.class.getCanonicalName(), "boolean"});
 
             LOGGER.info("Heap snapshot successfully dumped to file {}", fileName);
         } catch (RuntimeException e) {
-            LOGGER.error("", e);
+            LOGGER.error("Heap snapshot could not be dumped to file {}", e);
             String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.error("Heap snapshot could not be dumped to file {}", e);
             String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
         } finally {
