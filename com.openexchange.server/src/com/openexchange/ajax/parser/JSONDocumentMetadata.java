@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.parser;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -508,9 +509,16 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         if (jsonObject.has(Metadata.OBJECT_PERMISSIONS_LITERAL.getName())) {
             try {
                 JSONArray jsonArray = jsonObject.getJSONArray(Metadata.OBJECT_PERMISSIONS_LITERAL.getName());
-
-
-
+                if (null != jsonArray) {
+                    List<ObjectPermission> objectPermissions = new ArrayList<ObjectPermission>(jsonArray.length());
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonPermission = jsonArray.getJSONObject(i);
+                        int entity = jsonPermission.getInt("entity");
+                        boolean group = jsonPermission.getBoolean("group");
+                        int permissions = jsonPermission.getInt("bits");
+                        objectPermissions.add(new ObjectPermission(entity, group, permissions));
+                    }
+                }
             } catch (JSONException e) {
                 LOG.error("", e);
             }
@@ -524,8 +532,16 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             if (null == objectPermissions) {
                 jsonObject.put(Metadata.OBJECT_PERMISSIONS_LITERAL.getName(), JSONObject.NULL);
             } else {
+                JSONArray jsonArray = new JSONArray(objectPermissions.size());
+                for (int i = 0; i < objectPermissions.size(); i++) {
+                    ObjectPermission objectPermission = objectPermissions.get(i);
+                    JSONObject jsonPermission = new JSONObject(3);
+                    jsonPermission.put("entity", objectPermission.getEntity());
+                    jsonPermission.put("group", objectPermission.isGroup());
+                    jsonPermission.put("bits", objectPermission.getPermissions());
 
-
+                }
+                jsonObject.put(Metadata.OBJECT_PERMISSIONS_LITERAL.getName(), jsonArray);
             }
         } catch (JSONException e) {
             LOG.error("", e);

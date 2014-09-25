@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.writer;
 
 import java.util.Date;
@@ -325,9 +323,8 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
                         writeInteger(objectPermission.getEntity());
                         writer.key("group");
                         writeBoolean(objectPermission.isGroup());
-
-
-
+                        writer.key("bits");
+                        writeInteger(objectPermission.getPermissions());
                         writer.endObject();
                     }
                     writer.endArray();
