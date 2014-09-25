@@ -95,6 +95,7 @@ import com.openexchange.groupware.infostore.database.InfostoreFilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.BatchFilenameReserverImpl;
 import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.CreateObjectPermissionAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DeleteDocumentAction;
@@ -620,6 +621,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
 
                 perform(new CreateDocumentAction(this, QUERIES, context, Collections.singletonList(document)), true);
+                perform(new CreateObjectPermissionAction(this, context, document, document.getCreatedBy()), true); //TODO: supply folder for sharedBy
 
                 final DocumentMetadata version0 = new DocumentMetadataImpl(document);
                 version0.setFileName(null);
