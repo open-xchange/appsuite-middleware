@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,69 +50,25 @@
 package com.openexchange.heapdump;
 
 import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
+
 
 /**
- * {@link HeapDumper} - Command-line tool to obtain a heap dump.
+ * {@link HeapDumpMBean} - The MBean to dump a heap snapshot.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HeapDumper extends AbstractMBeanCLI<Void> {
+public interface HeapDumpMBean {
+
+    /** The MBean's domain */
+    public static final String DOMAIN = "com.openexchange.heapdump";
 
     /**
-     * Initializes a new {@link HeapDumper}.
+     * Dumps current heap snapshot into a file.
+     *
+     * @param fileName The file name
+     * @param live <code>true</code> to dump only the live objects; otherwise <code>false</code>
+     * @throws MBeanException If dumping current heap snapshot fails
      */
-    public HeapDumper() {
-        super();
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        if (!cmd.hasOption('f')) {
-            System.out.println("You must provide a file name.");
-            System.exit(-1);
-            return;
-        }
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        // Nothing
-    }
-
-    @Override
-    protected String getFooter() {
-        return null;
-    }
-
-    @Override
-    protected String getName() {
-        return "heapdump";
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        options.addOption("f", "file", true, "The name of the file in which to dump the heap snapshot");
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        HeapDumpMBean heapDumpMBean = getMBean(mbsc, HeapDumpMBean.class, HeapDumpMBean.DOMAIN);
-
-        String fileName = cmd.getOptionValue('f');
-        heapDumpMBean.dumpHeap(fileName, true);
-
-        System.out.println("Heap dump written to " + fileName);
-        return null;
-    }
+    void dumpHeap(String fileName, boolean live) throws MBeanException;
 
 }

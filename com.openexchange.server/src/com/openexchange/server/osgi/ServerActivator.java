@@ -149,6 +149,8 @@ import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
+import com.openexchange.heapdump.HeapDumpMBean;
+import com.openexchange.heapdump.impl.HeapDumpMBeanImpl;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
@@ -464,21 +466,42 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
             @Override
-            public void added(final ServiceReference<ManagementService> ref, final ManagementService management) {
+            public void added(ServiceReference<ManagementService> ref, ManagementService management) {
                 try {
-                    final ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
+                    ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
                     management.registerMBean(objectName, new AuthenticatorMBeanImpl());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Could not register MBean {}", AuthenticatorMBean.class.getName());
                 }
             }
 
             @Override
-            public void removed(final ServiceReference<ManagementService> ref, final ManagementService management) {
+            public void removed(ServiceReference<ManagementService> ref, ManagementService management) {
                 try {
                     management.unregisterMBean(Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN));
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Could not un-register MBean {}", AuthenticatorMBean.class.getName());
+                }
+            }
+        });
+        track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+            @Override
+            public void added(ServiceReference<ManagementService> ref, ManagementService management) {
+                try {
+                    ObjectName objectName = Managements.getObjectName(HeapDumpMBean.class.getName(), HeapDumpMBean.DOMAIN);
+                    management.registerMBean(objectName, new HeapDumpMBeanImpl());
+                } catch (Exception e) {
+                    LOG.warn("Could not register MBean {}", HeapDumpMBean.class.getName());
+                }
+            }
+
+            @Override
+            public void removed(ServiceReference<ManagementService> ref, ManagementService management) {
+                try {
+                    management.unregisterMBean(Managements.getObjectName(HeapDumpMBean.class.getName(), HeapDumpMBean.DOMAIN));
+                } catch (Exception e) {
+                    LOG.warn("Could not un-register MBean {}", HeapDumpMBean.class.getName());
                 }
             }
         });
