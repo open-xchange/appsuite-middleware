@@ -68,6 +68,7 @@ import javax.security.auth.Subject;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.heapdump.HeapDumpMBean;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.sun.management.HotSpotDiagnosticMXBean;
 
@@ -103,7 +104,7 @@ public class HeapDumpMBeanImpl extends StandardMBean implements HeapDumpMBean {
 
         // Build JMX environment
         Map<String, Object> environment;
-        if (jmxLogin == null || jmxPassword == null) {
+        if (Strings.isEmpty(jmxLogin) || Strings.isEmpty(jmxPassword)) {
             environment = null;
         } else {
             environment = new HashMap<String, Object>(1);
@@ -123,7 +124,13 @@ public class HeapDumpMBeanImpl extends StandardMBean implements HeapDumpMBean {
             Class<HotSpotDiagnosticMXBean> clazz = com.sun.management.HotSpotDiagnosticMXBean.class;
             com.sun.management.HotSpotDiagnosticMXBean hotspotMBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, name, clazz, false);
 
-            hotspotMBean.dumpHeap(fileName, live);
+            String fn = fileName;
+            if (Strings.isEmpty(fn)) {
+                fn = "heap.bin";
+            }
+            hotspotMBean.dumpHeap(fn, live);
+
+            LOGGER.info("Heap snapshot successfully dumped to file {}", fileName);
         } catch (RuntimeException e) {
             LOGGER.error("", e);
             String message = e.getMessage();
