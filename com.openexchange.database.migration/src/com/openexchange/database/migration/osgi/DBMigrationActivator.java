@@ -103,15 +103,15 @@ public class DBMigrationActivator extends HousekeepingActivator {
             @Override
             public Void call() throws Exception {
                 DBMigrationExecutorServiceImpl dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(databaseService);
-                dbMigrationExecutorService.runConfigDBCoreMigrations();
-                context.registerService(DBMigrationExecutorService.class, dbMigrationExecutorService, null);
-
                 ServiceTracker<ManagementService, ManagementService> managementServiceTracker = new ServiceTracker<ManagementService, ManagementService>(
                     context,
                     ManagementService.class,
                     new ManagementServiceTracker(context, dbMigrationExecutorService, databaseService));
                 DBMigrationActivator.this.managementServiceTracker = managementServiceTracker;
                 managementServiceTracker.open();
+
+                dbMigrationExecutorService.runConfigDBCoreMigrations();
+                context.registerService(DBMigrationExecutorService.class, dbMigrationExecutorService, null);
                 return null;
             }
         });
