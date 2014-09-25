@@ -174,6 +174,10 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
             // Check for error
             Exception error = errorRef.get();
             if (null != error) {
+                if (error instanceof javax.management.InstanceNotFoundException) {
+                    System.out.println("The \"" + getFooter() + "\" is not supported by installed Java version/vendor.");
+                    return null;
+                }
                 throw error;
             }
 
