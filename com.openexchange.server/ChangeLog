@@ -1,3 +1,7 @@
+* 2014-09-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34623: Pass null references for user/password arguments in case SMTP authentication is explicitly disabled
+
 * 2014-09-25 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34622: Added missing userId-check in ContextSetConfigProvider
@@ -8,7 +12,7 @@
 
 * 2014-09-24 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 34561: Introduced various checks to prevent synchronization of equally named files and folders at the same level of the 
+ - Fix for bug 34561: Introduced various checks to prevent synchronization of equally named files and folders at the same level of the
                       folder hierarchy
 
 * 2014-09-24 - martin.schneider@open-xchange.com
