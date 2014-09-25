@@ -92,6 +92,7 @@ public class FieldMapping {
         field2metadata.put(File.Field.LAST_MODIFIED_UTC, Metadata.LAST_MODIFIED_UTC_LITERAL);
         field2metadata.put(File.Field.NUMBER_OF_VERSIONS, Metadata.NUMBER_OF_VERSIONS_LITERAL);
         field2metadata.put(File.Field.META, Metadata.META_LITERAL);
+        field2metadata.put(File.Field.OBJECT_PERMISSIONS, Metadata.OBJECT_PERMISSIONS_LITERAL);
     }
 
     public static Metadata getMatching(File.Field field) {
