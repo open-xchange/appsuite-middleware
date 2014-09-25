@@ -1,6 +1,7 @@
 * 2014-09-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 34623: Pass null references for user/password arguments in case SMTP authentication is explicitly disabled
+ - Fix for bug 34633: Added "UserPermissionBits" cache region to cache configuration to orderly align to cache usage and to disable lateral distribution of its cache elements
 
 * 2014-09-25 - jan.bauerdick@open-xchange.com
 
