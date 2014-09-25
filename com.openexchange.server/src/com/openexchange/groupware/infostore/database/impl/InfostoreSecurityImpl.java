@@ -62,7 +62,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.groupware.container.EffectiveObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -93,7 +93,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         try {
             con = getReadConnection(ctx);
             final EffectivePermission isperm = new OXFolderAccess(con, ctx).getFolderPermission((int)document.getFolderId(), user.getId(), userPermissions);
-            final ObjectPermission objectPermission = getObjectPermission(ctx, user, document.getFolderId(), document.getId(), con);
+            final EffectiveObjectPermission objectPermission = getObjectPermission(ctx, user, document.getFolderId(), document.getId(), con);
             //final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
             return new EffectiveInfostorePermission(isperm, objectPermission, document,user);
         } finally {
@@ -123,7 +123,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     @Override
     public <L> L injectInfostorePermissions(final int[] ids, final Context ctx, final User user, final UserPermissionBits userPermissions, final L list, final Injector<L, EffectiveInfostorePermission> injector) throws OXException {
         final Map<Integer, EffectivePermission> fpCache = new HashMap<Integer, EffectivePermission>();
-        final Map<Integer, ObjectPermission> opCache = new HashMap<Integer, ObjectPermission>();
+        final Map<Integer, EffectiveObjectPermission> opCache = new HashMap<Integer, EffectiveObjectPermission>();
         final List<EffectiveInfostorePermission> permissions = new ArrayList<EffectiveInfostorePermission>();
         Connection con = null;
         final List<DocumentMetadata> metadata = getFolderIdAndCreatorForDocuments(ids, ctx);
@@ -139,7 +139,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
                     fpCache.put(Integer.valueOf((int) m.getFolderId()), isperm);
                 }
 
-                final ObjectPermission objectPermission;
+                final EffectiveObjectPermission objectPermission;
                 if (opCache.containsKey(m.getId())) {
                     objectPermission = opCache.get(m.getId());
                 } else {
@@ -175,7 +175,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     @Override
-    public ObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id) throws OXException {
+    public EffectiveObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id) throws OXException {
         Connection readCon = null;
         try {
             readCon = getReadConnection(ctx);
@@ -188,7 +188,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     @Override
-    public ObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id, Connection con) throws OXException {
+    public EffectiveObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id, Connection con) throws OXException {
         int[] groups = user.getGroups();
         boolean hasGroups = groups != null && groups.length > 0;
         StringBuilder sb = new StringBuilder(128).append("SELECT bits FROM object_permission WHERE cid = ").append(ctx.getContextId()).append(" AND module = 8");
@@ -224,7 +224,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             Databases.closeSQLStuff(rs, stmt);
         }
 
-        return new ObjectPermission((int) folderId, id, bits);
+        return new EffectiveObjectPermission((int) folderId, id, bits);
     }
 
 

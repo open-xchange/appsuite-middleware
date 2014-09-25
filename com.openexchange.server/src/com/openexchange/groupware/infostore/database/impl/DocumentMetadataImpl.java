@@ -49,60 +49,31 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
+import com.openexchange.groupware.infostore.DefaultDocumentMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
 
-public class DocumentMetadataImpl implements DocumentMetadata {
+public class DocumentMetadataImpl extends DefaultDocumentMetadata {
 
 	private static final long serialVersionUID = 954199261404066624L;
-
-	private Date lastModified;
-	private Date creationDate;
-	private int modifiedBy;
-	private long folderId;
-	private String name;
-	private int version;
-	private int relevance;
-	private String content;
-	private int id = InfostoreFacade.NEW;
-	private long contentLength;
-	private String description;
-	private String url;
-	private int createdBy;
-	private String contentType;
-	private String filename;
-	private Date lockedUntil;
-	private String categories;
-	private String md5;
-	private String versionComment;
-	private boolean currentVersion;
-	private int colorLabel;
-	private String filespoolPath;
-    private int numberOfVersions;
-    private Map<String,Object> meta;
-    private Map<String,String> properties;
     private static final String DEFAULT_TYPE = "application/octet-stream";
-
 
     /**
      * Initializes a new {@link DocumentMetadataImpl}.
      */
-    public DocumentMetadataImpl(){
-		super();
-		properties = new HashMap<String,String>();
-		meta = new LinkedHashMap<String, Object>();
+    public DocumentMetadataImpl() {
+		this(InfostoreFacade.NEW);
 	}
 
 	/**
 	 * Initializes a new {@link DocumentMetadataImpl}.
+	 *
 	 * @param id The document ID
 	 */
 	public DocumentMetadataImpl(final int id){
@@ -112,7 +83,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		meta = new LinkedHashMap<String, Object>();
 	}
 
-	public DocumentMetadataImpl(final DocumentMetadata dm){
+	public DocumentMetadataImpl(final DocumentMetadata dm) {
 	    this();
 		final SetSwitch setSwitch = new SetSwitch(this);
 		final GetSwitch getSwitch = new GetSwitch(dm);
@@ -120,45 +91,6 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 			setSwitch.setValue(attr.doSwitch(getSwitch));
 			attr.doSwitch(setSwitch);
 		}
-	}
-
-	@Override
-    public String getProperty(final String key) {
-		return properties.get(key);
-	}
-
-	@Override
-    public Set<String> getPropertyNames() {
-		return properties.keySet();
-	}
-
-	@Override
-    public Date getCreationDate() {
-		return creationDate;
-	}
-
-	@Override
-    public long getFolderId() {
-		return folderId;
-	}
-
-	@Override
-    public Date getLastModified() {
-		return lastModified;
-	}
-
-	@Override
-    public String getTitle() {
-		return name;
-	}
-
-	public int getRelevance() {
-		return relevance;
-	}
-
-	@Override
-    public int getVersion() {
-		return version;
 	}
 
 	@Override
@@ -184,228 +116,19 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	}
 
 	@Override
-    public void setCreationDate(final Date creationDate) {
-		this.creationDate = creationDate;
-	}
-
-	@Override
-    public void setFolderId(final long folderId) {
-		this.folderId = folderId;
-	}
-
-
-	@Override
-    public void setLastModified(final Date lastModified) {
-		this.lastModified = lastModified;
-	}
-
-	@Override
-    public void setTitle(final String name) {
-		this.name = name;
-	}
-
-	@Override
-    public void setVersion(final int version) {
-		this.version = version;
-	}
-
-	@Override
-    public String getContent(){
-		return content;
-	}
-
-	@Override
-    public int getId(){
-		return id;
-	}
-
-	@Override
-    public long getFileSize(){
-		return contentLength;
-	}
-
-	@Override
-    public String getDescription() {
-		return description;
-	}
-
-	@Override
-    public void setDescription(final String description) {
-		this.description = description;
-	}
-
-	@Override
-    public String getURL() {
-		return url;
-	}
-
-	@Override
-    public void setURL(final String url) {
-		this.url = url;
-	}
-
-	public void setContent(final String content) {
-		this.content = content;
-	}
-
-	@Override
-    public void setFileSize(final long contentLength) {
-		this.contentLength = contentLength;
-	}
-
-	@Override
-    public void setId(final int id) {
-		this.id = id;
-	}
-
-	@Override
     public String getFileMIMEType() {
-        final String contentType = this.contentType;
-        if (contentType == null) {
-            return DEFAULT_TYPE;
-        }
-        return contentType;
+	    return null == fileMIMEType ? DEFAULT_TYPE : fileMIMEType;
     }
-
-	@Override
-    public void setFileMIMEType(final String contentType) {
-		this.contentType = contentType;
-	}
-
-	@Override
-    public int getCreatedBy() {
-		return createdBy;
-	}
-
-	@Override
-    public void setCreatedBy(final int createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	@Override
-    public String getFileName() {
-		return filename;
-	}
-
-	@Override
-    public void setFileName(final String filename) {
-		this.filename = filename;
-	}
-
-	@Override
-    public int getModifiedBy() {
-		return modifiedBy;
-	}
-
-	@Override
-    public void setModifiedBy(final int modifiedBy) {
-		this.modifiedBy = modifiedBy;
-	}
 
 	@Override
     public long getSequenceNumber() {
-		if(lastModified == null) {
-			return 0;
-		}
-		return lastModified.getTime();
+	    return null == lastModified ? 0 : lastModified.getTime();
 	}
 
-	public void setSequenceNumber(final long sequenceNumber) {
+	@Override
+    public void setSequenceNumber(final long sequenceNumber) {
 	    // Nothing to do, yet
 	}
-
-	@Override
-    public void setCategories(final String categories) {
-		this.categories = categories;
-	}
-
-	@Override
-    public String getCategories(){
-		return this.categories;
-	}
-
-	@Override
-    public Date getLockedUntil() {
-		return lockedUntil;
-	}
-
-	@Override
-    public void setLockedUntil(final Date lockedUntil) {
-		this.lockedUntil = lockedUntil;
-	}
-
-	@Override
-    public void setFileMD5Sum(final String sum){
-		this.md5 = sum;
-	}
-
-	@Override
-    public String getFileMD5Sum(){
-		return this.md5;
-	}
-
-	protected void setFileSpoolPath(final String filespoolPath){
-		this.filespoolPath = filespoolPath;
-	}
-
-	protected String getFileSpoolPath(){
-		return this.filespoolPath;
-	}
-
-	@Override
-    public int getColorLabel() {
-		return colorLabel;
-	}
-
-	@Override
-    public void setColorLabel(final int color) {
-		this.colorLabel=color;
-	}
-
-	@Override
-    public boolean isCurrentVersion() {
-		return currentVersion;
-	}
-
-	@Override
-    public void setIsCurrentVersion(final boolean bool) {
-		this.currentVersion=bool;
-	}
-
-	@Override
-    public String getVersionComment() {
-		return versionComment;
-	}
-
-	@Override
-    public void setVersionComment(final String comment) {
-		this.versionComment=comment;
-	}
-
-	@Override
-    public String getFilestoreLocation() {
-		return getFileSpoolPath();
-	}
-
-	@Override
-    public void setFilestoreLocation(final String string) {
-		setFileSpoolPath(string);
-	}
-
-    @Override
-    public int getNumberOfVersions() {
-        return numberOfVersions;
-    }
-
-    @Override
-    public void setNumberOfVersions(final int numberOfVersions) {
-        this.numberOfVersions = numberOfVersions;
-    }
-
-    @Override
-    public Map<String, Object> getMeta() {
-        return meta;
-    }
 
     @Override
     public void setMeta(Map<String, Object> properties) {
@@ -415,4 +138,5 @@ public class DocumentMetadataImpl implements DocumentMetadata {
             this.meta = new LinkedHashMap<String, Object>(properties);
         }
     }
+
 }

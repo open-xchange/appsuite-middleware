@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.groupware.container.EffectiveObjectPermission;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 
 public class EffectiveInfostorePermission {
 
-    private final ObjectPermission objectPermission;
+    private final EffectiveObjectPermission objectPermission;
 
     private final EffectivePermission permission;
 
@@ -68,10 +68,10 @@ public class EffectiveInfostorePermission {
         this.document = document;
         this.user = user;
         this.permission = permission;
-        objectPermission = new ObjectPermission((int) document.getFolderId(), document.getId(), ObjectPermission.NONE);
+        objectPermission = new EffectiveObjectPermission((int) document.getFolderId(), document.getId(), EffectiveObjectPermission.NONE);
     }
 
-    public EffectiveInfostorePermission(final EffectivePermission permission, final ObjectPermission objectPermission, final DocumentMetadata document, final User user) {
+    public EffectiveInfostorePermission(final EffectivePermission permission, final EffectiveObjectPermission objectPermission, final DocumentMetadata document, final User user) {
         this.document = document;
         this.user = user;
         this.permission = permission;
@@ -244,7 +244,7 @@ public class EffectiveInfostorePermission {
         return permission;
     }
 
-    public ObjectPermission getObjectPermission() {
+    public EffectiveObjectPermission getObjectPermission() {
         return objectPermission;
     }
 

@@ -51,8 +51,10 @@ package com.openexchange.groupware.infostore;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.container.ObjectPermission;
 
 public interface DocumentMetadata extends Serializable {
 
@@ -169,5 +171,19 @@ public interface DocumentMetadata extends Serializable {
     Map<String, Object> getMeta();
 
     void setMeta(Map<String, Object> properties);
+
+    /**
+     * Gets the object permissions in case they are defined.
+     *
+     * @return A list holding additional object permissions, or <code>null</code> if not defined
+     */
+    List<ObjectPermission> getObjectPermissions();
+
+    /**
+     * Sets the object permissions.
+     *
+     * @param objectPermissions The object permissions to set, or <code>null</code> to remove previously set permissions
+     */
+    void setObjectPermissions(List<ObjectPermission> objectPermissions);
 
 }

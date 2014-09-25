@@ -47,24 +47,77 @@
  *
  */
 
-package com.openexchange.index.solr.internal.infostore;
-
-import com.openexchange.groupware.infostore.DefaultDocumentMetadata;
-
+package com.openexchange.file.storage;
 
 /**
- * {@link SolrDocumentMetadata}
+ * {@link FileStorageObjectPermission}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SolrDocumentMetadata extends DefaultDocumentMetadata {
-
-    private static final long serialVersionUID = -4095262954539802227L;
+public interface FileStorageObjectPermission {
 
     /**
-     * Initializes a new {@link SolrDocumentMetadata}.
+     * The numerical value indicating no object permissions.
      */
-    public SolrDocumentMetadata() {
-        super();
-    }
+    static final int NONE = 0;
+
+    /**
+     * The numerical value indicating read object permissions.
+     */
+    static final int READ = 1;
+
+    /**
+     * The numerical value indicating write object permissions. This implicitly includes the {@link #READ} permission (this is no bitmask).
+     */
+    static final int WRITE = 2;
+
+    /**
+     * The numerical value indicating delete object permissions. This implicitly includes the {@link #READ} and {@link #WRITE} permission
+     * (this is no bitmask).
+     */
+    static final int DELETE = 4;
+
+    /**
+     * Gets the entity associated with this permission, i.e. either the user ID in case this permission is mapped to a user, or the group
+     * ID if it is mapped to a group.
+     *
+     * @return The permission entity
+     */
+    int getEntity();
+
+    /**
+     * Gets a value indicating whether this permission entity represents a group or not.
+     *
+     * @return <code>true</code> if this permission represents a group, <code>false</code>, otherwise
+     */
+    boolean isGroup();
+
+    /**
+     * Gets the numerical permission value (also known as permission bits).
+     *
+     * @return The permissions, usually one of {@link #NONE}, {@link #READ}, {@link #WRITE} or {@link #DELETE}.
+     */
+    int getPermissions();
+
+    /**
+     * Gets a value indicating whether it's permitted to view and access an item or not.
+     *
+     * @return <code>true</code> if it's permitted to read, <code>false</code>, otherwise
+     */
+    boolean canRead();
+
+    /**
+     * Gets a value indicating whether it's permitted to update/change an item or not.
+     *
+     * @return <code>true</code> if it's permitted to write, <code>false</code>, otherwise
+     */
+    boolean canWrite();
+
+    /**
+     * Gets a value indicating whether it's permitted to delete an item or not.
+     *
+     * @return <code>true</code> if it's permitted to delete, <code>false</code>, otherwise
+     */
+    boolean canDelete();
+
 }

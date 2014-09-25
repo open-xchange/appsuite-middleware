@@ -50,10 +50,13 @@
 package com.openexchange.ajax.parser;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -498,6 +501,35 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             return jsonObject.optInt(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName());
         }
         return -1;
+    }
+
+    @Override
+    public List<ObjectPermission> getObjectPermissions() {
+        if (jsonObject.has(Metadata.OBJECT_PERMISSIONS_LITERAL.getName())) {
+            try {
+                JSONArray jsonArray = jsonObject.getJSONArray(Metadata.OBJECT_PERMISSIONS_LITERAL.getName());
+
+
+
+            } catch (JSONException e) {
+                LOG.error("", e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
+        try {
+            if (null == objectPermissions) {
+                jsonObject.put(Metadata.OBJECT_PERMISSIONS_LITERAL.getName(), JSONObject.NULL);
+            } else {
+
+
+            }
+        } catch (JSONException e) {
+            LOG.error("", e);
+        }
     }
 
 }

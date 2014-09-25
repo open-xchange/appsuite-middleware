@@ -50,12 +50,14 @@
 package com.openexchange.file.storage.infostore;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 
@@ -322,6 +324,16 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public void setMeta(final Map<String, Object> properties) {
         file.setMeta(properties);
+    }
+
+    @Override
+    public List<ObjectPermission> getObjectPermissions() {
+        return PermissionHelper.getObjectPermissions(file.getObjectPermissions());
+    }
+
+    @Override
+    public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
+        file.setObjectPermissions(PermissionHelper.getFileStorageObjectPermissions(objectPermissions));
     }
 
     private static boolean isEmpty(final String string) {
@@ -609,6 +621,16 @@ public class FileMetadata implements DocumentMetadata {
 
             @Override
             public void setMeta(Map<String, Object> properties) {
+                // Nothing to do
+            }
+
+            @Override
+            public List<ObjectPermission> getObjectPermissions() {
+                return PermissionHelper.getObjectPermissions(file.getObjectPermissions());
+            }
+
+            @Override
+            public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
                 // Nothing to do
             }
         };

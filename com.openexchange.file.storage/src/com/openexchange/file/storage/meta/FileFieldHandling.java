@@ -272,10 +272,16 @@ public class FileFieldHandling {
         public Object versionComment(final Object... args) {
             return handler.handle(Field.VERSION_COMMENT, args);
         }
-        
+
         @Override
         public Object meta(Object... args) {
             return handler.handle(Field.META, args);
         }
+
+        @Override
+        public Object objectPermissions(Object... args) {
+            return handler.handle(Field.OBJECT_PERMISSIONS, args);
+        }
+
     }
 }

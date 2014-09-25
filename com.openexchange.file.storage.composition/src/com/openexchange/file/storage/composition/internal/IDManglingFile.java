@@ -50,9 +50,11 @@
 package com.openexchange.file.storage.composition.internal;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 
@@ -234,10 +236,15 @@ public class IDManglingFile implements File {
     public boolean isCurrentVersion() {
         return file.isCurrentVersion();
     }
-    
+
     @Override
     public Map<String, Object> getMeta() {
         return file.getMeta();
+    }
+
+    @Override
+    public List<FileStorageObjectPermission> getObjectPermissions() {
+        return file.getObjectPermissions();
     }
 
     @Override
@@ -339,10 +346,20 @@ public class IDManglingFile implements File {
     public void setVersionComment(final String string) {
         file.setVersionComment(string);
     }
-    
+
     @Override
     public void setMeta(Map<String, Object> properties) {
         file.setMeta(properties);
+    }
+
+    @Override
+    public void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions) {
+        file.setObjectPermissions(objectPermissions);
+    }
+
+    @Override
+    public String toString() {
+        return "IDManglingFile [id=" + id + ", delegateId=" + file.getId() + ", name=" + file.getFileName() + "]";
     }
 
 }

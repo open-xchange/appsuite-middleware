@@ -52,6 +52,7 @@ package com.openexchange.file.storage;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -107,6 +108,8 @@ public class DefaultFile extends AbstractFile {
     private boolean isCurrentVersion;
 
     private Map<String, Object> dynamicProperties;
+
+    private List<FileStorageObjectPermission> objectPermissions;
 
     private static final String DEFAULT_TYPE = "application/octet-stream";
 
@@ -389,6 +392,16 @@ public class DefaultFile extends AbstractFile {
     @Override
     public Map<String, Object> getMeta() {
         return dynamicProperties;
+    }
+
+    @Override
+    public void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions) {
+        this.objectPermissions = objectPermissions;
+    }
+
+    @Override
+    public List<FileStorageObjectPermission> getObjectPermissions() {
+        return objectPermissions;
     }
 
 }

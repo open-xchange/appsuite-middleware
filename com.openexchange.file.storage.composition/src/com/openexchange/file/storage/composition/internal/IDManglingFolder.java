@@ -223,8 +223,6 @@ public class IDManglingFolder implements TypeAware {
         return delegate.getProperties();
     }
 
-
-
     @Override
     public Map<String, Object> getMeta() {
         return delegate.getMeta();
@@ -232,7 +230,7 @@ public class IDManglingFolder implements TypeAware {
 
     @Override
     public String toString() {
-        return "IDManglingFolder [id=" + id + ", delegateId=" + delegate.getId() + "]";
+        return "IDManglingFolder [id=" + id + ", delegateId=" + delegate.getId() + ", name=" + delegate.getName() + "]";
     }
 
 }

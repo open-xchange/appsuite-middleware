@@ -79,7 +79,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.AttachmentUUID;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.groupware.container.EffectiveObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -1157,7 +1157,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             if (false == new EffectiveInfostorePermission(folderPermission, document, user).canDeleteObject()) {
                 // Retry with bare object permission
-                ObjectPermission objectPermission = security.getObjectPermission(context, user, folderID, document.getId());
+                EffectiveObjectPermission objectPermission = security.getObjectPermission(context, user, folderID, document.getId());
                 if (objectPermission.canNotDelete()) {
                     throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
                 }
@@ -1541,7 +1541,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     private TimedResult<DocumentMetadata> getReadableSharedDocuments(Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
-        InfostoreIterator iterator = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, columns, db);
+        InfostoreIterator iterator = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), EffectiveObjectPermission.READ, columns, db);
         iterator.setCustomizer(new DocumentCustomizer() {
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {
@@ -1778,7 +1778,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public int countDocuments(final long folderId, final ServerSession session) throws OXException {
         if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, getProvider());
+            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), EffectiveObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, getProvider());
             return it.asList().size();
         }
 

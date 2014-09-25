@@ -100,4 +100,6 @@ public interface MetadataSwitcher {
     public Object numberOfVersions();
 
     public Object meta();
+
+    Object objectPermissions();
 }

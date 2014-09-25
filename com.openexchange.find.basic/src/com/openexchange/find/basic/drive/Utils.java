@@ -66,6 +66,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.infostore.PermissionHelper;
 import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.ComparablePattern;
 import com.openexchange.file.storage.search.ComparisonType;
@@ -664,6 +666,16 @@ public final class Utils {
             public boolean matches(String pattern, Field... fields) {
                 // not needed here
                 return false;
+            }
+
+            @Override
+            public List<FileStorageObjectPermission> getObjectPermissions() {
+                return PermissionHelper.getFileStorageObjectPermissions(doc.getObjectPermissions());
+            }
+
+            @Override
+            public void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions) {
+                doc.setObjectPermissions(PermissionHelper.getObjectPermissions(objectPermissions));
             }
 
         };

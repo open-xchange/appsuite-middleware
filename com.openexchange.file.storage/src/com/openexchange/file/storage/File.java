@@ -161,6 +161,20 @@ public interface File {
 
     void setMeta(Map<String, Object> properties);
 
+    /**
+     * Gets the object permissions in case they are defined.
+     *
+     * @return A list holding additional object permissions, or <code>null</code> if not defined or not supported by the storage
+     */
+    List<FileStorageObjectPermission> getObjectPermissions();
+
+    /**
+     * Sets the object permissions.
+     *
+     * @param objectPermissions The object permissions to set, or <code>null</code> to remove previously set permissions
+     */
+    void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions);
+
     File dup();
 
     void copyInto(File other);
@@ -212,7 +226,9 @@ public interface File {
         COLOR_LABEL("color_label", 102),
         LAST_MODIFIED_UTC("last_modified_utc", 6),
         NUMBER_OF_VERSIONS("number_of_versions", 711),
-        META("meta", 23);
+        META("meta", 23),
+        OBJECT_PERMISSIONS("object_permissions", 108)
+        ;
 
         private final int number;
 
@@ -281,6 +297,8 @@ public interface File {
                 return switcher.numberOfVersions(args);
             case META:
                 return switcher.meta(args);
+            case OBJECT_PERMISSIONS:
+                return switcher.objectPermissions(args);
             default:
                 throw new IllegalArgumentException("Don't know field: " + getName());
             }

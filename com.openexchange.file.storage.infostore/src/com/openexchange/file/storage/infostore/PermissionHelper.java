@@ -47,24 +47,56 @@
  *
  */
 
-package com.openexchange.index.solr.internal.infostore;
+package com.openexchange.file.storage.infostore;
 
-import com.openexchange.groupware.infostore.DefaultDocumentMetadata;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.groupware.container.ObjectPermission;
 
 
 /**
- * {@link SolrDocumentMetadata}
+ * {@link PermissionHelper}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SolrDocumentMetadata extends DefaultDocumentMetadata {
+public class PermissionHelper {
 
-    private static final long serialVersionUID = -4095262954539802227L;
+    public static List<FileStorageObjectPermission> getFileStorageObjectPermissions(List<ObjectPermission> objectPermissions) {
+        if (null == objectPermissions) {
+            return null;
+        }
+        List<FileStorageObjectPermission> fileStorageObjectPermissions = new ArrayList<FileStorageObjectPermission>(objectPermissions.size());
+        for (ObjectPermission objectPermission : objectPermissions) {
+            fileStorageObjectPermissions.add(getFileStorageObjectPermission(objectPermission));
+        }
+        return fileStorageObjectPermissions;
+    }
 
-    /**
-     * Initializes a new {@link SolrDocumentMetadata}.
-     */
-    public SolrDocumentMetadata() {
+    public static DefaultFileStorageObjectPermission getFileStorageObjectPermission(ObjectPermission objectPermission) {
+        return new DefaultFileStorageObjectPermission(
+            objectPermission.getEntity(), objectPermission.isGroup(), objectPermission.getPermissions());
+    }
+
+    public static List<ObjectPermission> getObjectPermissions(List<FileStorageObjectPermission> fileStorageObjectPermissions) {
+        if (null == fileStorageObjectPermissions) {
+            return null;
+        }
+        List<ObjectPermission> objectPermissions = new ArrayList<ObjectPermission>(fileStorageObjectPermissions.size());
+        for (FileStorageObjectPermission fileStorageObjectPermission : fileStorageObjectPermissions) {
+            objectPermissions.add(getObjectPermission(fileStorageObjectPermission));
+        }
+        return objectPermissions;
+    }
+
+    public static ObjectPermission getObjectPermission(FileStorageObjectPermission fileStorageObjectPermission) {
+        return new ObjectPermission(
+            fileStorageObjectPermission.getEntity(), fileStorageObjectPermission.isGroup(), fileStorageObjectPermission.getPermissions());
+    }
+
+    private PermissionHelper() {
         super();
     }
+
 }

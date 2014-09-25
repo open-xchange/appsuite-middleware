@@ -863,6 +863,11 @@ public class InfostoreQueryCatalog {
             return null;
         }
 
+        @Override
+        public Object objectPermissions() {
+            return null;
+        }
+
     }
 
     public static final class DelInfostoreColumnsSwitch implements MetadataSwitcher {
@@ -991,6 +996,12 @@ public class InfostoreQueryCatalog {
         public Object numberOfVersions() {
             return null;
         }
+
+        @Override
+        public Object objectPermissions() {
+            return null;
+        }
+
     }
 
     public static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher {
@@ -1119,6 +1130,12 @@ public class InfostoreQueryCatalog {
         public Object numberOfVersions() {
             return null;
         }
+
+        @Override
+        public Object objectPermissions() {
+            return null;
+        }
+
     }
 
     public static final class DelInfostoreDocumentColumnsSwitch implements MetadataSwitcher {
@@ -1247,6 +1264,12 @@ public class InfostoreQueryCatalog {
         public Object numberOfVersions() {
             return null;
         }
+
+        @Override
+        public Object objectPermissions() {
+            return null;
+        }
+
     }
 
     public static interface FieldChooser {

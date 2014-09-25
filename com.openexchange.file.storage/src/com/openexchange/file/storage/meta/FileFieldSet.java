@@ -49,8 +49,10 @@
 
 package com.openexchange.file.storage.meta;
 
+import java.util.List;
 import java.util.Map;
 import com.openexchange.file.storage.AbstractFileFieldSwitcher;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 
 /**
  * {@link FileFieldSet}
@@ -205,6 +207,12 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     @Override
     public Object meta(Object... args) {
         md(args).setMeta((Map<String, Object>) args[1]);
+        return null;
+    }
+
+    @Override
+    public Object objectPermissions(Object... args) {
+        md(args).setObjectPermissions((List<FileStorageObjectPermission>) args[1]);
         return null;
     }
 

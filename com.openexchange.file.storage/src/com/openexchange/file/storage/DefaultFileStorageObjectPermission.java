@@ -47,73 +47,43 @@
  *
  */
 
-package com.openexchange.groupware.container;
+package com.openexchange.file.storage;
 
-import java.io.Serializable;
-import java.security.acl.Permission;
 
 /**
- * {@link ObjectPermission}
+ * {@link DefaultFileStorageObjectPermission}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ObjectPermission implements Permission, Serializable {
-
-    /**
-     * The numerical value indicating no object permissions.
-     */
-    public static final int NONE = 0;
-
-    /**
-     * The numerical value indicating read object permissions.
-     */
-    public static final int READ = 1;
-
-    /**
-     * The numerical value indicating write object permissions. This implicitly includes the {@link #READ} permission (this is no bitmask).
-     */
-    public static final int WRITE = 2;
-
-    /**
-     * The numerical value indicating delete object permissions. This implicitly includes the {@link #READ} and {@link #WRITE} permission
-     * (this is no bitmask).
-     */
-    public static final int DELETE = 4;
-
-    private static final long serialVersionUID = 29807878639680055L;
+public class DefaultFileStorageObjectPermission implements FileStorageObjectPermission {
 
     private int entity;
     private boolean group;
     private int permissions;
 
     /**
-     * Initializes a new {@link ObjectPermission}.
+     * Initializes a new {@link DefaultFileStorageObjectPermission}.
      */
-    public ObjectPermission() {
+    public DefaultFileStorageObjectPermission() {
         super();
     }
 
     /**
-     * Initializes a new {@link ObjectPermission}.
+     * Initializes a new {@link DefaultFileStorageObjectPermission}.
      *
      * @param entity The entity associated with this permission
      * @param <code>true</code> if this permission represents a group, <code>false</code>, otherwise
      * @param permissions The numerical permission value (also known as permission bits)
      *
      */
-    public ObjectPermission(int entity, boolean group, int permissions) {
+    public DefaultFileStorageObjectPermission(int entity, boolean group, int permissions) {
         super();
         this.entity = entity;
         this.group = group;
         this.permissions = permissions;
     }
 
-    /**
-     * Gets the entity associated with this permission, i.e. either the user ID in case this permission is mapped to a user, or the group
-     * ID if it is mapped to a group.
-     *
-     * @return The permission entity
-     */
+    @Override
     public int getEntity() {
         return entity;
     }
@@ -128,11 +98,7 @@ public class ObjectPermission implements Permission, Serializable {
         this.entity = entity;
     }
 
-    /**
-     * Gets a value indicating whether this permission entity represents a group or not.
-     *
-     * @return <code>true</code> if this permission represents a group, <code>false</code>, otherwise
-     */
+    @Override
     public boolean isGroup() {
         return group;
     }
@@ -146,11 +112,7 @@ public class ObjectPermission implements Permission, Serializable {
         this.group = group;
     }
 
-    /**
-     * Gets the numerical permission value (also known as permission bits).
-     *
-     * @return The permissions, usually one of {@link #NONE}, {@link #READ}, {@link #WRITE} or {@link #DELETE}.
-     */
+    @Override
     public int getPermissions() {
         return permissions;
     }
@@ -164,29 +126,17 @@ public class ObjectPermission implements Permission, Serializable {
         this.permissions = permissions;
     }
 
-    /**
-     * Gets a value indicating whether it's permitted to view and access an item or not.
-     *
-     * @return <code>true</code> if it's permitted to read, <code>false</code>, otherwise
-     */
+    @Override
     public boolean canRead() {
         return permissions >= READ;
     }
 
-    /**
-     * Gets a value indicating whether it's permitted to update/change an item or not.
-     *
-     * @return <code>true</code> if it's permitted to write, <code>false</code>, otherwise
-     */
+    @Override
     public boolean canWrite() {
         return permissions >= WRITE;
     }
 
-    /**
-     * Gets a value indicating whether it's permitted to delete an item or not.
-     *
-     * @return <code>true</code> if it's permitted to delete, <code>false</code>, otherwise
-     */
+    @Override
     public boolean canDelete() {
         return permissions >= DELETE;
     }

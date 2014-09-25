@@ -47,24 +47,68 @@
  *
  */
 
-package com.openexchange.index.solr.internal.infostore;
-
-import com.openexchange.groupware.infostore.DefaultDocumentMetadata;
+package com.openexchange.groupware.container;
 
 
 /**
- * {@link SolrDocumentMetadata}
+ * {@link EffectiveObjectPermission}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class SolrDocumentMetadata extends DefaultDocumentMetadata {
+public class EffectiveObjectPermission {
 
-    private static final long serialVersionUID = -4095262954539802227L;
+    public static final int NONE = 0;
 
-    /**
-     * Initializes a new {@link SolrDocumentMetadata}.
-     */
-    public SolrDocumentMetadata() {
+    public static final int READ = 1;
+
+    public static final int WRITE = 2;
+
+    public static final int DELETE = 4;
+
+    private final int folderId;
+
+    private final int objectId;
+
+    private final int bits;
+
+    public EffectiveObjectPermission(int folderId, int objectId, int bits) {
         super();
+        this.folderId = folderId;
+        this.objectId = objectId;
+        this.bits = bits;
     }
+
+    public boolean canRead() {
+        return bits >= READ;
+    }
+
+    public boolean canNotRead() {
+        return !canRead();
+    }
+
+    public boolean canWrite() {
+        return bits >= WRITE;
+    }
+
+    public boolean canNotWrite() {
+        return !canWrite();
+    }
+
+    public boolean canDelete() {
+        return bits >= DELETE;
+    }
+
+    public boolean canNotDelete() {
+        return !canDelete();
+    }
+
+    public int getFolderId() {
+        return folderId;
+    }
+
+    public int getObjectId() {
+        return objectId;
+    }
+
 }

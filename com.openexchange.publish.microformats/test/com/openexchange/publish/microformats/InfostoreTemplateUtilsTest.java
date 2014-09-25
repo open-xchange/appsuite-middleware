@@ -50,8 +50,10 @@
 package com.openexchange.publish.microformats;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import junit.framework.TestCase;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.publish.Publication;
@@ -101,6 +103,8 @@ public class InfostoreTemplateUtilsTest extends TestCase {
 
 
     private final DocumentMetadata document = new DocumentMetadata(){
+
+        private static final long serialVersionUID = 1690751003278385342L;
 
         @Override
         public java.util.Map<String,Object> getMeta() {
@@ -384,6 +388,18 @@ public class InfostoreTemplateUtilsTest extends TestCase {
 
         @Override
         public void setVersionComment(String string) {
+            // Nothing to do
+
+        }
+
+        @Override
+        public List<ObjectPermission> getObjectPermissions() {
+            // Nothing to do
+            return null;
+        }
+
+        @Override
+        public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
             // Nothing to do
 
         }

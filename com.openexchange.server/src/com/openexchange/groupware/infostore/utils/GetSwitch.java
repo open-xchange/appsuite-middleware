@@ -184,4 +184,9 @@ public class GetSwitch implements MetadataSwitcher {
         return metadata.getNumberOfVersions();
     }
 
+    @Override
+    public Object objectPermissions() {
+        return metadata.getObjectPermissions();
+    }
+
 }

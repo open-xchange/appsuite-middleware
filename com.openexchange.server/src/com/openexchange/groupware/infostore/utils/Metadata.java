@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.java.Strings;
 
 public class Metadata {
 
@@ -81,6 +82,7 @@ public class Metadata {
     public static final int COLOR_LABEL = 102;
     public static final int LAST_MODIFIED_UTC = 6;
     public static final int META = 23;
+    public static final int OBJECT_PERMISSIONS = 108;
 
 
     public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED,"last_modified");
@@ -108,6 +110,7 @@ public class Metadata {
     public static final Metadata LAST_MODIFIED_UTC_LITERAL = new Metadata(LAST_MODIFIED_UTC, "last_modified_utc");
     public static final Metadata NUMBER_OF_VERSIONS_LITERAL = new Metadata(NUMBER_OF_VERSIONS, "number_of_versions");
     public static final Metadata META_LITERAL = new Metadata(META, "meta");
+    public static final Metadata OBJECT_PERMISSIONS_LITERAL = new Metadata(OBJECT_PERMISSIONS, "object_permissions");
 
 
     public static final Metadata[] VALUES_ARRAY = new Metadata[]{
@@ -135,7 +138,8 @@ public class Metadata {
         FILESTORE_LOCATION_LITERAL,
         LAST_MODIFIED_UTC_LITERAL,
         NUMBER_OF_VERSIONS_LITERAL,
-        META_LITERAL
+        META_LITERAL,
+        OBJECT_PERMISSIONS_LITERAL
     };
 
     public static final Metadata[] HTTPAPI_VALUES_ARRAY = new Metadata[]{
@@ -161,7 +165,8 @@ public class Metadata {
         COLOR_LABEL_LITERAL,
         LAST_MODIFIED_UTC_LITERAL,
         NUMBER_OF_VERSIONS_LITERAL,
-        META_LITERAL
+        META_LITERAL,
+        OBJECT_PERMISSIONS_LITERAL
     };
 
     public static final List<Metadata> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
@@ -178,7 +183,7 @@ public class Metadata {
 
     @Override
     public String toString() {
-        return toUpperCase(name);
+        return Strings.toUpperCase(name);
     }
 
     public String getName(){
@@ -216,6 +221,7 @@ public class Metadata {
         case LAST_MODIFIED_UTC : return LAST_MODIFIED_UTC_LITERAL;
         case NUMBER_OF_VERSIONS : return NUMBER_OF_VERSIONS_LITERAL;
         case META : return META_LITERAL;
+        case OBJECT_PERMISSIONS: return OBJECT_PERMISSIONS_LITERAL;
         default : return null;
         }
     }
@@ -256,6 +262,7 @@ public class Metadata {
         case LAST_MODIFIED_UTC : return switcher.lastModifiedUTC();
         case NUMBER_OF_VERSIONS : return switcher.numberOfVersions();
         case META : return switcher.meta();
+        case OBJECT_PERMISSIONS: return switcher.objectPermissions();
         default : return null;
         }
     }
@@ -269,20 +276,6 @@ public class Metadata {
         case DESCRIPTION : return AttachmentField.COMMENT_LITERAL;
         default : return null;
         }
-    }
-
-    /** ASCII-wise upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
     }
 
 }

@@ -1,11 +1,13 @@
 package com.openexchange.file.storage.infostore;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.AbstractFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 
@@ -352,6 +354,24 @@ public class InfostoreFile extends AbstractFile implements File {
     @Override
     public void setMeta(final Map<String, Object> properties) {
        document.setMeta(properties);
+    }
+
+
+    @Override
+    public List<FileStorageObjectPermission> getObjectPermissions() {
+
+
+
+
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    @Override
+    public void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions) {
+        // TODO Auto-generated method stub
+
     }
 
 

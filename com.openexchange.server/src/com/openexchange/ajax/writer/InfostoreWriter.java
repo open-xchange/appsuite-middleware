@@ -52,12 +52,14 @@
 package com.openexchange.ajax.writer;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
@@ -308,6 +310,33 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			writeString(dm.getFileMD5Sum());
 			return null;
 		}
+
+        @Override
+        public Object objectPermissions() {
+            List<ObjectPermission> objectPermissions = dm.getObjectPermissions();
+            if (null == objectPermissions) {
+                writeNull();
+            } else {
+                try {
+                    writer.array();
+                    for (ObjectPermission objectPermission : objectPermissions) {
+                        writer.object();
+                        writer.key("entity");
+                        writeInteger(objectPermission.getEntity());
+                        writer.key("group");
+                        writeBoolean(objectPermission.isGroup());
+
+
+
+                        writer.endObject();
+                    }
+                    writer.endArray();
+                } catch (JSONException e) {
+                    LOG.debug("", e);
+                }
+            }
+            return null;
+        }
 
 		private void writeDate(final Date date) {
 			if (date == null) {

@@ -53,7 +53,9 @@
 package com.openexchange.groupware.infostore.utils;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class SetSwitch implements MetadataSwitcher{
@@ -257,6 +259,12 @@ public class SetSwitch implements MetadataSwitcher{
     @Override
     public Object numberOfVersions() {
         impl.setNumberOfVersions(((Integer)value).intValue());
+        return null;
+    }
+
+    @Override
+    public Object objectPermissions() {
+        impl.setObjectPermissions((List<ObjectPermission>)value);
         return null;
     }
 
