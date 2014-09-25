@@ -1,3 +1,7 @@
+* 2014-09-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34592: Check for potential client-side changes in the subdirectory tree before instructing to remove a directory
+
 * 2014-09-24 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34561: Introduced various checks to prevent synchronization of equally named files and folders at the same level of the 
