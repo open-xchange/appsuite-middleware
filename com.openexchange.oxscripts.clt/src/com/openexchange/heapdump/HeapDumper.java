@@ -131,11 +131,7 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
         final String fn;
         {
             String fileName = cmd.getOptionValue('f');
-            if (Strings.isEmpty(fileName)) {
-                fn = "heap.bin";
-            } else {
-                fn = fileName;
-            }
+            fn = Strings.isEmpty(fileName) ? "heap.bin" : fileName;
 
             if (new File(fn).exists()) {
                 throw new Exception("File already exists: " + fn);
