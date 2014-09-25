@@ -1043,6 +1043,9 @@ if [ "secret" = "$VALUE" ]; then
     ox_set_property com.openexchange.rest.services.basic-auth.password "" $PFILE
 fi
 
+# SoftwareChange_Request-2177
+ox_add_property com.openexchange.preview.thumbnail.blockingWorker false /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
