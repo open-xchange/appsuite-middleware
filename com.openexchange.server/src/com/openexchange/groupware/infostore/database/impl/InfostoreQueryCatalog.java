@@ -676,8 +676,31 @@ public class InfostoreQueryCatalog {
         builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
         builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
         builder.append(" WHERE");
+        appendEntityConstraint(builder, "object_permission", userId, groups);
+
+        builder.append(" AND object_permission.bits >=").append(leastPermission);
+        return builder.toString();
+    }
+
+    public String getSharedDocumentsSequenceNumbersQuery(final boolean versionsOnly, final boolean deleted, final int contextId, final int userId, final int[] groups) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT);
+        if (deleted) {
+            builder.append("MAX(p.last_modified) FROM del_object_permission");
+        } else {
+            builder.append("MAX(i.last_modified) FROM object_permission");
+        }
+        builder.append(" AS p JOIN infostore AS i ON p.cid = i.cid AND p.module = 8 AND p.folder_id = i.folder_id AND p.object_id = i.id");
+        builder.append(" WHERE p.cid = ").append(contextId).append(" AND");
+        appendEntityConstraint(builder, "p", userId, groups);
+        if (versionsOnly) {
+            builder.append(" AND i.version > 0");
+        }
+        return builder.toString();
+    }
+
+    private static void appendEntityConstraint(StringBuilder builder, String tablePrefix, int userId, int[] groups) {
         if (groups != null && groups.length > 0) {
-            builder.append(" ((object_permission.group_flag <> 1 AND object_permission.permission_id = ").append(userId).append(") OR (object_permission.group_flag = 1 AND object_permission.permission_id IN (");
+            builder.append(" ((").append(tablePrefix).append(".group_flag <> 1 AND ").append(tablePrefix).append(".permission_id = ").append(userId).append(") OR (").append(tablePrefix).append(".group_flag = 1 AND ").append(tablePrefix).append(".permission_id IN (");
             boolean first = true;
             for (int group : groups) {
                 if (first) {
@@ -689,11 +712,8 @@ public class InfostoreQueryCatalog {
             }
             builder.append(")))");
         } else {
-            builder.append(" (object_permission.group_flag <> 1 AND object_permission.permission_id = ").append(userId).append(")");
+            builder.append(" (").append(tablePrefix).append(".group_flag <> 1 AND ").append(tablePrefix).append(".permission_id = ").append(userId).append(")");
         }
-
-        builder.append(" AND object_permission.bits >=").append(leastPermission);
-        return builder.toString();
     }
 
     private String order(final int order) {
@@ -1298,5 +1318,4 @@ public class InfostoreQueryCatalog {
             return Table.INFOSTORE_DOCUMENT;
         }
     }
-
 }

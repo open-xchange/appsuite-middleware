@@ -1723,9 +1723,43 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         final Map<Long, Long> sequenceNumbers = new HashMap<Long, Long>(folderIds.size());
         try {
-            performQuery(session.getContext(),
-                QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, true, session.getContext().getContextId()), new ResultProcessor<Void>() {
+            User user = session.getUser();
+            int contextId = session.getContextId();
+            Context context = session.getContext();
+            final Long userInfostoreId = new Long(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+            if (folderIds.remove(userInfostoreId)) {
+                performQuery(context,
+                    QUERIES.getSharedDocumentsSequenceNumbersQuery(versionsOnly, true, contextId, user.getId(), user.getGroups()), new ResultProcessor<Void>() {
+                    @Override
+                    public Void process(ResultSet rs) throws SQLException {
+                        while (rs.next()) {
+                            long newSequence = rs.getLong(1);
+                            Long oldSequence = sequenceNumbers.get(userInfostoreId);
+                            if (oldSequence == null || oldSequence.longValue() < newSequence) {
+                                sequenceNumbers.put(userInfostoreId, Long.valueOf(newSequence));
+                            }
+                        }
+                        return null;
+                    }
+                });
+                performQuery(context,
+                    QUERIES.getSharedDocumentsSequenceNumbersQuery(versionsOnly, false, contextId,  user.getId(), user.getGroups()), new ResultProcessor<Void>() {
+                    @Override
+                    public Void process(ResultSet rs) throws SQLException {
+                        while (rs.next()) {
+                            long newSequence = rs.getLong(1);
+                            Long oldSequence = sequenceNumbers.get(userInfostoreId);
+                            if (oldSequence == null || oldSequence.longValue() < newSequence) {
+                                sequenceNumbers.put(userInfostoreId, Long.valueOf(newSequence));
+                            }
+                        }
+                        return null;
+                    }
+                });
+            }
 
+            performQuery(context,
+                QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, true, contextId), new ResultProcessor<Void>() {
                 @Override
                 public Void process(ResultSet rs) throws SQLException {
                     while (rs.next()) {
@@ -1734,16 +1768,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     return null;
                 }
             });
-            performQuery(session.getContext(),
-                QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, false, session.getContext().getContextId()), new ResultProcessor<Void>() {
-
+            performQuery(context,
+                QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, false, contextId), new ResultProcessor<Void>() {
                 @Override
                 public Void process(ResultSet rs) throws SQLException {
                     while (rs.next()) {
                         Long folderID = Long.valueOf(rs.getLong(1));
-                        long sequenceNumber = rs.getLong(2);
-                        if (false == sequenceNumbers.containsKey(folderID) || sequenceNumbers.get(folderID).longValue() < sequenceNumber) {
-                            sequenceNumbers.put(folderID, Long.valueOf(sequenceNumber));
+                        long newSequence = rs.getLong(2);
+                        Long oldSequence = sequenceNumbers.get(folderID);
+                        if (oldSequence == null || oldSequence.longValue() < newSequence) {
+                            sequenceNumbers.put(folderID, Long.valueOf(newSequence));
                         }
                     }
                     return null;
