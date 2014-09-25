@@ -58,8 +58,10 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -158,7 +160,22 @@ public class FileMetadataParser implements FileMetadataParserService{
                     return null;
                 }
                 return JSONCoercion.coerceToNative(value);
-            default: return val;
+            case OBJECT_PERMISSIONS:
+                if (null == val || JSONObject.NULL.equals(val)) {
+                    return null;
+                }
+                JSONArray jsonArray = (JSONArray) val;
+                List<FileStorageObjectPermission> objectPermissions = new ArrayList<FileStorageObjectPermission>(jsonArray.length());
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonPermission = jsonArray.getJSONObject(i);
+                    int entity = jsonPermission.getInt("entity");
+                    boolean group = jsonPermission.getBoolean("group");
+                    int permissions = jsonPermission.getInt("bits");
+                    objectPermissions.add(new DefaultFileStorageObjectPermission(entity, group, permissions));
+                }
+                return objectPermissions;
+            default:
+                return val;
             }
         }
 
