@@ -51,10 +51,12 @@ package com.openexchange.heapdump;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.java.Strings;
 
 /**
  * {@link HeapDumper} - Command-line tool to obtain a heap dump.
@@ -62,6 +64,9 @@ import com.openexchange.cli.AbstractMBeanCLI;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HeapDumper extends AbstractMBeanCLI<Void> {
+
+    /** This is the name of the HotSpot Diagnostic MBean */
+    private static final String HOTSPOT_BEAN_NAME = "com.sun.management:type=HotSpotDiagnostic";
 
     /**
      * @param args
@@ -114,12 +119,26 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        HeapDumpMBean heapDumpMBean = getMBean(mbsc, HeapDumpMBean.class, HeapDumpMBean.DOMAIN);
+        // The MBean object name
+        ObjectName name = new ObjectName(HOTSPOT_BEAN_NAME);
 
+        // The name of the dump file
         String fileName = cmd.getOptionValue('f');
-        heapDumpMBean.dumpHeap(fileName, true);
+        if (Strings.isEmpty(fileName)) {
+            fileName = "heap.bin";
+        }
 
-        System.out.println("Heap dump written to " + fileName);
+        // Invoke...
+        try {
+            mbsc.invoke(name, "dumpHeap", new Object[] { fileName, Boolean.TRUE }, new String[]{ String.class.getCanonicalName(), "boolean"});
+            System.out.println("Heap snapshot successfully dumped to file " + fileName);
+        } catch (Exception e) {
+            System.out.println("Heap snapshot could not be dumped to file " + fileName + ". Reason: " + e.getMessage());
+            e.printStackTrace(System.out);
+            throw e;
+        }
+
+        // Return
         return null;
     }
 
