@@ -99,7 +99,7 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return null;
+        return "The Open-Xchange heap dump tool";
     }
 
     @Override
