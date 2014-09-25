@@ -1,3 +1,7 @@
+* 2014-09-25 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34622: Added missing userId-check in ContextSetConfigProvider
+
 * 2014-09-25 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34592: Check for potential client-side changes in the subdirectory tree before instructing to remove a directory
