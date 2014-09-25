@@ -49,6 +49,11 @@
 
 package com.openexchange.heapdump;
 
+import java.io.File;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -114,27 +119,72 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption("f", "file", true, "The name of the file in which to dump the heap snapshot");
+        options.addOption("f", "file", true, "The name of the file in which to dump the heap snapshot; e.g. /tmp/heap.bin");
     }
 
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+    protected Void invoke(Options option, CommandLine cmd, final MBeanServerConnection mbsc) throws Exception {
         // The MBean object name
-        ObjectName name = new ObjectName(HOTSPOT_BEAN_NAME);
+        final ObjectName name = new ObjectName(HOTSPOT_BEAN_NAME);
 
-        // The name of the dump file
-        String fileName = cmd.getOptionValue('f');
-        if (Strings.isEmpty(fileName)) {
-            fileName = "heap.bin";
+        // The name/path of the dump file
+        final String fn;
+        {
+            String fileName = cmd.getOptionValue('f');
+            if (Strings.isEmpty(fileName)) {
+                fn = "heap.bin";
+            } else {
+                fn = fileName;
+            }
+
+            if (new File(fn).exists()) {
+                throw new Exception("File already exists: " + fn);
+            }
         }
 
         // Invoke...
+        final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
         try {
-            System.out.println("Dumping heap snapshot...");
-            mbsc.invoke(name, "dumpHeap", new Object[] { fileName, Boolean.TRUE }, new String[]{ String.class.getCanonicalName(), "boolean"});
-            System.out.println("Heap snapshot successfully dumped to file " + fileName);
+            // Trigger heap dump
+            Runnable runnbable = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        mbsc.invoke(name, "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
+                    } catch (Exception e) {
+                        errorRef.set(e);
+                    }
+                }
+            };
+            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            new Thread(ft, "Open-Xchange Heap Dumper").start();
+
+            // Await termination
+            System.out.print("Dumping heap snapshot");
+            int c = 21;
+            while (false == ft.isDone()) {
+                System.out.print(".");
+                if (c >= 76) {
+                    c = 0;
+                    System.out.println();
+                } else {
+                    c++;
+                }
+                LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
+            }
+            System.out.println();
+
+            // Check for error
+            Exception error = errorRef.get();
+            if (null != error) {
+                throw error;
+            }
+
+            // Success...
+            System.out.println("Heap snapshot successfully dumped to file " + fn);
         } catch (Exception e) {
-            System.out.println("Heap snapshot could not be dumped to file " + fileName + ". Reason: " + e.getMessage());
+            System.out.println("Heap snapshot could not be dumped to file " + fn + ". Reason: " + e.getMessage());
             e.printStackTrace(System.out);
             throw e;
         }
