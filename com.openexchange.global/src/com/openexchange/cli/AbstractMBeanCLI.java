@@ -154,7 +154,7 @@ public abstract class AbstractMBeanCLI<R> {
             final String adminPassword = cmd.getOptionValue('P');
 
             // Check other mandatory options
-            checkOptions(cmd);
+            checkOptions(cmd, options);
 
             // Build JMX environment
             final Map<String, Object> environment;
@@ -297,8 +297,9 @@ public abstract class AbstractMBeanCLI<R> {
      * Checks other mandatory options.
      *
      * @param cmd The command line
+     * @param options TODO
      */
-    protected abstract void checkOptions(CommandLine cmd);
+    protected abstract void checkOptions(CommandLine cmd, Options options);
 
     /**
      * Signals if this command-line tool requires administrative permission.
