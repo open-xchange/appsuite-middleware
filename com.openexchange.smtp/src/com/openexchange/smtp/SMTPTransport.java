@@ -923,7 +923,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                     transport.connect(server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword);
                 }
             } else {
-                transport.connect(server, port, "", "");
+                transport.connect(server, port, null, null);
             }
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {

@@ -464,20 +464,20 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
             @Override
-            public void added(final ServiceReference<ManagementService> ref, final ManagementService management) {
+            public void added(ServiceReference<ManagementService> ref, ManagementService management) {
                 try {
-                    final ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
+                    ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
                     management.registerMBean(objectName, new AuthenticatorMBeanImpl());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Could not register MBean {}", AuthenticatorMBean.class.getName());
                 }
             }
 
             @Override
-            public void removed(final ServiceReference<ManagementService> ref, final ManagementService management) {
+            public void removed(ServiceReference<ManagementService> ref, ManagementService management) {
                 try {
                     management.unregisterMBean(Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN));
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Could not un-register MBean {}", AuthenticatorMBean.class.getName());
                 }
             }

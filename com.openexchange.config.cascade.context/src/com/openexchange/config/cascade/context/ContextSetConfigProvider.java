@@ -158,6 +158,9 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     @Override
     protected BasicProperty get(final String property, final Context context, final int user) throws OXException {
+        if (user == NO_USER) {
+            return NO_PROPERTY;
+        }
         final List<Map<String, Object>> config = getConfigData(getSpecification(context, getUserPermissionBits(context, user)));
 
         final String value = findFirst(config, property);

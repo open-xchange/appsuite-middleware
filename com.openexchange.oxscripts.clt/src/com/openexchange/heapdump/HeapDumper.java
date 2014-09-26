@@ -49,96 +49,148 @@
 
 package com.openexchange.heapdump;
 
-import java.lang.management.ManagementFactory;
-import javax.management.MBeanServer;
+import java.io.File;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
+import javax.management.MBeanException;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.cli.AbstractMBeanCLI;
 import com.openexchange.java.Strings;
-
 
 /**
  * {@link HeapDumper} - Command-line tool to obtain a heap dump.
- * <p>
- * Aligned to <a href="https://blogs.oracle.com/sundararajan/entry/programmatically_dumping_heap_from_java">this article</a>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HeapDumper {
+public class HeapDumper extends AbstractMBeanCLI<Void> {
 
     /** This is the name of the HotSpot Diagnostic MBean */
     private static final String HOTSPOT_BEAN_NAME = "com.sun.management:type=HotSpotDiagnostic";
 
-    /** field to store the HotSpot diagnostic MBean */
-    private static volatile com.sun.management.HotSpotDiagnosticMXBean hotspotMBean;
-
     /**
-     * Call this method from your application whenever you want to dump the heap snapshot into a file.
-     *
-     * @param fileName The name of the heap dump file
-     * @param live The flag that tells whether to dump only the live objects
+     * @param args
      */
-    static void dumpHeap(String fileName, boolean live) {
-        // Initialize HotSpot diagnostic MBean
-        initHotspotMBean();
-        try {
-            hotspotMBean.dumpHeap(fileName, live);
-        } catch (RuntimeException re) {
-            throw re;
-        } catch (Exception exp) {
-            throw new RuntimeException(exp);
-        }
+    public static void main(String[] args) {
+        new HeapDumper().execute(args);
     }
 
     /**
-     * Initializes the HotSpot diagnostic MBean field
+     * Initializes a new {@link HeapDumper}.
      */
-    private static void initHotspotMBean() {
-        if (hotspotMBean == null) {
-            synchronized (HeapDumper.class) {
-                if (hotspotMBean == null) {
-                    hotspotMBean = getHotspotMBean();
-                }
+    public HeapDumper() {
+        super();
+    }
+
+    @Override
+    protected void checkOptions(CommandLine cmd, Options options) {
+        if (!cmd.hasOption('f')) {
+            System.out.println("You must provide a file name.");
+            printHelp(options);
+            System.exit(-1);
+            return;
+        }
+    }
+
+    @Override
+    protected boolean requiresAdministrativePermission() {
+        return false;
+    }
+
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
+        // Nothing
+    }
+
+    @Override
+    protected String getFooter() {
+        return "The Open-Xchange heap dump tool";
+    }
+
+    @Override
+    protected String getName() {
+        return "heapdump";
+    }
+
+    @Override
+    protected void addOptions(Options options) {
+        options.addOption("f", "file", true, "The name of the file in which to dump the heap snapshot; e.g. /tmp/heap.bin");
+    }
+
+    @Override
+    protected Void invoke(Options option, CommandLine cmd, final MBeanServerConnection mbsc) throws Exception {
+        // The MBean object name
+        final ObjectName name = new ObjectName(HOTSPOT_BEAN_NAME);
+
+        // The name/path of the dump file
+        final String fn;
+        {
+            String fileName = cmd.getOptionValue('f');
+            fn = Strings.isEmpty(fileName) ? "heap.bin" : fileName;
+
+            if (new File(fn).exists()) {
+                throw new Exception("File already exists: " + fn);
             }
         }
-    }
 
-    /**
-     * Gets the HotSpot diagnostic MBean from the platform MBean server
-     *
-     * @return The HotSpot diagnostic MBean
-     */
-    private static com.sun.management.HotSpotDiagnosticMXBean getHotspotMBean() {
+        // Invoke...
+        final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
         try {
-            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-            Class<com.sun.management.HotSpotDiagnosticMXBean> mxbeanInterface = com.sun.management.HotSpotDiagnosticMXBean.class;
-            return ManagementFactory.newPlatformMXBeanProxy(server, HOTSPOT_BEAN_NAME, mxbeanInterface);
-        } catch (RuntimeException re) {
-            throw re;
-        } catch (Exception exp) {
-            throw new RuntimeException(exp);
+            // Trigger heap dump
+            Runnable runnbable = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        mbsc.invoke(name, "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
+                    } catch (Exception e) {
+                        errorRef.set(e);
+                    }
+                }
+            };
+            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            new Thread(ft, "Open-Xchange Heap Dumper").start();
+
+            // Await termination
+            System.out.print("Dumping heap snapshot");
+            int c = 21;
+            while (false == ft.isDone()) {
+                System.out.print(".");
+                if (c >= 76) {
+                    c = 0;
+                    System.out.println();
+                } else {
+                    c++;
+                }
+                LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
+            }
+            System.out.println();
+
+            // Check for error
+            Exception error = errorRef.get();
+            if (null != error) {
+                if (error instanceof javax.management.InstanceNotFoundException) {
+                    System.out.println("The \"" + getFooter() + "\" is not supported by installed Java version/vendor.");
+                    return null;
+                }
+                throw error;
+            }
+
+            // Success...
+            System.out.println("Heap snapshot successfully dumped to file " + fn);
+        } catch (Exception e) {
+            System.out.println("Heap snapshot could not be dumped to file " + fn + ". Reason: " + e.getMessage());
+            e.printStackTrace(System.out);
+            throw e;
         }
-    }
 
-    public static void main(String[] args) {
-        // Default heap dump file name
-        String fileName = "heap.bin";
-
-        // By default dump only the live objects
-        boolean live = true;
-
-        // Simple command line options
-        switch (args.length) {
-        case 2:
-            live = Boolean.parseBoolean(args[1]);
-            //$FALL-THROUGH$
-        case 1:
-            fileName = args[0];
-        }
-
-        if (Strings.isEmpty(fileName)) {
-            fileName = "heap.bin";
-        }
-
-        // Dump the heap
-        dumpHeap(fileName, live);
+        // Return
+        return null;
     }
 
 }
