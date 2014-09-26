@@ -68,7 +68,7 @@ public class EffectiveInfostorePermission {
         this.document = document;
         this.user = user;
         this.permission = permission;
-        objectPermission = new EffectiveObjectPermission((int) document.getFolderId(), document.getId(), EffectiveObjectPermission.NONE);
+        objectPermission = null;
     }
 
     public EffectiveInfostorePermission(final EffectivePermission permission, final EffectiveObjectPermission objectPermission, final DocumentMetadata document, final User user) {
@@ -79,7 +79,7 @@ public class EffectiveInfostorePermission {
     }
 
     public boolean canReadObject() {
-        return canReadObjectInFolder() || objectPermission.canRead();
+        return canReadObjectInFolder() || (objectPermission != null && objectPermission.canRead());
     }
 
     public boolean canReadObjectInFolder() {
@@ -87,7 +87,7 @@ public class EffectiveInfostorePermission {
     }
 
     public boolean canDeleteObject() {
-        return canDeleteObjectInFolder() || objectPermission.canDelete();
+        return canDeleteObjectInFolder() || (objectPermission != null && objectPermission.canDelete());
     }
 
     public boolean canDeleteObjectInFolder() {
@@ -95,7 +95,7 @@ public class EffectiveInfostorePermission {
     }
 
     public boolean canWriteObject() {
-        return canWriteObjectInFolder() || objectPermission.canWrite();
+        return canWriteObjectInFolder() || (objectPermission != null && objectPermission.canWrite());
     }
 
     public boolean canWriteObjectInFolder() {
@@ -242,10 +242,6 @@ public class EffectiveInfostorePermission {
 
     public EffectivePermission getEffectivePermission() {
         return permission;
-    }
-
-    public EffectiveObjectPermission getObjectPermission() {
-        return objectPermission;
     }
 
     /*

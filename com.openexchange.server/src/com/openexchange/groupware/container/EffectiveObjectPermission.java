@@ -49,38 +49,39 @@
 
 package com.openexchange.groupware.container;
 
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+
 
 /**
  * {@link EffectiveObjectPermission}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class EffectiveObjectPermission {
 
-    public static final int NONE = 0;
-
-    public static final int READ = 1;
-
-    public static final int WRITE = 2;
-
-    public static final int DELETE = 4;
+    private final int module;
 
     private final int folderId;
 
     private final int objectId;
 
-    private final int bits;
+    private final ObjectPermission permission;
 
-    public EffectiveObjectPermission(int folderId, int objectId, int bits) {
+    private final UserPermissionBits permissionBits;
+
+
+    public EffectiveObjectPermission(int module, int folderId, int objectId, ObjectPermission permission, UserPermissionBits permissionBits) {
         super();
+        this.module = module;
         this.folderId = folderId;
         this.objectId = objectId;
-        this.bits = bits;
+        this.permission = permission;
+        this.permissionBits = permissionBits;
     }
 
     public boolean canRead() {
-        return bits >= READ;
+        return hasModulePermission() && permission.canRead();
     }
 
     public boolean canNotRead() {
@@ -88,7 +89,7 @@ public class EffectiveObjectPermission {
     }
 
     public boolean canWrite() {
-        return bits >= WRITE;
+        return hasModulePermission() && permission.canWrite();
     }
 
     public boolean canNotWrite() {
@@ -96,11 +97,15 @@ public class EffectiveObjectPermission {
     }
 
     public boolean canDelete() {
-        return bits >= DELETE;
+        return hasModulePermission() && permission.canDelete();
     }
 
     public boolean canNotDelete() {
         return !canDelete();
+    }
+
+    public int getModule() {
+        return module;
     }
 
     public int getFolderId() {
@@ -109,6 +114,14 @@ public class EffectiveObjectPermission {
 
     public int getObjectId() {
         return objectId;
+    }
+
+    public ObjectPermission getPermission() {
+        return permission;
+    }
+
+    private boolean hasModulePermission() {
+        return permissionBits.hasModuleAccess(module);
     }
 
 }

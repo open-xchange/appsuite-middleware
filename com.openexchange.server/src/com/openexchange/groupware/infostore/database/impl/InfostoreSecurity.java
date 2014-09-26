@@ -50,8 +50,8 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.Connection;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.EffectiveObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -66,16 +66,15 @@ public interface InfostoreSecurity {
 
     EffectiveInfostorePermission getInfostorePermission(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 
+    List<EffectiveInfostorePermission> getInfostorePermissions(List<DocumentMetadata> documents, Context context, User user, UserPermissionBits permissionBits) throws OXException;
+
     EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 
     EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions, Connection readConArg) throws OXException;
 
-    EffectiveObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id) throws OXException;
-
-    EffectiveObjectPermission getObjectPermission(Context ctx, User user, long folderId, int id, Connection readConArg) throws OXException;
-
     <L> L injectInfostorePermissions(int[] ids, Context ctx, User user, UserPermissionBits userPermissions, L list, Injector<L, EffectiveInfostorePermission> injector) throws OXException;
 
     void checkFolderId(long folderId, Context ctx) throws OXException;
+
 
 }

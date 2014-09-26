@@ -50,8 +50,6 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -78,8 +76,8 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.AttachmentUUID;
-import com.openexchange.groupware.container.EffectiveObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -137,6 +135,7 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.impl.EffectivePermission;
@@ -1135,35 +1134,24 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * check destination folder permissions
          */
-        Map<Long, EffectivePermission> folderPermissions = new HashMap<Long, EffectivePermission>();
         EffectivePermission destinationFolderPermission = security.getFolderPermission(destinationFolderID, context, user, permissionBits);
         if (false == destinationFolderPermission.canCreateObjects()) {
             throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
         }
-        folderPermissions.put(Long.valueOf(destinationFolderID), destinationFolderPermission);
+
         /*
          * check source folder permissions, write locks and client timestamp
          */
         List<DocumentMetadata> rejectedDocuments = new ArrayList<DocumentMetadata>();
         List<DocumentMetadata> sourceDocuments = new ArrayList<DocumentMetadata>(documents.size());
-        for (DocumentMetadata document : documents) {
-            if (destinationFolderID == document.getFolderId()) {
-                continue;
+        List<EffectiveInfostorePermission> permissions = security.getInfostorePermissions(documents, context, user, permissionBits);
+        for (EffectiveInfostorePermission permission : permissions) {
+            if (!permission.canDeleteObject()) {
+                throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
             }
-            Long folderID = Long.valueOf(document.getFolderId());
-            EffectivePermission folderPermission = folderPermissions.get(folderID);
-            if (null == folderPermission) {
-                folderPermission = security.getFolderPermission(folderID, context, user, permissionBits);
-                folderPermissions.put(folderID, folderPermission);
-            }
+        }
 
-            if (false == new EffectiveInfostorePermission(folderPermission, document, user).canDeleteObject()) {
-                // Retry with bare object permission
-                EffectiveObjectPermission objectPermission = security.getObjectPermission(context, user, folderID, document.getId());
-                if (objectPermission.canNotDelete()) {
-                    throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
-                }
-            }
+        for (DocumentMetadata document : documents) {
             checkWriteLock(document, session);
             if (document.getSequenceNumber() <= sequenceNumber) {
                 sourceDocuments.add(document);
@@ -1171,6 +1159,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 rejectedDocuments.add(document);
             }
         }
+
         if (0 < sourceDocuments.size()) {
             /*
              * prepare move
@@ -1283,21 +1272,27 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public int[] removeDocument(final int[] ids, final long date, final ServerSession session) throws OXException {
-        final StringBuilder sIds = new StringBuilder().append('(');
-        for (final int i : ids) {
-            sIds.append(i).append(',');
+        if (ids == null || ids.length == 0) {
+            return new int[0];
         }
-        sIds.setLength(sIds.length() - 1);
-        sIds.append(')');
 
-        List<DocumentMetadata> allVersions = null;
-        List<DocumentMetadata> allDocuments = null;
+        final Set<Integer> idSet = new HashSet<Integer>();
+        for (final int i : ids) {
+            idSet.add(Integer.valueOf(i));
+        }
 
         final Context context = session.getContext();
         final User user = session.getUser();
+        final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
 
         final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
+        List<DocumentMetadata> allVersions = null;
+        List<DocumentMetadata> allDocuments = null;
         try {
+            final StringBuilder sIds = new StringBuilder().append('(');
+            Strings.join(idSet, ", ", sIds);
+            sIds.append(')');
+
             allVersions = InfostoreIterator.allVersionsWhere(
                 "infostore.id IN " + sIds.toString(),
                 Metadata.VALUES_ARRAY,
@@ -1315,61 +1310,27 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
 
         // Check Permissions
+        List<EffectiveInfostorePermission> permissions = security.getInfostorePermissions(allDocuments, context, user, userPermissionBits);
+        for (EffectiveInfostorePermission permission : permissions) {
+            if (!permission.canDeleteObject()) {
+                throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
+            }
+        }
+
+        final Set<Integer> unknownDocuments = new HashSet<Integer>(idSet);
+        for (DocumentMetadata document : allDocuments) {
+            unknownDocuments.remove(document.getId());
+        }
 
         final List<DocumentMetadata> rejected = new ArrayList<DocumentMetadata>();
-        final Set<Integer> rejectedIds = new HashSet<Integer>();
+        removeDocuments(allDocuments, allVersions, date, session, rejected);
 
-        final Set<Integer> idSet = new HashSet<Integer>();
-        for (final int i : ids) {
-            idSet.add(Integer.valueOf(i));
-        }
-
-        final TLongObjectMap<EffectivePermission> perms = new TLongObjectHashMap<EffectivePermission>();
-
-        final List<DocumentMetadata> toDeleteDocs = new ArrayList<DocumentMetadata>();
-        final List<DocumentMetadata> toDeleteVersions = new ArrayList<DocumentMetadata>();
-
-        if (allDocuments != null) {
-            for (final DocumentMetadata m : allDocuments) {
-                int id = m.getId();
-                idSet.remove(id);
-                long folderId = m.getFolderId();
-                EffectivePermission p = perms.get(folderId);
-                if (p == null) {
-                    p = security.getFolderPermission(
-                        folderId,
-                        context,
-                        user,
-                        session.getUserPermissionBits());
-                    perms.put(folderId, p);
-                }
-                final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(p, m, user);
-                if (!infoPerm.canDeleteObject()) {
-                    // Retry with bare object permission
-                    if (security.getObjectPermission(context, user, folderId, id).canNotDelete()) {
-                        throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
-                    }
-                }
-                toDeleteDocs.add(m);
-            }
-        }
-
-        if (allVersions != null) {
-            for (final DocumentMetadata m : allVersions) {
-                if (!rejectedIds.contains(Integer.valueOf(m.getId()))) {
-                    toDeleteVersions.add(m);
-                }
-            }
-        }
-
-        removeDocuments(toDeleteDocs, toDeleteVersions, date, session, rejected);
-
-        final int[] nd = new int[rejected.size() + idSet.size()];
+        final int[] nd = new int[rejected.size() + unknownDocuments.size()];
         int i = 0;
         for (final DocumentMetadata rej : rejected) {
             nd[i++] = rej.getId();
         }
-        for (final int notFound : idSet) {
+        for (final int notFound : unknownDocuments) {
             nd[i++] = notFound;
         }
 
@@ -1543,7 +1504,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     private TimedResult<DocumentMetadata> getReadableSharedDocuments(Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
-        InfostoreIterator iterator = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), EffectiveObjectPermission.READ, columns, db);
+        InfostoreIterator iterator = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, columns, db);
         iterator.setCustomizer(new DocumentCustomizer() {
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {
@@ -1831,7 +1792,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public int countDocuments(final long folderId, final ServerSession session) throws OXException {
         if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), EffectiveObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, getProvider());
+            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, getProvider());
             return it.asList().size();
         }
 
