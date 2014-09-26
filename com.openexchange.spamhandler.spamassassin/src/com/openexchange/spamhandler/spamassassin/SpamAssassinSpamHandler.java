@@ -213,7 +213,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleHam(final int accountId, final String spamFullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         final MailService mailService = Services.getService(MailService.class);
         if (null == mailService) {
             throw SpamhandlerSpamassassinExceptionCode.MAILSERVICE_MISSING.create();
@@ -224,7 +224,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             mailAccess.connect();
             final PropertyHandler instance2 = PropertyHandler.getInstance();
             final SpamdSettings spamdSettings = getSpamdSettings(session, instance2);
-            unwrap(new UnwrapParameter(spamFullname, move, mailAccess), mailIDs, spamdSettings, accountId, session);
+            unwrap(new UnwrapParameter(spamFullName, move, mailAccess), mailIDs, spamdSettings, accountId, session);
         } finally {
             if (null != mailAccess) {
                 mailAccess.close();
@@ -233,7 +233,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleSpam(final int accountId, final String fullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         /*
          * Copy to confirmed spam folder
          */
@@ -241,19 +241,19 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         if (null == mailService) {
             throw SpamhandlerSpamassassinExceptionCode.MAILSERVICE_MISSING.create();
         }
-        LOGGER.debug("Handle spam for messages {} from folder {} in account {} (user={}, context={})", Arrays.toString(mailIDs), fullname, accountId, session.getUserId(), session.getContextId());
+        LOGGER.debug("Handle spam for messages {} from folder {} in account {} (user={}, context={})", Arrays.toString(mailIDs), fullName, accountId, session.getUserId(), session.getContextId());
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = mailService.getMailAccess(session, accountId);
             mailAccess.connect();
             if (isCreateConfirmedSpam()) {
                 final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
-                mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
-                LOGGER.debug("Spam messages {} from folder {} in account {} moved to confirmed-spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullname, accountId, confirmedSpamFullname, session.getUserId(), session.getContextId());
+                mailAccess.getMessageStorage().copyMessages(fullName, confirmedSpamFullname, mailIDs, true);
+                LOGGER.debug("Spam messages {} from folder {} in account {} copied to confirmed-spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullName, accountId, confirmedSpamFullname, session.getUserId(), session.getContextId());
             }
             final SpamdSettings spamdSettings = getSpamdSettings(session, PropertyHandler.getInstance());
             if (null != spamdSettings) {
-                final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullname, mailIDs, new MailField[]{MailField.ID, MailField.FOLDER_ID});
+                final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullName, mailIDs, new MailField[]{MailField.ID, MailField.FOLDER_ID});
                 spamdMessageProcessing(mails, spamdSettings, true, accountId, mailAccess, session);
             }
             if (move) {
@@ -261,8 +261,8 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                  * Move to spam folder
                  */
                 final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
-                mailAccess.getMessageStorage().moveMessages(fullname, spamFullname, mailIDs, true);
-                LOGGER.debug("Spam messages {} from folder {} in account {} moved to spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullname, accountId, spamFullname, session.getUserId(), session.getContextId());
+                mailAccess.getMessageStorage().moveMessages(fullName, spamFullname, mailIDs, true);
+                LOGGER.debug("Spam messages {} from folder {} in account {} moved to spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullName, accountId, spamFullname, session.getUserId(), session.getContextId());
             }
         } finally {
             if (null != mailAccess) {

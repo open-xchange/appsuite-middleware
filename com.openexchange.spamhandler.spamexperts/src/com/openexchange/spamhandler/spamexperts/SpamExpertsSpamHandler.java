@@ -139,9 +139,9 @@ public class SpamExpertsSpamHandler extends SpamHandler {
      * @see com.openexchange.spamhandler.SpamHandler#handleHam(int, java.lang.String, java.lang.String[], boolean, com.openexchange.session.Session)
      */
     @Override
-    public void handleHam(int accountId, String spamFullname, String[] mailIDs, boolean move, Session session) throws OXException {
+    public void handleHam(int accountId, String spamFullName, String[] mailIDs, boolean move, Session session) throws OXException {
         LOG.debug("handleHam");
-        LOG.debug("accid: {}, spamfullname: {}, move: {}, session: {}", accountId, spamFullname, move, session.toString());
+        LOG.debug("accid: {}, spamfullname: {}, move: {}, session: {}", accountId, spamFullName, move, session.toString());
 
         // get access to internal mailstore
         final MailService mailService = SpamExpertsServiceRegistry.getInstance().getService(MailService.class);
@@ -153,7 +153,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         try {
             mailAccess = mailService.getMailAccess(session, accountId);
             mailAccess.connect();
-            final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(spamFullname, mailIDs, new MailField[]{MailField.FULL});
+            final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(spamFullName, mailIDs, new MailField[]{MailField.FULL});
 
             copyToSpamexpertsFolder(SpamExpertsConfig.getInstance().getTrainHamFolder(), mails);
             
@@ -161,7 +161,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
                 /*
                  * Move to inbox
                  */
-                mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
+                mailAccess.getMessageStorage().moveMessages(spamFullName, FULLNAME_INBOX, mailIDs, true);
             }
         } finally {
             if (null != mailAccess) {
@@ -171,9 +171,9 @@ public class SpamExpertsSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleSpam(final int accountId, final String fullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         LOG.debug("handleSpam");
-        LOG.debug("accid: {}, fullname: {}, move: {}, session: {}", accountId, fullname, move, session.toString());
+        LOG.debug("accid: {}, fullname: {}, move: {}, session: {}", accountId, fullName, move, session.toString());
 
         // get access to internal mailstore
         final MailService mailService = SpamExpertsServiceRegistry.getInstance().getService(MailService.class);
@@ -185,7 +185,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         try {
             mailAccess = mailService.getMailAccess(session, accountId);
             mailAccess.connect();
-            final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullname, mailIDs, new MailField[]{MailField.FULL});
+            final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullName, mailIDs, new MailField[]{MailField.FULL});
 
             copyToSpamexpertsFolder(SpamExpertsConfig.getInstance().getTrainSpamFolder(), mails);
             
@@ -194,7 +194,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
                  * Move to spam folder (copied from spamassassin spamhandler)
                  */
                 final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
-                mailAccess.getMessageStorage().moveMessages(fullname, spamFullname, mailIDs, true);
+                mailAccess.getMessageStorage().moveMessages(fullName, spamFullname, mailIDs, true);
             }
         } finally {
             if (null != mailAccess) {
