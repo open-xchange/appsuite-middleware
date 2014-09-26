@@ -1,3 +1,9 @@
+open-xchange-authorization-standard (7.4.2-35) stable; urgency=low
+
+  * Build for patch 2014-10-06
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Sep 2014 10:58:18 +0200
+
 open-xchange-authorization-standard (7.4.2-34) stable; urgency=medium
 
   * Build for patch 2014-09-15
