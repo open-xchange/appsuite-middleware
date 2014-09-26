@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import static com.google.common.net.HttpHeaders.ETAG;
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import java.io.IOException;
 import java.io.InputStream;
@@ -159,12 +160,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                         // apply to request/response
                         applyCachedPreview(requestData, result, cachedPreview);
                         preventTransformations(requestData);
-                        LOG.debug(
-                            "Applied cached preview for file {} with MIME type {} from cache for user {} in context {}",
-                            cachedPreview.getFileName(),
-                            cachedPreview.getFileType(),
-                            userId,
-                            contextId);
+                        LOG.debug("Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}", cachedPreview.getFileName(), cachedPreview.getFileType(), result.getHeader(ETAG), session.getUserId(), session.getContextId());
                     } else {
                         // generate async and put to cache
                         PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(result, requestData, session, previewService, THRESHOLD, false, cacheKeyGenerator);
