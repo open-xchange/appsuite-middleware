@@ -496,6 +496,49 @@ public class Strings {
         return builder.substring(0, builder.length() - connector.length());
     }
 
+    /**
+     * Joins a collection of objects by connecting the results of their #toString() method with a connector
+     *
+     * @param coll Collection to be connected
+     * @param connector Connector place between two objects
+     * @param builder The string builder to use
+     * @return connected strings or null if collection == null or empty string if collection is empty
+     */
+    public static void join(final Collection<? extends Object> coll, final String connector, final StringBuilder builder) {
+        if (coll == null) {
+            return;
+        }
+        final int size = coll.size();
+        if (size == 0) {
+            return;
+        }
+        for (final Object obj : coll) {
+            if (obj == null) {
+                builder.append("null");
+            } else {
+                builder.append(obj.toString());
+            }
+            builder.append(connector);
+        }
+        builder.setLength(builder.length() - connector.length());
+    }
+
+    /**
+     * Joins an array of integers by connecting their String representations with a connector
+     *
+     * @param arr Integers to be connected
+     * @param connector Connector place between two objects
+     * @param builder The string builder to use
+     * @return connected strings or null if collection == null or empty string if collection is empty
+     */
+    public static void join(final int[] arr, final String connector, final StringBuilder builder) {
+        final List<Integer> list = new LinkedList<Integer>();
+        for (final int i : arr) {
+            list.add(Autoboxing.I(i));
+        }
+        join(list, connector, builder);
+    }
+
     public static <T> String join(final T[] arr, final String connector) {
         return join(Arrays.asList(arr), connector);
     }
