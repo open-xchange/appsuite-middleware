@@ -1,3 +1,7 @@
+* 2014-09-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34465: Fixed update for POP3 mail accounts
+
 * 2014-09-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 34623: Pass null references for user/password arguments in case SMTP authentication is explicitly disabled
