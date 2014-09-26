@@ -214,6 +214,8 @@ public class FilestoreDataMover implements Callable<Void> {
                 final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 Cache cache = cacheService.getCache("Filestore");
                 cache.clear();
+                Cache contextCache = cacheService.getCache("Context");
+                contextCache.remove(ctx.getId());
                 oxcox.enable(ctx);
             } catch (OXException e) {
                 throw new StorageException(e);

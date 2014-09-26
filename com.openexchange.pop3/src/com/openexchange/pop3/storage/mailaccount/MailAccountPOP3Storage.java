@@ -150,7 +150,9 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 // Try to compose path
                 tmp = composeUniquePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
                 // Add to properties
-                properties.addProperty(POP3StoragePropertyNames.PROPERTY_PATH, tmp);
+                if (!"validate".equals(session.getParameter("mail-account.request"))) {
+                    properties.addProperty(POP3StoragePropertyNames.PROPERTY_PATH, tmp);
+                }
             }
             path = tmp;
         }
@@ -357,11 +359,11 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
             defaultMailAccess.connect(false);
             // Check path existence
             final IMailFolderStorage fs = defaultMailAccess.getFolderStorage();
-            if (!fs.exists(path)) {
+            Session session = pop3Access.getSession();
+            if (!"validate".equals(session.getParameter("mail-account.request")) && !fs.exists(path)) {
                 final MailFolderDescription toCreate = new MailFolderDescription();
 
                 final MailPermission mp = new DefaultMailPermission();
-                final Session session = pop3Access.getSession();
                 mp.setEntity(session.getUserId());
 
                 toCreate.addPermission(mp);

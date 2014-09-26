@@ -439,7 +439,8 @@ public class DispatcherServlet extends SessionServlet {
             // Handle other OXExceptions
 
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
-                LOG.error("Unexpected error", e);
+                Throwable cause = e.getCause();
+                LOG.error("Unexpected error", null == cause ? e : cause);
             } else {
                 // Ignore special "folder not found" error
                 if (ignore(e)) {
@@ -477,7 +478,7 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * Do "error" handling in case the response status is != 200. Like writing Retry-After header for a successful 202 response or removing
      * the default Content-Type: text/javascript we assume in {@link AJAXServlet#service()}.
-     * 
+     *
      * @param result The current {@link AJAXRequestResult}
      * @param httpServletResponse The current {@link HttpServletResponse}
      * @throws IOException If sending the error fails
