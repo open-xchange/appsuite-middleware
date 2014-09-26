@@ -75,7 +75,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 public class InfostoreAJAXTest extends AbstractAJAXTest {
 
-    protected static final int[] virtualFolders = {FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID};
+    protected static final int[] virtualFolders = {FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID};
 
     public static final String INFOSTORE_FOLDER = "infostore.folder";
 

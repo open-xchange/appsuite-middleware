@@ -53,10 +53,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
-
 import org.json.JSONArray;
 import org.junit.Test;
-
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
@@ -81,8 +79,8 @@ import com.openexchange.test.TestInit;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UpdatesTest extends AbstractAJAXSession {
-	
-	protected static final int[] virtualFolders = {FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID};
+
+	protected static final int[] virtualFolders = {FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID};
 
     private FolderTestManager ftm;
     private FolderObject testFolder;
@@ -179,7 +177,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         }
         assertEquals("Wrong documents have been deleted", 2, found);
     }
-    
+
     public void testRemovedVersionForcesUpdate() throws Exception {
     	AllInfostoreRequest allReq = new AllInfostoreRequest(
                 testFolder.getObjectID(),
@@ -188,22 +186,22 @@ public class UpdatesTest extends AbstractAJAXSession {
                 Order.ASCENDING);
         AbstractColumnsResponse allResp = client.execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
-        
+
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         DocumentMetadataImpl updateDoc = new DocumentMetadataImpl();
         updateDoc.setId(knowledgeDoc.getId());
         updateDoc.setVersionComment("Comment 1");
         itm.updateAction(updateDoc, upload, new Metadata[] { Metadata.VERSION_COMMENT_LITERAL }, timestamp);
         timestamp = itm.getLastResponse().getTimestamp();
-        
+
         updateDoc.setVersionComment("Comment 2");
         itm.updateAction(updateDoc, upload, new Metadata[] { Metadata.VERSION_COMMENT_LITERAL }, timestamp);
         timestamp = itm.getLastResponse().getTimestamp();
-        
+
         updateDoc.setVersionComment("Comment 3");
         itm.updateAction(updateDoc, upload, new Metadata[] { Metadata.VERSION_COMMENT_LITERAL }, timestamp);
         timestamp = itm.getLastResponse().getTimestamp();
-        
+
         DetachInfostoreRequest detachReq = new DetachInfostoreRequest(
         		updateDoc.getId(),
         		testFolder.getObjectID(),
@@ -211,7 +209,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         		timestamp);
         DetachInfostoreResponse detachResp = client.execute(detachReq);
         assertEquals("Version was not deleted", 0, detachResp.getNotDeleted().length);
-        
+
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
                 testFolder.getObjectID(),
                 new int[] { Metadata.TITLE, Metadata.DESCRIPTION },
@@ -223,7 +221,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         UpdatesInfostoreResponse resp = client.execute(req);
         assertEquals("Wrong number of modified documents", 1, resp.getNewAndModified().size());
     }
-    
+
     //Bug 4269
   	public void testVirtualFolder() throws Exception {
           for(int folderId : virtualFolders) {
@@ -247,7 +245,7 @@ public class UpdatesTest extends AbstractAJAXSession {
   	}
 
     // Node 2652
-    public void testLastModifiedUTC() throws Exception {  		
+    public void testLastModifiedUTC() throws Exception {
   		UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
   				testFolder.getObjectID(),
                 new int[] { Metadata.LAST_MODIFIED_UTC },
@@ -276,8 +274,8 @@ public class UpdatesTest extends AbstractAJAXSession {
                 Ignore.NONE,
                 new Date(0L),
                 true);
-        UpdatesInfostoreResponse resp = client.execute(req); 
-        
+        UpdatesInfostoreResponse resp = client.execute(req);
+
         boolean found = false;
         for (JSONArray modified : resp.getNewAndModified()) {
         	int id = modified.getInt(0);
