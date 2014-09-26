@@ -71,8 +71,11 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      */
     private final List<String> ignoredFiles = new ArrayList<String>(Arrays.asList(new String[] {
         "mpasswd",
-        "secrets",
-        ""
+        "secrets"
+    }));
+
+    private final List<String> ignoredDirectories = new ArrayList<String>(Arrays.asList(new String[] {
+        "/languages/"
     }));
 
     /**
@@ -90,7 +93,7 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      */
     @Override
     public void addFile(DiffResult diffresult, ConfigurationFile configurationFile) {
-        if (ignoredFiles.contains(configurationFile.getName())) {
+        if (ignoredFiles.contains(configurationFile.getName()) || isIgnoredDirectory(configurationFile.getPathBelowRootDirectory())) {
             return;
         }
 
@@ -150,5 +153,15 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
         if (lInstalledFiles.size() > 0) {
             diffResult.getAdditionalFiles().addAll(lInstalledFiles);
         }
+    }
+
+    private boolean isIgnoredDirectory(String folderPath) {
+
+        for (String ignoredDirectory : ignoredDirectories) {
+            if (folderPath.contains(ignoredDirectory)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
