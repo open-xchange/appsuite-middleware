@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveConstants;
@@ -133,6 +134,26 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
     protected int processServerChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         switch (comparison.getServerChange()) {
         case DELETED:
+            /*
+             * deleted on server, check for potential conflicts in subfolders
+             */
+            String normalizedPathToDelete = PathNormalizer.normalize(comparison.getClientVersion().getPath()).toLowerCase();
+            for (Entry<String, ThreeWayComparison<DirectoryVersion>> entry : mapper) {
+                Change clientChange = entry.getValue().getClientChange();
+                if (Change.NONE != clientChange && Change.DELETED != clientChange) {
+                    String normalizedPath = PathNormalizer.normalize(entry.getKey()).toLowerCase();
+                    if (normalizedPath.startsWith(normalizedPathToDelete) && false == normalizedPath.equals(normalizedPathToDelete)) {
+                        /*
+                         * conflicting change in one of the subfolders, don't delete directory at client for now
+                         */
+                        if (session.isTraceEnabled()) {
+                            session.trace("Skipping action \""+ new RemoveDirectoryAction(comparison.getClientVersion(), comparison) +
+                                "\" due to conflicting client-side changes in subfolders.");
+                        }
+                        return 0;
+                    }
+                }
+            }
             /*
              * deleted on server, delete directory on client, too
              */
