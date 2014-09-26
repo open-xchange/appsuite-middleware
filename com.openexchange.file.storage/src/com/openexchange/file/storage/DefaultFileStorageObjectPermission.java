@@ -141,4 +141,43 @@ public class DefaultFileStorageObjectPermission implements FileStorageObjectPerm
         return permissions >= DELETE;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + entity;
+        result = prime * result + (group ? 1231 : 1237);
+        result = prime * result + permissions;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof DefaultFileStorageObjectPermission)) {
+            return false;
+        }
+        DefaultFileStorageObjectPermission other = (DefaultFileStorageObjectPermission) obj;
+        if (entity != other.entity) {
+            return false;
+        }
+        if (group != other.group) {
+            return false;
+        }
+        if (permissions != other.permissions) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultFileStorageObjectPermission [entity=" + entity + ", group=" + group + ", permissions=" + permissions + "]";
+    }
+
 }
