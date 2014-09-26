@@ -249,7 +249,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             if (isCreateConfirmedSpam()) {
                 final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
                 mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
-                LOGGER.debug("Spam messages {} from folder {} in account {} moved to confirmed-spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullname, accountId, confirmedSpamFullname, session.getUserId(), session.getContextId());
+                LOGGER.debug("Spam messages {} from folder {} in account {} copied to confirmed-spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullname, accountId, confirmedSpamFullname, session.getUserId(), session.getContextId());
             }
             final SpamdSettings spamdSettings = getSpamdSettings(session, PropertyHandler.getInstance());
             if (null != spamdSettings) {
