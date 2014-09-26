@@ -90,7 +90,7 @@ public final class DefaultSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleHam(final int accountId, final String spamFullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         /*
          * Copy to confirmed ham
          */
@@ -103,9 +103,9 @@ public final class DefaultSpamHandler extends SpamHandler {
             mailAccess = mailService.getMailAccess(session, accountId);
             mailAccess.connect();
             final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
-            mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, mailIDs, true);
+            mailAccess.getMessageStorage().copyMessages(spamFullName, confirmedHamFullname, mailIDs, true);
             if (move) {
-                mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
+                mailAccess.getMessageStorage().moveMessages(spamFullName, FULLNAME_INBOX, mailIDs, true);
             }
         } finally {
             if (null != mailAccess) {
