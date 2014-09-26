@@ -1,3 +1,7 @@
+* 2014-09-26 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34652: Invalidate context cache when moving filestore
+
 * 2014-09-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 34465: Fixed update for POP3 mail accounts
