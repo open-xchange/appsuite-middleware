@@ -234,10 +234,10 @@ public class AJAXClient {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Protocol: " + this.protocol);
-        builder.append("Hostname: " + this.hostname);
+        builder.append("Protocol: " + this.protocol + ", ");
+        builder.append("Hostname: " + this.hostname + ", ");
         try {
-            builder.append("ContextId: " + this.getValues().getContextId());
+            builder.append("ContextId: " + this.getValues().getContextId() + ", ");
             builder.append("UserId: " + this.getValues().getUserId());
         } catch (OXException e) {
         } catch (IOException e) {

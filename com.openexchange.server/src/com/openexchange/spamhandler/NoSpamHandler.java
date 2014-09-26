@@ -85,12 +85,12 @@ public final class NoSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleHam(final int accountId, final String spamFullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         // Nothing to do
     }
 
     @Override
-    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleSpam(final int accountId, final String fullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         // Nothing to do
     }
 

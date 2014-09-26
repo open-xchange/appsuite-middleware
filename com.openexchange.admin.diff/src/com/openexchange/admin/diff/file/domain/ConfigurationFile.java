@@ -53,7 +53,7 @@ import org.apache.commons.io.FilenameUtils;
 
 /**
  * Domain object that reflects a file marked as configuration file
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -73,7 +73,7 @@ public class ConfigurationFile {
 
     /**
      * Initializes a new {@link ConfigurationFile}.
-     * 
+     *
      * @param name - the name of the file (includes possible file extensions)
      * @param rootDirectory - root directory of the files
      * @param pathBelowRootDirectory - location of the file below the root directory
@@ -91,7 +91,7 @@ public class ConfigurationFile {
 
     /**
      * Gets the name. This contains also the file name extension
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -100,7 +100,7 @@ public class ConfigurationFile {
 
     /**
      * Gets the extension
-     * 
+     *
      * @return The extension
      */
     public String getExtension() {
@@ -109,7 +109,7 @@ public class ConfigurationFile {
 
     /**
      * Gets the content
-     * 
+     *
      * @return The content
      */
     public String getContent() {
@@ -118,7 +118,7 @@ public class ConfigurationFile {
 
     /**
      * Gets the isOriginal
-     * 
+     *
      * @return The isOriginal
      */
     public boolean isOriginal() {
@@ -127,7 +127,7 @@ public class ConfigurationFile {
 
     /**
      * Gets the rootDirectory
-     * 
+     *
      * @return The rootDirectory
      */
     protected String getRootDirectory() {
@@ -136,16 +136,16 @@ public class ConfigurationFile {
 
     /**
      * Gets the pathBelowRootDirectory
-     * 
+     *
      * @return The pathBelowRootDirectory
      */
-    protected String getPathBelowRootDirectory() {
+    public String getPathBelowRootDirectory() {
         return pathBelowRootDirectory;
     }
 
     /**
      * Returns the full file name (incl. extension) but no path
-     * 
+     *
      * @return String - full file name (incl. extension) but no path
      */
     public String getFileNameWithExtension() {
@@ -157,7 +157,7 @@ public class ConfigurationFile {
 
     /**
      * Returns the full file name (incl. extension) and the path the file is located in
-     * 
+     *
      * @return String - full file name (incl. extension) and the path the file is located in
      */
     public String getFullFilePathWithExtension() {
@@ -166,7 +166,7 @@ public class ConfigurationFile {
 
     /**
      * Sets the name
-     * 
+     *
      * @param name The name to set
      */
     public void setName(String name) {
@@ -175,7 +175,7 @@ public class ConfigurationFile {
 
     /**
      * Sets the extension
-     * 
+     *
      * @param extension The extension to set
      */
     public void setExtension(String extension) {

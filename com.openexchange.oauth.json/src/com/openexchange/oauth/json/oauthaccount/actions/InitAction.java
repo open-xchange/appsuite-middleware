@@ -275,6 +275,22 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         session.setParameter(uuid, oauthState);
         session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
         /*
+         * Check redirect parameter
+         */
+        if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("redirect"))) {
+            // Request for redirect
+            HttpServletResponse response = request.optHttpServletResponse();
+            if (null != response) {
+                try {
+                    response.sendRedirect(interaction.getAuthorizationURL());
+                    //response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+                    return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(ResultType.DIRECT);
+                } catch (IOException e) {
+                    throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+        /*
          * Write as JSON
          */
         final JSONObject jsonInteraction = AccountWriter.write(interaction, uuid);
