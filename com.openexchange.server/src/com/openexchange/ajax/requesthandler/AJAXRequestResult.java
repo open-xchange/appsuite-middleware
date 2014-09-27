@@ -291,6 +291,48 @@ public class AJAXRequestResult {
     }
 
     /**
+     * Initializes a new {@link AJAXRequestResult} based on another instance.
+     * 
+     * @param other The other instance.
+     */
+    public AJAXRequestResult(AJAXRequestResult other) {
+        continuationUuid = other.continuationUuid;
+        deferred = other.deferred;
+        duration = other.duration;
+        expires=other.expires;
+        exception=other.exception;
+        format=other.format;
+        httpStatusCode = other.httpStatusCode;
+        resultObject = other.resultObject;
+        resultType = other.resultType;
+        timestamp = other.timestamp;
+
+        if(other.headers != null) {
+            headers =  new LinkedHashMap<String, String>(other.headers);
+        } else {
+            headers =  new LinkedHashMap<String, String>(8);
+        }
+
+        if(other.parameters != null) {
+            parameters = new HashMap<String, Object>(other.parameters);
+        } else {
+            parameters = new HashMap<String, Object>(8);
+        }
+
+        if(other.responseProperties != null) {
+            responseProperties = new HashMap<String, Object>(other.responseProperties);
+        } else {
+            responseProperties = new HashMap<String, Object>(4);
+        }
+
+        if(other.warnings != null) {
+            warnings = new HashSet<OXException>(other.warnings);
+        } else {
+            warnings = new HashSet<OXException>(4);
+        }
+    }
+
+    /**
      * Sets the continuation UUID
      *
      * @param continuationUuid The continuation UUID to set

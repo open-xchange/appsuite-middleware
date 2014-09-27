@@ -50,7 +50,7 @@
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import static com.google.common.net.HttpHeaders.ETAG;
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
+import static com.google.common.net.HttpHeaders.EXPIRES;
 import java.io.IOException;
 import java.io.InputStream;
 import org.slf4j.Logger;
@@ -160,12 +160,28 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                         // apply to request/response
                         applyCachedPreview(requestData, result, cachedPreview);
                         preventTransformations(requestData);
-                        LOG.debug("Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}", cachedPreview.getFileName(), cachedPreview.getFileType(), result.getHeader(ETAG), session.getUserId(), session.getContextId());
+                        LOG.debug(
+                            "Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}",
+                            cachedPreview.getFileName(),
+                            cachedPreview.getFileType(),
+                            result.getHeader(ETAG),
+                            session.getUserId(),
+                            session.getContextId());
                     } else {
-                        // generate async and put to cache
-                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(result, requestData, session, previewService, THRESHOLD, false, cacheKeyGenerator);
+                        /*
+                         * Generate preview asynchronously and put to cache. Make sure to create copies of result and requestdata to use for
+                         * thumbnail generation as existing instances have to be used to indicate the accepted request.
+                         */
+                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(
+                            new AJAXRequestResult(result),
+                            requestData.copyOf(),
+                            session,
+                            previewService,
+                            THRESHOLD,
+                            false,
+                            cacheKeyGenerator);
                         ThreadPools.getExecutorService().submit(previewAndCache);
-                        indicateRequestAccepted(result);
+                        indicateRequestAccepted(result, requestData);
                     }
                     return;
                 }
@@ -264,9 +280,24 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
      * Indicate that the request has been accepted for processing, but the processing has not been completed
      * @param result The current {@link AJAXRequestResult}
      */
-    protected void indicateRequestAccepted(AJAXRequestResult result) {
+    protected void indicateRequestAccepted(AJAXRequestResult result, AJAXRequestData requestData) {
         //can't remove Content-Type, see DispatcherServlet handleError
-        result.setHttpStatusCode(202);
-        result.setHeader(RETRY_AFTER, String.valueOf(THRESHOLD / 1000));
+        //result.setHttpStatusCode(202);
+        //result.setHeader(RETRY_AFTER, String.valueOf(THRESHOLD / 1000));
+        //TODO: move back to 202/Retry-After when UI finished refactoring.
+        setMissingThumbnail(requestData, result);
+        preventCaching(result);
+        preventTransformations(requestData);
     }
+
+    /**
+     * Prevent Caching by removing associated headers like EXPIRES or ETAG
+     * 
+     * @param result The current {@link AJAXRequestResult}
+     */
+    private void preventCaching(AJAXRequestResult result) {
+        result.setHeader(EXPIRES, "0");
+        result.removeHeader(ETAG);
+    }
+
 }
