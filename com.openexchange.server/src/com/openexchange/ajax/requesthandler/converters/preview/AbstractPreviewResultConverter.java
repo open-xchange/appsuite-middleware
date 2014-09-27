@@ -610,12 +610,33 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         return timeToWaitMillis;
     }
 
+    /**
+     * Add the default thumbnail as result to the current response
+     * 
+     * @param requestData The current {@link AJAXRequestData} needed to set format and prevent further transformation.
+     * @param result The current {@link AJAXRequestResult}
+     */
     public static void setDefaulThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
+        setJpegThumbnail(requestData, result, PreviewConst.DEFAULT_THUMBNAIL);
+    }
+
+    /**
+     * Add the 1x1 white jpeg thumbnail as result to the current response. This indicates an accepted thumbnail request that can't deliver
+     * an immediate response from cache but initaited the generation of the needed thumbnail.
+     * 
+     * @param requestData The current {@link AJAXRequestData} needed to set format and prevent further transformation.
+     * @param result The current {@link AJAXRequestResult}
+     * TODO: Remove when ui can properly handle 202/Retry-After responses
+     */
+    public static void setMissingThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
+        setJpegThumbnail(requestData, result, PreviewConst.MISSING_THUMBNAIL);
+    }
+
+    private static void setJpegThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result, byte[] thumbnailBytes) {
         requestData.setFormat("file");
-        final byte[] bytes = PreviewConst.DEFAULT_THUMBNAIL;
-        InputStream thumbnail = Streams.newByteArrayInputStream(bytes);
+        InputStream thumbnail = Streams.newByteArrayInputStream(thumbnailBytes);
         requestData.putParameter("transformationNeeded", "false");
-        final FileHolder responseFileHolder = new FileHolder(thumbnail, bytes.length, "image/jpeg", "thumbs.jpg");
+        final FileHolder responseFileHolder = new FileHolder(thumbnail, thumbnailBytes.length, "image/jpeg", "thumbs.jpg");
         result.setResultObject(responseFileHolder, "file");
     }
 

@@ -135,28 +135,34 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
 
         String cacheKey = cacheKeyGenerator.generateCacheKey();
         if (cacheKey != null) {
-            PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(
-                result,
-                requestData,
-                session,
-                previewService,
-                threshold,
-                respectLanguage,
-                cacheKey);
-            if (previewDocument == null || previewDocument.getThumbnail() == null) {
-                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
-            }
-
-            InputStream thumbnail = previewDocument.getThumbnail();
-            final String fileName = previewDocument.getMetaData().get("resourcename");
-            byte[] thumbnailBytes;
             try {
-                thumbnailBytes = Streams.stream2bytes(thumbnail);
-            } catch (IOException ioex) {
-                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
-            }
+                PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(
+                    result,
+                    requestData,
+                    session,
+                    previewService,
+                    threshold,
+                    respectLanguage,
+                    cacheKey);
 
-            syncToCache(session, requestData, thumbnailBytes, fileName, resourceCache, cacheKey);
+                if (previewDocument == null || previewDocument.getThumbnail() == null) {
+                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+                }
+
+                InputStream thumbnail = previewDocument.getThumbnail();
+                final String fileName = previewDocument.getMetaData().get("resourcename");
+                byte[] thumbnailBytes;
+                try {
+                    thumbnailBytes = Streams.stream2bytes(thumbnail);
+                } catch (IOException ioex) {
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
+                }
+
+                syncToCache(session, requestData, thumbnailBytes, fileName, resourceCache, cacheKey);
+
+            } catch (OXException oxe) {
+                LOG.error("Error while trying to get PreviewDocument.", oxe);
+            }
         } else {
             LOG.error("Refusing to generate and cache preview without valid cache key");
         }

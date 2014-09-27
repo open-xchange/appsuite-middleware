@@ -25,6 +25,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
@@ -74,13 +75,16 @@ public class PreviewThumbResultConverterTest {
         when(user.getPreferredLanguage()).thenReturn("de/de");
         when(session.getUser()).thenReturn(user);
 
-        requestData = mock(AJAXRequestData.class);
-        when(requestData.getSession()).thenReturn(session);
-        when(requestData.getParameter("width")).thenReturn("160");
-        when(requestData.getParameter("height")).thenReturn("160");
-        when(requestData.getParameter("scaleType")).thenReturn("cover");
-        when(requestData.getParameter("content_type")).thenReturn("image/jpeg");
-        when(requestData.getParameter("delivery")).thenReturn("view");
+        requestData = new AJAXRequestData() {
+            {
+                setSession(session);
+                putParameter("width", "160");
+                putParameter("height", "160");
+                putParameter("scaleType", "cover");
+                putParameter("content_type", "image/jpeg");
+                putParameter("delivery", "view");
+            }
+        };
 
         result = new AJAXRequestResult();
         result.setHeader(ETAG, ETAG_VALUE);
@@ -113,13 +117,16 @@ public class PreviewThumbResultConverterTest {
     public void testConvertWithoutCachedResult() throws OXException {
         when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(true);
         when(resourceCache.get(anyString(), anyInt(), anyInt())).thenReturn(noResource);
-        
+
         converter = new PreviewThumbResultConverter(allowedConfig);
 
         converter.convert(requestData, result, session, null);
-        assertNull(result.getResultObject());
-        assertEquals(202, result.getHttpStatusCode());
-        assertEquals(String.valueOf(10), result.getHeader(RETRY_AFTER));
+        assertNotNull(result.getResultObject());
+        FileHolder resultObject = (FileHolder) result.getResultObject();
+        assertEquals(PreviewConst.MISSING_THUMBNAIL.length, resultObject.getLength());
+        assertEquals(200, result.getHttpStatusCode());
+//        assertEquals(202, result.getHttpStatusCode());
+//        assertEquals(String.valueOf(10), result.getHeader(RETRY_AFTER));
     }
 
     /**
