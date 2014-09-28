@@ -1,3 +1,7 @@
+* 2014-09-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34617: Signal proper write permission in case "ENABLE_INTERNAL_USER_EDIT" is set to "false"
+
 * 2014-09-26 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34652: Invalidate context cache when moving filestore
