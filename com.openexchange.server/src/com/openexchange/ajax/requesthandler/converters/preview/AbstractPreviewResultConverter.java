@@ -612,7 +612,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Add the default thumbnail as result to the current response
-     * 
+     *
      * @param requestData The current {@link AJAXRequestData} needed to set format and prevent further transformation.
      * @param result The current {@link AJAXRequestResult}
      */
@@ -622,8 +622,8 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Add the 1x1 white jpeg thumbnail as result to the current response. This indicates an accepted thumbnail request that can't deliver
-     * an immediate response from cache but initaited the generation of the needed thumbnail.
-     * 
+     * an immediate response from cache but initiated the generation of the needed thumbnail.
+     *
      * @param requestData The current {@link AJAXRequestData} needed to set format and prevent further transformation.
      * @param result The current {@link AJAXRequestResult}
      * TODO: Remove when ui can properly handle 202/Retry-After responses
