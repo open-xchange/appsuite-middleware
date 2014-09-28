@@ -116,7 +116,7 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String LAST_NAME_MANDATORY_DISPLAY = "Required  value \"last name\" was not supplied.";
 
-    public final static String NO_CHANGE_PERMISSION_DISPLAY = "You do not have the appropriate permission to change objects in the folder \"%2$s\".";
+    public final static String NO_CHANGE_PERMISSION_DISPLAY = "You are not allowed to modify that contact";
 
     public final static String EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_DISPLAY = "An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address.";
 
