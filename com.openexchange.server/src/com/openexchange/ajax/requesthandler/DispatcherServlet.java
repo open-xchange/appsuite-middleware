@@ -68,12 +68,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.SessionUtility;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.NonNull;
@@ -451,17 +449,7 @@ public class DispatcherServlet extends SessionServlet {
             }
 
             if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
-                try {
-                    // As API response
-                    APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);
-                } catch (JSONException je) {
-                    LOG.error("", e);
-                    try {
-                        httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
-                    } catch (final IOException ioe) {
-                        LOG.error("", ioe);
-                    }
-                }
+                writeErrorAsJsCallback(e, httpRequest, httpResponse);
             } else {
                 handleOXException(e, httpRequest, httpResponse);
             }
