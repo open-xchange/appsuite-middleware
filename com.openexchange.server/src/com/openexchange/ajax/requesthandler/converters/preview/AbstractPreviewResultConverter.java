@@ -598,16 +598,13 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     }
 
     /**
-     * Detect if the previewService should be called via a current thread or worker thread strategy.
-     * @param previewService
-     * @return
+     * Detects if specified preview service should be called via a current thread or worker thread strategy.
+     *
+     * @param previewService The preview service to check
+     * @return The await time (worker thread) or <code>0</code> (current thread)
      */
     public static long getAwaitThreshold(PreviewService previewService) {
-        long timeToWaitMillis = 0;
-        if (previewService instanceof RemoteInternalPreviewService) {
-            timeToWaitMillis = ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis();
-        }
-        return timeToWaitMillis;
+        return previewService instanceof RemoteInternalPreviewService ? ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis() : 0L;
     }
 
     /**
