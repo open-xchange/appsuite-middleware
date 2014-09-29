@@ -79,12 +79,7 @@ public class List extends ListCore {
 
     @Override
     protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        return maincall(parser, oxusr, search_pattern, ignoreCase, ctx, auth, false, false);
-    }
-
-    @Override
-    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final User[] allusers = ignoreCase ? oxusr.listCaseInsensitive(ctx, search_pattern, auth, includeGuests, excludeUsers) : oxusr.list(ctx, search_pattern, auth, includeGuests, excludeUsers);
+        final User[] allusers = ignoreCase ? oxusr.listCaseInsensitive(ctx, search_pattern, auth) : oxusr.list(ctx, search_pattern, auth);
         if( allusers.length == 0 ) {
             return new User[0];
         }
@@ -93,8 +88,6 @@ public class List extends ListCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        setIncludeGuestsOption(parser);
-        setExcludeUsersOption(parser);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.openexchange.webdav.xml.appointment;
 
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -10,10 +11,6 @@ public class Bug4395Test extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4395Test.class);
 
-	private FolderObject folderObj = null;
-
-    private int parentFolderId;
-
 	public Bug4395Test(final String name) {
 		super(name);
 	}
@@ -21,25 +18,13 @@ public class Bug4395Test extends AppointmentTest {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		folderObj = null;
-		parentFolderId = 0;
 	}
-
-	@Override
-    protected void tearDown() throws Exception {
-	    if (null != folderObj) {
-	        if (0 != parentFolderId) {
-	            FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
-	        }
-	    }
-        super.tearDown();
-    }
 
 	public void testBug4395() throws Exception {
 		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 
-		folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testBug4395" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PRIVATE);
@@ -52,7 +37,7 @@ public class Bug4395Test extends AppointmentTest {
 
 		folderObj.setPermissionsAsArray( permission );
 
-		parentFolderId = FolderTest.insertFolder(getSecondWebConversation(), folderObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+		final int parentFolderId = FolderTest.insertFolder(getSecondWebConversation(), folderObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
 
 		permission = new OCLPermission[] {
 			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false),
@@ -79,7 +64,5 @@ public class Bug4395Test extends AppointmentTest {
 		compareObject(appointmentObj, loadAppointment);
 
 		FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
-		folderObj = null;
-		parentFolderId = 0;
 	}
 }

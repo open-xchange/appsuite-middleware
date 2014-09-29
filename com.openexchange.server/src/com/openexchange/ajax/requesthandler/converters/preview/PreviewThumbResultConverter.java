@@ -112,7 +112,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
 
     private static final int DEFAULT_THUMB_HEIGHT = 160;
 
-    private final boolean isBlockingWorkerAllowed;
+    private boolean isBlockingWorkerAllowed = false;
 
     /**
      * Initializes a new {@link PreviewThumbResultConverter}.
@@ -152,7 +152,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
 
         try {
             // do we have a usable resource cache and are we allowed to use it?
-            if (useCache(requestData)) {
+            if (isResourceCacheEnabled(contextId, userId) && useCache(requestData)) {
                 ResourceCache resourceCache = getResourceCache(contextId, userId);
                 if (resourceCache != null) {
                     CachedResource cachedPreview = getCachedResourceForContext(session, cacheKeyGenerator.generateCacheKey(), resourceCache);
@@ -175,6 +175,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                         PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(
                             new AJAXRequestResult(result),
                             requestData.copyOf(),
+
                             session,
                             previewService,
                             THRESHOLD,
@@ -183,11 +184,8 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                         ThreadPools.getExecutorService().submit(previewAndCache);
                         indicateRequestAccepted(result, requestData);
                     }
-                    return;
                 }
-            }
-
-            if (isBlockingWorkerAllowed) {
+            } else if (isBlockingWorkerAllowed) {
                 // there is no cached resource but we are allowed to wait for thumbnail generation
                 // do as callable anyway
                 PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(

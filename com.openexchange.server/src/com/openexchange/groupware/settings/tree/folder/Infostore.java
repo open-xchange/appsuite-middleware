@@ -113,9 +113,6 @@ public class Infostore implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {
-                if (user.isGuest()) {
-                    return;
-                }
                 // Check availability of InfoStore
                 if (InfostoreFacades.isInfoStoreAvailable()) {
                     setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolder(

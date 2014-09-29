@@ -1,8 +1,17 @@
 package com.openexchange.groupware.container;
 
-import static com.openexchange.groupware.container.FolderChildObject.FOLDER_ID;
+import static com.openexchange.groupware.container.FolderChildObject.*;
 
 public class FolderChildObjectTest extends DataObjectTest {
+    @Override
+    public void testFindDifferingFields() {
+        FolderChildObject dataObject = getFolderChildObject();
+        FolderChildObject otherDataObject = getFolderChildObject();
+
+        otherDataObject.setParentFolderID(42);
+        assertDifferences(dataObject, otherDataObject , FolderChildObject.FOLDER_ID);
+
+    }
 
     @Override
     public void testAttrAccessors() {

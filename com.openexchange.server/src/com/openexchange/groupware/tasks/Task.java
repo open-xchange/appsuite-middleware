@@ -55,10 +55,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.mapping.Alarm;
 
 /**
@@ -546,14 +546,14 @@ public class Task extends CalendarObject {
         }
     }
 
-    /**
-     * Gets a set containing the identifiers of those fields that are different in this instance compared to the supplied task.
-     *
-     * @param other The task to determine the differing fields for
-     * @return A set of column identifiers of the differing fields
-     */
-    public Set<Integer> findDifferingFields(Task other) {
-        Set<Integer> differingFields = new HashSet<Integer>();
+    @Override
+    public Set<Integer> findDifferingFields(final DataObject dataObject) {
+        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
+        if (!getClass().isAssignableFrom(dataObject.getClass())) {
+            return differingFields;
+        }
+
+        final Task other = (Task) dataObject;
         for (final Mapper<?> mapper : ALL_MAPPERS) {
             if (mapper.isSet(this) && (!mapper.isSet(other) || !mapper.equals(this, other))) {
                 differingFields.add(Integer.valueOf(mapper.getId()));

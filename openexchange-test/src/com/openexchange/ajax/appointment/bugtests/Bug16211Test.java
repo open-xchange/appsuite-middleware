@@ -113,10 +113,7 @@ public class Bug16211Test extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         calendar = TimeTools.createCalendar(tz);
 
-        sharedAppointmentFolder = Create.createPublicFolder(
-            client2,
-            "Bug16211PublicFolder" + System.currentTimeMillis(),
-            FolderObject.CALENDAR);
+        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder"+System.currentTimeMillis(), FolderObject.CALENDAR);
         FolderTools.shareFolder(
             client2,
             EnumAPI.OX_NEW,
@@ -205,24 +202,13 @@ public class Bug16211Test extends AbstractAJAXSession {
         final GetRequest toDeleteReq = new GetRequest(personalAppointmentFolder.getObjectID(), appointment.getObjectID());
         final GetResponse toDeleteResp = client.execute(toDeleteReq);
         final Appointment toDelete = toDeleteResp.getAppointment(tz);
-        if (null != toDelete) {
-            client.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
-        }
+        client.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
 
         // Delete folders
-        if (null != personalAppointmentFolder) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
-        }
-        if (null != sharedAppointmentFolder) {
-            client2.execute(new DeleteRequest(EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
-        }
+        client.execute(new DeleteRequest(EnumAPI.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
+        client2.execute(new DeleteRequest(EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
 
-        if (null != client2) {
-            client2.logout();
-        }
-        if (null != client3) {
-            client3.logout();
-        }
+        client2.logout();
 
         super.tearDown();
     }

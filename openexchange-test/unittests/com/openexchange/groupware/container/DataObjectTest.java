@@ -1,15 +1,46 @@
 
 package com.openexchange.groupware.container;
 
-import static com.openexchange.groupware.container.DataObject.CREATED_BY;
-import static com.openexchange.groupware.container.DataObject.CREATION_DATE;
-import static com.openexchange.groupware.container.DataObject.LAST_MODIFIED;
-import static com.openexchange.groupware.container.DataObject.MODIFIED_BY;
-import static com.openexchange.groupware.container.DataObject.OBJECT_ID;
 import java.util.Date;
+import java.util.Set;
 import junit.framework.TestCase;
 
+import static com.openexchange.groupware.container.DataObject.*;
+
 public class DataObjectTest extends TestCase {
+
+    public void testFindDifferingFields() {
+        DataObject dataObject = getDataObject();
+        DataObject otherDataObject = getDataObject();
+
+        otherDataObject.setCreatedBy(-1);
+        assertDifferences(dataObject, otherDataObject, DataObject.CREATED_BY);
+
+        otherDataObject.setCreationDate(new Date());
+        assertDifferences(dataObject, otherDataObject, DataObject.CREATED_BY, DataObject.CREATION_DATE);
+
+        otherDataObject.setLastModified(new Date());
+        assertDifferences(dataObject, otherDataObject, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED);
+
+        otherDataObject.setModifiedBy(-23);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            DataObject.CREATED_BY,
+            DataObject.CREATION_DATE,
+            DataObject.LAST_MODIFIED,
+            DataObject.MODIFIED_BY);
+
+        otherDataObject.setObjectID(12);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            DataObject.CREATED_BY,
+            DataObject.CREATION_DATE,
+            DataObject.LAST_MODIFIED,
+            DataObject.MODIFIED_BY,
+            DataObject.OBJECT_ID);
+    }
 
     public void testAttrAccessors() {
         DataObject object = new DataObject(){};
@@ -102,6 +133,17 @@ public class DataObjectTest extends TestCase {
         assertFalse(object.contains(CREATED_BY));
         assertFalse(object.containsCreatedBy());
 
+    }
+
+    public void assertDifferences(DataObject dataObject, DataObject otherDataObject, int... fields) {
+
+        Set<Integer> differingFields = dataObject.findDifferingFields(otherDataObject);
+        String diffString = differingFields.toString();
+
+        for (int field : fields) {
+            assertTrue(diffString+" Didn't find: "+field, differingFields.remove(field));
+        }
+        assertTrue(diffString+" Have unexpected field: "+differingFields, differingFields.isEmpty());
     }
 
     private DataObject getDataObject() {

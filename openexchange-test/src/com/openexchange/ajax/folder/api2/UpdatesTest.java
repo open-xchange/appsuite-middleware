@@ -145,11 +145,11 @@ public class UpdatesTest extends AbstractFolderTest {
         assertNotNull(response);
         assertFalse("Error occurred: " + response.getResponse().getErrorMessage(), response.getResponse().hasError());
     }
-
+    
     public void testModifiedAndDeleted() throws Throwable {
         // insert some
         final int numberOfFolders = 8;
-        List<FolderObject> newFolders = createAndPersistSeveral("testFolder-" + System.currentTimeMillis(), numberOfFolders);
+        List<FolderObject> newFolders = createAndPersistSeveral("testFolder", numberOfFolders);
 
         // update 2
         List<FolderObject> updatedFolders = new ArrayList<FolderObject>(2);
@@ -169,7 +169,7 @@ public class UpdatesTest extends AbstractFolderTest {
         expectDeletedFolderIds.add(newFolders.get(3).getObjectID());
         deleteFolders(deletedFolders);
 
-        // check modified with timestamp from last
+        // check modified with timestamp from last 
         Date lastModified = newFolders.get(numberOfFolders-1).getLastModified();
         int[] cols = new int[]{ FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME};
         FolderUpdatesResponse modifiedFoldersResponse = listModifiedFolders(FolderObject.SYSTEM_ROOT_FOLDER_ID, cols, lastModified, Ignore.NONE);

@@ -53,7 +53,7 @@
 
 * 2014-09-22 - ioannis.chouklis@open-xchange.com
 
- - Fix for bug 34551: Correctly remove the XING subscriptions when the OAuth account is removed
+ - Fix for bug 34551: Correctly remove the XING subscriptions when the OAuth account is removed 
 
 * 2014-09-21 - thorben.betten@open-xchange.com
 
@@ -83,10 +83,6 @@
 * 2014-09-18 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34507: Added user-friendly error message
-
-* 2014-09-17 - marcus.klein@open-xchange.com
-
- - Fix for bug 34467: Documented LoginHandlerService.handleLogout() method in more detail when it is called and for what it can be used.
 
 * 2014-09-16 - tobias.friedrich@open-xchange.com
 

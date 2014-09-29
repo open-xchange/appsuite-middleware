@@ -259,18 +259,6 @@ public abstract class OXUserStorageInterface {
     public abstract User[] list(final Context ctx, final String search_pattern) throws StorageException;
 
     /**
-     * Retrieve all user objects for a given context. Which match the given search_pattern
-     *
-     * @param ctx numerical context identifier
-     * @param includeGuests List guest users too
-     * @param excludeUsers List only guest users
-     * @return User[] containing user ids.
-     * @throws StorageException
-     *
-     */
-    public abstract User[] list(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException;
-
-    /**
      * Retrieve all user objects for a given context, that match (case insensitive) the given search_pattern
      *
      * @param ctx The context
@@ -278,17 +266,6 @@ public abstract class OXUserStorageInterface {
      * @throws StorageException
      */
     public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern) throws StorageException;
-
-    /**
-     * Retrieve all user objects for a given context, that match (case insensitive) the given search_pattern
-     *
-     * @param ctx The context
-     * @param includeGuests List guest users too
-     * @param excludeUsers List only guest users
-     * @return User[] containing user identifier
-     * @throws StorageException
-     */
-    public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException;
 
     /**
      * Delete an user or multiple from given context in given connection

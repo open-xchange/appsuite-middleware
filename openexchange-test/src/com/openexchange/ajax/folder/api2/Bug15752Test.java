@@ -92,8 +92,8 @@ public class Bug15752Test extends AbstractAJAXSession {
         mailIds = response.getIds()[0];
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.MAIL);
-        testFolder.setFolderName("testFolder4Bug15752-2-" + System.currentTimeMillis());
-        testFolder.setFullName(inboxFolder + '/' + testFolder.getFolderName());
+        testFolder.setFullName(inboxFolder + "/testFolder4Bug15752-2");
+        testFolder.setFolderName("testFolder4Bug15752-2");
         InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, testFolder);
         InsertResponse iResp = client.execute(iReq);
         iResp.fillObject(testFolder);

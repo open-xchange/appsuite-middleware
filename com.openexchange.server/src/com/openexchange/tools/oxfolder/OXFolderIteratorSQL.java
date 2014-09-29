@@ -655,9 +655,7 @@ public final class OXFolderIteratorSQL {
      * certain parent folder.
      */
     public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserPermissionBits permissionBits, final Timestamp since, final Connection con) throws SQLException, OXException {
-        if (parentFolderId == SYSTEM_ROOT_FOLDER_ID) {
-            return getUserRootFoldersIterator(userId, groups, permissionBits, ctx);
-        } else if (parentFolderId == SYSTEM_PRIVATE_FOLDER_ID) {
+        if (parentFolderId == SYSTEM_PRIVATE_FOLDER_ID) {
             return getVisiblePrivateFolders(userId, groups, permissionBits.getAccessibleModules(), ctx, since, con);
         } else if (parentFolderId == SYSTEM_PUBLIC_FOLDER_ID) {
             return getVisiblePublicFolders(userId, groups, permissionBits.getAccessibleModules(), ctx, since, con);

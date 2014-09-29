@@ -49,19 +49,15 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.exception.OXException;
+import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.database.DatabaseFolder;
-import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link SystemRootFolder} - Gets the system shared folder.
@@ -69,6 +65,8 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemRootFolder {
+
+    private static final boolean preload = true;
 
     /**
      * Initializes a new {@link SystemRootFolder}.
@@ -87,48 +85,48 @@ public final class SystemRootFolder {
         /*
          * The system root folder
          */
-        final OCLPermission guestPermission = new OCLPermission(GroupStorage.GUEST_GROUP_IDENTIFIER, FolderObject.SYSTEM_ROOT_FOLDER_ID);
-        guestPermission.setFolderAdmin(false);
-        guestPermission.setGroupPermission(true);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
-        final FolderObject fo = FolderObject.createVirtualFolderObject(
-            FolderObject.SYSTEM_ROOT_FOLDER_ID,
-            "root",
-            FolderObject.SYSTEM_MODULE,
-            true,
-            FolderObject.SYSTEM_TYPE,
-            FolderObject.VIRTUAL_FOLDER_PERMISSION,
-            guestPermission);
+        final FolderObject fo = FolderObject.createVirtualFolderObject(FolderObject.SYSTEM_ROOT_FOLDER_ID, "root", FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
         final DatabaseFolder retval = new DatabaseFolder(fo);
-        retval.setSubfolderIDs(null);
-        retval.setSubscribedSubfolders(true);
-
+        // Enforce getSubfolders() from storage
+        if (preload) {
+            final List<String> list = new ArrayList<String>(4);
+            list.add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+            list.add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+            list.add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+            list.add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+            retval.setSubfolderIDs(list.toArray(new String[list.size()]));
+        } else {
+            retval.setSubfolderIDs(null);
+            retval.setSubscribedSubfolders(true);
+        }
         return retval;
     }
+
+    private static final ConcurrentMap<Locale, List<String[]>> CACHED_SUBFOLDERS = new ConcurrentHashMap<Locale, List<String[]>>(16);
 
     /**
      * Gets the subfolder identifiers of database folder representing system root folder for given user.
      *
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
-    public static List<String[]> getSystemRootFolderSubfolder(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
-        final List<FolderObject> list = ((FolderObjectIterator) OXFolderIteratorSQL.getUserRootFoldersIterator(user.getId(), user.getGroups(), userPerm, ctx)).asList();
-        final List<String[]> ret = new ArrayList<String[]>(list.size());
-        for (final FolderObject folderObject : list) {
-            int folderId = folderObject.getObjectID();
-            String displayName = FolderObject.getFolderString(folderId, user.getLocale());
-            if (displayName == null) {
-                displayName = folderObject.getFolderName();
+    public static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
+        /*
+         * The system root folder
+         */
+        List<String[]> list = CACHED_SUBFOLDERS.get(locale);
+        if (null == list) {
+            final StringHelper sh = StringHelper.valueOf(locale);
+            final List<String[]> newList = new ArrayList<String[]>(4);
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_SHARED_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME) });
+            list = CACHED_SUBFOLDERS.putIfAbsent(locale, newList);
+            if (null == list) {
+                list = newList;
             }
-
-            ret.add(new String[] { String.valueOf(folderId), displayName });
         }
-
-        return ret;
+        return list;
     }
 
 }

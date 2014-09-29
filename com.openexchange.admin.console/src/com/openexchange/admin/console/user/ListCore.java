@@ -115,17 +115,7 @@ public abstract class ListCore extends UserAbstraction {
                 ignoreCase = Boolean.FALSE;
             }
 
-            Boolean includeGuests = (Boolean) parser.getOptionValue(this.includeGuestsOption);
-            if (null == includeGuests) {
-                includeGuests = Boolean.FALSE;
-            }
-
-            Boolean excludeUsers = (Boolean) parser.getOptionValue(this.excludeUsersOption);
-            if (null == excludeUsers) {
-                excludeUsers = Boolean.FALSE;
-            }
-
-            final User[] allusers = maincall(parser, oxusr, pattern, ignoreCase.booleanValue(), ctx, auth, includeGuests.booleanValue(), excludeUsers.booleanValue());
+            final User[] allusers = maincall(parser, oxusr, pattern, ignoreCase.booleanValue(), ctx, auth);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 // map user data to corresponding module access
@@ -147,8 +137,6 @@ public abstract class ListCore extends UserAbstraction {
     }
 
     protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
-
-    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
 
     /**
      * This method is used to define how a date value is transferred to string

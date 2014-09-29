@@ -365,9 +365,9 @@ public class CalendarTestManager implements TestManager {
         }
 
     }
-    
-    public void update(int inFolder, Appointment updatedAppointment) {
-        UpdateRequest updateRequest = new UpdateRequest(inFolder, updatedAppointment, timezone, getFailOnError());
+
+    public void update(Appointment updatedAppointment) {
+        UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone, getFailOnError());
         UpdateResponse updateResponse = execute(updateRequest);
         extractInfo(updateResponse);
         updatedAppointment.setLastModified(updateResponse.getTimestamp());
@@ -380,11 +380,6 @@ public class CalendarTestManager implements TestManager {
                 continue;
             }
         }
-        
-    }
-
-    public void update(Appointment updatedAppointment) {
-        update(updatedAppointment.getParentFolderID(), updatedAppointment);
     }
 
     public List<Appointment> list(ListIDs foldersAndIds, int[] columns) {

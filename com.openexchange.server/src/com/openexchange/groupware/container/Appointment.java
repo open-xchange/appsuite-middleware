@@ -354,6 +354,40 @@ public class Appointment extends CalendarObject implements Cloneable {
     }
 
     @Override
+    public Set<Integer> findDifferingFields(DataObject dataObject) {
+        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+
+        if (!getClass().isAssignableFrom(dataObject.getClass())) {
+            return differingFields;
+        }
+
+        Appointment other = (Appointment) dataObject;
+
+        if ((!containsAlarm() && other.containsAlarm()) || (containsAlarm() && other.containsAlarm() && getAlarm() != other.getAlarm())) {
+            differingFields.add(ALARM);
+        }
+
+        if ((!containsLocation() && other.containsLocation()) || (containsLocation() && other.containsLocation() && getLocation() != other.getLocation() && (getLocation() == null || !getLocation().equals(
+            other.getLocation())))) {
+            differingFields.add(LOCATION);
+        }
+
+        if ((!containsRecurringStart() && other.containsRecurringStart()) || (containsRecurringStart() && other.containsRecurringStart() && getRecurringStart() != other.getRecurringStart())) {
+            differingFields.add(RECURRENCE_START);
+        }
+
+        if ((!containsShownAs() && other.containsShownAs()) || (containsShownAs() && other.containsShownAs() && getShownAs() != other.getShownAs())) {
+            differingFields.add(SHOWN_AS);
+        }
+
+        if ((!containsTimezone() && other.containsTimezone()) || (containsTimezone() && other.containsTimezone() && getTimezone() != other.getTimezone() && (getTimezone() == null || !getTimezone().equals(
+            other.getTimezone())))) {
+            differingFields.add(TIMEZONE);
+        }
+        return differingFields;
+    }
+
+    @Override
     public void set(int field, Object value) {
         switch (field) {
         case SHOWN_AS:

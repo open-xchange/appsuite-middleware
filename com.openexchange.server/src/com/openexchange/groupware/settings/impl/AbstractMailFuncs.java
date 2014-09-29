@@ -58,8 +58,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * This class contains the shared, same functions for all mail bit settings.
@@ -104,17 +102,14 @@ public abstract class AbstractMailFuncs implements IValueHandler {
 	 */
 	@Override
     public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
-	    ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-	    if (serverSession.getUserConfiguration().hasWebMail()) {
-            final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
-            final int userId = user.getId();
-            final UserSettingMail settings = storage.loadUserSettingMail(userId, ctx);
-            final int prevBitsValue = settings.getBitsValue();
-            setValue(settings, setting.getSingleValue().toString());
-            if (settings.getBitsValue() != prevBitsValue) {
-                storage.saveUserSettingMailBits(settings, userId, ctx);
-            }
-	    }
+        final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
+        final int userId = user.getId();
+        final UserSettingMail settings = storage.loadUserSettingMail(userId, ctx);
+        final int prevBitsValue = settings.getBitsValue();
+        setValue(settings, setting.getSingleValue().toString());
+        if (settings.getBitsValue() != prevBitsValue) {
+            storage.saveUserSettingMailBits(settings, userId, ctx);
+        }
     }
 
 	/**

@@ -477,33 +477,6 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
-     * Accumulate values under a key. It is similar to the put method except that if there is already an object stored under the key then a
-     * JSONArray is stored under the key to hold all of the accumulated values. If there is already a JSONArray, then the new value is
-     * appended to it. In contrast, the put method replaces the previous value.
-     *
-     * @param key A key string.
-     * @param value An object to be accumulated under the key.
-     * @param forceArray <code>true</code> to enforce to accumulate under a JSON array; otherwise <code>false</code>
-     * @return this.
-     * @throws JSONException If the value is an invalid number or if the key is null.
-     */
-    public JSONObject accumulate(final String key, final Object value, final boolean forceArray) throws JSONException {
-        final Object o = opt(key);
-        if (o == null) {
-            if (value instanceof JSONArray) {
-                put(key, new JSONArray().put(value));
-            } else {
-                put(key, forceArray ? new JSONArray().put(value) : value);
-            }
-        } else if (o instanceof JSONArray) {
-            ((JSONArray) o).put(value);
-        } else {
-            put(key, new JSONArray().put(o).put(value));
-        }
-        return this;
-    }
-
-    /**
      * Append values to the array under a key. If the key does not exist in the JSONObject, then the key is put in the JSONObject with its
      * value being a JSONArray containing the value parameter. If the key was already associated with a JSONArray, then the value parameter
      * is appended to it.

@@ -64,11 +64,6 @@ public final class Authorization {
 
     private static final String SPNEGO_AUTH = "negotiate";
 
-    /**
-     * Digest type for authorization.
-     */
-    private static final String DIGEST_AUTH = "digest";
-
     private Authorization() {
         super();
     }
@@ -79,25 +74,6 @@ public final class Authorization {
             return false;
         }
         if (!(authScheme.equalsIgnoreCase(BASIC_AUTH) || authScheme.equalsIgnoreCase(SPNEGO_AUTH))) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Checks if the client sends a correct digest authorization header.
-     *
-     * @param auth Authorization header.
-     * @return <code>true</code> if the client sent a correct authorization header.
-     */
-    public static boolean checkForDigestAuthorization(final String auth) {
-        if (null == auth) {
-            return false;
-        }
-        if (auth.length() <= DIGEST_AUTH.length()) {
-            return false;
-        }
-        if (!auth.substring(0, DIGEST_AUTH.length()).equalsIgnoreCase(DIGEST_AUTH)) {
             return false;
         }
         return true;

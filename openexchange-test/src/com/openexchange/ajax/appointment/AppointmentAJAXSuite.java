@@ -100,7 +100,6 @@ public class AppointmentAJAXSuite extends TestSuite{
         tests.addTest(NewAppointmentHttpApiTestSuite.suite());
         tests.addTestSuite(PrivateTests.class);
         tests.addTestSuite(FolderIdTestAjax.class);
-        tests.addTestSuite(MoveTestNew.class);
         return tests;
     }
 }

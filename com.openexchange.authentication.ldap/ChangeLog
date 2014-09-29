@@ -1,7 +1,3 @@
-* 2014-07-02 - wolfgang.rosenauer@open-xchange.com
-
- - Allow to search for the full login info (e.g. for mail attribute)
-
 * 2011-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.

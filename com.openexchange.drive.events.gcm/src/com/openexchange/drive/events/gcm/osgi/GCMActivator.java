@@ -49,6 +49,9 @@
 
 package com.openexchange.drive.events.gcm.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.gcm.GCMKeyProvider;
@@ -90,13 +93,15 @@ public class GCMActivator extends HousekeepingActivator {
              */
             final String configuredKey = configService.getProperty("com.openexchange.drive.events.gcm.key");
             if (false == Strings.isEmpty(configuredKey)) {
+                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
                 registerService(GCMKeyProvider.class, new GCMKeyProvider() {
 
                     @Override
                     public String getKey() {
                         return configuredKey;
                     }
-                }, 1);
+                }, dictionary);
                 LOG.info("Successfully registered GCM key provider.");
             } else {
                 LOG.info("No GCM key confgiured, skipping key provider registration.");

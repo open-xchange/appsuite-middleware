@@ -166,9 +166,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.Trackable;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -387,33 +385,24 @@ public final class OutlookFolderStorage implements FolderStorage {
         return null == session ? null : ContextStorage.getStorageContext(session);
     }
 
-    /**
-     * Gets the ID of the user's default infostore folder.
-     *
-     * @param session The session to get the default folder for
-     * @return The folder ID, or <code>null</code> if not found
-     */
     private static String getDefaultInfoStoreFolderId(final Session session) {
         final String paramName = "com.openexchange.folderstorage.defaultInfoStoreFolderId";
-        String id = (String) session.getParameter(paramName);
-        if (null == id) {
-            try {
-                id = Integer.toString(new OXFolderAccess(getContext(session)).getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID());
-            } catch (final OXException e) {
-                if (OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.equals(e)) {
-                    id = "-1";
-                } else {
-                    LOG.error("", e);
-                    return null;
-                }
-            }
+        final String tmp = (String) session.getParameter(paramName);
+        if (null != tmp) {
+            return tmp;
+        }
+        try {
+            final String id = Integer.toString(new OXFolderAccess(getContext(session)).getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID());
             if (session instanceof PutIfAbsent) {
                 ((PutIfAbsent) session).setParameterIfAbsent(paramName, id);
             } else {
                 session.setParameter(paramName, id);
             }
+            return id;
+        } catch (final OXException e) {
+            LOG.error("", e);
+            return null;
         }
-        return "-1".equals(id) ? null : id;
     }
 
     /*-
@@ -2033,10 +2022,8 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Callable for primary mail folder
          */
-        if (null == parameters.getSession() || ServerSessionAdapter.valueOf(parameters.getSession()).getUserConfiguration().hasWebMail()) {
-            completionService.submit(new MailFolderCallable(comparator, locale, user, contextId, tree, parameters));
-            taskCount++;
-        }
+        completionService.submit(new MailFolderCallable(comparator, locale, user, contextId, tree, parameters));
+        taskCount++;
         /*
          * Callable for the ones from virtual table
          */

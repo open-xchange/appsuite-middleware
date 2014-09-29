@@ -51,13 +51,14 @@ package com.openexchange.tools.webdav.digest;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.http.HeaderElement;
-import org.apache.http.message.BasicHeaderValueParser;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
@@ -123,7 +124,7 @@ public final class DigestUtility {
         return generateServerDigest(req.getHeader("Authorization"), req.getMethod(), password);
     }
 
-    public String generateServerDigest(final String auth, final String method, final String password) {
+    private String generateServerDigest(final String auth, final String method, final String password) {
         if ((auth == null) || (!auth.startsWith("Digest ")) || (method == null) || (password == null)) {
             return null;
         }
@@ -197,15 +198,18 @@ public final class DigestUtility {
         final String tokenRegex = "(?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)";
         final String quotedStringRegex = "(?:\"(?:(?:\\\\\\\")|[^\"])+?\")"; // Grab '\"' char sequence or any non-quote character
         PATTERN_DIGEST_LIST =
-            Pattern.compile("(?:\\s*,\\s*|\\s*)" + paramNameRegex + "(?: *= *(" + tokenRegex + '|' + quotedStringRegex + "))?");
+            Pattern.compile("(?:\\s*,\\s*|\\s+)" + paramNameRegex + "(?: *= *(" + tokenRegex + '|' + quotedStringRegex + "))?");
     }
 
     private static Map<String, String> auth2map(final String auth) {
-        HeaderElement[] elements = BasicHeaderValueParser.parseElements(auth, null);
-        Map<String, String> map = new HashMap<String, String>(elements.length);
-        for (HeaderElement element : elements) {
-            map.put(element.getName(), element.getValue());
+        final Matcher m = PATTERN_DIGEST_LIST.matcher(auth);
+        if (!m.find()) {
+            return Collections.emptyMap();
         }
+        final Map<String, String> map = new HashMap<String, String>(8);
+        do {
+            map.put(m.group(1).toLowerCase(Locale.ENGLISH), m.group(2));
+        } while (m.find());
         return map;
     }
 

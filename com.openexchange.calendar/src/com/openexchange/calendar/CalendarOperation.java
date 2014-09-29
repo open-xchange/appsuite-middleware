@@ -916,9 +916,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         recColl.removeParticipant(cdao, uid);
                         recColl.removeUserParticipant(cdao, uid);
                     }
-                    if (null != edao && FolderObject.SHARED == edao.getFolderType()) {
-                        recColl.removeUserParticipant(cdao, edao.getSharedFolderOwner());
-                    }
                     recColl.checkAndFillIfUserIsUser(cdao, up);
                     recColl.checkAndFillIfUserIsParticipant(cdao, up);
                 }

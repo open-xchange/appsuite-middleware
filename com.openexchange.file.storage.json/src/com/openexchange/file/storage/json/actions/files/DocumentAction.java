@@ -186,7 +186,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     private static final String COVER = com.openexchange.tools.images.ScaleType.COVER.getKeyword();
 
     private boolean seemsLikeThumbnailRequest(AJAXRequestData requestData) {
-        return "thumbnail_image".equals(requestData.getFormat()) || COVER.equals(requestData.getParameter("scaleType"));
+        return COVER.equals(requestData.getParameter("scaleType"));
     }
 
     private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {

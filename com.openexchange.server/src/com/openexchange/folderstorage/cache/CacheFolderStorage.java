@@ -456,7 +456,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         if (null == session) {
             return new PathPerformer(storageParameters.getUser(), storageParameters.getContext(), null, registry);
         }
-        return new PathPerformer(storageParameters, registry);
+        return new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry);
     }
 
     @Override
@@ -466,6 +466,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
 
     @Override
     public void commitTransaction(final StorageParameters params) throws OXException {
+        // Nothing to do
     }
 
     @Override
@@ -478,7 +479,12 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             /*
              * Perform create operation via non-cache storage
              */
-            final CreatePerformer createPerformer = new CreatePerformer(storageParameters, registry);
+            final CreatePerformer createPerformer;
+            if (null == session) {
+                createPerformer = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
+            } else {
+                createPerformer = new CreatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
+            }
             createPerformer.setCheck4Duplicates(false);
             final String folderId = createPerformer.doCreate(folder);
             /*
@@ -924,10 +930,17 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             /*
              * Perform delete
              */
-            new DeletePerformer(storageParameters, registry).doDelete(
-                treeId,
-                folderId,
-                storageParameters.getTimeStamp());
+            if (null == session) {
+                new DeletePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry).doDelete(
+                    treeId,
+                    folderId,
+                    storageParameters.getTimeStamp());
+            } else {
+                new DeletePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry).doDelete(
+                    treeId,
+                    folderId,
+                    storageParameters.getTimeStamp());
+            }
             /*
              * Refresh
              */
@@ -1426,7 +1439,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
 
     @Override
     public void rollback(final StorageParameters params) {
-
+        // Nothing to do
     }
 
     @Override
@@ -1450,9 +1463,9 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                 storageVersion = getFolder(treeId, oldFolderId, storageParameters);
             }
             final boolean isMove = null != folder.getParentID();
-            final String oldParentId = isMove ? storageVersion.getParentID() : null;
+            final String oldParentId = isMove ? getFolder(treeId, oldFolderId, storageParameters).getParentID() : null;
             if (null == session) {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters, registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
 
@@ -1463,7 +1476,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                     }
                 }
             } else {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters, registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
 

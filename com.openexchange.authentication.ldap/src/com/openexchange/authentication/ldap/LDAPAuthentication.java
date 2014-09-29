@@ -114,8 +114,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         BIND_DN_PASSWORD("bindDNPassword"),
         PROXY_USER("proxyUser"),
         PROXY_DELIMITER("proxyDelimiter"),
-        REFERRAL("referral"),
-        USE_FULL_LOGIN_INFO("useFullLoginInfo");
+        REFERRAL("referral");
 
         public String name;
 
@@ -136,7 +135,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
      */
     private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, proxyUser, proxyDelimiter, referral;
 
-    private boolean subtreeSearch, useFullLoginInfo;
+    private boolean subtreeSearch;
 
     private boolean adsbind;
 
@@ -158,13 +157,11 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         final String[] splitted = split(loginInfo.getUsername());
         final String uid = splitted[1];
         final String password = loginInfo.getPassword();
-        final String returnstring;
         if ("".equals(uid) || "".equals(password)) {
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
         }
-        LOG.debug("Using full login info: {}", loginInfo.getUsername());
-        returnstring = bind(useFullLoginInfo ? loginInfo.getUsername() : uid, password);
-        LOG.info("User {} successfully authenticated.", useFullLoginInfo ? loginInfo.getUsername() : uid);
+        final String returnstring = bind(uid, password);
+        LOG.info("User {} successful authenticated.", uid);
         return new AuthenticatedImpl(returnstring, splitted);
     }
 
@@ -199,8 +196,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         }
         try {
             String samAccountName = null;
-            // We need to really search if attribute can be in a subtree or we search for anything but uid
-            if (subtreeSearch || ! uidAttribute.equals("uid")) {
+            if( subtreeSearch ) {
                 // get user dn from user
                 final Properties aprops = (Properties)props.clone();
                 aprops.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -378,8 +374,6 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.REFERRAL.name);
         }
         referral = props.getProperty(PropertyNames.REFERRAL.name);
-        
-        useFullLoginInfo = Boolean.parseBoolean(props.getProperty(PropertyNames.USE_FULL_LOGIN_INFO.name));
 
     }
 

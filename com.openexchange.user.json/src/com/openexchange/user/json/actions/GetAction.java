@@ -117,13 +117,8 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Obtain user's contact
          */
-        Contact contact = null;
-        if (false == user.isGuest()) {
-            ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-            contact = contactService.getUser(session, userId, contactFields);
-        } else {
-            contact = getVirtualContact(session, user);
-        }
+        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+        final Contact contact = contactService.getUser(session, userId, contactFields);
         /*
          * Return appropriate result
          */

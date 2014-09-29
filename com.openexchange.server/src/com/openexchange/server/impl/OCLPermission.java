@@ -139,8 +139,6 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     public static final int ALL_GROUPS_AND_USERS = GroupStorage.GROUP_ZERO_IDENTIFIER;
 
-    public static final int ALL_GUESTS = GroupStorage.GUEST_GROUP_IDENTIFIER;
-
     /**
      * The bit for system flag
      */

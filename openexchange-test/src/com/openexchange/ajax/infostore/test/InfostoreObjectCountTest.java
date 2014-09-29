@@ -61,7 +61,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link InfostoreObjectCountTest}
- *
+ * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.2.2
  */
@@ -69,7 +69,7 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
 
     /**
      * Initializes a new {@link InfostoreObjectCountTest}.
-     *
+     * 
      * @param name
      */
     public InfostoreObjectCountTest(String name) {
@@ -128,10 +128,9 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
     @Test
     public void testCountInSharedInfostoreFolder_AddFiveFromOwner_CountReturnsFiveToOwner() throws Exception {
         InfostoreTestManager infostoreTestManager = new InfostoreTestManager(client1);
-        FolderTestManager folderTestManager = new FolderTestManager(client1);
 
         try {
-            FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, client2.getValues().getUserId(), folderTestManager);
+            FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, client2.getValues().getUserId());
             Folder folder = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
 
@@ -149,17 +148,15 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             assertEquals("Other client is able to see objects", 0, reloaded2.getTotal());
         } finally {
             infostoreTestManager.cleanUp();
-            folderTestManager.cleanUp();
         }
     }
 
     @Test
     public void testCountInSharedInfostoreFolder_AddFiveFromUserWithPermission_CountReturnsFiveToUserWithPermission() throws Exception {
         InfostoreTestManager infostoreTestManager = new InfostoreTestManager(client2);
-        FolderTestManager folderTestManager = new FolderTestManager(client1);
 
         try {
-            FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, client2.getValues().getUserId(), folderTestManager);
+            FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, client2.getValues().getUserId());
             Folder folder = getFolder(client2, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
 
@@ -177,13 +174,12 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             assertEquals("Wrong object count", 0, reloaded2.getTotal());
         } finally {
             infostoreTestManager.cleanUp();
-            folderTestManager.cleanUp();
         }
     }
 
     /**
      * Creates a {@link DocumentMetadata} for further processing
-     *
+     * 
      * @param folder - the folder to create the {@link DocumentMetadata} for
      * @return {@link DocumentMetadata} - created object
      */

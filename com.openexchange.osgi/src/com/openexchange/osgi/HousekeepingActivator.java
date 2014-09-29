@@ -50,11 +50,9 @@
 package com.openexchange.osgi;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -171,7 +169,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     private final List<ServiceTracker<?, ?>> serviceTrackers;
-
+    
     private final HashMultimap<Object,ServiceRegistration<?>> serviceRegistrations;
 
     /**
@@ -238,19 +236,6 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      */
     protected <S> void registerService(final Class<S> clazz, final S service) {
         registerService(clazz, service, null);
-    }
-
-    /**
-     * Registers specified service under the specified class, using the supplied service ranking.
-     *
-     * @param clazz The service's class
-     * @param service The service reference
-     * @param serviceRanking The value to configure the {@link Constants#SERVICE_RANKING} to
-     */
-    protected <S> void registerService(final Class<S> clazz, final S service, int serviceRanking) {
-        Dictionary<String, String> properties = new Hashtable<String, String>(1);
-        properties.put(Constants.SERVICE_RANKING, String.valueOf(serviceRanking));
-        registerService(clazz, service, properties);
     }
 
     /**

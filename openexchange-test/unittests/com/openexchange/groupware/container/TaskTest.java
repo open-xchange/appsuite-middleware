@@ -1,26 +1,184 @@
 
 package com.openexchange.groupware.container;
 
-import static com.openexchange.groupware.container.CalendarObject.ALARM;
-import static com.openexchange.groupware.tasks.Task.ACTUAL_COSTS;
-import static com.openexchange.groupware.tasks.Task.ACTUAL_DURATION;
-import static com.openexchange.groupware.tasks.Task.BILLING_INFORMATION;
-import static com.openexchange.groupware.tasks.Task.COMPANIES;
-import static com.openexchange.groupware.tasks.Task.CURRENCY;
-import static com.openexchange.groupware.tasks.Task.DATE_COMPLETED;
-import static com.openexchange.groupware.tasks.Task.PERCENT_COMPLETED;
-import static com.openexchange.groupware.tasks.Task.PRIORITY;
-import static com.openexchange.groupware.tasks.Task.PROJECT_ID;
-import static com.openexchange.groupware.tasks.Task.STATUS;
-import static com.openexchange.groupware.tasks.Task.TARGET_COSTS;
-import static com.openexchange.groupware.tasks.Task.TARGET_DURATION;
-import static com.openexchange.groupware.tasks.Task.TRIP_METER;
+import static com.openexchange.groupware.tasks.Task.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.openexchange.groupware.tasks.Task;
 
 
 public class TaskTest extends CalendarObjectTest {
+
+    @Override
+    public void testFindDifferingFields() {
+        Task dataObject = getTask();
+        Task otherDataObject = getTask();
+
+        otherDataObject.setActualCosts(new BigDecimal("1.2"));
+        assertDifferences(dataObject, otherDataObject, Task.ACTUAL_COSTS);
+
+        otherDataObject.setActualDuration(12L);
+        assertDifferences(dataObject, otherDataObject, Task.ACTUAL_COSTS, Task.ACTUAL_DURATION);
+
+
+        otherDataObject.setAlarm(new Date(23));
+        assertDifferences(dataObject, otherDataObject, Task.ACTUAL_COSTS, Task.ACTUAL_DURATION, Task.ALARM);
+
+        otherDataObject.setBillingInformation("Blupp");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION);
+
+        otherDataObject.setCompanies("Blupp");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES);
+
+        otherDataObject.setCurrency("Blupp");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY);
+
+        otherDataObject.setDateCompleted(new Date(23));
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY,
+            Task.DATE_COMPLETED);
+
+        otherDataObject.setPercentComplete(12);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY,
+            Task.DATE_COMPLETED,
+            Task.PERCENT_COMPLETED);
+
+        otherDataObject.setPriority(12);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY,
+            Task.DATE_COMPLETED,
+            Task.PERCENT_COMPLETED,
+            Task.PRIORITY);
+
+        otherDataObject.setProjectID(12);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY,
+            Task.DATE_COMPLETED,
+            Task.PERCENT_COMPLETED,
+            Task.PRIORITY,
+            Task.PROJECT_ID);
+
+        otherDataObject.setStatus(12);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY,
+            Task.DATE_COMPLETED,
+            Task.PERCENT_COMPLETED,
+            Task.PRIORITY,
+            Task.PROJECT_ID,
+            Task.STATUS);
+
+        otherDataObject.setTargetCosts(new BigDecimal("1.2"));
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY,
+            Task.DATE_COMPLETED,
+            Task.PERCENT_COMPLETED,
+            Task.PRIORITY,
+            Task.PROJECT_ID,
+            Task.STATUS,
+            Task.TARGET_COSTS);
+
+        otherDataObject.setTargetDuration(12L);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY,
+            Task.DATE_COMPLETED,
+            Task.PERCENT_COMPLETED,
+            Task.PRIORITY,
+            Task.PROJECT_ID,
+            Task.STATUS,
+            Task.TARGET_COSTS,
+            Task.TARGET_DURATION);
+
+        otherDataObject.setTripMeter("Blupp");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Task.ACTUAL_COSTS,
+            Task.ACTUAL_DURATION,
+            Task.ALARM,
+            Task.BILLING_INFORMATION,
+            Task.COMPANIES,
+            Task.CURRENCY,
+            Task.DATE_COMPLETED,
+            Task.PERCENT_COMPLETED,
+            Task.PRIORITY,
+            Task.PROJECT_ID,
+            Task.STATUS,
+            Task.TARGET_COSTS,
+            Task.TARGET_DURATION,
+            Task.TRIP_METER);
+
+    }
 
     @Override
     public void testAttrAccessors() {

@@ -193,7 +193,7 @@ final class MovePerformer extends AbstractPerformer {
         folderStorage.updateFolder(folder, storageParameters);
     }
 
-    void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final Collection<FolderStorage> openedStorages) throws OXException {
+    void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final List<FolderStorage> openedStorages) throws OXException {
         /*
          * Check permission on folder
          */
@@ -524,7 +524,7 @@ final class MovePerformer extends AbstractPerformer {
         }
     }
 
-    private void checkOpenedStorage(final FolderStorage storage, final Collection<FolderStorage> openedStorages) throws OXException {
+    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage openedStorage : openedStorages) {
             if (openedStorage.equals(storage)) {
                 return;

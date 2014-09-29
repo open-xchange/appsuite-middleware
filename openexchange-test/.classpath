@@ -118,9 +118,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.api.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.gdata"/>
-	<classpathentry kind="src" path="/com.openexchange.share"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.impl"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.storage"/>
 	<classpathentry kind="src" path="/com.openexchange.subscribe.google"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/com.openexchange.oauth.google"/>

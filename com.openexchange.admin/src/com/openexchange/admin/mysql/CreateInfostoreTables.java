@@ -68,6 +68,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
     private static final String lockNullTableName = "lock_null";
     private static final String lockNullLockTableName = "lock_null_lock";
 
+
     private static final String createInfostoreTable = "CREATE TABLE `infostore` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`id` int4 unsigned NOT NULL,"
@@ -195,11 +196,17 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
         super();
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.database.CreateTableService#requiredTables()
+     */
     @Override
     public String[] requiredTables() {
         return NO_TABLES;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.database.CreateTableService#tablesToCreate()
+     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { infostoreTableName, infostoreDocumentsTableName, delInfostoreTableName,
@@ -207,6 +214,9 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
             lockNullLockTableName };
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
+     */
     @Override
     protected String[] getCreateStatements() {
         return new String[] { createInfostoreTable, createInfostoreDocumentTable, createDelInfostoreTable,

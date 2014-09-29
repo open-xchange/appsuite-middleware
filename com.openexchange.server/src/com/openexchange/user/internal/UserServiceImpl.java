@@ -159,32 +159,6 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Context context, User user) throws OXException {
-        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeDelete(context, user, interceptors);
-        UserStorage.getInstance().deleteUser(context, user.getId());
-        afterDelete(context, user, interceptors);
-    }
-
-    @Override
-    public void deleteUser(Connection con, Context context, User user) throws OXException {
-        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeDelete(context, user, interceptors);
-        UserStorage.getInstance().deleteUser(con, context, user.getId());
-        afterDelete(context, user, interceptors);
-    }
-
-    @Override
-    public void deleteUser(Context context, int userId) throws OXException {
-        deleteUser(context, getUser(userId, context));
-    }
-
-    @Override
-    public void deleteUser(Connection con, Context context, int userId) throws OXException {
-        deleteUser(con, context, getUser(con, userId, context));
-    }
-
-    @Override
     public int getUserId(final String loginInfo, final Context context) throws OXException {
         return UserStorage.getInstance().getUserId(loginInfo, context);
     }
@@ -197,11 +171,6 @@ public final class UserServiceImpl implements UserService {
     @Override
     public int[] listAllUser(final Context context) throws OXException {
         return UserStorage.getInstance().listAllUser(context);
-    }
-
-    @Override
-    public int[] listAllUser(final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return UserStorage.getInstance().listAllUser(context, includeGuests, excludeUsers);
     }
 
     @Override
@@ -222,11 +191,6 @@ public final class UserServiceImpl implements UserService {
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
         return UserStorage.getInstance().searchUser(email, context, considerAliases);
-    }
-
-    @Override
-    public User searchUser(final String email, final Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return UserStorage.getInstance().searchUser(email, context, considerAliases, includeGuests, excludeUsers);
     }
 
     @Override
@@ -282,22 +246,6 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
-    private void beforeDelete(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeDelete(context, user, null);
-        }
-    }
-
-    private void afterDelete(Context context, User user, List<UserServiceInterceptor> interceptors) {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            try {
-                interceptor.afterDelete(context, user, null);
-            } catch (OXException e) {
-                LOG.error("Error while calling interceptor.", e);
-            }
-        }
-    }
-
     private void checkUser(final User user) throws OXException {
         final String mail = user.getMail();
         final String language = user.getPreferredLanguage();
@@ -348,6 +296,10 @@ public final class UserServiceImpl implements UserService {
          */
         if (passwordMech == null) {
             throw UserExceptionCode.MISSING_PASSWORD_MECH.create();
+        } else {
+            if (!passwordMech.equalsIgnoreCase("{CRYPT}") && !passwordMech.equalsIgnoreCase("{SHA}")) {
+                throw UserExceptionCode.MISSING_PASSWORD_MECH.create(passwordMech);
+            }
         }
 
         // TODO: Maybe we have to check the contact id here.

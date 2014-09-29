@@ -112,7 +112,6 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
-import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -129,7 +128,6 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -146,7 +144,6 @@ import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link DatabaseFolderStorage} - The database folder storage.
@@ -382,31 +379,30 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (null == con) {
             return;
         }
-
-        if (!con.controlledExternally) {
-            if (WRITEES.contains(con.readWrite)) {
-                try {
-                    con.connection.commit();
-                } catch (final SQLException e) {
-                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    DBUtils.autocommit(con.connection);
-                    final DatabaseService databaseService = services.getService(DatabaseService.class);
-                    if (null != databaseService) {
-                        con.close(databaseService, params.getContext().getContextId());
-                    }
-                }
-            } else {
+        if (WRITEES.contains(con.readWrite)) {
+            try {
+                con.connection.commit();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.autocommit(con.connection);
                 final DatabaseService databaseService = services.getService(DatabaseService.class);
                 if (null != databaseService) {
-                    databaseService.backReadOnly(params.getContext(), con.connection);
+                    con.close(databaseService, params.getContext().getContextId());
                 }
+                final FolderType folderType = getFolderType();
+                params.putParameter(folderType, PARAM_CONNECTION, null);
+                params.markCommitted();
             }
+        } else {
+            final DatabaseService databaseService = services.getService(DatabaseService.class);
+            if (null != databaseService) {
+                databaseService.backReadOnly(params.getContext(), con.connection);
+            }
+            final FolderType folderType = getFolderType();
+            params.putParameter(folderType, PARAM_CONNECTION, null);
+            params.markCommitted();
         }
-
-        final FolderType folderType = getFolderType();
-        params.putParameter(folderType, PARAM_CONNECTION, null);
-        params.markCommitted();
     }
 
     @Override
@@ -893,12 +889,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 if (s instanceof ServerSession) {
                     userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-                    if (userPermissionService == null) {
-                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserPermissionService.class.getName());
-                    }
-
-                    userPermissionBits = userPermissionService.getUserPermissionBits(user.getId(), ctx);
+                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -1121,10 +1112,10 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
-        final User user = storageParameters.getUser();
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
+            final User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
             final UserPermissionBits userPermissionBits;
@@ -1239,20 +1230,20 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
-            final User user = storageParameters.getUser();
-            final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits;
-            {
-                final Session s = storageParameters.getSession();
-                if (s instanceof ServerSession) {
-                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                } else {
-                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                }
-            }
-
             final Connection con = provider.getConnection();
+
             if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserPermissionBits userPermissionBits;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
+                    } else {
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    }
+                }
                 final List<FolderIdNamePair> subfolderIds =
                     SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userPermissionBits, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
@@ -1266,7 +1257,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final int parentId = Integer.parseInt(parentIdentifier);
 
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
-                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(user, userPermissionBits, ctx, con);
+                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(storageParameters.getUser().getLocale());
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
                 for (final String[] sa : subfolderIds) {
@@ -1279,6 +1270,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * A virtual database folder
                  */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserPermissionBits userPermissionBits;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
+                    } else {
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    }
+                }
                 final List<String[]> subfolderIds =
                     VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
@@ -1294,6 +1296,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system private folder
                  */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserPermissionBits userPermissionBits;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
+                    } else {
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    }
+                }
                 final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1308,6 +1321,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system shared folder
                  */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserPermissionBits userPermissionBits;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
+                    } else {
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    }
+                }
                 final List<String[]> subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1322,6 +1346,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system public folder
                  */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserPermissionBits userPermissionBits;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
+                    } else {
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    }
+                }
                 final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1336,6 +1371,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system infostore folder
                  */
+                final User user = storageParameters.getUser();
+                final Context ctx = storageParameters.getContext();
+                final UserPermissionBits userPermissionBits;
+                {
+                    final Session s = storageParameters.getSession();
+                    if (s instanceof ServerSession) {
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
+                    } else {
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    }
+                }
                 final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                 final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userPermissionBits, ctx, altNames, storageParameters.getSession(), con);
                 final int size = subfolderIds.size();
@@ -1462,27 +1508,23 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (null == con) {
             return;
         }
-
-        if (!con.controlledExternally) {
-            if (con.isWritable()) {
-                try {
-                    DBUtils.rollback(con.connection);
-                } finally {
-                    DBUtils.autocommit(con.connection);
-                    final DatabaseService databaseService = services.getService(DatabaseService.class);
-                    if (null != databaseService) {
-                        con.close(databaseService, params.getContext().getContextId());
-                    }
-                }
-            } else {
+        if (con.isWritable()) {
+            try {
+                DBUtils.rollback(con.connection);
+            } finally {
+                DBUtils.autocommit(con.connection);
                 final DatabaseService databaseService = services.getService(DatabaseService.class);
                 if (null != databaseService) {
-                    databaseService.backReadOnly(params.getContext(), con.connection);
+                    con.close(databaseService, params.getContext().getContextId());
                 }
+                params.putParameter(getFolderType(), PARAM_CONNECTION, null);
+            }
+        } else {
+            final DatabaseService databaseService = services.getService(DatabaseService.class);
+            if (null != databaseService) {
+                databaseService.backReadOnly(params.getContext(), con.connection);
             }
         }
-
-        params.putParameter(getFolderType(), PARAM_CONNECTION, null);
     }
 
     @Override
@@ -1496,9 +1538,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             final DatabaseService databaseService = services.getService(DatabaseService.class);
             final Context context = parameters.getContext();
-            ConnectionMode connectionMode = parameters.getParameter(folderType, PARAM_CONNECTION);
-            if (null != connectionMode) {
-                if (connectionMode.supports(mode)) {
+            ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
+            if (null != con) {
+                if (con.supports(mode)) {
                     // Connection already present in proper access mode
                     return false;
                 }
@@ -1507,62 +1549,34 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  *
                  * commit, restore auto-commit & push to pool
                  */
-                if (!connectionMode.controlledExternally) {
-                    parameters.putParameter(folderType, PARAM_CONNECTION, null);
-                    if (connectionMode.isWritable()) {
-                        try {
-                            connectionMode.connection.commit();
-                        } catch (final Exception e) {
-                            // Ignore
-                            DBUtils.rollback(connectionMode.connection);
-                        }
-                        DBUtils.autocommit(connectionMode.connection);
+                parameters.putParameter(folderType, PARAM_CONNECTION, null);
+                if (con.isWritable()) {
+                    try {
+                        con.connection.commit();
+                    } catch (final Exception e) {
+                        // Ignore
+                        DBUtils.rollback(con.connection);
                     }
-                    connectionMode.close(databaseService, context.getContextId());
+                    DBUtils.autocommit(con.connection);
                 }
+                con.close(databaseService, context.getContextId());
             }
-
-            Connection connection = null;
-            FolderServiceDecorator decorator = parameters.getDecorator();
-            if (decorator != null) {
-                Object obj = decorator.getProperty(Connection.class.getName());
-                if (obj != null && obj instanceof Connection) {
-                    connection = (Connection) obj;
-                }
-            }
-
             if (WRITEES.contains(mode)) {
-                if (connection == null || connection.isReadOnly()) {
-                    connectionMode = new ConnectionMode(databaseService.getWritable(context), mode);
-                    connectionMode.connection.setAutoCommit(false);
-                } else {
-                    connectionMode = new ConnectionMode(connection, mode, true);
-                }
+                con = new ConnectionMode(databaseService.getWritable(context), mode);
+                con.connection.setAutoCommit(false);
             } else {
-                if (connection == null) {
-                    connectionMode = new ConnectionMode(databaseService.getReadOnly(context), mode);
-                } else {
-                    connectionMode = new ConnectionMode(connection, mode, true);
-                }
+                con = new ConnectionMode(databaseService.getReadOnly(context), mode);
             }
             // Put to parameters
-            if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, connectionMode)) {
+            if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, con)) {
                 // Success
             } else {
                 // Fail
-                if (!connectionMode.controlledExternally) {
-                    if (connectionMode.isWritable()) {
-                        connectionMode.connection.setAutoCommit(true);
-                    }
-                    connectionMode.close(databaseService, context.getContextId());
+                if (con.isWritable()) {
+                    con.connection.setAutoCommit(true);
                 }
+                con.close(databaseService, context.getContextId());
             }
-
-            if (TransactionManager.isManagedTransaction(parameters)) {
-                TransactionManager.getTransactionManager(parameters).transactionStarted(this);
-                return false;
-            }
-
             return true;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -2111,32 +2125,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         public Mode readWrite;
 
         /**
-         * Whether this connection is in a transactional state controlled by an outer scope.
-         */
-        public boolean controlledExternally;
-
-        /**
          * Initializes a new {@link ConnectionMode}.
          *
          * @param connection
          * @param readWrite
          */
         public ConnectionMode(final Connection connection, final Mode readWrite) {
-            this(connection, readWrite, false);
-        }
-
-        /**
-         * Initializes a new {@link ConnectionMode}.
-         *
-         * @param connection
-         * @param readWrite
-         * @param controlledExternally
-         */
-        public ConnectionMode(final Connection connection, final Mode readWrite, final boolean controlledExternally) {
             super();
             this.connection = connection;
             this.readWrite = readWrite;
-            this.controlledExternally = controlledExternally;
         }
 
         public boolean isWritable () {
@@ -2160,14 +2157,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
          * @param contextId The context identifier
          */
         public void close(final DatabaseService databaseService, final int contextId) {
-            if (!controlledExternally) {
-                if (Mode.WRITE == readWrite) {
-                    databaseService.backWritable(contextId, connection);
-                } else if (Mode.WRITE_AFTER_READ == readWrite) {
-                    databaseService.backWritableAfterReading(contextId, connection);
-                } else {
-                    databaseService.backReadOnly(contextId, connection);
-                }
+            if (Mode.WRITE == readWrite) {
+                databaseService.backWritable(contextId, connection);
+            } else if (Mode.WRITE_AFTER_READ == readWrite) {
+                databaseService.backWritableAfterReading(contextId, connection);
+            } else {
+                databaseService.backReadOnly(contextId, connection);
             }
         }
     }

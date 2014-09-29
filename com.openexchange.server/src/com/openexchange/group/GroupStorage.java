@@ -62,15 +62,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public abstract class GroupStorage {
 
-    /**
-     * Identifies the virtual 0-group containing all users but no guests.
-     */
     public static final int GROUP_ZERO_IDENTIFIER = 0;
-
-    /**
-     * Identifies the virtual guest group containing all guests.
-     */
-    public static final int GUEST_GROUP_IDENTIFIER = Integer.MAX_VALUE;
 
     private static volatile GroupStorage instance;
 

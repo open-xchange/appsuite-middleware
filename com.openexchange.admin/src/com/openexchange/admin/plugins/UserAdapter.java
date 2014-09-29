@@ -204,14 +204,4 @@ public class UserAdapter implements User {
         return delegate.toString();
     }
 
-    @Override
-    public boolean isGuest() {
-        return false;
-    }
-
-    @Override
-    public int getCreatedBy() {
-        return 0;
-    }
-
 }

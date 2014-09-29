@@ -50,12 +50,7 @@
 package com.openexchange.groupware.container;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static com.openexchange.groupware.container.Appointment.LOCATION;
-import static com.openexchange.groupware.container.Appointment.RECURRENCE_START;
-import static com.openexchange.groupware.container.Appointment.SHOWN_AS;
-import static com.openexchange.groupware.container.Appointment.TIMEZONE;
-import static com.openexchange.groupware.container.CalendarObject.ALARM;
-import static com.openexchange.groupware.container.CalendarObject.FULL_TIME;
+import static com.openexchange.groupware.container.Appointment.*;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -67,6 +62,57 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertFalse(a.containsShownAs());
         Appointment b = a.clone();
         assertFalse(b.containsShownAs());
+    }
+
+    @Override
+    public void testFindDifferingFields() {
+        Appointment dataObject = getAppointmentObject();
+        Appointment otherDataObject = getAppointmentObject();
+
+        otherDataObject.setAlarm(12);
+        assertDifferences(dataObject, otherDataObject, Appointment.ALARM);
+
+        otherDataObject.setFullTime(true);
+        assertDifferences(dataObject, otherDataObject, Appointment.ALARM, Appointment.FULL_TIME);
+
+        otherDataObject.setLocation("Blupp");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Appointment.ALARM,
+            Appointment.FULL_TIME,
+            Appointment.LOCATION);
+
+        otherDataObject.setRecurringStart(D("24/02/2008 10:00").getTime());
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Appointment.ALARM,
+            Appointment.FULL_TIME,
+            Appointment.LOCATION,
+            Appointment.RECURRENCE_START);
+
+        otherDataObject.setShownAs(12);
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Appointment.ALARM,
+            Appointment.FULL_TIME,
+            Appointment.LOCATION,
+            Appointment.RECURRENCE_START,
+            Appointment.SHOWN_AS);
+
+        otherDataObject.setTimezone("Blupp");
+        assertDifferences(
+            dataObject,
+            otherDataObject,
+            Appointment.ALARM,
+            Appointment.FULL_TIME,
+            Appointment.LOCATION,
+            Appointment.RECURRENCE_START,
+            Appointment.SHOWN_AS,
+            Appointment.TIMEZONE);
+
     }
 
     @Override

@@ -291,7 +291,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                         {
                             int newDeletedCount = imapFolder.getDeletedMessageCount();
                             if (imapFolder.getDeletedMessageCount() != deletedCount) {
-                                LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current deleted count {} vs. old deleted count {}", sUserId, sContextId, Integer.toString(newDeletedCount), Integer.toString(deletedCount));
+                                LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current deleted count {} vs. old deleted count {}", Integer.toString(newDeletedCount), Integer.toString(deletedCount));
                                 notifyNewMail();
                                 notified = true;
                                 break;
@@ -302,7 +302,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                         {
                             int newTotalCount = imapFolder.getMessageCount();
                             if (newTotalCount != totalCount) {
-                                LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current total count {} vs. old total count {}", sUserId, sContextId, Integer.toString(newTotalCount), Integer.toString(totalCount));
+                                LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current total count {} vs. old total count {}", Integer.toString(newTotalCount), Integer.toString(totalCount));
                                 notifyNewMail();
                                 notified = true;
                                 break;

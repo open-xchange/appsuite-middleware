@@ -743,12 +743,6 @@ public final class InternalList {
         // Corrects values in the 'changing_date' column that are set to {@link Long#MAX_VALUE}.
         list.add(new com.openexchange.groupware.update.tasks.FolderCorrectChangingDateTask());
 
-        // Adds permissions to system- and root-folders for the virtual guest group.
-        list.add(new com.openexchange.groupware.update.tasks.FolderPermissionAddGuestGroup());
-
-        // Adds the column 'guestCreatedBy' to the tables 'user' and 'del_user'
-        list.add(new com.openexchange.groupware.update.tasks.UserAddGuestCreatedByTask());
-
         // (Re-)adds indexes in prg_contacts for "auto-complete" queries
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearchV2());
 
@@ -758,10 +752,6 @@ public final class InternalList {
         // Adds the 'full_time' column to the tasks tables
         list.add(new com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask());
 
-        // Create table for object permissions
-        list.add(new com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableTask());
-
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
-
 }

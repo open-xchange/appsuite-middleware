@@ -212,16 +212,6 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return false;
         }
 
-        @Override
-        public boolean isGuest() {
-            return delegate.isGuest();
-        }
-
-        @Override
-        public int getCreatedBy() {
-            return delegate.getCreatedBy();
-        }
-
 
     }
 

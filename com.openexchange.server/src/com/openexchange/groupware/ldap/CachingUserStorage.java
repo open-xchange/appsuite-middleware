@@ -117,13 +117,8 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public void deleteUser(Context context, int userId) throws OXException {
-        delegate.deleteUser(context, userId);
-    }
-
-    @Override
-    public void deleteUser(final Connection con, final Context context, int userId) throws OXException {
-        delegate.deleteUser(con, context, userId);
+    public int createUser(final Context context, final User user) throws OXException {
+        return delegate.createUser(context, user);
     }
 
     @Override
@@ -138,8 +133,8 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return getUser(ctx, listAllUser(ctx, includeGuests, excludeUsers));
+    public User[] getUser(final Context ctx) throws OXException {
+        return getUser(ctx, listAllUser(ctx));
     }
 
     @Override
@@ -268,8 +263,15 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public User searchUser(String email, Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return delegate.searchUser(email, context, considerAliases, includeGuests, excludeUsers);
+    public User searchUser(final String email, final Context context) throws OXException {
+        // Caching doesn't make any sense here.
+        return delegate.searchUser(email, context);
+    }
+
+    @Override
+    public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
+        // Caching doesn't make any sense here.
+        return delegate.searchUser(email, context, considerAliases);
     }
 
     @Override
@@ -284,10 +286,9 @@ public class CachingUserStorage extends UserStorage {
         return delegate.searchUserByName(name, context, searchType);
     }
 
-
     @Override
-    public int[] listAllUser(Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return delegate.listAllUser(context, includeGuests, excludeUsers);
+    public int[] listAllUser(final Context ctx) throws OXException {
+        return delegate.listAllUser(ctx);
     }
 
     @Override

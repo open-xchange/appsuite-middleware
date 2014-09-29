@@ -62,12 +62,11 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * Implementation of the group storage that adds the virtual groups {@link GroupStorage#GROUP_ZERO_IDENTIFIER}
- * and {@link GroupStorage#GUEST_GROUP_IDENTIFIER} to all requests.
+ * Implementation of the group storage that adds group with identifier 0 to all requests.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class VirtualGroupStorage extends GroupStorage {
+public final class GroupsWithGroupZero extends GroupStorage {
 
     /**
      * Underlying group storage handling groups except group with identifier 0.
@@ -80,7 +79,7 @@ public final class VirtualGroupStorage extends GroupStorage {
      * @param ctx Context.
      * @param delegate underlying group storage.
      */
-    public VirtualGroupStorage(final GroupStorage delegate) {
+    public GroupsWithGroupZero(final GroupStorage delegate) {
         super();
         this.delegate = delegate;
     }
@@ -93,8 +92,6 @@ public final class VirtualGroupStorage extends GroupStorage {
         final Group retval;
         if (GroupTools.GROUP_ZERO.getIdentifier() == gid) {
             retval = GroupTools.getGroupZero(ctx);
-        } else if (GroupTools.GUEST_GROUP.getIdentifier() == gid) {
-            retval = GroupTools.getGuestGroup(ctx);
         } else {
             retval = delegate.getGroup(gid, ctx);
         }
@@ -107,10 +104,9 @@ public final class VirtualGroupStorage extends GroupStorage {
     @Override
     public Group[] getGroups(final boolean loadMembers, final Context ctx) throws OXException {
         final Group[] groups = delegate.getGroups(loadMembers, ctx);
-        final Group[] retval = new Group[groups.length + 2];
+        final Group[] retval = new Group[groups.length + 1];
         retval[0] = GroupTools.getGroupZero(ctx);
-        retval[1] = GroupTools.getGuestGroup(ctx);
-        System.arraycopy(groups, 0, retval, 2, groups.length);
+        System.arraycopy(groups, 0, retval, 1, groups.length);
         return retval;
     }
 
@@ -120,20 +116,18 @@ public final class VirtualGroupStorage extends GroupStorage {
     @Override
     public Group[] listModifiedGroups(final Date modifiedSince, final Context ctx) throws OXException {
         final Group[] groups = delegate.listModifiedGroups(modifiedSince, ctx);
-        final Group[] retval = new Group[groups.length + 2];
+        final Group[] retval = new Group[groups.length + 1];
         retval[0] = GroupTools.getGroupZero(ctx);
-        retval[1] = GroupTools.getGuestGroup(ctx);
-        System.arraycopy(groups, 0, retval, 2, groups.length);
+        System.arraycopy(groups, 0, retval, 1, groups.length);
         return retval;
     }
 
     @Override
     public Group[] listDeletedGroups(final Date modifiedSince, final Context ctx) throws OXException {
         final Group[] groups = delegate.listDeletedGroups(modifiedSince, ctx);
-        final Group[] retval = new Group[groups.length + 2];
+        final Group[] retval = new Group[groups.length + 1];
         retval[0] = GroupTools.getGroupZero(ctx);
-        retval[1] = GroupTools.getGuestGroup(ctx);
-        System.arraycopy(groups, 0, retval, 2, groups.length);
+        System.arraycopy(groups, 0, retval, 1, groups.length);
         return retval;
     }
 
@@ -144,16 +138,11 @@ public final class VirtualGroupStorage extends GroupStorage {
     public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context ctx) throws OXException {
         final Pattern pat = Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
         final Group zero = GroupTools.getGroupZero(ctx);
-        final Matcher zeroMatch = pat.matcher(zero.getDisplayName());
-        final Group guests = GroupTools.getGuestGroup(ctx);
-        final Matcher guestsMatch = pat.matcher(guests.getDisplayName());
+        final Matcher match = pat.matcher(zero.getDisplayName());
         final List<Group> groups = new ArrayList<Group>();
         groups.addAll(Arrays.asList(delegate.searchGroups(pattern, loadMembers, ctx)));
-        if (zeroMatch.find()) {
+        if (match.find()) {
             groups.add(zero);
-        }
-        if (guestsMatch.find()) {
-            groups.add(guests);
         }
         return groups.toArray(new Group[groups.size()]);
     }

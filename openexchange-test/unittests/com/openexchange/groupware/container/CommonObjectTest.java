@@ -6,6 +6,24 @@ import static com.openexchange.groupware.container.CommonObject.NUMBER_OF_ATTACH
 import static com.openexchange.groupware.container.CommonObject.PRIVATE_FLAG;
 
 public class CommonObjectTest extends FolderChildObjectTest {
+    @Override
+    public void testFindDifferingFields() {
+        CommonObject dataObject = getCommonObject();
+        CommonObject otherDataObject = getCommonObject();
+
+        otherDataObject.setCategories("blupp");
+        assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES);
+
+        otherDataObject.setLabel(-2);
+        assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES, CommonObject.COLOR_LABEL);
+
+        otherDataObject.setNumberOfAttachments(-2);
+        assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES, CommonObject.COLOR_LABEL, CommonObject.NUMBER_OF_ATTACHMENTS);
+
+        otherDataObject.setPrivateFlag(false);
+        assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES, CommonObject.COLOR_LABEL, CommonObject.NUMBER_OF_ATTACHMENTS, CommonObject.PRIVATE_FLAG);
+
+    }
 
     @Override
     public void testAttrAccessors() {
@@ -78,6 +96,12 @@ public class CommonObjectTest extends FolderChildObjectTest {
         object.remove(PRIVATE_FLAG);
         assertFalse(object.contains(PRIVATE_FLAG));
         assertFalse(object.containsPrivateFlag());
+    }
+
+    private CommonObject getCommonObject() {
+        CommonObject co = new CommonObject(){};
+        fillCommonObject(co);
+        return co;
     }
 
     public void fillCommonObject(CommonObject co) {

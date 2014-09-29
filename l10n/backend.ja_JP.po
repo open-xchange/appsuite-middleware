@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-24 09:28+0900\n"
+"PO-Revision-Date: 2014-09-05 14:42+0900\n"
 "Last-Translator: \n"
 "Language-Team:  <ja@li.org>\n"
 "Language: ja_JP\n"
@@ -782,8 +782,9 @@ msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr "イベントの日付が変更されました。元の日付: %1$s 新しい日付: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
+#, fuzzy
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
-msgstr "イベントの日時が変更されました。元の日時: %1$s 新しい日時: %2$s"
+msgstr "イベントの日付が変更されました。元の日付: %1$s 新しい日付: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
@@ -1357,7 +1358,7 @@ msgstr "住所 (その他)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:61
 msgid "The type %1$s of the provided file is not supported."
-msgstr "指定されたファイルのタイプ %1$s はサポートしていません。"
+msgstr "指定されたファイルのタイプ %1$s はサポートされていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
@@ -1615,11 +1616,10 @@ msgid "A newer version of your client application is available for download."
 msgstr "クライアント アプリケーションの最新バージョンがダウンロードできます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
+#, fuzzy
 msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
-msgstr ""
-"パターン \"%1$s\" は無効です。有効なパターンを使用して、もう一度やり直してく"
-"ださい。"
+msgstr "アカウント \"%1$s\" は無効です。アカウントを作成し直してください。"
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -1628,46 +1628,52 @@ msgstr "%1$s (%2$s) でアップロード"
 
 #. A Box error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:62
+#, fuzzy
 msgid "A Box error occurred: %1$s"
-msgstr "次の Box エラーが発生しました: %1$s"
+msgstr "次のエラーが発生しました: %1$s"
 
 #. A Box error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:65
+#, fuzzy
 msgid ""
 "A Box server error occurred with HTTP status code %1$s. Error message: %2$s"
-msgstr ""
-"Box サーバ エラーが発生しました。HTTP ステータス コード: %1$s エラー メッセー"
-"ジ: %2$s"
+msgstr "HTTP エラーが発生しました。ステータス %1$s、メッセージ %2$s"
 
 #. Invalid Box URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:68
+#, fuzzy
 msgid "The provided Box URL: %1$s is invalid"
-msgstr "入力した Box の URL %1$s は無効です。"
+msgstr "入力した Dropbox の URL %1$s は無効です。"
 
 #. Box URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:71
+#, fuzzy
 msgid "The provided Box URL does not denote a directory: %1$s"
-msgstr "入力した次の Box の URL はディレクトリではありません: %1$s"
+msgstr "入力した Dropbox の URL はディレクトリ %1$s ではありません。"
 
 #. The Box resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:74
+#, fuzzy
 msgid "The provided Box resource does not exist: %1$s"
-msgstr "入力した次の Box のリソースは存在しません: %1$s"
+msgstr "次の入力した Dropbox のリソースは存在しません: %1$s"
 
 #. Update denied for Box resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:77
+#, fuzzy
 msgid "Update denied for the provided Box resource: %1$s"
-msgstr "入力した次の Box のリソースの更新が拒否されました: %1$s"
+msgstr "次の入力した Dropbox のリソースの更新が拒否されました: %1$s"
 
 #. Delete denied for Box resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:80
+#, fuzzy
 msgid "Delete denied for the provided Box resource: %1$s"
-msgstr "入力した次の Box のリソースの削除が拒否されました: %1$s"
+msgstr "次の入力した Dropbox のリソースの削除が拒否されました: %1$s"
 
 #. Box URL does not denote a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:83
+#, fuzzy
 msgid "The provided Box URL does not denote a file: %1$s"
-msgstr "入力した次の Box の URL はファイルではありません: %1$s"
+msgstr "次の入力した Dropbox の URL はファイルではありません: %1$s"
 
 #. Missing file name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:86
@@ -1681,8 +1687,9 @@ msgstr ""
 
 #. Versioning not supported by Box file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:89
+#, fuzzy
 msgid "Versioning not supported by Box file storage."
-msgstr "Box ファイル ストレージはバージョン管理をサポートしていません。"
+msgstr "Dropbox ファイル ストレージはバージョン管理をサポートしていません。"
 
 #. Missing configuration for account "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:92
@@ -1717,8 +1724,9 @@ msgstr "I/O エラーが発生しました: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:101
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:101
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:101
+#, fuzzy
 msgid "Authentication failed: %1$s"
-msgstr "次の認証に失敗しました: %1$s"
+msgstr "次のユーザ名の認証に失敗しました: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/FormStrings.java:61
@@ -1781,7 +1789,7 @@ msgstr "ファイル名が見つかりません。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:87
 msgid "Versioning not supported by CIFS/SMB file storage."
 msgstr ""
-"CIFS/SMB ファイル ストレージでは、バージョン管理はサポートしていません。"
+"CIFS/SMB ファイル ストレージでは、バージョン管理はサポートされていません。"
 
 #. The operation completed successfully.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:90
@@ -2095,57 +2103,65 @@ msgstr "CMIS ファイル ストレージはバージョン管理をサポート
 
 #. A Copy.com error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:62
+#, fuzzy
 msgid "A Copy.com error occurred: %1$s"
-msgstr "次の Copy.com のエラーが発生しました: %1$s"
+msgstr "次の Dropbox のエラーが発生しました: %1$s"
 
 #. A Copy.com error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:65
+#, fuzzy
 msgid ""
 "A Copy.com server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
-msgstr ""
-"Copy.com サーバ エラーが発生しました。HTTP ステータス: %1$s エラー メッセー"
-"ジ: %2$s"
+msgstr "HTTP エラーが発生しました。ステータス %1$s、メッセージ %2$s"
 
 #. Invalid Copy.com URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:68
+#, fuzzy
 msgid "The provided Copy.com URL: %1$s is invalid"
-msgstr "入力した Copy.com の URL %1$s は無効です。"
+msgstr "入力した Dropbox の URL %1$s は無効です。"
 
 #. Copy.com URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:71
+#, fuzzy
 msgid "The provided Copy.com URL does not denote a directory: %1$s"
-msgstr "入力した Box の URL はディレクトリではありません: %1$s"
+msgstr "入力した Dropbox の URL はディレクトリ %1$s ではありません。"
 
 #. The Copy.com resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:74
+#, fuzzy
 msgid "The provided Copy.com resource does not exist: %1$s"
-msgstr "入力した次の Copy.com のリソースは存在しません: %1$s"
+msgstr "次の入力した Dropbox のリソースは存在しません: %1$s"
 
 #. Update denied for Copy.com resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:77
+#, fuzzy
 msgid "Update denied for the provided Copy.com resource: %1$s"
-msgstr "入力した次の Copy.com のリソースの更新が拒否されました: %1$s"
+msgstr "次の入力した Dropbox のリソースの更新が拒否されました: %1$s"
 
 #. Delete denied for Copy.com resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:80
+#, fuzzy
 msgid "Delete denied for the provided Copy.com resource: %1$s"
-msgstr "入力した次の Copy.com のリソースの削除が拒否されました: %1$s"
+msgstr "次の入力した Dropbox のリソースの削除が拒否されました: %1$s"
 
 #. Copy.com URL does not denote a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:83
+#, fuzzy
 msgid "The provided Copy.com URL does not denote a file: %1$s"
-msgstr "入力した次の Copy.com の URL はファイルではありません: %1$s"
+msgstr "次の入力した Dropbox の URL はファイルではありません: %1$s"
 
 #. Versioning not supported by Copy.com file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:89
+#, fuzzy
 msgid "Versioning not supported by Copy.com file storage."
-msgstr "Copy.com ファイル ストレージはバージョン管理をサポートしていません。"
+msgstr "Dropbox ファイル ストレージはバージョン管理をサポートしていません。"
 
 #. The Copy.com resource does not exist
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:104
+#, fuzzy
 msgid "The Copy.com resource does not exist"
-msgstr "Copy.com のリソースは存在しません。"
+msgstr "次の CMIS のリソースは存在しません: %1$s"
 
 #. A Dropbox error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:62
@@ -2154,12 +2170,11 @@ msgstr "次の Dropbox のエラーが発生しました: %1$s"
 
 #. A Dropbox error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:65
+#, fuzzy
 msgid ""
 "A Dropbox server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
-msgstr ""
-"Dropbox サーバ エラーが発生しました。HTTP ステータス: %1$s エラー メッセー"
-"ジ: %2$s"
+msgstr "HTTP エラーが発生しました。ステータス %1$s、メッセージ %2$s"
 
 #. Invalid Dropbox URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:68
@@ -2198,107 +2213,121 @@ msgstr "Dropbox ファイル ストレージはバージョン管理をサポー
 
 #. A Google Drive error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:62
+#, fuzzy
 msgid "A Google Drive error occurred: %1$s"
-msgstr "次の Google Drive のエラーが発生しました: %1$s "
+msgstr "次のイベント エラーが発生しました: %1$s "
 
 #. A Google Drive error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:65
+#, fuzzy
 msgid ""
 "A Google Drive server error occurred with HTTP status code %1$s. Error "
 "message: %2$s"
-msgstr ""
-"Google Drive サーバ エラーが発生しました。HTTP ステータス: %1$s エラー メッ"
-"セージ: %2$s"
+msgstr "HTTP エラーが発生しました。ステータス %1$s、メッセージ %2$s"
 
 #. Google Drive URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
+#, fuzzy
 msgid "The provided Google Drive URL does not denote a directory: %1$s"
-msgstr "入力した次の Google Drive の URL はディレクトリではありません: %1$s"
+msgstr "入力した Dropbox の URL はディレクトリ %1$s ではありません。"
 
 #. The Google Drive resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:71
+#, fuzzy
 msgid "The provided Google Drive resource does not exist: %1$s"
-msgstr "入力した次の Google Drive のリソースは存在しません: %1$s"
+msgstr "次の入力した Dropbox のリソースは存在しません: %1$s"
 
 #. Update denied for Google Drive resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:74
+#, fuzzy
 msgid "Update denied for the provided Google Drive resource: %1$s"
-msgstr "入力した次の Google Drive のリソースの更新が拒否されました: %1$s"
+msgstr "次の入力した Dropbox のリソースの更新が拒否されました: %1$s"
 
 #. Delete denied for Google Drive resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:77
+#, fuzzy
 msgid "Delete denied for the provided Google Drive resource: %1$s"
-msgstr "入力した次の Google Drive のリソースの削除が拒否されました: %1$s"
+msgstr "次の入力した Dropbox のリソースの削除が拒否されました: %1$s"
 
 #. Google Drive URL does not denote a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:80
+#, fuzzy
 msgid "The provided Google Drive URL does not denote a file: %1$s"
-msgstr "入力した次の Google Drive の URL はファイルではありません: %1$s"
+msgstr "次の入力した Dropbox の URL はファイルではありません: %1$s"
 
 #. Versioning not supported by Google Drive file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:86
+#, fuzzy
 msgid "Versioning not supported by Google Drive file storage."
-msgstr ""
-"Google Drive ファイル ストレージはバージョン管理をサポートしていません。"
+msgstr "XING ファイル ストレージはバージョン管理をサポートしていません。"
 
 #. The file %1$s doesn't have any content stored on Drive
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:98
+#, fuzzy
 msgid "The file %1$s doesn't have any content stored on Drive"
-msgstr "ファイル %1$s の内容は、Drive に保存されていません。"
+msgstr "フォルダ \"%1$s\" は共有されているため、移動できません。"
 
 #. A OneDrive error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:62
+#, fuzzy
 msgid "A OneDrive error occurred: %1$s"
-msgstr "次の OneDrive エラーが発生しました: %1$s "
+msgstr "次のイベント エラーが発生しました: %1$s "
 
 #. A OneDrive error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:65
+#, fuzzy
 msgid ""
 "A OneDrive server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
-msgstr ""
-"OneDrive サーバ エラーが発生しました。HTTP ステータス コード: %1$s エラー "
-"メッセージ: %2$s"
+msgstr "HTTP エラーが発生しました。ステータス %1$s、メッセージ %2$s"
 
 #. Invalid OneDrive URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:68
+#, fuzzy
 msgid "The provided OneDrive URL: %1$s is invalid"
-msgstr "入力した次の OneDrive の URL は無効です: %1$s"
+msgstr "入力した Dropbox の URL %1$s は無効です。"
 
 #. OneDrive URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:71
+#, fuzzy
 msgid "The provided OneDrive URL does not denote a directory: %1$s"
-msgstr "入力した次の OneDrive の URL はディレクトリではありません: %1$s"
+msgstr "入力した Dropbox の URL はディレクトリ %1$s ではありません。"
 
 #. The OneDrive resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:74
+#, fuzzy
 msgid "The provided OneDrive resource does not exist: %1$s"
-msgstr "入力した次の OneDrive のリソースは存在しません: %1$s"
+msgstr "次の入力した Dropbox のリソースは存在しません: %1$s"
 
 #. Update denied for OneDrive resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:77
+#, fuzzy
 msgid "Update denied for the provided OneDrive resource: %1$s"
-msgstr "入力した次の OneDrive のリソースの更新が拒否されました: %1$s"
+msgstr "次の入力した Dropbox のリソースの更新が拒否されました: %1$s"
 
 #. Delete denied for OneDrive resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:80
+#, fuzzy
 msgid "Delete denied for the provided OneDrive resource: %1$s"
-msgstr "入力した次の OneDrive のリソースの削除が拒否されました: %1$s"
+msgstr "次の入力した Dropbox のリソースの削除が拒否されました: %1$s"
 
 #. OneDrive URL does not denote a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:83
+#, fuzzy
 msgid "The provided OneDrive URL does not denote a file: %1$s"
-msgstr "入力した次の OneDrive の URL はファイルではありません: %1$s"
+msgstr "次の入力した Dropbox の URL はファイルではありません: %1$s"
 
 #. Versioning not supported by OneDrive file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:89
+#, fuzzy
 msgid "Versioning not supported by OneDrive file storage."
-msgstr "OneDrive ファイル ストレージはバージョン管理をサポートしていません。"
+msgstr "Dropbox ファイル ストレージはバージョン管理をサポートしていません。"
 
 #. The OneDrive resource does not exist
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:104
+#, fuzzy
 msgid "The OneDrive resource does not exist"
-msgstr "OneDrive のリソースは存在しません。"
+msgstr "次の CMIS のリソースは存在しません: %1$s"
 
 #. Directory "%1$s" must not be deleted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:64
@@ -2375,11 +2404,6 @@ msgid ""
 msgstr ""
 "割当量を超えました。新規のアイテムを作成するには、既存のアイテムを削除してく"
 "ださい。"
-
-#. ZIP archive exceeds max. allowed size of %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
-msgid "ZIP archive exceeds max. allowed size of %1$s"
-msgstr "ZIP アーカイブのサイズが次の許可された最大サイズを超えています:  %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -2603,7 +2627,7 @@ msgstr "フォルダID \"%1$s\" はモジュール \"%2$s\" には無効です�
 #. The folder type \"%1$s\" is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
 msgid "The folder type \"%1$s\" is not supported."
-msgstr "フォルダ タイプ \"%1$s\" はサポートしていません。"
+msgstr "フォルダ タイプ \"%1$s\" はサポートされていません。"
 
 #. The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
@@ -3664,11 +3688,11 @@ msgid ""
 msgstr ""
 "参照先の JSlob %1$s をサービス %2$s に設定できません。処理を停止します。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
 msgid "The E-Mail address %1$s is invalid."
 msgstr "メール アドレス %1$s は無効です。"
 
@@ -3887,8 +3911,9 @@ msgstr "関連付けられた OAuth プロバイダから有効な応答を取�
 
 #. There was a problem while creating a connection to the remote service.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
+#, fuzzy
 msgid "There was a problem while creating a connection to the remote service."
-msgstr "リモート サービスに接続を確立中にエラーが発生しました。"
+msgstr "LDAP サーバへの接続中に次のエラーが発生しました。"
 
 #. *
 #. * New password too short.
@@ -4607,8 +4632,10 @@ msgstr ""
 
 #. * The recipient you tried to reach is currently unavailable
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
+#, fuzzy
 msgid "The recipient you tried to reach is currently unavailable: %1$s"
-msgstr "送信しようとした次の宛先は現在利用できません: %1$s"
+msgstr ""
+"要求されたサービスは一時的に利用できません。後でもう一度やり直してください。"
 
 #. * Your session is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:92
@@ -4908,8 +4935,9 @@ msgstr ""
 
 #. The module attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
+#, fuzzy
 msgid "Attachments"
-msgstr "添付ファイル"
+msgstr "メールの添付ファイル"
 
 #. *
 #. * Appointments must have at least one participant.
@@ -7066,38 +7094,6 @@ msgid ""
 msgstr "入力したパスワードは無効なため、保存できません。許可された文字: %1$s"
 
 #. *
-#. * The current password is incorrect. Please enter your correct current password and try again.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
-msgid ""
-"The current password is incorrect. Please enter your correct current "
-"password and try again."
-msgstr ""
-"入力したパスワードが正しくありません。正しいパスワードを入力して、もう一度や"
-"り直してください。"
-
-#. *
-#. * The current password is missing. Please enter your current password and try again.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
-msgid ""
-"The current password is missing. Please enter your current password and try "
-"again."
-msgstr ""
-"現在のパスワードが見つかりません。現在のパスワードを入力して、もう一度やり直"
-"してください。"
-
-#. *
-#. * The new password is missing. Please enter your new password and try again.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
-msgid ""
-"The new password is missing. Please enter your new password and try again."
-msgstr ""
-"新しいパスワードが見つかりません。新しいパスワードを入力して、もう一度やり直"
-"してください。"
-
-#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -7310,12 +7306,12 @@ msgid "Start date \"%1$s\" must be before end date \"%2$s\"."
 msgstr "開始日 \"%1$s\" は終了日 \"%2$s\" よりも前の日付にしてください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:109
+#, fuzzy
 msgid ""
 "The task could not be saved. Please shorten the \"%1$s\" and try again. "
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
-"仕事を保存できませんでした。\"%1$s\" を短くして、もう一度やり直してください。"
-"現在の文字数 \"%3$d\" は、許可された文字数 \"%2$d\" よりも大きいです。"
+"仕事を保存できません。\"%1$s\" の長さを短くして、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
@@ -7354,8 +7350,9 @@ msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr "属性 \"%2$s\" の値 \"%1$s\" に数字以外の文字が含まれています。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
+#, fuzzy
 msgid "Priority is %d but must be between 1 and 3."
-msgstr "優先度が %d になっていますが、1 から 3 までの値にしてください。"
+msgstr "パーセントの値は %d ではなく、0 から 100 までの必要があります。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
@@ -7941,8 +7938,9 @@ msgstr "メッセージのサイズが大き過ぎるため、送信できませ
 #. * Message could not be sent because it is too large.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:130
+#, fuzzy
 msgid "Message could not be sent because it is too large (%1$s)."
-msgstr "メッセージのサイズ (%1$s) が大き過ぎるため、送信できませんでした。"
+msgstr "メッセージのサイズが大き過ぎるため、送信できませんでした。"
 
 #. *
 #. * Message could not be sent to following recipients: %1$s.
@@ -7955,8 +7953,9 @@ msgstr "次の宛先にメッセージを送信できませんでした: %1$s"
 #. * Message could not be sent to following recipients: %1$s (%2$s)
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:140
+#, fuzzy
 msgid "Message could not be sent to the following recipients: %1$s (%2$s)"
-msgstr "次の宛先にメッセージを送信できませんでした: %1$s (%2$s)"
+msgstr "次の宛先にメッセージを送信できませんでした: %1$s %2$s"
 
 #. *
 #. * Lost connection to mail server.
@@ -8486,10 +8485,6 @@ msgid ""
 "restored."
 msgstr "フォルダ \"%2$s\" の所有者 \"%1$s\" の管理者権限が復元されました。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
-msgid "You must enter a folder name."
-msgstr "フォルダ名を入力してください。"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr "要求された操作は、安全でない接続では実行できません。"
@@ -8526,8 +8521,9 @@ msgstr ""
 "してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:68
+#, fuzzy
 msgid "Missing the following field in JSON data: %1$s"
-msgstr "次のフィールドは JSON データに見つかりませんでした: %1$s"
+msgstr "次のリクエスト パラメータが見つかりません: %s "
 
 #. *
 #. * The provided cookie is invalid. Please login.
@@ -11502,6 +11498,9 @@ msgstr "ズールー"
 #~ msgid "This link already exists."
 #~ msgstr "このリンクは既に存在します。"
 
+#~ msgid "Invalid folder name."
+#~ msgstr "フォルダ名が無効です。"
+
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "メール サーバに接続できません。"
 
@@ -11795,6 +11794,9 @@ msgstr "ズールー"
 
 #~ msgid "POST requires exactly one file upload per request.e."
 #~ msgstr "POSTでは、リクエストごとに一つのファイルしか許可されていません。"
+
+#~ msgid "Inline data exceeds the maximum allowed size."
+#~ msgstr "インラインデータが、許可された最大サイズを超えています。"
 
 #~ msgid "We encountered an internal error. Please try again."
 #~ msgstr "内部エラーが発生しました。もう一度やり直してください。"

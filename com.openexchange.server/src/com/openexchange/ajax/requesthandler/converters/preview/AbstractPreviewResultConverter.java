@@ -525,7 +525,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Get the user language based on the current {@link Session}.
-     *
+     * 
      * @param session The session used for the language lookup.
      * @return <code>null</code> or the preferred language of the user in a "en-gb" like notation.
      */
@@ -536,7 +536,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Checks if a {@link ResourceCache} is enabled fo the given context.
-     *
+     * 
      * @param contextId The context identifier
      * @return true if a {@link ResourceCache} is enabled for the context
      * @throws OXException if check fails
@@ -547,7 +547,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Checks if a {@link ResourceCache} is enabled fo the given context and user.
-     *
+     * 
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return true if a {@link ResourceCache} is enabled for the context, user
@@ -564,21 +564,24 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Get the {@link ResourceCache}.
-     *
-     * @return The preview cache or null if cache is either absent or not enabled for context, user
+     * 
+     * @return The preview cache or null if cache is either absent or not enabled for context, user 
      */
     public static ResourceCache getResourceCache(int contextId, int userId) {
+        ResourceCache cache = null;
         try {
-            return isResourceCacheEnabled(contextId, userId) ? ResourceCaches.getResourceCache() : null;
+            if(isResourceCacheEnabled(contextId, userId)) {
+                cache = ResourceCaches.getResourceCache();
+            }
         } catch (OXException e) {
             LOGGER.warn("Failed to check if ResourceCache is enabled for context {} and user {}", contextId, userId, e);
         }
-        return null;
+        return cache;
     }
 
     /**
      * Try to get a context global cached resource.
-     *
+     * 
      * @param session The current session
      * @param cacheKey The cacheKey
      * @param resourceCache The resourceCache to use
@@ -641,13 +644,13 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Get the {@link IFileHolder} from the given {@link AJAXRequestResult}.
-     *
+     * 
      * @param result
      * @return The {@link IFileHolder} from the given {@link AJAXRequestResult}.
      * @throws OXException if the result object isn't compatible
      */
     public static IFileHolder getFileHolderFromResult(AJAXRequestResult result) throws OXException {
-
+        
         final Object resultObject = result.getResultObject();
         if (!(resultObject instanceof IFileHolder)) {
             throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
@@ -657,7 +660,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Check if the client actively wants to prevent caching.
-     *
+     * 
      * @param requestData The requestData
      * @return True if the client didn't actively specify caching=false
      */
@@ -667,7 +670,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Check if the ETag is valid iow. non empty
-     *
+     * 
      * @param eTag The ETag to check
      * @return True if !Strings.isEmpty(eTag)
      */
@@ -678,7 +681,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Detect if the {@link PreviewDocument} needs further transformations or not and set <code>transformationNeeded</code> parameter on the
      * given {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the client.
-     *
+     * 
      * @param requestData The {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the
      *            client.
      * @param previewDocument The current {@link PreviewDocument}
@@ -691,7 +694,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Set <code>transformationNeeded</code> parameter to <code>false</code> on the given {@link AJAXRequestData}.
-     *
+     * 
      * @param requestData The {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the
      *            client.
      */

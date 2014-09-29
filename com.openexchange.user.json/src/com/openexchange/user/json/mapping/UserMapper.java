@@ -336,51 +336,28 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			}
 		});
 
-        mappings.put(UserField.LOGIN_INFO, new StringMapping<User>("login_info", 615) {
+		mappings.put(UserField.LOGIN_INFO, new StringMapping<User>("login_info", 615) {
 
-            @Override
-            public boolean isSet(User object) {
-                return null != object.getLoginInfo();
-            }
+			@Override
+			public boolean isSet(User object) {
+				return null != object.getLoginInfo();
+			}
 
-            @Override
-            public void set(User object, String value) throws OXException {
-                throw new UnsupportedOperationException();
-            }
+			@Override
+			public void set(User object, String value) throws OXException {
+				throw new UnsupportedOperationException();
+			}
 
-            @Override
-            public String get(User object) {
-                return object.getLoginInfo();
-            }
+			@Override
+			public String get(User object) {
+				return object.getLoginInfo();
+			}
 
-            @Override
-            public void remove(User object) {
-                throw new UnsupportedOperationException();
-            }
-        });
-
-        mappings.put(UserField.GUEST_CREATED_BY, new IntegerMapping<User>("guest_created_by", 616) {
-
-            @Override
-            public boolean isSet(User object) {
-                return 0 < object.getCreatedBy();
-            }
-
-            @Override
-            public void set(User object, Integer value) throws OXException {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Integer get(User object) {
-                return Integer.valueOf(object.getCreatedBy());
-            }
-
-            @Override
-            public void remove(User object) {
-                throw new UnsupportedOperationException();
-            }
-        });
+			@Override
+			public void remove(User object) {
+				throw new UnsupportedOperationException();
+			}
+		});
 
 		return mappings;
 	}

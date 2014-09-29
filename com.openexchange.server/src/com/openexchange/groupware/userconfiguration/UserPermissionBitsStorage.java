@@ -49,14 +49,12 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
- * Direct usage of this class is strictly discouraged! Always use {@link UserPermissionService}!
+ * {@link UserPermissionBitsStorage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -116,17 +114,12 @@ public abstract class UserPermissionBitsStorage {
     /**
      * Retrieve the permission bits for the given user
      */
-    public abstract UserPermissionBits getUserPermissionBits(final int userId, final int contextId) throws OXException;
+    public abstract UserPermissionBits getUserPermissionBits( final int userId, final int contextId) throws OXException;
 
     /**
      * Retrieve the permission bits for the given user
      */
-    public abstract UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException;
-
-    /**
-     * Retrieve the permission bits for the given user
-     */
-    public abstract UserPermissionBits getUserPermissionBits(final Connection con, final int userId, final Context ctx) throws OXException;
+    public abstract UserPermissionBits getUserPermissionBits( final int userId, final Context ctx) throws OXException;
 
     /**
      * Retrieve the permission bits for the given users
@@ -152,11 +145,6 @@ public abstract class UserPermissionBitsStorage {
      * Store the permission bits in the database
      */
     public abstract void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException;
-
-    /**
-     * Store the permission bits in the database
-     */
-    public abstract void saveUserPermissionBits(Connection con, int permissionBits, int userId, Context ctx) throws OXException;
 
 
     protected void startInternal() throws OXException {

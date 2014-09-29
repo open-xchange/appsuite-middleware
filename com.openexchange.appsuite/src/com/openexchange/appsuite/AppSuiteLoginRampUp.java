@@ -169,7 +169,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
                     JSONArray lobs = (JSONArray) ox.perform(request()
                         .module("jslob")
                         .action("list")
-                        .data(new JSONArray(Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")
+                        .data(new JSONArray(Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/core/settingOptions", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")
                             ), "json"
                         ).format("json").build(), null, session).getResultObject();
                     for(int i = 0, size = lobs.length(); i < size; i++) {
