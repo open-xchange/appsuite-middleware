@@ -68,7 +68,6 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.MessageFormat;
 import java.util.Calendar;
 
 /**
@@ -107,7 +106,7 @@ public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper impleme
 
     @Override
     public boolean execute() throws SQLException {
-        LOG.debug(MessageFormat.format("{0} executes: {1}", Thread.currentThread(), delegate.toString()));
+        LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
         boolean retval = delegate.execute();
         con.updatePerformed();
         return retval;
@@ -115,13 +114,13 @@ public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper impleme
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        LOG.debug(MessageFormat.format("{0} executes: {1}", Thread.currentThread(), delegate.toString()));
+        LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
         return new JDBC4ResultSetWrapper(delegate.executeQuery(), this);
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        LOG.debug(MessageFormat.format("{0} executes: {1}", Thread.currentThread(), delegate.toString()));
+        LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
         int retval = delegate.executeUpdate();
         con.updatePerformed();
         return retval;
