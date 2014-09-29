@@ -57,10 +57,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -502,27 +504,39 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             document.setObjectPermissions(knownObjectPermissions.get(id));
             return document;
         }
-        try {
-            return performQuery(ctx, "SELECT entity,group,bits FROM object_permission WHERE cid=? AND id=?;",
-                new ResultProcessor<DocumentMetadata>() {
+        Map<Integer, List<ObjectPermission>> objectPermissions = loadObjectPermissions(Collections.singleton(id), ctx);
+        document.setObjectPermissions(objectPermissions.get(id));
+        return document;
+    }
 
-                @Override
-                public DocumentMetadata process(ResultSet rs) throws SQLException {
-                    if (false == rs.next()) {
-                        return null;
-                    }
-                    List<ObjectPermission> objectPermissions = new ArrayList<ObjectPermission>();
-                    do {
-                        objectPermissions.add(new ObjectPermission(rs.getInt(1), rs.getBoolean(2), rs.getInt(3)));
-                    } while (rs.next());
-                    document.setObjectPermissions(objectPermissions);
-                    return document;
-                }
-            }, Integer.valueOf(ctx.getContextId()), id);
-        } catch (SQLException e) {
-            LOG.error("", e);
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+    /**
+     * Adds object permissions to the supplied documents.
+     *
+     * @param document The documents to add the object permissions for
+     * @param ctx The context
+     * @return The document, with added object permissions (in case they are set)
+     * @throws OXException
+     */
+    private List<DocumentMetadata> addObjectPermissions(List<DocumentMetadata> documents, Context ctx, Map<Integer, List<ObjectPermission>> knownObjectPermissions) throws OXException {
+        List<Integer> idsToQuery = new ArrayList<Integer>();
+        for (DocumentMetadata document : documents) {
+            Integer id = Integer.valueOf(document.getId());
+            if (null != knownObjectPermissions && knownObjectPermissions.containsKey(id)) {
+                document.setObjectPermissions(knownObjectPermissions.get(id));
+            } else {
+                idsToQuery.add(id);
+            }
         }
+        if (0 < idsToQuery.size()) {
+            Map<Integer, List<ObjectPermission>> objectPermissions = loadObjectPermissions(idsToQuery, ctx);
+            for (DocumentMetadata document : documents) {
+                Integer id = Integer.valueOf(document.getId());
+                if (objectPermissions.containsKey(id)) {
+                    document.setObjectPermissions(objectPermissions.get(id));
+                }
+            }
+        }
+        return documents;
     }
 
     SearchIterator<DocumentMetadata> numberOfVersionsIterator(final SearchIterator<?> iter, final Context ctx) throws OXException {
@@ -876,7 +890,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         CheckSizeSwitch.checkSizes(document, getProvider(), context);
 
-        final DocumentMetadata oldDocument = checkWriteLock(document.getId(), session);
+        final DocumentMetadata oldDocument = addObjectPermissions(checkWriteLock(document.getId(), session), session.getContext(), null);
 
         Metadata[] modifiedCols = modifiedColumns;
         final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedCols));
@@ -1029,7 +1043,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             /*
              * update object permissions as needed
              */
-            perform(new UpdateObjectPermissionAction(this, context, document, oldDocument), true);
+            if (updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)) {
+                perform(new UpdateObjectPermissionAction(this, context, document, oldDocument), true);
+            }
 
             // insert tombstone row to del_infostore table in case of move operations to aid folder based synchronizations
             if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId()) {
@@ -1065,6 +1081,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             Metadata.VALUES_ARRAY,
             reuseProvider,
             session.getContext()).asList();
+        addObjectPermissions(allDocuments, session.getContext(), null);
         removeDocuments(allDocuments, allVersions, date, session, null);
     }
 
@@ -1373,6 +1390,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 Metadata.VALUES_ARRAY,
                 reuseProvider,
                 context).asList();
+            addObjectPermissions(allDocuments, context, null);
         } catch (final OXException x) {
             throw x;
         } catch (final Throwable t) {
@@ -1390,6 +1408,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         final Set<Integer> unknownDocuments = new HashSet<Integer>(idSet);
         for (DocumentMetadata document : allDocuments) {
             unknownDocuments.remove(document.getId());
+            addObjectPermissions(document, context, null);
         }
 
         final List<DocumentMetadata> rejected = new ArrayList<DocumentMetadata>();
@@ -1405,6 +1424,66 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
 
         return nd;
+    }
+
+    /**
+     * Loads all stored object permissions for one or more documents from the database.
+     *
+     * @param ids The identifiers of the documents to get the object permissions for
+     * @param ctx The context
+     * @return A map holding the object permissions (or <code>null</code>) to a document's id
+     * @throws OXException
+     */
+    private Map<Integer, List<ObjectPermission>> loadObjectPermissions(Collection<Integer> ids, Context ctx) throws OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyMap();
+        }
+        final Map<Integer, List<ObjectPermission>> objectPermissions = new HashMap<Integer, List<ObjectPermission>>(ids.size());
+        List<Object> parameters = new ArrayList<Object>(ids.size() + 1);
+        parameters.add(Integer.valueOf(ctx.getContextId()));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT object_id,permission_id,group_flag,bits FROM object_permission WHERE cid=? AND object_id");
+        if (1 == ids.size()) {
+            stringBuilder.append("=?;");
+            Integer id = ids.iterator().next();
+            parameters.add(id);
+            objectPermissions.put(id, null);
+        } else {
+            Iterator<Integer> iterator = ids.iterator();
+            stringBuilder.append(" IN (?");
+            Integer id = iterator.next();
+            parameters.add(id);
+            objectPermissions.put(id, null);
+            do {
+                stringBuilder.append(",?");
+                id = iterator.next();
+                parameters.add(id);
+                objectPermissions.put(id, null);
+            } while (iterator.hasNext());
+            stringBuilder.append(");");
+        }
+        try {
+            performQuery(ctx, stringBuilder.toString(), new ResultProcessor<Void>() {
+
+                @Override
+                public Void process(ResultSet rs) throws SQLException {
+                    while (rs.next()) {
+                        Integer id = Integer.valueOf(rs.getInt(1));
+                        List<ObjectPermission> permissions = objectPermissions.get(id);
+                        if (null == permissions) {
+                            permissions = new ArrayList<ObjectPermission>();
+                            objectPermissions.put(id, permissions);
+                        }
+                        permissions.add(new ObjectPermission(rs.getInt(2), rs.getBoolean(3), rs.getInt(4)));
+                    }
+                    return null;
+                }
+            }, parameters.toArray(new Object[parameters.size()]));
+        } catch (SQLException e) {
+            LOG.error("", e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
+        return objectPermissions;
     }
 
     @Override
