@@ -157,6 +157,7 @@ import com.openexchange.tools.iterator.Customizer;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
@@ -1251,12 +1252,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             /*
              * prepare move
              */
+            boolean moveToTrash = FolderObject.TRASH == new OXFolderAccess(getReadConnection(context), context)
+                .getFolderObject((int) destinationFolderID).getType();
             Date now = new Date();
             BatchFilenameReserver filenameReserver = new BatchFilenameReserverImpl(session.getContext(), this);
             try {
                 List<DocumentMetadata> tombstoneDocuments = new ArrayList<DocumentMetadata>(sourceDocuments.size());
                 List<DocumentMetadata> documentsToUpdate = new ArrayList<DocumentMetadata>(sourceDocuments.size());
                 List<DocumentMetadata> versionsToUpdate = new ArrayList<DocumentMetadata>();
+                List<DocumentMetadata> objectPermissionsToCreate = new ArrayList<DocumentMetadata>();
+                List<DocumentMetadata> objectPermissionsToDelete = new ArrayList<DocumentMetadata>();
                 for (DocumentMetadata document : sourceDocuments) {
                     /*
                      * prepare updated document
@@ -1273,6 +1278,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     tombstoneDocument.setLastModified(now);
                     tombstoneDocument.setModifiedBy(session.getUserId());
                     tombstoneDocuments.add(tombstoneDocument);
+                    /*
+                     * prepare object permission update / removal
+                     */
+                    if (null != document.getObjectPermissions() && 0 < document.getObjectPermissions().size()) {
+                        objectPermissionsToDelete.add(document);
+                        if (false == moveToTrash) {
+                            objectPermissionsToCreate.add(documentToUpdate);
+                        }
+                    }
                 }
                 /*
                  * reserve filenames
@@ -1303,6 +1317,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                  */
                 perform(new UpdateDocumentAction(this, QUERIES, session.getContext(), documentsToUpdate, sourceDocuments, new Metadata[] {
                     Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL }, sequenceNumber), true);
+                /*
+                 * perform object permission inserts / removals
+                 */
+                if (0 < objectPermissionsToDelete.size()) {
+                    perform(new DeleteObjectPermissionAction(this, context, objectPermissionsToDelete), true);
+                }
+                if (0 < objectPermissionsToCreate.size()) {
+                    for (DocumentMetadata document : objectPermissionsToCreate) {
+                        perform(new CreateObjectPermissionAction(this, context, document), true);
+                    }
+                }
                 /*
                  * perform version update (only required in case of adjusted filenames)
                  */
@@ -1342,6 +1367,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
          */
         DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
         List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), ids, Metadata.VALUES_ARRAY);
+        addObjectPermissions(allDocuments, session.getContext(), null);
         /*
          * perform move
          */
@@ -1408,7 +1434,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         final Set<Integer> unknownDocuments = new HashSet<Integer>(idSet);
         for (DocumentMetadata document : allDocuments) {
             unknownDocuments.remove(document.getId());
-            addObjectPermissions(document, context, null);
         }
 
         final List<DocumentMetadata> rejected = new ArrayList<DocumentMetadata>();
