@@ -163,8 +163,10 @@ public final class BrowserDetector {
      * Initializes a new {@link BrowserDetector}.
      *
      * @param userAgent The user-agent
+     * @deprecated Please use {@link #detectorFor(String)} method
      */
-    private BrowserDetector(String userAgent) {
+    @Deprecated
+    public BrowserDetector(String userAgent) {
         super();
         this.userAgent = userAgent;
         browserName = UNKNOWN;
