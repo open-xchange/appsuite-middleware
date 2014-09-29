@@ -278,4 +278,14 @@ public class Metadata {
         }
     }
 
+    public static int[] columns(Metadata[] metadata) {
+        int[] columns = new int[metadata.length];
+        for (int i = 0; i < metadata.length; i++) {
+            Metadata m = metadata[i];
+            columns[i] = m.getId();
+        }
+
+        return columns;
+    }
+
 }

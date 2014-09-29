@@ -74,6 +74,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
@@ -1356,10 +1357,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public int[] moveDocuments(ServerSession session, int[] ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
-        if (null == ids || 0 == ids.length) {
-            return new int[0];
+    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyList();
         }
+
         long destinationFolderID;
         try {
             destinationFolderID = Long.valueOf(targetFolderID).longValue();
@@ -1370,7 +1372,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
          * get documents to move
          */
         DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
-        List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), ids, Metadata.VALUES_ARRAY);
+        int[] objectIds = new int[ids.size()];
+        for (int i = 0; i < objectIds.length; i++) {
+            try {
+                objectIds[i] = Integer.parseInt(ids.get(i).getId());
+            } catch (NumberFormatException e) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
+        }
+        List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), objectIds, Metadata.VALUES_ARRAY);
         addObjectPermissions(allDocuments, session.getContext(), null);
         /*
          * perform move
@@ -1378,24 +1388,28 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         List<DocumentMetadata> rejectedDocuments = moveDocuments(
             session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
         if (null == rejectedDocuments || 0 == rejectedDocuments.size()) {
-            return new int[0];
+            return Collections.emptyList();
         }
-        int[] rejectedIDs = new int[rejectedDocuments.size()];
-        for (int i = 0; i < rejectedIDs.length; i++) {
-            rejectedIDs[i] = rejectedDocuments.get(i).getId();
+        List<IDTuple> rejectedIDs = new ArrayList<IDTuple>();
+        for (DocumentMetadata rejected : rejectedDocuments) {
+            rejectedIDs.add(new IDTuple(Long.toString(rejected.getFolderId()), Integer.toString(rejected.getId())));
         }
         return rejectedIDs;
     }
 
     @Override
-    public int[] removeDocument(final int[] ids, final long date, final ServerSession session) throws OXException {
-        if (ids == null || ids.length == 0) {
-            return new int[0];
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long date, final ServerSession session) throws OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyList();
         }
 
-        final Set<Integer> idSet = new HashSet<Integer>();
-        for (final int i : ids) {
-            idSet.add(Integer.valueOf(i));
+        final Map<Integer, Long> idsToFolders = new HashMap<Integer, Long>();
+        for (IDTuple idTuple : ids) {
+            try {
+                idsToFolders.put(Integer.parseInt(idTuple.getId()), Long.parseLong(idTuple.getFolder()));
+            } catch (NumberFormatException e) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
         }
 
         final Context context = session.getContext();
@@ -1407,7 +1421,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         List<DocumentMetadata> allDocuments = null;
         try {
             final StringBuilder sIds = new StringBuilder().append('(');
-            Strings.join(idSet, ", ", sIds);
+            Strings.join(idsToFolders.keySet(), ", ", sIds);
             sIds.append(')');
 
             allVersions = InfostoreIterator.allVersionsWhere(
@@ -1435,24 +1449,24 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         }
 
-        final Set<Integer> unknownDocuments = new HashSet<Integer>(idSet);
+        final Set<Integer> unknownDocuments = new HashSet<Integer>(idsToFolders.keySet());
         for (DocumentMetadata document : allDocuments) {
             unknownDocuments.remove(document.getId());
         }
 
-        final List<DocumentMetadata> rejected = new ArrayList<DocumentMetadata>();
-        removeDocuments(allDocuments, allVersions, date, session, rejected);
+        final List<DocumentMetadata> rejectedDocuments = new ArrayList<DocumentMetadata>();
+        removeDocuments(allDocuments, allVersions, date, session, rejectedDocuments);
 
-        final int[] nd = new int[rejected.size() + unknownDocuments.size()];
-        int i = 0;
-        for (final DocumentMetadata rej : rejected) {
-            nd[i++] = rej.getId();
-        }
-        for (final int notFound : unknownDocuments) {
-            nd[i++] = notFound;
+        List<IDTuple> rejectedIDs = new ArrayList<IDTuple>(rejectedDocuments.size() + unknownDocuments.size());
+        for (final DocumentMetadata rejected : rejectedDocuments) {
+            rejectedIDs.add(new IDTuple(Long.toString(rejected.getFolderId()), Integer.toString(rejected.getId())));
         }
 
-        return nd;
+        for (Integer notFound : unknownDocuments) {
+            rejectedIDs.add(new IDTuple(idsToFolders.get(notFound).toString(), Integer.toString(notFound)));
+        }
+
+        return rejectedIDs;
     }
 
     /**
@@ -1742,11 +1756,42 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, Metadata[] columns, final ServerSession session) throws OXException {
+    public TimedResult<DocumentMetadata> getDocuments(final List<IDTuple> ids, Metadata[] columns, final ServerSession session) throws OXException {
         final User user = session.getUser();
+//        final Context ctx = session.getContext();
+//        final UserPermissionBits userPermissions = session.getUserPermissionBits();
+//        final Map<Long, EffectivePermission> folderPermissions = new HashMap<Long, EffectivePermission>();
+//        for (IDTuple idTuple : ids) {
+//            long folderId;
+//            try {
+//                folderId = Long.parseLong(idTuple.getFolder());
+//            } catch (NumberFormatException e) {
+//                throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(idTuple.getFolder() == null ? "null" : idTuple.getFolder());
+//            }
+//
+//            EffectivePermission folderPermission = folderPermissions.get(folderId);
+//            if (folderPermission == null) {
+//                folderPermission = security.getFolderPermission(folderId, ctx, user, userPermissions);
+//                folderPermissions.put(folderId, folderPermission);
+//            }
+//
+//            if (!folderPermission.isFolderVisible()) {
+//                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+//            }
+//        }
+
+        int[] objectIds = new int[ids.size()];
+        for (int i = 0; i < objectIds.length; i++) {
+            try {
+                objectIds[i] = Integer.parseInt(ids.get(i).getId());
+            } catch (NumberFormatException e) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
+        }
+
         final Map<Integer, EffectiveInfostorePermission> permissionsById;
         try {
-            permissionsById = security.injectInfostorePermissions(ids, session.getContext(), user, session.getUserPermissionBits(), new HashMap<Integer, EffectiveInfostorePermission>(ids.length * 2), new Injector<Map<Integer, EffectiveInfostorePermission>, EffectiveInfostorePermission>() {
+            permissionsById = security.injectInfostorePermissions(objectIds, session.getContext(), user, session.getUserPermissionBits(), new HashMap<Integer, EffectiveInfostorePermission>(objectIds.length * 2), new Injector<Map<Integer, EffectiveInfostorePermission>, EffectiveInfostorePermission>() {
 
                 @Override
                 public Map<Integer, EffectiveInfostorePermission> inject(final Map<Integer, EffectiveInfostorePermission> permissions, final EffectiveInfostorePermission element) {
@@ -1762,7 +1807,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         Metadata[] cols = addLastModifiedIfNeeded(columns);
-        final InfostoreIterator iter = InfostoreIterator.list(ids, cols, getProvider(), session.getContext());
+        final InfostoreIterator iter = InfostoreIterator.list(objectIds, cols, getProvider(), session.getContext());
         iter.setCustomizer(new DocumentCustomizer() {
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {

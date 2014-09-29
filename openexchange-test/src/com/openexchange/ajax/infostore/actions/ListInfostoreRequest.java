@@ -77,9 +77,14 @@ public class ListInfostoreRequest extends AbstractInfostoreRequest<ListInfostore
     }
 
     public ListInfostoreRequest(final List<ListItem> items, final int columns[]) {
+        this(items, columns, true);
+    }
+
+    public ListInfostoreRequest(final List<ListItem> items, final int columns[], boolean failOnError) {
         super();
         this.items = items;
         this.columns = columns;
+        setFailOnError(failOnError);
     }
 
     public void addItem(ListItem item) {

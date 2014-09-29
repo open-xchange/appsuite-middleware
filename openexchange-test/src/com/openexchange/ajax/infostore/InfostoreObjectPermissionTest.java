@@ -50,21 +50,40 @@
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
+import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.ajax.infostore.actions.ListInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
+import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.configuration.MailConfig;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.test.FolderTestManager;
 
 
 /**
@@ -76,8 +95,10 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
 
     private AJAXClient client2;
     private InfostoreTestManager itm;
-    private DocumentMetadata expectedDocument;
-    private String testDataDir;
+    private Map<Integer, Boolean> shareStates;
+    private Map<Integer, DocumentMetadata> allFiles;
+    private FolderTestManager ftm;
+    private FolderObject testFolder;
 
     /**
      * Initializes a new {@link InfostoreObjectPermissionTest}.
@@ -91,54 +112,174 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(User.User2);
+        ftm = new FolderTestManager(client);
+        String folderName = "InfostoreObjectPermissionTest_" + System.currentTimeMillis();
+        testFolder = ftm.generatePrivateFolder(folderName,
+            FolderObject.INFOSTORE,
+            client.getValues().getPrivateInfostoreFolder(),
+            client.getValues().getUserId());
+        testFolder = ftm.insertFolderOnServer(testFolder);
+
+        allFiles = new HashMap<Integer, DocumentMetadata>();
+        shareStates = new HashMap<Integer, Boolean>();
+
         itm = new InfostoreTestManager(client);
-        expectedDocument = new DocumentMetadataImpl();
-        expectedDocument.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
-        expectedDocument.setDescription("Infostore Item Description");
-        expectedDocument.setFileMIMEType("image/png");
-        expectedDocument.setFolderId(client.getValues().getPrivateInfostoreFolder());
-        expectedDocument.setObjectPermissions(
-            Collections.singletonList(new ObjectPermission(client2.getValues().getUserId(), false, ObjectPermission.READ)));
-        testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
-        File upload = new File(testDataDir, "contact_image.png");
-        expectedDocument.setFileName(upload.getName());
-        itm.newAction(expectedDocument, upload);
+        itm.setFailOnError(true);
+        File upload = new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "contact_image.png");
+        Random r = new Random();
+        for (int i = 0; i < 10; i++) {
+            boolean shared = false;
+            List<ObjectPermission> objectPermissions = null;
+            if (r.nextBoolean()) {
+                objectPermissions = Collections.singletonList(new ObjectPermission(client2.getValues().getUserId(), false, ObjectPermission.READ));
+                shared = true;
+            }
+            DocumentMetadata newDocument = newDocument(testFolder.getObjectID(), objectPermissions);
+            itm.newAction(newDocument, upload);
+            allFiles.put(newDocument.getId(), newDocument);
+            shareStates.put(newDocument.getId(), shared);
+        }
     }
 
     @Override
     protected void tearDown() throws Exception {
-        if (client2 != null) {
-            client2.logout();
-        }
         if (itm != null) {
             itm.cleanUp();
+        }
+        if (ftm != null) {
+            ftm.cleanUp();
+        }
+        if (client2 != null) {
+            client2.logout();
         }
         super.tearDown();
     }
 
     public void testReadPermission() throws Exception {
+        /*
+         * Must fail because of missing folder permissions
+         */
         AbstractColumnsResponse allResp = client2.execute(new AllInfostoreRequest(
-            10,
-            convertColumns(Metadata.HTTPAPI_VALUES_ARRAY),
+            testFolder.getObjectID(),
+            Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
+            Metadata.ID,
+            Order.ASCENDING,
+            false));
+        OXException exception = allResp.getException();
+        assertTrue("Expected exception: InfostoreExceptionCodes.NO_READ_PERMISSION", InfostoreExceptionCodes.NO_READ_PERMISSION.equals(exception));
+
+        List<Integer> sharedFiles = new ArrayList<Integer>(10);
+        List<Integer> otherFiles = new ArrayList<Integer>(10);
+        for (Entry<Integer, Boolean> entry : shareStates.entrySet()) {
+            if (entry.getValue().booleanValue()) {
+                sharedFiles.add(entry.getKey());
+            } else {
+                otherFiles.add(entry.getKey());
+            }
+        }
+
+        List<ListItem> listItems = new ArrayList<ListItem>(sharedFiles.size());
+        for (Integer id : sharedFiles) {
+            listItems.add(new ListItem(Integer.toString(testFolder.getObjectID()), id.toString()));
+        }
+
+        ListInfostoreResponse listResp = client2.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), false));
+        exception = listResp.getException();
+        assertNotNull(exception);
+        // TODO: check code
+
+        /*
+         * Shared files must be visible for client2
+         * - via get requests
+         * - via list request (folder 10)
+         * - via all request (folder 10)
+         */
+        listItems.clear();
+        for (Integer id : sharedFiles) {
+            GetInfostoreResponse getResp = client2.execute(new GetInfostoreRequest(id.intValue()));
+            DocumentMetadata doc = getResp.getDocumentMetadata();
+            assertNotNull(doc);
+            assertEquals(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, (int) doc.getFolderId());
+            assertEquals(id.intValue(), doc.getId());
+
+            listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), id.toString()));
+        }
+
+        listResp = client2.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
+        Object[][] array = listResp.getArray();
+        for (int i = 0; i < array.length; i++) {
+            Object[] doc = array[i];
+            assertEquals(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Integer.parseInt((String) doc[listResp.getColumnPos(Metadata.FOLDER_ID)]));
+            assertEquals(listItems.get(i).getId(), doc[listResp.getColumnPos(Metadata.ID)].toString());
+        }
+
+        allResp = client2.execute(new AllInfostoreRequest(
+            FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+            Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
             Metadata.ID,
             Order.ASCENDING));
-
-        int docId = -1;
+        Set<Integer> foundIds = new HashSet<Integer>(sharedFiles);
         for (Object[] doc : allResp.getArray()) {
-            docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
+            int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
+            foundIds.remove(docId);
         }
 
-        assertEquals(expectedDocument.getId(), docId);
+        assertTrue("Not all shared documents have been found", foundIds.isEmpty());
+
+        /*
+         * Non-shared files must not be visible via get- and list-requests
+         */
+        listItems.clear();
+        for (Integer id : otherFiles) {
+            GetInfostoreRequest req = new GetInfostoreRequest(id.intValue());
+            req.setFailOnError(false);
+            GetInfostoreResponse getResp = client2.execute(req);
+            OXException exception2 = getResp.getException();
+            assertNotNull(exception2);
+            // TODO: check code
+
+            listItems.add(new ListItem(allFiles.get(id.intValue())));
+        }
+
+        listResp = client2.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), false));
+        exception = listResp.getException();
+        assertNotNull(exception);
+        // TODO: check code
+
+        /*
+         * The file creator must not see the files within folder 10
+         */
+        allResp = client.execute(new AllInfostoreRequest(
+            FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+            Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
+            Metadata.ID,
+            Order.ASCENDING));
+        for (Object[] doc : allResp.getArray()) {
+            int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
+            assertFalse(allFiles.containsKey(docId));
+        }
+
+        listItems.clear();
+        for (Integer id : allFiles.keySet()) {
+            listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), id.toString()));
+        }
+
+        listResp = client.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
+        for (Object[] doc : listResp.getArray()) {
+            int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
+            assertFalse(allFiles.containsKey(docId));
+        }
     }
 
-    private static int[] convertColumns(Metadata[] columns) {
-        int[] iColumns = new int[columns.length];
-        for (int i = 0; i < columns.length; i++) {
-            Metadata column = columns[i];
-            iColumns[i] = column.getId();
-        }
-
-        return iColumns;
+    private DocumentMetadata newDocument(int folderId, List<ObjectPermission> objectPermissions) throws OXException, IOException, JSONException {
+        DocumentMetadata doc = new DocumentMetadataImpl();
+        doc.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
+        doc.setDescription("Infostore Item Description");
+        doc.setFileMIMEType("image/png");
+        doc.setFolderId(folderId);
+        doc.setObjectPermissions(objectPermissions);
+        doc.setFileName("contact_image.png");
+        return doc;
     }
 
 }

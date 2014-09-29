@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
@@ -131,7 +132,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, final Metadata[] columns, ServerSession session) {
+    public TimedResult<DocumentMetadata> getDocuments(final List<IDTuple> ids, final Metadata[] columns, ServerSession session) {
         return new EmptyTimedResult();
     }
 
@@ -173,12 +174,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public int[] removeDocument(final int[] ids, final long date, final ServerSession session) {
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long date, final ServerSession session) {
         return ids;
     }
 
     @Override
-    public int[] moveDocuments(ServerSession session, int ids[], long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
+    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
         return ids;
     }
 

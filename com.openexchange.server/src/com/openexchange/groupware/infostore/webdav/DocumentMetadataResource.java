@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -58,6 +58,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -938,12 +939,18 @@ public class DocumentMetadataResource extends AbstractResource implements
 		final ServerSession session = getSession();
 		database.startTransaction();
 		try {
-			final int[] nd = database.removeDocument(new int[] { id },
-					Long.MAX_VALUE, session);
-			if (nd.length > 0) {
+		    DocumentMetadata document = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
+			List<IDTuple> nd = database.removeDocument(
+			    Collections.<IDTuple>singletonList(
+			        new IDTuple(
+			            Long.toString(document.getFolderId()),
+			            Integer.toString(document.getId())
+			        )
+			    ), Long.MAX_VALUE, session);
+			if (nd.size() > 0) {
 				database.rollback();
 				throw InfostoreExceptionCodes.DELETE_FAILED
-						.create(I(nd[0]));
+						.create(Integer.parseInt(nd.get(0).getId()));
 			}
 			database.commit();
 		} catch (final OXException x) {

@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
@@ -206,7 +207,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The identifiers of those documents that could <b>not</b> be deleted successfully
      * @throws OXException If remove operation fails
      */
-    public int[] removeDocument(int ids[], long date, ServerSession session) throws OXException;
+    public List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException;
 
     /**
      * Moves denoted documents to another folder. Colliding filenames in the target folder may be renamed automatically.
@@ -219,7 +220,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The identifiers of those documents that could <b>not</b> be moved successfully
      * @throws OXException If remove operation fails
      */
-    int[] moveDocuments(ServerSession session, int ids[], long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException;
+    List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException;
 
     /**
      * Removes denoted versions.
@@ -323,7 +324,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException;
+    public TimedResult<DocumentMetadata> getDocuments(List<IDTuple> ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException;
 
     /**
      * Gets the folder's updated & deleted documents.

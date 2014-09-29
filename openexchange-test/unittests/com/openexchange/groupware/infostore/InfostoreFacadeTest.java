@@ -51,7 +51,9 @@ package com.openexchange.groupware.infostore;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
+import java.util.Collections;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.server.impl.OCLPermission;
@@ -70,7 +72,8 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
         clean.add(dm);
         assertTrue("Should Exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, session));
 
-        infostore.removeDocument(new int[]{dm.getId()}, System.currentTimeMillis(), session);
+        IDTuple idTuple = new IDTuple(Long.toString(dm.getFolderId()), Integer.toString(dm.getId()));
+        infostore.removeDocument(Collections.singletonList(idTuple), System.currentTimeMillis(), session);
         clean.remove(dm);
         assertFalse("Should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, session));
 

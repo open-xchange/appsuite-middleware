@@ -50,6 +50,7 @@ package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import junit.framework.TestCase;
@@ -58,6 +59,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -145,7 +147,8 @@ public class InfostoreDowngradeTest extends TestCase {
 
     private void deleteAll() throws OXException {
         for(final DocumentMetadata document : clean) {
-            database.removeDocument(new int[]{document.getId()}, Long.MAX_VALUE, session);
+            IDTuple idTuple = new IDTuple(Long.toString(document.getFolderId()), Integer.toString(document.getId()));
+            database.removeDocument(Collections.singletonList(idTuple), Long.MAX_VALUE, session);
         }
     }
 

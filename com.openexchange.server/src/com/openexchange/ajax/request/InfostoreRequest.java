@@ -58,6 +58,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,6 +75,7 @@ import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -187,7 +189,12 @@ public class InfostoreRequest extends CommonRequest {
                     return true;
                 }
                 final JSONArray array = (JSONArray) req.getBody();
-                final int[] ids = parseIDList(array, null);
+                final TIntIntMap folderMapping = new TIntIntHashMap(array.length() * 2);
+                final int[] ids = parseIDList(array, folderMapping);
+                List<IDTuple> idTuples = new ArrayList<IDTuple>(ids.length);
+                for (int id : ids) {
+                    idTuples.add(new IDTuple(Integer.toString(folderMapping.get(id)), Integer.toString(id)));
+                }
 
                 Metadata[] cols = null;
 
@@ -200,7 +207,7 @@ public class InfostoreRequest extends CommonRequest {
 
                 final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
 
-                list(ids, cols, timeZoneId);
+                list(idTuples, cols, timeZoneId);
 
                 return true;
             } else if (action.equals(AJAXServlet.ACTION_DELETE)) {
@@ -211,7 +218,11 @@ public class InfostoreRequest extends CommonRequest {
                 final TIntIntMap folderMapping = new TIntIntHashMap();
                 final int[] ids = parseIDList(toDelete, folderMapping);
                 final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
-                delete(ids, folderMapping, timestamp);
+                final List<IDTuple> idTuples = new ArrayList<IDTuple>(ids.length);
+                for (int id : ids) {
+                    idTuples.add(new IDTuple(Integer.toString(folderMapping.get(id)), Integer.toString(id)));
+                }
+                delete(idTuples, folderMapping, timestamp);
                 return true;
             } else if (action.equals(AJAXServlet.ACTION_DETACH)) {
                 if (!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP, AJAXServlet.PARAMETER_ID)) {
@@ -477,7 +488,7 @@ public class InfostoreRequest extends CommonRequest {
 
     // Actions
 
-    protected void list(final int[] ids, final Metadata[] cols, final String timeZoneId) throws OXException {
+    protected void list(final List<IDTuple> ids, final Metadata[] cols, final String timeZoneId) throws OXException {
         final InfostoreFacade infostore = getInfostore();
         TimedResult<DocumentMetadata> result = null;
         SearchIterator<DocumentMetadata> iter = null;
@@ -787,12 +798,12 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    protected void delete(final int[] ids, final TIntIntMap folderMapping, final long timestamp) {
+    protected void delete(final List<IDTuple> ids, final TIntIntMap folderMapping, final long timestamp) {
         final InfostoreFacade infostore = getInfostore();
         final InfostoreSearchEngine searchEngine = getSearchEngine();
 
-        int[] notDeleted = new int[0];
-        if (ids.length != 0) {
+        List<IDTuple> notDeleted = Collections.emptyList();
+        if (ids.size() != 0) {
             try {
 
                 infostore.startTransaction();
@@ -801,11 +812,12 @@ public class InfostoreRequest extends CommonRequest {
                 notDeleted = infostore.removeDocument(ids, timestamp, session);
 
                 final TIntSet notDeletedSet = new TIntHashSet();
-                for (final int nd : notDeleted) {
-                    notDeletedSet.add(nd);
+                for (IDTuple idTuple : notDeleted) {
+                    notDeletedSet.add(Integer.parseInt(idTuple.getId()));
                 }
 
-                for (final int id : ids) {
+                for (IDTuple idTuple : ids) {
+                    int id = Integer.parseInt(idTuple.getId());
                     if (!notDeletedSet.contains(id)) {
                         searchEngine.unIndex0r(id, ctx, user, userPermissionBits);
                     }
@@ -839,13 +851,12 @@ public class InfostoreRequest extends CommonRequest {
             w.key("data");
 
             w.array();
-            for (int i = 0; i < notDeleted.length; i++) {
+            for (IDTuple idTuple : notDeleted) {
                 w.object();
                 w.key(AJAXServlet.PARAMETER_ID);
-                final int nd = notDeleted[i];
-                w.value(nd);
+                w.value(idTuple.getId());
                 w.key("folder");
-                w.value(folderMapping.get(nd));
+                w.value(idTuple.getFolder());
                 w.endObject();
             }
             w.endArray();

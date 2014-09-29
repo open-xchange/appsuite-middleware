@@ -244,12 +244,12 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
             id2folder.put(Integer.valueOf(infostoreIDs[i]), tuple);
         }
         InfostoreFacade infostore = getInfostore(null);
-        int[] conflicted = null;
+        List<IDTuple> conflicted = null;
         if (hardDelete) {
             /*
              * perform hard-deletion independently of file's parent folders
              */
-            conflicted = infostore.removeDocument(infostoreIDs, sequenceNumber, sessionObj);
+            conflicted = infostore.removeDocument(ids, sequenceNumber, sessionObj);
         } else {
             /*
              * check for presence of trash folder
@@ -259,15 +259,15 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
                 /*
                  * perform hard-deletion instead
                  */
-                conflicted = infostore.removeDocument(infostoreIDs, sequenceNumber, sessionObj);
+                conflicted = infostore.removeDocument(ids, sequenceNumber, sessionObj);
             } else {
                 /*
                  * distinguish between files already in or below trash folder
                  */
                 FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
                 String rootFolderID = folderAccess.getRootFolder().getId();
-                List<Integer> filesToDelete = new ArrayList<Integer>();
-                List<Integer> filesToMove = new ArrayList<Integer>();
+                List<IDTuple> filesToDelete = new ArrayList<IDTuple>();
+                List<IDTuple> filesToMove = new ArrayList<IDTuple>();
                 Map<String, FileStorageFolder> knownFolders = new HashMap<String, FileStorageFolder>();
                 for (IDTuple tuple : ids) {
                     String folderID = tuple.getFolder();
@@ -280,49 +280,35 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
                         folderID = folder.getParentId();
                     }
                     if (trashFolderID.equals(folderID)) {
-                        filesToDelete.add(Integer.valueOf(tuple.getId()));
+                        filesToDelete.add(tuple);
                     } else {
-                        filesToMove.add(Integer.valueOf(tuple.getId()));
+                        filesToMove.add(tuple);
                     }
                 }
                 /*
                  * hard-delete already deleted files
                  */
                 if (0 < filesToDelete.size()) {
-                    int[] idsToDelete = new int[filesToDelete.size()];
-                    for (int i = 0; i < idsToDelete.length; i++) {
-                        idsToDelete[i] = filesToDelete.get(i).intValue();
-                    }
-                    conflicted = infostore.removeDocument(idsToDelete, sequenceNumber, sessionObj);
+                    conflicted = infostore.removeDocument(filesToDelete, sequenceNumber, sessionObj);
                 }
                 /*
                  * move other files to trash folder
                  */
                 if (0 < filesToMove.size()) {
-                    int[] idsToMove = new int[filesToMove.size()];
-                    for (int i = 0; i < idsToMove.length; i++) {
-                        idsToMove[i] = filesToMove.get(i).intValue();
-                    }
-                    int[] conflicted2 = infostore.moveDocuments(sessionObj, idsToMove, sequenceNumber, trashFolderID, true);
-                    if (null == conflicted || 0 == conflicted.length) {
+                    List<IDTuple> conflicted2 = infostore.moveDocuments(sessionObj, filesToMove, sequenceNumber, trashFolderID, true);
+                    if (null == conflicted || 0 == conflicted.size()) {
                         conflicted = conflicted2;
-                    } else if (null != conflicted2 && 0 < conflicted2.length){
-                        int[] temp = new int[conflicted.length + conflicted2.length];
-                        System.arraycopy(conflicted, 0, temp, 0, conflicted.length);
-                        System.arraycopy(conflicted2, 0, temp, conflicted.length, conflicted2.length);
+                    } else if (null != conflicted2 && 0 < conflicted2.size()) {
+                        List<IDTuple> temp = new ArrayList<IDTuple>(conflicted.size() + conflicted2.size());
+                        temp.addAll(conflicted);
+                        temp.addAll(conflicted2);
                         conflicted = temp;
                     }
                 }
             }
         }
-        /*
-         * return ID tuples for conflicted files
-         */
-        final List<IDTuple> retval = new ArrayList<IDTuple>(conflicted.length);
-        for (final int id : conflicted) {
-            retval.add(id2folder.get(Integer.valueOf(id)));
-        }
-        return retval;
+
+        return conflicted;
     }
 
     @Override
@@ -509,10 +495,9 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
 
     @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws OXException {
-        final int[] infostoreIDs = IDS(ids);
         TimedResult<DocumentMetadata> documents;
         try {
-            documents = getInfostore(null).getDocuments(infostoreIDs, FieldMapping.getMatching(fields), sessionObj);
+            documents = getInfostore(null).getDocuments(ids, FieldMapping.getMatching(fields), sessionObj);
             return new InfostoreTimedResult(documents);
         } catch (final IllegalAccessException e) {
             throw new OXException(e);
@@ -632,14 +617,6 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
 
     private static long FOLDERID(final String folderId) {
         return Long.parseLong(folderId);
-    }
-
-    private static int[] IDS(final List<IDTuple> ids) {
-        final int[] infostoreIDs = new int[ids.size()];
-        for (int i = 0; i < ids.size(); i++) {
-            infostoreIDs[i] = ID(ids.get(i).getId());
-        }
-        return infostoreIDs;
     }
 
     @Override

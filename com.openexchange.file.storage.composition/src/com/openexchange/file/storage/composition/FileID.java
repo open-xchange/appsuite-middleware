@@ -185,9 +185,18 @@ public class FileID {
      * @return The unified identifier
      */
     public String toUniqueID() {
+        return toUniqueID(false);
+    }
+
+    public String toUniqueID(boolean preserveObsoleteFolderId) {
         if (serviceId.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
-            return fileId;
+            if (!preserveObsoleteFolderId || folderId == null) {
+                return fileId;
+            }
+
+            return folderId + IDMangler.SECONDARY_DELIM + fileId;
         }
+
         return IDMangler.mangle(serviceId, accountId, folderId, fileId);
     }
 

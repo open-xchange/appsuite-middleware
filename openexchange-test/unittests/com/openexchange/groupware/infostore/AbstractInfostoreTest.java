@@ -50,11 +50,13 @@
 package com.openexchange.groupware.infostore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -141,7 +143,8 @@ public class AbstractInfostoreTest extends TestCase{
     @Override
     public void tearDown() throws Exception{
         for(final DocumentMetadata dm : clean) {
-            infostore.removeDocument(new int[]{dm.getId()}, System.currentTimeMillis(), session);
+            IDTuple idTuple = new IDTuple(Long.toString(dm.getFolderId()), Integer.toString(dm.getId()));
+            infostore.removeDocument(Collections.singletonList(idTuple), System.currentTimeMillis(), session);
         }
 
         final OXFolderManager oxma = OXFolderManager.getInstance(session);

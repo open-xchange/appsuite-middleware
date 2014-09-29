@@ -76,6 +76,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.FileMetadataParser;
@@ -504,6 +505,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             if (ids != null) {
                 return;
             }
+
             // Initialize
             final JSONArray array = (JSONArray) data.requireData();
             final int length = array.length();
@@ -520,13 +522,22 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             // Iterate JSON array
             for (int i = 0, size = length; i < size; i++) {
                 final JSONObject tuple = array.getJSONObject(i);
-                // Identifier
-                final String id = tuple.getString(Param.ID.getName());
-                ids.add(id);
-                // Folder
                 final String folderId = tuple.optString(Param.FOLDER_ID.getName());
                 folders.add(folderId);
+
+                // Identifier
+                String id = tuple.getString(Param.ID.getName());
+                FileID fileID = new FileID(id);
+                if (fileID.getFolderId() == null) {
+                    fileID.setFolderId(folderId);
+                    ids.add(fileID.toUniqueID(true));
+                } else {
+                    ids.add(id);
+                }
+
+                // Folder
                 folderMapping.put(id, folderId);
+
                 // Version
                 final String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
                 idVersions.add(version);

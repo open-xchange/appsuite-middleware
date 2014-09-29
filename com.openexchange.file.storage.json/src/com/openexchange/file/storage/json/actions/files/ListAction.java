@@ -58,6 +58,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.FilteringTimedResult;
 import com.openexchange.groupware.results.TimedResult;
@@ -101,14 +102,15 @@ public class ListAction extends AbstractFileAction {
 
         // This is too complicated. We'd rather have layers below here aggressively check folders.
 
-        final TimedResult<File> documents = new FilteringTimedResult<File>(fileAccess.getDocuments(request.getIds(), columns)) {
+        final TimedResult<File> documents = new FilteringTimedResult<File>(fileAccess.getDocuments(ids, columns)) {
             private int threshhold = 0;
 
             @Override
             protected boolean accept(File thing) throws OXException {
                 int i = threshhold;
                 while(i < ids.size()) {
-                    if(ids.get(i).equals(thing.getId())) {
+                    FileID fileID = new FileID(ids.get(i));
+                    if(fileID.getFileId().equals(thing.getId())) {
                         threshhold = i+1;
                         break;
                     }
