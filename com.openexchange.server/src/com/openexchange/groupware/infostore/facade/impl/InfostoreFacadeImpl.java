@@ -433,6 +433,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return new NumberOfVersionsTimedResult(tr, ctx);
     }
 
+    private TimedResult<DocumentMetadata> addObjectPermissions(TimedResult<DocumentMetadata> tr, Context ctx, Map<Integer, List<ObjectPermission>> knownObjectPermissions) throws OXException {
+        return new ObjectPermissionsTimedResult(tr, ctx, knownObjectPermissions);
+    }
+
     private TimedResult<DocumentMetadata> addLocked(final TimedResult<DocumentMetadata> tr, final ServerSession session) throws OXException {
         try {
             return new LockTimedResult(tr, session);
@@ -1650,14 +1654,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
         boolean addLocked = false;
         boolean addNumberOfVersions = false;
+        boolean addObjectPermissions = false;
         for (final Metadata m : cols) {
             if (m == Metadata.LOCKED_UNTIL_LITERAL) {
                 addLocked = true;
-                break;
-            }
-            if (m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
+            } else if (m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
                 addNumberOfVersions = true;
-                break;
+            } else if (Metadata.OBJECT_PERMISSIONS_LITERAL == m) {
+                addObjectPermissions = true;
             }
         }
 
@@ -1673,6 +1677,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
         if (addNumberOfVersions) {
             tr = addNumberOfVersions(tr, session.getContext());
+        }
+        if (addObjectPermissions) {
+            tr = addObjectPermissions(tr, session.getContext(), null);
         }
         return tr;
     }
