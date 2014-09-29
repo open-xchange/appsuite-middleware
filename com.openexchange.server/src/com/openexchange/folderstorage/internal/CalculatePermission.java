@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.tools.session.ServerSession;
@@ -80,8 +81,6 @@ import com.openexchange.userconf.UserPermissionService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CalculatePermission {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalculatePermission.class);
 
     /**
      * Initializes a new {@link CalculatePermission}.
@@ -96,21 +95,20 @@ public final class CalculatePermission {
      * @param folder The folder whose effective user permissions shall be calculated
      * @param context The context
      */
-    public static void calculateUserPermissions(final Folder folder, final Context context) {
-        final Permission[] staticPermissions = folder.getPermissions();
+    public static void calculateUserPermissions(Folder folder, Context context) {
+        Permission[] staticPermissions = folder.getPermissions();
         if (null == staticPermissions || 0 == staticPermissions.length) {
             return;
         }
+        UserPermissionBitsStorage userConfStorage = UserPermissionBitsStorage.getInstance();
+        String id = folder.getID();
+        Type type = folder.getType();
+        ContentType contentType = folder.getContentType();
 
-
-        final String id = folder.getID();
-        final Type type = folder.getType();
-        final ContentType contentType = folder.getContentType();
-
-        final Permission[] userizedPermissions = new Permission[staticPermissions.length];
-        final TIntIntHashMap toLoad = new TIntIntHashMap(staticPermissions.length);
+        Permission[] userizedPermissions = new Permission[staticPermissions.length];
+        TIntIntHashMap toLoad = new TIntIntHashMap(staticPermissions.length);
         for (int index = 0; index < staticPermissions.length; index++) {
-            final Permission staticPermission = staticPermissions[index];
+            Permission staticPermission = staticPermissions[index];
             if (0 == staticPermission.getSystem()) {
                 // A non-system permission
                 if (staticPermission.isGroup()) {
@@ -125,13 +123,13 @@ public final class CalculatePermission {
          * Batch-load user configurations
          */
         if (!toLoad.isEmpty()) {
-            final int[] userIds = toLoad.keys();
+            int[] userIds = toLoad.keys();
             try {
-                final UserPermissionBits[] configurations = getUserPermissionBits(context, getUsers(userIds, context));
+                UserPermissionBits[] configurations = userConfStorage.getUserPermissionBits(context, userIds);
                 for (int i = 0; i < configurations.length; i++) {
-                    final int userId = userIds[i];
+                    int userId = userIds[i];
                     if (toLoad.containsKey(userId)) {
-                        final int index = toLoad.get(userId);
+                        int index = toLoad.get(userId);
                         UserPermissionBits userPermissionBits = configurations[i];
                         userizedPermissions[index] = new EffectivePermission(
                             staticPermissions[index],
@@ -142,16 +140,17 @@ public final class CalculatePermission {
                             Collections.<ContentType> emptyList()).setEntityInfo(userId, context);
                     }
                 }
-            } catch (final OXException e) {
-                LOG.warn("User configuration could not be loaded. Ignoring user permissions.", e);
+            } catch (OXException e) {
+                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CalculatePermission.class);
+                logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             }
         }
         /*
          * Remove possible null values & apply to folder
          */
-        final java.util.List<Permission> tmp = new ArrayList<Permission>(userizedPermissions.length);
+        java.util.List<Permission> tmp = new ArrayList<Permission>(userizedPermissions.length);
         for (int i = 0; i < userizedPermissions.length; i++) {
-            final Permission p = userizedPermissions[i];
+            Permission p = userizedPermissions[i];
             if (null != p) {
                 tmp.add(p);
             }

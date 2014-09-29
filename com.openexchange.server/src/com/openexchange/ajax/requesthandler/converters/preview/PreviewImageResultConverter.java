@@ -72,6 +72,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.InterruptibleInputStream;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -249,7 +250,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                             setDefaulThumbnail(requestData, result);
                             return;
                         }
-                        final Ref<InputStream> ref = new Ref<InputStream>();
+                        final Reference<InputStream> ref = new Reference<InputStream>();
                         if (streamIsEof(stream, ref)) {
                             Streams.close(stream, fileHolder);
                             stream = null;
