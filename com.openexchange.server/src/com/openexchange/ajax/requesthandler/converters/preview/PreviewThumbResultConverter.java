@@ -84,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  *   <li>Deliver the existing thumbnail from cache if possible and not forbidden by client</li>
  *   <li>If the image isn't in the cache already trigger the asynchronous {@link PreviewAndCacheTask} while quickly returning a 202 Accepted
  *       to the client so he can try again later</li>
- *   <li>If there is no cache available at all or the client fobids cache usage decide based on
+ *   <li>If there is no cache available at all or the client forbids cache usage decide based on
  *       <code>com.openexchange.preview.thumbnail.blockingWorker</code> property</li>
  *   <ol>
  *     <li>If true: Block the current thread(client request) until the thumbnail was generated</li>
@@ -292,7 +292,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
 
     /**
      * Prevent Caching by removing associated headers like EXPIRES or ETAG
-     * 
+     *
      * @param result The current {@link AJAXRequestResult}
      */
     private void preventCaching(AJAXRequestResult result) {

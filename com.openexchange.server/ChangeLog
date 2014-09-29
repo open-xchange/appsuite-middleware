@@ -1,3 +1,8 @@
+* 2014-09-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34617: Signal proper write permission in case "ENABLE_INTERNAL_USER_EDIT" is set to "false"
+ - Fix for bug 34656: Use proper cache region name to not silently fall-back to default one
+
 * 2014-09-26 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34652: Invalidate context cache when moving filestore
@@ -9,7 +14,8 @@
 * 2014-09-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 34623: Pass null references for user/password arguments in case SMTP authentication is explicitly disabled
- - Fix for bug 34633: Added "UserPermissionBits" cache region to cache configuration to orderly align to cache usage and to disable lateral distribution of its cache elements
+ - Fix for bug 34633: Added "UserPermissionBits" cache region to cache configuration to orderly align to cache usage and to disable lateral
+                      distribution of its cache elements
 
 * 2014-09-25 - jan.bauerdick@open-xchange.com
 

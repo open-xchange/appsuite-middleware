@@ -88,10 +88,10 @@ public final class MailMessageCache {
     private static final MailFieldUpdater flagsUpdater = new MailFieldUpdater() {
 
         @Override
-        public void updateField(final MailMessage mail, final Object newValue) {
+        public void updateField(MailMessage mail, Object newValue) {
             int newFlags = mail.getFlags();
             int flags = ((Integer) newValue).intValue();
-            final boolean set = flags > 0;
+            boolean set = flags > 0;
             flags = set ? flags : flags * -1;
             if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
                 newFlags = set ? (newFlags | MailMessage.FLAG_ANSWERED) : (newFlags & ~MailMessage.FLAG_ANSWERED);
@@ -127,13 +127,13 @@ public final class MailMessageCache {
     private static final MailFieldUpdater colorFlagUpdater = new MailFieldUpdater() {
 
         @Override
-        public void updateField(final MailMessage mail, final Object newValue) {
+        public void updateField(MailMessage mail, Object newValue) {
             mail.setColorLabel(((Integer) newValue).intValue());
         }
     };
 
-    private static MailFieldUpdater[] createMailFieldUpdater(final MailListField[] changedFields) {
-        final MailFieldUpdater[] updaters = new MailFieldUpdater[changedFields.length];
+    private static MailFieldUpdater[] createMailFieldUpdater(MailListField[] changedFields) {
+        MailFieldUpdater[] updaters = new MailFieldUpdater[changedFields.length];
         for (int i = 0; i < changedFields.length; i++) {
             switch (changedFields[i]) {
             case FLAGS:
@@ -149,11 +149,7 @@ public final class MailMessageCache {
         return updaters;
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageCache.class);
-
-    private static final Object[] EMPTY_ARGS = new Object[0];
-
-    static final String REGION_NAME = "MailMessageCache";
+    static final String REGION_NAME = "OXMessageCache";
 
     private static final ConcurrentMap<CacheKey, ReadWriteLock> contextLocks = new ConcurrentHashMap<CacheKey, ReadWriteLock>();
 
@@ -163,7 +159,7 @@ public final class MailMessageCache {
      * ############################################## Field members ##############################################
      */
 
-    private Cache cache;
+    private volatile Cache cache;
 
     /**
      * Singleton instantiation.
@@ -199,17 +195,18 @@ public final class MailMessageCache {
      * @throws OXException If clearing cache fails
      */
     public void releaseCache() throws OXException {
+        Cache cache = this.cache;
         if (cache == null) {
             return;
         }
         try {
             cache.clear();
-            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 cacheService.freeCache(REGION_NAME);
             }
         } finally {
-            cache = null;
+            this.cache = null;
         }
     }
 
@@ -219,10 +216,10 @@ public final class MailMessageCache {
      * @param key The lock's key
      * @return The appropriate lock
      */
-    private static ReadWriteLock getLock(final CacheKey key) {
+    private static ReadWriteLock getLock(CacheKey key) {
         ReadWriteLock l = contextLocks.get(key);
         if (l == null) {
-            final ReentrantReadWriteLock tmp = new ReentrantReadWriteLock();
+            ReentrantReadWriteLock tmp = new ReentrantReadWriteLock();
             l = contextLocks.putIfAbsent(key, tmp);
             if (null == l) {
                 l = tmp;
@@ -268,33 +265,34 @@ public final class MailMessageCache {
      *
      * @param uids The messages' identifiers; pass <code>null</code>  update all cached message of given folder
      * @param accountId The account ID
-     * @param fullname The fullname
+     * @param fullName The full name
      * @param userId The user identifier
      * @param cid The context identifier
      * @param changedFields The changed fields
      * @param newValues The new values
      */
-    public void updateCachedMessages(final String[] uids, final int accountId, final String fullname, final int userId, final int cid, final MailListField[] changedFields, final Object[] newValues) {
+    public void updateCachedMessages(String[] uids, int accountId, String fullName, int userId, int cid, MailListField[] changedFields, Object[] newValues) {
+        Cache cache = this.cache;
         if (null == cache) {
             return;
         }
         if (null == uids) {
-            updateCachedMessages(accountId, fullname, userId, cid, changedFields, newValues);
+            updateCachedMessages(accountId, fullName, userId, cid, changedFields, newValues);
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, cid);
-        final Lock writeLock = getLock(mapKey).writeLock();
+        CacheKey mapKey = getMapKey(userId, cid);
+        Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
-            final MailMessage[] mails = map.getValues(getEntryKey(accountId, fullname), uids);
+            MailMessage[] mails = map.getValues(getEntryKey(accountId, fullName), uids);
             if ((mails != null) && (mails.length > 0)) {
-                final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
-                for (final MailMessage mail : mails) {
+                MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
+                for (MailMessage mail : mails) {
                     if (mail != null) {
                         for (int i = 0; i < updaters.length; i++) {
                             updaters[i].updateField(mail, newValues[i]);
@@ -311,29 +309,30 @@ public final class MailMessageCache {
      * Updates cached message
      *
      * @param accountId The account ID
-     * @param fullname The fullname
+     * @param fullName The full name
      * @param userId The user identifier
      * @param cid The context identifier
      * @param changedFields The changed fields
      * @param newValues The new values
      */
-    public void updateCachedMessages(final int accountId, final String fullname, final int userId, final int cid, final MailListField[] changedFields, final Object[] newValues) {
+    public void updateCachedMessages(int accountId, String fullName, int userId, int cid, MailListField[] changedFields, Object[] newValues) {
+        Cache cache = this.cache;
         if (null == cache) {
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, cid);
-        final Lock writeLock = getLock(mapKey).writeLock();
+        CacheKey mapKey = getMapKey(userId, cid);
+        Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
-            final MailMessage[] mails = map.getValues(getEntryKey(accountId, fullname));
+            MailMessage[] mails = map.getValues(getEntryKey(accountId, fullName));
             if ((mails != null) && (mails.length > 0)) {
-                final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
-                for (final MailMessage mail : mails) {
+                MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
+                for (MailMessage mail : mails) {
                     if (mail != null) {
                         for (int i = 0; i < updaters.length; i++) {
                             updaters[i].updateField(mail, newValues[i]);
@@ -353,7 +352,8 @@ public final class MailMessageCache {
      * @param cid The context ID
      * @return <code>true</code> if messages are present; otherwise <code>false</code>
      */
-    public boolean containsUserMessages(final int userId, final int cid) {
+    public boolean containsUserMessages(int userId, int cid) {
+        Cache cache = this.cache;
         if (null == cache) {
             return false;
         }
@@ -364,22 +364,23 @@ public final class MailMessageCache {
      * Detects if cache holds messages belonging to a certain folder.
      *
      * @param accountId The account ID
-     * @param fullname The folder fullname
+     * @param fullName The folder full name
      * @param userId The user ID
      * @param cid The context ID
      * @return <code>true</code> if cache holds messages belonging to a certain folder; otherwise <code>false</code>
      */
-    public boolean containsFolderMessages(final int accountId, final String fullname, final int userId, final int cid) {
+    public boolean containsFolderMessages(int accountId, String fullName, int userId, int cid) {
+        Cache cache = this.cache;
         if (null == cache) {
             return false;
         }
-        final CacheKey mapKey = getMapKey(userId, cid);
-        final @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+        CacheKey mapKey = getMapKey(userId, cid);
+        @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
             (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
         if (map == null) {
             return false;
         }
-        return map.containsKey(getEntryKey(accountId, fullname));
+        return map.containsKey(getEntryKey(accountId, fullName));
     }
 
     /**
@@ -389,16 +390,16 @@ public final class MailMessageCache {
      * @param cid The context ID
      * @throws OXException
      */
-    public void removeUserMessages(final int userId, final int cid) throws OXException {
-        final Cache cache = this.cache;
+    public void removeUserMessages(int userId, int cid) throws OXException {
+        Cache cache = this.cache;
         if (null == cache) {
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, cid);
+        CacheKey mapKey = getMapKey(userId, cid);
         if (cache.get(mapKey) == null) {
             return;
         }
-        final Lock writeLock = getLock(mapKey).writeLock();
+        Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
             cache.remove(mapKey);
@@ -411,24 +412,25 @@ public final class MailMessageCache {
      * Removes cached messages belonging to a certain folder.
      *
      * @param accountId The account ID
-     * @param fullname The folder fullname
+     * @param fullName The folder full name
      * @param userId The user ID
      * @param cid The context ID
      */
-    public void removeFolderMessages(final int accountId, final String fullname, final int userId, final int cid) {
+    public void removeFolderMessages(int accountId, String fullName, int userId, int cid) {
+        Cache cache = this.cache;
         if (null == cache) {
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, cid);
-        final Lock writeLock = getLock(mapKey).writeLock();
+        CacheKey mapKey = getMapKey(userId, cid);
+        Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
-            map.removeValues(getEntryKey(accountId, fullname));
+            map.removeValues(getEntryKey(accountId, fullName));
         } finally {
             writeLock.unlock();
         }
@@ -439,27 +441,28 @@ public final class MailMessageCache {
      *
      * @param uids The mail IDs; pass <code>null</code> to remove all associated with folder
      * @param accountId The account ID
-     * @param fullname The folder fullname
+     * @param fullName The folder full name
      * @param userId The user ID
      * @param cid The context ID
      */
-    public void removeMessages(final String[] uids, final int accountId, final String fullname, final int userId, final int cid) {
+    public void removeMessages(String[] uids, int accountId, String fullName, int userId, int cid) {
+        Cache cache = this.cache;
         if (null == cache) {
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, cid);
-        final Lock writeLock = getLock(mapKey).writeLock();
+        CacheKey mapKey = getMapKey(userId, cid);
+        Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            final @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
             if (null == uids) {
-                map.removeValues(getEntryKey(accountId, fullname));
+                map.removeValues(getEntryKey(accountId, fullName));
             } else {
-                map.removeValues(getEntryKey(accountId, fullname), uids);
+                map.removeValues(getEntryKey(accountId, fullName), uids);
             }
         } finally {
             writeLock.unlock();
@@ -472,29 +475,30 @@ public final class MailMessageCache {
      *
      * @param uids The UIDs
      * @param accountId The account ID
-     * @param fullname The folder fullname
+     * @param fullName The folder full name
      * @param userId The user ID
      * @param cid The context ID
      * @return An array of {@link MailMessage} containing the fetched messages or <code>null</code>
      */
-    public MailMessage[] getMessages(final String[] uids, final int accountId, final String fullname, final int userId, final int cid) {
+    public MailMessage[] getMessages(String[] uids, int accountId, String fullName, int userId, int cid) {
+        Cache cache = this.cache;
         if (null == cache) {
             return null;
         }
-        final CacheKey mapKey = getMapKey(userId, cid);
-        final Lock readLock = getLock(mapKey).readLock();
+        CacheKey mapKey = getMapKey(userId, cid);
+        Lock readLock = getLock(mapKey).readLock();
         readLock.lock();
         try {
-            final @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (null == map) {
                 return null;
             }
-            final CacheKey entryKey = getEntryKey(accountId, fullname);
+            CacheKey entryKey = getEntryKey(accountId, fullName);
             if (!map.containsKey(entryKey)) {
                 return null;
             }
-            final MailMessage[] retval = new MailMessage[uids.length];
+            MailMessage[] retval = new MailMessage[uids.length];
             for (int i = 0; i < retval.length; i++) {
                 /*
                  * TODO: Return cloned version ???
@@ -522,14 +526,15 @@ public final class MailMessageCache {
      * @param cid The context ID
      * @throws OXException If cache put fails
      */
-    public void putMessages(final int accountId, final MailMessage[] mails, final int userId, final int cid) throws OXException {
+    public void putMessages(int accountId, MailMessage[] mails, int userId, int cid) throws OXException {
+        Cache cache = this.cache;
         if (null == cache) {
             return;
         } else if ((mails == null) || (mails.length == 0)) {
             return;
         }
-        final CacheKey mapKey = getMapKey(userId, cid);
-        final Lock writeLock = getLock(mapKey).writeLock();
+        CacheKey mapKey = getMapKey(userId, cid);
+        Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
             @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
@@ -538,7 +543,7 @@ public final class MailMessageCache {
                 map = new DoubleKeyMap<CacheKey, String, MailMessage>(MailMessage.class);
                 cache.put(mapKey, map, false);
             }
-            for (final MailMessage mail : mails) {
+            for (MailMessage mail : mails) {
                 if (mail != null) {
                     mail.prepareForCaching();
                     /*
@@ -552,11 +557,13 @@ public final class MailMessageCache {
         }
     }
 
-    private CacheKey getMapKey(final int userId, final int cid) {
+    private CacheKey getMapKey(int userId, int cid) {
+        Cache cache = this.cache;
         return cache.newCacheKey(cid, userId);
     }
 
-    private CacheKey getEntryKey(final int accountId, final String fullname) {
+    private CacheKey getEntryKey(int accountId, String fullname) {
+        Cache cache = this.cache;
         return cache.newCacheKey(accountId, fullname);
     }
 
