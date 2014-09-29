@@ -211,7 +211,7 @@ public class IMAPAuthentication implements AuthenticationService {
     public IMAPAuthentication(final ServiceLookup services) {
         super();
         this.services = services;
-        failures = CacheBuilder.newBuilder().maximumSize(100).expireAfterWrite(2, TimeUnit.HOURS).build();
+        failures = CacheBuilder.newBuilder().maximumSize(1024).expireAfterWrite(2, TimeUnit.HOURS).build();
     }
 
     // /**
