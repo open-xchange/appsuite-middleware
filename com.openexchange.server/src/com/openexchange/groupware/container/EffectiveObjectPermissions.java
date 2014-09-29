@@ -78,7 +78,8 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link EffectiveObjectPermissions}
+ * {@link EffectiveObjectPermissions} provides static helper functions to load
+ * {@link EffectiveObjectPermission} instances.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -89,6 +90,15 @@ public class EffectiveObjectPermissions {
         super();
     }
 
+    /**
+     * Finds the permission with the highest bits for the given user in the given
+     * list of permissions.
+     *
+     * @param user The user
+     * @param permissions The list of permissions
+     * @return The highest permission within the list, or <code>null</code> if no permission
+     * for the user was contained.
+     */
     public static ObjectPermission find(final User user, Collection<ObjectPermission> permissions) {
         if (permissions == null || permissions.isEmpty()) {
             return null;
@@ -125,6 +135,16 @@ public class EffectiveObjectPermissions {
         return found;
     }
 
+    /**
+     * Converts an {@link ObjectPermission} into an {@link EffectiveObjectPermission}.
+     *
+     * @param module The module (see {@link Module#getFolderConstant()}).
+     * @param folderId The folder
+     * @param id The object id
+     * @param permission The permission
+     * @param permissionBits The users permission bits
+     * @return A new {@link EffectiveObjectPermission} instance
+     */
     public static EffectiveObjectPermission convert(int module, int folderId, int id, ObjectPermission permission, UserPermissionBits permissionBits) {
         return new EffectiveObjectPermission(module, folderId, id, permission, permissionBits);
     }
@@ -132,8 +152,8 @@ public class EffectiveObjectPermissions {
     /**
      * Loads the {@link EffectiveObjectPermission} for a given user and item. If the
      * user has multiple permissions (e.g. due to being member of several groups), the
-     * one with the highest bits is returned. The permission is fetched from the database,
-     * if an active database connection is available, you should use the method with the
+     * one with the highest bits is returned. The permission is fetched from the database.
+     * If an active database connection is available, you should use the method with the
      * connection parameter.
      *
      * @param session The users session
@@ -147,10 +167,39 @@ public class EffectiveObjectPermissions {
         return load(session.getContext(), session.getUser(), session.getUserPermissionBits(), module, folderId, id);
     }
 
+    /**
+     * Loads the {@link EffectiveObjectPermission} for a given user and item. If the
+     * user has multiple permissions (e.g. due to being member of several groups), the
+     * one with the highest bits is returned. The permission is fetched from the database.
+     *
+     * @param session The users session
+     * @param module The module (see {@link Module#getFolderConstant()}).
+     * @param folderId The folder id
+     * @param id The item id
+     * @param con The active database connection
+     * @return The users permission for the given item or <code>null</code> if no permission is defined.
+     * @throws OXException
+     */
     public static EffectiveObjectPermission load(ServerSession session, int module, int folderId, int id, Connection con) throws OXException {
         return load(session.getContext(), session.getUser(), session.getUserPermissionBits(), module, folderId, id, con);
     }
 
+    /**
+     * Loads the {@link EffectiveObjectPermission} for a given user and item. If the
+     * user has multiple permissions (e.g. due to being member of several groups), the
+     * one with the highest bits is returned. The permission is fetched from the database.
+     * If an active database connection is available, you should use the method with the
+     * connection parameter.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param permissionBits The users permission bits
+     * @param module The module (see {@link Module#getFolderConstant()}).
+     * @param folderId The folder id
+     * @param id The item id
+     * @return The users permission for the given item or <code>null</code> if no permission is defined.
+     * @throws OXException
+     */
     public static EffectiveObjectPermission load(final Context ctx, final User user, final UserPermissionBits permissionBits, final int module, final int folderId, final int id) throws OXException {
         try {
             return ServiceCallWrapper.doServiceCall(EffectiveObjectPermissions.class, DatabaseService.class, new ServiceCallWrapper.ServiceUser<DatabaseService, EffectiveObjectPermission>() {
@@ -172,6 +221,21 @@ public class EffectiveObjectPermissions {
         }
     }
 
+    /**
+     * Loads the {@link EffectiveObjectPermission} for a given user and item. If the
+     * user has multiple permissions (e.g. due to being member of several groups), the
+     * one with the highest bits is returned. The permission is fetched from the database.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param permissionBits The users permission bits
+     * @param module The module (see {@link Module#getFolderConstant()}).
+     * @param folderId The folder id
+     * @param id The item id
+     * @param con The active database connection
+     * @return The users permission for the given item or <code>null</code> if no permission is defined.
+     * @throws OXException
+     */
     public static EffectiveObjectPermission load(Context ctx, User user, UserPermissionBits permissionBits, int module, int folderId, int id, Connection con) throws OXException {
         StringBuilder sb = new StringBuilder(128).append("SELECT bits, permission_id, group_flag FROM object_permission WHERE cid = ").append(ctx.getContextId()).append(" AND module = ").append(module);
         sb.append(" AND folder_id = ").append(folderId).append(" AND object_id = ").append(id);
@@ -202,6 +266,21 @@ public class EffectiveObjectPermissions {
         return new EffectiveObjectPermission(module, folderId, id, permission, permissionBits);
     }
 
+    /**
+     * Loads all {@link EffectiveObjectPermissions} for a user and a list of &lt;folder-id&gt;-&lt;object-id&gt;-pairs
+     * in a given module.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param permissionBits The users permission bits
+     * @param module The module (see {@link Module#getFolderConstant()}).
+     * @param folderAndObjectIds The folder and object ids to load permissions for. For every desired
+     * permission, a {@link Pair} has to be defined, with the folder id as first parameter and object
+     * id as second parameter.
+     * @param con The active database connection
+     * @return A mapping &lt;folder-id&gt; =&gt; &lt;object-id&gt; =&gt; &lt;permission&gt;
+     * @throws OXException
+     */
     public static Map<Integer, Map<Integer, EffectiveObjectPermission>> load(Context ctx, User user, UserPermissionBits permissionBits, int module, List<Pair<Integer, Integer>> folderAndObjectIds, Connection con) throws OXException {
         if (folderAndObjectIds.isEmpty()) {
             return Collections.emptyMap();
@@ -262,6 +341,13 @@ public class EffectiveObjectPermissions {
         return gatheredPermissions;
     }
 
+    /**
+     * Flattens a permission mapping like the one returned in
+     * {@link EffectiveObjectPermissions#load(Context, User, UserPermissionBits, int, List, Connection)}.
+     *
+     * @param permissions The input map
+     * @return A plain list of alle permissions contained in the input map
+     */
     public static List<EffectiveObjectPermission> flatten(Map<Integer, Map<Integer, EffectiveObjectPermission>> permissions) {
         List<EffectiveObjectPermission> permissionList = new ArrayList<EffectiveObjectPermission>();
         for (Map<Integer, EffectiveObjectPermission> value : permissions.values()) {
