@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.tools.session.ServerSession;
@@ -120,7 +119,7 @@ public final class CalculatePermission {
         if (!toLoad.isEmpty()) {
             int[] userIds = toLoad.keys();
             try {
-                UserPermissionBits[] configurations = userConfStorage.getUserPermissionBits(context, UserStorage.getInstance().getUser(context, userIds));
+                UserPermissionBits[] configurations = userConfStorage.getUserPermissionBits(context, userIds);
                 for (int i = 0; i < configurations.length; i++) {
                     int userId = userIds[i];
                     if (toLoad.containsKey(userId)) {
