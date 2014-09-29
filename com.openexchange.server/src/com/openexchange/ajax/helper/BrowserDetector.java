@@ -49,12 +49,39 @@
 
 package com.openexchange.ajax.helper;
 
+import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 /**
  * {@link BrowserDetector} - Parses useful information out of <i>"user-agent"</i> header.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BrowserDetector {
+
+    private static final Cache<String, BrowserDetector> CACHE = CacheBuilder.newBuilder().maximumSize(100).expireAfterWrite(2, TimeUnit.HOURS).build();
+
+    /**
+     * Gets the {@link BrowserDetector} instance for given User-Agent string.
+     *
+     * @param userAgent The User-Agent string
+     * @return The {@link BrowserDetector} instance
+     */
+    public static BrowserDetector detectorFor(String userAgent) {
+        if (null == userAgent) {
+            return null;
+        }
+
+        BrowserDetector result = CACHE.getIfPresent(userAgent);
+        if (result == null) {
+            result = new BrowserDetector(userAgent);
+            CACHE.put(userAgent, result);
+        }
+        return result;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * The constant for an unknown value.
@@ -136,8 +163,11 @@ public final class BrowserDetector {
      * Initializes a new {@link BrowserDetector}.
      *
      * @param userAgent The user-agent
+     * @deprecated Use {@link #detectorFor(String)} method
      */
-    public BrowserDetector(final String userAgent) {
+    @Deprecated
+    public BrowserDetector(String userAgent) {
+        super();
         this.userAgent = userAgent;
         browserName = UNKNOWN;
         browserVersion = 0F;
