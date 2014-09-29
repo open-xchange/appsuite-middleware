@@ -49,79 +49,61 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.tx.AbstractDBAction;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
- * {@link CreateObjectPermissionAction}
+ * {@link AbstractObjectPermissionAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CreateObjectPermissionAction extends AbstractObjectPermissionAction {
+public abstract class AbstractObjectPermissionAction extends AbstractDBAction {
 
-    private final DocumentMetadata document;
+    protected static final String INSERT_OBJECT_PERMISSION =
+        "INSERT INTO object_permission (cid,permission_id,module,folder_id,object_id,created_by,shared_by,bits,last_modified,group_flag) " +
+        "VALUES (?,?,?,?,?,?,?,?,?,?);";
+
+    protected static final String DELETE_OBJECT_PERMISSION =
+        "DELETE FROM object_permission " +
+        "WHERE cid=? AND object_id=?;";
+
+    protected static final String UPDATE_OBJECT_PERMISSION =
+        "UPDATE object_permission SET created_by=?,shared_by=?,bits=?,last_modified=? " +
+        "WHERE cid=? AND object_id=? AND permission_id=?;";
+
+    protected static final String DELETE_OBJECT_PERMISSION_ENTITY =
+        "DELETE FROM object_permission " +
+        "WHERE cid=? AND object_id=? AND permission_id=?;";
+
+    protected static final String DELETE_DEL_OBJECT_PERMISSION_ENTITY =
+        "DELETE FROM del_object_permission " +
+        "WHERE cid=? AND object_id=? AND permission_id=?;";
+
+    protected static final String REPLACE_DEL_OBJECT_PERMISSION =
+        "REPLACE INTO del_object_permission (cid,permission_id,module,folder_id,object_id,created_by,shared_by,bits,last_modified,group_flag) " +
+        "VALUES (?,?,?,?,?,?,?,?,?,?);";
 
     /**
-     * Initializes a new {@link CreateObjectPermissionAction}.
+     * Initializes a new {@link AbstractObjectPermissionAction}.
      *
      * @param provider The database provider
      * @param context The context
-     * @param document The document to create the object permissions for
      */
-    public CreateObjectPermissionAction(DBProvider provider, Context context, DocumentMetadata document) {
-        super(provider, context);
-        this.document = document;
+    protected AbstractObjectPermissionAction(DBProvider provider, Context context) {
+        super();
+        setProvider(provider);
+        setContext(context);
     }
 
     @Override
-    public void perform() throws OXException {
-        List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
-        List<ObjectPermission> objectPermissions = document.getObjectPermissions();
-        if (null != objectPermissions) {
-            for (final ObjectPermission objectPermission : objectPermissions) {
-                updates.add(new Update(INSERT_OBJECT_PERMISSION) {
-
-                    @Override
-                    public void fillStatement() throws SQLException {
-
-                        // shared by == session user
-                        // created by == object created by
-
-                        // (cid, permission_id, module, folder_id, object_id, created_by, shared_by, bits, group_flag)
-                        stmt.setInt(1, getContext().getContextId());
-                        stmt.setInt(2, objectPermission.getEntity());
-                        stmt.setInt(3, FolderObject.INFOSTORE);
-                        stmt.setInt(4, (int) document.getFolderId());
-                        stmt.setInt(5, document.getId());
-                        stmt.setInt(6, document.getModifiedBy());
-                        stmt.setInt(7, document.getCreatedBy());
-                        stmt.setInt(8, objectPermission.getPermissions());
-                        stmt.setLong(9, document.getLastModified().getTime());
-                        stmt.setBoolean(10, objectPermission.isGroup());
-                    }
-                });
-            }
+    protected int doUpdates(List<UpdateBlock> updates) throws OXException {
+        if (null != updates && 0 < updates.size()) {
+            return super.doUpdates(updates);
         }
-        doUpdates(updates);
-    }
-
-    @Override
-    protected void undoAction() throws OXException {
-        doUpdates(new Update(DELETE_OBJECT_PERMISSION) {
-
-            @Override
-            public void fillStatement() throws SQLException {
-                stmt.setInt(1, getContext().getContextId());
-                stmt.setInt(2, document.getId());
-            }
-        });
+        return 0;
     }
 
 }
