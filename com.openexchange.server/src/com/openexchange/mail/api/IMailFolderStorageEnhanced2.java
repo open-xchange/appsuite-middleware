@@ -67,13 +67,4 @@ public interface IMailFolderStorageEnhanced2 extends IMailFolderStorageEnhanced 
      */
     int[] getTotalAndUnreadCounter(final String fullName) throws OXException;
 
-    /**
-     * Gets the size of the denoted folder in bytes
-     *
-     * @param fullName The full name
-     * @return The size in bytes or <code>-1L</code> if unknown
-     * @throws OXException
-     */
-    long getSize(String fullName) throws OXException;
-
 }

@@ -124,6 +124,10 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         List<OXException> warnings = new LinkedList<OXException>();
         Set<Attribute> availableAttributes = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
+        if (accountDescription.getId() == MailAccount.DEFAULT_ID) {
+            return new AJAXRequestResult(Boolean.TRUE);
+        }
+
         if (!availableAttributes.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
             accountDescription.setTransportAuth(TransportAuth.MAIL);
             availableAttributes.add(Attribute.TRANSPORT_AUTH_LITERAL);

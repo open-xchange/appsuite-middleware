@@ -93,7 +93,7 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        //
+        // No more options to check
     }
 
     /**

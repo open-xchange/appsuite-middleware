@@ -397,11 +397,6 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     @Override
-    public long getSize() {
-        return folder.getSize();
-    }
-
-    @Override
     public int getTotal() {
         if (null == totalAndUnread) {
             if (folder instanceof FolderExtension) {
@@ -469,11 +464,6 @@ public final class UserizedFolderImpl implements UserizedFolder {
     @Override
     public void setSummary(final String summary) {
         folder.setSummary(summary);
-    }
-
-    @Override
-    public void setSize(long size) {
-        folder.setSize(size);
     }
 
     @Override

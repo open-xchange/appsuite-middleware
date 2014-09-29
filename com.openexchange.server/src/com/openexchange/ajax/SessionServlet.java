@@ -58,6 +58,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.HttpStatus;
+import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -199,6 +200,28 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     /**
+     * Writes common JavaScript call-back for given error.
+     *
+     * @param e The error
+     * @param httpRequest The HTTP request
+     * @param httpResponse The HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    protected void writeErrorAsJsCallback(final OXException e, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws IOException {
+        try {
+            // As API response
+            APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);
+        } catch (JSONException je) {
+            LOG.error("", e);
+            try {
+                httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
+            } catch (final IOException ioe) {
+                LOG.error("", ioe);
+            }
+        }
+    }
+
+    /**
      * Handles passed {@link OXException} instance.
      *
      * @param e The {@code OXException} instance
@@ -209,6 +232,8 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         handleOXException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred inside the server which prevented it from fulfilling the request.", req, resp);
     }
+
+    private static final String USM_USER_AGENT = "Open-Xchange USM HTTP Client";
 
     /**
      * Handles passed {@link OXException} instance.
@@ -230,10 +255,14 @@ public abstract class SessionServlet extends AJAXServlet {
                 // API response
                 APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
             } else {
-                // No JSON response
-                String desc = e.getMessage();
-                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                writeErrorPage(HttpServletResponse.SC_FORBIDDEN, desc, resp);
+                // No JSON response; either JavaScript call-back or regular HTML error (page)
+                if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
+                    writeErrorAsJsCallback(e, req, resp);
+                } else {
+                    String desc = e.getMessage();
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    writeErrorPage(HttpServletResponse.SC_FORBIDDEN, desc, resp);
+                }
             }
         } else {
             e.log(LOG);
@@ -243,10 +272,14 @@ public abstract class SessionServlet extends AJAXServlet {
                 // API response
                 APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
             } else {
-                // No JSON response
-                String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
-                resp.setStatus(statusCode);
-                writeErrorPage(statusCode, desc, resp);
+                // No JSON response; either JavaScript call-back or regular HTML error (page)
+                if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
+                    writeErrorAsJsCallback(e, req, resp);
+                } else {
+                    String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
+                    resp.setStatus(statusCode);
+                    writeErrorPage(statusCode, desc, resp);
+                }
             }
         }
     }

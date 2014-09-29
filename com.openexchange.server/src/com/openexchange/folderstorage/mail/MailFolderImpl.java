@@ -89,7 +89,6 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -165,7 +164,6 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     private int m_total = -1;
     private int m_unread = -1;
-    private final long m_size;
 
     private static final int BIT_USER_FLAG = (1 << 29);
 
@@ -243,7 +241,6 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         nu = mailFolder.getNewMessageCount();
         unread = mailFolder.getUnreadMessageCount();
         deleted = mailFolder.getDeletedMessageCount();
-        size = mailFolder.getSize();
         final MailPermission mp;
         if (mailFolder.isRootFolder()) {
             mailFolderType = MailFolderType.ROOT;
@@ -411,26 +408,22 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             cache = false;
         }
         // Since not cached we can obtain total/unread counter here
-        long sz = -1L;
-        IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
         if (!cache) {
-            String fn = ensureFullName(fullName);
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-                IMailFolderStorageEnhanced2 storageEnhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
-                int[] tu = storageEnhanced2.getTotalAndUnreadCounter(fn);
+                final IMailFolderStorageEnhanced2 storageEnhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
+                final int[] tu = storageEnhanced2.getTotalAndUnreadCounter(ensureFullName(fullName));
                 m_total = null == tu ? -1 : tu[0];
                 m_unread = null == tu ? -1 : tu[1];
-                sz = storageEnhanced2.getSize(fn);
             } else if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
-                m_total = storageEnhanced.getTotalCounter(fn);
-                m_unread = storageEnhanced.getUnreadCounter(fn);
+                final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
+                m_total = storageEnhanced.getTotalCounter(ensureFullName(fullName));
+                m_unread = storageEnhanced.getUnreadCounter(ensureFullName(fullName));
             } else {
-                m_total = mailAccess.getMessageStorage().searchMessages(fn, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
-                m_unread = mailAccess.getMessageStorage().getUnreadMessages(fn, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
+                m_total = mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
+                m_unread = mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
             }
         }
-        m_size = sz;
         cacheable = cache;
     }
 
@@ -514,38 +507,6 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     }
      *
      */
-
-    @Override
-    public long getSize() {
-        long size = m_size;
-        if (size >= 0) {
-            return size;
-        }
-
-        if ((false == MailProperties.getInstance().supportsMailboxSize()) || (accountId > 0)) {
-            // Either not enabled or non-primary account!
-            return -1;
-        }
-
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = MailAccess.getInstance(userId, contextId, accountId);
-            mailAccess.connect(false);
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-                return ((IMailFolderStorageEnhanced2) folderStorage).getSize(ensureFullName(fullName));
-            }
-            return -1L;
-        } catch (final OXException e) {
-            LOG.debug("Cannot return up-to-date size.", e);
-            return super.getUnread();
-        } catch (final Exception e) {
-            LOG.debug("Cannot return up-to-date size.", e);
-            return super.getUnread();
-        } finally {
-            closeMailAccess(mailAccess);
-        }
-    }
 
     private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
 

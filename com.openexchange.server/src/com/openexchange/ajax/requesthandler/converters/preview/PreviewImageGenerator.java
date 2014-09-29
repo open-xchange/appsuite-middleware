@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PreviewImageGenerator} A cancellable asynchronous generator for preview images.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -81,14 +81,14 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
     private static final Logger LOG = LoggerFactory.getLogger(PreviewImageGenerator.class);
 
     /** Used to prevent multiple requests from generating and cachin the same preview */
-    private static Set<String> currentlyRunning = Sets.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    private static final Set<String> currentlyRunning = Sets.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     /** Does the actual work */
-    private PreviewDocumentCallable callable;
+    private final PreviewDocumentCallable callable;
 
     /**
      * Initializes a new {@link PreviewImageGenerator}.
-     * 
+     *
      * @param callable The Callable that does the actual preview generation
      */
     public PreviewImageGenerator(PreviewDocumentCallable callable) {
@@ -111,7 +111,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
 
     /**
      * Detect the recommended await threshold for the {@link PreviewService} or use the given default threshold.
-     * 
+     *
      * @param defaultThreshold The default threshold in milliseconds to use if the {@link PreviewService} doesn't specify any.
      * @return The recommended await threshold for the {@link PreviewService} or the given default threshold in milliseconds.
      */
@@ -121,7 +121,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
 
     /**
      * Try to generate a {@link PreviewDocument} for the given request.
-     * 
+     *
      * @param result The {@link AJAXRequestResult} for the current request
      * @param requestData The {@link AJAXRequestData} from the current request
      * @param session The current {@link ServerSession}
@@ -137,7 +137,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
 
     /**
      * Try to generate a {@link PreviewDocument} for the given request.
-     * 
+     *
      * @param result The {@link AJAXRequestResult} for the current request
      * @param requestData The {@link AJAXRequestData} from the current request
      * @param session The current {@link ServerSession}
@@ -155,10 +155,9 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
         PreviewDocument previewDocument = null;
         //prevent multiple caching requests/allow multiple blocking
         if (cacheKey != null) {
-            if (currentlyRunning.contains(cacheKey)) {
+            if (false == currentlyRunning.add(cacheKey)) {
+                // Already contained
                 return null;
-            } else {
-                currentlyRunning.add(cacheKey);
             }
         }
         try {

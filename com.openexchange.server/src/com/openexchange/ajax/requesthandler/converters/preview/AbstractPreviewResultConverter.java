@@ -83,6 +83,7 @@ import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
@@ -112,7 +113,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractPreviewResultConverter implements ResultConverter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractPreviewResultConverter.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractPreviewResultConverter.class);
 
     private static final Charset UTF8 = Charsets.UTF_8;
     private static final byte[] DELIM = new byte[] { '\r', '\n' };
@@ -223,7 +225,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             final PreviewDocument previewDocument;
             {
                 InputStream stream = fileHolder.getStream();
-                final Ref<InputStream> ref = new Ref<InputStream>();
+                final Reference<InputStream> ref = new Reference<InputStream>();
                 if (streamIsEof(stream, null)) {
                     Streams.close(stream, fileHolder);
                     throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
@@ -273,7 +275,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                                         final CachedResource preview = new CachedResource(bytes, fileName, fileType, bytes.length);
                                         resourceCache.save(cacheKey, preview, 0, session.getContextId());
                                     } catch (OXException e) {
-                                        LOG.warn("Could not cache preview.", e);
+                                        LOGGER.warn("Could not cache preview.", e);
                                     }
 
                                     return null;
@@ -434,7 +436,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             usm.setAllowHTMLImages(false);
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         } else {
-            LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", PARAMETER_VIEW, view);
+            LOGGER.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", PARAMETER_VIEW, view);
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         }
         return displayMode;
@@ -457,7 +459,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Finds the first occurrence of the pattern in the text.
      */
-    private int indexOf(final byte[] data, final byte[] pattern, final int fromIndex, final int[] computedFailure) {
+    private int indexOf(byte[] data, final byte[] pattern, int fromIndex, int[] computedFailure) {
         final int[] failure = null == computedFailure ? computeFailure(pattern) : computedFailure;
         int j = 0;
         final int dLen = data.length;
@@ -482,7 +484,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Computes the failure function using a boot-strapping process, where the pattern is matched against itself.
      */
-    private int[] computeFailure(final byte[] pattern) {
+    private int[] computeFailure(byte[] pattern) {
         final int length = pattern.length;
         final int[] failure = new int[length];
         int j = 0;
@@ -507,7 +509,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @return <code>true</code> if passed stream signals EOF; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      */
-    protected static boolean streamIsEof(final InputStream in, final Ref<InputStream> ref) throws IOException {
+    protected static boolean streamIsEof(InputStream in, Reference<InputStream> ref) throws IOException {
         if (null == in) {
             return true;
         }
@@ -523,18 +525,18 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Get the user language based on the current {@link Session}.
-     * 
+     *
      * @param session The session used for the language lookup.
-     * @return Null or the preferred language of the user in a "en-gb" like notation.
+     * @return <code>null</code> or the preferred language of the user in a "en-gb" like notation.
      */
-    public static String getUserLanguage(final ServerSession session) {
-        final User sessionUser = session.getUser();
+    public static String getUserLanguage(ServerSession session) {
+        User sessionUser = session.getUser();
         return null == sessionUser ? null : sessionUser.getPreferredLanguage();
     }
 
     /**
      * Checks if a {@link ResourceCache} is enabled fo the given context.
-     * 
+     *
      * @param contextId The context identifier
      * @return true if a {@link ResourceCache} is enabled for the context
      * @throws OXException if check fails
@@ -545,7 +547,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Checks if a {@link ResourceCache} is enabled fo the given context and user.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return true if a {@link ResourceCache} is enabled for the context, user
@@ -562,24 +564,21 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Get the {@link ResourceCache}.
-     * 
-     * @return The preview cache or null if cache is either absent or not enabled for context, user 
+     *
+     * @return The preview cache or null if cache is either absent or not enabled for context, user
      */
     public static ResourceCache getResourceCache(int contextId, int userId) {
-        ResourceCache cache = null;
         try {
-            if(isResourceCacheEnabled(contextId, userId)) {
-                cache = ResourceCaches.getResourceCache();
-            }
+            return isResourceCacheEnabled(contextId, userId) ? ResourceCaches.getResourceCache() : null;
         } catch (OXException e) {
-            LOG.warn("Failed to check if ResourceCache is enabled for context {} and user {}", contextId, userId, e);
+            LOGGER.warn("Failed to check if ResourceCache is enabled for context {} and user {}", contextId, userId, e);
         }
-        return cache;
+        return null;
     }
 
     /**
      * Try to get a context global cached resource.
-     * 
+     *
      * @param session The current session
      * @param cacheKey The cacheKey
      * @param resourceCache The resourceCache to use
@@ -593,7 +592,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 try {
                     cachedResource = resourceCache.get(cacheKey, 0, contextId);
                 } catch (OXException e) {
-                    LOG.debug("Error while trying to look up CachedResource with key {} in context {}", e);
+                    LOGGER.debug("Error while trying to look up CachedResource with key {} in context {}", e);
                 }
             }
         }
@@ -601,36 +600,54 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     }
 
     /**
-     * Detect if the previewService should be called via a current thread or worker thread strategy.
-     * @param previewService
-     * @return
+     * Detects if specified preview service should be called via a current thread or worker thread strategy.
+     *
+     * @param previewService The preview service to check
+     * @return The await time (worker thread) or <code>0</code> (current thread)
      */
     public static long getAwaitThreshold(PreviewService previewService) {
-        long timeToWaitMillis = 0;
-        if (previewService instanceof RemoteInternalPreviewService) {
-            timeToWaitMillis = ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis();
-        }
-        return timeToWaitMillis;
+        return previewService instanceof RemoteInternalPreviewService ? ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis() : 0L;
     }
 
+    /**
+     * Add the default thumbnail as result to the current response
+     *
+     * @param requestData The current {@link AJAXRequestData} needed to set format and prevent further transformation.
+     * @param result The current {@link AJAXRequestResult}
+     */
     public static void setDefaulThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
+        setJpegThumbnail(requestData, result, PreviewConst.DEFAULT_THUMBNAIL);
+    }
+
+    /**
+     * Add the 1x1 white jpeg thumbnail as result to the current response. This indicates an accepted thumbnail request that can't deliver
+     * an immediate response from cache but initiated the generation of the needed thumbnail.
+     *
+     * @param requestData The current {@link AJAXRequestData} needed to set format and prevent further transformation.
+     * @param result The current {@link AJAXRequestResult}
+     * TODO: Remove when ui can properly handle 202/Retry-After responses
+     */
+    public static void setMissingThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
+        setJpegThumbnail(requestData, result, PreviewConst.MISSING_THUMBNAIL);
+    }
+
+    private static void setJpegThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result, byte[] thumbnailBytes) {
         requestData.setFormat("file");
-        final byte[] bytes = PreviewConst.DEFAULT_THUMBNAIL;
-        InputStream thumbnail = Streams.newByteArrayInputStream(bytes);
+        InputStream thumbnail = Streams.newByteArrayInputStream(thumbnailBytes);
         requestData.putParameter("transformationNeeded", "false");
-        final FileHolder responseFileHolder = new FileHolder(thumbnail, bytes.length, "image/jpeg", "thumbs.jpg");
+        final FileHolder responseFileHolder = new FileHolder(thumbnail, thumbnailBytes.length, "image/jpeg", "thumbs.jpg");
         result.setResultObject(responseFileHolder, "file");
     }
 
     /**
      * Get the {@link IFileHolder} from the given {@link AJAXRequestResult}.
-     * 
+     *
      * @param result
      * @return The {@link IFileHolder} from the given {@link AJAXRequestResult}.
      * @throws OXException if the result object isn't compatible
      */
     public static IFileHolder getFileHolderFromResult(AJAXRequestResult result) throws OXException {
-        
+
         final Object resultObject = result.getResultObject();
         if (!(resultObject instanceof IFileHolder)) {
             throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
@@ -640,7 +657,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Check if the client actively wants to prevent caching.
-     * 
+     *
      * @param requestData The requestData
      * @return True if the client didn't actively specify caching=false
      */
@@ -650,7 +667,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Check if the ETag is valid iow. non empty
-     * 
+     *
      * @param eTag The ETag to check
      * @return True if !Strings.isEmpty(eTag)
      */
@@ -661,7 +678,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Detect if the {@link PreviewDocument} needs further transformations or not and set <code>transformationNeeded</code> parameter on the
      * given {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the client.
-     * 
+     *
      * @param requestData The {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the
      *            client.
      * @param previewDocument The current {@link PreviewDocument}
@@ -674,42 +691,12 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Set <code>transformationNeeded</code> parameter to <code>false</code> on the given {@link AJAXRequestData}.
-     * 
+     *
      * @param requestData The {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the
      *            client.
      */
     public static void preventTransformations(AJAXRequestData requestData) {
         requestData.putParameter("transformationNeeded", "false");
-    }
-
-    /** Simple reference class */
-    protected static final class Ref<V> {
-
-        private V value;
-
-        Ref() {
-            super();
-            this.value = null;
-        }
-
-        /**
-         * Gets the value
-         *
-         * @return The value
-         */
-        V getValue() {
-            return value;
-        }
-
-        /**
-         * Sets the value
-         *
-         * @param value The value to set
-         */
-        Ref<V> setValue(final V value) {
-            this.value = value;
-            return this;
-        }
     }
 
 }

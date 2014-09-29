@@ -78,7 +78,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.scribe.model.Response;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
@@ -781,30 +780,7 @@ public final class FacebookMessagingUtility {
         return fireFQLJsonQuery(fqlQuery, facebookOAuthAccess);
     }
 
-    private static final String FQL_XML_START = "https://api.facebook.com/method/fql.query?format=XML&query=";
-    private static final int FQL_XML_START_LEN = FQL_XML_START.length();
-
-    /**
-     * Fires given FQL query using specified Facebook REST client.
-     *
-     * @param fqlQuery The FQL query to fire
-     * @param facebookOAuthAccess The Facebook OAuth access
-     * @return The FQL query's results
-     * @throws OXException If query cannot be fired
-     * @deprecated Use {@link #fireFQLJsonQuery(CharSequence, FacebookOAuthAccess)} instead
-     */
-    @Deprecated
-    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthAccess) throws OXException {
-        try {
-            final String encodedQuery = encodeUrl(fqlQuery.toString());
-            return FacebookDOMParser.parseXMLResponse(facebookOAuthAccess.executeGETRequest(new StringBuilder(
-                FQL_XML_START_LEN + encodedQuery.length()).append(FQL_XML_START).append(encodedQuery).toString()));
-        } catch (final RuntimeException e) {
-            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static final String FQL_JSON_START = "https://api.facebook.com/method/fql.query?format=JSON&query=";
+    private static final String FQL_JSON_START = "https://graph.facebook.com/v2.0/fql?q=";
     private static final int FQL_JSON_START_LEN = FQL_JSON_START.length();
 
     /**
@@ -821,16 +797,7 @@ public final class FacebookMessagingUtility {
             final JSONValue body = facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(
                 FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery));
             if (body.isArray()) {
-                final JSONArray array = body.toArray();
-                final int length = array.length();
-                if (length <= 0) {
-                    return Collections.emptyList();
-                }
-                final List<JSONObject> ret = new ArrayList<JSONObject>(length);
-                for (int i = 0; i < length; i++) {
-                    ret.add(array.getJSONObject(i));
-                }
-                return ret;
+                return parseJsonArray(body.toArray());
             }
             if (body.isObject()) {
                 /*
@@ -848,6 +815,10 @@ public final class FacebookMessagingUtility {
                         null == type ? "<unknown>" : type,
                         null == message ? "" : message);
                 }
+                JSONArray jsonArray = result.optJSONArray("data");
+                if (null != jsonArray) {
+                    return parseJsonArray(jsonArray);
+                }
                 return Collections.singletonList(result);
             }
             throw FacebookMessagingExceptionCodes.INVALID_RESPONSE_BODY.create(body);
@@ -856,6 +827,18 @@ public final class FacebookMessagingUtility {
         } catch (final RuntimeException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static List<JSONObject> parseJsonArray(final JSONArray array) throws JSONException {
+        final int length = array.length();
+        if (length <= 0) {
+            return Collections.emptyList();
+        }
+        final List<JSONObject> ret = new ArrayList<JSONObject>(length);
+        for (int i = 0; i < length; i++) {
+            ret.add(array.getJSONObject(i));
+        }
+        return ret;
     }
 
     /**

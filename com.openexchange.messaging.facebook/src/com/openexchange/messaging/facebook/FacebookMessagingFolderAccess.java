@@ -286,9 +286,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
             /*
              * The collection of users
              */
-            final int wallCount =
-                performFQLQuery(new StringBuilder("SELECT wall_count FROM user WHERE uid = ").append(facebookUserId).toString()).getInt(
-                    "wall_count");
+            int wallCount = performFQLQuery(new StringBuilder("SELECT wall_count FROM user WHERE uid = ").append(facebookUserId).toString()).getInt("wall_count");
             final DefaultMessagingFolder rootFolder = generateFolder(MessagingFolder.ROOT_FULLNAME, null, "Facebook", wallCount);
             rootFolder.setHoldsFolders(true);
             rootFolder.setSubfolders(true);

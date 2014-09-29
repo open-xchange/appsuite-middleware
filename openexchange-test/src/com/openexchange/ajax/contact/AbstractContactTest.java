@@ -612,7 +612,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
         try {
             final AJAXSession ajaxSession = getSession();
 
-            System.out.println("MS for debugging. Client values: " + client.toString() + ".\n");
             final HttpGet httpRequest = new HttpGet((null == protocol ? "http" : protocol) + "://" + (hostname == null ? "localhost" : hostname) + imageUrl);
             final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
             inputStream = httpResponse.getEntity().getContent();

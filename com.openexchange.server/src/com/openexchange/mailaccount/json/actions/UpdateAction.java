@@ -74,6 +74,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.mail.MailSessionCache;
@@ -207,9 +208,12 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
         // Check standard folder names against full names
         if (id != MailAccount.DEFAULT_ID) {
-            fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
-            Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
+            boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
+            if (false == pop3) {
+                fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
+                Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
+            }
         }
 
         // Update

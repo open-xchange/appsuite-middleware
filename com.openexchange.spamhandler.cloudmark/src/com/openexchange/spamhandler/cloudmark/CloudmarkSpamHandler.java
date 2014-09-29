@@ -89,7 +89,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleSpam(final int accountId, final String fullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
         final String targetSpamEmailAddress = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress", "").trim();
 
@@ -97,7 +97,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-            final MailMessage[] mailMessage = mailAccess.getMessageStorage().getMessages(fullname, mailIDs, new MailField[]{MailField.FULL});
+            final MailMessage[] mailMessage = mailAccess.getMessageStorage().getMessages(fullName, mailIDs, new MailField[]{MailField.FULL});
             for (int i = 0; i < mailMessage.length; i++) {
                 final MailTransport transport = MailTransport.getInstance(session);
                 try {
@@ -117,15 +117,15 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 final String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
 
                 if (targetSpamFolder.equals("1")) {
-                    mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
+                    mailAccess.getMessageStorage().moveMessages(fullName, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
                 } else if (targetSpamFolder.equals("2")) {
-                    mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getSpamFolder(), mailIDs, true);
+                    mailAccess.getMessageStorage().moveMessages(fullName, mailAccess.getFolderStorage().getSpamFolder(), mailIDs, true);
                 } else if (targetSpamFolder.equals("3")) {
-                    mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getConfirmedSpamFolder(), mailIDs, true);
+                    mailAccess.getMessageStorage().moveMessages(fullName, mailAccess.getFolderStorage().getConfirmedSpamFolder(), mailIDs, true);
                 } else if (targetSpamFolder.equals("0")) {
                 	// no move at all
                 } else {
-                    mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
+                    mailAccess.getMessageStorage().moveMessages(fullName, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
                     LOG.error("There is no valid 'com.openexchange.spamhandler.cloudmark.targetSpamFolder' configured. Moving spam to trash.");
                 }
             }
@@ -150,7 +150,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 
     @Override
     public void handleHam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
-    	
+
     	final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
         final String targetHamEmailAddress = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetHamEmailAddress", "").trim();
 
@@ -173,7 +173,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                     transport.close();
                 }
             }
-            
+
             if (move) {
             	final String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
 

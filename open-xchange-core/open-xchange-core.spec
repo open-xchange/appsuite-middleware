@@ -20,6 +20,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
+Requires:      open-xchange-system
 Provides:      open-xchange-cache = %{version}
 Obsoletes:     open-xchange-cache < %{version}
 Provides:      open-xchange-calendar = %{version}
@@ -1040,6 +1041,30 @@ fi
 VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
 if [ "secret" = "$VALUE" ]; then
     ox_set_property com.openexchange.rest.services.basic-auth.password "" $PFILE
+fi
+
+# SoftwareChange_Request-2177
+ox_add_property com.openexchange.preview.thumbnail.blockingWorker false /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2190
+pfile=/opt/open-xchange/etc/cache.ccf
+if ! grep "jcs.region.UserPermissionBits=LTCP" > /dev/null $pfile; then
+    echo -e "\n# # Pre-defined cache for user configuration\n" >> $pfile
+    echo "jcs.region.UserPermissionBits=LTCP\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile 
 fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"

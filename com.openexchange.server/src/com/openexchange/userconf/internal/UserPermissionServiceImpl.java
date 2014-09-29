@@ -75,6 +75,11 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     }
 
     @Override
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(ctx, userIds);
+    }
+
+    @Override
     public void clearStorage() throws OXException {
         UserPermissionBitsStorage.getInstance().clearStorage();
     }

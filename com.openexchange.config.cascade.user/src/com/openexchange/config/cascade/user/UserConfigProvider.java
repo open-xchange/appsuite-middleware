@@ -149,7 +149,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     @Override
     public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
-        if (userId == NO_CONTEXT) {
+        if (userId == NO_USER) {
             return Collections.emptyList();
         }
         final User user = getUser(userId, services.getService(ContextService.class).getContext(contextId));

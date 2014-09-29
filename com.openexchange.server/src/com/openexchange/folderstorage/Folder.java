@@ -332,20 +332,6 @@ public interface Folder extends Serializable, Cloneable {
     void setSummary(String summary);
 
     /**
-     * Gets the size of this folder in bytes.
-     *
-     * @return The folder's size or <code>-1</code> if not supported
-     */
-    long getSize();
-
-    /**
-     * Sets the size of this folder in bytes.
-     *
-     * @param size The folder's size or <code>-1</code> if not supported
-     */
-    void setSize(long size);
-
-    /**
      * Gets the total number of elements held by this folder.
      *
      * @return The total number of elements or <code>-1</code> if not supported

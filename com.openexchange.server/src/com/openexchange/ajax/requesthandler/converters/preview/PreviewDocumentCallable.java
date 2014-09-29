@@ -63,7 +63,9 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.InterruptibleInputStream;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.preview.ContentTypeChecker;
+import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
@@ -171,12 +173,25 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
      * 
      * @param defaultThreshold The default threshold in milliseconds to use if the previewService doesn't specify any.
      * @return The recommended await threshold for the previewService or the given default threshold in milliseconds.
+     * TODO: Check if {@link DelegationPreviewService} is completely obsolete and this code can be cleaned up!
      */
     public long getAwaitThreshold(long defaultThreshold) {
         long timeToWaitMillis = 0;
-        if (previewService instanceof RemoteInternalPreviewService) {
-            timeToWaitMillis = ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis();
+
+        final String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
+        PreviewService candidate = null;
+        if ((null != mimeType) && (previewService instanceof Delegating)) {
+            // Determine candidate
+            try {
+                candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, previewOutput);
+            } catch (OXException e) {
+                LOG.info("Failed to find delegate for mime-type {} and preview output {}", mimeType, previewOutput);
+            }
+            if (candidate instanceof RemoteInternalPreviewService) {
+                timeToWaitMillis = ((RemoteInternalPreviewService) candidate).getTimeToWaitMillis();
+            }
         }
+
         return timeToWaitMillis == 0 ? defaultThreshold : timeToWaitMillis;
     }
 
