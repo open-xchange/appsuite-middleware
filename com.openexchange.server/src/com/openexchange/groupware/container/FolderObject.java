@@ -166,6 +166,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     public static final int VIRTUAL_LIST_INFOSTORE_FOLDER_ID = 14;
 
+    public static final int VIRTUAL_GUEST_CONTACT_FOLDER_ID = 16;
+
     public static final int MIN_FOLDER_ID = 20;
 
     // Constant identifier for system folders
