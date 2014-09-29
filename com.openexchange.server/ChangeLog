@@ -1,3 +1,8 @@
+* 2014-09-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34668: Special handling for Windows IE 11 Browser in session management
+ - Fix for bug 34664: Removed connection from volatile cache if a severe SQL error occurred
+
 * 2014-09-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 34617: Signal proper write permission in case "ENABLE_INTERNAL_USER_EDIT" is set to "false"

@@ -92,8 +92,8 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
      * {@inheritDoc}
      */
     @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
-        //
+    protected void checkOptions(CommandLine cmd) {
+        // No more options to check
     }
 
     /**

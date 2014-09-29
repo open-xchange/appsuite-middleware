@@ -297,9 +297,19 @@ public abstract class AbstractMBeanCLI<R> {
      * Checks other mandatory options.
      *
      * @param cmd The command line
-     * @param options TODO
+     * @param options The associated options
      */
-    protected abstract void checkOptions(CommandLine cmd, Options options);
+    protected void checkOptions(CommandLine cmd, Options options) {
+        checkOptions(cmd);
+    }
+
+    /**
+     * Checks other mandatory options.
+     *
+     * @param cmd The command line
+     * @param options The associated options
+     */
+    protected abstract void checkOptions(CommandLine cmd);
 
     /**
      * Signals if this command-line tool requires administrative permission.

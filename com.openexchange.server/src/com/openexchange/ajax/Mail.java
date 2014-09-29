@@ -2338,7 +2338,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private static boolean isMSIEOnWindows(final String userAgent) {
-        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
+        final BrowserDetector browserDetector = BrowserDetector.detectorFor(userAgent);
         return (browserDetector.isMSIE() && browserDetector.isWindows());
     }
 
@@ -2403,7 +2403,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         }
         fn = escapeBackslashAndQuote(fn);
-        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
+        if (null != userAgent && BrowserDetector.detectorFor(userAgent).isMSIE()) {
             // InternetExplorer
             return new StringBuilder("attachment; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"').toString();
         }

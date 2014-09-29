@@ -88,10 +88,17 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
     }
 
     @Override
+    protected void checkOptions(CommandLine cmd) {
+        checkOptions(cmd, null);
+    }
+
+    @Override
     protected void checkOptions(CommandLine cmd, Options options) {
         if (!cmd.hasOption('f')) {
             System.out.println("You must provide a file name.");
-            printHelp(options);
+            if (null != options) {
+                printHelp(options);
+            }
             System.exit(-1);
             return;
         }

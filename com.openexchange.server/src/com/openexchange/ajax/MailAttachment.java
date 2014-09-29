@@ -157,7 +157,7 @@ public class MailAttachment extends AJAXServlet {
                     AttachmentTokenRegistry.getInstance().removeToken(id);
                     throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
                 }
-                if (!new BrowserDetector(token.getUserAgent()).nearlyEquals(new BrowserDetector(requestUserAgent))) {
+                if (!BrowserDetector.detectorFor(token.getUserAgent()).nearlyEquals(BrowserDetector.detectorFor(requestUserAgent))) {
                     AttachmentTokenRegistry.getInstance().removeToken(id);
                     throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
                 }
@@ -372,7 +372,7 @@ public class MailAttachment extends AJAXServlet {
     }
 
     private static boolean isMSIEOnWindows(final String userAgent) {
-        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
+        final BrowserDetector browserDetector = BrowserDetector.detectorFor(userAgent);
         return (browserDetector.isMSIE() && browserDetector.isWindows());
     }
 
