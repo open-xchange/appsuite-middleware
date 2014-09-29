@@ -354,6 +354,8 @@ public class Orchestration implements ReportService {
             }
             // Mark context as done
             report.markTaskAsDone();
+            // Save it back to hazelcast
+            pendingReports.put(report.getUUID(), PortableReport.wrap(report));
         } finally {
             if (lock != null) {
                 lock.unlock();
