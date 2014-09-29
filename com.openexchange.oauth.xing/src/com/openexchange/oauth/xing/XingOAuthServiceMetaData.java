@@ -92,7 +92,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         super();
         this.services = services;
         id = "com.openexchange.oauth.xing";
-        displayName = "XING OAuth";
+        displayName = "XING";
         setAPIKeyName("com.openexchange.oauth.xing.apiKey");
         setAPISecretName("com.openexchange.oauth.xing.apiSecret");
         setConsumerKeyName("com.openexchange.oauth.xing.consumerKey");
