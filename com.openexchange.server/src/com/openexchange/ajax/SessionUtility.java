@@ -72,6 +72,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
@@ -265,7 +266,7 @@ public final class SessionUtility {
                 if (null != publicSessionId) {
                     handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth);
                 } else {
-                    if (mayUseFallbackSession && isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
+                    if (mayUseFallbackSession && isChangeableUserAgent(req.getHeader(USER_AGENT))) {
                         for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
                             if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
                                 handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
@@ -631,7 +632,7 @@ public final class SessionUtility {
                 }
 
                 // Check for special User-Agent to allow look-up by remembered cookie name
-                if (isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
+                if (isChangeableUserAgent(req.getHeader(USER_AGENT))) {
                     tmp.setLength(0);
                     cookie = cookies.get(tmp.append(secretPrefix).append(hash).toString());
                     if (null != cookie) {
@@ -660,9 +661,13 @@ public final class SessionUtility {
         return null;
     }
 
+    private static boolean isChangeableUserAgent(String userAgent) {
+        return isMediaPlayerAgent(userAgent) || isMSIE11(userAgent);
+    }
+
     private static final Set<String> MEDIA_AGENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("applecoremedia/", "stagefright/")));
 
-    private static boolean isMediaPlayerAgent(final String userAgent) {
+    private static boolean isMediaPlayerAgent(String userAgent) {
         if (null == userAgent) {
             return false;
         }
@@ -673,6 +678,14 @@ public final class SessionUtility {
             }
         }
         return false;
+    }
+
+    private static boolean isMSIE11(String userAgent) {
+        if (null == userAgent) {
+            return false;
+        }
+        BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
+        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && "5.0".equals(bd.getBrowserVersion());
     }
 
     /**

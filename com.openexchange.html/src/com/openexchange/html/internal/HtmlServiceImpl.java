@@ -1687,7 +1687,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
-    private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);");
 
     private static String replaceHexEntities(final String htmlContent) {
         final Matcher m = PAT_HEX_ENTITIES.matcher(htmlContent);

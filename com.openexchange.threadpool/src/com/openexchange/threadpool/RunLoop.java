@@ -121,6 +121,8 @@ public abstract class RunLoop<E> implements Runnable {
             } catch (Throwable t) {
                 LOG.error("", t);
             } finally {
+                //don't prevent gc of last handled element 
+                currentElement = null;
                 handleLock.unlock();
             }
         }
