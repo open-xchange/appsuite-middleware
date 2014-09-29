@@ -78,7 +78,7 @@ public final class CloseSessionsCLT extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
+    protected void checkOptions(CommandLine cmd) {
         // No more options to check
     }
 

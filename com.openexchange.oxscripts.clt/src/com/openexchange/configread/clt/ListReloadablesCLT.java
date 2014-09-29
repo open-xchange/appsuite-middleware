@@ -121,7 +121,7 @@ public class ListReloadablesCLT extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
+    protected void checkOptions(CommandLine cmd) {
         // nothing to do
     }
 
