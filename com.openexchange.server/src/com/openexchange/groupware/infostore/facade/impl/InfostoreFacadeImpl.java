@@ -1799,34 +1799,70 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         Metadata[] cols = addLastModifiedIfNeeded(columns);
         boolean onlyOwn = false;
+        Context context = session.getContext();
         User user = session.getUser();
-        final EffectivePermission isperm = security.getFolderPermission(folderId, session.getContext(), user, session.getUserPermissionBits());
+        final EffectivePermission isperm = security.getFolderPermission(folderId, context, user, session.getUserPermissionBits());
         if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
             onlyOwn = true;
         }
 
-        InfostoreIterator iter = null;
+        InfostoreIterator iter;
         if (onlyOwn) {
-            iter = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, getProvider(), session.getContext());
+            iter = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, getProvider(), context);
         } else {
-            iter = InfostoreIterator.documents(folderId, cols, sort, order, getProvider(), session.getContext());
+            iter = InfostoreIterator.documents(folderId, cols, sort, order, getProvider(), context);
         }
+        /*
+         * fast-forward results to get the object IDs and sequence number in case additional metadata is required
+         * (#lockedUntilIterator() would do it anyway)
+         */
+        boolean addLocked = contains(columns, Metadata.LOCKED_UNTIL_LITERAL);
+        boolean addNumberOfVersions = contains(columns, Metadata.NUMBER_OF_VERSIONS_LITERAL);
+        boolean addObjectPermissions = contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL);
+        if (addLocked || addNumberOfVersions || addObjectPermissions) {
+            long maxSequenceNumber = 0;
+            final List<DocumentMetadata> documents = iter.asList();
+            if (0 == documents.size()) {
+                return com.openexchange.groupware.results.Results.emptyTimedResult();
+            }
+            List<Integer> objectIDs = new ArrayList<Integer>(documents.size());
+            for (DocumentMetadata document : documents) {
+                maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
+                objectIDs.add(Integer.valueOf(document.getId()));
+            }
+            final long sequenceNumber = maxSequenceNumber;
+            TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {
 
-        // TODO: prefetch document ids to get locks and object permissions more efficiently
+                @Override
+                public SearchIterator<DocumentMetadata> results() throws OXException {
+                    return new SearchIteratorAdapter<DocumentMetadata>(documents.iterator());
+                }
 
-        TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iter);
-        if (contains(columns, Metadata.LOCKED_UNTIL_LITERAL)) {
-            timedResult = addLocked(timedResult, null, session);
+                @Override
+                public long sequenceNumber() throws OXException {
+                    return sequenceNumber;
+                }
+            };
+            /*
+             * enhance metadata with pre-loaded data as needed
+             */
+            if (addObjectPermissions) {
+                timedResult = addObjectPermissions(timedResult, context, loadObjectPermissions(objectIDs, context));
+            }
+            if (addLocked) {
+                timedResult = addLocked(timedResult, lockManager.findLocks(objectIDs, session), session);
+            }
+            if (addNumberOfVersions) {
+                timedResult = addNumberOfVersions(timedResult, context, loadNumberOfVersions(objectIDs, context));
+            }
+            return timedResult;
         }
-        if (contains(columns, Metadata.NUMBER_OF_VERSIONS_LITERAL)) {
-            timedResult = addNumberOfVersions(timedResult, session.getContext(), null);
-        }
-        if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
-            timedResult = addObjectPermissions(timedResult, session.getContext(), null);
-        }
-        return timedResult;
+        /*
+         * stick to plain infostore timed result, otherwise
+         */
+        return new InfostoreTimedResult(iter);
     }
 
     private TimedResult<DocumentMetadata> getReadableSharedDocuments(Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
