@@ -49,8 +49,6 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import static com.openexchange.java.Autoboxing.O2S;
-import static com.openexchange.java.Autoboxing.i2I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,7 +60,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
-import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -84,21 +81,16 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
-import com.openexchange.folderstorage.osgi.ContactServiceHolder;
 import com.openexchange.folderstorage.osgi.ShareServiceHolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.share.AddedGuest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -441,14 +433,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         for (int i = 0; i < removedPermissions.size(); i++) {
             guests[i] = removedPermissions.get(i).getEntity();
         }
-        ContactService contactService = ContactServiceHolder.requireContactService();
-        try {
-            contactService.deleteContacts(session, String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID), O2S(i2I(guests)), new Date());
-        } catch (OXException e) {
-            if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
-                throw e;
-            }
-        }
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
@@ -483,27 +467,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             }
             for (int i = 0; i < shares.size(); i++) {
                 addedPermissions.get(i).setEntity(shares.get(i).getGuest());
-            }
-            // TODO: Create contact in hidden folder for guest
-            ContactService contactService = ContactServiceHolder.requireContactService();
-            for (AddedGuest guest : guests) {
-                String guestMailAddress = guest.getMailAddress();
-                if (null != guestMailAddress && !"".equals(guestMailAddress)) {
-                    Contact contact = null;
-                    ContactSearchObject searchObject = new ContactSearchObject();
-                    searchObject.setEmail1(guestMailAddress);
-                    SearchIterator<Contact> it = contactService.searchContacts(session, searchObject);
-                    if (it.hasNext()) {
-                        contact = it.next();
-                    } else {
-                        contact = new Contact();
-                        contact.setDisplayName(guest.getDisplayName());
-                        contact.setEmail1(guestMailAddress);
-                    }
-                    contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
-                    contact.setCreatedBy(session.getUserId());
-                    contactService.createContact(session, String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID), contact);
-                }
             }
             return shares;
         } finally {

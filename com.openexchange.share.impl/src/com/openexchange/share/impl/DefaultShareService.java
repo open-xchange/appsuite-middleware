@@ -61,15 +61,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AddedGuest;
@@ -80,6 +85,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -139,7 +145,7 @@ public class DefaultShareService implements ShareService {
             /*
              * delete / adjust guest users as needed
              */
-            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), affectedGuestIDs);
+            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), affectedGuestIDs, session);
             connectionHelper.commit();
             LOG.info("Shares to guest user(s) {} for folder {} in context {} deleted successfully.",
                 Arrays.toString(guests), folder, session.getContextId());
@@ -184,7 +190,7 @@ public class DefaultShareService implements ShareService {
             /*
              * delete / adjust guest users as needed
              */
-            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), I2i(affectedGuestIDs));
+            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), I2i(affectedGuestIDs), session);
             connectionHelper.commit();
             return deletedGuestIDs;
         } finally {
@@ -246,7 +252,7 @@ public class DefaultShareService implements ShareService {
             User sharingUser = services.getService(UserService.class).getUser(
                 connectionHelper.getConnection(), session.getUserId(), context);
             for (AddedGuest guest : guests) {
-                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, guest);
+                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, guest, session);
                 Share share = ShareTool.prepareShare(sharingUser, context.getContextId(), module, folder, guestUser.getId(),
                     guest.getExpires(), guest.getAuthenticationMode());
                 services.getService(ShareStorage.class).storeShare(share, connectionHelper.getParameters());
@@ -490,7 +496,8 @@ public class DefaultShareService implements ShareService {
             /*
              * delete / adjust guest users as needed
              */
-            cleanupGuestUsers(connectionHelper, connectionHelper.getContextID(), I2i(affectedGuestIDs));
+            // TODO find a way to delete guests without session
+//            cleanupGuestUsers(connectionHelper, connectionHelper.getContextID(), I2i(affectedGuestIDs), session);
             connectionHelper.commit();
             LOG.info("Deleted {} share(s) in context {}: {}", tokens.size(), connectionHelper.getContextID(), tokens);
         }
@@ -507,7 +514,7 @@ public class DefaultShareService implements ShareService {
      * @return The guest user
      * @throws OXException
      */
-    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, AddedGuest guest) throws OXException {
+    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, AddedGuest guest, Session session) throws OXException {
         UserService userService = services.getService(UserService.class);
         if (AuthenticationMode.ANONYMOUS != guest.getAuthenticationMode() && services.getService(
             ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", true)) {
@@ -536,8 +543,36 @@ public class DefaultShareService implements ShareService {
         /*
          * create new guest user
          */
-        UserImpl guestUser = ShareTool.prepareGuestUser(services, sharingUser, guest);
+        // TODO create contact
+        ContactService contactService = services.getService(ContactService.class);
+        if (null == contactService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactService.class);
+        }
+        String guestMailAddress = guest.getMailAddress();
+        Contact contact = null;
+        ContactSearchObject searchObject = new ContactSearchObject();
+        searchObject.setEmail1(guestMailAddress);
+        SearchIterator<Contact> it = contactService.searchContacts(session, searchObject);
+        if (it.hasNext()) {
+            contact = it.next();
+        } else {
+            contact = new Contact();
+            contact.setDisplayName(guest.getDisplayName());
+            contact.setEmail1(guestMailAddress);
+        }
+        contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        contact.setCreatedBy(sharingUser.getId());
+        contactService.createContact(session, String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID), contact);
+        UserImpl guestUser = ShareTool.prepareGuestUser(services, sharingUser, guest, contact.getObjectID());
         int guestID = userService.createUser(connection, context, guestUser);
+        // TODO update contact, guestId = internal user id
+        contact.setInternalUserId(guestID);
+        contactService.updateContact(
+            session,
+            String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID),
+            String.valueOf(contact.getObjectID()),
+            contact,
+            new Date());
         guestUser.setId(guestID);
         services.getService(UserPermissionService.class).saveUserPermissionBits(
             connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
@@ -560,7 +595,7 @@ public class DefaultShareService implements ShareService {
      * @return The identifiers of the deleted guest users
      * @throws OXException
      */
-    private int[] cleanupGuestUsers(ConnectionHelper connectionHelper, int contextID, int[] guestIDs) throws OXException {
+    private int[] cleanupGuestUsers(ConnectionHelper connectionHelper, int contextID, int[] guestIDs, Session session) throws OXException {
         if (null == guestIDs || 0 == guestIDs.length) {
             return new int[0];
         }
@@ -588,6 +623,10 @@ public class DefaultShareService implements ShareService {
                 userService.deleteUser(connectionHelper.getConnection(), context, guestID);
                 LOG.info("Deleted {} guest user(s) in context {}: {}", guestIDs.length, contextID, Arrays.toString(guestIDs));
                 deletedGuestIDs.add(Integer.valueOf(guestID));
+
+                // TODO remove guest contact
+                ContactService contactService = services.getService(ContactService.class);
+                contactService.deleteContact(session, String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID), String.valueOf(guestID), new Date());
             }
         }
         return I2i(deletedGuestIDs);

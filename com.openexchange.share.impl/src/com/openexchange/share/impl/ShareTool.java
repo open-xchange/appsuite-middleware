@@ -72,9 +72,9 @@ import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AddedGuest;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.AddedGuest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
@@ -241,7 +241,7 @@ public class ShareTool {
      * @return The guest user
      * @throws OXException
      */
-    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, AddedGuest guest) throws OXException {
+    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, AddedGuest guest, int contactId) throws OXException {
         UserImpl guestUser = new UserImpl();
         guestUser.setCreatedBy(sharingUser.getId());
         guestUser.setPreferredLanguage(sharingUser.getPreferredLanguage());
@@ -249,6 +249,7 @@ public class ShareTool {
         guestUser.setDisplayName(guest.getDisplayName());
         guestUser.setMailEnabled(true);
         guestUser.setPasswordMech("{CRYPTO_SERVICE}");
+        guestUser.setContactId(contactId);
         AuthenticationMode authenticationMode = guest.getAuthenticationMode();
         if (authenticationMode != null && authenticationMode != AuthenticationMode.ANONYMOUS) {
             guestUser.setMail(guest.getMailAddress());
