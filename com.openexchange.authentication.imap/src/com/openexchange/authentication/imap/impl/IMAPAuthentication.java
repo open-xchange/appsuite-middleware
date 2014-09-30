@@ -57,6 +57,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
@@ -64,6 +65,8 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.login.LoginException;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -84,6 +87,73 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 public class IMAPAuthentication implements AuthenticationService {
+
+    private static final class FailureKey {
+
+        private final String host;
+        private final int port;
+        private final String user;
+        private final String password;
+        private final int hash;
+
+        FailureKey(String host, int port, String user, String password) {
+            super();
+            this.host = host;
+            this.port = port;
+            this.user = user;
+            this.password = password;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((host == null) ? 0 : host.hashCode());
+            result = prime * result + ((password == null) ? 0 : password.hashCode());
+            result = prime * result + port;
+            result = prime * result + ((user == null) ? 0 : user.hashCode());
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof FailureKey)) {
+                return false;
+            }
+            FailureKey other = (FailureKey) obj;
+            if (port != other.port) {
+                return false;
+            }
+            if (host == null) {
+                if (other.host != null) {
+                    return false;
+                }
+            } else if (!host.equals(other.host)) {
+                return false;
+            }
+            if (password == null) {
+                if (other.password != null) {
+                    return false;
+                }
+            } else if (!password.equals(other.password)) {
+                return false;
+            }
+            if (user == null) {
+                if (other.user != null) {
+                    return false;
+                }
+            } else if (!user.equals(other.user)) {
+                return false;
+            }
+            return true;
+        }
+
+    }
 
     private static final class AuthenticatedImpl implements Authenticated {
 
@@ -133,6 +203,7 @@ public class IMAPAuthentication implements AuthenticationService {
     private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
     private final ServiceLookup services;
+    private final Cache<FailureKey, AuthenticationFailedException> failures;
 
     /**
      * Default constructor.
@@ -140,6 +211,7 @@ public class IMAPAuthentication implements AuthenticationService {
     public IMAPAuthentication(final ServiceLookup services) {
         super();
         this.services = services;
+        failures = CacheBuilder.newBuilder().maximumSize(1024).expireAfterWrite(2, TimeUnit.HOURS).build();
     }
 
     // /**
@@ -165,6 +237,7 @@ public class IMAPAuthentication implements AuthenticationService {
         String user = null;
         String connectiontimeout = "4000";
         String imaptimeout = "4000";
+        FailureKey failureKey = null;
 
         try {
             if (props == null) {
@@ -284,6 +357,14 @@ public class IMAPAuthentication implements AuthenticationService {
                 }
             }
 
+            failureKey = new FailureKey(host, port, user, password);
+            {
+                AuthenticationFailedException authenticationFailed = failures.getIfPresent(failureKey);
+                if (null != authenticationFailed) {
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create(authenticationFailed);
+                }
+            }
+
             final String socketFactoryClass = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
             final String sPort = String.valueOf(port);
             if (USE_IMAPS) {
@@ -383,6 +464,9 @@ public class IMAPAuthentication implements AuthenticationService {
             LOG.error("Error setup initial imap envorinment!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } catch (final AuthenticationFailedException e) {
+            if (null != failureKey) {
+                failures.put(failureKey, e);
+            }
             LOG.info("Authentication error on host {}:{} for user {}", host, port, user, e);
             LOG.debug("Debug imap authentication", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
