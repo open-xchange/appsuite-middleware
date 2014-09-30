@@ -237,7 +237,6 @@ public final class PermissionLoaderService implements Runnable {
             @Override
             public void run() {
                 try {
-                    final boolean debug = LOG.isDebugEnabled();
                     final long stamp = System.currentTimeMillis() - 1000;
                     for (final Iterator<ConWrapper> it = pooledCons.values().iterator(); it.hasNext();) {
                         final ConWrapper vw = it.next();
@@ -245,9 +244,7 @@ public final class PermissionLoaderService implements Runnable {
                         if (connection != null) {
                             it.remove();
                             Database.backNoTimeout(vw.contextId, false, connection);
-                            if (debug) {
-                                LOG.debug("Closed \"shared\" connection.");
-                            }
+                            LOG.debug("Closed \"shared\" connection.");
                         }
                     }
                 } catch (final Exception e) {
@@ -547,6 +544,8 @@ public final class PermissionLoaderService implements Runnable {
                         for (final Pair pair : pairsChunk) {
                             permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, newReadCon), 60);
                         }
+                    } catch (SQLException e) {
+                        throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.FOLDER, e.getMessage());
                     } finally {
                         Database.backNoTimeout(contextId, false, newReadCon);
                         LOG.debug("Released \"un-shared\" connection.");
@@ -576,15 +575,19 @@ public final class PermissionLoaderService implements Runnable {
                     handlePairsSublist(pairsChunk, threadDesc);
                     return;
                 }
+            } catch (SQLException e) {
+                // Fatal SQL error
+                pooledCons.remove(key);
+                throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.FOLDER, e.getMessage());
             } finally {
                 if (dec) {
                     readConWrapper.release();
                 }
                 rlock.unlock();
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Failed loading permissions.", e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("Failed loading permissions.", e);
         } finally {
             if (null != placeHolder) {
@@ -598,7 +601,7 @@ public final class PermissionLoaderService implements Runnable {
     private static final String SQL_LOAD_P =
         "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
-    protected static OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws OXException {
+    protected static OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws OXException, SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -623,7 +626,11 @@ public final class PermissionLoaderService implements Runnable {
                 ret.add(p);
             } while (rs.next());
             return ret.toArray(new OCLPermission[ret.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
+            if ("Connection was already closed.".equals(e.getMessage())) {
+                // Fatal...
+                throw e;
+            }
             throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.FOLDER, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);

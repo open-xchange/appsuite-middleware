@@ -171,7 +171,7 @@ public class PortableReport extends AbstractCustomPortable {
         }
         Report report = new Report(portableReport.uuid, portableReport.type, portableReport.startTime);
         report.setStopTime(portableReport.stopTime);
-        report.setNumberOfTasks(portableReport.numberOfTasks);
+        report.setTaskState(portableReport.numberOfTasks, portableReport.pendingTasks);
         report.getData().putAll(portableReport.namespaces);
         return report;
     }
