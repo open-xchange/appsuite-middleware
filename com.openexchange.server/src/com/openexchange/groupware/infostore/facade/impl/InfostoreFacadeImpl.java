@@ -1304,11 +1304,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             /*
              * prepare move
              */
-            boolean moveToTrash = FolderObject.TRASH == new OXFolderAccess(getReadConnection(context), context)
-                .getFolderObject((int) destinationFolderID).getType();
             Date now = new Date();
+            Connection readConnection = null;
             BatchFilenameReserver filenameReserver = new BatchFilenameReserverImpl(session.getContext(), this);
             try {
+                readConnection = getReadConnection(context);
+                boolean moveToTrash = FolderObject.TRASH == new OXFolderAccess(readConnection, context)
+                    .getFolderObject((int) destinationFolderID).getType();
                 List<DocumentMetadata> tombstoneDocuments = new ArrayList<DocumentMetadata>(sourceDocuments.size());
                 List<DocumentMetadata> documentsToUpdate = new ArrayList<DocumentMetadata>(sourceDocuments.size());
                 List<DocumentMetadata> versionsToUpdate = new ArrayList<DocumentMetadata>();
@@ -1395,6 +1397,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
             } finally {
                 filenameReserver.cleanUp();
+                if (null != readConnection) {
+                    releaseReadConnection(context, readConnection);
+                }
             }
         }
         /*
