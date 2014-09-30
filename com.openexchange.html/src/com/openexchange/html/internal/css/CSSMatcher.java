@@ -305,6 +305,9 @@ public final class CSSMatcher {
     /** Matches a CR?LF plus indention */
     protected static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
+    /** Matches multiple white-spaces */
+    protected static final Pattern WS = Pattern.compile(" +");
+
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
      *
@@ -388,56 +391,53 @@ public final class CSSMatcher {
         // User StringBuffer-based invocation to honor concurrency
         final Stringer cssBld = new StringBufferStringer(new StringBuffer(cssBuilder.toString()));
         cssBuilder.setLength(0);
-        final Task<Boolean> task = new AbstractTask<Boolean>() {
+
+        // Check for internal invocation
+        if (internallyInvoked) {
+            boolean retval = doCheckCss(cssBld, styleMap, cssPrefix, removeIfAbsent);
+            cssBuilder.append(cssBld);
+            return retval;
+        }
+
+        // Thread pool available?
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        if (null == threadPool) {
+            boolean retval = doCheckCss(cssBld, styleMap, cssPrefix, removeIfAbsent);
+            cssBuilder.append(cssBld);
+            return retval;
+        }
+
+        // Run as a separate task
+        Task<Boolean> task = new AbstractTask<Boolean>() {
 
             @Override
             public Boolean call() {
                 return Boolean.valueOf(doCheckCss(cssBld, styleMap, cssPrefix, removeIfAbsent));
             }
         };
-        // Check for internal invocation
-        final ThreadPoolService threadPool;
-        if (internallyInvoked || (null == (threadPool = ThreadPools.getThreadPool()))) {
-            // Invoke with current thread
-            boolean ran = false;
-            task.beforeExecute(Thread.currentThread());
-            try {
-                final boolean retval = task.call().booleanValue();
-                cssBuilder.append(cssBld);
-                ran = true;
-                task.afterExecute(null);
-                return retval;
-            } catch (final Exception ex) {
-                if (!ran) {
-                    task.afterExecute(ex);
-                }
-                LOG.error("", ex);
-                cssBuilder.setLength(0);
-                return false;
-            }
-        }
+
         // Submit to thread pool ...
-        final Future<Boolean> f = threadPool.submit(task);
+        Future<Boolean> f = threadPool.submit(task);
         // ... and await response
-        final int timeout = cssParseTimeoutSec();
-        final TimeUnit timeUnit = TimeUnit.SECONDS;
+        int timeout = cssParseTimeoutSec();
+        TimeUnit timeUnit = TimeUnit.SECONDS;
         try {
-            final boolean retval = f.get(timeout, timeUnit).booleanValue();
+            boolean retval = f.get(timeout, timeUnit).booleanValue();
             cssBuilder.append(cssBld);
             return retval;
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             cssBuilder.setLength(0);
             return false;
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             LOG.error("", cause);
             cssBuilder.setLength(0);
             f.cancel(true);
             return false;
-        } catch (final TimeoutException e) {
+        } catch (TimeoutException e) {
             // Wait time exceeded
-            LOG.warn(Strings.concat(Strings.getLineSeparator(), "Parsing of CSS content exceeded max. response time of ", Integer.valueOf(timeout), toLowerCase(timeUnit.name()), Strings.getLineSeparator()));
+            LOG.warn("{}Parsing of CSS content exceeded max. response time of {}{}{}", Strings.getLineSeparator(), Integer.valueOf(timeout), toLowerCase(timeUnit.name()), Strings.getLineSeparator());
             cssBuilder.setLength(0);
             f.cancel(true);
             return false;
@@ -461,7 +461,7 @@ public final class CSSMatcher {
         if (cssBld.indexOf("{") < 0) {
             return checkCSSElements(cssBld, styleMap, removeIfAbsent);
         }
-        final String css = dropComments(CRLF.matcher(cssBld).replaceAll(" "));
+        final String css = dropComments(WS.matcher(CRLF.matcher(cssBld).replaceAll(" ")).replaceAll(" "));
         final int length = css.length();
         cssBld.setLength(0);
         final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
