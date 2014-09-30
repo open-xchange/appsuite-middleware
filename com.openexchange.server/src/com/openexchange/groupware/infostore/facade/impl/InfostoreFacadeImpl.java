@@ -229,21 +229,29 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public DocumentMetadata getDocumentMetadata(final int id, final int version, final ServerSession session) throws OXException {
-        final User user = session.getUser();
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, session.getContext(), user, session.getUserPermissionBits());
-        if (!infoPerm.canReadObject()) {
+        Context context = session.getContext();
+        /*
+         * load document metadata (including object permissions)
+         */
+        DocumentMetadata document = addObjectPermissions(load(id, version, context), context, null);
+        /*
+         * check permissions
+         */
+        EffectiveInfostorePermission permission = security.getInfostorePermission(
+            document, context, session.getUser(), session.getUserPermissionBits());
+        if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
-
-        final List<Lock> locks = lockManager.findLocks(id, session);
-        final Map<Integer, List<Lock>> allLocks = new HashMap<Integer, List<Lock>>();
-        allLocks.put(Integer.valueOf(id), locks);
-
-        DocumentMetadata document = load(id, version, session.getContext());
-        if (!infoPerm.canReadObjectInFolder() && infoPerm.canReadObject()) {
-            document.setFolderId(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+        /*
+         * adjust parent folder if required
+         */
+        if (false == permission.canReadObjectInFolder()) {
+            document.setFolderId(getSharedFilesFolderID(session));
         }
-        return addObjectPermissions(addNumberOfVersions(addLocked(document, allLocks, session), session.getContext()), session.getContext(), null);
+        /*
+         * add further metadata and return
+         */
+        return addNumberOfVersions(addLocked(document, null, session), context);
     }
 
     @Override
@@ -1470,6 +1478,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     /**
+     * Gets the identifier of the folder holding single documents shared to the session's user based on extended object permissions.
+     *
+     * @param session The session
+     * @return The identifier of the shared documents folder
+     */
+    private int getSharedFilesFolderID(ServerSession session) {
+        return FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
+    }
+
+    /**
      * Loads all stored object permissions for one or more documents from the database.
      *
      * @param ids The identifiers of the documents to get the object permissions for
@@ -1534,23 +1552,25 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         if (null == versionIds || 0 == versionIds.length) {
             return new int[0];
         }
-
-        final Context context = session.getContext();
-
-        DocumentMetadata metadata = load(id, InfostoreFacade.CURRENT_VERSION, context);
+        Context context = session.getContext();
+        /*
+         * load document metadata (including object permissions)
+         */
+        DocumentMetadata metadata = addObjectPermissions(load(id, CURRENT_VERSION, context), context, null);
+        /*
+         * check write lock & permissions
+         */
         try {
             checkWriteLock(metadata, session);
-        } catch (final OXException x) {
+        } catch (OXException x) {
             return versionIds;
         }
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-            metadata,
-            context,
-            getUser(session),
-            session.getUserPermissionBits());
-        if (!infoPerm.canDeleteObject()) {
+        EffectiveInfostorePermission permission = security.getInfostorePermission(
+            metadata, context, session.getUser(), session.getUserPermissionBits());
+        if (false == permission.canDeleteObject()) {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION_FOR_VERSION.create();
         }
+
         final StringBuilder versions = new StringBuilder().append('(');
         final Set<Integer> versionSet = new HashSet<Integer>();
 
@@ -1722,20 +1742,23 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
+        Context context = session.getContext();
         final User user = session.getUser();
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, session.getContext(), user, session.getUserPermissionBits());
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, context, user, session.getUserPermissionBits());
         if (!infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         boolean addLocked = false;
+        boolean addObjectPermissions = false;
         for (final Metadata m : columns) {
             if (m == Metadata.LOCKED_UNTIL_LITERAL) {
                 addLocked = true;
-                break;
+            } else if (Metadata.OBJECT_PERMISSIONS_LITERAL == m) {
+                addObjectPermissions = true;
             }
         }
         Metadata[] cols = addLastModifiedIfNeeded(columns);
-        final InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, getProvider(), session.getContext());
+        final InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, getProvider(), context);
         iter.setCustomizer(new DocumentCustomizer() {
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {
@@ -1746,13 +1769,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 return document;
             }
         });
-        final TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
-
+        TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
         if (addLocked) {
-            return addLocked(tr, session);
+            tr = addLocked(tr, session);
+        }
+        if (addObjectPermissions) {
+            tr = addObjectPermissions(tr, session.getContext(), loadObjectPermissions(Collections.singleton(I(id)), context));
         }
         return tr;
-
     }
 
     @Override

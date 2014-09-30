@@ -82,6 +82,13 @@ public class EffectiveInfostorePermission {
         return canReadObjectInFolder() || (objectPermission != null && objectPermission.canRead());
     }
 
+    /**
+     * Gets a value indicating whether the user is allowed to read the document in its (real) parent folder, based on the underlying
+     * folder permissions.
+     *
+     * @return <code>true</code> if the document can be read based on the permissions of its (real) parent folder, <code>false</code>,
+     *         otherwise
+     */
     public boolean canReadObjectInFolder() {
         return permission.canReadAllObjects() || (permission.canReadOwnObjects() && document.getCreatedBy() == user.getId());
     }
