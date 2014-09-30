@@ -322,7 +322,7 @@ public class RequestDBProvider implements DBProvider {
                 tx.readConnection = null;
             }
         } catch (final SQLException e) {
-            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e);
+            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
         txIds.set(null);
         final DBProvider prov = getProvider();
