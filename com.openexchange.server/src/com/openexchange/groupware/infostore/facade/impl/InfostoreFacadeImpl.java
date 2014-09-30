@@ -530,19 +530,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
      *
      * @param document The document to add the object permissions for
      * @param ctx The context
-     * @param knownObjectPermissions A map of already known object permissions, or <code>null</code> if not available
+     * @param knownObjectPermissions A map of known object permissions, or <code>null</code> if not available
      * @return The document, with added object permissions (in case they are set)
      * @throws OXException
      */
     private DocumentMetadata addObjectPermissions(final DocumentMetadata document, final Context ctx, Map<Integer, List<ObjectPermission>> knownObjectPermissions) throws OXException {
-        Integer id = Integer.valueOf(document.getId());
-        if (null != knownObjectPermissions && knownObjectPermissions.containsKey(id)) {
-            document.setObjectPermissions(knownObjectPermissions.get(id));
-            return document;
-        }
-        Map<Integer, List<ObjectPermission>> objectPermissions = loadObjectPermissions(Collections.singleton(id), ctx);
-        document.setObjectPermissions(objectPermissions.get(id));
-        return document;
+        return addObjectPermissions(Collections.singletonList(document), ctx, knownObjectPermissions).get(0);
     }
 
     /**
@@ -550,6 +543,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
      *
      * @param document The documents to add the object permissions for
      * @param ctx The context
+     * @param knownObjectPermissions A map of known object permissions, or <code>null</code> if not available
      * @return The document, with added object permissions (in case they are set)
      * @throws OXException
      */
@@ -557,7 +551,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         List<Integer> idsToQuery = new ArrayList<Integer>();
         for (DocumentMetadata document : documents) {
             Integer id = Integer.valueOf(document.getId());
-            if (null != knownObjectPermissions && knownObjectPermissions.containsKey(id)) {
+            if (null != knownObjectPermissions) {
                 document.setObjectPermissions(knownObjectPermissions.get(id));
             } else {
                 idsToQuery.add(id);
