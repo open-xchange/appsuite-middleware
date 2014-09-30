@@ -341,6 +341,10 @@ public class ResilientConnection implements Connection {
         return connection.createStruct(typeName, attributes);
     }
 
+    /*
+     * FIXME: The following methods must also delegate to the underlying connection as soon
+     * as we require Java 7 as minimum JRE version.
+     */
     public void setSchema(String schema) throws SQLException {
         throw new UnsupportedOperationException();
     }
