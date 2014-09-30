@@ -49,10 +49,15 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.java.Strings;
 
 /**
@@ -99,6 +104,28 @@ public class Tools {
             }
         }
         return possibleWildcards;
+    }
+
+    /**
+     * Gets a list containing the object identifiers of the supplied ID tuples.
+     *
+     * @param tuples The tuples to get the object identifiers for
+     * @return A list of corresponding object identifiers
+     * @throws OXException
+     */
+    public static List<Integer> getObjectIDs(List<IDTuple> tuples) throws OXException {
+        if (null == tuples) {
+            return null;
+        }
+        List<Integer> ids = new ArrayList<Integer>(tuples.size());
+        for (IDTuple tuple : tuples) {
+            try {
+                ids.add(Integer.valueOf(tuple.getId()));
+            } catch (NumberFormatException e) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
+        }
+        return ids;
     }
 
 

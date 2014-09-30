@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -66,6 +67,8 @@ public interface EntityLockManager extends LockManager {
 
     @Override
     List<Lock> findLocks(int entity, Session session) throws OXException;
+
+    Map<Integer, List<Lock>> findLocks(List<Integer> entities, Session session) throws OXException;
 
     boolean isLocked(int entity, Context context, User userObject) throws OXException;
 

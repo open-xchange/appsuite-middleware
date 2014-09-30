@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore.webdav;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -77,7 +78,12 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements Enti
 
 	@Override
     public List<Lock> findLocks(final int entity, final Session session) throws OXException {
-		return findLocksByEntity(Arrays.asList(Integer.valueOf(entity)), getContextFrom(session)).get(Integer.valueOf(entity));
+		return findLocks(Arrays.asList(Integer.valueOf(entity)), session).get(Integer.valueOf(entity));
+	}
+
+	@Override
+    public Map<Integer, List<Lock>> findLocks(List<Integer> entities, Session session) throws OXException {
+	    return findLocksByEntity(entities, getContextFrom(session));
 	}
 
 	@Override

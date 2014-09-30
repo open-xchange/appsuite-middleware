@@ -363,6 +363,31 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
+    /**
+     * Gets a SQL statement to retrieve the number of versions for multiple documents.
+     *
+     * @param ids The ids of the documents to get the versions for
+     * @return The statement
+     */
+    public String getNumberOfVersionsQueryForDocuments(int[] ids) {
+        if (null == ids || 0 == ids.length) {
+            throw new IllegalArgumentException("ids");
+        }
+        StringBuilder stringBuilder = new StringBuilder("SELECT infostore_id,COUNT(infostore_id) ")
+            .append("FROM infostore_document WHERE cid=? AND infostore_id");
+        if (1 == ids.length) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" (?");
+            for (int i = 1; i < ids.length; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        stringBuilder.append(" GROUP BY infostore_id;");
+        return stringBuilder.toString();
+    }
+
     public Metadata[] getDocumentFields() {
         return Table.INFOSTORE.getFields();
     }

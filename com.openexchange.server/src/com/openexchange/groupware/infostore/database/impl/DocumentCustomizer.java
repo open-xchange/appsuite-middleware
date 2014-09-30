@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl.InfostoreSearchIterator;
 
@@ -68,7 +69,8 @@ public interface DocumentCustomizer {
      * @param document The document to modify.
      * @return The modified document. Its allowed to return a different instance
      * than the input document.
+     * @throws OXException
      */
-    DocumentMetadata handle(DocumentMetadata document);
+    DocumentMetadata handle(DocumentMetadata document) throws OXException;
 
 }
