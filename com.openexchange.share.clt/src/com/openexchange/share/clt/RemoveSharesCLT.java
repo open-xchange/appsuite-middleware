@@ -84,7 +84,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
+    protected void checkOptions(CommandLine cmd) {
         if (cmd.hasOption("c")) {
             contextId = cmd.getOptionValue("c");
         }

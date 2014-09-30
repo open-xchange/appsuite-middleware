@@ -84,7 +84,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
+    protected void checkOptions(CommandLine cmd) {
         contextId = cmd.getOptionValue("c");
         userId = cmd.getOptionValue("i");
     }
