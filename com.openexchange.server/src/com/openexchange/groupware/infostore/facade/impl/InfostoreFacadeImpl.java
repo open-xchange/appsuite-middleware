@@ -1370,6 +1370,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             return Collections.emptyList();
         }
 
+        final Map<Integer, Long> idsToFolders = new HashMap<Integer, Long>();
+        for (IDTuple idTuple : ids) {
+            try {
+                idsToFolders.put(Integer.parseInt(idTuple.getId()), Long.parseLong(idTuple.getFolder()));
+            } catch (NumberFormatException e) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
+        }
+
         long destinationFolderID;
         try {
             destinationFolderID = Long.valueOf(targetFolderID).longValue();
@@ -1390,6 +1399,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
         List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), objectIds, Metadata.VALUES_ARRAY);
         addObjectPermissions(allDocuments, session.getContext(), null);
+
+        // Ensure folder ids are consistent between request and existing documents
+        for (DocumentMetadata document : allDocuments) {
+            Long requestedFolder = idsToFolders.get(document.getId());
+            long expectedFolder = document.getFolderId();
+            if (requestedFolder == null || requestedFolder.longValue() != expectedFolder) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
+        }
+
         /*
          * perform move
          */
@@ -1447,6 +1466,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw x;
         } catch (final Throwable t) {
             LOG.error("Unexpected Error:", t);
+        }
+
+        // Ensure folder ids are consistent between request and existing documents
+        for (DocumentMetadata document : allDocuments) {
+            Long requestedFolder = idsToFolders.get(document.getId());
+            long expectedFolder = document.getFolderId();
+            if (requestedFolder == null || requestedFolder.longValue() != expectedFolder) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
         }
 
         // Check Permissions
