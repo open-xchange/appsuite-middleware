@@ -378,7 +378,7 @@ public class InfostoreQueryCatalog {
         if (1 == ids.length) {
             stringBuilder.append("=?");
         } else {
-            stringBuilder.append(" (?");
+            stringBuilder.append(" IN (?");
             for (int i = 1; i < ids.length; i++) {
                 stringBuilder.append(",?");
             }
