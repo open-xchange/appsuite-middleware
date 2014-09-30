@@ -445,14 +445,16 @@ public interface ContactService {
      * @param session The session
      * @param folderIDs A list of folder IDs to restrict the search to
      * @param query The search query as supplied by the client
-     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
-     *                     otherwise
+     * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
+     *                   but use an empty instance to use the default parameter values.
      * @param fields The contact fields that should be retrieved
      * @param sortOptions The options to sort the results
      * @return The contacts found with the search
      * @throws OXException
+     * 
+     * @see {@link AutocompleteParameters#newInstance()}
      */
-    SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Performs an "auto-complete" lookup for contacts. Depending <code>com.openexchange.contacts.allFoldersForAutoComplete</code>, either
@@ -460,14 +462,14 @@ public interface ContactService {
      *
      * @param session The session
      * @param query The search query as supplied by the client
-     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
-     *                     otherwise
+     * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
+     *                   but use an empty instance to use the default parameter values.
      * @param fields The contact fields that should be retrieved
      * @param sortOptions The options to sort the results
      * @return The contacts found with the search
      * @throws OXException
      */
-    SearchIterator<Contact> autocompleteContacts(Session session, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> autocompleteContacts(Session session, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Creates a new contact in a folder.

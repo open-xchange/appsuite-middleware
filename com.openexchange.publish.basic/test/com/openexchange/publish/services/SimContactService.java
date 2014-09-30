@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -429,13 +431,13 @@ public class SimContactService implements ContactService {
     }
 
     @Override
-    public SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public SearchIterator<Contact> autocompleteContacts(Session session, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> autocompleteContacts(Session session, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

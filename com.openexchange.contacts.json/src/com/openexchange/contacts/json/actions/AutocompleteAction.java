@@ -53,7 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
@@ -106,12 +108,14 @@ public class AutocompleteAction extends ContactAction {
         /*
          * perform search
          */
+        AutocompleteParameters parameters = AutocompleteParameters.newInstance();
+        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, new Boolean(requireEmail));
         SearchIterator<Contact> searchIterator;
         if (null != folderID) {
             searchIterator = getContactService().autocompleteContacts(request.getSession(), Collections.singletonList(folderID),
-                query, requireEmail, fields, request.getSortOptions());
+                query, parameters, fields, request.getSortOptions());
         } else {
-            searchIterator = getContactService().autocompleteContacts(request.getSession(), query, requireEmail, fields,
+            searchIterator = getContactService().autocompleteContacts(request.getSession(), query, parameters, fields,
                 request.getSortOptions());
         }
         /*

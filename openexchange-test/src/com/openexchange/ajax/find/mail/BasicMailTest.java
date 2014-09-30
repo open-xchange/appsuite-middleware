@@ -62,8 +62,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
+
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -88,6 +90,7 @@ import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.MailField;
@@ -152,6 +155,20 @@ public class BasicMailTest extends AbstractFindTest {
         modified.setImageContentType("image/png");
         modified.setLastModified(new Date());
         contactManager.updateAction(ownContact.getParentFolderID(), modified);
+        
+        /*
+         * Create a distribution list
+         */        
+        Contact distributionList = new Contact();
+        distributionList.setParentFolderID(client.getValues().getPrivateContactFolder());
+        distributionList.setSurName(randomUID());
+        distributionList.setGivenName(randomUID());
+        distributionList.setDisplayName(distributionList.getGivenName() + " " + distributionList.getSurName());
+        distributionList.setDistributionList(new DistributionListEntryObject[] {
+	        new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT),
+	        new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT)
+        });
+        distributionList = contactManager.newAction(distributionList);
 
         /*
          * Expect the clients contact in autocomplete response
@@ -182,6 +199,20 @@ public class BasicMailTest extends AbstractFindTest {
         facets = autocomplete(prefix, Collections.singletonList(activeFacet));
         found = detectContact(facets);
         assertNull("Own contact should've been missing in response", found);
+        
+        /*
+         * Distribution lists ignored?
+         */
+        facets = autocomplete(distributionList.getSurName().substring(0, 10));
+        DefaultFacet contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);
+        boolean dlFound = false;
+        for (FacetValue v : contactFacet.getValues()) {
+        	if (v.getDisplayItem().getDisplayName().contains(distributionList.getSurName())) {
+        		dlFound = true;
+        		break;
+        	}
+        }
+        assertFalse("Distribution list was found but should not", dlFound);
     }
 
     public void testSearch() throws Exception {
