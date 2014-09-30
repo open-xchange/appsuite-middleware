@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -232,6 +233,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
     }
 
     public Map<Integer,List<T>> findLocksByEntity(final List<Integer> entities, final Context ctx) throws OXException {
+        if (null == entities || 0 == entities.size()) {
+            return Collections.emptyMap();
+        }
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
