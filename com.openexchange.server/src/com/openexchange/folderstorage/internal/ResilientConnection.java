@@ -66,6 +66,7 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -340,4 +341,27 @@ public class ResilientConnection implements Connection {
         return connection.createStruct(typeName, attributes);
     }
 
+    public void setSchema(String schema) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+
+    public String getSchema() throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+
+    public void abort(Executor executor) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+
+    public int getNetworkTimeout() throws SQLException {
+        throw new UnsupportedOperationException();
+    }
 }
