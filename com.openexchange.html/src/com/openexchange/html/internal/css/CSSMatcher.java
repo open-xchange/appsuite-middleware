@@ -392,7 +392,7 @@ public final class CSSMatcher {
 
             @Override
             public Boolean call() {
-                return Boolean.valueOf(doCheckCss(styleMap, cssPrefix, removeIfAbsent, cssBld));
+                return Boolean.valueOf(doCheckCss(cssBld, styleMap, cssPrefix, removeIfAbsent));
             }
         };
         // Check for internal invocation
@@ -447,13 +447,13 @@ public final class CSSMatcher {
     /**
      * Performs the actual CSS sanitizing
      *
+     * @param cssBld The {@link Stringer} helper instance providing the CSS content to check and used to hold the sanitized CSS content as well once this routine terminated
      * @param styleMap The style map providing allowed elements/values
      * @param cssPrefix The optional CSS prefix
      * @param removeIfAbsent Whether to remove non-whitelisted CSS content or not
-     * @param cssBld The {@link Stringer} helper instance providing the CSS content to check and used to hold the sanitized CSS content as well once this routine terminated
      * @return <code>true</code> if any modification has been performed; otherwise <code>false</code>
      */
-    public static boolean doCheckCss(final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent, final Stringer cssBld) {
+    public static boolean doCheckCss(final Stringer cssBld, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent) {
         boolean modified = false;
         /*
          * Feed matcher with buffer's content and reset
