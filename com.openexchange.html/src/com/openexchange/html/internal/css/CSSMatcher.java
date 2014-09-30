@@ -392,88 +392,7 @@ public final class CSSMatcher {
 
             @Override
             public Boolean call() {
-                boolean modified = false;
-                /*
-                 * Feed matcher with buffer's content and reset
-                 */
-                if (cssBld.indexOf("{") < 0) {
-                    return Boolean.valueOf(checkCSSElements(cssBld, styleMap, removeIfAbsent));
-                }
-                final String css = dropComments(CRLF.matcher(cssBld).replaceAll(" "));
-                final int length = css.length();
-                cssBld.setLength(0);
-                final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
-                final Thread thread = Thread.currentThread();
-                // Block-wise sanitizing
-                if (CONSIDER_NESTED_BLOCKS) {
-                    int off = 0;
-                    Matcher m;
-                    while ((off < length) && (continueParsing(off, css)) && (!thread.isInterrupted()) && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css.substring(off)))).find()) {
-                        final int end = m.end() + off;
-                        int index = end;
-                        int level = 1;
-                        while (level > 0 && index < length) {
-                            final char c = css.charAt(index++);
-                            if ('{' == c) {
-                                level++;
-                            } else if ('}' == c) {
-                                level--;
-                            }
-                        }
-                        // Check prefix part
-                        final int start = m.start() + off;
-                        cssElemsBuffer.append(css.substring(off, start));
-                        final String prefix;
-                        if (cssElemsBuffer.length() > 0) {
-                            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                            prefix = cssElemsBuffer.toString();
-                        } else {
-                            prefix = "";
-                        }
-                        cssElemsBuffer.setLength(0);
-                        // Check block part
-                        cssElemsBuffer.append(css.substring(end, index - 1));
-                        modified |= checkCSS(cssElemsBuffer, styleMap, cssPrefix, removeIfAbsent, true);
-                        // Check selector part
-                        cssElemsBuffer.insert(0, prefixBlock(css.substring(start, end - 1), cssPrefix)).append('}').append('\n'); // Surround with block definition
-                        final String block = cssElemsBuffer.toString();
-                        cssElemsBuffer.setLength(0);
-                        // Add to main builder
-                        cssBld.append(prefix);
-                        cssBld.append(block);
-                        off = index;
-                    }
-                    cssElemsBuffer.append(css.substring(off, css.length()));
-                } else {
-                    final Matcher m = PATTERN_STYLE_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
-                    cssBld.setLength(0);
-                    int lastPos = 0;
-                    while (!thread.isInterrupted() && m.find()) {
-                        // Check prefix part
-                        cssElemsBuffer.append(css.substring(lastPos, m.start()));
-                        modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                        final String prefix = cssElemsBuffer.toString();
-                        cssElemsBuffer.setLength(0);
-                        // Check block part
-                        cssElemsBuffer.append(m.group(2));
-                        modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                        cssElemsBuffer.insert(0, prefixBlock(m.group(1), cssPrefix)).append('}').append('\n'); // Surround with block definition
-                        final String block = cssElemsBuffer.toString();
-                        cssElemsBuffer.setLength(0);
-                        // Add to main builder
-                        cssBld.append(prefix);
-                        cssBld.append(block);
-                        lastPos = m.end();
-                    }
-                    cssElemsBuffer.append(css.substring(lastPos, css.length()));
-                }
-                if (cssElemsBuffer.length() > 0) {
-                    modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                    final String tail = cssElemsBuffer.toString();
-                    cssElemsBuffer.setLength(0);
-                    cssBld.append(tail);
-                }
-                return Boolean.valueOf(modified);
+                return Boolean.valueOf(doCheckCss(styleMap, cssPrefix, removeIfAbsent, cssBld));
             }
         };
         // Check for internal invocation
@@ -523,6 +442,100 @@ public final class CSSMatcher {
             f.cancel(true);
             return false;
         }
+    }
+
+    /**
+     * Performs the actual CSS sanitizing
+     *
+     * @param styleMap The style map providing allowed elements/values
+     * @param cssPrefix The optional CSS prefix
+     * @param removeIfAbsent Whether to remove non-whitelisted CSS content or not
+     * @param cssBld The {@link Stringer} helper instance providing the CSS content to check and used to hold the sanitized CSS content as well once this routine terminated
+     * @return <code>true</code> if any modification has been performed; otherwise <code>false</code>
+     */
+    public static boolean doCheckCss(final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent, final Stringer cssBld) {
+        boolean modified = false;
+        /*
+         * Feed matcher with buffer's content and reset
+         */
+        if (cssBld.indexOf("{") < 0) {
+            return checkCSSElements(cssBld, styleMap, removeIfAbsent);
+        }
+        final String css = dropComments(CRLF.matcher(cssBld).replaceAll(" "));
+        final int length = css.length();
+        cssBld.setLength(0);
+        final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
+        final Thread thread = Thread.currentThread();
+        // Block-wise sanitizing
+        if (CONSIDER_NESTED_BLOCKS) {
+            int off = 0;
+            Matcher m;
+            while ((off < length) && (continueParsing(off, css)) && (!thread.isInterrupted()) && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css.substring(off)))).find()) {
+                final int end = m.end() + off;
+                int index = end;
+                int level = 1;
+                while (level > 0 && index < length) {
+                    final char c = css.charAt(index++);
+                    if ('{' == c) {
+                        level++;
+                    } else if ('}' == c) {
+                        level--;
+                    }
+                }
+                // Check prefix part
+                final int start = m.start() + off;
+                cssElemsBuffer.append(css.substring(off, start));
+                final String prefix;
+                if (cssElemsBuffer.length() > 0) {
+                    modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                    prefix = cssElemsBuffer.toString();
+                } else {
+                    prefix = "";
+                }
+                cssElemsBuffer.setLength(0);
+                // Check block part
+                cssElemsBuffer.append(css.substring(end, index - 1));
+                modified |= checkCSS(cssElemsBuffer, styleMap, cssPrefix, removeIfAbsent, true);
+                // Check selector part
+                cssElemsBuffer.insert(0, prefixBlock(css.substring(start, end - 1), cssPrefix)).append('}').append('\n'); // Surround with block definition
+                final String block = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Add to main builder
+                cssBld.append(prefix);
+                cssBld.append(block);
+                off = index;
+            }
+            cssElemsBuffer.append(css.substring(off, css.length()));
+        } else {
+            final Matcher m = PATTERN_STYLE_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
+            cssBld.setLength(0);
+            int lastPos = 0;
+            while (!thread.isInterrupted() && m.find()) {
+                // Check prefix part
+                cssElemsBuffer.append(css.substring(lastPos, m.start()));
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                final String prefix = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Check block part
+                cssElemsBuffer.append(m.group(2));
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                cssElemsBuffer.insert(0, prefixBlock(m.group(1), cssPrefix)).append('}').append('\n'); // Surround with block definition
+                final String block = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Add to main builder
+                cssBld.append(prefix);
+                cssBld.append(block);
+                lastPos = m.end();
+            }
+            cssElemsBuffer.append(css.substring(lastPos, css.length()));
+        }
+        if (cssElemsBuffer.length() > 0) {
+            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+            final String tail = cssElemsBuffer.toString();
+            cssElemsBuffer.setLength(0);
+            cssBld.append(tail);
+        }
+        return modified;
     }
 
     private static final Pattern SPLIT_LINES = Pattern.compile("\r?\n");
