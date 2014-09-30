@@ -111,7 +111,7 @@ public class ListTest extends InfostoreAJAXTest {
     public int getFantasyID() throws JSONException, IOException, SAXException {
         int id = 20000;
         Response res = this.get(getWebConversation(), getHostName(), sessionId, id);
-        while(!res.getErrorMessage().contains("IFO-0300")) {
+        while(!(res.getErrorMessage().contains("IFO-0300") || res.getErrorMessage().contains("IFO-0438"))) {
             id += 10000;
             res = this.get(getWebConversation(), getHostName(), sessionId, id);
         }

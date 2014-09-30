@@ -8,6 +8,8 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class DeleteTest extends InfostoreAJAXTest {
@@ -53,6 +55,10 @@ public class DeleteTest extends InfostoreAJAXTest {
 		removeDocumentsAndFolders();
 		clean.clear();
 
+		final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), sessionId), false);
+		for(int i = 0; i < toDelete.length; i++) {
+            toDelete[i][0] = client.getValues().getInfostoreTrashFolder();
+        }
 		notDeleted = delete(getWebConversation(),getHostName(),sessionId, 0, toDelete);
 		assertEquals(toDelete.length,notDeleted.length);
 

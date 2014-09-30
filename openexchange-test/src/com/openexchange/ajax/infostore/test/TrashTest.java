@@ -240,6 +240,7 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * delete file again
          */
+        file.setFolderId(client.getValues().getInfostoreTrashFolder());
         deleteFile(file, null);
         /*
          * check source & trash folder contents
@@ -281,8 +282,9 @@ public class TrashTest extends AbstractInfostoreTest {
 
     private void deleteFile(DocumentMetadataImpl file, Boolean hardDelete) throws Exception {
         Date timestamp = null != file.getLastModified() ? file.getLastModified() : new Date(Long.MAX_VALUE);
-        DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(file.getId(), testFolder.getObjectID(), timestamp);
+        DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(file.getId(), (int) file.getFolderId(), timestamp);
         deleteRequest.setHardDelete(hardDelete);
+        deleteRequest.setFailOnError(true);
         DeleteInfostoreResponse deleteResponse = client.execute(deleteRequest);
         JSONArray json = (JSONArray) deleteResponse.getData();
         assertEquals("file not deleted", 0, json.length());
