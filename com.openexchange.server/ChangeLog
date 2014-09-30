@@ -1,3 +1,7 @@
+* 2014-09-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34676: Reviewed caching behavior and settings. Optimized to avoid superfluous querying of database service
+
 * 2014-09-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 34668: Special handling for Windows IE 11 Browser in session management

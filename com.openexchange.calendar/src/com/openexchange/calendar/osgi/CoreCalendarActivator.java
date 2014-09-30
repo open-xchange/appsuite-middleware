@@ -116,8 +116,8 @@ public class CoreCalendarActivator extends HousekeepingActivator {
          */
         final String regionName = CalendarVolatileCache.REGION;
         final int maxObjects = 10000000;
-        final int maxLifeSeconds = 300;
-        final int idleTimeSeconds = 180;
+        final int maxLifeSeconds = -1;
+        final int idleTimeSeconds = 360;
         final int shrinkerIntervalSeconds = 60;
         /*
          * Compose cache configuration

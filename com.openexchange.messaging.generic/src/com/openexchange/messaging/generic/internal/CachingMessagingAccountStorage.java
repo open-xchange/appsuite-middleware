@@ -49,13 +49,11 @@
 
 package com.openexchange.messaging.generic.internal;
 
-import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.procedure.TIntProcedure;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -100,15 +98,33 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
      *
      * @return The new cache key
      */
-    static CacheKey newCacheKey(final CacheService cacheService, final String serviceId, final int id, final int user, final int cid) {
-        return cacheService.newCacheKey(cid, serviceId, String.valueOf(id), String.valueOf(user));
+    static CacheKey newCacheKey(CacheService cacheService, String serviceId, int id, int userId, int contextId) {
+        return cacheService.newCacheKey(contextId, serviceId, Integer.toString(id), Integer.toString(userId));
     }
 
-    private static void invalidateMessagingAccount(final String serviceId, final int id, final int user, final int cid) throws OXException {
+    private static void invalidateMessagingAccount(final String serviceId, final int id, final int userId, final int contextId) throws OXException {
         final CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
         if (null != cacheService) {
             final Cache cache = cacheService.getCache(REGION_NAME);
-            cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
+            cache.remove(newCacheKey(cacheService, serviceId, id, userId, contextId));
+            cache.remove(accountIDsCacheKey(cacheService, serviceId, userId, contextId));
+        }
+    }
+
+    /**
+     * Generates a new cache key.
+     *
+     * @return The new cache key
+     */
+    static CacheKey accountIDsCacheKey(CacheService cacheService, String serviceId, int userId, int contextId) {
+        return cacheService.newCacheKey(contextId, serviceId, Integer.toString(userId));
+    }
+
+    private static void invalidateAccounts(String serviceId, int userId, int contextId) throws OXException {
+        final CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
+        if (null != cacheService) {
+            final Cache cache = cacheService.getCache(REGION_NAME);
+            cache.remove(accountIDsCacheKey(cacheService, serviceId, userId, contextId));
         }
     }
 
@@ -122,17 +138,11 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
     private final RdbMessagingAccountStorage delegatee;
 
     /**
-     * Lock for the cache.
-     */
-    private final Lock cacheLock;
-
-    /**
      * Initializes a new {@link CachingMessagingAccountStorage}.
      */
     private CachingMessagingAccountStorage() {
         super();
         delegatee = RdbMessagingAccountStorage.getInstance();
-        cacheLock = new ReentrantLock(true);
     }
 
     /**
@@ -150,7 +160,9 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     @Override
     public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
-        return delegatee.addAccount(serviceId, account, session, modifier);
+        int identifier = delegatee.addAccount(serviceId, account, session, modifier);
+        invalidateAccounts(serviceId, session.getUserId(), session.getContextId());
+        return identifier;
     }
 
     @Override
@@ -161,26 +173,45 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     @Override
     public MessagingAccount getAccount(final String serviceId, final int id, final Session session, final Modifier modifier) throws OXException {
-        final CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
+        CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session, modifier);
         }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object object = cache.get(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()));
+        Cache cache = cacheService.getCache(REGION_NAME);
+        CacheKey cacheKey = newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId());
+        Object object = cache.get(cacheKey);
         if (object instanceof MessagingAccount) {
             return (MessagingAccount) object;
         }
-        final MessagingAccount messagingAccount = delegatee.getAccount(serviceId, id, session, modifier);
-        cache.put(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()), messagingAccount, false);
+        MessagingAccount messagingAccount = delegatee.getAccount(serviceId, id, session, modifier);
+        cache.put(cacheKey, messagingAccount, false);
         return messagingAccount;
     }
 
     @Override
     public List<MessagingAccount> getAccounts(final String serviceId, final Session session, final Modifier modifier) throws OXException {
-        final TIntList ids = delegatee.getAccountIDs(serviceId, session);
+        TIntArrayList ids;
+        {
+            CacheService cacheService = MessagingGenericServiceRegistry.getService(CacheService.class);
+            if (cacheService == null) {
+                ids = delegatee.getAccountIDs(serviceId, session);
+            } else {
+                Cache cache = cacheService.getCache(REGION_NAME);
+                CacheKey accountsKey = accountIDsCacheKey(cacheService, serviceId, session.getUserId(), session.getContextId());
+                Object object = cache.get(accountsKey);
+                if (object instanceof TIntArrayList) {
+                    ids = (TIntArrayList) object;
+                } else {
+                    ids = delegatee.getAccountIDs(serviceId, session);
+                    cache.put(accountsKey, ids, false);
+                }
+            }
+        }
+
         if (ids.isEmpty()) {
             return Collections.emptyList();
         }
+
         final List<MessagingAccount> accounts = new ArrayList<MessagingAccount>(ids.size());
         class AdderProcedure implements TIntProcedure {
 
