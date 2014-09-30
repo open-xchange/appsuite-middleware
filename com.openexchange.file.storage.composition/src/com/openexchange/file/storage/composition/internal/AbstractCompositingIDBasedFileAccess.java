@@ -95,7 +95,9 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageService;
@@ -780,7 +782,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 targetFolderID = new FolderID(folderId);
             }
             document.setFolderId(targetFolderID.getFolderId());
-            saveDelegation.call(getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId()));
+            FileStorageFileAccess fileAccess = getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId());
+            saveDelegation.call(fileAccess);
             FileID newID = new FileID(
                 targetFolderID.getService(),
                 targetFolderID.getAccountId(),
@@ -788,6 +791,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 document.getId());
             document.setId(newID.toUniqueID());
             document.setFolderId(targetFolderID.toUniqueID());
+
+            // TODO: only if FileStorageFileAccess supports object permissions
+            List<FileStorageObjectPermission> objectPermissions = document.getObjectPermissions();
+            if (objectPermissions != null && !objectPermissions.isEmpty()) {
+                for (FileStorageObjectPermission fsop : objectPermissions) {
+                    if (FileStorageGuestObjectPermission.class.isAssignableFrom(fsop.getClass())) {
+                        // TODO: implement me
+                    }
+                }
+            }
+
             postEvent(FileStorageEventHelper.buildCreateEvent(
                 session,
                 newID.getService(),

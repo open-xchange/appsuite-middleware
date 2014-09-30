@@ -177,7 +177,7 @@ public class RequestDBProvider implements DBProvider {
                 }
             }
         } catch (final SQLException e) {
-            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e);
+            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -193,7 +193,7 @@ public class RequestDBProvider implements DBProvider {
                 tx.writeConnection.rollback();
             }
         } catch (final SQLException e) {
-            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e);
+            throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
