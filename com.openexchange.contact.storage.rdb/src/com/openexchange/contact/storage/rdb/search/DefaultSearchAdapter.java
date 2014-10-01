@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Pattern;
+
 import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Table;
@@ -82,8 +83,6 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 	 * Pattern to check whether a string contains SQL wildcards or not
 	 */
 	private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
-
-	private static String eMailAutomCompleteClause = null;
 
 	protected List<Object> parameters;
 	protected String charset;
@@ -152,19 +151,31 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
             return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";
         }
     }
-
+	
 	protected static String getEMailAutoCompleteClause() throws OXException {
-        if (null == eMailAutomCompleteClause) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder
-                .append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
-                .append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")
-                .append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>'' OR ")
-                .append(Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel()).append(">0")
-            ;
-            eMailAutomCompleteClause = stringBuilder.toString();
-        }
-        return eMailAutomCompleteClause;
-    }
+		return getEMailAutoCompleteClause(false);
+	}
 
+	protected static String getEMailAutoCompleteClause(boolean ignoreDistributionLists) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+            .append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
+            .append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")
+            .append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>''");
+        String dlColumn = Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel();
+        if (ignoreDistributionLists) {
+        	stringBuilder.append(" AND ").append(getIgnoreDistributionListsClause());
+        } else {            	
+        	stringBuilder.append(" OR ").append(dlColumn).append(">0");
+        }
+        
+        return stringBuilder.toString();
+    }
+	
+	protected static String getIgnoreDistributionListsClause() throws OXException {
+		String dlColumn = Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel();
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("(").append(dlColumn).append("=0 OR ").append(dlColumn).append(" IS NULL)");
+		return stringBuilder.toString();
+	}
 }

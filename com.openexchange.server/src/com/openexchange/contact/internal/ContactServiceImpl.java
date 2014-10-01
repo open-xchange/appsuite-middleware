@@ -50,6 +50,7 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -59,6 +60,8 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
@@ -993,7 +996,7 @@ public class ContactServiceImpl extends DefaultContactService {
     }
 
     @Override
-    protected SearchIterator<Contact> doAutocompleteContacts(final Session session, List<String> folderIDs, final String query, final boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    protected SearchIterator<Contact> doAutocompleteContacts(final Session session, List<String> folderIDs, final String query, final AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         int userID = session.getUserId();
         int contextID = session.getContextId();
         /*
@@ -1023,7 +1026,7 @@ public class ContactServiceImpl extends DefaultContactService {
                 @Override
                 public SearchIterator<Contact> call() throws Exception {
                     return queriedStorage.getKey().autoComplete(
-                        session, queriedStorage.getValue(), query, requireEmail, queryFields.getFields(), sOptions);
+                        session, queriedStorage.getValue(), query, parameters, queryFields.getFields(), sOptions);
                 }
             });
         }

@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage.rdb.sql;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,6 +66,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -405,20 +408,18 @@ public class Executor {
      * @param contextID The context ID
      * @param folderIDs The folder IDs, or <code>null</code> if there's no restriction on folders
      * @param query The query, as supplied by the client
-     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
-     *                     otherwise
+     * @param parameters The {@link AutocompleteParameters}
      * @param fields The contact fields to select
      * @param sortOptions The sort options to apply
      * @return The found contacts
      * @throws SQLException
      * @throws OXException
      */
-    public List<Contact> selectByAutoComplete(Connection connection, int contextID, int[] folderIDs, String query, boolean requireEmail,
-        ContactField[] fields, SortOptions sortOptions) throws SQLException, OXException {
+    public List<Contact> selectByAutoComplete(Connection connection, int contextID, int[] folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws SQLException, OXException {
         /*
          * construct query string
          */
-        SearchAdapter adapter = new AutocompleteAdapter(query, requireEmail, folderIDs,contextID, fields, getCharset(sortOptions));
+        SearchAdapter adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(adapter.getClause());
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {

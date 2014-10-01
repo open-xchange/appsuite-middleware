@@ -246,7 +246,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
      * @return The identifiers of user-associated accounts of a certain service
      * @throws OXException If identifiers cannot be returned
      */
-    public TIntList getAccountIDs(final String serviceId, final Session session) throws OXException {
+    public TIntArrayList getAccountIDs(final String serviceId, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         if (null == databaseService) {
             throw ServiceExceptionCode.serviceUnavailable(CLAZZ_DB);
@@ -256,11 +256,11 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
          */
         final int contextId = session.getContextId();
         final Connection rc = databaseService.getReadOnly(contextId);
-        TIntList accounts;
+        TIntArrayList accounts;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = rc.prepareStatement(SQL_SELECT_ACCOUNTS);
+            stmt = rc.prepareStatement("SELECT account FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, session.getUserId());

@@ -56,9 +56,10 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * This class defines the methods for accessing the storage of contexts.
- * TODO We should introduce a logic layer above this context storage layer. That layer should then trigger the update tasks.
- * Nearly all accesses to the ContextStorage need then to be replaced with an access to the ContextService.
+ * This class defines the methods for accessing the storage of contexts. TODO We should introduce a logic layer above this context storage
+ * layer. That layer should then trigger the update tasks. Nearly all accesses to the ContextStorage need then to be replaced with an access
+ * to the ContextService.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -181,6 +182,15 @@ public abstract class ContextStorage {
      * @throws OXException if reading the contexts fails.
      */
     public abstract List<Integer> getAllContextIds() throws OXException;
+
+    /**
+     * Get a list of all context ids that are bound to the specified filestore id
+     * 
+     * @param filestoreId the filestoreId
+     * @return the list of context ids
+     * @throws OXException if reading the contexts fails.
+     */
+    public abstract List<Integer> getAllContextIdsForFilestore(final int filestoreId) throws OXException;
 
     /**
      * Internal start-up routine invoked in {@link #start()}

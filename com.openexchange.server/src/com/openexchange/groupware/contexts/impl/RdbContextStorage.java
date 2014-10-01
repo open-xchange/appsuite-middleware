@@ -287,6 +287,29 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     @Override
+    public List<Integer> getAllContextIdsForFilestore(int filestoreId) throws OXException {
+        final List<Integer> retval = new ArrayList<Integer>();
+        final Connection con = DBPool.pickup();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id = ?");
+            stmt.setInt(1, filestoreId);
+            
+            result = stmt.executeQuery();
+            while (result.next()) {
+                retval.add(Integer.valueOf(result.getInt(1)));
+            }
+        } catch (final SQLException e) {
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(con);
+        }
+        return retval;
+    }
+
+    @Override
     protected void shutDown() {
         // Nothing to do.
     }
@@ -295,4 +318,5 @@ public class RdbContextStorage extends ContextStorage {
     protected void startUp() {
         // Nothing to do.
     }
+
 }

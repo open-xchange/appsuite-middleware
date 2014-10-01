@@ -58,6 +58,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.internal.SearchAdapter;
@@ -200,14 +202,14 @@ public abstract class DefaultContactStorage implements ContactStorage {
      * if applicable for storage.
      */
     @Override
-    public SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         String pattern = query;
         if (false == Strings.isEmpty(pattern) && false == "*".equals(pattern) && '*' != pattern.charAt(pattern.length() - 1)) {
             pattern = pattern + "*";
         }
         ContactSearchObject preparedSearchObject = new ContactSearchObject();
         preparedSearchObject.setOrSearch(true);
-        preparedSearchObject.setEmailAutoComplete(requireEmail);
+        preparedSearchObject.setEmailAutoComplete(parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true));
         if (null != folderIDs && 0 < folderIDs.size()) {
             preparedSearchObject.setFolders(parse(folderIDs.toArray(new String[folderIDs.size()])));
         }

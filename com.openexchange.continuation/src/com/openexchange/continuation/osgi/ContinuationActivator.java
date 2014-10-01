@@ -97,12 +97,12 @@ public final class ContinuationActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".cacheattributes.MaxObjects=20000\n" +
                 "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
                 "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
                 "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
                 "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
                 "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
                 "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
-                "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();

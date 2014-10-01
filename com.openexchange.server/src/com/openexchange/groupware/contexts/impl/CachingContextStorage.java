@@ -131,6 +131,11 @@ public class CachingContextStorage extends ContextStorage {
     public List<Integer> getAllContextIds() throws OXException {
         return persistantImpl.getAllContextIds();
     }
+    
+    @Override
+    public List<Integer> getAllContextIdsForFilestore(int filestoreId) throws OXException {
+        return persistantImpl.getAllContextIdsForFilestore(filestoreId);
+    }
 
     @Override
     protected void startUp() throws OXException {
@@ -232,5 +237,4 @@ public class CachingContextStorage extends ContextStorage {
         }
         return retval;
     }
-
 }

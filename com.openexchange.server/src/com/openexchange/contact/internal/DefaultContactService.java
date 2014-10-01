@@ -50,8 +50,11 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
+
 import java.util.Date;
 import java.util.List;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -192,8 +195,8 @@ public abstract class DefaultContactService implements ContactService {
     }
 
     @Override
-    public SearchIterator<Contact> autocompleteContacts(Session session, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        return autocompleteContacts(session, null, query, requireEmail, fields, sortOptions);
+    public SearchIterator<Contact> autocompleteContacts(Session session, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return autocompleteContacts(session, null, query, parameters, fields, sortOptions);
     }
 
 	/*
@@ -417,13 +420,13 @@ public abstract class DefaultContactService implements ContactService {
     }
 
     @Override
-    public SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         Check.argNotNull(session, "session");
         Check.argNotNull(query, "pattern");
-        return doAutocompleteContacts(session, folderIDs, query, requireEmail, fields, sortOptions);
+        return doAutocompleteContacts(session, folderIDs, query, parameters, fields, sortOptions);
     }
 
-    @Override
+	@Override
     public boolean isFolderEmpty(Session session, String folderID) throws OXException {
         Check.argNotNull(session, "session");
         Check.argNotNull(folderID, "folderID");
@@ -483,7 +486,7 @@ public abstract class DefaultContactService implements ContactService {
         ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     protected abstract SearchIterator<Contact> doAutocompleteContacts(Session session, List<String> folderIDs, String query,
-        boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException;
+		AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     protected abstract SearchIterator<Contact> doGetContacts(Session session, List<String> folderIDs, ContactField[] fields,
         SortOptions sortOptions) throws OXException;
