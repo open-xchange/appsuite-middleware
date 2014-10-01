@@ -192,14 +192,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                          * Generate preview asynchronously and put to cache. Make sure to create copies of result and requestdata to use for
                          * thumbnail generation as existing instances have to be used to indicate the accepted request.
                          */
-                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(
-                            new AJAXRequestResult(result),
-                            requestData.copyOf(),
-                            session,
-                            previewService,
-                            THRESHOLD,
-                            false,
-                            cacheKeyGenerator);
+                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(new AJAXRequestResult(result), requestData.copyOf(), session, previewService, THRESHOLD, false, cacheKeyGenerator);
                         ThreadPools.getExecutorService().submit(previewAndCache);
                         indicateRequestAccepted(result, requestData);
                     }
@@ -210,13 +203,16 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
             if (isBlockingWorkerAllowed) {
                 // there is no cached resource but we are allowed to wait for thumbnail generation
                 // do as callable anyway
-                PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(
-                    result,
-                    requestData,
-                    session,
-                    previewService,
-                    THRESHOLD,
-                    false);
+                PreviewDocument previewDocument;
+                try {
+                    previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, THRESHOLD, false);
+                } catch (OXException e) {
+                    if (PreviewExceptionCodes.DEFAULT_THUMBNAIL.equals(e)) {
+                        setDefaulThumbnail(requestData, result);
+                        return;
+                    }
+                    throw e;
+                }
                 if (previewDocument == null || previewDocument.getThumbnail() == null) {
                     throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
                 }

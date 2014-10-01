@@ -509,7 +509,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @return <code>true</code> if passed stream signals EOF; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      */
-    protected static boolean streamIsEof(InputStream in, Reference<InputStream> ref) throws IOException {
+    public static boolean streamIsEof(InputStream in, Reference<InputStream> ref) throws IOException {
         if (null == in) {
             return true;
         }
@@ -647,7 +647,6 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @throws OXException if the result object isn't compatible
      */
     public static IFileHolder getFileHolderFromResult(AJAXRequestResult result) throws OXException {
-
         final Object resultObject = result.getResultObject();
         if (!(resultObject instanceof IFileHolder)) {
             throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());

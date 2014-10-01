@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link PreviewAndCacheTask} - Generate a {@link PreviewDocument} and put the resulting thumbnail to cache using the given
  * {@link CacheKeyGenerator}.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -83,21 +83,21 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
 
     private final PreviewService previewService;
 
-    private long threshold;
+    private final long threshold;
 
-    private AJAXRequestResult result;
+    private final AJAXRequestResult result;
 
-    private AJAXRequestData requestData;
+    private final AJAXRequestData requestData;
 
-    private ServerSession session;
+    private final ServerSession session;
 
-    private boolean respectLanguage;
+    private final boolean respectLanguage;
 
-    private CacheKeyGenerator cacheKeyGenerator;
+    private final CacheKeyGenerator cacheKeyGenerator;
 
     /**
      * Initializes a new {@link PreviewAndCacheTask}.
-     * 
+     *
      * @param result The current {@link AJAXRequestResult}
      * @param requestData The current {@link AJAXRequestData}
      * @param session The current {@link ServerSession}
@@ -127,6 +127,7 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
     public Void call() throws Exception {
         int contextId = session.getContextId();
         int userId = session.getUserId();
+
         ResourceCache resourceCache = getResourceCache(contextId, userId);
         if (resourceCache == null) {
             LOG.error("Unable to get ResourceCache for user {} in context {}");
@@ -134,21 +135,23 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
         }
 
         String cacheKey = cacheKeyGenerator.generateCacheKey();
-        if (cacheKey != null) {
+        if (cacheKey == null) {
+            LOG.error("Refusing to generate and cache preview without valid cache key");
+            return null;
+        }
+
+        try {
+            PreviewDocument previewDocument;
             try {
-                PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(
-                    result,
-                    requestData,
-                    session,
-                    previewService,
-                    threshold,
-                    respectLanguage,
-                    cacheKey);
-
-                if (previewDocument == null || previewDocument.getThumbnail() == null) {
-                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+                previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, threshold, respectLanguage, cacheKey);
+            } catch (OXException e) {
+                if (PreviewExceptionCodes.DEFAULT_THUMBNAIL.equals(e)) {
+                    previewDocument = null;
                 }
+                throw e;
+            }
 
+            if (previewDocument != null && previewDocument.getThumbnail() != null) {
                 InputStream thumbnail = previewDocument.getThumbnail();
                 final String fileName = previewDocument.getMetaData().get("resourcename");
                 byte[] thumbnailBytes;
@@ -159,20 +162,16 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                 }
 
                 syncToCache(session, requestData, thumbnailBytes, fileName, resourceCache, cacheKey);
-
-            } catch (OXException oxe) {
-                LOG.error("Error while trying to get PreviewDocument.", oxe);
             }
-        } else {
-            LOG.error("Refusing to generate and cache preview without valid cache key");
+        } catch (Exception oxe) {
+            LOG.error("Error while trying to get PreviewDocument.", oxe);
         }
-
         return null;
     }
 
     /**
      * Puts a resource into the {@link ResourceCache}.
-     * 
+     *
      * @param session The current {@link ServerSession}
      * @param requestData The current {@link AJAXRequestData}
      * @param input The resource we are caching

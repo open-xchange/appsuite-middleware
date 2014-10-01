@@ -50,16 +50,14 @@
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.collect.Sets;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -71,17 +69,15 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PreviewImageGenerator} A cancellable asynchronous generator for preview images.
+ * {@link PreviewImageGenerator} - A cancellable asynchronous generator for preview images.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.1
  */
 public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreviewImageGenerator.class);
-
-    /** Used to prevent multiple requests from generating and cachin the same preview */
-    private static final Set<String> currentlyRunning = Sets.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     /** Does the actual work */
     private final PreviewDocumentCallable callable;
@@ -119,6 +115,11 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
         return callable == null ? defaultThreshold : callable.getAwaitThreshold(defaultThreshold);
     }
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+    /** Used to prevent multiple requests from generating and caching the same preview */
+    private static final ConcurrentMap<String, PreviewImageGenerator> RUNNING = new ConcurrentHashMap<String, PreviewImageGenerator>(32);
+
     /**
      * Try to generate a {@link PreviewDocument} for the given request.
      *
@@ -144,52 +145,64 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
      * @param previewService The previewService to use for document generation
      * @param threshold The await threshold (in Milliseconds) to use if the {@link PreviewService} doesn't specify one
      * @param respectLanguage Should the preferredLanguage be respected for preview creation?
-     * @param cacheKey Used to prevent multiple requests from generating and cachin the same preview, can be null in case you don't want to
+     * @param cacheKey Used to prevent multiple requests from generating and caching the same preview, can be <code>null</code> in case you don't want to
      *            prevent previews being generated in parallel (e.g. there is no cache configured and previews have to be created in a
      *            blocking fashion)
-     * @return null or the generated PreviewDocument
-     * @throws OXException if the preview generation was interrupted, timed out or simply failed
+     * @return <code>null</code> or the generated {@link PreviewDocument} instance
+     * @throws OXException If the preview generation was interrupted, timed out or simply failed
      */
     public static PreviewDocument getPreviewDocument(AJAXRequestResult result, AJAXRequestData requestData, ServerSession session, PreviewService previewService, long threshold, boolean respectLanguage, String cacheKey) throws OXException {
-        PreviewImageGenerator previewFuture = null;
-        PreviewDocument previewDocument = null;
-        //prevent multiple caching requests/allow multiple blocking
+        // Prevent multiple caching requests/allow multiple blocking
         if (cacheKey != null) {
-            if (false == currentlyRunning.add(cacheKey)) {
-                // Already contained
-                return null;
+            boolean removeFromRunning = false;
+            try {
+                PreviewImageGenerator previewFuture = RUNNING.get(cacheKey);
+                if (null == previewFuture) {
+                    PreviewImageGenerator newFuture = new PreviewImageGenerator(new PreviewDocumentCallable(result, requestData, PreviewOutput.IMAGE, session, previewService, respectLanguage));
+                    previewFuture = RUNNING.putIfAbsent(cacheKey, newFuture);
+                    if (null == previewFuture) {
+                        previewFuture = newFuture;
+                        ThreadPools.getExecutorService().execute(previewFuture);
+                        removeFromRunning = true;
+                    }
+                }
+                return getFrom(previewFuture, threshold);
+            } finally {
+                if (removeFromRunning) {
+                    RUNNING.remove(cacheKey);
+                }
             }
         }
+
+        // Just do it...
+        PreviewImageGenerator previewFuture = new PreviewImageGenerator(new PreviewDocumentCallable(result, requestData, PreviewOutput.IMAGE, session, previewService, respectLanguage));
+        ThreadPools.getExecutorService().execute(previewFuture);
+        return getFrom(previewFuture, threshold);
+    }
+
+    private static PreviewDocument getFrom(PreviewImageGenerator previewFuture, long threshold) throws OXException {
         try {
-            previewFuture = new PreviewImageGenerator(new PreviewDocumentCallable(
-                result,
-                requestData,
-                PreviewOutput.IMAGE,
-                session,
-                previewService,
-                respectLanguage));
-            ExecutorService executorService = ThreadPools.getExecutorService();
-            executorService.execute(previewFuture);
-            previewDocument = previewFuture.get(previewFuture.getAwaitThreshold(threshold), TimeUnit.MILLISECONDS);
+            return previewFuture.get(previewFuture.getAwaitThreshold(threshold), TimeUnit.MILLISECONDS);
         } catch (InterruptedException ie) {
             // Keep interrupted state
-            previewFuture.cancel(true);
             Thread.currentThread().interrupt();
+            if (null != previewFuture) {
+                previewFuture.cancel(true);
+            }
             throw PreviewExceptionCodes.ERROR.create(ie, ie.getMessage());
         } catch (ExecutionException ee) {
             // Failed to generate preview image
-            previewFuture.cancel(true);
+            if (null != previewFuture) {
+                previewFuture.cancel(true);
+            }
             throw ThreadPools.launderThrowable(ee, OXException.class);
         } catch (TimeoutException te) {
             // Preview image has not been generated in time
-            previewFuture.cancel(true);
-            throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
-        } finally {
-            if(cacheKey != null) {
-                currentlyRunning.remove(cacheKey);
+            if (null != previewFuture) {
+                previewFuture.cancel(true);
             }
+            throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
         }
-        return previewDocument;
     }
 
 }
