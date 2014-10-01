@@ -152,17 +152,17 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                 throw e;
             }
 
-            if (previewDocument != null && previewDocument.getThumbnail() != null) {
+            if (previewDocument != null) {
                 InputStream thumbnail = previewDocument.getThumbnail();
-                final String fileName = previewDocument.getMetaData().get("resourcename");
-                byte[] thumbnailBytes;
-                try {
-                    thumbnailBytes = Streams.stream2bytes(thumbnail);
-                } catch (IOException ioex) {
-                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
+                if (thumbnail != null) {
+                    try {
+                        byte[] thumbnailBytes = Streams.stream2bytes(thumbnail);
+                        final String fileName = previewDocument.getMetaData().get("resourcename");
+                        syncToCache(session, requestData, thumbnailBytes, fileName, resourceCache, cacheKey);
+                    } catch (IOException ioex) {
+                        throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
+                    }
                 }
-
-                syncToCache(session, requestData, thumbnailBytes, fileName, resourceCache, cacheKey);
             }
         } catch (Exception oxe) {
             LOG.error("Error while trying to get PreviewDocument.", oxe);
