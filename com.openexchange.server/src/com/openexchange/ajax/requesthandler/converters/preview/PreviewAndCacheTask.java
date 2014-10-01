@@ -146,10 +146,10 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                 previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, threshold, respectLanguage, cacheKey);
             } catch (OXException e) {
                 if (PreviewExceptionCodes.DEFAULT_THUMBNAIL.equals(e)) {
-                    previewDocument = null;
-                } else {
-                    throw e;
+                    // Nothing to sync to cache
+                    return null;
                 }
+                throw e;
             }
 
             if (previewDocument != null && previewDocument.getThumbnail() != null) {
