@@ -147,8 +147,9 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
             } catch (OXException e) {
                 if (PreviewExceptionCodes.DEFAULT_THUMBNAIL.equals(e)) {
                     previewDocument = null;
+                } else {
+                    throw e;
                 }
-                throw e;
             }
 
             if (previewDocument != null && previewDocument.getThumbnail() != null) {
