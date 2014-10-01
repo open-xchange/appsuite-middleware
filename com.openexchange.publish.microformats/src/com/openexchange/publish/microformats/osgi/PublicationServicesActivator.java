@@ -52,6 +52,7 @@ package com.openexchange.publish.microformats.osgi;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
@@ -77,6 +78,10 @@ public class PublicationServicesActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+
+        trackService(HostnameService.class);
+
         final OXMFPublicationService contactPublisher = new OXMFPublicationService();
         this.contactPublisher = contactPublisher;
         contactPublisher.setFolderType("contacts");
@@ -113,7 +118,8 @@ public class PublicationServicesActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        unregisterServices();
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
     /**

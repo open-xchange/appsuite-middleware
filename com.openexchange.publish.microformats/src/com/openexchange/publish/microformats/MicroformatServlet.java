@@ -71,13 +71,16 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.microformats.osgi.Services;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
+import com.openexchange.publish.microformats.tools.CustomizableHttpServletRequest;
 import com.openexchange.publish.microformats.tools.HTMLUtils;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
@@ -208,7 +211,24 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             // Compose variables for template processing
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
-            variables.put("request", req);
+            {
+                HttpServletRequest httpRequest = req;
+
+                HostnameService hostnameService = Services.getService(HostnameService.class);
+                if (null != hostnameService) {
+                    try {
+                        String hostName = hostnameService.getHostname(publication.getUserId(), publication.getContext().getContextId());
+                        if (false == Strings.isEmpty(hostName)) {
+                            // Set server name as returned by HostnameService
+                            httpRequest = new CustomizableHttpServletRequest(httpRequest).setServerName(hostName);
+                        }
+                    } catch (Exception e) {
+                        // Unable to check for proper host name
+                    }
+                }
+
+                variables.put("request", httpRequest);
+            }
             variables.put("dateFormat", DATE_FORMAT);
             variables.put("timeFormat", TIME_FORMAT);
             {

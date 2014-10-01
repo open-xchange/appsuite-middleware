@@ -506,16 +506,16 @@ public final class RateLimiter {
 
     // ------------------------- Lenient clients ----------------------------------------- //
 
-    private static interface UserAgentChecker {
+    private static interface StringChecker {
 
-        boolean isLenient(String userAgent);
+        boolean matches(String identifier);
     }
 
-    private static final class StartsWithUserAgentChecker implements UserAgentChecker {
+    private static final class StartsWithStringChecker implements StringChecker {
 
         private final String[] prefixes;
 
-        StartsWithUserAgentChecker(final List<String> prefixes) {
+        StartsWithStringChecker(final List<String> prefixes) {
             super();
             final int size = prefixes.size();
             final String[] newArray = new String[size];
@@ -526,8 +526,8 @@ public final class RateLimiter {
         }
 
         @Override
-        public boolean isLenient(final String userAgent) {
-            final String lc = toLowerCase(userAgent);
+        public boolean matches(final String identifier) {
+            final String lc = toLowerCase(identifier);
             for (final String prefix : prefixes) {
                 if (lc.startsWith(prefix)) {
                     return true;
@@ -538,23 +538,23 @@ public final class RateLimiter {
 
     }
 
-    private static final class IgnoreCaseUserAgentChecker implements UserAgentChecker {
+    private static final class IgnoreCaseStringChecker implements StringChecker {
 
         private final String userAgent;
 
-        IgnoreCaseUserAgentChecker(final String userAgent) {
+        IgnoreCaseStringChecker(final String userAgent) {
             super();
             this.userAgent = toLowerCase(userAgent);
         }
 
         @Override
-        public boolean isLenient(final String userAgent) {
-            return this.userAgent.equals(toLowerCase(userAgent));
+        public boolean matches(final String identifier) {
+            return this.userAgent.equals(toLowerCase(identifier));
         }
 
     }
 
-    private static final class PatternUserAgentChecker implements UserAgentChecker {
+    private static final class PatternUserAgentChecker implements StringChecker {
 
         private final Pattern pattern;
 
@@ -564,16 +564,16 @@ public final class RateLimiter {
         }
 
         @Override
-        public boolean isLenient(final String userAgent) {
-            return pattern.matcher(userAgent).matches();
+        public boolean matches(final String identifier) {
+            return pattern.matcher(identifier).matches();
         }
 
     }
 
-    private static volatile List<UserAgentChecker> userAgentCheckers;
+    private static volatile List<StringChecker> userAgentCheckers;
 
-    private static List<UserAgentChecker> userAgentCheckers() {
-        List<UserAgentChecker> tmp = userAgentCheckers;
+    private static List<StringChecker> userAgentCheckers() {
+        List<StringChecker> tmp = userAgentCheckers;
         if (null == tmp) {
             synchronized (RateLimiter.class) {
                 tmp = userAgentCheckers;
@@ -590,7 +590,7 @@ public final class RateLimiter {
                     if (com.openexchange.java.Strings.isEmpty(sProviders)) {
                         tmp = Collections.emptyList();
                     } else {
-                        final List<UserAgentChecker> list = new LinkedList<UserAgentChecker>();
+                        final List<StringChecker> list = new LinkedList<StringChecker>();
                         final List<String> startsWiths = new LinkedList<String>();
                         for (final String sChecker : Strings.splitByComma(sProviders)) {
                             String s = unquote(sChecker);
@@ -603,14 +603,14 @@ public final class RateLimiter {
                                     // Pattern
                                     list.add(new PatternUserAgentChecker(s));
                                 } else {
-                                    list.add(new IgnoreCaseUserAgentChecker(s));
+                                    list.add(new IgnoreCaseStringChecker(s));
                                 }
                             }
                         }
                         if (!startsWiths.isEmpty()) {
-                            list.add(0, new StartsWithUserAgentChecker(startsWiths));
+                            list.add(0, new StartsWithStringChecker(startsWiths));
                         }
-                        tmp = list.isEmpty() ? Collections.<UserAgentChecker> emptyList() : (1 == list.size() ? Collections.singletonList(list.get(0)) : Collections.unmodifiableList(list));
+                        tmp = list.isEmpty() ? Collections.<StringChecker> emptyList() : (1 == list.size() ? Collections.singletonList(list.get(0)) : Collections.unmodifiableList(list));
                     }
                     userAgentCheckers = tmp;
                 }
@@ -619,14 +619,59 @@ public final class RateLimiter {
         return tmp;
     }
 
-    private static final Cache<String, Boolean> CACHE_AGENTS = CacheBuilder.newBuilder().maximumSize(250).expireAfterWrite(2, TimeUnit.HOURS).build();
+    private static volatile List<StringChecker> remoteAddressCheckers;
+
+    private static List<StringChecker> remoteAddressCheckers() {
+        List<StringChecker> tmp = remoteAddressCheckers;
+        if (null == tmp) {
+            synchronized (RateLimiter.class) {
+                tmp = remoteAddressCheckers;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return Collections.emptyList();
+                    }
+                    final String sRemoteAddrs = service.getProperty("com.openexchange.servlet.maxRateLenientRemoteAddresses");
+                    if (com.openexchange.java.Strings.isEmpty(sRemoteAddrs)) {
+                        tmp = Collections.emptyList();
+                    } else {
+                        final List<StringChecker> list = new LinkedList<StringChecker>();
+                        final List<String> startsWiths = new LinkedList<String>();
+                        for (final String sChecker : Strings.splitByComma(sRemoteAddrs)) {
+                            String s = unquote(sChecker);
+                            if (!com.openexchange.java.Strings.isEmpty(s)) {
+                                s = s.trim();
+                                if (isStartsWith(s)) {
+                                    // Starts-with
+                                    startsWiths.add(s.substring(0, s.length() - 1));
+                                } else if (s.indexOf('*') >= 0 || s.indexOf('?') >= 0) {
+                                    // Pattern
+                                    list.add(new PatternUserAgentChecker(s));
+                                } else {
+                                    list.add(new IgnoreCaseStringChecker(s));
+                                }
+                            }
+                        }
+                        if (!startsWiths.isEmpty()) {
+                            list.add(0, new StartsWithStringChecker(startsWiths));
+                        }
+                        tmp = list.isEmpty() ? Collections.<StringChecker> emptyList() : (1 == list.size() ? Collections.singletonList(list.get(0)) : Collections.unmodifiableList(list));
+                    }
+                    remoteAddressCheckers = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    private static final Cache<String, Boolean> CACHE_AGENTS = CacheBuilder.newBuilder().maximumSize(250).expireAfterWrite(30, TimeUnit.MINUTES).build();
 
     private static boolean lenientCheckForUserAgent(final String userAgent) {
         if (null != userAgent) {
             Boolean result = CACHE_AGENTS.getIfPresent(userAgent);
             if (null == result) {
-                for (final UserAgentChecker checker : userAgentCheckers()) {
-                    if (checker.isLenient(userAgent)) {
+                for (final StringChecker checker : userAgentCheckers()) {
+                    if (checker.matches(userAgent)) {
                         result = Boolean.TRUE;
                         break;
                     }
@@ -635,6 +680,29 @@ public final class RateLimiter {
                     result = Boolean.FALSE;
                 }
                 CACHE_AGENTS.put(userAgent, result);
+            }
+
+            return result.booleanValue();
+        }
+        return false;
+    }
+
+    private static final Cache<String, Boolean> CACHE_REMOTE_ADDRS = CacheBuilder.newBuilder().maximumSize(2500).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    private static boolean lenientCheckForRemoteAddress(final String remoteAddress) {
+        if (null != remoteAddress) {
+            Boolean result = CACHE_REMOTE_ADDRS.getIfPresent(remoteAddress);
+            if (null == result) {
+                for (final StringChecker checker : remoteAddressCheckers()) {
+                    if (checker.matches(remoteAddress)) {
+                        result = Boolean.TRUE;
+                        break;
+                    }
+                }
+                if (null == result) {
+                    result = Boolean.FALSE;
+                }
+                CACHE_REMOTE_ADDRS.put(remoteAddress, result);
             }
 
             return result.booleanValue();
@@ -709,6 +777,11 @@ public final class RateLimiter {
 
         // User-Agent check
         if (lenientCheckForUserAgent(servletRequest.getHeader("User-Agent"))) {
+            return true;
+        }
+
+        // Remote address check
+        if (lenientCheckForRemoteAddress(servletRequest.getRemoteAddr())) {
             return true;
         }
 

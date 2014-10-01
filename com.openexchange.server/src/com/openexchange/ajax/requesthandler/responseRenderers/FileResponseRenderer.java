@@ -118,11 +118,13 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     /** The default in-memory threshold of 1MB. */
     private static final int DEFAULT_IN_MEMORY_THRESHOLD = 1024 * 1024; // 1MB
+
     private static final int INITIAL_CAPACITY = 8192;
 
     private static final int BUFLEN = 2048;
 
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
+
     private static final String PARAMETER_CONTENT_TYPE = "content_type";
 
     private static final String SAVE_AS_TYPE = "application/octet-stream";
@@ -132,6 +134,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     private static final String DELIVERY = AJAXServlet.PARAMETER_DELIVERY;
 
     private static final String DOWNLOAD = "download";
+
     private static final String VIEW = "view";
 
     private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
@@ -441,7 +444,13 @@ public class FileResponseRenderer implements ResponseRenderer {
              * Browsers don't like the Pragma header the way we usually set this. Especially if files are sent to the browser. So removing
              * pragma header.
              */
-            Tools.removeCachingHeader(resp);
+            boolean keepCachingHeaders = false;
+            if (requestData.isSet("keepCachingHeaders")) {
+                keepCachingHeaders = requestData.getParameter("keepCachingHeaders", Boolean.class).booleanValue();
+            }
+            if (!keepCachingHeaders) {
+                Tools.removeCachingHeader(resp);
+            }
             if (delivery == null || !delivery.equalsIgnoreCase(DOWNLOAD)) {
                 /*
                  * ETag present and caching?
@@ -892,6 +901,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String fileName = file.getName();
             final String contentType = fileContentType;
             final AbstractTask<Void> task = new AbstractTask<Void>() {
+
                 @Override
                 public Void call() {
                     try {
@@ -1097,10 +1107,13 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         /** The begin position (inclusive) */
         final long start;
+
         /** The end position (inclusive) */
         final long end;
+
         /** The length */
         final long length;
+
         /** The total length */
         final long total;
 
@@ -1119,6 +1132,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         private static final long serialVersionUID = 8094333124726048736L;
 
         private final long off;
+
         private final long available;
 
         /**

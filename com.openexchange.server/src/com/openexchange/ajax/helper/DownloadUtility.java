@@ -345,7 +345,7 @@ public final class DownloadUtility {
                  * Image content requested for download...
                  */
                 final BrowserDetector browserDetector = BrowserDetector.detectorFor(userAgent);
-                final boolean msieOnWindows = (browserDetector.isMSIE() && browserDetector.isWindows());
+                final boolean msieOnWindows = null != browserDetector && (browserDetector.isMSIE() && browserDetector.isWindows());
                 {
                     /*-
                      * Image content requested
