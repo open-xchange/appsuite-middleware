@@ -292,10 +292,11 @@ public class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult} based on another instance.
-     * 
+     *
      * @param other The other instance.
      */
     public AJAXRequestResult(AJAXRequestResult other) {
+        super();
         continuationUuid = other.continuationUuid;
         deferred = other.deferred;
         duration = other.duration;

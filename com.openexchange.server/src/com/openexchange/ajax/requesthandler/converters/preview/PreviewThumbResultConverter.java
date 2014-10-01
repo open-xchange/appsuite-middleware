@@ -49,10 +49,17 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.ETAG;
 import static com.google.common.net.HttpHeaders.EXPIRES;
+import static com.google.common.net.HttpHeaders.PRAGMA;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
@@ -111,6 +118,19 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
     private static final String HEIGHT = "height";
 
     private static final int DEFAULT_THUMB_HEIGHT = 160;
+
+    private static final DateFormat HEADER_DATEFORMAT;
+
+    static {
+        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
+        HEADER_DATEFORMAT.setTimeZone(getTimeZone("GMT"));
+    }
+
+    private static final String CACHE_VALUE = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+
+    private static final String PRAGMA_VALUE = "no-cache";
+
+    private static final String EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
 
     private final boolean isBlockingWorkerAllowed;
 
@@ -172,14 +192,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                          * Generate preview asynchronously and put to cache. Make sure to create copies of result and requestdata to use for
                          * thumbnail generation as existing instances have to be used to indicate the accepted request.
                          */
-                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(
-                            new AJAXRequestResult(result),
-                            requestData.copyOf(),
-                            session,
-                            previewService,
-                            THRESHOLD,
-                            false,
-                            cacheKeyGenerator);
+                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(new AJAXRequestResult(result), requestData.copyOf(), session, previewService, THRESHOLD, false, cacheKeyGenerator);
                         ThreadPools.getExecutorService().submit(previewAndCache);
                         indicateRequestAccepted(result, requestData);
                     }
@@ -190,13 +203,16 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
             if (isBlockingWorkerAllowed) {
                 // there is no cached resource but we are allowed to wait for thumbnail generation
                 // do as callable anyway
-                PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(
-                    result,
-                    requestData,
-                    session,
-                    previewService,
-                    THRESHOLD,
-                    false);
+                PreviewDocument previewDocument;
+                try {
+                    previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, THRESHOLD, false);
+                } catch (OXException e) {
+                    if (PreviewExceptionCodes.DEFAULT_THUMBNAIL.equals(e)) {
+                        setDefaulThumbnail(requestData, result);
+                        return;
+                    }
+                    throw e;
+                }
                 if (previewDocument == null || previewDocument.getThumbnail() == null) {
                     throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
                 }
@@ -286,7 +302,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
         //result.setHeader(RETRY_AFTER, String.valueOf(THRESHOLD / 1000));
         //TODO: move back to 202/Retry-After when UI finished refactoring.
         setMissingThumbnail(requestData, result);
-        preventCaching(result);
+        preventCaching(requestData, result);
         preventTransformations(requestData);
     }
 
@@ -295,9 +311,12 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
      *
      * @param result The current {@link AJAXRequestResult}
      */
-    private void preventCaching(AJAXRequestResult result) {
-        result.setHeader(EXPIRES, "0");
+    private void preventCaching(AJAXRequestData requestData, AJAXRequestResult result) {
+        requestData.putParameter("keepCachingHeaders", Boolean.toString(Boolean.TRUE));
         result.removeHeader(ETAG);
+        result.setHeader(EXPIRES, EXPIRES_DATE);
+        result.setHeader(CACHE_CONTROL, CACHE_VALUE);
+        result.setHeader(PRAGMA, PRAGMA_VALUE);
     }
 
 }

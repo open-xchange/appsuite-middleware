@@ -52,17 +52,23 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 import static com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter.getContentType;
 import static com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter.getFileHolderFromResult;
 import static com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter.getUserLanguage;
+import static com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter.streamIsEof;
 import java.io.IOException;
 import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.ModifyableFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.InterruptibleInputStream;
+import com.openexchange.java.Reference;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.Delegating;
@@ -71,11 +77,12 @@ import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.RemoteInternalPreviewService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * {@link PreviewDocumentCallable} - {@link Callable} to generate a PreviewDocument via a given {@link PreviewService}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -86,17 +93,17 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
     private static final Logger LOG = LoggerFactory.getLogger(PreviewDocumentCallable.class);
 
     private final AJAXRequestData requestData;
-    private final IFileHolder fileHolder;
     private final String previewLanguage;
     private final PreviewOutput previewOutput;
     private final ServerSession session;
-    private final InterruptibleInputStream stream;
+    private volatile IFileHolder fileHolder;
+    private volatile InterruptibleInputStream stream;
     private final PreviewService previewService;
     private final boolean respectLanguage;
 
     /**
      * Initializes a new {@link PreviewDocumentCallable}.
-     * 
+     *
      * @param result To get the FileHolder and associated metadata for the requested document
      * @param requestData To get requested parameters for document/preview action
      * @param previewOutput The requested output format of the preview
@@ -107,8 +114,7 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
      */
     PreviewDocumentCallable(AJAXRequestResult result, AJAXRequestData requestData, PreviewOutput previewOutput, ServerSession session, PreviewService previewService, boolean respectLanguage) throws OXException {
         super();
-        this.fileHolder=getFileHolderFromResult(result);
-        this.stream = new InterruptibleInputStream(fileHolder.getStream());
+        this.fileHolder = getFileHolderFromResult(result);
         this.requestData = requestData;
         this.previewLanguage = getUserLanguage(session);
         this.previewOutput = previewOutput;
@@ -118,28 +124,61 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
     }
 
     @Override
-    public PreviewDocument call() throws OXException {
+    public PreviewDocument call() throws Exception {
         try {
+            // Check file holder's content
+            IFileHolder fileHolder = this.fileHolder;
+            InterruptibleInputStream stream1;
+            {
+                InputStream in = fileHolder.getStream();
+                if (0 == fileHolder.getLength()) {
+                    Streams.close(in, fileHolder);
+                    throw PreviewExceptionCodes.DEFAULT_THUMBNAIL.create();
+                }
+                final Reference<InputStream> ref = new Reference<InputStream>();
+                if (streamIsEof(in, ref)) {
+                    Streams.close(in, fileHolder);
+                    throw PreviewExceptionCodes.DEFAULT_THUMBNAIL.create();
+                }
+                in = ref.getValue();
+                stream1 = new InterruptibleInputStream(in);
+                this.stream = stream1;
+            }
+
+            // Obtain preview either using running or separate thread
+            PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+
+            // Name-wise MIME type detection
+            {
+                String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
+                if (null == mimeType) {
+                    // Unknown. Then detect MIME type by content.
+                    fileHolder = new ThresholdFileHolder().write(stream).setContentInfo(fileHolder);
+                    mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
+                    this.fileHolder = fileHolder;
+                    stream1 = new InterruptibleInputStream(fileHolder.getStream());
+                    this.stream = stream1;
+                    LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
+                } else {
+                    LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
+                }
+                fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
+            }
+
             // Prepare properties for preview generation
             DataProperties dataProperties = new DataProperties(12);
-            String mimeType = getContentType(
-                fileHolder,
-                previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
+            String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
             dataProperties.put("PreviewWidth", requestData.getParameter("width"));
             dataProperties.put("PreviewHeight", requestData.getParameter("height"));
             dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
-            if(respectLanguage) {
+            if (respectLanguage) {
                 dataProperties.put("PreviewLanguage", previewLanguage);
             }
             dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
             dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
 
             // Generate preview
-            PreviewDocument previewDocument = previewService.getPreviewFor(
-                new SimpleData<InputStream>(stream, dataProperties),
-                previewOutput,
-                session,
-                1);
+            PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
 
             LOG.debug(
                 "Obtained preview for file {} with MIME type {} from {} for user {} in context {}",
@@ -157,20 +196,28 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
 
     /**
      * Interrupt and cleanup internal resources
-     * 
+     *
      * @throws IOException if an I/O error occurs
      */
     public void interrupt() throws IOException {
         try {
-            fileHolder.close();
-        } finally { 
-            stream.interrupt();
+            IFileHolder fileHolder = this.fileHolder;
+            if (null != fileHolder) {
+                fileHolder.close();
+                this.fileHolder = null;
+            }
+        } finally {
+            InterruptibleInputStream stream = this.stream;
+            if (null != stream) {
+                stream.interrupt();
+                this.stream = null;
+            }
         }
     }
 
     /**
      * Detect the recommended await threshold for the previewService or use the given default threshold.
-     * 
+     *
      * @param defaultThreshold The default threshold in milliseconds to use if the previewService doesn't specify any.
      * @return The recommended await threshold for the previewService or the given default threshold in milliseconds.
      * TODO: Check if {@link DelegationPreviewService} is completely obsolete and this code can be cleaned up!

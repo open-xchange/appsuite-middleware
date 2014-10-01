@@ -47,39 +47,72 @@
  *
  */
 
-package com.openexchange.groupware.notify.hostname;
+package com.openexchange.publish.microformats.osgi;
 
-import com.openexchange.osgi.annotation.SingletonService;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link HostnameService} - A simple interface providing the host name part in generated links to internal objects, e.g. for notifications:
- *
- * <pre>
- * http://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]
- * </pre>
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@SingletonService
-public interface HostnameService {
+public final class Services {
 
     /**
-     * The parameter name for host data.
-     *
-     * @type <code>com.openexchange.groupware.notify.hostname.HostData</code>
+     * Initializes a new {@link Services}.
      */
-    public static final String PARAM_HOST_DATA = "com.openexchange.groupware.hostdata";
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Returns the host name part used in generated links to internal objects; meaning the replacement for &quot;[hostname]&quot; in URL
-     * template defined by property &quot;object_link&quot; in properties file &quot;notification.properties&quot;. Additionally this
-     * service may be used for the host name when generating direct links into the UI.
+     * Sets the service lookup.
      *
-     * @param userId The user ID or a value less than/equal to zero if not available
-     * @param contextId The context ID or a value less than/equal to zero if not available
-     * @return The host name part used in generated links to internal objects or <code>null</code> (if user ID and/or context ID could not
-     *         be resolved or any error occurred).
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    String getHostname(int userId, int contextId);
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.publish.microformats\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }

@@ -91,6 +91,10 @@ public enum PreviewExceptionCodes implements DisplayableOXExceptionCode {
      * No preview service for MIME type %1$s (file name %2$s)
      */
     NO_PREVIEW_SERVICE2("No preview service for MIME type %1$s (file name %2$s)", PreviewExceptionMessages.NO_PREVIEW_SERVICE, NO_PREVIEW_SERVICE.getCategory(), NO_PREVIEW_SERVICE.getNumber()),
+    /**
+     * Default thumbnail expected.
+     */
+    DEFAULT_THUMBNAIL("Default thumbnail expected.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 7),
 
     ;
 

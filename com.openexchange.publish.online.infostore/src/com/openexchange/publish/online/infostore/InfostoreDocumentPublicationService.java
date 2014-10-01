@@ -170,12 +170,13 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         return ALLOW_ALL;
     }
 
+    private static final Pattern SPLIT = Pattern.compile("/");
+
     @Override
     public Publication resolveUrl(final Context ctx, final String URL) throws OXException {
         if(!URL.contains(PREFIX)){
             return null;
         }
-        final Pattern SPLIT = Pattern.compile("/");
         final String[] path = SPLIT.split(URL, 0);
         final String secret = getSecret(path);
         if (secret == null) {
