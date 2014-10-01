@@ -52,11 +52,14 @@ package com.openexchange.find.basic.contacts;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contacts.json.mapping.ColumnParser;
@@ -238,7 +241,9 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          * add ContactsFacetType.CONTACT facet dynamically
          */
         {
-            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, false);
+        	AutocompleteParameters parameters = AutocompleteParameters.newInstance();
+        	parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
+            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
             if (null != contacts && !contacts.isEmpty()) {
                 DefaultFacetBuilder builder = newDefaultBuilder(ContactsFacetType.CONTACT);
                 for (Contact contact : contacts) {

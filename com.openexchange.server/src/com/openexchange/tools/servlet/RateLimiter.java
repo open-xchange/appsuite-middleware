@@ -65,6 +65,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
@@ -617,13 +619,25 @@ public final class RateLimiter {
         return tmp;
     }
 
+    private static final Cache<String, Boolean> CACHE_AGENTS = CacheBuilder.newBuilder().maximumSize(250).expireAfterWrite(2, TimeUnit.HOURS).build();
+
     private static boolean lenientCheckForUserAgent(final String userAgent) {
         if (null != userAgent) {
-            for (final UserAgentChecker checker : userAgentCheckers()) {
-                if (checker.isLenient(userAgent)) {
-                    return true;
+            Boolean result = CACHE_AGENTS.getIfPresent(userAgent);
+            if (null == result) {
+                for (final UserAgentChecker checker : userAgentCheckers()) {
+                    if (checker.isLenient(userAgent)) {
+                        result = Boolean.TRUE;
+                        break;
+                    }
                 }
+                if (null == result) {
+                    result = Boolean.FALSE;
+                }
+                CACHE_AGENTS.put(userAgent, result);
             }
+
+            return result.booleanValue();
         }
         return false;
     }
@@ -665,18 +679,31 @@ public final class RateLimiter {
         return tmp;
     }
 
+    private static final Cache<String, Boolean> CACHE_PATHS = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
 
     private static boolean lenientCheckForRequest(final HttpServletRequest servletRequest) {
         // Servlet path check
         {
-            final String requestURI = toLowerCase(servletRequest.getRequestURI());
-            final StringBuilder sb = new StringBuilder(toLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix()));
-            final int reslen = sb.length();
-            for (final String module : modules()) {
-                sb.setLength(reslen);
-                if (requestURI.startsWith(sb.append(module).toString())) {
-                    return true;
+            String requestURI = toLowerCase(servletRequest.getRequestURI());
+            Boolean result = CACHE_PATHS.getIfPresent(requestURI);
+            if (null == result) {
+                StringBuilder sb = new StringBuilder(toLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix()));
+                int reslen = sb.length();
+                for (String module : modules()) {
+                    sb.setLength(reslen);
+                    if (requestURI.startsWith(sb.append(module).toString())) {
+                        result = Boolean.TRUE;
+                        break;
+                    }
                 }
+                if (null == result) {
+                    result = Boolean.FALSE;
+                }
+                CACHE_PATHS.put(requestURI, result);
+            }
+
+            if (result.booleanValue()) {
+                return true;
             }
         }
 

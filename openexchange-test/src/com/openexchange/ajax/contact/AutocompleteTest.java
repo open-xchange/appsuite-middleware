@@ -50,10 +50,13 @@
 package com.openexchange.ajax.contact;
 
 import java.util.List;
+
 import org.json.JSONArray;
+
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 
 /**
  * {@link AutocompleteTest}
@@ -125,6 +128,29 @@ public class AutocompleteTest extends AbstractManagedContactTest {
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());
         assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());
+    }
+    
+    
+    public void testAutocompleteDistributionList() throws Exception {
+        Contact distributionList = new Contact();
+        distributionList.setParentFolderID(folderID);
+        distributionList.setSurName("LisTe");
+        distributionList.setGivenName("VerTeiLer");
+        distributionList.setDisplayName(distributionList.getGivenName() + " " + distributionList.getSurName());
+        distributionList.setDistributionList(new DistributionListEntryObject[] {
+	        new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT),
+	        new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT)
+        });
+        distributionList = manager.newAction(distributionList);
+        /*
+         * expect in auto-complete response
+         */
+        AutocompleteRequest request = new AutocompleteRequest(distributionList.getGivenName(), false, Integer.toString(folderID), Contact.ALL_COLUMNS, true);
+        CommonSearchResponse response = client.execute(request);
+        List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+        assertNotNull(contacts);
+        assertEquals("wrong number of results", 1, contacts.size());
+        assertEquals(distributionList.getDisplayName(), contacts.get(0).getDisplayName());
     }
 
 }

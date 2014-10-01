@@ -76,6 +76,7 @@ import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -85,8 +86,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
@@ -207,7 +211,10 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         String prefix = autocompleteRequest.getPrefix();
-        List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
+        AutocompleteParameters parameters = AutocompleteParameters.newInstance();
+        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.TRUE);
+        parameters.put(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, Boolean.TRUE);
+        List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
         List<Facet> facets = new ArrayList<Facet>(5);
         List<String> prefixTokens = Collections.emptyList();
         if (!prefix.isEmpty()) {

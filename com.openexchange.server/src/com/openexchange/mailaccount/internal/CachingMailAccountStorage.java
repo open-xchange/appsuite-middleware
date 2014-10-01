@@ -110,16 +110,21 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return delegate;
     }
 
-    static CacheKey newCacheKey(final CacheService cacheService, final int id, final int user, final int cid) {
+    static CacheKey newCacheKey(CacheService cacheService, int id, int user, int cid) {
         return cacheService.newCacheKey(cid, String.valueOf(id), String.valueOf(user));
     }
 
+    static CacheKey accountsCacheKey(CacheService cacheService, int user, int cid) {
+        return cacheService.newCacheKey(cid, String.valueOf(user));
+    }
+
     @Override
-    public void invalidateMailAccount(final int id, final int user, final int cid) throws OXException {
+    public void invalidateMailAccount(int id, int user, int cid) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
-            final Cache cache = cacheService.getCache(REGION_NAME);
+            Cache cache = cacheService.getCache(REGION_NAME);
             cache.remove(newCacheKey(cacheService, id, user, cid));
+            cache.remove(accountsCacheKey(cacheService, user, cid));
             cache.invalidateGroup(Integer.toString(cid));
         }
         final FolderMap folderMap = FolderMapManagement.getInstance().optFor(user, cid);
@@ -142,8 +147,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 db.backWritableAfterReading(cid, con);
             }
 
+            Cache cache = cacheService.getCache(REGION_NAME);
+            cache.remove(accountsCacheKey(cacheService, user, cid));
             for (final int id : ids) {
-                final Cache cache = cacheService.getCache(REGION_NAME);
                 cache.remove(newCacheKey(cacheService, id, user, cid));
                 cache.invalidateGroup(Integer.toString(cid));
             }
@@ -271,18 +277,19 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     private MailAccount getMailAccount0(final int id, final int user, final int cid, final Connection con) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getMailAccount(id, user, cid, con);
         }
-        final CacheKey key = newCacheKey(cacheService, id, user, cid);
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object object = cache.get(key);
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        CacheKey key = newCacheKey(cacheService, id, user, cid);
+        Object object = cache.get(key);
         if (object == null) {
             /*
              * Not contained in cache. Load with specified connection
              */
-            final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
+            MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
             cache.put(key, mailAccount, false);
         }
         /*
@@ -291,15 +298,32 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (object instanceof MailAccount) {
             return (MailAccount) object;
         }
-        final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
+        MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
         cache.put(key, mailAccount, false);
         return mailAccount;
     }
 
     @Override
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws OXException {
-        final int[] ids = delegate.getUserMailAccountIDs(user, cid);
-        final MailAccount[] accounts = new MailAccount[ids.length];
+        int[] ids;
+        {
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (cacheService == null) {
+                ids = delegate.getUserMailAccountIDs(user, cid);
+            } else {
+                Cache cache = cacheService.getCache(REGION_NAME);
+                CacheKey key = accountsCacheKey(cacheService, user, cid);
+                Object object = cache.get(key);
+                if (object instanceof int[]) {
+                    ids = (int[]) object;
+                } else {
+                    ids = delegate.getUserMailAccountIDs(user, cid);
+                    cache.put(key, ids, false);
+                }
+            }
+        }
+
+        MailAccount[] accounts = new MailAccount[ids.length];
         for (int i = 0; i < accounts.length; i++) {
             accounts[i] = getMailAccount(ids[i], user, cid);
         }

@@ -57,6 +57,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
@@ -622,7 +624,7 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    public SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         /*
          * prepare select
          */
@@ -643,7 +645,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */
-            List<Contact> contacts = executor.selectByAutoComplete(connection, contextID, parentFolderIDs, query, requireEmail,
+            List<Contact> contacts = executor.selectByAutoComplete(connection, contextID, parentFolderIDs, query, parameters,
                 queryFields.getContactDataFields(), sortOptions);
             if (null != contacts && 0 < contacts.size()) {
                 /*
