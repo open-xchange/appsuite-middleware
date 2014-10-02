@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-08 21:46+0200\n"
+"PO-Revision-Date: 2014-09-23 21:03+0200\n"
 "Last-Translator: Nicolas Ternisien <nicolas@bureau-cornavin.com>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_FR\n"
@@ -2262,8 +2262,8 @@ msgid ""
 "A Google Drive server error occurred with HTTP status code %1$s. Error "
 "message: %2$s"
 msgstr ""
-"Une erreur du serveur Google Drive s'est produite avec le code d'état HTTP %"
-"1$s. Message d'erreur : %2$s"
+"Une erreur du serveur Google Drive s'est produite avec le code d'état HTTP "
+"%1$s. Message d'erreur : %2$s"
 
 #. Google Drive URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
@@ -2434,6 +2434,11 @@ msgid ""
 msgstr ""
 "Le quota autorisé est dépassé. Veuillez supprimer certains éléments si vous "
 "souhaitez en enregistrer de nouveaux."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "L'archive ZIP dépasse la taille maximale autorisée de %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3763,11 +3768,11 @@ msgstr ""
 "Le JSlob référencé %1$s ne doit pas être mis en place pour le service %2$s. "
 "Rien ne sera fait."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "L'adresse de courrier électronique %1$s est invalide."
 
@@ -7264,6 +7269,38 @@ msgstr ""
 "autorisés sont : %1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Le mot de passe actuel n'est pas valable. Veuillez saisir le bon mot de passe "
+"et réessayer."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Le mot de passe est manquant. Veuillez saisir le mot de passe actuel et "
+"réessayer."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"Le nouveau mot de passe est manquant. Veuillez saisir le nouveau mot de passe "
+"et réessayer."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -8753,6 +8790,10 @@ msgid ""
 msgstr ""
 "Les droits administratifs du propriétaire « %1$s » dans le dossier « %2$s » "
 "ont été restaurés."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Vous devez saisir un nom de dossier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11831,9 +11872,6 @@ msgstr "Zoulou"
 
 #~ msgid "This link already exists."
 #~ msgstr "Le lien existe déjà."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Nom de dossier invalide."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Impossible de se connecter au serveur de courrier."
@@ -16354,10 +16392,6 @@ msgstr "Zoulou"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "La chaîne saisie « %1$s » n'est pas un nombre."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr ""
-#~ "La valeur entière dépasse la valeur maximale autorisée (65535) : %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Valeur de l'en-tête « Content-Type » invalide : %1$s"

@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: errors.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-13 12:25+0200\n"
+"PO-Revision-Date: 2014-09-24 21:25+0200\n"
 "Last-Translator: Ivar Snaaijer\n"
 "Language-Team: Dutch <kde-i18n-doc@kde.org>\n"
 "Language: nl\n"
@@ -1642,8 +1642,8 @@ msgstr "Er is een Box fout opgetreden: %1$s"
 msgid ""
 "A Box server error occurred with HTTP status code %1$s. Error message: %2$s"
 msgstr ""
-"Er is een Box serverfout opgetreden met HTTP statuscode %1$s. Foutmelding: %"
-"2$s"
+"Er is een Box serverfout opgetreden met HTTP statuscode %1$s. Foutmelding: "
+"%2$s"
 
 #. Invalid Box URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:68
@@ -2117,8 +2117,7 @@ msgid ""
 "%2$s"
 msgstr ""
 "Er is een Copy.com serverfout opgetreden met HTTP statuscode %1$s. "
-"Foutmelding: "
-"%2$s"
+"Foutmelding: %2$s"
 
 #. Invalid Copy.com URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:68
@@ -2172,8 +2171,7 @@ msgid ""
 "%2$s"
 msgstr ""
 "Er is een Dropbox serverfout opgetreden met HTTP statuscode %1$s. "
-"Foutmelding: "
-"%2$s"
+"Foutmelding: %2$s"
 
 #. Invalid Dropbox URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:68
@@ -2273,8 +2271,7 @@ msgid ""
 "%2$s"
 msgstr ""
 "Er is een OneDrive serverfout opgetreden met HTTP statuscode %1$s. "
-"Foutmelding: "
-"%2$s"
+"Foutmelding: %2$s"
 
 #. Invalid OneDrive URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:68
@@ -2392,6 +2389,11 @@ msgid ""
 msgstr ""
 "Het toegestane quota is overschreden. Verwijder alstublieft wat items zodat "
 "u weer nieuwe kan maken."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "ZIP archive overschrijdt maximaal toegestane grote van %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3689,11 +3691,11 @@ msgstr ""
 "Verwezen JSlob %1$s mag niet ingesteld zijn voor dienst %2$s. Er zal niets "
 "uitgevoerd worden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "Het e-mailadres \"%1$s\" is ongeldig "
 
@@ -7191,6 +7193,38 @@ msgstr ""
 "toegestane tekens zijn: %1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Het huidige wachtwoord is ongeldig. Geef alstublieft het correcte wachtwoord "
+"en probeer opnieuw."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Het huidige wachtwoord is niet ingevoerd. Geef alstublieft uw huidige "
+"wachtwoord en probeer opnieuw."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"Het nieuwe wachtwoord is niet ingevoerd. Geef alstublieft uw nieuwe "
+"wachtwoord en probeer opnieuw."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -7411,9 +7445,8 @@ msgid ""
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
 "De taak kon niet worden opgeslagen. Verkort de \"%1$s\" en probeer het "
-"opnieuw. "
-"Huidige lengte \"%3$d\" is langer dan de toegestane lengte van \"%2$d\" "
-"tekens."
+"opnieuw. Huidige lengte \"%3$d\" is langer dan de toegestane lengte van "
+"\"%2$d\" tekens."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
@@ -8607,6 +8640,10 @@ msgid ""
 msgstr ""
 "De administratieve rechten van de eigenaar \"%1$s\" in map \"%2$s\" zijn "
 "hersteld."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "U moet een nieuwe mapnaam ingeven."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11642,9 +11679,6 @@ msgstr "Zoeloe"
 
 #~ msgid "This link already exists."
 #~ msgstr "Deze link bestaat reeds."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Ongeldige mapnaam."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Het is niet mogelijk verbinding met de mailserver te maken."
@@ -15943,10 +15977,6 @@ msgstr "Zoeloe"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "Ingevoerde waarde \"%1$s\" is geen getal."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr ""
-#~ "Integer-waarde overschrijdt maximaal toegestane waarde (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "ongeldige waarde voor koptekst content-type"

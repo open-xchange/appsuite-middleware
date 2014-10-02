@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-09 01:49+0200\n"
+"PO-Revision-Date: 2014-09-28 12:02+0200\n"
 "Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu\n"
@@ -2091,9 +2091,7 @@ msgstr "Copy.com hiba történt: %1$s"
 msgid ""
 "A Copy.com server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
-msgstr ""
-"Copy.com kiszolgálóhiba történt, a HTTP-állapotkód: %1$s. Üzenet: "
-"%2$s"
+msgstr "Copy.com kiszolgálóhiba történt, a HTTP-állapotkód: %1$s. Üzenet: %2$s"
 
 #. Invalid Copy.com URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:68
@@ -2145,9 +2143,7 @@ msgstr "Dropbox-hiba történt: %1$s"
 msgid ""
 "A Dropbox server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
-msgstr ""
-"Dropbox kiszolgálóhiba történt, a HTTP-állapotkód: %1$s. Üzenet: "
-"%2$s"
+msgstr "Dropbox kiszolgálóhiba történt, a HTTP-állapotkód: %1$s. Üzenet: %2$s"
 
 #. Invalid Dropbox URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:68
@@ -2195,8 +2191,7 @@ msgid ""
 "A Google Drive server error occurred with HTTP status code %1$s. Error "
 "message: %2$s"
 msgstr ""
-"Google Drive kiszolgálóhiba történt, a HTTP-állapotkód: %1$s. Üzenet: "
-"%2$s"
+"Google Drive kiszolgálóhiba történt, a HTTP-állapotkód: %1$s. Üzenet: %2$s"
 
 #. Google Drive URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
@@ -2243,9 +2238,7 @@ msgstr "OneDrive hiba történt: %1$s"
 msgid ""
 "A OneDrive server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
-msgstr ""
-"OneDrive kiszolgálóhiba történt, a HTTP-állapotkód: %1$s. Üzenet: "
-"%2$s"
+msgstr "OneDrive kiszolgálóhiba történt, a HTTP-állapotkód: %1$s. Üzenet: %2$s"
 
 #. Invalid OneDrive URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:68
@@ -2359,6 +2352,11 @@ msgid ""
 "ones."
 msgstr ""
 "Az engedélyezett kvóta elérve. Töröljön néhány elemet az újak létrehozásához."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "A ZIP archívum meghaladja a legnagyobb engedélyezett értéket (%1$s)"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3636,11 +3634,11 @@ msgstr ""
 "A hivatkozott JSlob (%1$s) nem állítható be a(z) %2$s szolgáltatáshoz. Semmi "
 "sem fog történni."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "A(z) %1$s e-mail cím hibás."
 
@@ -7047,8 +7045,36 @@ msgid ""
 "The entered password is illegal and can't be saved. Allowed characters are: "
 "%1$s"
 msgstr ""
-"A megadott jelszó érvénytelen és nem menthető. Az engedélyezett karakterek: %"
-"1$s"
+"A megadott jelszó érvénytelen és nem menthető. Az engedélyezett karakterek: "
+"%1$s"
+
+#. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"A jelenlegi jelszó helytelen. Írja be a jelenlegi jelszavát, és próbálja újra."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"A jelenlegi jelszó hiányzik. Írja be a jelenlegi jelszavát, és próbálja újra."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Az új jelszó hiányzik. Írja be az új jelszavát, és próbálja újra."
 
 #. *
 #. * User is missing for the reminder.
@@ -8464,6 +8490,10 @@ msgid ""
 msgstr ""
 "„%1$s” tulajdonos adminisztrációs jogosultságai helyre lettek állítva a(z) "
 "„%2$s” mappán."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Meg kell adnia egy mappanevet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11499,9 +11529,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "A hivatkozás már létezik."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Érvénytelen mappanév."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Nem lehet kapcsolódni a levélkiszolgálóhoz."
@@ -15772,10 +15799,6 @@ msgstr "Zulu"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "A megadott  „%1$s” érték nem szám."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr ""
-#~ "Az egész érték meghaladja a legnagyobb engedélyezett értéket (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Érvénytelen content-type fejlécérték: %1$s"
