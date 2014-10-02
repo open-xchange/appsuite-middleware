@@ -1,3 +1,9 @@
+open-xchange-realtime-events (7.6.0-6) stable; urgency=medium
+
+  * Third release candidate for 7.6.1
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Thu, 02 Oct 2014 12:04:56 +0000
+
 open-xchange-realtime-events (7.6.0-5) stable; urgency=low
 
   * Second release candidate for 7.6.1
