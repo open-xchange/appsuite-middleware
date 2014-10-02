@@ -11,9 +11,9 @@ msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-13 11:14+0200\n"
-"Last-Translator: Robert Kratky <rkratky@gmail.com>\n"
-"Language-Team: Czech <>\n"
+"PO-Revision-Date: 2014-09-28 11:35+0200\n"
+"Last-Translator: Robert Krátký <rkratky@gmail.com>\n"
+"Language-Team: Czech <kde-i18n-doc@kde.org>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -778,7 +778,8 @@ msgstr "Naplánujte událost na jindy. Původní datum: %1$s. Nové datum: %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
-"Naplánujte událost na jindy. Původní datum a čas: %1$s. Nové datum a čas: %2$s"
+"Naplánujte událost na jindy. Původní datum a čas: %1$s. Nové datum a čas: "
+"%2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
@@ -2193,8 +2194,8 @@ msgid ""
 "A Google Drive server error occurred with HTTP status code %1$s. Error "
 "message: %2$s"
 msgstr ""
-"Došlo k chybě serveru Google Drive. Stavový kód HTTP: %1$s. Chybová zpráva: %"
-"2$s"
+"Došlo k chybě serveru Google Drive. Stavový kód HTTP: %1$s. Chybová zpráva: "
+"%2$s"
 
 #. Google Drive URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
@@ -2356,6 +2357,11 @@ msgid ""
 msgstr ""
 "Povolená kvóta byla naplněna. Smažte, prosím, některé položky, aby bylo "
 "možné ukládat nové."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "Archív ZIP je větší než maximální povolená velikost %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3623,11 +3629,11 @@ msgstr ""
 "Odkazovaný JSlob %1$s nesmí být pro službu %2$s nastaven. Nic nebude "
 "provedeno."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "E-mailová adresa %1$s není platná."
 
@@ -4566,8 +4572,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
 msgid "The recipient you tried to reach is currently unavailable: %1$s"
 msgstr ""
-"Příjemce, kterého jste se pokoušeli zastihnout, je v tuto chvíli nedostupný: %"
-"1$s"
+"Příjemce, kterého jste se pokoušeli zastihnout, je v tuto chvíli nedostupný: "
+"%1$s"
 
 #. * Your session is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:92
@@ -7007,6 +7013,33 @@ msgstr ""
 "znaky: %1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Aktuální heslo není správné. Zadejte, prosím, správné heslo a zkuste to znovu."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr "Chybí aktuální heslo. Zadejte, prosím, své heslo a zkuste to znovu."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Nové heslo chybí. Zadejte, prosím, své nové heslo a zkuste to znovu."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -8379,6 +8412,10 @@ msgid ""
 "restored."
 msgstr ""
 "Administrátorská práva vlastníka „%1$s“ ve složce „%2$s“ byla obnovena."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Musíte zadat název složky."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11405,9 +11442,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "Odkaz již existuje."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Neplatný název složky."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Nelze se připojit poštovnímu serveru."
@@ -15575,10 +15609,6 @@ msgstr "Zulu"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "Vstupní řetězec „%1$s“ není číslo."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr ""
-#~ "Celočíselná hodnota převyšuje maximální povolenou hodnotu (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Neplatná hodnota hlavičky content-type: %1$s"
