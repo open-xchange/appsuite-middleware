@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-06 15:00+0200\n"
+"PO-Revision-Date: 2014-09-23 12:46+0200\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -1605,7 +1605,8 @@ msgstr "Novšie verzie klientskej aplikácie je k dispozícii na stiahnutie."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
 msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
-msgstr "Vzor „%1$s“ je neplatný. Prosím, použite platný vzor a skúste to znova."
+msgstr ""
+"Vzor „%1$s“ je neplatný. Prosím, použite platný vzor a skúste to znova."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -2359,6 +2360,11 @@ msgid ""
 msgstr ""
 "Bola dosiahnutá povolená kvóta. Prosím, odstráňte niektoré položky, aby ste "
 "mohli uložiť nové."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "Archív ZIP prekračuje maximálnu povolenú veľkosť %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3640,11 +3646,11 @@ msgid ""
 msgstr ""
 "Odkazovaný JSlob %1$s nesmie byť nastavený pre službu %2$s. Nevykoná sa nič."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "Emailová adresa %1$s je neplatná."
 
@@ -7030,6 +7036,35 @@ msgid ""
 msgstr "Zadané heslo je neplatné a nemožno ho uložiť. Povolené znaky sú: %1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Aktuálne heslo je príliš slabé. Prosím, skúste to znova s zložitejším "
+"heslom."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Aktuálne heslo chýba. Prosím, zadajte svoje aktuálne heslo a skúste znova."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Nové heslo chýba. Prosím, zadajte svoje nové heslo a skúste znova."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -8431,6 +8466,10 @@ msgid ""
 "restored."
 msgstr ""
 "Administratívne oprávnenia vlastníka „%1$s“ v priečinku „%2$s“ boli obnovené."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Musíte zadať názov priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11462,9 +11501,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "Tento odkaz už existuje."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Neplatný názov priečinka."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Nepodarilo sa pripojiť k poštovému serveru."
@@ -15708,10 +15744,6 @@ msgstr "Zulu"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "Vstupný reťazec „%1$s“ nie je číslo."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr ""
-#~ "Celočíselná hodnota prekračuje maximálnu povolenú hodnotu (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Neplatná hodnota hlavičky content-type: %1$s"
