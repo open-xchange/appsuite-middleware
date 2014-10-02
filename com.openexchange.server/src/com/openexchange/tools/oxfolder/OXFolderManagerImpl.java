@@ -478,7 +478,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (FolderCacheManager.isInitialized()) {
                     final FolderCacheManager manager = FolderCacheManager.getInstance();
                     manager.removeFolderObject(parentFolder.getObjectID(), ctx);
-                    // manager.putFolderObject(parentFolder, ctx);
+                    manager.loadFolderObject(parentFolder.getObjectID(), ctx, wc);
                     folderObj.fill(manager.getFolderObject(fuid, false, ctx, wc));
                 } else {
                     folderObj.fill(FolderObject.loadFolderObjectFromDB(fuid, ctx, wc));
@@ -581,6 +581,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     if (parentFolderID > 0) {
                         /*
                          * Update parent, too
+                         * it is needed to do this by removing the folder object so the invalidation is distributed every time also in the
+                         * event that it is not in the local cache
                          */
                         cacheManager.removeFolderObject(parentFolderID, ctx);
                         cacheManager.loadFolderObject(parentFolderID, ctx, wc);
@@ -1545,6 +1547,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                  * Update cache
                  */
                 if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
+                    FolderCacheManager.getInstance().removeFolderObject(parentFolder.getObjectID(), ctx);
                     FolderCacheManager.getInstance().loadFolderObject(parentFolder.getObjectID(), ctx, wc);
                 }
                 /*

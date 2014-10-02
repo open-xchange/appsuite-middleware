@@ -285,6 +285,9 @@ public final class FolderCacheManager {
             // Conditional put into cache: Put only if absent.
             if (null != readCon) {
                 putIfAbsentInternal(new LoadingFolderProvider(objectId, ctx, readCon), ctx, null);
+            } else {
+                // This will save one folderCache.get call additionaly, it will have the same effect as the later called putFolderObject(fo, ctx, false == fromCache, null);
+                putFolderObject(loadFolderObjectInternal(objectId, ctx, readCon), ctx, false, null);
             }
         } else {
             // Forced put into cache: Always put.
@@ -295,6 +298,7 @@ public final class FolderCacheManager {
         if (object instanceof FolderObject) {
             return ((FolderObject) object).clone();
         }
+        // It should be nearly impossible to end at this point but to be sure to always return a working FolderObject, the following lines are necessary
         final FolderObject fo = loadFolderObjectInternal(objectId, ctx, readCon);
         putFolderObject(fo, ctx, false == fromCache, null);
         return fo.clone();
