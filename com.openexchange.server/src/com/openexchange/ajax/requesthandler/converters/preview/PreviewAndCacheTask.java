@@ -164,8 +164,14 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                     }
                 }
             }
-        } catch (Exception oxe) {
-            LOG.error("Error while trying to get PreviewDocument.", oxe);
+        } catch (OXException oxe) {
+            if (PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.equals(oxe)) {
+                LOG.debug("Thumbnail has not been generated in time.", oxe);
+            } else {
+                LOG.error("Error while trying to get PreviewDocument.", oxe);
+            }
+        } catch (Exception e) {
+            LOG.error("Error while trying to get PreviewDocument.", e);
         }
         return null;
     }
