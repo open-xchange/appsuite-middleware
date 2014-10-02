@@ -108,10 +108,10 @@ public class ExceptionUtils {
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                    logBuilder.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                    logBuilder.append(Strings.getLineSeparator()).append(entry.getKey()).append('=').append(entry.getValue());
                 }
                 logBuilder.deleteCharAt(0);
-                logBuilder.append("\n\n");
+                logBuilder.append(Strings.getLineSeparator()).append(Strings.getLineSeparator());
                 logBuilder.append(MARKER);
                 logBuilder.append("Thread death");
                 logBuilder.append(MARKER);
@@ -153,9 +153,7 @@ public class ExceptionUtils {
         if (t instanceof VirtualMachineError) {
             final Map<String, String> taskProperties = LogProperties.getPropertyMap();
             if (null == taskProperties) {
-                LOG.error(
-                    MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
-                    t);
+                LOG.error(MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER, t);
             } else {
                 final StringBuilder logBuilder = new StringBuilder(512);
                 final Map<String, String> sorted = new TreeMap<String, String>();
@@ -167,10 +165,10 @@ public class ExceptionUtils {
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                    logBuilder.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                    logBuilder.append(Strings.getLineSeparator()).append(entry.getKey()).append('=').append(entry.getValue());
                 }
                 logBuilder.deleteCharAt(0);
-                logBuilder.append("\n\n");
+                logBuilder.append(Strings.getLineSeparator()).append(Strings.getLineSeparator());
                 logBuilder.append(MARKER);
                 logBuilder.append("The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.");
                 logBuilder.append(MARKER);
