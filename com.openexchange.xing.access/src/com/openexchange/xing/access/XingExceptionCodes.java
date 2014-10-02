@@ -110,8 +110,7 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Bad or expired access token. Need to re-authenticate user.
      */
-    UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", Category.CATEGORY_CONFIGURATION, 15,
-        XingExceptionMessages.UNLINKED_ERROR_MSG),
+    UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", Category.CATEGORY_USER_INPUT, 15, XingExceptionMessages.UNLINKED_ERROR_MSG),
     /**
      * Invalid E-Mail address: %1$s
      */
