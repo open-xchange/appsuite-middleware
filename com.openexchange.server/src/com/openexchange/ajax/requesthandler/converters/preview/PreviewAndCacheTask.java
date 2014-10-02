@@ -164,6 +164,9 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
             } else {
                 LOG.error("Error while trying to get PreviewDocument.", oxe);
             }
+        } catch (java.util.concurrent.CancellationException e) {
+            // Cancelled...
+            LOG.debug("Thumbnail generation has been cancelled.", e);
         } catch (Exception e) {
             LOG.error("Error while trying to get PreviewDocument.", e);
         }
