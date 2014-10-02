@@ -1,6 +1,7 @@
 * 2014-10-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 34608: Cleanse "unified-mail enabled" information from session parameters
+ - Fix for bug 34728: Fixed start-up order inside capabilities bundle; ensure cache configuration is done prior to registering capabilities service
 
 * 2014-10-02 - tobias.friedrich@open-xchange.com
 
