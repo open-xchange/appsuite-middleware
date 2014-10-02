@@ -120,8 +120,7 @@ public class ExceptionUtils {
             throw (ThreadDeath) t;
         }
         if (t instanceof OutOfMemoryError) {
-            OutOfMemoryError oom = (OutOfMemoryError) t;
-            String message = oom.getMessage();
+            String message = t.getMessage();
             if ("unable to create new native thread".equalsIgnoreCase(message)) {
                 // Dump all the threads to the log
                 Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
@@ -149,34 +148,40 @@ public class ExceptionUtils {
                     // Failed for any reason...
                 }
             }
+            logVirtualMachineError(t);
+            throw (OutOfMemoryError) t;
         }
         if (t instanceof VirtualMachineError) {
-            final Map<String, String> taskProperties = LogProperties.getPropertyMap();
-            if (null == taskProperties) {
-                LOG.error(MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER, t);
-            } else {
-                final StringBuilder logBuilder = new StringBuilder(512);
-                final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Map.Entry<String, String> entry : taskProperties.entrySet()) {
-                    final String propertyName = entry.getKey();
-                    final String value = entry.getValue();
-                    if (null != value) {
-                        sorted.put(propertyName, value);
-                    }
-                }
-                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                    logBuilder.append(Strings.getLineSeparator()).append(entry.getKey()).append('=').append(entry.getValue());
-                }
-                logBuilder.deleteCharAt(0);
-                logBuilder.append(Strings.getLineSeparator()).append(Strings.getLineSeparator());
-                logBuilder.append(MARKER);
-                logBuilder.append("The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.");
-                logBuilder.append(MARKER);
-                LOG.error(logBuilder.toString(), t);
-            }
+            logVirtualMachineError(t);
             throw (VirtualMachineError) t;
         }
         // All other instances of Throwable will be silently swallowed
+    }
+
+    private static void logVirtualMachineError(final Throwable t) {
+        Map<String, String> taskProperties = LogProperties.getPropertyMap();
+        if (null == taskProperties) {
+            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", MARKER, MARKER, t);
+        } else {
+            StringBuilder logBuilder = new StringBuilder(512);
+            Map<String, String> sorted = new TreeMap<String, String>();
+            for (Map.Entry<String, String> entry : taskProperties.entrySet()) {
+                String propertyName = entry.getKey();
+                String value = entry.getValue();
+                if (null != value) {
+                    sorted.put(propertyName, value);
+                }
+            }
+            for (Map.Entry<String, String> entry : sorted.entrySet()) {
+                logBuilder.append(Strings.getLineSeparator()).append(entry.getKey()).append('=').append(entry.getValue());
+            }
+            logBuilder.deleteCharAt(0);
+            logBuilder.append(Strings.getLineSeparator()).append(Strings.getLineSeparator());
+            logBuilder.append(MARKER);
+            logBuilder.append("The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.");
+            logBuilder.append(MARKER);
+            LOG.error(logBuilder.toString(), t);
+        }
     }
 
     private static String surroundWithMarker(final String message) {
