@@ -166,7 +166,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
                         removeFromRunning = true;
                     }
                 }
-                return getFrom(previewFuture, threshold);
+                return removeFromRunning ? getFrom(previewFuture, threshold) : null;
             } finally {
                 if (removeFromRunning) {
                     RUNNING.remove(cacheKey);
