@@ -49,21 +49,25 @@
 
 package com.openexchange.calendar.itip.analyzers;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnalyzer;
 import com.openexchange.calendar.itip.ITipAnalyzerService;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
+import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.data.conversion.ical.itip.ITipSpecialHandling;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultITipAnalyzerService}
@@ -72,11 +76,16 @@ import com.openexchange.session.Session;
  */
 public class DefaultITipAnalyzerService implements ITipAnalyzerService {
 
+    public static final Integer RAKING = 0;
+
     private final Map<ITipMethod, ITipAnalyzer> analyzers = new EnumMap<ITipMethod, ITipAnalyzer>(ITipMethod.class);
 
     private final ITipAnalyzer internalAnalyzer;
 
+    private ServiceLookup services;
+
     public DefaultITipAnalyzerService(ITipIntegrationUtility util, ServiceLookup services) {
+        this.services = services;
         add(new AddITipAnalyzer(util, services));
         add(new CancelITipAnalyzer(util, services));
         add(new DeclineCounterITipAnalyzer(util, services));
@@ -95,12 +104,23 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
     }
 
     @Override
-    public List<ITipAnalysis> analyze(List<ITipMessage> messages, String format, Session session, Map<String, String> mailHeader) throws OXException {
+    public List<ITipAnalysis> analyze(InputStream ical, String format, ServerSession session, Map<String, String> mailHeader) throws OXException {
+        ITipParser itipParser = services.getService(ITipParser.class);
+        List<ConversionError> errors = new ArrayList<ConversionError>();
+        List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        TimeZone tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        int owner = 0;
+        if (mailHeader.containsKey("com.openexchange.conversion.owner")) {
+            owner = Integer.parseInt(mailHeader.get("com.openexchange.conversion.owner"));
+        }
+
+        List<ITipMessage> messages = itipParser.parseMessage(ical, tz, session.getContext(), owner, errors, warnings);
+
         List<ITipAnalysis> result = new ArrayList<ITipAnalysis>(messages.size());
         for (ITipMessage message : messages) {
             ITipMethod method = message.getMethod();
             if (mailHeader.containsKey("X-Mailer") && mailHeader.get("X-Mailer").toLowerCase().contains("outlook")) {
-            	message.addFeature(ITipSpecialHandling.MICROSOFT);
+                message.addFeature(ITipSpecialHandling.MICROSOFT);
             }
             if (method == ITipMethod.COUNTER && message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
                 method = ITipMethod.REPLY;
@@ -116,7 +136,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
             if (analyzer == null) {
                 // TODO: Error
             } else {
-            	result.add(analyzer.analyze(message, mailHeader, format, session));
+                result.add(analyzer.analyze(message, mailHeader, format, session));
             }
         }
 
