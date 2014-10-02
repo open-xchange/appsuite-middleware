@@ -143,6 +143,16 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                     // Nothing to sync to cache
                     return null;
                 }
+                if (PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.equals(e)) {
+                    // Thumbnail has not been generated in time
+                    LOG.debug("Thumbnail has not been generated in time.", e);
+                    return null;
+                }
+                if (PreviewExceptionCodes.NO_PREVIEW_SERVICE.equals(e)) {
+                    // Unable to handle file
+                    LOG.debug("", e);
+                    return null;
+                }
                 throw e;
             }
 
@@ -157,12 +167,6 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                         throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
                     }
                 }
-            }
-        } catch (OXException oxe) {
-            if (PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.equals(oxe)) {
-                LOG.debug("Thumbnail has not been generated in time.", oxe);
-            } else {
-                LOG.error("Error while trying to get PreviewDocument.", oxe);
             }
         } catch (java.util.concurrent.CancellationException e) {
             // Cancelled...
