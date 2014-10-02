@@ -62,6 +62,7 @@ import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindPropNamesMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
@@ -109,19 +110,22 @@ public class WebdavPropfindAction extends AbstractAction {
 		}
 
         final LoadingHints loadingHints = new LoadingHints();
-		ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, loadingHints);
+        ResourceMarshaller marshaller;
+        if (null != req.getHeader("Depth")) {
+            int depth = 0;
+            if(req.getHeader("depth").trim().equalsIgnoreCase("infinity")) {
+                depth = WebdavCollection.INFINITY;
+            } else {
+                depth = Integer.parseInt(req.getHeader("Depth"));
+            }
 
-		if(null != req.getHeader("Depth")) {
-			int depth = 0;
-			if(req.getHeader("depth").trim().equalsIgnoreCase("infinity")) {
-				depth = WebdavCollection.INFINITY;
-			} else {
-				depth = Integer.parseInt(req.getHeader("Depth"));
-			}
+            PropertiesMarshaller delegate = getMarshaller(req, forceAllProp, requestBody, loadingHints);
+            marshaller = new RecursiveMarshaller(delegate, depth, protocol.getRecursiveMarshallingLimit());
+            loadingHints.setDepth(depth);
+        } else {
+            marshaller = getMarshaller(req, forceAllProp, requestBody, loadingHints);
+        }
 
-			marshaller = new RecursiveMarshaller(marshaller, depth);
-			loadingHints.setDepth(depth);
-		}
 		preLoad(loadingHints);
 		if (marshaller != null) {
 			response.addContent(marshaller.marshal(req.getResource()));
@@ -136,11 +140,11 @@ public class WebdavPropfindAction extends AbstractAction {
 		}
 	}
 
-    protected ResourceMarshaller getMarshaller(final WebdavRequest req, boolean forceAllProp, Document requestBody, LoadingHints loadingHints) {
+    protected PropertiesMarshaller getMarshaller(final WebdavRequest req, boolean forceAllProp, Document requestBody, LoadingHints loadingHints) {
         if (loadingHints == null) {
             loadingHints = new LoadingHints();
         }
-        ResourceMarshaller marshaller = null;
+        PropertiesMarshaller marshaller = null;
 		loadingHints.setUrl(req.getUrl());
 
 		if(null != requestBody && null != requestBody.getRootElement().getChild("propname", DAV_NS)) {
