@@ -1,3 +1,7 @@
+* 2014-10-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34608: Cleanse "unified-mail enabled" information from session parameters
+
 * 2014-10-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34283: Introduced a hard limit when marshalling the XML elements of a WebDAV response with a depth >= 1 recursively

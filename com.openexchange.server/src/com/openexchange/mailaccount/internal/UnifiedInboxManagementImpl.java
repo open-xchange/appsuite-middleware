@@ -69,6 +69,9 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
@@ -170,10 +173,10 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     @Override
     public void deleteUnifiedINBOX(final int userId, final int contextId, final Connection con) throws OXException {
         try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
             // Determine the ID of the Unified Mail account for given user
-            final MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
+            MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
             int id = -1;
             for (int i = 0; i < existingAccounts.length && id < 0; i++) {
                 final MailAccount mailAccount = existingAccounts[i];
@@ -183,6 +186,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             }
             // Delete the Unified Mail account
             if (id >= 0) {
+                dropSessionParameter(userId, contextId);
                 if (null == con) {
                     storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false);
                 } else {
@@ -192,6 +196,23 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
         } catch (final OXException e) {
             throw e;
         }
+    }
+
+    private void dropSessionParameter(final int userId, final int contextId) {
+        Task<Void> task = new AbstractTask<Void>() {
+
+            @Override
+            public Void call() {
+                SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                if (null != service) {
+                    for (Session session : service.getSessions(userId, contextId)) {
+                        session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
+                    }
+                }
+                return null;
+            }
+        };
+        ThreadPools.getThreadPool().submit(task);
     }
 
     @Override
