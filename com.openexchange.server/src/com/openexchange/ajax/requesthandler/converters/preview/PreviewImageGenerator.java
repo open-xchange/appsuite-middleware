@@ -186,21 +186,15 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
         } catch (InterruptedException ie) {
             // Keep interrupted state
             Thread.currentThread().interrupt();
-            if (null != previewFuture) {
-                previewFuture.cancel(true);
-            }
+            previewFuture.cancel(true);
             throw PreviewExceptionCodes.ERROR.create(ie, ie.getMessage());
         } catch (ExecutionException ee) {
             // Failed to generate preview image
-            if (null != previewFuture) {
-                previewFuture.cancel(true);
-            }
+            previewFuture.cancel(true);
             throw ThreadPools.launderThrowable(ee, OXException.class);
         } catch (TimeoutException te) {
             // Preview image has not been generated in time
-            if (null != previewFuture) {
-                previewFuture.cancel(true);
-            }
+            previewFuture.cancel(true);
             throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
         }
     }
