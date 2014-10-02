@@ -82,17 +82,11 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
     private static final Logger LOG = LoggerFactory.getLogger(PreviewAndCacheTask.class);
 
     private final PreviewService previewService;
-
     private final long threshold;
-
     private final AJAXRequestResult result;
-
     private final AJAXRequestData requestData;
-
     private final ServerSession session;
-
     private final boolean respectLanguage;
-
     private final CacheKeyGenerator cacheKeyGenerator;
 
     /**
@@ -107,7 +101,7 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
      * @param cacheKeyGenerator The {@link CacheKeyGenerator} to use when adding the generated preview to cache
      * @throws IllegalArgumentException if any parameter is null
      */
-    public PreviewAndCacheTask(final AJAXRequestResult result, final AJAXRequestData requestData, final ServerSession session, final PreviewService previewService, final long threshold, final boolean respectLanguage, CacheKeyGenerator cacheKeyGenerator) {
+    public PreviewAndCacheTask(AJAXRequestResult result, AJAXRequestData requestData, ServerSession session, PreviewService previewService, long threshold, boolean respectLanguage, CacheKeyGenerator cacheKeyGenerator) {
         super();
         Validate.notNull(result);
         Validate.notNull(requestData);
@@ -157,8 +151,8 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                 if (thumbnail != null) {
                     try {
                         byte[] thumbnailBytes = Streams.stream2bytes(thumbnail);
-                        final String fileName = previewDocument.getMetaData().get("resourcename");
-                        syncToCache(session, requestData, thumbnailBytes, fileName, resourceCache, cacheKey);
+                        String fileName = previewDocument.getMetaData().get("resourcename");
+                        syncToCache(session, thumbnailBytes, fileName, resourceCache, cacheKey);
                     } catch (IOException ioex) {
                         throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
                     }
@@ -180,13 +174,12 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
      * Puts a resource into the {@link ResourceCache}.
      *
      * @param session The current {@link ServerSession}
-     * @param requestData The current {@link AJAXRequestData}
      * @param input The resource we are caching
      * @param fileName The name of the resource we are caching
      * @param resourceCache The {@link ResourceCache to use}
      * @throws OXException if caching fails
      */
-    private void syncToCache(final ServerSession session, AJAXRequestData requestData, final byte[] input, final String fileName, final ResourceCache resourceCache, final String cacheKey) throws OXException {
+    private void syncToCache(ServerSession session, byte[] input, String fileName, ResourceCache resourceCache, String cacheKey) throws OXException {
         if (null != resourceCache && null != cacheKey) {
             try {
                 final CachedResource preview = new CachedResource(input, fileName, "image/jpeg", input.length);
