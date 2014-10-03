@@ -127,7 +127,7 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param dispatcher The dispatcher instance or <code>null</code> to remove
      */
-    public static void setDispatcher(final Dispatcher dispatcher) {
+    public static void setDispatcher(Dispatcher dispatcher) {
         DISPATCHER.set(dispatcher);
     }
 
@@ -145,7 +145,7 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param prefix The prefix or <code>null</code> to remove
      */
-    public static void setPrefix(final String prefix) {
+    public static void setPrefix(String prefix) {
         PREFIX.set(prefix);
     }
 
@@ -193,7 +193,7 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param renderer The renderer
      */
-    public static void registerRenderer(final ResponseRenderer renderer) {
+    public static void registerRenderer(ResponseRenderer renderer) {
         List<ResponseRenderer> expect;
         List<ResponseRenderer> update;
         do {
@@ -218,7 +218,7 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param renderer The renderer
      */
-    public static synchronized void unregisterRenderer(final ResponseRenderer renderer) {
+    public static synchronized void unregisterRenderer(ResponseRenderer renderer) {
         List<ResponseRenderer> expect;
         List<ResponseRenderer> update;
         do {
@@ -246,28 +246,28 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
-    protected void initializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
+    protected void initializeSession(HttpServletRequest req, HttpServletResponse resp) throws OXException {
         if (null != SessionUtility.getSessionObject(req, true)) {
             return;
         }
         // Remember session
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
         ServerSession session;
-        final boolean sessionParamFound;
+        boolean sessionParamFound;
         {
-            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId != null && sessionId.length() > 0) {
                 try {
                     session = SessionUtility.getSession(req, sessionId, sessiondService);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
                         throw e;
                     }
                     // Got a wrong or missing secret
-                    final String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                    String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
                     if (!"null".equals(wrongSecret)) {
                         // No information available or a differing secret
                         throw e;
@@ -289,10 +289,10 @@ public class DispatcherServlet extends SessionServlet {
         boolean mayUseFallbackSession = false;
         boolean mayPerformPublicSessionAuth = false;
         if (!sessionParamFound) {
-            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            final String module = requestDataTools.getModule(PREFIX.get(), req);
-            final String action = requestDataTools.getAction(req);
-            final Dispatcher dispatcher = DISPATCHER.get();
+            AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+            String module = requestDataTools.getModule(PREFIX.get(), req);
+            String action = requestDataTools.getAction(req);
+            Dispatcher dispatcher = DISPATCHER.get();
             mayOmitSession = dispatcher.mayOmitSession(module, action);
             mayUseFallbackSession = dispatcher.mayUseFallbackSession(module, action);
             mayPerformPublicSessionAuth = dispatcher.mayPerformPublicSessionAuth(module, action);
@@ -304,17 +304,17 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp, false);
     }
 
     @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp, false);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp, true);
     }
 
@@ -329,8 +329,8 @@ public class DispatcherServlet extends SessionServlet {
      * @param e The {@code OXException} instance to check
      * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
-    private static boolean ignore(final OXException e) {
-        for (final OXExceptionCode code : IGNOREES) {
+    private static boolean ignore(OXException e) {
+        for (OXExceptionCode code : IGNOREES) {
             if (code.equals(e)) {
                 return true;
             }
@@ -347,23 +347,23 @@ public class DispatcherServlet extends SessionServlet {
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    public void handle(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, final boolean preferStream) throws IOException {
+    public void handle(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws IOException {
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(httpResponse);
 
         AJAXState state = null;
-        final Dispatcher dispatcher = DISPATCHER.get();
+        Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final AJAXRequestData requestData;
-            final ServerSession session;
+            AJAXRequestData requestData;
+            ServerSession session;
             /*
              * Parse & acquire session
              */
             {
-                final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-                final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
-                final String action = requestDataTools.getAction(httpRequest);
+                AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+                String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+                String action = requestDataTools.getAction(httpRequest);
                 session = getSession(httpRequest, dispatcher, module, action);
                 /*
                  * Parse AJAXRequestData
@@ -378,7 +378,7 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Perform request
              */
-            final AJAXRequestResult result = dispatcher.perform(requestData, state, session);
+            AJAXRequestResult result = dispatcher.perform(requestData, state, session);
             /*
              * Check result's type
              */
@@ -387,7 +387,7 @@ public class DispatcherServlet extends SessionServlet {
                 switch (resultType) {
                 case ETAG: {
                     httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                    final long expires = result.getExpires();
+                    long expires = result.getExpires();
                     Tools.setETag(requestData.getETag(), expires > 0 ? expires : -1L, httpResponse);
                     return;
                 }
@@ -413,7 +413,7 @@ public class DispatcherServlet extends SessionServlet {
              * ... and send response
              */
             sendResponse(requestData, result, httpRequest, httpResponse);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 flushSafe(httpResponse);
@@ -453,7 +453,7 @@ public class DispatcherServlet extends SessionServlet {
             } else {
                 handleOXException(e, httpRequest, httpResponse);
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             logException(e);
             handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
         } finally {
@@ -499,20 +499,20 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void logException(final @Nullable Exception e) {
+    private void logException(@Nullable Exception e) {
         logException(e, null, -1);
     }
 
-    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel) {
+    private void logException(@Nullable Exception e, @Nullable LogLevel logLevel) {
         logException(e, logLevel, -1);
     }
 
-    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel, final int statusCode) {
+    private void logException(@Nullable Exception e, @Nullable LogLevel logLevel, int statusCode) {
         if (null == e) {
             return;
         }
 
-        final String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
+        String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
 
         if (null == logLevel) {
             LOG.error(msg, e);
@@ -539,13 +539,13 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private ServerSession getSession(final HttpServletRequest httpRequest, final Dispatcher dispatcher, final String module, final String action) throws OXException {
+    private ServerSession getSession(HttpServletRequest httpRequest, Dispatcher dispatcher, String module, String action) throws OXException {
         ServerSession session = SessionUtility.getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
         if (session == null) {
             if (!dispatcher.mayOmitSession(module, action)) {
                 if (dispatcher.mayUseFallbackSession(module, action)) {
                     // "open-xchange-public-session" allowed, but missing for associated action
-                    final String name = LoginServlet.getPublicSessionCookieName(httpRequest);
+                    String name = LoginServlet.getPublicSessionCookieName(httpRequest);
                     throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(name) : AjaxExceptionCodes.MISSING_COOKIE.create(name);
                 }
                 // "open-xchange-public-session" NOT allowed for associated action, therefore complain about missing "session" parameter
@@ -557,7 +557,7 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private ServerSession fakeSession() {
-        final UserImpl user = new UserImpl();
+        UserImpl user = new UserImpl();
         user.setAttributes(new HashMap<String, Set<String>>(1));
         return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
     }
@@ -570,11 +570,11 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpRequest The associated HTTP Servlet request
      * @param httpResponse The associated HTTP Servlet response
      */
-    protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-        final List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
-        final Iterator<ResponseRenderer> iter = responseRenderers.iterator();
+    protected void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
+        Iterator<ResponseRenderer> iter = responseRenderers.iterator();
         for (int i = responseRenderers.size(); i-- > 0;) {
-            final ResponseRenderer renderer = iter.next();
+            ResponseRenderer renderer = iter.next();
             if (renderer.handles(requestData, result)) {
                 renderer.write(requestData, result, httpRequest, httpResponse);
                 return;
@@ -613,7 +613,7 @@ public class DispatcherServlet extends SessionServlet {
         /**
          * Initializes a new {@link SessionSecretCheckerImplementation}.
          */
-        protected NoSecretCallbackChecker(final Dispatcher dispatcher, final OXException e, final AJAXRequestDataTools requestDataTools) {
+        protected NoSecretCallbackChecker(Dispatcher dispatcher, OXException e, AJAXRequestDataTools requestDataTools) {
             super();
             this.requestDataTools = requestDataTools;
             this.dispatcher = dispatcher;
@@ -621,15 +621,15 @@ public class DispatcherServlet extends SessionServlet {
         }
 
         @Override
-        public void checkSecret(final Session session, final HttpServletRequest req, final String cookieHashSource) throws OXException {
-            final String module = requestDataTools.getModule(PREFIX.get(), req);
-            final String action = requestDataTools.getAction(req);
-            final boolean noSecretCallback = dispatcher.noSecretCallback(module, action);
+        public void checkSecret(Session session, HttpServletRequest req, String cookieHashSource) throws OXException {
+            String module = requestDataTools.getModule(PREFIX.get(), req);
+            String action = requestDataTools.getAction(req);
+            boolean noSecretCallback = dispatcher.noSecretCallback(module, action);
             if (!noSecretCallback) {
                 throw e;
             }
-            final String paramToken = PARAM_TOKEN;
-            final String token = (String) session.getParameter(paramToken);
+            String paramToken = PARAM_TOKEN;
+            String token = (String) session.getParameter(paramToken);
             session.setParameter(paramToken, null);
             if (null == token || !token.equals(req.getParameter(paramToken))) {
                 throw e;

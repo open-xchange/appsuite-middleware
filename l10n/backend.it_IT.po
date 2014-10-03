@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-05 21:41+0200\n"
+"PO-Revision-Date: 2014-09-23 15:56+0200\n"
 "Last-Translator: Vincenzo Reale <vincenzo@bureau-cornavin.com>\n"
 "Language-Team: Italian <it@bureau-cornavin.com>\n"
 "Language: it\n"
@@ -786,8 +786,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
-"Pianifica nuovamente l'evento. Data/Ora originale: %1$s. Nuova "
-"data/ora: %2$s"
+"Pianifica nuovamente l'evento. Data/Ora originale: %1$s. Nuova data/ora: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
@@ -2229,8 +2228,8 @@ msgid ""
 "A Google Drive server error occurred with HTTP status code %1$s. Error "
 "message: %2$s"
 msgstr ""
-"Si è verificato un errore del server Google Drive con codice di stato HTTP %"
-"1$s. Messaggio di errore: %2$s"
+"Si è verificato un errore del server Google Drive con codice di stato HTTP "
+"%1$s. Messaggio di errore: %2$s"
 
 #. Google Drive URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
@@ -2399,6 +2398,11 @@ msgid ""
 msgstr ""
 "La quota consentita è stata raggiunta. Elimina alcuni elementi per "
 "archiviarne di nuovi."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "L'archivio ZIP eccede il valore massimo consentito di %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3713,11 +3717,11 @@ msgstr ""
 "Il JSlob %1$s specificato non deve essere configurato per il servizio %2$s. "
 "Non sarà eseguita alcuna operazione."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "L'indirizzo di posta %1$s per non è valido."
 
@@ -3941,8 +3945,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "There was a problem while creating a connection to the remote service."
 msgstr ""
-"Si è verificato un errore durante la creazione di una connessione al servizio "
-"remoto."
+"Si è verificato un errore durante la creazione di una connessione al "
+"servizio remoto."
 
 #. *
 #. * New password too short.
@@ -4681,8 +4685,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
 msgid "The recipient you tried to reach is currently unavailable: %1$s"
 msgstr ""
-"Il destinatario che hai provato a raggiungere non è attualmente disponibile: %"
-"1$s"
+"Il destinatario che hai provato a raggiungere non è attualmente disponibile: "
+"%1$s"
 
 #. * Your session is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:92
@@ -7171,8 +7175,35 @@ msgid ""
 "%1$s"
 msgstr ""
 "La password digitata non è consentita e non può essere salvata. I caratteri "
-"consentiti sono: "
-"%1$s"
+"consentiti sono: %1$s"
+
+#. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"La password attuale non è corretta. Digita la password corretta "
+"e prova ancora."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr "Manca la password attuale. Digita la password attuale e prova ancora."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Manca la nuova password. Digita la nuova password e prova ancora."
 
 #. *
 #. * User is missing for the reminder.
@@ -8642,6 +8673,10 @@ msgid ""
 msgstr ""
 "I permessi amministrativi del proprietario \"%1$s\" nella cartella \"%2$s\" "
 "sono stati ripristinati."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Devi digitare il nome di una cartella."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11697,9 +11732,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "Il collegamento esiste già."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Nome della cartella non valido."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Impossibile connettersi al server di posta."
@@ -16106,9 +16138,6 @@ msgstr "Zulu"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "La stringa inserita \"%1$s\" non è un numero."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr "Il valore intero supera il valore massimo consentito (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Valore content-type dell'intestazione non valido: %1$s"

@@ -61,10 +61,13 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.hazelcast.core.OutOfMemoryHandler;
+import com.hazelcast.instance.OutOfMemoryErrorDispatcher;
 import com.openexchange.hazelcast.HazelcastMBeanImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.ExceptionUtils;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
@@ -230,7 +233,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
     /**
      * Closes all opened service trackers.
      */
-    private void closeTrackers() {
+    void closeTrackers() {
         ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.configTracker;
         if (null != tracker) {
             tracker.close();
@@ -284,6 +287,22 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                 LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
             }
         }
+
+        // Custom OutOfMemoryHandler implementation
+        OutOfMemoryHandler handler = new OutOfMemoryHandler() {
+
+            @Override
+            public void onOutOfMemory(OutOfMemoryError oom, HazelcastInstance[] hazelcastInstances) {
+                try {
+                    closeTrackers();
+                    stopHazelcast();
+                } catch (Exception e) {
+                    LOG.error("Failed to shut-down Hazelcast", e);
+                }
+                ExceptionUtils.handleThrowable(oom);
+            }
+        };
+        OutOfMemoryErrorDispatcher.setHandler(handler);
         long hzStart = System.currentTimeMillis();
         HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
         LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, (System.currentTimeMillis() - hzStart), lf);

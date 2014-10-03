@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-09 23:20+0200\n"
+"PO-Revision-Date: 2014-09-28 00:59+0200\n"
 "Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
 "Language-Team: Spanish <es@bureau-cornavin.com>\n"
 "Language: es\n"
@@ -327,7 +327,7 @@ msgstr "Hasta %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:137
 msgid "No end"
-msgstr "Sin fecha de finalización"
+msgstr "Sin fecha de fin"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:61
 msgid "An attendee would like to be brought up to date about this appointment."
@@ -849,7 +849,7 @@ msgid ""
 "%1$s which is managed by you."
 msgstr ""
 "Ha recibido este E-Mail porque esta cita contiene el recurso %1$s, el cual "
-"gestiona usted."
+"administra usted."
 
 #. No account found with identifier "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:63
@@ -2165,8 +2165,8 @@ msgstr "La URL de Copy.com indicada no corresponde a un archivo: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:89
 msgid "Versioning not supported by Copy.com file storage."
 msgstr ""
-"Control de versiones no admitido por el almacenamiento de archivos de "
-"Copy.com."
+"Control de versiones no admitido por el almacenamiento de archivos de Copy."
+"com."
 
 #. The Copy.com resource does not exist
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:104
@@ -2235,8 +2235,8 @@ msgid ""
 "A Google Drive server error occurred with HTTP status code %1$s. Error "
 "message: %2$s"
 msgstr ""
-"Se produjo un error del servidor de Google Drive con código de estado HTTP %"
-"1$s. Mensaje de error: %2$s"
+"Se produjo un error del servidor de Google Drive con código de estado HTTP "
+"%1$s. Mensaje de error: %2$s"
 
 #. Google Drive URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
@@ -2287,8 +2287,8 @@ msgid ""
 "A OneDrive server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
 msgstr ""
-"Se ha producido un error del servidor de OneDrive con código de estado HTTP %"
-"1$s. Mensaje de error: %2$s"
+"Se ha producido un error del servidor de OneDrive con código de estado HTTP "
+"%1$s. Mensaje de error: %2$s"
 
 #. Invalid OneDrive URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:68
@@ -2409,6 +2409,11 @@ msgid ""
 msgstr ""
 "Ha alcanzado la cuota permitida. Por favor, borre algunos elementos para "
 "poder crear otros nuevos."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "El archivo ZIP excede el tamaño máximo permitido de %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3185,7 +3190,7 @@ msgstr "Archivo no encontrado. %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/filemanagement/ManagedFileExceptionMessages.java:69
 msgid "No such managed file associated with ID: %1$s"
-msgstr "No existe tal archivo gestionado asociado con el ID: %1$s"
+msgstr "No existe tal archivo administrado asociado con el ID: %1$s"
 
 #. *
 #. * The required service %1$s is temporary not available. Please try again later.
@@ -3306,7 +3311,7 @@ msgstr "No hay acceso de escritura a la carpeta IMAP"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
 msgid "No keep-seen access to mail folder"
-msgstr "No hay acceso para marcar como leído en la carpeta de correo"
+msgstr "No hay acceso para etiquetar como leído en la carpeta de correo"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:86
 msgid "Folder does not allow subfolders."
@@ -3365,7 +3370,7 @@ msgstr "La carpeta predeterminada %1$s no puede borrarse"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:108
 msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
-msgstr "La marca %1$s no se puede cambiar por la siguiente razón: \"%2$s\""
+msgstr "La etiqueta %1$s no se puede cambiar por la siguiente razón: \"%2$s\""
 
 #. *
 #. * Number of search fields (%d) do not match number of search patterns (%d)
@@ -3712,11 +3717,11 @@ msgstr ""
 "El JSlob %1$s indicado no se debe configurar para el servicio %2$s. No se "
 "hará nada."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "La dirección de E-Mail %1$s no es válida."
 
@@ -4127,7 +4132,7 @@ msgstr "La carpeta %1$s no puede borrarse"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:152
 msgid "Flag %1$s could not be changed due to the following reason: %2$s"
-msgstr "La marca %1$s no se ha podido cambiar por la siguiente razón: %2$s"
+msgstr "La etiqueta %1$s no se ha podido cambiar por la siguiente razón: %2$s"
 
 #. *
 #. * POP3 search failed due to following reason: %1$s. Switching to application-based search
@@ -4526,7 +4531,7 @@ msgstr "el proveedor de alojamiento"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
 msgid "Publish Infostore document"
-msgstr "Publicar documento del Portadocumentos de información"
+msgstr "Publicar documento del Portadocumentos"
 
 #. Cannot find the requested publication site.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
@@ -4788,7 +4793,7 @@ msgstr ""
 #. Not supported recurrence pattern: BYMONTH
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:91
 msgid "Not supported recurrence pattern: BYMONTH"
-msgstr "No se admite el patrón de recurrencia: BYMONTH"
+msgstr "No se admite el patrón de frecuencia: BYMONTH"
 
 #. This does not look like an iCal file. Please check the file.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:94
@@ -5010,7 +5015,7 @@ msgstr "No tiene los permisos necesarios para leer citas de la carpeta %1$d."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:82
 msgid "End date must not be before start date."
-msgstr "La fecha de finalización no debe ser anterior a la fecha de inicio."
+msgstr "La fecha de fin no debe ser anterior a la fecha de inicio."
 
 #. *
 #. * This label (%d) is not supported.
@@ -5024,7 +5029,7 @@ msgstr "Esta etiqueta (%d) no está permitida."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:92
 msgid "Private flag is only allowed inside of a private folder."
-msgstr "Sólo se permite una marca privada dentro de una carpeta privada."
+msgstr "Sólo se permite una etiqueta privada dentro de una carpeta privada."
 
 #. *
 #. * Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional
@@ -5036,9 +5041,9 @@ msgid ""
 "user (or owner of the calendar). Please remove additional participants or "
 "remove the \"Private\" mark."
 msgstr ""
-"Las citas marcadas como 'Cita privada' sólo pueden ser programadas por el "
+"Las citas etiquetadas como 'Cita privada' sólo pueden ser programadas por el "
 "usuario correspondiente (o el propietario del calendario). Por favor, "
-"elimine los participantes adicionales o quite la marca \"Cita privada\"."
+"elimine los participantes adicionales o quite la etiqueta \"Cita privada\"."
 
 #. *
 #. * Unsupported \"shown as\" value %d.
@@ -5059,7 +5064,7 @@ msgstr "No se ha proporcionado el valor requerido \"Fecha de inicio\"."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:113
 msgid "Required value \"End Date\" was not supplied."
-msgstr "No se ha proporcionado el valor requerido \"Fecha de finalización\""
+msgstr "No se ha proporcionado el valor requerido \"Fecha de fin\""
 
 #. *
 #. * Required value \"Title\" was not supplied.
@@ -5113,7 +5118,8 @@ msgstr "La carpeta no es de tipo Calendar."
 msgid ""
 "Moving an appointment with private flag to a public folder is not allowed."
 msgstr ""
-"No está permitido mover una cita marcada como privada a una carpeta pública."
+"No está permitido mover una cita etiquetada como privada a una carpeta "
+"pública."
 
 #. *
 #. * You do not have the appropriate permissions to modify this object.
@@ -5162,7 +5168,7 @@ msgid ""
 "Moving an instance of a recurring appointment into another folder is not "
 "allowed."
 msgstr ""
-"No se permite mover una instancia de una cita recurrente a otra carpeta."
+"No se permite mover una instancia de una cita frecuente a otra carpeta."
 
 #. *
 #. * Moving an appointment with private flag to a shared folder is not allowed.
@@ -5171,7 +5177,7 @@ msgstr ""
 msgid ""
 "Moving an appointment with private flag to a shared folder is not allowed."
 msgstr ""
-"No está permitido mover una cita marcada como privada a una carpeta "
+"No está permitido mover una cita etiquetada como privada a una carpeta "
 "compartida."
 
 #. *
@@ -5183,14 +5189,15 @@ msgid ""
 "appointment."
 msgstr ""
 "No pueden utilizar distintas etiquetas de privado para un sólo elemento de "
-"una cita recurrente."
+"una "
+"cita frecuente."
 
 #. *
 #. * You can not use the private flag in a non private folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:193
 msgid "You can not use the private flag in a non private folder."
-msgstr "No puede usar la marca de privado en una carpeta no privada."
+msgstr "No puede usar la etiqueta de privado en una carpeta no privada."
 
 #. *
 #. * Invalid characters in field %1$s.
@@ -5204,7 +5211,7 @@ msgstr "Caracteres incorrectos en el campo %1$s."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:203
 msgid "Series end is before start date."
-msgstr "La fecha de finalización es anterior a la fecha de inicio."
+msgstr "La fecha de fin es anterior a la fecha de inicio."
 
 #. *
 #. * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
@@ -5222,7 +5229,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:213
 msgid "Moving a recurring appointment to another folder is not supported."
-msgstr "No está permitido mover una cita recurrente a otra carpeta."
+msgstr "No está permitido mover una cita frecuente a otra carpeta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address."
@@ -5265,7 +5272,7 @@ msgstr "No se pudo sincronizar el antiguo contacto con los nuevos cambios."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:79
 msgid "You are not allowed to mark this contact as private contact."
-msgstr "No le está permitido marcar este contacto como privado."
+msgstr "No le está permitido etiquetar este contacto como privado."
 
 #. Somebody else modified the same object just before the actual change should be saved. Actual change is denied and user should refresh
 #. his object.
@@ -5313,7 +5320,7 @@ msgstr "No se ha proporcionado el valor requerido \"nombre para mostrar\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
 msgid "Unable to move this contact because it is marked as private."
-msgstr "No se pudo mover este contacto porque está marcado como privado."
+msgstr "No se pudo mover este contacto porque está etiquetado como privado."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:101
 msgid ""
@@ -5341,7 +5348,7 @@ msgstr "El tipo mime no está definido."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:109
 msgid "Storing a contact with private flag in a shared folder is not allowed."
 msgstr ""
-"No está permitido guardar un contacto marcado como privado en una carpeta "
+"No está permitido guardar un contacto etiquetado como privado en una carpeta "
 "compartida."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
@@ -6587,7 +6594,7 @@ msgstr "No se ha planificado ningún recurso."
 #. No series
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:642
 msgid "No series"
-msgstr "No recurrente"
+msgstr "No frecuente"
 
 #. No start date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:645
@@ -6597,7 +6604,7 @@ msgstr "Sin fecha de comienzo"
 #. No end date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:648
 msgid "No end date"
-msgstr "Sin fecha de finalización"
+msgstr "Sin fecha de fin"
 
 #. No due date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:651
@@ -6683,7 +6690,7 @@ msgstr "Fecha de comienzo: %1$s"
 #. End date: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:727
 msgid "End date: %1$s"
-msgstr "Fecha de finalización: %1$s"
+msgstr "Fecha de fin: %1$s"
 
 #. Due date: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:730
@@ -6873,7 +6880,7 @@ msgstr ""
 #. The folder %1$s you requested is not an Infostore folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
 msgid "The folder %1$s you requested is not an Infostore folder."
-msgstr "La carpeta requerida %1$s no es una carpeta del portadocumentos."
+msgstr "La carpeta requerida %1$s no es una carpeta del Portadocumentos."
 
 #. You do not have the appropriate permissions to read the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
@@ -7177,6 +7184,38 @@ msgstr ""
 "válidos son: %1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"La contraseña actual no es válida. Por favor, introduzca correctamente su "
+"contraseña actual e inténtelo de nuevo."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"La contraseña actual no se encuentra. Por favor, introduzca su contraseña "
+"actual e inténtelo de nuevo."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"La nueva contraseña no se encuentra. Por favor introduzca su nueva contraseña "
+"e inténtelo de nuevo."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -7354,7 +7393,7 @@ msgstr "No tiene los permisos adecuados para delegar tareas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:91
 msgid "Tasks with private flag cannot be delegated."
-msgstr "Las tareas con marca privada no pueden ser delegadas."
+msgstr "Las tareas con etiqueta privada no pueden ser delegadas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:93
 msgid "Percent is %d but must be between 0 and 100."
@@ -7381,11 +7420,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
 msgid "Unknown recurrence type %d."
-msgstr "Tipo de recurrencia %d desconocido."
+msgstr "Tipo de frecuencia %d desconocido."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:103
 msgid "Value for the recurrence is missing: %d."
-msgstr "Falta el valor para la recurrencia: %d."
+msgstr "Falta el valor para la frecuencia: %d."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:105
 msgid "Finished tasks need to have a percentage of 100 and not %d."
@@ -7394,26 +7433,26 @@ msgstr "Las tareas finalizadas deben tener un porcentaje de 100 y no de %d."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:107
 msgid "Start date \"%1$s\" must be before end date \"%2$s\"."
 msgstr ""
-"La fecha de inicio \"%1$s\" debe ser anterior a la fecha de finalización "
-"\"%2$s\"."
+"La fecha de inicio \"%1$s\" debe ser anterior a la fecha de fin \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:109
 msgid ""
 "The task could not be saved. Please shorten the \"%1$s\" and try again. "
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
-"No se pudo guardar la tarea. Por favor, recorte el %1$s y pruebe de nuevo. La "
-"longitud actual de \"%3$d\" es mayor que la longitud permitida de \"%2$d\" "
-"caracteres."
+"No se pudo guardar la tarea. Por favor, recorte el %1$s y pruebe de nuevo. "
+"La longitud actual de \"%3$d\" es mayor que la longitud permitida de \"%2$d"
+"\" caracteres."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
 msgstr ""
-"No se pueden mover tareas con marca privada a una carpeta pública \"%1$s\"."
+"No se pueden mover tareas con etiqueta privada a una carpeta pública "
+"\"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
-msgstr "Sólo se permite poner la marca de privada al creador de la tarea."
+msgstr "Sólo se permite poner la etiqueta de privada al creador de la tarea."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:116
 msgid "External participants without E-Mail address can not be added."
@@ -7478,7 +7517,8 @@ msgid ""
 "The version can not be set back if the update tasks handling has been "
 "migrated to the Remember Executed Update Tasks concept on schema \"%1$s\"."
 msgstr ""
-"La versión no puede modificarse si la gestión de las tareas de actualización "
+"La versión no puede modificarse si la administración de las tareas de "
+"actualización "
 "ha sido migrada a un concepto de recordatorio de tareas de actualización "
 "ejecutadas en el esquema \"%1$s\"."
 
@@ -7880,7 +7920,7 @@ msgid ""
 "flagged as \"replied\" and/or \"forwarded\"."
 msgstr ""
 "Su E-Mail se ha enviado correctamente, pero el E-Mail original no se pudo "
-"marcar como \"respondido\" y/o \"reenviado\"."
+"etiquetar como \"respondido\" y/o \"reenviado\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
 msgid ""
@@ -8636,6 +8676,10 @@ msgid ""
 msgstr ""
 "Los permisos administrativos del propietario \"%1$s\" en la carpeta \"%2$s\" "
 "fueron restaurados."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Debe introducir un nombre de carpeta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11678,9 +11722,6 @@ msgstr "Zulú"
 
 #~ msgid "This link already exists."
 #~ msgstr "Este enlace ya existe."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Nombre de carpeta no válido."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "No se puede conectar con el servidor de correo."

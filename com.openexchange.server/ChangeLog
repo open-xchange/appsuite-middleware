@@ -1,3 +1,12 @@
+* 2014-10-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34608: Cleanse "unified-mail enabled" information from session parameters
+ - Fix for bug 34728: Fixed start-up order inside capabilities bundle; ensure cache configuration is done prior to registering capabilities service
+
+* 2014-10-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34283: Introduced a hard limit when marshalling the XML elements of a WebDAV response with a depth >= 1 recursively
+
 * 2014-10-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 34710: Pass host name from HostnameService to template

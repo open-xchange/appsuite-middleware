@@ -98,36 +98,6 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         PermissionAvailabilityServiceRegistry tracker = new PermissionAvailabilityServiceRegistry(context);
         track(PermissionAvailabilityService.class, tracker);
 
-        final CapabilityCheckerRegistry capCheckers = new CapabilityCheckerRegistry(context, this);
-        rememberTracker(capCheckers);
-
-        /*
-         * Create & register CapabilityService
-         */
-        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers, tracker);
-        registerService(CapabilityService.class, capService);
-
-        track(Capability.class, new SimpleRegistryListener<Capability>() {
-
-            @Override
-            public void added(ServiceReference<Capability> ref, Capability capability) {
-                getCapability(capability.getId());
-            }
-
-            @Override
-            public void removed(ServiceReference<Capability> ref, Capability service) {
-                // Nothing
-            }
-
-        });
-
-        /*
-         * Register update task, create table job and delete listener
-         */
-        registerService(CreateTableService.class, new CapabilityCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CapabilityCreateTableTask()));
-        registerService(DeleteListener.class, new CapabilityDeleteListener());
-
         /*
          * Define cache regions
          */
@@ -191,6 +161,36 @@ public class CapabilitiesActivator extends HousekeepingActivator {
             dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, eventHandler, dict);
         }
+
+        final CapabilityCheckerRegistry capCheckers = new CapabilityCheckerRegistry(context, this);
+        rememberTracker(capCheckers);
+
+        /*
+         * Create & register CapabilityService
+         */
+        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers, tracker);
+        registerService(CapabilityService.class, capService);
+
+        track(Capability.class, new SimpleRegistryListener<Capability>() {
+
+            @Override
+            public void added(ServiceReference<Capability> ref, Capability capability) {
+                getCapability(capability.getId());
+            }
+
+            @Override
+            public void removed(ServiceReference<Capability> ref, Capability service) {
+                // Nothing
+            }
+
+        });
+
+        /*
+         * Register update task, create table job and delete listener
+         */
+        registerService(CreateTableService.class, new CapabilityCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CapabilityCreateTableTask()));
+        registerService(DeleteListener.class, new CapabilityDeleteListener());
 
         openTrackers();
     }

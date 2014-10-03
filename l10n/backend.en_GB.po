@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-12 23:23-0600\n"
+"PO-Revision-Date: 2014-09-27 12:20-0600\n"
 "Last-Translator: \n"
 "Language-Team: British English <kde-i18n-doc@kde.org>\n"
 "Language: en_GB\n"
@@ -2361,6 +2361,11 @@ msgstr ""
 "The allowed quota has been reached. Please delete some items in order to "
 "store new ones."
 
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "ZIP archive exceeds max. allowed size of %1$s"
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3638,11 +3643,11 @@ msgid ""
 msgstr ""
 "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "The email address %1$s is invalid."
 
@@ -7038,6 +7043,37 @@ msgstr ""
 "%1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"The current password is missing. Please enter your current password and try "
+"again."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"The new password is missing. Please enter your new password and try again."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -8439,6 +8475,10 @@ msgid ""
 msgstr ""
 "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
 "restored."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "You must enter a folder name."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11466,9 +11506,6 @@ msgstr "Zulu"
 #~ msgid "This link already exists."
 #~ msgstr "This link already exists."
 
-#~ msgid "Invalid folder name."
-#~ msgstr "Invalid folder name."
-
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Unable to connect to e-mail server."
 
@@ -11738,9 +11775,6 @@ msgstr "Zulu"
 
 #~ msgid "POST requires exactly one file upload per request.e."
 #~ msgstr "POST requires exactly one file upload per request."
-
-#~ msgid "Inline data exceeds the maximum allowed size."
-#~ msgstr "Inline data exceeds the maximum allowed size."
 
 #~ msgid "We encountered an internal error. Please try again."
 #~ msgstr "We encountered an internal error. Please try again."

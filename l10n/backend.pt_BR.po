@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-09 20:40-0300\n"
+"PO-Revision-Date: 2014-09-26 09:08-0300\n"
 "Last-Translator: Bianca Oliveira <biatopeira@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <kde-i18n-pt_BR@kde.org>\n"
 "Language: pt_BR\n"
@@ -2388,6 +2388,11 @@ msgstr ""
 "A cota permitida foi atingida. Por favor, exclua alguns itens a fim de criar "
 "novos."
 
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "Arquivo ZIP excede o tamanho máximo permitido de %1$s."
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3689,11 +3694,11 @@ msgstr ""
 "O JSlob referenciado %1$s não deve ser definido para o serviço %2$s. Nada "
 "será feito."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "O endereço de e-mail %1$s é inválido."
 
@@ -7131,6 +7136,38 @@ msgstr ""
 "são: %1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"A senha digitada está incorreta. Por favor, digite sua senha atual e tente "
+"novamente."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Está faltando a senha atual. Por favor, digite sua senha atual e tente "
+"novamente."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"Está faltando a nova senha. Por favor, digite sua nova senha e tente "
+"novamente."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -7352,9 +7389,9 @@ msgid ""
 "The task could not be saved. Please shorten the \"%1$s\" and try again. "
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
-"A tarefa não pôde ser salva. Por favor, diminua o \"%1$s\" e tente novamente. "
-"O comprimento atual \"%3$d\" é maior que o comprimento permitido de \"%2$d\" "
-"caracteres."
+"A tarefa não pôde ser salva. Por favor, diminua o \"%1$s\" e tente "
+"novamente. O comprimento atual \"%3$d\" é maior que o comprimento permitido "
+"de \"%2$d\" caracteres."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
@@ -8563,6 +8600,10 @@ msgid ""
 msgstr ""
 "As permissões administrativas do proprietário \"%1$s\" na pasta \"%2$s\" "
 "foram restauradas."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Você deve digitar um nome de pasta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11598,9 +11639,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "O link já existe."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Nome da pasta inválido."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Não é possível conectar ao servidor de e-mail."

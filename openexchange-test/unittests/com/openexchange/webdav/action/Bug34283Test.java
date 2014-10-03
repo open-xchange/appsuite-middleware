@@ -47,68 +47,62 @@
  *
  */
 
-package com.openexchange.webdav.xml.resources;
+package com.openexchange.webdav.action;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.jdom2.Element;
+import java.io.ByteArrayInputStream;
+import java.util.UUID;
+import com.openexchange.java.Charsets;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
-public class RecursiveMarshaller implements ResourceMarshaller {
+/**
+ * {@link Bug34283Test}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug34283Test extends ActionTestCase {
 
-	private final PropertiesMarshaller delegate;
-	private final int depth;
-	private final int limit;
-
-    /**
-     * Initializes a new {@link RecursiveMarshaller}.
-     *
-     * @param delegate The underlying properties marshaller
-     * @param depth The depth as requested by the client
-     * @param limit The maximum number of elements to marshall
-     */
-    public RecursiveMarshaller(PropertiesMarshaller delegate, int depth, int limit) {
-        super();
-        this.delegate = delegate;
-        this.depth = depth;
-        this.limit = limit;
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        /*
+         * create child resources
+         */
+        WebdavCollection collection = factory.resolveCollection(testCollection);
+        for (int i = 0; i < 30; i++) {
+            byte[] bytes = UUID.randomUUID().toString().getBytes(Charsets.UTF_8);
+            WebdavResource resource = collection.resolveResource(new WebdavPath("child_" + i + ".test"));
+            resource.setContentType("text/html");
+            resource.putBodyAndGuessLength(new ByteArrayInputStream(bytes));
+            resource.create();
+        }
     }
 
-	@Override
-    public List<Element> marshal(WebdavResource resource) throws WebdavProtocolException  {
-		List<Element> elements = new LinkedList<Element>();
-		elements.addAll(delegate.marshal(resource));
-		if (resource.isCollection()) {
-		    for (WebdavResource childResource : resource.toCollection().toIterable(depth)) {
-		        elements.addAll(delegate.marshal(childResource));
-		        if (elements.size() > limit) {
-		            elements.add(getInsufficientStorageResponse(resource));
-                    break;
-		        }
-            }
-		}
-		return elements;
-	}
+    public void testMarshallingLimit() throws Exception {
+        /*
+         * prepare propfind request
+         */
+        MockWebdavRequest request = new MockWebdavRequest(factory, "http://localhost/");
+        request.setBodyAsString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+            + "<D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop></D:propfind>");
+        request.setHeader("depth", "1");
+        request.setUrl(testCollection);
+        MockWebdavResponse response = new MockWebdavResponse();
+        Protocol protocol = new Protocol() {
 
-	/**
-	 * Constructs a response element indicating a <code>HTTP/1.1 507 Insufficient Storage</code> error due to too many child resources
-	 * of the parent resource.
-	 *
-	 * @param resource The parent resource whose children count exceeded the limit
-	 * @return The respons element
-	 */
-	private Element getInsufficientStorageResponse(WebdavResource resource) {
-        Element response = new Element("response", Protocol.DAV_NS);
-        response.addContent(delegate.marshalHREF(resource.getUrl(), resource.isCollection()));
-        Element status = delegate.marshalStatus(507);
-        status.setText("HTTP/1.1 507 Insufficient Storage");
-        response.addContent(status);
-        Element error = new Element("error", Protocol.DAV_NS);
-        error.addContent(new Element("number-of-matches-within-limits", Protocol.DAV_NS));
-        response.addContent(error);
-	    return response;
-	}
+            @Override
+            public int getRecursiveMarshallingLimit() {
+                return 25;
+            }
+        };
+        new WebdavPropfindAction(protocol).perform(request, response);
+        /*
+         * check response for HTTP 507
+         */
+        assertEquals("Wrong response status", Protocol.SC_MULTISTATUS, response.getStatus());
+        assertTrue("No HTTP 507 in response", response.getResponseBodyAsString().contains("HTTP/1.1 507"));
+    }
 
 }

@@ -66,8 +66,16 @@
 
 package com.openexchange.tools.exceptions;
 
+import java.lang.management.ManagementFactory;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeMap;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -100,10 +108,10 @@ public class ExceptionUtils {
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                    logBuilder.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                    logBuilder.append(Strings.getLineSeparator()).append(entry.getKey()).append('=').append(entry.getValue());
                 }
                 logBuilder.deleteCharAt(0);
-                logBuilder.append("\n\n");
+                logBuilder.append(Strings.getLineSeparator()).append(Strings.getLineSeparator());
                 logBuilder.append(MARKER);
                 logBuilder.append("Thread death");
                 logBuilder.append(MARKER);
@@ -111,35 +119,69 @@ public class ExceptionUtils {
             }
             throw (ThreadDeath) t;
         }
-        if (t instanceof VirtualMachineError) {
-            final Map<String, String> taskProperties = LogProperties.getPropertyMap();
-            if (null == taskProperties) {
-                LOG.error(
-                    MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
-                    t);
-            } else {
-                final StringBuilder logBuilder = new StringBuilder(512);
-                final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Map.Entry<String, String> entry : taskProperties.entrySet()) {
-                    final String propertyName = entry.getKey();
-                    final String value = entry.getValue();
-                    if (null != value) {
-                        sorted.put(propertyName, value);
+        if (t instanceof OutOfMemoryError) {
+            String message = t.getMessage();
+            if ("unable to create new native thread".equalsIgnoreCase(message)) {
+                // Dump all the threads to the log
+                Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
+                LOG.info("{}Threads: {}", Strings.getLineSeparator(), threads.size());
+                for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
+                    Thread thread = mapEntry.getKey();
+                    LOG.info("        thread: {}", thread);
+                    for (final StackTraceElement stackTraceElement : mapEntry.getValue()) {
+                        LOG.info(stackTraceElement.toString());
                     }
                 }
-                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                    logBuilder.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                LOG.info("{}    Thread dump finished{}", Strings.getLineSeparator(), Strings.getLineSeparator());
+            } else if ("Java heap space".equalsIgnoreCase(message)) {
+                try {
+                    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+                    String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    String fn = "/tmp/" + dateFormat.format(new Date()) + "-heap.hprof";
+
+                    server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
+                    LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
+                } catch (Exception e) {
+                    // Failed for any reason...
                 }
-                logBuilder.deleteCharAt(0);
-                logBuilder.append("\n\n");
-                logBuilder.append(MARKER);
-                logBuilder.append("The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.");
-                logBuilder.append(MARKER);
-                LOG.error(logBuilder.toString(), t);
             }
+            logVirtualMachineError(t);
+            throw (OutOfMemoryError) t;
+        }
+        if (t instanceof VirtualMachineError) {
+            logVirtualMachineError(t);
             throw (VirtualMachineError) t;
         }
         // All other instances of Throwable will be silently swallowed
+    }
+
+    private static void logVirtualMachineError(final Throwable t) {
+        Map<String, String> taskProperties = LogProperties.getPropertyMap();
+        if (null == taskProperties) {
+            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", MARKER, MARKER, t);
+        } else {
+            StringBuilder logBuilder = new StringBuilder(512);
+            Map<String, String> sorted = new TreeMap<String, String>();
+            for (Map.Entry<String, String> entry : taskProperties.entrySet()) {
+                String propertyName = entry.getKey();
+                String value = entry.getValue();
+                if (null != value) {
+                    sorted.put(propertyName, value);
+                }
+            }
+            for (Map.Entry<String, String> entry : sorted.entrySet()) {
+                logBuilder.append(Strings.getLineSeparator()).append(entry.getKey()).append('=').append(entry.getValue());
+            }
+            logBuilder.deleteCharAt(0);
+            logBuilder.append(Strings.getLineSeparator()).append(Strings.getLineSeparator());
+            logBuilder.append(MARKER);
+            logBuilder.append("The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.");
+            logBuilder.append(MARKER);
+            LOG.error(logBuilder.toString(), t);
+        }
     }
 
     private static String surroundWithMarker(final String message) {

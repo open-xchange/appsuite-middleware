@@ -336,7 +336,7 @@ public class ResourceCacheMetadataStore {
             rs = stmt.executeQuery();
             if (rs.next()) {
                 int count = rs.getInt(1);
-                return count == 0 ? false : true;
+                return count > 0;
             }
 
             return false;

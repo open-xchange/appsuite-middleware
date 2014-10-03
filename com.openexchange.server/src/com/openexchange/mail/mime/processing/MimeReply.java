@@ -436,15 +436,6 @@ public final class MimeReply {
                         fromAdded = false;
                     }
                 }
-                if (checkSender(originalMsg)) {
-                    /*
-                     * Check 'Sender', too
-                     */
-                    final String[] hdr = originalMsg.getHeader("Sender");
-                    if (!MimeMessageUtility.isEmptyHeader(hdr)) {
-                        tmpSet.addAll(Arrays.asList(QuotedInternetAddress.parseHeader(unfold(hdr[0]), true)));
-                    }
-                }
                 if (replyAll) {
                     /*-
                      * Check 'From' has been added
@@ -740,18 +731,6 @@ public final class MimeReply {
         }
     }
 
-    /**
-     * Checks whether to consider "Sender" header on reply to specified message.
-     *
-     * @param originalMsg The original message
-     * @return <code>true</code> to consider "Sender" header on reply; otherwise <code>false</code>
-     */
-    private static boolean checkSender(final MailMessage originalMsg) {
-        // Check if folder has "hasOnBehalfOf" flag set
-        final String fullName = originalMsg.getFolder();
-        return false;
-    }
-
     private static void appendInlineContent(final MailMessage originalMail, final CompositeMailMessage replyMail, final List<String> cids) throws OXException {
         final InlineContentHandler handler = new InlineContentHandler(cids);
         new MailMessageParser().parseMailMessage(originalMail, handler);
@@ -975,7 +954,7 @@ public final class MimeReply {
             /*
              * Get any text content
              */
-            found = getTextContent(false, !htmlPreferred, multipartPart, count, partContentType, accountId, pc);
+            found = getTextContent(false, !htmlPreferred && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED), multipartPart, count, partContentType, accountId, pc);
             if (!found) {
                 /*
                  * No HTML part found, retry with any text part

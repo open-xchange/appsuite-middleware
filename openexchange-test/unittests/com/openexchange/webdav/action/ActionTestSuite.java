@@ -30,6 +30,7 @@ public class ActionTestSuite {
         tests.addTestSuite(StandardIfHeaderApplyTest.class);
 		tests.addTestSuite(IgnoreLocksIfHeaderApplyTest.class);
         tests.addTestSuite(Bug33505Test.class);
+        tests.addTestSuite(Bug34283Test.class);
 
 		return tests;
 	}

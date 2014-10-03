@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-12 16:00+0000\n"
+"PO-Revision-Date: 2014-09-23 09:01+0000\n"
 "Last-Translator: Jacob Sparre Andersen <jacob@jacob-sparre.dk>\n"
 "Language-Team: Danish <da@bureau-cornavin.com>\n"
 "Language: da\n"
@@ -768,8 +768,8 @@ msgstr "Giv begivenheden en ny dato. Original dato: %1$s. Ny dato %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
-"Genplanlæg begivenheden. Oprindelig dato/tidspunkt: %1$s. Ny dato/tidspunkt: %"
-"2$s"
+"Genplanlæg begivenheden. Oprindelig dato/tidspunkt: %1$s. Ny dato/tidspunkt: "
+"%2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
@@ -1616,8 +1616,8 @@ msgstr "Der opstod en »Box«-fejl: %1$s"
 msgid ""
 "A Box server error occurred with HTTP status code %1$s. Error message: %2$s"
 msgstr ""
-"Der opstod en »Box«-serverfejl med HTTP-statuskoden %1$s.  Fejlmeddelelse: %"
-"2$s"
+"Der opstod en »Box«-serverfejl med HTTP-statuskoden %1$s.  Fejlmeddelelse: "
+"%2$s"
 
 #. Invalid Box URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:68
@@ -2137,8 +2137,8 @@ msgid ""
 "A Dropbox server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
 msgstr ""
-"Der opstod en »Dropbox«-serverfejl med HTTP-statuskode %1$s.  Fejlmeddelelse: "
-"%2$s"
+"Der opstod en »Dropbox«-serverfejl med HTTP-statuskode %1$s.  "
+"Fejlmeddelelse: %2$s"
 
 #. Invalid Dropbox URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:68
@@ -2351,6 +2351,11 @@ msgid ""
 msgstr ""
 "Den tilladte kvote er nået. Slet venligst nogle elementer for at få plads, "
 "til at gemme nogle nye."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "For stort ZIP-arkiv.  Må ikke fylde mere end %1$s."
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3622,11 +3627,11 @@ msgstr ""
 "Refereret \"JSlob\" %1$s må ikke sættes for service %2$s.  Intet bliver "
 "gjort."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "E-mail-adressen %s er ugyldig."
 
@@ -6694,7 +6699,40 @@ msgid ""
 "The entered password is illegal and can't be saved. Allowed characters are: "
 "%1$s"
 msgstr ""
-"Den indtastede adgangskode er ugyldig og kan ikke gemmes.  Tilladte tegn: %1$s"
+"Den indtastede adgangskode er ugyldig og kan ikke gemmes.  Tilladte tegn: "
+"%1$s"
+
+#. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Forkert aktuel adgangskode.  Indtast venligst din korrekte, aktuelle "
+"adgangskode og prøv igen."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Aktuel adgangskode mangler.  Indtast venligst din aktuelle adgangskode og "
+"prøv igen."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"Ny adgangskode mangler.  Indtast venligst din ønskede nye adgangskode og prøv "
+"igen."
 
 #. *
 #. * User is missing for the reminder.
@@ -8099,6 +8137,10 @@ msgid ""
 msgstr ""
 "De administrative rettigheder af ejer \"%1$s\" i mappe \"%2$s\" blev "
 "gendannet."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Du skal angive et mappenavn."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11103,9 +11145,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "Linket findes allerede."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Ugyldigt mappenavn."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Kan ikke forbinde til mail-serveren."
