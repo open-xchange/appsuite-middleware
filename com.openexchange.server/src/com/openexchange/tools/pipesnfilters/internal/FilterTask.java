@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
@@ -98,6 +99,7 @@ class FilterTask<I, O> extends AbstractTask<Void> {
         } catch (PipesAndFiltersException e) {
             output.exception(e);
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             output.exception(new PipesAndFiltersException(t));
         }
         return null;

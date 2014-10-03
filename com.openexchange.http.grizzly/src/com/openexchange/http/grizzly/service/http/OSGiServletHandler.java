@@ -596,6 +596,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                     try {
                         ((ServletRequestListener) listeners[i]).requestDestroyed(event);
                     } catch (Throwable t) {
+                        ExceptionUtils.handleThrowable(t);
                         if (LOGGER.isLoggable(Level.WARNING)) {
                             LOGGER.log(Level.WARNING, LogMessages.WARNING_GRIZZLY_HTTP_SERVLET_CONTAINER_OBJECT_DESTROYED_ERROR(
                                 "requestDestroyed",
@@ -615,6 +616,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                     try {
                         ((ServletRequestListener) listeners[i]).requestDestroyed(event);
                     } catch (Throwable t) {
+                        ExceptionUtils.handleThrowable(t);
                         if (LOGGER.isLoggable(Level.WARNING)) {
                             LOGGER.log(Level.WARNING, LogMessages.WARNING_GRIZZLY_HTTP_SERVLET_CONTAINER_OBJECT_INITIALIZED_ERROR(
                                 "requestDestroyed",

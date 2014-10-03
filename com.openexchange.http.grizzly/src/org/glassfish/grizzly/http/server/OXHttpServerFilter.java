@@ -129,6 +129,7 @@ import com.openexchange.http.grizzly.util.RequestTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * Filter implementation to provide high-level HTTP request/response processing.
@@ -360,6 +361,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         handlerResponse.getOutputBuffer().writeBuffer(buf);
                     }
                 } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
                     LOGGER.log(Level.WARNING, "Unexpected error", t);
                     throw new IllegalStateException(t);
                 } finally {

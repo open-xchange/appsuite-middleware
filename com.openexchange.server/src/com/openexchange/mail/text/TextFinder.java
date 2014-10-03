@@ -83,6 +83,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.openexchange.tools.tnef.TNEF2ICal;
 
 /**
@@ -152,6 +153,7 @@ public final class TextFinder {
                         LOG.warn("StackOverflowError while rendering html content. Returning null.");
                         content = extractPlainText(content);
                     } catch (Throwable t) {
+                        ExceptionUtils.handleThrowable(t);
                         LOG.warn("Error while rendering html content. Returning null.", t);
                         content = null;
                     }

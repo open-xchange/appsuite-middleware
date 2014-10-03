@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
@@ -173,6 +174,7 @@ public class RTJSONHandler implements StanzaSender {
                 try {
                 stateManager.timeOutStaleStates(System.currentTimeMillis());
                 } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
                     logger.error("Error during CleanupTimer run.", t);
                 }
             }

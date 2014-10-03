@@ -70,6 +70,7 @@ import com.openexchange.index.IndexProperties;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.solr.ModuleSet;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
@@ -191,8 +192,8 @@ public class RunOrRescheduleAtTargetJob implements Job {
         try {
             indexingJob = jobClass.newInstance();
         } catch (Throwable t) {
-            String msg = "Could not instantiate IndexingJob from class object. " + jobInfo.toString();
-            LOG.error(msg, t);
+            ExceptionUtils.handleThrowable(t);
+            LOG.error("Could not instantiate IndexingJob from class object. {}", jobInfo.toString(), t);
             return;
         }
 
@@ -200,8 +201,8 @@ public class RunOrRescheduleAtTargetJob implements Job {
             LOG.debug("Executing job {}", jobInfo);
             indexingJob.execute(jobInfo);
         } catch (Throwable t) {
-            String msg = "Error during IndexingJob execution. " + jobInfo.toString();
-            LOG.error(msg, t);
+            ExceptionUtils.handleThrowable(t);
+            LOG.error("Error during IndexingJob execution. {}", jobInfo.toString(), t);
             return;
         }
     }
