@@ -215,9 +215,14 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                 con.commit();
                 committed = true;
                 return true;
-            } catch (final DataTruncation e) {
+            } catch (DataTruncation e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-            } catch (final SQLException e) {
+            } catch (java.sql.SQLIntegrityConstraintViolationException e) {
+                // Duplicate key conflict; just leave
+                long transactionDuration = System.currentTimeMillis() - start;
+                LOG.warn("Caching a resource failed due to a duplicate key conflict, this should happen very rarely otherwise this may indicate a performance problem."
+                    + " The transaction lasted {}ms. Original message: {}.", transactionDuration, e.getMessage());
+            } catch (SQLException e) {
                 // duplicate key conflict
                 if (e.getErrorCode() == 1022) {
                     long transactionDuration = System.currentTimeMillis() - start;

@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-06 08:36+0200\n"
+"PO-Revision-Date: 2014-09-23 18:31+0200\n"
 "Last-Translator: Arve Eriksson <031299870@telia.com>\n"
 "Language-Team: Swedish <ox@bureau-cornavin.com>\n"
 "Language: sv\n"
@@ -2081,7 +2081,8 @@ msgid ""
 "A Copy.com server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
 msgstr ""
-"Ett Copy.com-serverfel inträffade med HTTP-statuskod %1$s. Felmeddelande: %2$s"
+"Ett Copy.com-serverfel inträffade med HTTP-statuskod %1$s. Felmeddelande: "
+"%2$s"
 
 #. Invalid Copy.com URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:68
@@ -2231,7 +2232,8 @@ msgid ""
 "A OneDrive server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
 msgstr ""
-"Ett OneDrive-serverfel inträffade med HTTP-statuskod %1$s. Felmeddelande: %2$s"
+"Ett OneDrive-serverfel inträffade med HTTP-statuskod %1$s. Felmeddelande: "
+"%2$s"
 
 #. Invalid OneDrive URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:68
@@ -2346,6 +2348,11 @@ msgid ""
 "ones."
 msgstr ""
 "Den tilldelade kvoten är nådd. Ta bort några objekt för att kunna lagra nya."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "ZIP-arkivet överstiger den största tillåtna storleken %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3622,11 +3629,11 @@ msgid ""
 msgstr ""
 "Hänvisad JSlob %1$s får inte anges för tjänsten %2$s. Inget kommer utföras."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "E-postadressen %1$s är ogiltig."
 
@@ -7011,6 +7018,34 @@ msgstr ""
 "%1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr "Nuvarande lösenordet stämmer inte. Försök igen med rätt lösenord."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Nuvarande lösenord saknas. Skriv in ditt nuvarande lösenord och "
+"försök igen."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Det nya lösenordet saknas. Skriv in ditt nya lösenord och försök igen."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -7231,8 +7266,8 @@ msgid ""
 "The task could not be saved. Please shorten the \"%1$s\" and try again. "
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
-"Uppgiften kunde inte sparas. Korta av \"%1$s\" och försök igen. "
-"Nuvarande längd \"%3$d\" överskrider den maximala längden på \"%2$d\" tecken."
+"Uppgiften kunde inte sparas. Korta av \"%1$s\" och försök igen. Nuvarande "
+"längd \"%3$d\" överskrider den maximala längden på \"%2$d\" tecken."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
@@ -8417,6 +8452,10 @@ msgid ""
 msgstr ""
 "Administratörsrättigheterna för ägaren \"%1$s\" i mappen \"%2$s\" "
 "återställdes."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Du måste skriva in ett mappnamn."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11446,9 +11485,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "Länken finns redan."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Ogiltigt mappnamn."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Kunde inte ansluta till e-postservern."
@@ -15852,9 +15888,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Otillräckliga skrivrättigheter för denna mapp. Går ej att bifoga "
 #~ "dokument. Kontext %4$d Mapp %1$d Objekt %2$d Användare %3$d"
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr "Heltalsvärdet överstiger det högst tillåtna värdet (65535): %1$d"
 
 #~ msgid "Invalid SQL Query : %s"
 #~ msgstr "Ogiltig SQL-förfrågan : %s"

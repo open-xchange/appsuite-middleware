@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-08 15:58+0800\n"
+"PO-Revision-Date: 2014-09-22 22:47+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -2291,6 +2291,11 @@ msgid ""
 "ones."
 msgstr "已達配額。請刪除某些項目以建立新項目。"
 
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "ZIP 壓縮檔超過允許的最大大小 %1$s"
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3511,11 +3516,11 @@ msgid ""
 "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
 msgstr "參照的 JSlob %1$s 必須未設定給 %2$s 服務。不會進行任何事。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "電子郵件地址「%s」無效。"
 
@@ -6785,6 +6790,32 @@ msgid ""
 msgstr "輸入的密碼無效，無法儲存。只允許下列符號: %1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr "目前的密碼不正確，請輸入正確的目前密碼並再試一次。"
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr "缺少目前的密碼，請輸入您目前的密碼並再試一次。"
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "缺少新密碼，請輸入您的新密碼並再試一次。"
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -8064,6 +8095,10 @@ msgid ""
 "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
 "restored."
 msgstr "資料夾「%2$s」的擁有者「%1$s」的管理權限已被還原。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "必須輸入資料夾名稱。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11060,9 +11095,6 @@ msgstr "祖魯"
 
 #~ msgid "This link already exists."
 #~ msgstr "連結已經存在。"
-
-#~ msgid "Invalid folder name."
-#~ msgstr "資料夾名稱無效。"
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "無法連線至郵件伺服器。"
@@ -14928,9 +14960,6 @@ msgstr "祖魯"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "輸入的「%1$s」不是一個數字。"
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr "整數值超過允許的最大值 (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "內容類型標頭值無效: %1$s"

@@ -4,8 +4,8 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-13 12:31+0100\n"
-"Last-Translator: daiana heinrich <xdaiana@yahoo.com>\n"
+"PO-Revision-Date: 2014-09-29 20:16+0100\n"
+"Last-Translator: \n"
 "Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
@@ -2384,6 +2384,11 @@ msgid ""
 msgstr ""
 "S-a atins limita permisă. Ștergeți câteva elemente pentru a stoca altele noi."
 
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "Arhiva ZIP depășește dimensiunea maximă permisă de %1$s"
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3675,11 +3680,11 @@ msgstr ""
 "JSlob referențiat %1$s nu poate fi setat pentru serviciul %2$s. Nu se va "
 "efectua nicio operațiune."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "Adresa de e-mail %1$s este incorectă."
 
@@ -7105,6 +7110,35 @@ msgstr ""
 "%1$s"
 
 #. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Parola actuală nu este corectă. Introduceți parola actuală corectă și "
+"încercați din nou."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Lipsește parola actuală. Introduceți parola actuală și încercați din nou."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Lipsește noua parolă. Introduceți noua parolă și încercați din nou."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -8533,6 +8567,10 @@ msgid ""
 msgstr ""
 "Permisiunile de administrare ale proprietarului \"%1$s\" în dosarul \"%2$s\" "
 "au fost restabilite."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Este necesar un nume de dosar."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11574,9 +11612,6 @@ msgstr "Zulu"
 
 #~ msgid "This link already exists."
 #~ msgstr "Legătura există deja."
-
-#~ msgid "Invalid folder name."
-#~ msgstr "Nume de dosar incorect."
 
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Conexiune cu serverul de mail imposibilă."
@@ -15912,9 +15947,6 @@ msgstr "Zulu"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "Șirul introdus \"%1$s\" nu este un număr."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr "Valoarea întreagă depășește valoarea maximă permisă (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Valoare de antet content-type incorectă: %1$s"

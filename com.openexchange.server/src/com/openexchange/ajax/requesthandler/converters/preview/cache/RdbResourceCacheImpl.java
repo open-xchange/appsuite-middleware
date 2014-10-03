@@ -150,7 +150,14 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
             return true;
         } catch (final DataTruncation e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (java.sql.SQLIntegrityConstraintViolationException e) {
+            // Duplicate key conflict; just leave
+            return false;
         } catch (final SQLException e) {
+            // duplicate key conflict
+            if (e.getErrorCode() == 1022) {
+                return false;
+            }
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             if (!committed) {

@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
+ com.hazelcast.instance,
  com.hazelcast.logging,
  com.hazelcast.transaction,
  com.hazelcast.util,
