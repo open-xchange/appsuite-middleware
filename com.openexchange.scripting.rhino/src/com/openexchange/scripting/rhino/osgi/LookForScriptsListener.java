@@ -54,20 +54,20 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.HashMap;
-
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.slf4j.Logger;
 import static com.openexchange.scripting.rhino.SharedScope.*;
-
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.scripting.rhino.libs.Console;
 import com.openexchange.scripting.rhino.require.RequireSupport;
 
 public class LookForScriptsListener implements BundleListener {
 
-
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(LookForScriptsListener.class);
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
@@ -101,13 +101,13 @@ public class LookForScriptsListener implements BundleListener {
 			cx.evaluateReader(serviceScope, r, bundle.getSymbolicName()+"/main.js", 1, null);
 
 		} catch (Throwable t) {
-			t.printStackTrace();
+		    ExceptionUtils.handleThrowable(t);
+			LOGGER.error("", t);
 		} finally {
 			try {
 				r.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// Ignore
 			}
 			Context.exit();
 		}

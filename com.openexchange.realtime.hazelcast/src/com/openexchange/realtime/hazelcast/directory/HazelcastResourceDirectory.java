@@ -66,6 +66,7 @@ import com.hazelcast.query.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.DefaultResource;
@@ -86,7 +87,7 @@ import com.openexchange.realtime.util.IDMap;
  * {@link HazelcastResourceDirectory} - Keeps mappings of general {@link ID}s to full {@link ID}s and full {@link ID}s to {@link Resource}s.
  * New {@link ID}s and {@link DefaultResource}s that are added to this directory are automatically converted to {@link PortableID}s and
  * {@link PortableResource}s and extended with {@link RoutingInfo}s based on the local Hazelcast {@link Member}.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -271,6 +272,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 }
             }
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             throw new OXException(t);
         }
         LOG.debug("Removed Resource(s) from HazelcastResourceDirectory: {}", removedResources);
@@ -303,6 +305,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 }
             }
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             throw new OXException(t);
         }
         LOG.debug("Removed Resource(s) from HazelcastResourceDirectory: {}", removedResources);
@@ -349,6 +352,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 }
             }
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             throw new OXException(t);
         }
         return previousPortableResource;
@@ -375,7 +379,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     /**
      * Try to create a new Resource for the given ID and persist it in the ResourceDirectory. One place where this is used is during
      * creation of GroupDispatchers.
-     * 
+     *
      * @param id The ID used to reach a Resource
      * @return null if the HazelcastResource couldn't be created, otherwise the new Resource
      * @throws OXException
@@ -419,7 +423,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     /**
      * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> Resource. The resource includes the
      * {@link RoutingInfo} needed to address clients identified by the {@link ID}
-     * 
+     *
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
@@ -440,7 +444,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     }
 
     /**
-     * Add a {@link ResourceMappingEntryListener} to this ResourceDirectory. 
+     * Add a {@link ResourceMappingEntryListener} to this ResourceDirectory.
      * @param entryListener the {@link ResourceMappingEntryListener} to add
      * @param includeValue should the value be included when informing the listener
      * @return the registration id that can be used to remove a previously added listener
@@ -467,7 +471,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Find all Resources in this directory that are located on a given member node.
-     * 
+     *
      * @param member The cluster member
      * @return all Resources in this directory that are located on the given member node.
      * @throws OXException
@@ -476,7 +480,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         IMap<PortableID, PortableResource> allResources = getResourceMapping();
         PortableMemberPredicate memberPredicate = new PortableMemberPredicate(member);
         Set<Entry<PortableID, PortableResource>> matchingResources = allResources.entrySet(memberPredicate);
-        
+
         IDMap<Resource> foundIds = new IDMap<Resource>();
         Iterator<Entry<PortableID, PortableResource>> iterator = matchingResources.iterator();
         while(iterator.hasNext()) {

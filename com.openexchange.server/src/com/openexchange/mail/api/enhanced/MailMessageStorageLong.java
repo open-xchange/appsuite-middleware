@@ -70,6 +70,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * {@link MailMessageStorageLong} - Enhances {@link MailMessageStorage} to delegate its methods to number-based invocations.
@@ -268,6 +269,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             try {
                 text = textFinder.getText(getMessageLong(folder, mailIds[i], false));
             } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
                 LOG.warn("Error while getting primary content for mail ''{}'' in folder ''{}''. Returning null.", mailIds[i], folder, t);
             }
 

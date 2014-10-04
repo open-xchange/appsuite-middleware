@@ -56,6 +56,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ExceptionUtils;
 
 
 /**
@@ -65,20 +66,20 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class RunLoop<E> implements Runnable {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RunLoop.class);
-    
+
     protected final BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
 
     private final String name;
 
     /** Is the RunLoop currently paused */
-    private AtomicBoolean isPaused = new AtomicBoolean();
+    private final AtomicBoolean isPaused = new AtomicBoolean();
 
-    private Lock handleLock = new ReentrantLock();
+    private final Lock handleLock = new ReentrantLock();
 
     /** The Condition to await before the runloop continues processing */
-    private Condition proceedCondition = handleLock.newCondition();
+    private final Condition proceedCondition = handleLock.newCondition();
 
     /** The element we have just taken from the queue for handling */
     protected E currentElement;
@@ -119,9 +120,10 @@ public abstract class RunLoop<E> implements Runnable {
                 LOG.info("Returning from RunLoop due to interruption");
                 return;
             } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
                 LOG.error("", t);
             } finally {
-                //don't prevent gc of last handled element 
+                // Do not prevent GC of last handled element
                 currentElement = null;
                 handleLock.unlock();
             }
@@ -139,7 +141,7 @@ public abstract class RunLoop<E> implements Runnable {
 
     /**
      * Causes the Runloop to pause until {@link RunLoop#continueHandling()} is called again.
-     * 
+     *
      * @throws InterruptedException
      */
     protected void pauseHandling() {
@@ -148,7 +150,7 @@ public abstract class RunLoop<E> implements Runnable {
 
     /**
      * Causes the Runloop to continue handling offered Elements after {@link RunLoop#pauseHandling()} was called.
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     protected void continueHandling() {
           try {
@@ -161,5 +163,5 @@ public abstract class RunLoop<E> implements Runnable {
     }
 
     protected abstract void handle(E element) throws OXException;
-    
+
 }

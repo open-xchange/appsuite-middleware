@@ -55,6 +55,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ReportContextHandler;
 import com.openexchange.report.appsuite.ReportUserHandler;
@@ -71,17 +72,17 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AnalyzeContextBatch implements Runnable, Serializable {
-    
+
     private static final long serialVersionUID = -578253218760102061L;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AnalyzeContextBatch.class);
-    
+
     private final String uuid;
     private String reportType;
     private final List<Integer> contextIds;
 
     /**
-     *       
+     *
      * Initializes a new {@link AnalyzeContextBatch}.
      * @param uuid The uuid of the report we're running
      * @param reportType The type of report that is being run
@@ -99,25 +100,25 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
         int previousPriority = Thread.currentThread().getPriority();
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         try {
-            
+
             if (reportType == null) {
                 reportType = "default";
             }
-            
+
             for(Integer ctxId: contextIds) {
                 try {
                     // First let's have a look at the context
                     Context ctx = loadContext(ctxId);
 
                     ContextReport contextReport = new ContextReport(uuid, reportType, ctx);
-                    
+
                     // Run all Context Analyzers that apply to this reportType
                     for(ReportContextHandler contextHandler: Services.getContextHandlers()) {
                         if(contextHandler.appliesTo(reportType)) {
                             contextHandler.runContextReport(contextReport);
                         }
                     }
-                    
+
                     // Next, let's look at all the users in this context
                     for (User user: loadUsers(ctx)) {
                         UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);
@@ -127,35 +128,37 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
                                 userHandler.runUserReport(userReport);
                             }
                         }
-                        
+
                         // Compact User Analysis and add to context report
                         for (UserReportCumulator cumulator: Services.getUserReportCumulators()) {
                             if (cumulator.appliesTo(reportType)) {
-                                cumulator.merge(userReport, contextReport);                    
+                                cumulator.merge(userReport, contextReport);
                             }
                         }
                     }
-                    
+
                     // Add context to general report and mark context as done
                     Orchestration.getInstance().done(contextReport);
                 } catch (Throwable t) {
                     Orchestration.getInstance().abort(uuid, reportType, ctxId);
+                    ExceptionUtils.handleThrowable(t);
                     LOG.error("", t);
                 }
 
             }
-            
+
 
         } catch (Throwable t) {
             // Shouldn't happen
             for (Integer ctxId: contextIds) {
                 Orchestration.getInstance().abort(uuid, reportType, ctxId);
             }
+            ExceptionUtils.handleThrowable(t);
             LOG.error("", t);
         } finally {
             Thread.currentThread().setPriority(previousPriority);
         }
-        
+
     }
 
     private User[] loadUsers(Context ctx) throws OXException {

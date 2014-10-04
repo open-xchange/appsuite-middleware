@@ -49,14 +49,22 @@
 
 package com.openexchange.ajax.meta.internal;
 
+import java.lang.management.ManagementFactory;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.ajax.meta.MetaContributionConstants;
 import com.openexchange.ajax.meta.MetaContributor;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -214,7 +222,55 @@ public class MetaContributorReference implements MetaContributor {
             contributor.contributeTo(meta, id, session);
         } catch (Throwable t) {
             // log/handle any Throwable thrown by the listener
+            handleThrowable(t);
             LOG.error("Entity contribution failed", t);
+        }
+    }
+
+    private void handleThrowable(final Throwable t) {
+        if (t instanceof ThreadDeath) {
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}Thread death{}", marker, marker, t);
+            throw (ThreadDeath) t;
+        }
+        if (t instanceof OutOfMemoryError) {
+            OutOfMemoryError oom = (OutOfMemoryError) t;
+            String message = oom.getMessage();
+            if ("unable to create new native thread".equalsIgnoreCase(message)) {
+                // Dump all the threads to the log
+                Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
+                LOG.info("{}Threads: {}", Strings.getLineSeparator(), threads.size());
+                for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
+                    Thread thread = mapEntry.getKey();
+                    LOG.info("        thread: {}", thread);
+                    for (final StackTraceElement stackTraceElement : mapEntry.getValue()) {
+                        LOG.info(stackTraceElement.toString());
+                    }
+                }
+                LOG.info("{}    Thread dump finished{}", Strings.getLineSeparator(), Strings.getLineSeparator());
+            } else if ("Java heap space".equalsIgnoreCase(message)) {
+                try {
+                    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+                    String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    String fn = "/tmp/" + dateFormat.format(new Date()) + "-heap.hprof";
+
+                    server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
+                    LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
+                } catch (Exception e) {
+                    // Failed for any reason...
+                }
+            }
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
+            throw oom;
+        }
+        if (t instanceof VirtualMachineError) {
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
+            throw (VirtualMachineError) t;
         }
     }
 

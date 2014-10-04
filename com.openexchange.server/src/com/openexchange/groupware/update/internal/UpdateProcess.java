@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.TaskInfo;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * The {@link #run()} method of this class is started in a separate thread for
@@ -118,6 +119,7 @@ public class UpdateProcess implements Runnable {
         } catch (OXException e) {
             LOG.error("", e);
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("", t);
         }
     }
