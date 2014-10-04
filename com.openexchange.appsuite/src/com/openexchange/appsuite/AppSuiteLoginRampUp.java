@@ -217,7 +217,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
                 }
 
                 try {
-                    rampUp.put("secretCheck", ox.perform(request().module("recovery/secret").action("check").format("json").build(), null, session).getResultObject());
+                    oauth.put("secretCheck", ox.perform(request().module("recovery/secret").action("check").format("json").build(), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }

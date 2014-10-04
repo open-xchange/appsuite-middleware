@@ -44,7 +44,8 @@ public class ExceptionUtils {
      */
     public static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.error(surroundWithMarker("Thread death"), t);
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}Thread death{}", marker, marker, t);
             throw (ThreadDeath) t;
         }
         if (t instanceof OutOfMemoryError) {
@@ -77,18 +78,15 @@ public class ExceptionUtils {
                     // Failed for any reason...
                 }
             }
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
+            throw oom;
         }
         if (t instanceof VirtualMachineError) {
-            final String message = "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.";
-            LOG.error(surroundWithMarker(message), t);
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
             throw (VirtualMachineError) t;
         }
-        // All other instances of Throwable will be silently swallowed
-    }
-
-    private static String surroundWithMarker(final String message) {
-        final String marker = " ---=== /!\\ ===--- ";
-        return new StringBuilder(message.length() + 40).append(marker).append(message).append(marker).toString();
     }
 
     /**

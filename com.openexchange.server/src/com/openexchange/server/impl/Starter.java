@@ -54,6 +54,7 @@ import java.util.Properties;
 import java.util.Stack;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.openexchange.version.Version;
 
 /**
@@ -177,6 +178,7 @@ public class Starter implements Initialization {
                 init.start();
                 started.push(init);
             } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
                 LOG.error("initialization of {} failed", init.getClass().getName(), t);
             }
         }

@@ -62,6 +62,7 @@ import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.MultiMap;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.service.indexing.impl.internal.Services;
 
 
@@ -116,6 +117,7 @@ public class MonitoringMapConsistencyJob implements Job {
 
             LOG.debug("Removed {} jobs from monitoring map.", removed);
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.warn("MonitoringMapConsistencyJob failed.", t);
         }
     }

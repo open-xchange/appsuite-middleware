@@ -51,6 +51,7 @@ package com.openexchange.realtime.handle.impl;
 
 import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -63,19 +64,19 @@ import com.openexchange.realtime.packet.Stanza;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractStrategyHandler<T extends Stanza> implements StrategyHandler<T>, Runnable {
-    
+
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractStrategyHandler.class);
-    
+
     protected final BlockingQueue<T> queue;
-    
+
     protected final HandlerStrategy<T> strategy;
-    
+
     public AbstractStrategyHandler(BlockingQueue<T> queue, HandlerStrategy<T> strategy) {
         super();
         this.queue = queue;
         this.strategy = strategy;
     }
-    
+
     @Override
     public void run() {
         while (true) {
@@ -85,11 +86,12 @@ public abstract class AbstractStrategyHandler<T extends Stanza> implements Strat
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
                 LOG.error("Error while handling stanza.", t);
             }
         }
     }
-    
+
     protected ResourceDirectory getResourceDirectory() throws OXException {
         ResourceDirectory resourceDirectory = Services.optService(ResourceDirectory.class);
         if (resourceDirectory == null) {

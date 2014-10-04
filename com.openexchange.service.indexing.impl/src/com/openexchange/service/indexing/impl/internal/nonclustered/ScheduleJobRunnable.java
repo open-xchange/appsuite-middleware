@@ -62,6 +62,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.service.QuartzService;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.service.indexing.impl.internal.JobConstants;
 import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
@@ -150,6 +151,7 @@ public class ScheduleJobRunnable implements Runnable, Serializable {
                 }
             }
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("", t);
         }
     }

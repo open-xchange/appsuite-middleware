@@ -57,6 +57,7 @@ import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.Tools;
@@ -118,6 +119,7 @@ public class UnscheduleAllJobsRunnable implements Runnable, Serializable {
                 }
             }
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("", t);
         }
     }

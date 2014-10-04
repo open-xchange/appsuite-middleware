@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.directory.ChangeListener;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
@@ -85,6 +86,7 @@ public class ResourceListener implements ChangeListener {
                 retrySendOrRestoreMessage(id, stanza, 2, null);
             }
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("Could not handle added resource.",t);
         }
     }

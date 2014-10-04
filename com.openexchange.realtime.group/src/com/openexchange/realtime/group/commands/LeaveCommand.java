@@ -52,6 +52,7 @@ package com.openexchange.realtime.group.commands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
@@ -73,7 +74,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class LeaveCommand implements GroupCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(LeaveCommand.class);
-    
+
     @Override
     public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
         ID realSender = getRealSender(stanza);
@@ -91,6 +92,7 @@ public class LeaveCommand implements GroupCommand {
                         try {
                             doSignOff(stanza, groupDispatcher);
                         } catch (Throwable t) {
+                            ExceptionUtils.handleThrowable(t);
                             LOG.error("Error invoking LeaveCommand.", t);
                         }
                         return null;
@@ -130,8 +132,8 @@ public class LeaveCommand implements GroupCommand {
      * During synchronous calls the real sender gets moved to Stanza's onBehalfOf and is replaced by a surrogate sender, a UUID (see
      * com.openexchange.realtime.hazelcast.impl.ResponseChannel.setUp(String, Stanza)). We have to find out who actually wants to leave the
      * GroupDispatcher.
-     * 
-     * @param stanza the {@link Stanza} representing the LeaveCommand. 
+     *
+     * @param stanza the {@link Stanza} representing the LeaveCommand.
      * @return the real sender
      */
     private ID getRealSender(Stanza stanza) {
@@ -144,7 +146,7 @@ public class LeaveCommand implements GroupCommand {
     /**
      * Notify the sender of the {@link Stanza} that we refuse to execute the {@link LeaveCommand} as he is no member of the addressed
      * {@link GroupDispatcher}
-     * 
+     *
      * @param leaveCommand
      * @throws OXException
      */

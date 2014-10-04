@@ -133,6 +133,7 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
             LOG.trace("Registering service {}", serviceClass.getName());
             registration = context.registerService(serviceType, registeredService, properties);
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("Can not register {}", serviceClass.getName(), t);
         }
     }
@@ -186,6 +187,7 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
         } catch (NoSuchMethodException e) {
             // Service does not have a shutDown() method.
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("Can not shut down {}", serviceClass.getName(), t);
         }
     }

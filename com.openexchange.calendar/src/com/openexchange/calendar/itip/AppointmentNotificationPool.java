@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.notify.State;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 
@@ -127,6 +128,7 @@ public class AppointmentNotificationPool implements
 				tick(item.getContextId(), item.getAppointmentId(), false);
 			}
 		} catch (Throwable t) {
+		    ExceptionUtils.handleThrowable(t);
 			LOG.error("", t);
 		} finally {
 			lock.unlock();
@@ -234,6 +236,7 @@ public class AppointmentNotificationPool implements
 				drop(contextId, objectID);
 			}
 		} catch (Throwable t) {
+		    ExceptionUtils.handleThrowable(t);
 			LOG.error("", t);
 			drop(contextId, objectID);
 		}
