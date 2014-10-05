@@ -1693,13 +1693,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         for (final Conversation conversation : conversations) {
                             conversation.addMessageIdsTo(allMessageIds);
                         }
-                        List<MailMessage> tmp = new LinkedList<MailMessage>();
+                        List<MailMessage> tmp = null;
                         for (MailMessage sentMessage : sentMessages) {
                             if (false == allMessageIds.contains(sentMessage.getMessageId())) {
+                                if (null == tmp) {
+                                    tmp = new LinkedList<MailMessage>();
+                                }
                                 tmp.add(sentMessage);
                             }
                         }
-                        sentMessages = tmp;
+                        if (null != tmp) {
+                            sentMessages = tmp;
+                        }
                     }
 
                     if (false == sentMessages.isEmpty()) {
