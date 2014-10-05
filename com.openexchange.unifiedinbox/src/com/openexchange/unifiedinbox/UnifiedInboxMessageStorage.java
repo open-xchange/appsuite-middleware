@@ -557,7 +557,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
             // Prepare it
             final int unifiedAccountId = access.getAccountId();
-            mail.loadContent();
+            // mail.loadContent();
             mail.setFolder(fullName);
             mail.setAccountId(unifiedAccountId);
             return mail;
