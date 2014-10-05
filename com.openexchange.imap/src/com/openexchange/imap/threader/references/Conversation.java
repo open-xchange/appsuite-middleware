@@ -183,19 +183,21 @@ public final class Conversation {
      * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
      */
     public boolean referencesOrIsReferencedBy(final MailMessage message) {
+        if (!this.referencesEmpty) {
+            final String messageId = message.getMessageId();
+            if (null != messageId && this.references.contains(messageId)) {
+                return true;
+            }
+        }
         if (!this.messageIdsEmpty) {
+            /*
             if (this.messageIds.contains(message.getMessageId())) {
                 // Already contained
                 return false;
             }
+            */
             final String[] sReferences = message.getReferences();
             if (null != sReferences && containsAny(this.messageIds, Arrays.asList(sReferences))) {
-                return true;
-            }
-        }
-        if (!this.referencesEmpty) {
-            final String messageId = message.getMessageId();
-            if (null != messageId && this.references.contains(messageId)) {
                 return true;
             }
         }
@@ -247,6 +249,17 @@ public final class Conversation {
             }
         }
         return false;
+    }
+
+    /**
+     *Adds the message identifiers from this conversation to given set.
+     *
+     * @param set The set to add the message identifiers to
+     */
+    public void addMessageIdsTo(Set<String> set) {
+        if (!messageIdsEmpty) {
+            set.addAll(messageIds);
+        }
     }
 
     /**
