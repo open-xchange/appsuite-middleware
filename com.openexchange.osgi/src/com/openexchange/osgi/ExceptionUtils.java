@@ -50,36 +50,7 @@ public class ExceptionUtils {
         }
         if (t instanceof OutOfMemoryError) {
             OutOfMemoryError oom = (OutOfMemoryError) t;
-            String message = oom.getMessage();
-            if ("unable to create new native thread".equalsIgnoreCase(message)) {
-                // Dump all the threads to the log
-                Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
-                LOG.info("{}Threads: {}", Strings.getLineSeparator(), threads.size());
-                for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
-                    Thread thread = mapEntry.getKey();
-                    LOG.info("        thread: {}", thread);
-                    for (final StackTraceElement stackTraceElement : mapEntry.getValue()) {
-                        LOG.info(stackTraceElement.toString());
-                    }
-                }
-                LOG.info("{}    Thread dump finished{}", Strings.getLineSeparator(), Strings.getLineSeparator());
-            } else if ("Java heap space".equalsIgnoreCase(message)) {
-                try {
-                    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-
-                    String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    String fn = "/tmp/" + dateFormat.format(new Date()) + "-heap.hprof";
-
-                    server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
-                    LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
-                } catch (Exception e) {
-                    // Failed for any reason...
-                }
-            }
-            String marker = " ---=== /!\\ ===--- ";
-            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
+            handleOOM(oom);
             throw oom;
         }
         if (t instanceof VirtualMachineError) {
@@ -87,6 +58,46 @@ public class ExceptionUtils {
             LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
             throw (VirtualMachineError) t;
         }
+    }
+
+    /**
+     * Handles given OutOfMemoryError instance
+     * <p>
+     * <b><i>Does not re-throw given OutOfMemoryError instance</i></b>
+     *
+     * @param oom The OutOfMemoryError instance
+     */
+    public static void handleOOM(OutOfMemoryError oom) {
+        String message = oom.getMessage();
+        if ("unable to create new native thread".equalsIgnoreCase(message)) {
+            // Dump all the threads to the log
+            Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
+            LOG.info("{}Threads: {}", Strings.getLineSeparator(), threads.size());
+            for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
+                Thread thread = mapEntry.getKey();
+                LOG.info("        thread: {}", thread);
+                for (final StackTraceElement stackTraceElement : mapEntry.getValue()) {
+                    LOG.info(stackTraceElement.toString());
+                }
+            }
+            LOG.info("{}    Thread dump finished{}", Strings.getLineSeparator(), Strings.getLineSeparator());
+        } else if ("Java heap space".equalsIgnoreCase(message)) {
+            try {
+                MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+                String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                String fn = "/tmp/" + dateFormat.format(new Date()) + "-heap.hprof";
+
+                server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
+                LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
+            } catch (Exception e) {
+                // Failed for any reason...
+            }
+        }
+        String marker = " ---=== /!\\ ===--- ";
+        LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, oom);
     }
 
     /**
