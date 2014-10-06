@@ -150,12 +150,12 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             startedWriting = true;
             writeFile(new PublicationSession(publication), metadata, fileData, req, resp);
 
-        } catch (final Throwable t) {
+        } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             if(!startedWriting) {
-                t.printStackTrace(resp.getWriter());
+                e.printStackTrace(resp.getWriter());
             }
-            LOG.error("", t);
+            LOG.error("", e);
         }
 
     }
