@@ -136,6 +136,12 @@ open-xchange-imap (7.6.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 12 Feb 2014 09:36:03 +0100
 
+open-xchange-imap (7.4.2-35) stable; urgency=low
+
+  * Build for patch 2014-10-06
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Sep 2014 10:59:01 +0200
+
 open-xchange-imap (7.4.2-34) stable; urgency=medium
 
   * Build for patch 2014-09-15
