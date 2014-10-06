@@ -247,7 +247,21 @@ create_heap_dump() {
 # to have the right permissions and is somehow much faster as '-F', calling as root
 # will fail on some systems.
     echo "Creating Java heap dump of Open-Xchange groupware..."
-    if [ 'ibm' != "${JAVA_VM_TYPE}" ]; then
+    if [ -f "/opt/open-xchange/sbin/heapdump" -a 'ibm' != "${JAVA_VM_TYPE}" ]; then
+        local _heap_dump="${TMP}/${LOGDIR}/commands/heapdump.bin"
+        local _heap_dump_cmd="heapdump -f ${_heap_dump}"
+        local _heap_dump_log="${TMP}/${LOGDIR}/commands/heapdump -f heapdump.bin"
+
+        # Grant write permissions for ox user
+        chmod a+w ${TMP}/${LOGDIR}/commands
+
+        ${_heap_dump_cmd} 2>&1 | tee "${_heap_dump_log}"
+
+        if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+            echo "Compressing Java heap dump: ${_heap_dump}${LOGS_SUFFIX}"
+            bzip2 "${_heap_dump}"
+        fi
+    elif [ 'ibm' != "${JAVA_VM_TYPE}" ]; then
         local _heap_dump_cmd="jmap -dump:file"
         local _heap_dump_log="${TMP}/${LOGDIR}/commands/${_heap_dump_cmd}"
         local _heap_dump="${_heap_dump_log} (heap-dump)"
@@ -636,7 +650,9 @@ for argument in ${@}; do
         ;;
         --${CREATE_HEAP_DUMP_LONG})
             CREATE_HEAP_DUMP=$(check_argument ${1} ${2})
-            if [ 'ibm' == "${JAVA_VM_TYPE}" ]; then
+            if [ -f "/opt/open-xchange/sbin/heapdump" -a 'ibm' != "${JAVA_VM_TYPE}" ]; then
+                NEEDED_TOOLS="heapdump tee ${NEEDED_TOOLS}"
+            elif [ 'ibm' == "${JAVA_VM_TYPE}" ]; then
                 NEEDED_TOOLS="kill service jextract tee ${NEEDED_TOOLS}"
             else
                 NEEDED_TOOLS="jmap sudo tee ${NEEDED_TOOLS}"
