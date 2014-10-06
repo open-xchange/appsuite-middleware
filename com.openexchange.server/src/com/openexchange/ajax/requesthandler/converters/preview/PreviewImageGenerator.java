@@ -195,7 +195,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
         } catch (TimeoutException te) {
             // Preview image has not been generated in time
             previewFuture.cancel(true);
-            // throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+            // throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("Preview image has not been generated in time");
             return null;
         }
     }
