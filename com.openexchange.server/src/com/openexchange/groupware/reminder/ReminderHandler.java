@@ -97,7 +97,7 @@ public class ReminderHandler implements ReminderService {
     }
 
     @Override
-    public int insertReminder( final ReminderObject reminderObj) throws OXException {
+    public int insertReminder(final ReminderObject reminderObj) throws OXException {
         Connection writeCon = null;
 
         try {
@@ -118,12 +118,12 @@ public class ReminderHandler implements ReminderService {
                 }
             }
 
-            DBPool.closeWriterSilent(context,writeCon);
+            DBPool.closeWriterSilent(context, writeCon);
         }
     }
 
     @Override
-    public int insertReminder( final ReminderObject reminderObj, final Connection writeCon) throws OXException {
+    public int insertReminder(final ReminderObject reminderObj, final Connection writeCon) throws OXException {
         if (reminderObj.getUser() == 0) {
             throw ReminderExceptionCode.MANDATORY_FIELD_USER.create("missing user id");
         }
@@ -139,7 +139,7 @@ public class ReminderHandler implements ReminderService {
         PreparedStatement ps = null;
 
         try {
-            int a  = 0;
+            int a = 0;
 
             final int objectId = IDGenerator.getId(context, Types.REMINDER, writeCon);
             reminderObj.setObjectId(objectId);
@@ -291,7 +291,7 @@ public class ReminderHandler implements ReminderService {
                 }
             }
 
-            DBPool.closeWriterSilent(context,writeCon);
+            DBPool.closeWriterSilent(context, writeCon);
         }
     }
 
@@ -307,7 +307,7 @@ public class ReminderHandler implements ReminderService {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
         } finally {
             DBUtils.autocommit(writeCon);
-            DBPool.closeWriterSilent(context,writeCon);
+            DBPool.closeWriterSilent(context, writeCon);
         }
     }
 
@@ -401,10 +401,11 @@ public class ReminderHandler implements ReminderService {
     }
 
     @Override
-    public ReminderObject loadReminder( final int targetId, final int userId, final int module) throws OXException {
+    public ReminderObject loadReminder(final int targetId, final int userId, final int module) throws OXException {
         return loadReminder(String.valueOf(targetId), userId, module);
     }
-    public ReminderObject loadReminder( final String targetId, final int userId, final int module) throws OXException {
+
+    public ReminderObject loadReminder(final String targetId, final int userId, final int module) throws OXException {
         final Connection readCon = DBPool.pickup(context);
         try {
             return loadReminder(targetId, userId, module, readCon);
@@ -414,7 +415,7 @@ public class ReminderHandler implements ReminderService {
     }
 
     @Override
-    public ReminderObject loadReminder( final int targetId, final int userId, final int module, final Connection readCon) throws OXException {
+    public ReminderObject loadReminder(final int targetId, final int userId, final int module, final Connection readCon) throws OXException {
         if (readCon == null) {
             return loadReminder(String.valueOf(targetId), userId, module);
         }
@@ -444,8 +445,7 @@ public class ReminderHandler implements ReminderService {
      * {@inheritDoc}
      */
     @Override
-    public ReminderObject[] loadReminder(final int[] targetIds,
-            final int userId, final int module) throws OXException {
+    public ReminderObject[] loadReminder(final int[] targetIds, final int userId, final int module) throws OXException {
         final Connection con = DBPool.pickup(context);
         try {
             return loadReminder(targetIds, userId, module, con);
@@ -476,6 +476,7 @@ public class ReminderHandler implements ReminderService {
 
     /**
      * This method loads the reminder for several target objects.
+     *
      * @param targetIds unique identifier of several target objects.
      * @param userId unique identifier of the user.
      * @param module module type of target objects.
@@ -505,8 +506,8 @@ public class ReminderHandler implements ReminderService {
     }
 
     /**
-     * Reads the rows from the {@link ResultSet} stores the values in reminder
-     * objects an returns them as an array.
+     * Reads the rows from the {@link ResultSet} stores the values in reminder objects an returns them as an array.
+     *
      * @param result result with rows of reminders.
      * @return an array of reminder objects.
      * @throws SQLException if an error occurs.
@@ -536,16 +537,16 @@ public class ReminderHandler implements ReminderService {
     }
 
     @Override
-    public ReminderObject loadReminder( final int objectId) throws OXException {
+    public ReminderObject loadReminder(final int objectId) throws OXException {
         final Connection readCon = DBPool.pickup(context);
         try {
             return loadReminder(objectId, readCon);
         } finally {
-            DBPool.closeReaderSilent(context,readCon);
+            DBPool.closeReaderSilent(context, readCon);
         }
     }
 
-    public ReminderObject loadReminder( final int objectId, final Connection readCon) throws OXException {
+    public ReminderObject loadReminder(final int objectId, final Connection readCon) throws OXException {
         final int contextId = context.getContextId();
         PreparedStatement ps = null;
         try {
@@ -607,13 +608,10 @@ public class ReminderHandler implements ReminderService {
             rs = ps.executeQuery();
             return new ReminderSearchIterator(context, ps, rs, con);
         } catch (final SQLException e) {
-            DBUtils.closeSQLStuff(rs, ps);
-            DBPool.closeReaderSilent(context, con);
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final SearchIteratorException e) {
+        } finally {
             DBUtils.closeSQLStuff(rs, ps);
             DBPool.closeReaderSilent(context, con);
-            throw e;
         }
     }
 
