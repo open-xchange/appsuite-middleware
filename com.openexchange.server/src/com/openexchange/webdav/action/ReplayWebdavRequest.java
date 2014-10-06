@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Map;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
@@ -66,6 +66,7 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.xml.jdom.JDOMParser;
 
 public class ReplayWebdavRequest implements WebdavRequest{
 	private final WebdavRequest delegate;
@@ -99,7 +100,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 
 	@Override
     public Document getBodyAsDocument() throws JDOMException, IOException {
-		return new SAXBuilder().build(getBody());
+        return ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(getBody());
 	}
 
 	@Override

@@ -337,6 +337,30 @@ public class AJAXRequestData {
     }
 
     /**
+     * Checks if this AJAX request data has access to <code>HttpServletResponse</code> instance; thus offering support for:
+     * <ul>
+     * <li> {@link #optOutputStream()} </li>
+     * <li> {@link #optWriter()} </li>
+     * <li> {@link #setCharacterEncoding(String)} </li>
+     * <ul>
+     * <p>
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public boolean isHttpServletResponseAvailable() {
+        return null != httpServletResponse;
+    }
+
+    /**
+     * Gets the optional {@link HttpServletResponse} instance associated with this request data
+     *
+     * @return The {@link HttpServletResponse} instance or <code>null</code>
+     */
+    public HttpServletResponse optHttpServletResponse() {
+        return httpServletResponse;
+    }
+
+    /**
      * Returns a {@link OutputStream} suitable for writing binary data in the response. The servlet container does not encode the
      * binary data.
      * <p>

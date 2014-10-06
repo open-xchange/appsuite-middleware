@@ -1,3 +1,15 @@
+* 2014-09-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request 
+
+* 2014-09-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33036: Introduced convenience methods to optionally resolve a setting and to ignore any load/save-back operations if such a setting is non-existent
+ 
+* 2014-09-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33967: Avoid 102 Processing interim responses for requests executed by USM component
+
 * 2014-09-01 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33354: Added display message for invalid characters in folder name
@@ -30,6 +42,10 @@
 * 2014-07-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 33839: Escape site information when generating the publication site from selected template
+
+* 2014-07-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32897: Send empty string for default alarms in CalDAV
 
 * 2014-07-29 - tobias.friedrich@open-xchange.com
 
