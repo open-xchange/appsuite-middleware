@@ -755,12 +755,20 @@ public final class SessionHandler {
                             public Void call() throws Exception {
                                 try {
                                     sessionStorageService.setLocalIp(session.getSessionID(), localIp);
-                                } catch (final OXException e) {
-                                    if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                        throw e;
+                                } catch (OXException e) {
+                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                        // No such session held in session storage
+                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                    } else {
+                                        LOG.warn("Failed to set local IP address", e);
                                     }
-                                    // No such session held in session storage
-                                    LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                } catch (Exception e) {
+                                    if (e.getCause() instanceof InterruptedException) {
+                                        // Timed out
+                                        LOG.warn("Failed to set local IP address in time");
+                                    } else {
+                                        LOG.warn("Failed to set local IP address", e);
+                                    }
                                 }
                                 return null;
                             }
@@ -792,7 +800,23 @@ public final class SessionHandler {
 
                             @Override
                             public Void call() throws Exception {
-                                sessionStorageService.setClient(session.getSessionID(), client);
+                                try {
+                                    sessionStorageService.setClient(session.getSessionID(), client);
+                                } catch (OXException e) {
+                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                        // No such session held in session storage
+                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                    } else {
+                                        LOG.warn("Failed to set client", e);
+                                    }
+                                } catch (Exception e) {
+                                    if (e.getCause() instanceof InterruptedException) {
+                                        // Timed out
+                                        LOG.warn("Failed to set client in time");
+                                    } else {
+                                        LOG.warn("Failed to set client", e);
+                                    }
+                                }
                                 return null;
                             }
                         };
@@ -823,7 +847,23 @@ public final class SessionHandler {
 
                             @Override
                             public Void call() throws Exception {
-                                sessionStorageService.setHash(session.getSessionID(), hash);
+                                try {
+                                    sessionStorageService.setHash(session.getSessionID(), hash);
+                                } catch (OXException e) {
+                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                        // No such session held in session storage
+                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                    } else {
+                                        LOG.warn("Failed to set hash", e);
+                                    }
+                                } catch (Exception e) {
+                                    if (e.getCause() instanceof InterruptedException) {
+                                        // Timed out
+                                        LOG.warn("Failed to set hash in time");
+                                    } else {
+                                        LOG.warn("Failed to set hash", e);
+                                    }
+                                }
                                 return null;
                             }
                         };
@@ -1489,7 +1529,13 @@ public final class SessionHandler {
     }
 
     private static volatile Integer timeout;
-    private static int timeout() {
+
+    /**
+     * Gets the timeout for session-storage operations.
+     *
+     * @return The timeout in milliseconds
+     */
+    public static int timeout() {
         Integer tmp = timeout;
         if (null == tmp) {
             synchronized (SessionHandler.class) {
@@ -1537,7 +1583,7 @@ public final class SessionHandler {
 
     private static <V> void submit(final AbstractTask<V> c) {
         try {
-            ThreadPools.getThreadPool().submit(c);
+            ThreadPools.getThreadPool().submit(new TimeoutTaskWrapper<V>(c));
         } catch (final RejectedExecutionException e) {
             c.execute();
         }
@@ -1631,4 +1677,34 @@ public final class SessionHandler {
             return true;
         }
     }
+
+    private static final class TimeoutTaskWrapper<V> extends AbstractTask<V> {
+
+        private final Task<V> task;
+        private final V defaultValue;
+
+        TimeoutTaskWrapper(Task<V> task) {
+            this(task, null);
+        }
+
+        TimeoutTaskWrapper(Task<V> task, V defaultValue) {
+            super();
+            this.task = task;
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public V call() throws Exception {
+            Future<V> f = ThreadPools.getThreadPool().submit(task);
+            try {
+                return f.get(timeout(), TimeUnit.MILLISECONDS);
+            } catch (final TimeoutException e) {
+                f.cancel(true);
+                return defaultValue;
+            } catch (final ExecutionException e) {
+                throw ThreadPools.launderThrowable(e, Exception.class);
+            }
+        }
+    }
+
 }

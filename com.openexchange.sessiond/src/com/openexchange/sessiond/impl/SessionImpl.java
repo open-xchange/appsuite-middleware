@@ -50,8 +50,13 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
@@ -59,6 +64,9 @@ import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link SessionImpl} - Implements interface {@link Session} (and {@link PutIfAbsent}).
@@ -347,7 +355,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setLocalIp(final String localIp) {
         try {
             setLocalIp(localIp, true);
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
                 // No such session held in session storage
                 LOG.debug("Session {} not available in session storage.", sessionId, e);
@@ -362,14 +370,26 @@ public final class SessionImpl implements PutIfAbsent {
      *
      * @param localIp The local IP address
      * @param propagate Whether to propagate that IP change through {@code SessiondService}
-     * @throws OXException If propagating change fails
      */
-    public void setLocalIp(final String localIp, final boolean propagate) throws OXException {
+    public void setLocalIp(final String localIp, final boolean propagate) {
         this.localIp = localIp;
         if (propagate) {
-            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-            if (sessionStorageService != null) {
-                sessionStorageService.setLocalIp(sessionId, localIp);
+            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                final String sessionId = this.sessionId;
+                Task<Void> c = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        try {
+                            storageService.setLocalIp(sessionId, localIp);
+                        } catch (Exception e) {
+                            // Ignore
+                        }
+                        return null;
+                    }
+                };
+                getFrom(c, null);
             }
         }
     }
@@ -422,7 +442,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setHash(final String hash) {
         try {
             setHash(hash, true);
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             LOG.error("Failed to propagate change of hash identifier.", e);
         }
     }
@@ -432,14 +452,26 @@ public final class SessionImpl implements PutIfAbsent {
      *
      * @param hash The hash identifier
      * @param propagate Whether to propagate that change through {@code SessiondService}
-     * @throws OXException If propagating change fails
      */
-    public void setHash(final String hash, final boolean propagate) throws OXException {
+    public void setHash(final String hash, final boolean propagate) {
         this.hash = hash;
         if (propagate) {
-            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-            if (sessionStorageService != null) {
-                sessionStorageService.setHash(sessionId, hash);
+            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                final String sessionId = this.sessionId;
+                Task<Void> c = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        try {
+                            storageService.setHash(sessionId, hash);
+                        } catch (Exception e) {
+                            // Ignore
+                        }
+                        return null;
+                    }
+                };
+                getFrom(c, null);
             }
         }
     }
@@ -453,7 +485,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setClient(final String client) {
         try {
             setClient(client, true);
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             LOG.error("Failed to propagate change of client identifier.", e);
         }
     }
@@ -476,15 +508,27 @@ public final class SessionImpl implements PutIfAbsent {
      * Sets the client identifier
      *
      * @param client The client identifier
-     * @param propagate Whether to propagate that change through {@code SessiondService}
-     * @throws OXException If propagating change fails
+     * @param propagate Whether to propagate that change
      */
-    public void setClient(final String client, final boolean propagate) throws OXException {
+    public void setClient(final String client, final boolean propagate) {
         this.client = client;
         if (propagate) {
-            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-            if (sessionStorageService != null) {
-                sessionStorageService.setClient(sessionId, client);
+            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                final String sessionId = this.sessionId;
+                Task<Void> c = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        try {
+                            storageService.setClient(sessionId, client);
+                        } catch (Exception e) {
+                            // Ignore
+                        }
+                        return null;
+                    }
+                };
+                getFrom(c, null);
             }
         }
     }
@@ -515,6 +559,24 @@ public final class SessionImpl implements PutIfAbsent {
         builder.append("transient=").append(tranzient);
         builder.append('}');
         return builder.toString();
+    }
+
+    private static <V> V getFrom(final Task<V> c, final V defaultValue) {
+        Future<V> f = ThreadPools.getThreadPool().submit(c);
+        try {
+            return f.get(SessionHandler.timeout(), TimeUnit.MILLISECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return defaultValue;
+        } catch (final ExecutionException e) {
+            ThreadPools.launderThrowable(e, OXException.class);
+            return defaultValue;
+        } catch (final TimeoutException e) {
+            f.cancel(true);
+            return defaultValue;
+        } catch (final CancellationException e) {
+            return defaultValue;
+        }
     }
 
 }
