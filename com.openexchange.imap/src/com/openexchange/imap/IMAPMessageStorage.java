@@ -70,11 +70,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -1682,11 +1684,37 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (mergeWithSent) {
                 // Switch folder
                 openReadOnly(sentFullName);
-                final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, byEnvelope);
-                for (final Conversation conversation : conversations) {
-                    for (final MailMessage sentMessage : sentMessages) {
-                        if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                            conversation.addMessage(sentMessage);
+                // Get sent messages
+                List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, byEnvelope);
+                if (false == sentMessages.isEmpty()) {
+                    // Filter messages already contained in conversations
+                    {
+                        Set<String> allMessageIds = new HashSet<String>(conversations.size());
+                        for (final Conversation conversation : conversations) {
+                            conversation.addMessageIdsTo(allMessageIds);
+                        }
+                        List<MailMessage> tmp = null;
+                        for (MailMessage sentMessage : sentMessages) {
+                            if (false == allMessageIds.contains(sentMessage.getMessageId())) {
+                                if (null == tmp) {
+                                    tmp = new LinkedList<MailMessage>();
+                                }
+                                tmp.add(sentMessage);
+                            }
+                        }
+                        if (null != tmp) {
+                            sentMessages = tmp;
+                        }
+                    }
+
+                    if (false == sentMessages.isEmpty()) {
+                        // Add to conversation if references or referenced-by
+                        for (Conversation conversation : conversations) {
+                            for (MailMessage sentMessage : sentMessages) {
+                                if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                    conversation.addMessage(sentMessage);
+                                }
+                            }
                         }
                     }
                 }
@@ -1697,7 +1725,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         // Fold it
         Conversations.fold(conversations);
         // Comparator
-        final MailMessageComparator threadComparator = COMPARATOR_DESC;
+        MailMessageComparator threadComparator = COMPARATOR_DESC;
         // Sort
         List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
         for (final Conversation conversation : conversations) {
@@ -1706,15 +1734,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         conversations = null;
         // Sort root elements
         {
-            final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-            final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+            MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+            Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
             Collections.sort(list, listComparator);
         }
         // Check for index range
         if (null != indexRange) {
-            final int fromIndex = indexRange.start;
+            int fromIndex = indexRange.start;
             int toIndex = indexRange.end;
-            final int size = list.size();
+            int size = list.size();
             if ((fromIndex) > size) {
                 // Return empty iterator if start is out of range
                 return Collections.emptyList();

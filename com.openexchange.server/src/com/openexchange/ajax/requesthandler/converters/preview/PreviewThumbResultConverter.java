@@ -213,11 +213,15 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                     }
                     throw e;
                 }
-                if (previewDocument == null || previewDocument.getThumbnail() == null) {
-                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+                if (previewDocument == null) {
+                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("PreviewDocument is null");
                 }
 
                 InputStream thumbnail = previewDocument.getThumbnail();
+                if (thumbnail == null) {
+                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("PreviewDocument's thumbnail input stream is null");
+                }
+
                 final String fileName = previewDocument.getMetaData().get("resourcename");
                 byte[] thumbnailBytes;
                 try {
@@ -231,7 +235,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                 result.setResultObject(responseFileHolder, "file");
                 preventTransformations(requestData, previewDocument);
             } else {
-                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("Blocking worker not allowed");
             }
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

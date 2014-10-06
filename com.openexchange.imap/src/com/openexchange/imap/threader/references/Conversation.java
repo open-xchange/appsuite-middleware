@@ -83,6 +83,9 @@ public final class Conversation {
     private final Set<String> messageIds;
     private final Set<String> references;
 
+    private boolean messageIdsEmpty;
+    private boolean referencesEmpty;
+
     /**
      * Initializes a new {@link Conversation}.
      */
@@ -91,17 +94,9 @@ public final class Conversation {
         messages = new HashSet<MailMessageWrapper>(DEFAULT_INITIAL_CAPACITY);
         messageIds = new HashSet<String>(DEFAULT_INITIAL_CAPACITY << 1, 0.9f);
         references = new HashSet<String>(DEFAULT_INITIAL_CAPACITY << 1, 0.9f);
-    }
 
-    /**
-     * Initializes a new {@link Conversation}.
-     */
-    public Conversation(final Conversation copy) {
-        super();
-        // Must not be null
-        messages = copy.messages;
-        messageIds = copy.messageIds;
-        references = copy.references;
+        messageIdsEmpty = true;
+        referencesEmpty = true;
     }
 
     /**
@@ -142,7 +137,9 @@ public final class Conversation {
             final MailMessage message = mmw.message;
             final String messageId = message.getMessageId();
             if (null != messageId) {
-                messageIds.add(messageId);
+                if (messageIds.add(messageId)) {
+                    messageIdsEmpty = false;
+                }
             }
             /*
             final String inReplyTo = message.getInReplyTo();
@@ -154,7 +151,9 @@ public final class Conversation {
             if (null != sReferences) {
                 for (final String sReference : sReferences) {
                     if (null != sReference) {
-                        references.add(sReference);
+                        if (references.add(sReference)) {
+                            referencesEmpty = false;
+                        }
                     }
                 }
             }
@@ -184,19 +183,21 @@ public final class Conversation {
      * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
      */
     public boolean referencesOrIsReferencedBy(final MailMessage message) {
-        if (!this.messageIds.isEmpty()) {
+        if (!this.referencesEmpty) {
+            final String messageId = message.getMessageId();
+            if (null != messageId && this.references.contains(messageId)) {
+                return true;
+            }
+        }
+        if (!this.messageIdsEmpty) {
+            /*
             if (this.messageIds.contains(message.getMessageId())) {
                 // Already contained
                 return false;
             }
+            */
             final String[] sReferences = message.getReferences();
             if (null != sReferences && containsAny(this.messageIds, Arrays.asList(sReferences))) {
-                return true;
-            }
-        }
-        if (!this.references.isEmpty()) {
-            final String messageId = message.getMessageId();
-            if (null != messageId && this.references.contains(messageId)) {
                 return true;
             }
         }
@@ -210,7 +211,7 @@ public final class Conversation {
      * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
      */
     public boolean referencesOrIsReferencedBy(final Conversation other) {
-        return (this.references.isEmpty() ? false : containsAny(this.references, other.messageIds)) || (other.references.isEmpty() ? false : containsAny(this.messageIds, other.references));
+        return (this.referencesEmpty ? false : containsAny(this.references, other.messageIds)) || (other.referencesEmpty ? false : containsAny(this.messageIds, other.references));
     }
 
     /**
@@ -220,7 +221,7 @@ public final class Conversation {
      * @return <code>true</code> if references; otherwise <code>false</code>
      */
     public boolean references(final Conversation other) {
-        return this.references.isEmpty() ? false : containsAny(this.references, other.messageIds);
+        return this.referencesEmpty ? false : containsAny(this.references, other.messageIds);
     }
 
     /**
@@ -230,7 +231,7 @@ public final class Conversation {
      * @return <code>true</code> if referenced-by; otherwise <code>false</code>
      */
     public boolean isReferencedBy(final Conversation other) {
-        return other.references.isEmpty() ? false : containsAny(this.messageIds, other.references);
+        return other.referencesEmpty ? false : containsAny(this.messageIds, other.references);
     }
 
     /**
@@ -248,6 +249,17 @@ public final class Conversation {
             }
         }
         return false;
+    }
+
+    /**
+     *Adds the message identifiers from this conversation to given set.
+     *
+     * @param set The set to add the message identifiers to
+     */
+    public void addMessageIdsTo(Set<String> set) {
+        if (!messageIdsEmpty) {
+            set.addAll(messageIds);
+        }
     }
 
     /**

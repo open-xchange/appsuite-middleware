@@ -301,7 +301,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                                     // Preview image has not been generated in time
                                     iis.interrupt();
                                     submittedTask.cancel(true);
-                                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+                                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("Thumbnail has not been generated in time.");
                                 } catch (InterruptedException e) {
                                     // Keep interrupted state
                                     Thread.currentThread().interrupt();
@@ -328,7 +328,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // Check result
             if (null == previewDocument) {
                 // No thumbnail available
-                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create(new NullPointerException("previewDocument is null"), new Object[0]);
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("PreviewDocument is null");
             }
 
             // Check thumbnail stream
@@ -336,7 +336,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             InputStream thumbnail = previewDocument.getThumbnail();
             if (null == thumbnail) {
                 // No thumbnail available
-                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("PreviewDocument's thumbnail input stream is null");
             }
 
             // Prepare response

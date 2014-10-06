@@ -95,6 +95,7 @@ public class RssAction implements AJAXActionService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RssAction.class);
 
     private static final int NOT_FOUND = 404;
+    private static final int FORBIDDEN = 403;
 
 	private final TimoutHttpURLFeedFetcher fetcher;
 	private final HashMapFeedInfoCache feedCache;
@@ -162,6 +163,8 @@ public class RssAction implements AJAXActionService {
                         }
                         if (NOT_FOUND == responseCode) {
                             LOG.debug("Resource could not be found: {}", url, e);
+                        } else if (FORBIDDEN == responseCode) {
+                            LOG.debug("Authentication required for resource: {}", url, e);
                         } else if (responseCode >= 500 && responseCode < 600) {
                             final OXException oxe = RssExceptionCodes.RSS_HTTP_ERROR.create(e, Integer.valueOf(responseCode), url);
                             if (1 == urls.size()) {
