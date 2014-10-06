@@ -1,3 +1,7 @@
+* 2014-10-06 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34722: Removed foreign keys from mailaccount create table task
+
 * 2014-10-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 34748: Added appropriate null guard prior to cleansing from session cache
