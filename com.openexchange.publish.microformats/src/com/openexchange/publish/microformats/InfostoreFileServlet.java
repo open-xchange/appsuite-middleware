@@ -78,6 +78,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -161,8 +162,12 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     protected DocumentMetadata loadMetadata(final Publication publication, final int infoId) throws OXException {
         try {
+            IDBasedFileAccessFactory factory = fileFactory;
+            if (null == factory) {
+                throw ServiceExceptionCode.absentService(IDBasedFileAccessFactory.class);
+            }
             Session session = new PublicationSession(publication);
-            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
+            IDBasedFileAccess fileAccess = factory.createAccess(session);
             return FileMetadata.getMetadata(fileAccess.getFileMetadata(String.valueOf(infoId), FileStorageFileAccess.CURRENT_VERSION));
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
@@ -174,7 +179,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     private void writeFile(final Session session, final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
         final FileResponseRenderer renderer = fileResponseRenderer;
-        if (null == fileResponseRenderer) {
+        if (null == renderer) {
             throw new IOException("Missing " + FileResponseRenderer.class.getName());
         }
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
