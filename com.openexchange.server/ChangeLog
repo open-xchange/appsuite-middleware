@@ -1,3 +1,7 @@
+* 2014-10-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34765: Use secure value insertion through PreparedStatement
+
 * 2014-09-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 34465: Fixed update for POP3 mail accounts
