@@ -3,6 +3,10 @@
  - Fix for bug 34748: Added appropriate null guard prior to cleansing from session cache
  - Fix for bug 34741: Improved description for the quota properties
 
+* 2014-10-06 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 34704: Parse the escaped double quotes correctly and convert all octet string literals to their ASCII/Unicode representations
+
 * 2014-10-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 34608: Cleanse "unified-mail enabled" information from session parameters
