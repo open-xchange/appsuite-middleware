@@ -71,6 +71,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.user.UserService;
@@ -122,21 +123,29 @@ public final class Tokens implements LoginRequestHandler {
             // IP check passed: update IP address if necessary
             LoginTools.updateIPAddress(conf, newIP, session);
         }
+        SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+
         // Update client, which is necessary for hash calculation. OXNotifier must not know which client will be used - maybe
         // com.openexchange.ox.gui.dhtml or open-xchange-appsuite.
-        session.setClient(client);
+        if (null != service) {
+            service.setClient(session.getSessionID(), client);
+        }
+
         // Update hash if the property com.openexchange.cookie.hash is configured to remember.
         String hash = HashCalculator.getInstance().getHash(req, userAgent, client);
-        session.setHash(hash);
+        if (null != service) {
+            service.setHash(session.getSessionID(), hash);
+        }
 
-        final Locale locale;
+        Locale locale;
         if (null != contextService && null != userService) {
             Context context = contextService.getContext(session.getContextId());
             locale = userService.getUser(session.getUserId(), context).getLocale();
         } else {
             locale = Locale.US;
         }
-        final Response response = new Response();
+
+        Response response = new Response();
         try {
             JSONObject json = new JSONObject();
             LoginWriter.write(session, json, locale);
@@ -146,6 +155,7 @@ public final class Tokens implements LoginRequestHandler {
             LOG.error("", oje);
             response.setException(oje);
         }
+
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
