@@ -77,6 +77,7 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredential
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
+import com.openexchange.tools.encoding.Hex;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -484,20 +485,36 @@ public class SieveHandler {
                 {
                     okStart = false;
                     sb.append((char) ch);
-                    ch = bis_sieve.read();
-                    if (ch == -1) {
-                        // End of stream
-                        throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                    final StringBuilder octetBuilder = new StringBuilder();
+                    int limit = 0;
+                    int index = 0;
+                    do {
+                        ch = bis_sieve.read();
+                        if (ch == -1) {
+                            // End of stream
+                            throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                        } else if (ch >= 48 && ch <= 55) {
+                            octetBuilder.append((char)ch);
+                            limit = 3;
+                            index++;
+                        } else {
+                            sb.append((char) ch);
+                        }
+                    } while (index < limit);
+                    if (octetBuilder.length() > 1) {
+                        sb.setLength(sb.length() - 1);
+                        sb.append((char)Integer.parseInt(octetBuilder.toString()));
                     }
-                    sb.append((char) ch);
                 }
                 break;
             case '"':
                 {
-                    if (inQuote) {
-                        inQuote = false;
-                    } else {
-                        inQuote = true;
+                    if (!inComment) {
+                        if (inQuote) {
+                            inQuote = false;
+                        } else {
+                            inQuote = true;
+                        }
                     }
                     okStart = false;
                     sb.append((char) ch);

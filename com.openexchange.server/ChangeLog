@@ -5,6 +5,7 @@
 
 * 2014-10-06 - thorben.betten@open-xchange.com
 
+ - Fix for bug 34704: Parse the escaped double quotes correctly and convert all octet string literals to their ASCII/Unicode representations
  - Fix for bug 34706: Use timeout-aware operations to distribute either change of local IP address, client identifier or hash string through
                       cluster to prevent the system from increasing number of stalled threads
  - Fix for bug 34765: Use secure value insertion through PreparedStatement
