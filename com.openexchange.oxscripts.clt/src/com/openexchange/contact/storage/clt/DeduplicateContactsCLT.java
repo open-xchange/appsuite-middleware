@@ -49,13 +49,13 @@
 
 package com.openexchange.contact.storage.clt;
 
+import java.util.Arrays;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link DeduplicateContactsCLT}
