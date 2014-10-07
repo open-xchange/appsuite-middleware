@@ -82,13 +82,13 @@ public class ObjectPermissionLoader extends DbMetadataLoader<List<ObjectPermissi
     }
 
     @Override
-    protected DocumentMetadata setMetadata(DocumentMetadata document, List<ObjectPermission> metadata) {
+    protected DocumentMetadata set(DocumentMetadata document, List<ObjectPermission> metadata) {
         document.setObjectPermissions(metadata);
         return document;
     }
 
     @Override
-    public Map<Integer, List<ObjectPermission>> loadMetadata(Collection<Integer> ids, Context context) throws OXException {
+    public Map<Integer, List<ObjectPermission>> load(Collection<Integer> ids, Context context) throws OXException {
         if (null == ids || 0 == ids.size()) {
             return Collections.emptyMap();
         }

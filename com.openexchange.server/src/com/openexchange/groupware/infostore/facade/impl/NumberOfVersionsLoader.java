@@ -83,13 +83,13 @@ public class NumberOfVersionsLoader extends DbMetadataLoader<Integer> {
     }
 
     @Override
-    protected DocumentMetadata setMetadata(DocumentMetadata document, Integer metadata) {
+    protected DocumentMetadata set(DocumentMetadata document, Integer metadata) {
         document.setNumberOfVersions(metadata.intValue());
         return document;
     }
 
     @Override
-    public Map<Integer, Integer> loadMetadata(Collection<Integer> ids, Context context) throws OXException {
+    public Map<Integer, Integer> load(Collection<Integer> ids, Context context) throws OXException {
         if (null == ids || 0 == ids.size()) {
             return Collections.emptyMap();
         }

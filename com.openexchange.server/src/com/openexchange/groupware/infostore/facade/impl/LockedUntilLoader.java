@@ -81,7 +81,7 @@ public class LockedUntilLoader extends MetadataLoader<List<Lock>> {
     }
 
     @Override
-    protected DocumentMetadata setMetadata(DocumentMetadata document, List<Lock> metadata) {
+    protected DocumentMetadata set(DocumentMetadata document, List<Lock> metadata) {
         if (null != metadata && 0 < metadata.size()) {
             long maximumTimeout = 0;
             for (Lock lock : metadata) {
@@ -93,7 +93,7 @@ public class LockedUntilLoader extends MetadataLoader<List<Lock>> {
     }
 
     @Override
-    public Map<Integer, List<Lock>> loadMetadata(Collection<Integer> ids, Context context) throws OXException {
+    public Map<Integer, List<Lock>> load(Collection<Integer> ids, Context context) throws OXException {
         if (null == ids || 0 == ids.size()) {
             return Collections.emptyMap();
         }

@@ -238,7 +238,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * load document metadata (including object permissions)
          */
-        DocumentMetadata document = objectPermissionLoader.addMetadata(load(id, version, context), context, null);
+        DocumentMetadata document = objectPermissionLoader.add(load(id, version, context), context, null);
         /*
          * check permissions
          */
@@ -256,7 +256,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * add further metadata and return
          */
-        return numberOfVersionsLoader.addMetadata(lockedUntilLoader.addMetadata(document, context, null), context, null);
+        return numberOfVersionsLoader.add(lockedUntilLoader.add(document, context, null), context, null);
     }
 
     @Override
@@ -729,7 +729,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         CheckSizeSwitch.checkSizes(document, getProvider(), context);
 
-        final DocumentMetadata oldDocument = objectPermissionLoader.addMetadata(checkWriteLock(document.getId(), session), session.getContext(), null);
+        final DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
 
         Metadata[] modifiedCols = modifiedColumns;
         final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedCols));
@@ -920,7 +920,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             Metadata.VALUES_ARRAY,
             reuseProvider,
             session.getContext()).asList();
-        objectPermissionLoader.addMetadata(allDocuments, session.getContext(), null);
+        objectPermissionLoader.add(allDocuments, session.getContext(), null);
         removeDocuments(allDocuments, allVersions, date, session, null);
     }
 
@@ -1228,7 +1228,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         }
         List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), objectIds, Metadata.VALUES_ARRAY);
-        objectPermissionLoader.addMetadata(allDocuments, session.getContext(), null);
+        objectPermissionLoader.add(allDocuments, session.getContext(), null);
 
         // Ensure folder ids are consistent between request and existing documents
         for (DocumentMetadata document : allDocuments) {
@@ -1291,7 +1291,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 Metadata.VALUES_ARRAY,
                 reuseProvider,
                 context).asList();
-            objectPermissionLoader.addMetadata(allDocuments, context, null);
+            objectPermissionLoader.add(allDocuments, context, null);
         } catch (final OXException x) {
             throw x;
         } catch (final Throwable t) {
@@ -1354,7 +1354,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * load document metadata (including object permissions)
          */
-        DocumentMetadata metadata = objectPermissionLoader.addMetadata(load(id, CURRENT_VERSION, context), context, null);
+        DocumentMetadata metadata = objectPermissionLoader.add(load(id, CURRENT_VERSION, context), context, null);
         /*
          * check write lock & permissions
          */
@@ -1527,13 +1527,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
              * enhance metadata with pre-loaded data as needed
              */
             if (addObjectPermissions) {
-                timedResult = objectPermissionLoader.addMetadata(timedResult, context, objectIDs);
+                timedResult = objectPermissionLoader.add(timedResult, context, objectIDs);
             }
             if (addLocked) {
-                timedResult = lockedUntilLoader.addMetadata(timedResult, context, objectIDs);
+                timedResult = lockedUntilLoader.add(timedResult, context, objectIDs);
             }
             if (addNumberOfVersions) {
-                timedResult = numberOfVersionsLoader.addMetadata(timedResult, context, objectIDs);
+                timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
             }
             return timedResult;
         }
@@ -1587,10 +1587,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         });
         TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iter);
         if (contains(columns, Metadata.LOCKED_UNTIL_LITERAL)) {
-            timedResult = lockedUntilLoader.addMetadata(timedResult, context, Collections.singleton(I(id)));
+            timedResult = lockedUntilLoader.add(timedResult, context, Collections.singleton(I(id)));
         }
         if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
-            timedResult = objectPermissionLoader.addMetadata(timedResult, context, Collections.singleton(I(id)));
+            timedResult = objectPermissionLoader.add(timedResult, context, Collections.singleton(I(id)));
         }
         return timedResult;
     }
@@ -1607,7 +1607,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
          */
         boolean addObjectPermissions = contains(cols, Metadata.OBJECT_PERMISSIONS_LITERAL);
         final Map<Integer, List<ObjectPermission>> knownObjectPermissions = addObjectPermissions ?
-            objectPermissionLoader.loadMetadata(objectIDs, context) : null;
+            objectPermissionLoader.load(objectIDs, context) : null;
         /*
          * get items, checking permissions as lazy as possible
          */
@@ -1635,7 +1635,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                      */
                     EffectiveInfostorePermission infostorePermission = null;
                     List<ObjectPermission> objectPermissions = null != knownObjectPermissions ?
-                        knownObjectPermissions.get(I(document.getId())) : objectPermissionLoader.loadMetadata(document.getId(), context);
+                        knownObjectPermissions.get(I(document.getId())) : objectPermissionLoader.load(document.getId(), context);
                     if (null != objectPermissions) {
                         ObjectPermission matchingPermission = EffectiveObjectPermissions.find(user, objectPermissions);
                         if (null != matchingPermission) {
@@ -1669,13 +1669,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
          */
         TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iterator);
         if (addObjectPermissions) {
-            timedResult = objectPermissionLoader.addMetadata(timedResult, context, knownObjectPermissions);
+            timedResult = objectPermissionLoader.add(timedResult, context, knownObjectPermissions);
         }
         if (contains(cols, Metadata.LOCKED_UNTIL_LITERAL)) {
-            timedResult = lockedUntilLoader.addMetadata(timedResult, context, objectIDs);
+            timedResult = lockedUntilLoader.add(timedResult, context, objectIDs);
         }
         if (contains(cols, Metadata.NUMBER_OF_VERSIONS_LITERAL)) {
-            timedResult = numberOfVersionsLoader.addMetadata(timedResult, context, objectIDs);
+            timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
         }
         return timedResult;
     }
@@ -1758,10 +1758,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
         if (addLocked) {
             final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session);
-            delta = lockedUntilLoader.addMetadata(delta, context, locks);
+            delta = lockedUntilLoader.add(delta, context, locks);
         }
         if (addNumberOfVersions) {
-            delta = numberOfVersionsLoader.addMetadata(delta, context, (Map<Integer, Integer>) null);
+            delta = numberOfVersionsLoader.add(delta, context, (Map<Integer, Integer>) null);
         }
         return delta;
     }

@@ -84,7 +84,7 @@ public abstract class MetadataLoader<T> {
      * @param metadata The metadata to set
      * @return The document with set metadata
      */
-    protected abstract DocumentMetadata setMetadata(DocumentMetadata document, T metadata);
+    protected abstract DocumentMetadata set(DocumentMetadata document, T metadata);
 
     /**
      * Loads additional metadata for multiple documents and puts them into a map, ready to be used for further result processing.
@@ -93,7 +93,7 @@ public abstract class MetadataLoader<T> {
      * @param context The context
      * @return A map holding the metadata (or <code>null</code>) to a document's id
      */
-    public abstract Map<Integer, T> loadMetadata(Collection<Integer> ids, Context context) throws OXException;
+    public abstract Map<Integer, T> load(Collection<Integer> ids, Context context) throws OXException;
 
     /**
      * Loads additional metadata for one document.
@@ -102,9 +102,9 @@ public abstract class MetadataLoader<T> {
      * @param context The context
      * @return The metadata (or <code>null</code> if not available)
      */
-    public T loadMetadata(int id, Context context) throws OXException {
+    public T load(int id, Context context) throws OXException {
         Integer identifier = Integer.valueOf(id);
-        return loadMetadata(Collections.singleton(identifier), context).get(identifier);
+        return load(Collections.singleton(identifier), context).get(identifier);
     }
 
     /**
@@ -115,7 +115,7 @@ public abstract class MetadataLoader<T> {
      * @param knownMetadata A map of known metadata, or <code>null</code> if not available
      * @return A timed result holding the documents with added metadata
      */
-    public Delta<DocumentMetadata> addMetadata(Delta<DocumentMetadata> delta, Context context, Map<Integer, T> knownMetadata) throws OXException {
+    public Delta<DocumentMetadata> add(Delta<DocumentMetadata> delta, Context context, Map<Integer, T> knownMetadata) throws OXException {
         return new CustomizableDelta<DocumentMetadata>(delta, getMetadataCustomizer(context, knownMetadata));
     }
 
@@ -127,7 +127,7 @@ public abstract class MetadataLoader<T> {
      * @param knownMetadata A map of known metadata, or <code>null</code> if not available
      * @return A timed result holding the documents with added metadata
      */
-    public TimedResult<DocumentMetadata> addMetadata(TimedResult<DocumentMetadata> timedResult, Context context, Map<Integer, T> knownMetadata) throws OXException {
+    public TimedResult<DocumentMetadata> add(TimedResult<DocumentMetadata> timedResult, Context context, Map<Integer, T> knownMetadata) throws OXException {
         return new CustomizableTimedResult<DocumentMetadata>(timedResult, getMetadataCustomizer(context, knownMetadata));
     }
 
@@ -139,8 +139,8 @@ public abstract class MetadataLoader<T> {
      * @param ids The identifiers of the documents in the timed results to pre-fetch the required metadata
      * @return A timed result holding the documents with added metadata
      */
-    public TimedResult<DocumentMetadata> addMetadata(TimedResult<DocumentMetadata> timedResult, Context context, Collection<Integer> ids) throws OXException {
-        return new CustomizableTimedResult<DocumentMetadata>(timedResult, getMetadataCustomizer(context, loadMetadata(ids, context)));
+    public TimedResult<DocumentMetadata> add(TimedResult<DocumentMetadata> timedResult, Context context, Collection<Integer> ids) throws OXException {
+        return new CustomizableTimedResult<DocumentMetadata>(timedResult, getMetadataCustomizer(context, load(ids, context)));
     }
 
     /**
@@ -151,8 +151,8 @@ public abstract class MetadataLoader<T> {
      * @param knownMetadata A map of known metadata, or <code>null</code> if not available
      * @return The document with added metadata
      */
-    public DocumentMetadata addMetadata(DocumentMetadata document, Context context, Map<Integer, T> knownMetadata) throws OXException {
-        return addMetadata(Collections.singletonList(document), context, knownMetadata).get(0);
+    public DocumentMetadata add(DocumentMetadata document, Context context, Map<Integer, T> knownMetadata) throws OXException {
+        return add(Collections.singletonList(document), context, knownMetadata).get(0);
     }
 
     /**
@@ -164,18 +164,18 @@ public abstract class MetadataLoader<T> {
      * @return The documents with added metadata
      * @throws OXException
      */
-    public List<DocumentMetadata> addMetadata(List<DocumentMetadata> documents, Context context, Map<Integer, T> knownMetadata) throws OXException {
+    public List<DocumentMetadata> add(List<DocumentMetadata> documents, Context context, Map<Integer, T> knownMetadata) throws OXException {
         /*
          * load required metadata if not available
          */
         if (null == knownMetadata) {
-            knownMetadata = loadMetadata(Tools.getIDs(documents), context);
+            knownMetadata = load(Tools.getIDs(documents), context);
         }
         /*
          * add metadata to documents
          */
         for (DocumentMetadata document : documents) {
-            setMetadata(document, knownMetadata.get(Integer.valueOf(document.getId())));
+            set(document, knownMetadata.get(Integer.valueOf(document.getId())));
         }
         return documents;
     }
@@ -193,7 +193,7 @@ public abstract class MetadataLoader<T> {
             @Override
             public DocumentMetadata customize(DocumentMetadata thing) throws OXException {
                 if (null != thing) {
-                    return addMetadata(thing, context, knownMetadata);
+                    return add(thing, context, knownMetadata);
                 }
                 return thing;
             }
