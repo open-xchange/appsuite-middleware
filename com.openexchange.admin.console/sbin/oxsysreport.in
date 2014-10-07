@@ -563,7 +563,7 @@ Groupware Max Heap Size: $(cat /opt/open-xchange/etc/ox-scriptconf.sh | \
     sed 's|"||g' | \
     sed 's| .*||g' | \
     tail -n 1)
-OX Log Storage: $(du -h ${OX_LOG_DIR})
+OX Log Storage: $(du -h ${OX_LOG_DIR} | sort | tail -n 1)
 
 $(df -h ${TMP})    Processing data within: $(normalize_path ${TMP}/${LOGDIR})
 $(df -h $(dirname ${LOGARC}) | tail -n 1)    Final tarball storage: ${LOGARC}
