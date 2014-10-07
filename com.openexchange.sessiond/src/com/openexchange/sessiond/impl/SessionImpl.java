@@ -50,23 +50,16 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link SessionImpl} - Implements interface {@link Session} (and {@link PutIfAbsent}).
@@ -389,7 +382,7 @@ public final class SessionImpl implements PutIfAbsent {
                         return null;
                     }
                 };
-                getFrom(c, null);
+                TimeoutTaskWrapper.submit(c);
             }
         }
     }
@@ -471,7 +464,7 @@ public final class SessionImpl implements PutIfAbsent {
                         return null;
                     }
                 };
-                getFrom(c, null);
+                TimeoutTaskWrapper.submit(c);
             }
         }
     }
@@ -528,7 +521,7 @@ public final class SessionImpl implements PutIfAbsent {
                         return null;
                     }
                 };
-                getFrom(c, null);
+                TimeoutTaskWrapper.submit(c);
             }
         }
     }
@@ -559,24 +552,6 @@ public final class SessionImpl implements PutIfAbsent {
         builder.append("transient=").append(tranzient);
         builder.append('}');
         return builder.toString();
-    }
-
-    private static <V> V getFrom(final Task<V> c, final V defaultValue) {
-        Future<V> f = ThreadPools.getThreadPool().submit(c);
-        try {
-            return f.get(SessionHandler.timeout(), TimeUnit.MILLISECONDS);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return defaultValue;
-        } catch (final ExecutionException e) {
-            ThreadPools.launderThrowable(e, OXException.class);
-            return defaultValue;
-        } catch (final TimeoutException e) {
-            f.cancel(true);
-            return defaultValue;
-        } catch (final CancellationException e) {
-            return defaultValue;
-        }
     }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.sessiond.impl.TimeoutTaskWrapper.submit;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1581,17 +1582,14 @@ public final class SessionHandler {
         }
     }
 
-    private static <V> void submit(final AbstractTask<V> c) {
+    /**
+     * Submits given task to thread pool while ignoring a possible {@link RejectedExecutionException} in case thread pool refuses its execution.
+     *
+     * @param task The task to submit
+     */
+    private static <V> void submitAndIgnoreRejection(Task<V> task) {
         try {
-            ThreadPools.getThreadPool().submit(new TimeoutTaskWrapper<V>(c));
-        } catch (final RejectedExecutionException e) {
-            c.execute();
-        }
-    }
-
-    private static <V> void submitAndIgnoreRejection(final Task<V> c) {
-        try {
-            ThreadPools.getThreadPool().submit(c);
+            ThreadPools.getThreadPool().submit(task);
         } catch (final RejectedExecutionException e) {
             // Ignore
         }
@@ -1675,35 +1673,6 @@ public final class SessionHandler {
                 return false;
             }
             return true;
-        }
-    }
-
-    private static final class TimeoutTaskWrapper<V> extends AbstractTask<V> {
-
-        private final Task<V> task;
-        private final V defaultValue;
-
-        TimeoutTaskWrapper(Task<V> task) {
-            this(task, null);
-        }
-
-        TimeoutTaskWrapper(Task<V> task, V defaultValue) {
-            super();
-            this.task = task;
-            this.defaultValue = defaultValue;
-        }
-
-        @Override
-        public V call() throws Exception {
-            Future<V> f = ThreadPools.getThreadPool().submit(task);
-            try {
-                return f.get(timeout(), TimeUnit.MILLISECONDS);
-            } catch (final TimeoutException e) {
-                f.cancel(true);
-                return defaultValue;
-            } catch (final ExecutionException e) {
-                throw ThreadPools.launderThrowable(e, Exception.class);
-            }
         }
     }
 

@@ -81,6 +81,54 @@ public final class ThreadPools {
     }
 
     /**
+     * Executes given task with current thread.
+     *
+     * @param task The task to execute
+     * @return The task's return value or <code>null</code> if an {@code Exception} occurred (in that {@link #afterExecute(Throwable)} is
+     *         invoked with a non-<code>null</code> {@code Throwable} reference)
+     */
+    public static <V> V execute(Task<V> task) {
+        Thread currentThread = Thread.currentThread();
+        if (!(currentThread instanceof ThreadRenamer)) {
+            return innerExecute(task, currentThread);
+        }
+        // Current thread supports ThreadRenamer
+        final String name = currentThread.getName();
+        task.setThreadName((ThreadRenamer) currentThread);
+        try {
+            return innerExecute(task, currentThread);
+        } finally {
+            currentThread.setName(name);
+        }
+    }
+
+    /**
+     * Execute with respect to <code>beforeExecute()</code> and <code>afterExecute()</code> methods
+     *
+     * @param task The task to execute
+     * @param currentThread The current thread
+     * @return The return value or <code>null</code>
+     */
+    private static <V> V innerExecute(Task<V> task, Thread currentThread) {
+        V retval = null;
+        boolean ran = false;
+        task.beforeExecute(currentThread);
+        try {
+            retval = task.call();
+            ran = true;
+            task.afterExecute(null);
+        } catch (final Exception ex) {
+            if (!ran) {
+                task.afterExecute(ex);
+            }
+            // Else the exception occurred within
+            // afterExecute itself in which case we don't
+            // want to call it again.
+        }
+        return retval;
+    }
+
+    /**
      * Gets the {@link ExecutorService} view on registered thread pool.
      * <p>
      * <b>Note</b>: Shut-down operations are not permitted and will throw an {@link UnsupportedOperationException}.
