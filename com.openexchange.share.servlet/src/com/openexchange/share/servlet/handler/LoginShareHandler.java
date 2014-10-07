@@ -60,91 +60,68 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * {@link RedirectingShareHandler} - The basic share handler that redirects to Web Interface.
- * <p>
- * This share handler performs a login, establishing a dedicated session.
+ * {@link LoginShareHandler} - The share handler that redirects to standard login page.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RedirectingShareHandler extends AbstractShareHandler {
+public class LoginShareHandler extends AbstractShareHandler {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RedirectingShareHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginShareHandler.class);
 
     /**
-     * Initializes a new {@link RedirectingShareHandler}.
+     * Initializes a new {@link LoginShareHandler}.
      *
      * @param shareLoginConfiguration The login configuration for shares
      */
-    public RedirectingShareHandler() {
+    public LoginShareHandler() {
         super();
     }
 
     @Override
     public int getRanking() {
-        return 0;
-    }
-
-    /**
-     * Gets a value indicating whether the guest's session should be kept alive, or if an implicit logout should be performed afterwards.
-     *
-     * @return <code>true</code> if the session should be kept, <code>false</code>, otherwise
-     */
-    protected boolean keepSession() {
-        return true;
+        return 10;
     }
 
     /**
      * Checks if this redirecting share handler fees responsible for passed share
      *
-     * @param share The share
      * @param request The associated HTTP request
-     * @param response The associated HTTP response
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
-     * @throws OXException If check fails for any reason
      */
-    protected boolean handles(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return true;
+    protected boolean handles(HttpServletRequest request){
+        String ua = request.getHeader("User-Agent");
+        // Full list of browsers: http://www.useragentstring.com/pages/Browserlist/
+        return null != ua && (ua.startsWith("Mozilla/") || ua.startsWith("Opera/"));
     }
 
     @Override
     public boolean handle(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (false == handles(share, request, response)) {
+        if (false == handles(request)) {
+            // Not a Browser
             return false;
         }
-        Session session = null;
+
         try {
-            /*
-             * get, authenticate and login as associated guest user
-             */
             ShareLoginConfiguration shareLoginConfig = getShareLoginConfiguration();
             LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
-            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions());
-            if (null == loginResult) {
-                return false;
-            }
-            session = loginResult.getSession();
-            handleResolvedShare(new ResolvedShare(share, loginResult, loginConfig, request, response));
+
+            int contextId = share.getContextID();
+            int guestId = share.getGuest();
+
+            // TODO: Jump to APp Suite UI login page
+
             return true;
-        } catch (IOException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (keepSession()) {
-                ShareServletUtils.logout(session);
-            }
         }
     }
 
@@ -179,7 +156,6 @@ public class RedirectingShareHandler extends AbstractShareHandler {
     // --------------------------------------------------------------------------------------------------------- //
 
     private static final Pattern P_UIWEBPATH = Pattern.compile("[uiwebpath]", Pattern.LITERAL);
-    private static final Pattern P_SESSION = Pattern.compile("[session]", Pattern.LITERAL);
     private static final Pattern P_USER = Pattern.compile("[user]", Pattern.LITERAL);
     private static final Pattern P_USER_ID = Pattern.compile("[user_id]", Pattern.LITERAL);
     private static final Pattern P_LANGUAGE = Pattern.compile("[language]", Pattern.LITERAL);
@@ -203,18 +179,17 @@ public class RedirectingShareHandler extends AbstractShareHandler {
 
         String redirectLink;
         if (isFolderShare) {
-            redirectLink = configService.getProperty("com.openexchange.share.redirectLinkFolder",
-                "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
+            redirectLink = configService.getProperty("com.openexchange.share.loginLinkFolder",
+                "/[uiwebpath]#store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
         } else {
-            redirectLink = configService.getProperty("com.openexchange.share.redirectLinkItem",
-                "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
+            redirectLink = configService.getProperty("com.openexchange.share.loginLinkItem",
+                "/[uiwebpath]#store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
         }
 
         {
             String uiWebPath = loginConfig.getUiWebPath(); // uiWebPath = "/ox6/index.html";
             redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
         }
-        redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
         redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
         redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
         redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));

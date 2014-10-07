@@ -61,6 +61,7 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.servlet.handler.AbstractShareHandler;
 import com.openexchange.share.servlet.handler.RedirectingShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
@@ -88,24 +89,27 @@ public class ShareServletActivator extends AbstractServletActivator {
         org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("starting bundle: \"com.openexchange.share.servlet\"");
         ShareServiceLookup.set(this);
         /*
-         * track share handlers
+         * Track share handlers
          */
         RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry = new RankingAwareNearRegistryServiceTracker<ShareHandler>(context, ShareHandler.class);
         rememberTracker(shareHandlerRegistry);
         openTrackers();
         /*
-         * register default handlers
+         * Initialize login configuration for shares
+         */
+        ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(getService(ConfigurationService.class));
+        AbstractShareHandler.setShareLoginConfiguration(loginConfig);
+        /*
+         * Register default handlers
          */
         {
-            ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(getService(ConfigurationService.class));
-            RedirectingShareHandler.setShareLoginConfiguration(loginConfig);
             ShareHandler handler = new RedirectingShareHandler();
             Dictionary<String, Object> props = new Hashtable<String, Object>(2);
             props.put(Constants.SERVICE_RANKING, Integer.valueOf(handler.getRanking()));
             registerService(ShareHandler.class, handler);
         }
         /*
-         * register servlet
+         * Register Servlet
          */
         super.registerServlet(ALIAS, new ShareServlet(shareHandlerRegistry), getService(HttpService.class));
     }
@@ -113,7 +117,7 @@ public class ShareServletActivator extends AbstractServletActivator {
     @Override
     protected void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("stopping bundle: \"com.openexchange.share.servlet\"");
-        RedirectingShareHandler.setShareLoginConfiguration(null);
+        AbstractShareHandler.setShareLoginConfiguration(null);
         ShareServiceLookup.set(null);
         super.stopBundle();
     }
