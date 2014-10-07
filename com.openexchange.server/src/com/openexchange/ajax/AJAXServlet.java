@@ -106,6 +106,7 @@ import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -512,6 +513,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
+    private static final String CONTENTTYPE_UPLOAD = "multipart/form-data";
+
     /**
      * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
      * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
@@ -530,7 +533,18 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
              */
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            super.service(new CountingHttpServletRequest(req), resp);
+            /*
+             * Check for possible upload
+             */
+            String contentType = Strings.asciiLowerCase(req.getContentType());
+            if (contentType != null && contentType.startsWith(CONTENTTYPE_UPLOAD, 0)) {
+                // An upload request
+                com.openexchange.tools.servlet.RateLimiter.checkRequest(req);
+                super.service(req, resp);
+            } else {
+                // Common request
+                super.service(new CountingHttpServletRequest(req), resp);
+            }
         } catch (final RateLimitedException e) {
             resp.setContentType("text/plain; charset=UTF-8");
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
