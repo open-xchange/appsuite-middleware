@@ -143,6 +143,9 @@ public class RedirectingShareHandler implements ShareHandler {
 
     @Override
     public boolean handle(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        if (false == handles(share, request, response)) {
+            return false;
+        }
         Session session = null;
         try {
             /*
