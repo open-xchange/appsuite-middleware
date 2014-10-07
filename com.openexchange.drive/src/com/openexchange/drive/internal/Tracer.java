@@ -59,8 +59,12 @@ import com.openexchange.drive.DriveConstants;
  */
 public class Tracer {
 
+    /**
+     * The maximum length of the stored trace log.
+     */
+    public static final int MAX_SIZE = 100000;
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tracer.class);
-    private static final int MAX_SIZE = 20000;
 
     private final StringBuilder traceLog;
 
