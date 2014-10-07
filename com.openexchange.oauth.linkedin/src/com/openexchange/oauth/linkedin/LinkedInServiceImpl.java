@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,6 +136,8 @@ public class LinkedInServiceImpl implements LinkedInService {
 
         final Token accessToken = new Token(account.getToken(), account.getSecret());
         final OAuthRequest request = new OAuthRequest(method, url);
+        request.setConnectTimeout(5, TimeUnit.SECONDS);
+        request.setReadTimeout(30, TimeUnit.SECONDS);
         service.signRequest(accessToken, request);
         return request.send();
     }

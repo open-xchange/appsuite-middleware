@@ -330,7 +330,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The appropriate {@link MailAccess} instance
      * @throws OXException If appropriate {@link MailAccess} instance cannot be determined
      */
-    protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+    protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings) throws OXException {
         final String mailServerURL = accountDescription.generateMailServerURL();
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = getMailProviderByURL(mailServerURL);
@@ -343,7 +343,8 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         MailConfig mailConfig = null;
         try {
             // Create a mail access instance
-            final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
+            int accountId = accountDescription.getId();
+            MailAccess<?, ?> mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
             mailConfig = mailAccess.getMailConfig();
             // Set login and password
             mailConfig.setLogin(accountDescription.getLogin());
