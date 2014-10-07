@@ -6,6 +6,7 @@ Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.report.appsuite.osgi.ReportActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-RegisterBuddy: com.hazelcast
 Import-Package: com.hazelcast.core,
  com.openexchange.ajax.tools,
  com.openexchange.capabilities,
