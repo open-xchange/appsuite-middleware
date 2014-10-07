@@ -190,7 +190,7 @@ public class RedirectingShareHandler implements ShareHandler {
              */
             String url = getRedirectURL(resolvedShare.getSession(), resolvedShare.getUser(), resolvedShare.getShare(), resolvedShare.getLoginConfig());
             LOG.info("Redirecting share {} to {}...", resolvedShare.getShare().getToken(), url);
-            resolvedShare.getResponse().sendRedirect(url);
+            response.sendRedirect(url);
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
