@@ -81,10 +81,15 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements Enti
 		return findLocks(Arrays.asList(Integer.valueOf(entity)), session).get(Integer.valueOf(entity));
 	}
 
-	@Override
+    @Override
     public Map<Integer, List<Lock>> findLocks(List<Integer> entities, Session session) throws OXException {
-	    return findLocksByEntity(entities, getContextFrom(session));
-	}
+        return findLocks(entities, getContextFrom(session));
+    }
+
+    @Override
+    public Map<Integer, List<Lock>> findLocks(List<Integer> entities, Context context) throws OXException {
+        return findLocksByEntity(entities, context);
+    }
 
 	@Override
     public boolean isLocked(final int entity, final Context ctx, final User user) throws OXException {

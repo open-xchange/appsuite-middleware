@@ -47,38 +47,57 @@
  *
  */
 
-package com.openexchange.groupware.infostore.webdav;
+package com.openexchange.groupware.infostore.facade.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.webdav.EntityLockManager;
+import com.openexchange.groupware.infostore.webdav.Lock;
 
-public interface EntityLockManager extends LockManager {
+/**
+ * {@link LockedUntilLoader}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class LockedUntilLoader extends MetadataLoader<List<Lock>> {
 
-    void transferLocks(Context ctx, int from_user, int to_user) throws OXException;
+    private final EntityLockManager lockManager;
+
+    /**
+     * Initializes a new {@link LockedUntilLoader}.
+     *
+     * @param lockManager The underlying lock manager
+     */
+    public LockedUntilLoader(EntityLockManager lockManager) {
+        super();
+        this.lockManager = lockManager;
+    }
 
     @Override
-    void unlock(int id, Session session) throws OXException;
-
-    int lock(int entity, long timeout, Scope exclusive, Type write, String ownerDesc, Context ctx, User user) throws OXException;
-
-    @Override
-    List<Lock> findLocks(int entity, Session session) throws OXException;
-
-    Map<Integer, List<Lock>> findLocks(List<Integer> entities, Session session) throws OXException;
-
-    Map<Integer, List<Lock>> findLocks(List<Integer> entities, Context context) throws OXException;
-
-    boolean isLocked(int entity, Context context, User userObject) throws OXException;
+    protected DocumentMetadata setMetadata(DocumentMetadata document, List<Lock> metadata) {
+        if (null != metadata && 0 < metadata.size()) {
+            long maximumTimeout = 0;
+            for (Lock lock : metadata) {
+                maximumTimeout = Math.max(maximumTimeout, lock.getTimeout());
+            }
+            document.setLockedUntil(new Date(System.currentTimeMillis() + maximumTimeout));
+        }
+        return document;
+    }
 
     @Override
-    void removeAll(int entity, Session session) throws OXException;
-
-    void relock(int lockId, long timeout, Scope scope, Type write, String owner, Context context, User userObject) throws OXException;
-
-    void addExpiryListener(LockExpiryListener listener);
+    public Map<Integer, List<Lock>> loadMetadata(Collection<Integer> ids, Context context) throws OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyMap();
+        }
+        return lockManager.findLocks(new ArrayList<Integer>(ids), context);
+    }
 
 }

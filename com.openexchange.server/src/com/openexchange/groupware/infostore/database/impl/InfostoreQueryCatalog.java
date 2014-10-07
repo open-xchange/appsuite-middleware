@@ -62,6 +62,24 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 
 public class InfostoreQueryCatalog {
 
+    private static final InfostoreQueryCatalog INSTANCE = new InfostoreQueryCatalog();
+
+    /**
+     * Gets the query catalog instance.
+     *
+     * @return The instance.
+     */
+    public static InfostoreQueryCatalog getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Initializes a new {@link InfostoreQueryCatalog}.
+     */
+    private InfostoreQueryCatalog() {
+        super();
+    }
+
     private static final String SQL_CHUNK05 = " AND infostore.last_modified > ";
 
     private static final String SQL_CHUNK04 = " FROM infostore JOIN infostore_document ON infostore.cid = ";

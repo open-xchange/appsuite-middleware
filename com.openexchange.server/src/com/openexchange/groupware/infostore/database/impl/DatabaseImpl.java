@@ -1026,7 +1026,7 @@ public class DatabaseImpl extends DBService {
                 versions.add(metadata);
             }
 
-            final InfostoreQueryCatalog catalog = new InfostoreQueryCatalog();
+            final InfostoreQueryCatalog catalog = InfostoreQueryCatalog.getInstance();
 
             final DeleteAllDocumentsAction deleteDocumentAction = new DeleteAllDocumentsAction();
             deleteDocumentAction.setProvider(getProvider());
@@ -1128,7 +1128,7 @@ public class DatabaseImpl extends DBService {
             parents.add(documentMetadata);
             discoverAllFiles(documentMetadata, session, files);
         }
-        final InfostoreQueryCatalog queries = new InfostoreQueryCatalog();
+        final InfostoreQueryCatalog queries = InfostoreQueryCatalog.getInstance();
 
         final List<String> parentDeletes = queries.getSingleDelete(InfostoreQueryCatalog.Table.INFOSTORE);
         final String allChildrenDelete = queries.getAllVersionsDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT);

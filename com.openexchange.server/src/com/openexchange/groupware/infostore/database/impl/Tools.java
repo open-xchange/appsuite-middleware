@@ -50,13 +50,16 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.java.Strings;
 
@@ -128,6 +131,42 @@ public class Tools {
         return ids;
     }
 
+    /**
+     * Gets a list containing the object identifiers of the supplied documents.
+     *
+     * @param documents The documents to get the object identifiers for
+     * @return A list of corresponding object identifiers
+     * @throws OXException
+     */
+    public static List<Integer> getIDs(List<DocumentMetadata> documents) throws OXException {
+        if (null == documents) {
+            return null;
+        }
+        List<Integer> ids = new ArrayList<Integer>(documents.size());
+        for (DocumentMetadata document : documents) {
+            ids.add(Integer.valueOf(document.getId()));
+        }
+        return ids;
+    }
+
+    /**
+     * Gets a map containing the object identifiers of the supplied ID tuples, mapped to their corresponding folder ID.
+     *
+     * @param tuples The tuples to get the ID mapping for
+     * @return A map of corresponding object identifiers
+     * @throws OXException
+     */
+    public static Map<Integer, Long> getIDsToFolders(List<IDTuple> tuples) throws OXException {
+        final Map<Integer, Long> idsToFolders = new HashMap<Integer, Long>(tuples.size());
+        for (IDTuple idTuple : tuples) {
+            try {
+                idsToFolders.put(Integer.parseInt(idTuple.getId()), Long.parseLong(idTuple.getFolder()));
+            } catch (NumberFormatException e) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
+        }
+        return idsToFolders;
+    }
 
     /**
      * Initializes a new {@link Tools}.

@@ -121,7 +121,7 @@ public class CheckSizeSwitch {
         Connection con = null;
         try {
             con = provider.getWriteConnection(ctx);
-            final String[] tuple = new InfostoreQueryCatalog().getFieldTuple(field, new InfostoreQueryCatalog.VersionWins());
+            final String[] tuple = InfostoreQueryCatalog.getInstance().getFieldTuple(field, new InfostoreQueryCatalog.VersionWins());
             final int size = DBUtils.getColumnSize(con, tuple[0], tuple[1]);
             SIZES.put(field, size);
             return size;

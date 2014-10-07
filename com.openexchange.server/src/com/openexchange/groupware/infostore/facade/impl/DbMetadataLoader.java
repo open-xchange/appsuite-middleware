@@ -47,38 +47,76 @@
  *
  */
 
-package com.openexchange.groupware.infostore.webdav;
+package com.openexchange.groupware.infostore.facade.impl;
 
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
-public interface EntityLockManager extends LockManager {
+/**
+ * {@link DbMetadataLoader}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public abstract class DbMetadataLoader<T> extends MetadataLoader<T> {
 
-    void transferLocks(Context ctx, int from_user, int to_user) throws OXException;
+    protected DBProvider provider;
 
-    @Override
-    void unlock(int id, Session session) throws OXException;
+    /**
+     * Initializes a new {@link DbMetadataLoader}.
+     *
+     * @param provider The underlying database provider
+     */
+    protected DbMetadataLoader(DBProvider provider) {
+        super();
+        this.provider = provider;
+    }
 
-    int lock(int entity, long timeout, Scope exclusive, Type write, String ownerDesc, Context ctx, User user) throws OXException;
+    /**
+     * Performs a query against the database, utilitzing the supplied result processor to iterate over the result set.
+     *
+     * @param context The context
+     * @param query The query, may contain placeholders that will be replaced in the statement by the supplied arguments
+     * @param processor The result processor to use
+     * @param args The arguments for the statement
+     * @return The result
+     * @throws SQLException
+     * @throws OXException
+     */
+    protected <R> R performQuery(Context context, String query, ResultProcessor<R> processor, Object...args) throws SQLException, OXException {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet results = null;
+        try {
+            connection = provider.getReadConnection(context);
+            stmt = connection.prepareStatement(query);
+            for (int i = 0; i < args.length; i++) {
+                stmt.setObject(i + 1, args[i]);
+            }
+            results = stmt.executeQuery();
+            return processor.process(results);
+        } finally {
+            DBUtils.closeSQLStuff(results, stmt);
+            if (null != connection) {
+                provider.releaseReadConnection(context, connection);
+            }
+        }
+    }
 
-    @Override
-    List<Lock> findLocks(int entity, Session session) throws OXException;
+    protected static interface ResultProcessor<R> {
 
-    Map<Integer, List<Lock>> findLocks(List<Integer> entities, Session session) throws OXException;
-
-    Map<Integer, List<Lock>> findLocks(List<Integer> entities, Context context) throws OXException;
-
-    boolean isLocked(int entity, Context context, User userObject) throws OXException;
-
-    @Override
-    void removeAll(int entity, Session session) throws OXException;
-
-    void relock(int lockId, long timeout, Scope scope, Type write, String owner, Context context, User userObject) throws OXException;
-
-    void addExpiryListener(LockExpiryListener listener);
+        /**
+         * Processes a result set, yielding custom results.
+         *
+         * @param results The result set
+         * @return The processed result
+         */
+        R process(ResultSet results) throws SQLException;
+    }
 
 }

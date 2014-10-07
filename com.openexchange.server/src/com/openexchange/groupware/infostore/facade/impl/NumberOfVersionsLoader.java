@@ -47,38 +47,72 @@
  *
  */
 
-package com.openexchange.groupware.infostore.webdav;
+package com.openexchange.groupware.infostore.facade.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 
-public interface EntityLockManager extends LockManager {
+/**
+ * {@link NumberOfVersionsLoader}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class NumberOfVersionsLoader extends DbMetadataLoader<Integer> {
 
-    void transferLocks(Context ctx, int from_user, int to_user) throws OXException;
+    /**
+     * Initializes a new {@link NumberOfVersionsLoader}.
+     *
+     * @param provider The underlying database provider
+     */
+    public NumberOfVersionsLoader(DBProvider provider) {
+        super(provider);
+    }
 
     @Override
-    void unlock(int id, Session session) throws OXException;
-
-    int lock(int entity, long timeout, Scope exclusive, Type write, String ownerDesc, Context ctx, User user) throws OXException;
-
-    @Override
-    List<Lock> findLocks(int entity, Session session) throws OXException;
-
-    Map<Integer, List<Lock>> findLocks(List<Integer> entities, Session session) throws OXException;
-
-    Map<Integer, List<Lock>> findLocks(List<Integer> entities, Context context) throws OXException;
-
-    boolean isLocked(int entity, Context context, User userObject) throws OXException;
+    protected DocumentMetadata setMetadata(DocumentMetadata document, Integer metadata) {
+        document.setNumberOfVersions(metadata.intValue());
+        return document;
+    }
 
     @Override
-    void removeAll(int entity, Session session) throws OXException;
+    public Map<Integer, Integer> loadMetadata(Collection<Integer> ids, Context context) throws OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyMap();
+        }
+        final Map<Integer, Integer> numberOfVersions = new HashMap<Integer, Integer>(ids.size());
+        List<Object> parameters = new ArrayList<Object>(ids.size() + 1);
+        parameters.add(I(context.getContextId()));
+        parameters.addAll(ids);
+        String query = InfostoreQueryCatalog.getInstance().getNumberOfVersionsQueryForDocuments(I2i(ids));
+        try {
+            performQuery(context, query, new ResultProcessor<Void>() {
 
-    void relock(int lockId, long timeout, Scope scope, Type write, String owner, Context context, User userObject) throws OXException;
-
-    void addExpiryListener(LockExpiryListener listener);
+                @Override
+                public Void process(ResultSet rs) throws SQLException {
+                    while (rs.next()) {
+                        numberOfVersions.put(I(rs.getInt(1)), I(rs.getInt(2) - 1));
+                    }
+                    return null;
+                }
+            }, parameters.toArray(new Object[parameters.size()]));
+        } catch (SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
+        return numberOfVersions;
+    }
 
 }
