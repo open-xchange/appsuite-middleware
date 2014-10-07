@@ -50,11 +50,10 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
+
 import java.util.Random;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.config.actions.SetRequest;
+
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 
 /**
@@ -62,42 +61,19 @@ import com.openexchange.ajax.framework.AJAXClient.User;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class BetaWriter implements Runnable {
+public final class BetaWriter extends AttributeWriter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BetaWriter.class);
 
-    private final User user;
-    private boolean run = true;
-
-    private Throwable t;
+    private final Random rand;
 
     public BetaWriter(User user) {
-        super();
-        this.user = user;
+        super(Tree.Beta, user);
+        rand = new Random(System.currentTimeMillis());
     }
 
-    public void stop() {
-        run = false;
-    }
-
-    public Throwable getThrowable() {
-        return t;
-    }
-
-    @Override
-    public void run() {
-        Random rand = new Random(System.currentTimeMillis());
-        try {
-            // This does a login which also touches the user attributes for the last login time stamp.
-            AJAXClient client = new AJAXClient(user);
-            while (run) {
-                // Touches the user attributes a second time.
-                client.execute(new SetRequest(Tree.Beta, B(rand.nextBoolean())));
-            }
-            client.logout();
-        } catch (Throwable t2) {
-            LOG.error(t2.getMessage(), t2);
-            t = t2;
-        }
-    }
+	@Override
+	protected Object getValue() {
+		return B(rand.nextBoolean());
+	}
 }

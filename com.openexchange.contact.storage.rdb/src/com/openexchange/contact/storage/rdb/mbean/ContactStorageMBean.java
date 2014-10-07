@@ -47,24 +47,31 @@
  *
  */
 
-package com.openexchange.java.util;
+package com.openexchange.contact.storage.rdb.mbean;
 
-import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link TimeZones}
+ * {@link ContactStorageMBean}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class TimeZones {
+public interface ContactStorageMBean {
 
-    public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    static final String DOMAIN = "com.openexchange.contact";
+    static final String NAME = "RDB Contact Storage Toolkit";
 
-    public static final TimeZone PST = TimeZone.getTimeZone("PST");
-    
-    public static final TimeZone EET = TimeZone.getTimeZone("EET");
+    /**
+     * De-duplicates contacts in a folder.
+     *
+     * @param contextID The context ID
+     * @param folderID The folder ID
+     * @param limit The maximum number of contacts to process, or <code>0</code> for no limits
+     * @param dryRun <code>true</code> to analyze the folder for duplicates only, without actually performing the deduplication,
+     *               <code>false</code>, otherwise
+     * @return The identifiers of the contacts identified (and deleted in case <code>dryRun</code> is <code>false</code>) as duplicates
+     * @throws OXException
+     */
+    int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun);
 
-    private TimeZones() {
-        super();
-    }
 }

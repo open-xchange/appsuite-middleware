@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-22 16:34+0100\n"
+"PO-Revision-Date: 2014-10-07 13:54+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1645,6 +1645,21 @@ msgid ""
 msgstr ""
 "Das Muster \"%1$s\" ist ungültig. Bitte verwenden Sie ein gültiges Muster "
 "und versuchen Sie es erneut."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Konflikt für den Dateinamen \"%1$s\". Es gibt bereits ein gleichnamiges "
+"Verzeichnis unter \"%2$s\". "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"Konflikt für den Pfad  \"%1$s\". Es gibt bereits eine gleichnamige Datei "
+"unter \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5432,12 +5447,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Erforderlicher Wert \"Nachname\" wurde nicht angegeben."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Ändern von Objekten im "
-"Ordner \"%2$s\"."
+msgid "You are not allowed to modify that contact"
+msgstr "Sie haben keine Berechtigung, diesen Kontakt zu ändern."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -11318,6 +11329,13 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Sie haben nicht die entsprechenden Berechtigungen zum Ändern von Objekten "
+#~ "im Ordner \"%2$s\"."
+
 #~ msgid "Time"
 #~ msgstr "Zeit"
 
@@ -14274,10 +14292,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Der Nachname ist Pflichtfeld. Bitte geben Sie den Namen ein."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr ""
-#~ "Sie haben keine Berechtigung, den Kontakt %1$d im Kontext %2$d zu ändern."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Objekte können nicht geladen werden. Kontext %1$d Benutzer %2$d"
 
@@ -15549,9 +15563,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Es trat ein Parameterkonflikt auf."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Konflikt zwischen Parameter \"%1$s\" und Parameter \"%2$s\"."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr ""

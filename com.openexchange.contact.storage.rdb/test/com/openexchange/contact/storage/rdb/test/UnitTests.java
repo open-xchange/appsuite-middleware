@@ -47,24 +47,34 @@
  *
  */
 
-package com.openexchange.java.util;
+package com.openexchange.contact.storage.rdb.test;
 
-import java.util.TimeZone;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
 
 /**
- * {@link TimeZones}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class TimeZones {
+public class UnitTests {
 
-    public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-
-    public static final TimeZone PST = TimeZone.getTimeZone("PST");
-    
-    public static final TimeZone EET = TimeZone.getTimeZone("EET");
-
-    private TimeZones() {
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
         super();
+    }
+
+    /**
+     * Creates the unit test suite.
+     *
+     * @return The test suite
+     */
+    public static Test suite() {
+        TestSuite tests = new TestSuite();
+        tests.addTestSuite(DeduplicatorTest.class);
+        return tests;
     }
 }

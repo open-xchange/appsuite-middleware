@@ -147,8 +147,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
             + "user INT4 UNSIGNED NOT NULL,"
             + "name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
             + "value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "PRIMARY KEY (cid, id, user, name),"
-            + "FOREIGN KEY (cid, id, user) REFERENCES user_mail_account (cid, id, user)"
+            + "PRIMARY KEY (cid, id, user, name)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
@@ -159,8 +158,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
             + "user INT4 UNSIGNED NOT NULL,"
             + "name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
             + "value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "PRIMARY KEY (cid, id, user, name),"
-            + "FOREIGN KEY (cid, id, user) REFERENCES user_transport_account (cid, id, user)"
+            + "PRIMARY KEY (cid, id, user, name)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 

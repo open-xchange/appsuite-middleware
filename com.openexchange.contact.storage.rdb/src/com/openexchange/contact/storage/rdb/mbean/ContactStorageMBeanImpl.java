@@ -47,24 +47,41 @@
  *
  */
 
-package com.openexchange.java.util;
+package com.openexchange.contact.storage.rdb.mbean;
 
-import java.util.TimeZone;
+import java.util.Collection;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import com.openexchange.contact.storage.rdb.internal.Deduplicator;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 
 /**
- * {@link TimeZones}
+ * {@link ContactStorageMBeanImpl}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class TimeZones {
+public class ContactStorageMBeanImpl extends StandardMBean implements ContactStorageMBean {
 
-    public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactStorageMBeanImpl.class);
 
-    public static final TimeZone PST = TimeZone.getTimeZone("PST");
-    
-    public static final TimeZone EET = TimeZone.getTimeZone("EET");
-
-    private TimeZones() {
-        super();
+    /**
+     * Initializes a new {@link ContactStorageMBeanImpl}.
+     */
+    public ContactStorageMBeanImpl() throws NotCompliantMBeanException {
+        super(ContactStorageMBean.class);
     }
+
+    @Override
+    public int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun) {
+        Collection<Integer> objectIDs = null;
+        try {
+            objectIDs = Deduplicator.deduplicateContacts(contextID, folderID, limit, dryRun);
+        } catch (OXException e) {
+            LOG.error("Error de-duplicating contacts in folder {} of context {}{}: {}",
+                folderID, contextID, dryRun ? " [dry-run]" : "", e.getMessage(), e);
+        }
+        return null != objectIDs ? Autoboxing.I2i(objectIDs) : null;
+    }
+
 }

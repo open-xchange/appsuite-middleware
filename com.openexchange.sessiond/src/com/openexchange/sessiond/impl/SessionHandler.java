@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.sessiond.impl.TimeoutTaskWrapper.submit;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -755,12 +756,20 @@ public final class SessionHandler {
                             public Void call() throws Exception {
                                 try {
                                     sessionStorageService.setLocalIp(session.getSessionID(), localIp);
-                                } catch (final OXException e) {
-                                    if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                        throw e;
+                                } catch (OXException e) {
+                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                        // No such session held in session storage
+                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                    } else {
+                                        LOG.warn("Failed to set local IP address", e);
                                     }
-                                    // No such session held in session storage
-                                    LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                } catch (Exception e) {
+                                    if (e.getCause() instanceof InterruptedException) {
+                                        // Timed out
+                                        LOG.warn("Failed to set local IP address in time");
+                                    } else {
+                                        LOG.warn("Failed to set local IP address", e);
+                                    }
                                 }
                                 return null;
                             }
@@ -792,7 +801,23 @@ public final class SessionHandler {
 
                             @Override
                             public Void call() throws Exception {
-                                sessionStorageService.setClient(session.getSessionID(), client);
+                                try {
+                                    sessionStorageService.setClient(session.getSessionID(), client);
+                                } catch (OXException e) {
+                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                        // No such session held in session storage
+                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                    } else {
+                                        LOG.warn("Failed to set client", e);
+                                    }
+                                } catch (Exception e) {
+                                    if (e.getCause() instanceof InterruptedException) {
+                                        // Timed out
+                                        LOG.warn("Failed to set client in time");
+                                    } else {
+                                        LOG.warn("Failed to set client", e);
+                                    }
+                                }
                                 return null;
                             }
                         };
@@ -823,7 +848,23 @@ public final class SessionHandler {
 
                             @Override
                             public Void call() throws Exception {
-                                sessionStorageService.setHash(session.getSessionID(), hash);
+                                try {
+                                    sessionStorageService.setHash(session.getSessionID(), hash);
+                                } catch (OXException e) {
+                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                        // No such session held in session storage
+                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                    } else {
+                                        LOG.warn("Failed to set hash", e);
+                                    }
+                                } catch (Exception e) {
+                                    if (e.getCause() instanceof InterruptedException) {
+                                        // Timed out
+                                        LOG.warn("Failed to set hash in time");
+                                    } else {
+                                        LOG.warn("Failed to set hash", e);
+                                    }
+                                }
                                 return null;
                             }
                         };
@@ -1489,7 +1530,13 @@ public final class SessionHandler {
     }
 
     private static volatile Integer timeout;
-    private static int timeout() {
+
+    /**
+     * Gets the timeout for session-storage operations.
+     *
+     * @return The timeout in milliseconds
+     */
+    public static int timeout() {
         Integer tmp = timeout;
         if (null == tmp) {
             synchronized (SessionHandler.class) {
@@ -1535,17 +1582,14 @@ public final class SessionHandler {
         }
     }
 
-    private static <V> void submit(final AbstractTask<V> c) {
+    /**
+     * Submits given task to thread pool while ignoring a possible {@link RejectedExecutionException} in case thread pool refuses its execution.
+     *
+     * @param task The task to submit
+     */
+    private static <V> void submitAndIgnoreRejection(Task<V> task) {
         try {
-            ThreadPools.getThreadPool().submit(c);
-        } catch (final RejectedExecutionException e) {
-            c.execute();
-        }
-    }
-
-    private static <V> void submitAndIgnoreRejection(final Task<V> c) {
-        try {
-            ThreadPools.getThreadPool().submit(c);
+            ThreadPools.getThreadPool().submit(task);
         } catch (final RejectedExecutionException e) {
             // Ignore
         }
@@ -1631,4 +1675,5 @@ public final class SessionHandler {
             return true;
         }
     }
+
 }

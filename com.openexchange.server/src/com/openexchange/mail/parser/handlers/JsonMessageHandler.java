@@ -236,8 +236,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private boolean attachHTMLAlternativePart;
     private boolean includePlainText;
     private boolean exactLength;
-
-    private int maxContentSize = -1;
+    private final int maxContentSize;
 
 
     /**
