@@ -299,7 +299,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                 } catch (Exception e) {
                     LOG.error("Failed to shut-down Hazelcast", e);
                 }
-                ExceptionUtils.handleThrowable(oom);
+                ExceptionUtils.handleOOM(oom);
             }
         };
         OutOfMemoryErrorDispatcher.setHandler(handler);

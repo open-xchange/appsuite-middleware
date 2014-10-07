@@ -63,6 +63,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -76,11 +77,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -780,64 +784,89 @@ public class RdbUserStorage extends UserStorage {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
-
+        
+        Connection con = null;
+        PreparedStatement stmt = null;
         try {
-            final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
-            do {
-                final Connection con;
-                try {
-                    con = DBPool.pickupWriteable(context);
-                } catch (final OXException e) {
-                    throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
-                }
-                condition.resetTransactionRollbackException();
-                boolean modificationPerformed = false;
-                boolean rollback = false;
-                try {
-                    con.setAutoCommit(false); // BEGIN
-                    rollback = true;
-                    modificationPerformed = setAttribute(context.getContextId(), con, userId, name, value);
-                    con.commit(); // COMMIT
-                    rollback = false;
-                } catch (final SQLException e) {
-                    if (!condition.isFailedTransactionRollback(e)) {
-                        throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
-                    }
-                } catch (final RuntimeException e) {
-                    throw LdapExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("USR");
-                } finally {
-                    if (rollback) {
-                        rollback(con);
-                    }
-                    autocommit(con);
-                    if (modificationPerformed) {
-                        DBPool.closeWriterSilent(context, con);
-                    } else {
-                        DBPool.closeWriterAfterReading(context, con);
-                    }
-                }
-            } while (condition.checkRetry());
-        } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+            con = DBPool.pickupWriteable(context);
+            if (value == null) {
+            	stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
+            	stmt.setInt(1, context.getContextId());
+            	stmt.setInt(2, userId);
+            	stmt.setString(3, name);
+            	stmt.executeUpdate();
+            } else {
+            	insertOrUpdateAttribute(name, value, userId, context, con);
+            }
+        } catch (SQLException e) {
+        	throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+        } finally {
+        	Databases.closeSQLStuff(stmt);
+        	if (con != null) {        		
+        		DBPool.closeWriterSilent(context, con);
+        	}        	
         }
-
     }
-
-    private static boolean setAttribute(int contextId, Connection con, int userId, String name, String value) throws SQLException, OXException {
-        TIntObjectMap<UserImpl> userMap = createSingleUserMap(userId);
-        loadAttributes(contextId, con, userMap, true);
-        Map<String, UserAttribute> oldAttributes = userMap.get(userId).getAttributesInternal();
-        Map<String, UserAttribute> attributes = new HashMap<String, UserAttribute>(oldAttributes);
-        if (null == value) {
-            attributes.remove(name);
-        } else {
-            UserAttribute newAttribute = new UserAttribute(name);
-            newAttribute.addValue(value);
-            attributes.put(name, newAttribute);
+    
+    private void insertOrUpdateAttribute(final String name, final String value, final int userId, final Context context, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+	    	Databases.startTransaction(con);
+	    	stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
+	    	stmt.setInt(1, context.getContextId());
+	    	stmt.setInt(2, userId);
+	    	stmt.setString(3, name);
+	    	rs = stmt.executeQuery();
+	    	List<UUID> toUpdate = new LinkedList<UUID>();
+	    	while (rs.next()) {
+	    		toUpdate.add(UUIDs.toUUID(rs.getBytes(1)));
+	    	}
+	    	
+	    	Databases.closeSQLStuff(rs, stmt);
+			rs = null;
+	    	if (toUpdate.isEmpty()) {
+	    		stmt = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
+	        	stmt.setInt(1, context.getContextId());
+	        	stmt.setInt(2, userId);
+	        	stmt.setString(3, name);
+	        	stmt.setString(4, value);
+	            stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+	            stmt.executeUpdate();
+	    	} else {
+	    		stmt = con.prepareStatement("UPDATE user_attribute SET value = ?, uuid = ? WHERE cid = ? AND id = ? AND name = ? AND uuid = ?");
+	    		for (UUID uuid : toUpdate) {
+	    			stmt.setString(1, value);
+	    			stmt.setBytes(2, UUIDs.toByteArray(UUID.randomUUID()));
+	            	stmt.setInt(3, context.getContextId());
+	            	stmt.setInt(4, userId);
+	            	stmt.setString(5, name);
+	            	stmt.setBytes(6, UUIDs.toByteArray(uuid));
+	    			stmt.addBatch();
+	    		}
+	    		int[] updateCounts = stmt.executeBatch();
+	    		for (int updateCount : updateCounts) {
+	    			// Concurrent modification of at least one attribute. We lost the race...
+	    			if (updateCount != 1) {
+	    				LOG.debug("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, context.getContextId(), value);
+	    				throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(context.getContextId(), userId);
+	    			}
+	    		}
+	    	}
+	    	
+	    	con.commit();
+        } catch (OXException e) {
+        	Databases.rollback(con);
+        	throw e;
+        } catch (SQLException e) {
+        	Databases.rollback(con);
+        	throw UserExceptionCode.SQL_ERROR.create(e.getMessage());
+        } finally {
+        	Databases.closeSQLStuff(stmt);
+        	Databases.autocommit(con);
         }
-        return updateAttributes(contextId, userId, con, oldAttributes, attributes);
     }
-
+    
     @Override
     public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
         if (null == name) {

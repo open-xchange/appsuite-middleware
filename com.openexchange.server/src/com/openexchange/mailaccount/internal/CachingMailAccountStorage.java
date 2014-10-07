@@ -390,7 +390,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException {
-        session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
+        if (null != session) {
+            session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
+        }
+        dropSessionParameter(userId, contextId);
 
         Connection con = Database.get(contextId, true);
         boolean rollback = false;
@@ -415,7 +418,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, Session session, Connection con, boolean changePrimary) throws OXException {
-        session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
+        if (null != session) {
+            session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
+        }
+        dropSessionParameter(userId, contextId);
 
         delegate.updateMailAccount(mailAccount, attributes, userId, contextId, session, con, changePrimary);
         invalidateMailAccount(mailAccount.getId(), userId, contextId);
@@ -433,7 +439,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(MailAccountDescription mailAccount, int userId, int contextId, Session session) throws OXException {
-        session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
+        if (null != session) {
+            session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
+        }
+        dropSessionParameter(userId, contextId);
 
         MailAccount changedAccount = delegate.updateAndReturnMailAccount(mailAccount, userId, contextId, session);
         invalidateMailAccount(mailAccount.getId(), userId, contextId);

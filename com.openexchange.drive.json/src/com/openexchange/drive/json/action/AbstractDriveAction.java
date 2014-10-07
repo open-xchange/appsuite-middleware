@@ -258,7 +258,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      */
     protected void enableUnlimitedBodySize(AJAXRequestData requestData) {
         HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest && CountingHttpServletRequest.class.isInstance(servletRequest)) {
+        if (servletRequest instanceof CountingHttpServletRequest) {
             ((CountingHttpServletRequest)servletRequest).setMax(-1);
         }
     }

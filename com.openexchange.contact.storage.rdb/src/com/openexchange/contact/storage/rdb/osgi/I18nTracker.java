@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,24 +47,50 @@
  *
  */
 
-package com.openexchange.java.util;
+package com.openexchange.contact.storage.rdb.osgi;
 
-import java.util.TimeZone;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.contact.storage.rdb.internal.Translator;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link TimeZones}
+ * {@link I18nTracker}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class TimeZones {
+final class I18nTracker implements ServiceTrackerCustomizer<I18nService, I18nService> {
 
-    public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    private final BundleContext context;
 
-    public static final TimeZone PST = TimeZone.getTimeZone("PST");
-    
-    public static final TimeZone EET = TimeZone.getTimeZone("EET");
-
-    private TimeZones() {
+    /**
+     * Initializes a new {@link I18nTracker}.
+     *
+     * @param context The bundle context
+     */
+    public I18nTracker(BundleContext context) {
         super();
+        this.context = context;
     }
+
+    @Override
+    public I18nService addingService(ServiceReference<I18nService> reference) {
+        I18nService i18nService = context.getService(reference);
+        Translator.getInstance().addService(i18nService);
+        return i18nService;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<I18nService> reference, I18nService service) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void removedService(ServiceReference<I18nService> reference, I18nService service) {
+        I18nService i18nService = service;
+        Translator.getInstance().removeService(i18nService);
+        context.ungetService(reference);
+    }
+
 }
