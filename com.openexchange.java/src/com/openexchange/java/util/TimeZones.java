@@ -61,6 +61,8 @@ public class TimeZones {
     public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     public static final TimeZone PST = TimeZone.getTimeZone("PST");
+    
+    public static final TimeZone EET = TimeZone.getTimeZone("EET");
 
     private TimeZones() {
         super();
