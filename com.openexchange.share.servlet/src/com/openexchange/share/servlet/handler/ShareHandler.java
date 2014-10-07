@@ -49,37 +49,40 @@
 
 package com.openexchange.share.servlet.handler;
 
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.Share;
 
 /**
  * {@link ShareHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ShareHandler {
 
     /**
-     * Gets a value indicating whether the guest's session should be kept alive, or if an implicit logout should be performed afterwards.
+     * Gets the ranking for this handler.
+     * <p>
+     * The default ranking is zero (<tt>0</tt>). A handler with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned as the
+     * appropriate handler, whereas a handler with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
      *
-     * @return <code>true</code> if the session should be kept, <code>false</code>, otherwise
+     * @return The ranking
      */
-    boolean keepSession();
+    int getRanking();
 
     /**
-     * Gets a value indicating whether this handler feels responsible for serving the supplied share request.
+     * Handles the given share.
+     * <p>
+     * If this handle feels responsible for the given share <code>true</code> is returned; otherwise <code>false</code>
      *
-     * @param share The resolved share
-     * @return <code>true</code>, if the request can be handled, <code>false</code>, otherwise
+     * @param share The share
+     * @param request The associated HTTP request
+     * @param response The associated HTTP response
+     * @return <code>true</code> if this handler successfully handled the share; otherwise <code>false</code>
+     * @throws OXException If the attempt to resolve given share fails
      */
-    boolean handles(ResolvedShare share);
-
-    /**
-     * Performs the share request.
-     *
-     * @param share The resolved share
-     * @throws OXException
-     */
-    void handle(ResolvedShare share) throws IOException, OXException;
+    boolean handle(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
 }

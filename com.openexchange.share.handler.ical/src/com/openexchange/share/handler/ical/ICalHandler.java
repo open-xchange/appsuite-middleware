@@ -82,8 +82,9 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
+import com.openexchange.share.Share;
+import com.openexchange.share.servlet.handler.RedirectingShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
-import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.user.UserService;
@@ -93,7 +94,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ICalHandler implements ShareHandler {
+public class ICalHandler extends RedirectingShareHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalHandler.class);
 
@@ -133,35 +134,34 @@ public class ICalHandler implements ShareHandler {
     }
 
     @Override
-    public boolean handles(ResolvedShare share) {
-        int module = share.getShare().getModule();
-        return (Module.CALENDAR.getFolderConstant() == module || Module.TASK.getFolderConstant() == module) &&
-            (acceptsICal(share.getRequest()) || indicatesICalClient(share.getRequest()));
+    protected boolean handles(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        int module = share.getModule();
+        return (Module.CALENDAR.getFolderConstant() == module || Module.TASK.getFolderConstant() == module) && (acceptsICal(request) || indicatesICalClient(request));
     }
 
     @Override
-    public void handle(ResolvedShare share) throws IOException, OXException {
+    protected void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException {
         /*
          * prepare iCal export
          */
         ICalEmitter iCalEmitter = Services.getService(ICalEmitter.class);
         ICalSession iCalSession = iCalEmitter.createSession();
-        String name = extractName(share);
+        String name = extractName(resolvedShare);
         if (false == Strings.isEmpty(name)) {
             iCalSession.setName(name);
         }
-        int module = share.getShare().getModule();
+        int module = resolvedShare.getShare().getModule();
         if (Module.CALENDAR.getFolderConstant() == module) {
-            writeCalendar(iCalEmitter, iCalSession, share);
+            writeCalendar(iCalEmitter, iCalSession, resolvedShare);
         } else if (Module.TASK.getFolderConstant() == module) {
-            writeTasks(iCalEmitter, iCalSession, share);
+            writeTasks(iCalEmitter, iCalSession, resolvedShare);
         } else {
             throw new UnsupportedOperationException("Unsupported module: " + module);
         }
         /*
          * write response
          */
-        HttpServletResponse response = share.getResponse();
+        HttpServletResponse response = resolvedShare.getResponse();
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/calendar");
         iCalEmitter.writeSession(iCalSession, response.getOutputStream());

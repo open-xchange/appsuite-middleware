@@ -378,6 +378,12 @@ public class FileMetadata implements DocumentMetadata {
         }
     }
 
+    /**
+     * Gets the InfoStore {@link DocumentMetadata} from given file.
+     *
+     * @param file The file
+     * @return The appropriate {@link DocumentMetadata} instance
+     */
     public static DocumentMetadata getMetadata(final File file) {
         final DocumentMetadata metaData = new DocumentMetadata() {
 

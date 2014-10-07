@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.Share;
 
@@ -61,21 +62,113 @@ import com.openexchange.share.Share;
  * {@link ResolvedShare}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ResolvedShare {
+public class ResolvedShare {
 
-    Share getShare();
+    private final Share share;
+    private final Session session;
+    private final User user;
+    private final Context context;
+    private final LoginConfiguration loginConfig;
+    private final LoginResult loginResult;
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
 
-    Session getSession();
+    /**
+     * Initializes a new {@link ResolvedShare}.
+     *
+     * @param share The share
+     * @param session The session
+     * @param user The user
+     * @param context The context
+     * @param loginResult The login result
+     * @param loginConfig The login config
+     * @param request The request
+     * @param response The response
+     */
+    public ResolvedShare(Share share, LoginResult loginResult, LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) {
+        super();
+        this.share = share;
+        this.session = loginResult.getSession();
+        this.user = loginResult.getUser();
+        this.context = loginResult.getContext();
+        this.loginResult = loginResult;
+        this.loginConfig = loginConfig;
+        this.request = request;
+        this.response = response;
+    }
 
-    User getUser();
+    /**
+     * Gets the associated share
+     *
+     * @return The share
+     */
+    public Share getShare() {
+        return share;
+    }
 
-    Context getContext();
+    /**
+     * Gets the established session
+     *
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
 
-    LoginConfiguration getLoginConfig();
+    /**
+     * Gets the associated user
+     *
+     * @return The user
+     */
+    public User getUser() {
+        return user;
+    }
 
-    HttpServletRequest getRequest();
+    /**
+     * Gets the associated user
+     *
+     * @return The user
+     */
+    public Context getContext() {
+        return context;
+    }
 
-    HttpServletResponse getResponse();
+    /**
+     * Gets the associated login result
+     *
+     * @return The login result
+     */
+    public LoginResult getLoginResult() {
+        return loginResult;
+    }
+
+    /**
+     * Gets the login configuration derived from the associated share
+     *
+     * @return The login configuration
+     */
+    public LoginConfiguration getLoginConfig() {
+        return loginConfig;
+    }
+
+    /**
+     * Gets the associated HTTP request
+     *
+     * @return The HTTP request
+     */
+    public HttpServletRequest getRequest() {
+        return request;
+    }
+
+    /**
+     * Gets the associated HTTP response
+     *
+     * @return The HTTP response
+     */
+    public HttpServletResponse getResponse() {
+        return response;
+    }
 
 }
