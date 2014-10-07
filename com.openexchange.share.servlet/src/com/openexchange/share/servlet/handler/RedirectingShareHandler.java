@@ -219,25 +219,30 @@ public class RedirectingShareHandler implements ShareHandler {
      */
     protected static String getRedirectURL(Session session, User user, Share share, LoginConfiguration loginConfig) {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
+        boolean isFolderShare = share.isFolder();
+
         String redirectLink;
-        if (share.isFolder()) {
+        if (isFolderShare) {
             redirectLink = configService.getProperty("com.openexchange.share.redirectLinkFolder",
                 "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
         } else {
             redirectLink = configService.getProperty("com.openexchange.share.redirectLinkItem",
                 "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
         }
-        String uiWebPath = loginConfig.getUiWebPath();
-//       uiWebPath = "/ox6/index.html";
 
-        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
+        {
+            String uiWebPath = loginConfig.getUiWebPath(); // uiWebPath = "/ox6/index.html";
+            redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
+        }
         redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
         redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
         redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
         redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
         redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(Module.getForFolderConstant(share.getModule()).getName()));
         redirectLink = P_FOLDER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(share.getFolder()));
-        redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(share.getItem()));
+        if (false == isFolderShare) {
+            redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(share.getItem()));
+        }
         redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin() ? "true" : "false");
         return redirectLink;
     }
