@@ -400,7 +400,7 @@ public final class MailAccountRequest {
         session.setParameter("mail-account.request", "validate");
         try {
             // Create a mail access instance
-            final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
+            final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(null);
             final MailConfig mailConfig = mailAccess.getMailConfig();
             // Set login and password
             mailConfig.setLogin(accountDescription.getLogin());

@@ -75,6 +75,7 @@ import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
+import com.openexchange.messaging.facebook.utility.FacebookRequestTuner;
 import com.openexchange.messaging.generic.Utility;
 import com.openexchange.session.Session;
 
@@ -158,7 +159,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                             Verb.POST,
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(stringContent.getData()));
                     facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
-                    final Response response = request.send();
+                    final Response response = request.send(FacebookRequestTuner.getInstance());
                     Reader reader = null;
                     try {
                         reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
@@ -195,7 +196,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                             Verb.POST,
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(Utility.textFormat(stringContent.getData())));
                     facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
-                    final Response response = request.send();
+                    final Response response = request.send(FacebookRequestTuner.getInstance());
                     Reader reader = null;
                     try {
                         reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
@@ -226,7 +227,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                             Verb.POST,
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(stringContent.getData()));
                     facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
-                    final Response response = request.send();
+                    final Response response = request.send(FacebookRequestTuner.getInstance());
                     Reader reader = null;
                     try {
                         reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);

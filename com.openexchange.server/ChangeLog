@@ -2,6 +2,31 @@
 
  - Fix for bug 34668: Special handling for Windows IE 11 Browser in session management
 
+* 2014-09-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34465: Fixed update for POP3 mail accounts
+
+* 2014-09-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34071: Properly build up namespace section in IMAP folder tree
+
+* 2014-09-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34281: Facebook made access to permissions more restrictive since April 30th 2014.
+                      Removed these permissions, because they were unused.
+
+* 2014-09-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34361: Case insensitive check for organizer.
+
+* 2014-09-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request
+
+* 2014-09-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33967: Avoid 102 Processing interim responses for requests executed by USM component
+
 * 2014-09-01 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33354: Added display message for invalid characters in folder name
@@ -26,6 +51,10 @@
 
  - Fix for bug 30599: Ical export stumbles over bad reccurring appointment.
 
+* 2014-08-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33899: Added missing project dependencies to "com.openexchange.report.client" classpath
+
 * 2014-08-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33914: Corrected parameter index when dropping the +/- variants of user capabilities
@@ -47,6 +76,10 @@
 * 2014-07-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 33839: Escape site information when generating the publication site from selected template
+
+* 2014-07-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32897: Send empty string for default alarms in CalDAV
 
 * 2014-07-29 - tobias.friedrich@open-xchange.com
 

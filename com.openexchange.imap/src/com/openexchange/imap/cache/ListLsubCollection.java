@@ -455,9 +455,7 @@ final class ListLsubCollection {
                             }
                         } catch (final Exception e) {
                             // Swallow failed STATUS command
-                            org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
-                                "STATUS command failed for " + imapFolder.getStore().toString(),
-                                e);
+                            org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug("STATUS command failed for {}", imapFolder.getStore().toString(), e);
                         }
                     }
                 }
@@ -561,29 +559,7 @@ final class ListLsubCollection {
                      * Either shared or user namespace
                      */
                     if (existsSafe(fullName, imapStore)) {
-                        final ListLsubEntryImpl lle = new ListLsubEntryImpl(entry.getValue(), true);
-                        listMap.put(fullName, lle);
-                        /*
-                         * Determine parent
-                         */
-                        final int pos = fullName.lastIndexOf(lle.getSeparator());
-                        if (pos >= 0) {
-                            /*
-                             * Non-root level
-                             */
-                            final String parentFullName = fullName.substring(0, pos);
-                            final ListLsubEntryImpl parent = listMap.get(parentFullName);
-                            {
-                                lle.setParent(parent);
-                                parent.addChild(lle);
-                            }
-                        } else {
-                            /*
-                             * Root level
-                             */
-                            lle.setParent(rootEntry);
-                            rootEntry.addChild(lle);
-                        }
+                        createLISTEntryForNamespaceFolder(fullName, entry.getValue(), rootEntry);
                     } else {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
                         final ListLsubEntryImpl lle = entry.getValue();
@@ -598,6 +574,42 @@ final class ListLsubCollection {
                 }
             }
         }
+    }
+
+    private ListLsubEntryImpl createLISTEntryForNamespaceFolder(String fullName, ListLsubEntryImpl lsubEntry, ListLsubEntryImpl rootEntry) {
+        ListLsubEntryImpl lle = new ListLsubEntryImpl(lsubEntry, true);
+        listMap.put(fullName, lle);
+
+        char separator = lle.getSeparator();
+        int pos = fullName.lastIndexOf(separator);
+        if (pos >= 0) {
+            /*
+             * Non-root level
+             */
+            final String parentFullName = fullName.substring(0, pos);
+            ListLsubEntryImpl parent = listMap.get(parentFullName);
+            if (null != parent) {
+                lle.setParent(parent);
+                parent.addChild(lle);
+            } else {
+                // Parent not contained in LIST map
+                ListLsubEntryImpl parentEntry = lsubMap.get(parentFullName);
+                if (null == parentEntry) {
+                    parentEntry = new ListLsubEntryImpl(parentFullName, ATTRIBUTES_NON_EXISTING_NAMESPACE, separator, ListLsubEntry.ChangeState.UNDEFINED, true, false, Boolean.TRUE, null).setNamespace(true);
+                    lsubMap.put(parentFullName, parentEntry);
+                }
+                parent = createLISTEntryForNamespaceFolder(parentFullName, parentEntry, rootEntry);
+                lle.setParent(parent);
+                parent.addChild(lle);
+            }
+        } else {
+            /*
+             * Root level
+             */
+            lle.setParent(rootEntry);
+            rootEntry.addChild(lle);
+        }
+        return lle;
     }
 
     private static void dropEntryFrom(final ListLsubEntryImpl lle, final ConcurrentMap<String, ListLsubEntryImpl> map) {
@@ -720,6 +732,8 @@ final class ListLsubCollection {
     private static final Set<String> ATTRIBUTES_NON_EXISTING_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
         "\\noselect",
         "\\hasnochildren")));
+
+    private static final Set<String> ATTRIBUTES_NO_SELECT_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("\\noselect")));
 
     private static final String ATTRIBUTE_DRAFTS = "\\drafts";
     private static final String ATTRIBUTE_JUNK = "\\junk";
@@ -1314,9 +1328,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed STATUS command
-                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
-                            "STATUS command failed for " + imapFolder.getStore().toString(),
-                            e);
+                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug("STATUS command failed for {}", imapFolder.getStore().toString(), e);
                     }
                 }
             }
@@ -1334,9 +1346,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed ACL command
-                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
-                            "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
-                            e);
+                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug("ACL/MYRIGHTS command failed for {}", imapFolder.getStore().toString(), e);
                     }
                 }
             }

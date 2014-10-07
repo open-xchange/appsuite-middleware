@@ -66,6 +66,7 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.oauth.yahoo.internal.YahooRequestTuner;
 
 /**
  * {@link YahooSimpleConnectionTest}
@@ -122,7 +123,7 @@ public class YahooSimpleConnectionTest extends TestCase {
         System.out.println("Now we're going to get the Users GUID");
         OAuthRequest request1 = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
         service.signRequest(accessToken, request1);
-        Response response1 = request1.send();
+        Response response1 = request1.send(YahooRequestTuner.getInstance());
         System.out.println("Lets see it ...");
         System.out.println();
         System.out.println(response1.getCode());
@@ -143,7 +144,7 @@ public class YahooSimpleConnectionTest extends TestCase {
         System.out.println("This is its URL : " + resource);
         OAuthRequest request = new OAuthRequest(Verb.GET, resource);
         service.signRequest(accessToken, request);
-        Response response = request.send();
+        Response response = request.send(YahooRequestTuner.getInstance());
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response.getCode());
@@ -163,7 +164,7 @@ public class YahooSimpleConnectionTest extends TestCase {
                             System.out.println("***** Get a single contact with this URL : " + singleContactUrl);
                             OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
                             service.signRequest(accessToken, singleContactRequest);
-                            Response singleContactResponse = singleContactRequest.send();
+                            Response singleContactResponse = singleContactRequest.send(YahooRequestTuner.getInstance());
                             System.out.println(singleContactResponse.getCode());
                             System.out.println(singleContactResponse.getBody());
 
