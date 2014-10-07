@@ -47,69 +47,41 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.osgi;
+package com.openexchange.contact.storage.rdb.mbean;
 
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
-import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.quota.QuotaService;
-
+import java.util.Collection;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import com.openexchange.contact.storage.rdb.internal.Deduplicator;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 
 /**
- * {@link RdbContactStorageActivator}
+ * {@link ContactStorageMBeanImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorageActivator extends HousekeepingActivator {
+public class ContactStorageMBeanImpl extends StandardMBean implements ContactStorageMBean {
 
-    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactStorageActivator.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactStorageMBeanImpl.class);
 
     /**
-     * Initializes a new {@link RdbContactStorageActivator}.
+     * Initializes a new {@link ContactStorageMBeanImpl}.
      */
-    public RdbContactStorageActivator() {
-        super();
+    public ContactStorageMBeanImpl() throws NotCompliantMBeanException {
+        super(ContactStorageMBean.class);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, QuotaService.class, ContextService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
+    public int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun) {
+        Collection<Integer> objectIDs = null;
         try {
-            LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
-            RdbServiceLookup.set(this);
-            registerService(ContactStorage.class, new RdbContactStorage());
-            DatabaseService dbService = getService(DatabaseService.class);
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-                new AddFilenameColumnTask(dbService),
-                new CorrectNumberOfImagesTask(dbService)
-            ));
-            track(I18nService.class, new I18nTracker(context));
-            track(ManagementService.class, new ManagementRegisterer(context));
-            openTrackers();
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
-            throw e;
+            objectIDs = Deduplicator.deduplicateContacts(contextID, folderID, limit, dryRun);
+        } catch (OXException e) {
+            LOG.error("Error de-duplicating contacts in folder {} of context {}{}: {}",
+                folderID, contextID, dryRun ? " [dry-run]" : "", e.getMessage(), e);
         }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
-        RdbServiceLookup.set(null);
-        super.stopBundle();
+        return null != objectIDs ? Autoboxing.I2i(objectIDs) : null;
     }
 
 }

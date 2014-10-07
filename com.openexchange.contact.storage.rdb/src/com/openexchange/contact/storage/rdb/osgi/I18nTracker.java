@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,67 +49,48 @@
 
 package com.openexchange.contact.storage.rdb.osgi;
 
-import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
-import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.contact.storage.rdb.internal.Translator;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.quota.QuotaService;
-
 
 /**
- * {@link RdbContactStorageActivator}
+ * {@link I18nTracker}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorageActivator extends HousekeepingActivator {
+final class I18nTracker implements ServiceTrackerCustomizer<I18nService, I18nService> {
 
-    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactStorageActivator.class);
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link RdbContactStorageActivator}.
+     * Initializes a new {@link I18nTracker}.
+     *
+     * @param context The bundle context
      */
-    public RdbContactStorageActivator() {
+    public I18nTracker(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, QuotaService.class, ContextService.class };
+    public I18nService addingService(ServiceReference<I18nService> reference) {
+        I18nService i18nService = context.getService(reference);
+        Translator.getInstance().addService(i18nService);
+        return i18nService;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
-            RdbServiceLookup.set(this);
-            registerService(ContactStorage.class, new RdbContactStorage());
-            DatabaseService dbService = getService(DatabaseService.class);
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-                new AddFilenameColumnTask(dbService),
-                new CorrectNumberOfImagesTask(dbService)
-            ));
-            track(I18nService.class, new I18nTracker(context));
-            track(ManagementService.class, new ManagementRegisterer(context));
-            openTrackers();
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);
-            throw e;
-        }
+    public void modifiedService(ServiceReference<I18nService> reference, I18nService service) {
+        // Nothing to do.
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.storage.rdb");
-        RdbServiceLookup.set(null);
-        super.stopBundle();
+    public void removedService(ServiceReference<I18nService> reference, I18nService service) {
+        I18nService i18nService = service;
+        Translator.getInstance().removeService(i18nService);
+        context.ungetService(reference);
     }
 
 }
