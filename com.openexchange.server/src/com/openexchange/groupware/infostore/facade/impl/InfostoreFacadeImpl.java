@@ -1599,7 +1599,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public TimedResult<DocumentMetadata> getDocuments(List<IDTuple> ids, Metadata[] columns, final ServerSession session) throws OXException {
         final Context context = session.getContext();
         final User user = session.getUser();
-        final Map<Integer, Long> idsToFolders = Tools.getIDsToFolders(ids);
+        final Map<Integer, Long> idsToFolders = Tools.getIDsToFolders(ensureFolderIDs(context, ids));
         List<Integer> objectIDs = Tools.getObjectIDs(ids);
         Metadata[] cols = addLastModifiedIfNeeded(columns);
         /*
@@ -2050,6 +2050,47 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public void setSessionHolder(final SessionHolder sessionHolder) {
         expiredLocksListener.setSessionHolder(sessionHolder);
+    }
+
+    /**
+     * Processes the list of supplied ID tuples to ensure that each entry has an assigned folder ID.
+     *
+     * @param context The context
+     * @param tuples The ID tuples to process
+     * @return The ID tuples, with each entry holding its full file- and folder-ID information
+     * @throws OXException
+     */
+    private List<IDTuple> ensureFolderIDs(Context context, List<IDTuple> tuples) throws OXException {
+        if (null == tuples || 0 == tuples.size()) {
+            return tuples;
+        }
+        Map<Integer, IDTuple> incompleteTuples = new HashMap<Integer, IDTuple>();
+        for (IDTuple tuple : tuples) {
+            if (null == tuple.getFolder()) {
+                try {
+                    incompleteTuples.put(Integer.valueOf(tuple.getId()), tuple);
+                } catch (NumberFormatException e) {
+                    throw InfostoreExceptionCodes.NOT_EXIST.create();
+                }
+            }
+        }
+        if (0 < incompleteTuples.size()) {
+            InfostoreIterator iterator = null;
+            try {
+                iterator = InfostoreIterator.list(Autoboxing.I2i(incompleteTuples.keySet()),
+                    new Metadata[] { Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL }, this, context);
+                while (iterator.hasNext()) {
+                    DocumentMetadata document = iterator.next();
+                    IDTuple tuple = incompleteTuples.get(Integer.valueOf(document.getId()));
+                    if (null != tuple) {
+                        tuple.setFolder(String.valueOf(document.getFolderId()));
+                    }
+                }
+            } finally {
+                SearchIterators.close(iterator);
+            }
+        }
+        return tuples;
     }
 
     private void removeFromIndex(final Context context, final int userId, final List<DocumentMetadata> documents) {
