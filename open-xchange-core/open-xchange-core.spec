@@ -1079,6 +1079,9 @@ for I in $(seq 1 ${#NAMES[@]}); do
     fi
 done
 
+# SoftwareChange_Request-2199
+ox_add_property com.openexchange.servlet.maxRateLenientRemoteAddresses "" /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
