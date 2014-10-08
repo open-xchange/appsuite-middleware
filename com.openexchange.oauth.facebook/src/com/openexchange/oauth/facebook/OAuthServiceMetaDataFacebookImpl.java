@@ -120,13 +120,25 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public String getScope() {
         // See https://developers.facebook.com/docs/facebook-login/permissions/#
         // TODO: "xmpp_login" for RTC chat access
-        return "offline_access,publish_stream,status_update,friends_about_me," +
-        		"friends_activities,friends_birthday," +
-        		"friends_education_history,friends_events,friends_hometown," +
-        		"friends_interests,friends_likes,friends_location," +
-        		"friends_photos,friends_relationships," +
-        		"friends_relationship_details,friends_status,friends_videos," +
-        		"friends_website,friends_work_history,email";
+        boolean restrictive = false;
+
+        if (restrictive) {
+            return "offline_access,publish_stream,status_update,friends_about_me," +
+            		"friends_activities,friends_birthday," +
+            		"friends_education_history,friends_events,friends_hometown," +
+            		"friends_interests,friends_likes,friends_location," +
+            		"friends_photos,friends_relationships," +
+            		"friends_relationship_details,friends_status,friends_videos," +
+            		"friends_website,friends_work_history,email";
+        }
+
+        return "offline_access,publish_stream,read_stream,status_update,user_about_me,friends_about_me," +
+                "user_activities,friends_activities,user_birthday,friends_birthday,user_education_history," +
+                "friends_education_history,user_events,friends_events,user_hometown,friends_hometown," +
+                "user_interests,friends_interests,user_likes,friends_likes,user_location,friends_location," +
+                "user_photos,friends_photos,user_relationships,friends_relationships,user_relationship_details," +
+                "friends_relationship_details,user_status,friends_status,user_videos,friends_videos," +
+                "user_website,friends_website,user_work_history,friends_work_history,email";
     }
 
     @Override
