@@ -96,6 +96,19 @@ public class ResourceCaches {
         return CACHE_REF.get();
     }
 
+    private static final List<String> DEFAULT_THUMBNAIL_PARAMS = Arrays.asList("content_type", "context", "folder", "format", "height", "id", "scaleType", "version", "width");
+
+    /**
+     * Generates the key for preview cache.
+     *
+     * @param eTag The ETag identifier
+     * @param requestData The request data
+     * @return The appropriate cache key
+     */
+    public static String generateDefaultThumbnailCacheKey(String eTag, AJAXRequestData requestData) {
+        return generateThumbnailCacheKey0(eTag, requestData, DEFAULT_THUMBNAIL_PARAMS);
+    }
+
     /**
      * Generates the key for preview cache.
      *
@@ -105,46 +118,29 @@ public class ResourceCaches {
      * @return The appropriate cache key
      */
     public static String generateThumbnailCacheKey(String eTag, AJAXRequestData requestData, String... paramNames) {
+        List<String> parameters = new ArrayList<String>(Arrays.asList(paramNames));
+        Collections.sort(parameters);
+        return generateThumbnailCacheKey0(eTag, requestData, parameters);
+    }
+
+    private static String generateThumbnailCacheKey0(String eTag, AJAXRequestData requestData, List<String> parameters) {
         StringBuilder sb = new StringBuilder(512);
         sb.append(requestData.getModule());
         sb.append('-').append(requestData.getAction());
         sb.append('-').append(requestData.getSession().getContextId());
 
         // Append sorted parameters
-        {
-            List<String> parameters = new ArrayList<String>(Arrays.asList(paramNames));
-            Collections.sort(parameters);
-            for (String name : parameters) {
-                if (isAcceptableParameter(name)) {
-                    sb.append('-').append(name);
-                    String parameter = requestData.getParameter(name);
-                    if (!Strings.isEmpty(parameter)) {
-                        sb.append('=').append(parameter);
-                    }
+        for (String name : parameters) {
+            if (isAcceptableParameter(name)) {
+                sb.append('-').append(name);
+                String parameter = requestData.getParameter(name);
+                if (!Strings.isEmpty(parameter)) {
+                    sb.append('=').append(parameter);
                 }
             }
         }
 
-        // Generate MD5 sum
-        try {
-            byte[] md5Bytes = sb.toString().getBytes("UTF-8");
-            String hashedParams = asHex(MessageDigest.getInstance("MD5").digest(md5Bytes));
-            String prefix = eTag;
-
-            // ensure key size does not exceed 128 characters (current db limit)
-            if (prefix.length() + 33 > 128) {
-                prefix = asHex(MessageDigest.getInstance("MD5").digest(prefix.getBytes()));
-            }
-            sb.setLength(0);
-            return sb.append(prefix).append('-').append(hashedParams).toString();
-        } catch (UnsupportedEncodingException e) {
-            // Shouldn't happen
-            LOG.error("", e);
-        } catch (NoSuchAlgorithmException e) {
-            // Shouldn't happen
-            LOG.error("", e);
-        }
-        return sb.toString();
+        return toMD5(eTag, sb);
     }
 
     /**
@@ -186,12 +182,16 @@ public class ResourceCaches {
         }
 
         // Generate MD5 sum
+        return toMD5(eTag, sb);
+    }
+
+    private static String toMD5(String eTag, StringBuilder sb) {
         try {
             byte[] md5Bytes = sb.toString().getBytes("UTF-8");
             String hashedParams = asHex(MessageDigest.getInstance("MD5").digest(md5Bytes));
             String prefix = eTag;
 
-            // ensure key size does not exceed 128 characters (current db limit)
+            // Ensure key size does not exceed 128 characters (current database limit)
             if (prefix.length() + 33 > 128) {
                 prefix = asHex(MessageDigest.getInstance("MD5").digest(prefix.getBytes()));
             }

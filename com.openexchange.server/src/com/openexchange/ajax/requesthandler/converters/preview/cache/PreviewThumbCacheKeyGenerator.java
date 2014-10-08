@@ -93,7 +93,7 @@ public class PreviewThumbCacheKeyGenerator implements CacheKeyGenerator {
         if (cachedCacheKey == null) {
             final String eTag = result.getHeader(ETAG);
             if (!Strings.isEmpty(eTag)) {
-                cachedCacheKey = ResourceCaches.generateThumbnailCacheKey(eTag, requestData, "folder", "id", "version", "context", "scaleType", "width", "height", "format", "content_type");
+                cachedCacheKey = ResourceCaches.generateDefaultThumbnailCacheKey(eTag, requestData);
                 LOG.debug("Generated cacheKey {} based on etag {}, width {}, height {} and scaleType {}", cachedCacheKey, eTag, width, height, scaleType);
             }
         }
