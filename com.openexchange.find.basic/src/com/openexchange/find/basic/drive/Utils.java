@@ -56,6 +56,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -117,18 +118,12 @@ public final class Utils {
 
     public static SearchTerm<?> prepareSearchTerm(final SearchRequest searchRequest) throws OXException {
         final List<SearchTerm<?>> facetTerms = new LinkedList<SearchTerm<?>>();
-        ActiveFacet customDateFacet = null;
         for (DriveFacetType type : DriveFacetType.values()) {
             final List<ActiveFacet> facets = searchRequest.getActiveFacets(type);
             if (facets != null && !facets.isEmpty()) {
                 final Pair<OP, OP> ops = operationsFor(type);
                 final List<Filter> filters = new LinkedList<Filter>();
                 for (final ActiveFacet facet : facets) {
-                    if (facet.getType() == CommonFacetType.DATE && facet.getFilter() == Filter.NO_FILTER) {
-                        customDateFacet = facet;
-                        continue;
-                    }
-
                     final Filter filter = facet.getFilter();
                     if (filter != Filter.NO_FILTER) {
                         filters.add(filter);
@@ -139,32 +134,39 @@ public final class Utils {
             }
         }
 
-        if (customDateFacet != null) {
-            String timeFramePattern = customDateFacet.getValueId();
-            TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
-            if (timeFrame == null) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_DATE);
-            }
+        List<ActiveFacet> dateFacets = searchRequest.getActiveFacets(CommonFacetType.DATE);
+        if (dateFacets != null && !dateFacets.isEmpty()) {
+            ActiveFacet dateFacet = dateFacets.get(0);
+            Filter dateFilter = dateFacet.getFilter();
+            if (dateFilter == Filter.NO_FILTER) {
+                String timeFramePattern = dateFacet.getValueId();
+                TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
+                if (timeFrame == null) {
+                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_DATE);
+                }
 
-            Comparison fromComparison;
-            Comparison toComparison;
-            if (timeFrame.isInclusive()) {
-                fromComparison = Comparison.GREATER_EQUALS;
-                toComparison = Comparison.LOWER_EQUALS;
+                Comparison fromComparison;
+                Comparison toComparison;
+                if (timeFrame.isInclusive()) {
+                    fromComparison = Comparison.GREATER_EQUALS;
+                    toComparison = Comparison.LOWER_EQUALS;
+                } else {
+                    fromComparison = Comparison.GREATER_THAN;
+                    toComparison = Comparison.LOWER_THAN;
+                }
+
+                long from = timeFrame.getFrom();
+                long to = timeFrame.getTo();
+                if (to < 0L) {
+                    facetTerms.add(buildDateTerm(fromComparison, from));
+                }
+
+                SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from);
+                SearchTerm<?> toTerm = buildDateTerm(toComparison, to);
+                facetTerms.add(new AndTerm(Arrays.<SearchTerm<?>> asList(fromTerm, toTerm)));
             } else {
-                fromComparison = Comparison.GREATER_THAN;
-                toComparison = Comparison.LOWER_THAN;
+                facetTerms.add(prepareFilterTerm(Collections.singletonList(dateFilter), OP.OR, OP.OR));
             }
-
-            long from = timeFrame.getFrom();
-            long to = timeFrame.getTo();
-            if (to < 0L) {
-                facetTerms.add(buildDateTerm(fromComparison, from));
-            }
-
-            SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from);
-            SearchTerm<?> toTerm = buildDateTerm(toComparison, to);
-            facetTerms.add(new AndTerm(Arrays.<SearchTerm<?>> asList(fromTerm, toTerm)));
         }
 
         final SearchTerm<?> queryTerm = prepareQueryTerm(searchRequest.getQueries());
@@ -286,7 +288,7 @@ public final class Utils {
 
             };
             return new FileSizeTerm(pattern);
-        } else if (Constants.FIELD_DATE.equals(field)) {
+        } else if (CommonConstants.FIELD_DATE.equals(field)) {
             final Pair<Comparison, Long> pair = parseDateQuery(query);
             return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
         }
@@ -722,7 +724,7 @@ public final class Utils {
 
     private static Pair<Comparison, Long> parseDateQuery(final String query) throws OXException {
         if (Strings.isEmpty(query)) {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, Constants.FIELD_DATE);
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CommonConstants.FIELD_DATE);
         }
 
         Comparison comparison;

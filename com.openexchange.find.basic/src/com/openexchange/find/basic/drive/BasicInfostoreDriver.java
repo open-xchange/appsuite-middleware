@@ -256,7 +256,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
         // Add static time facet
         {
-            final String fieldDate = Constants.FIELD_DATE;
+            final String fieldDate = CommonConstants.FIELD_DATE;
             facets.add(Facets.newExclusiveBuilder(CommonFacetType.DATE)
                 .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_WEEK)
                     .withLocalizableDisplayItem(CommonStrings.LAST_WEEK)
