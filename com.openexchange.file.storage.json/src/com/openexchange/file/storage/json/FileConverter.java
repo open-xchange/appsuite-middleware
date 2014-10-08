@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json;
 
+import java.util.Date;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -56,6 +57,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
+import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,6 +83,11 @@ public class FileConverter implements ResultConverter {
 
         if (resultObject instanceof File) {
             resultObject = writer.write((File) resultObject, iReq.getTimezone());
+        } else if (TimedResult.class.isInstance(resultObject)) {
+            @SuppressWarnings("unchecked")
+            TimedResult<File> timedResult = (TimedResult<File>) resultObject;
+            resultObject = writer.write(timedResult.results(), iReq.getColumns(), iReq.getTimezone());
+            result.setTimestamp(new Date(timedResult.sequenceNumber()));
         } else if (resultObject instanceof SearchIterator) {
             @SuppressWarnings("unchecked")
             final SearchIterator<File> iterator = (SearchIterator<File>) resultObject;
@@ -104,6 +111,5 @@ public class FileConverter implements ResultConverter {
     public Quality getQuality() {
         return Quality.GOOD;
     }
-
 
 }

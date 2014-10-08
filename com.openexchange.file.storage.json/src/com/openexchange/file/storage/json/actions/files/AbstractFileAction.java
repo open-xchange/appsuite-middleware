@@ -113,9 +113,16 @@ public abstract class AbstractFileAction implements AJAXActionService {
 
     public abstract AJAXRequestResult handle(InfostoreRequest request) throws OXException;
 
-    public AJAXRequestResult result(final TimedResult<File> documents, final InfostoreRequest request) throws OXException {
-        final SearchIterator<File> results = documents.results();
-        return results(results, documents.sequenceNumber() , request);
+    /**
+     * Wraps the supplied timed file result into an appropriate AJAX request result.
+     *
+     * @param documents The underyling timed result
+     * @param request The infostore request
+     * @return The AJAX request result
+     * @throws OXException
+     */
+    protected AJAXRequestResult result(TimedResult<File> documents, InfostoreRequest request) throws OXException {
+        return new AJAXRequestResult(documents, "infostore");
     }
 
     protected AJAXRequestResult results(final SearchIterator<File> results, final long timestamp, final InfostoreRequest request) throws OXException {
