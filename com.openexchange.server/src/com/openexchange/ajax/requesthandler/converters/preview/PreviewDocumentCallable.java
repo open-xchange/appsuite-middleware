@@ -133,12 +133,12 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
                 InputStream in = fileHolder.getStream();
                 if (0 == fileHolder.getLength()) {
                     Streams.close(in, fileHolder);
-                    throw PreviewExceptionCodes.DEFAULT_THUMBNAIL.create();
+                    return PreviewConst.DEFAULT_PREVIEW_DOCUMENT;
                 }
                 final Reference<InputStream> ref = new Reference<InputStream>();
                 if (streamIsEof(in, ref)) {
                     Streams.close(in, fileHolder);
-                    throw PreviewExceptionCodes.DEFAULT_THUMBNAIL.create();
+                    return PreviewConst.DEFAULT_PREVIEW_DOCUMENT;
                 }
                 in = ref.getValue();
                 stream1 = new InterruptibleInputStream(in);

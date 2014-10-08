@@ -49,6 +49,14 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.java.Streams;
+import com.openexchange.preview.PreviewDocument;
+
 
 /**
  * {@link PreviewConst} - Constants.
@@ -62,6 +70,48 @@ final class PreviewConst {
      */
     private PreviewConst() {
         super();
+    }
+
+    /** The default thumbnail preview document */
+    static final PreviewDocument DEFAULT_PREVIEW_DOCUMENT;
+
+    static {
+        final Map<String, String> metadata;
+        {
+            Map<String, String> m = new HashMap<String, String>(4);
+            m.put("content-type", "image/jpeg");
+            m.put("resourcename", "thumbs.jpg");
+            metadata = Collections.unmodifiableMap(m);
+        }
+
+        PreviewDocument pd = new PreviewDocument() {
+
+            @Override
+            public Boolean isMoreAvailable() {
+                return Boolean.FALSE;
+            }
+
+            @Override
+            public boolean hasContent() {
+                return false;
+            }
+
+            @Override
+            public InputStream getThumbnail() {
+                return Streams.newByteArrayInputStream(DEFAULT_THUMBNAIL);
+            }
+
+            @Override
+            public Map<String, String> getMetaData() {
+                return metadata;
+            }
+
+            @Override
+            public List<String> getContent() {
+                return null;
+            }
+        };
+        DEFAULT_PREVIEW_DOCUMENT = pd;
     }
 
     /** Default thumbnail image */
@@ -520,7 +570,7 @@ final class PreviewConst {
         (byte) 67, (byte) 18, (byte) 125, (byte) 154, (byte) 97, (byte) 185, (byte) 154, (byte) 54, (byte) 0, (byte) 100, (byte) 166,
         (byte) 7, (byte) 36, (byte) 117, (byte) 160, (byte) 15, (byte) 255, (byte) 217 };
 
-    
+
     /** 1x1 white jpg placeholder for missing thumbnail / thumbnail being generated */
     static final byte[] MISSING_THUMBNAIL = new byte[] {
         -1, -40, -1, -32, 0, 16, 74, 70, 73, 70, 0, 1, 1, 1, 0, 72, 0, 72, 0, 0, -1, -37, 0, 67, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
