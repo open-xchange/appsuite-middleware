@@ -206,14 +206,15 @@ public final class UnifiedInboxFolderConverter {
     }
 
     public static void setPermissions(final MailFolder mailFolder, final int userId) {
-        final int fp = mailFolder.getOwnPermission().getFolderPermission();
+        MailPermission realPermission = mailFolder.getOwnPermission();
+        final int fp = realPermission.getFolderPermission();
         {
             final MailPermission ownPermission = new DefaultMailPermission();
             ownPermission.setEntity(userId);
             ownPermission.setGroupPermission(false);
             // Grant not more than OCLPermission.CREATE_OBJECTS_IN_FOLDER
             ownPermission.setFolderPermission(fp > OCLPermission.CREATE_OBJECTS_IN_FOLDER ? OCLPermission.CREATE_OBJECTS_IN_FOLDER : fp);
-            ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
+            ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, realPermission.getWritePermission(), OCLPermission.DELETE_ALL_OBJECTS);
             ownPermission.setFolderAdmin(false);
             mailFolder.setOwnPermission(ownPermission);
         }
@@ -223,7 +224,7 @@ public final class UnifiedInboxFolderConverter {
             permission.setGroupPermission(true);
             // Grant not more than OCLPermission.CREATE_OBJECTS_IN_FOLDER
             permission.setFolderPermission(fp > OCLPermission.CREATE_OBJECTS_IN_FOLDER ? OCLPermission.CREATE_OBJECTS_IN_FOLDER : fp);
-            permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
+            permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, realPermission.getWritePermission(), OCLPermission.DELETE_ALL_OBJECTS);
             permission.setFolderAdmin(false);
             mailFolder.removePermissions();
             mailFolder.addPermission(permission);

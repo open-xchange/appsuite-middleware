@@ -1,6 +1,7 @@
 * 2014-10-08 - thorben.betten@open-xchange.com
 
  - Fix for bug #34835: Honor "CREATE-SPECIAL-USE" capability string when using the "USE" IMAP CREATE command extension
+ - Fix for bug 34727: Set proper full-name to Unified Mail subfolders
 
 * 2014-10-02 - tobias.friedrich@open-xchange.com
 
