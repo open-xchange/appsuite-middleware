@@ -60,7 +60,7 @@ import com.openexchange.java.Strings;
 /**
  * {@link PreviewThumbCacheKeyGenerator} - A cache key generator for preview thumbnails considering specified width and height parameters
  * used during creation.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -68,15 +68,15 @@ public class PreviewThumbCacheKeyGenerator implements CacheKeyGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreviewThumbCacheKeyGenerator.class);
 
-    private AJAXRequestResult result;
+    private final AJAXRequestResult result;
 
-    private String width;
+    private final String width;
 
-    private String height;
+    private final String height;
 
-    private String scaleType;
+    private final String scaleType;
 
-    private AJAXRequestData requestData;
+    private final AJAXRequestData requestData;
 
     private String cachedCacheKey = null;
 
@@ -93,7 +93,7 @@ public class PreviewThumbCacheKeyGenerator implements CacheKeyGenerator {
         if (cachedCacheKey == null) {
             final String eTag = result.getHeader(ETAG);
             if (!Strings.isEmpty(eTag)) {
-                cachedCacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, width, height, scaleType);
+                cachedCacheKey = ResourceCaches.generateThumbnailCacheKey(eTag, requestData, "folder", "id", "version", "context", "scaleType", "width", "height", "format", "content_type");
                 LOG.debug("Generated cacheKey {} based on etag {}, width {}, height {} and scaleType {}", cachedCacheKey, eTag, width, height, scaleType);
             }
         }
