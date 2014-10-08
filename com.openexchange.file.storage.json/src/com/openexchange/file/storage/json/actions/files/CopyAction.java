@@ -90,7 +90,7 @@ public class CopyAction extends AbstractWriteAction {
 
         final String id = request.getId();
         final File file = request.getFile();
-        final String folder = file.getFolderId();
+        final String folder = null != request.getFolderId() ? request.getFolderId() : file.getFolderId();
         String version = request.getVersion();
 
         String newId = null;
