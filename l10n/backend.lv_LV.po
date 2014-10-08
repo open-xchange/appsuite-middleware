@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-24 10:07+0200\n"
+"PO-Revision-Date: 2014-10-08 10:59+0200\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -1617,6 +1617,19 @@ msgid ""
 msgstr ""
 "Raksts \"%1$s\" nav derīgs. Lūdzu izveidojiet derīgu rakstu un mēģiniet "
 "vēlreiz."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Faila vārds \"%1$s\" konfliktē ar tāda pat nosaukuma direktoriju vietā \"%2$s"
+"\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "Ceļš \"%1$s\" konfliktē ar tāda pat nosaukuma failu vietā \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5235,10 +5248,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Obligātā vērtība \"Uzvārds\" nav norādīta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr "Jums nav tiesību ojektu izmaiņai mapē \"%2$s\"."
+msgid "You are not allowed to modify that contact"
+msgstr "Jums nav tiesību modificēt šo kontaktu"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -10950,6 +10961,11 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr "Jums nav tiesību ojektu izmaiņai mapē \"%2$s\"."
+
 #~ msgid "%1$s <i>in appointments</i>"
 #~ msgstr "%1$s <i>tikšanās ierakstos</i>"
 
@@ -13729,9 +13745,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Uzvārds ir obligāts. Lūdzu norādiet to."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "Jums nav tiesību modificēt kontaktu %1$d kontekstā %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Nevar ielādēt objektus. Konteksts %1$d, lietotājs %2$d"
 
@@ -14923,9 +14936,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Parametru konflikta kļūda."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parameters \"%1$s\" ir konfliktā ar parameteru \"%2$s\"."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "Operācija \"%1$s\" servera konfigurācijā ir atspējota"
