@@ -1085,6 +1085,13 @@ ox_add_property com.openexchange.servlet.maxRateLenientRemoteAddresses "" /opt/o
 # SoftwareChange_Request-2204
 ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2206
+NAMES=( com.openexchange.quota.calendar com.openexchange.quota.task com.openexchange.quota.contact com.openexchange.quota.infostore com.openexchange.quota.attachment )
+for I in "${NAMES[@]}"; do
+    VALUE=$(ox_read_property $I /opt/open-xchange/etc/quota.properties)
+    ox_set_property $I "$VALUE" /opt/open-xchange/etc/quota.properties
+done
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
