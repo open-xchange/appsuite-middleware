@@ -152,7 +152,7 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                 throw e;
             }
 
-            if (previewDocument != null) {
+            if (previewDocument != null && previewDocument != PreviewConst.DEFAULT_PREVIEW_DOCUMENT) {
                 InputStream thumbnail = previewDocument.getThumbnail();
                 if (thumbnail != null) {
                     try {
