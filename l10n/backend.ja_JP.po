@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-24 09:28+0900\n"
+"PO-Revision-Date: 2014-10-08 09:01+0900\n"
 "Last-Translator: \n"
 "Language-Team:  <ja@li.org>\n"
 "Language: ja_JP\n"
@@ -1620,6 +1620,17 @@ msgid ""
 msgstr ""
 "パターン \"%1$s\" は無効です。有効なパターンを使用して、もう一度やり直してく"
 "ださい。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr "ファイル名 \"%1$s\" は \"%2$s\" の同名のディレクトリと競合しています。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "パス \"%1$s\" は \"%2$s\" の同名のファイルと競合しています。"
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5281,10 +5292,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "必要な値 \"姓\" が入力されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr "フォルダ \"%2$s\" にあるオブジェクトを変更する適切な権限がありません。"
+msgid "You are not allowed to modify that contact"
+msgstr "この連絡先の変更は許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -11017,6 +11026,12 @@ msgstr "UTC (協定世界時)"
 msgid "Zulu"
 msgstr "ズールー"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "フォルダ \"%2$s\" にあるオブジェクトを変更する適切な権限がありません。"
+
 #~ msgid "in appointments"
 #~ msgstr "検索対象: アポイント"
 
@@ -13858,9 +13873,6 @@ msgstr "ズールー"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "姓は必須です。入力してください。"
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "コンテキスト %2$d の連絡先 %1$d の変更は許可されていません。"
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "オブジェクトを読み込めません。コンテキスト %1$d ユーザ %2$d"
 
@@ -15100,9 +15112,6 @@ msgstr "ズールー"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "パラメータの競合が発生しました。"
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "パラメータ \"%1$s\"がパラメータ \"%2$s\" と競合しています。"
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "サーバの構成により、操作 \"%1$s\" が無効になっています。"
