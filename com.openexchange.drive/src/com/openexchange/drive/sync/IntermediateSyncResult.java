@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.internal.Tracer;
 
 
 /**
@@ -150,20 +151,28 @@ public class IntermediateSyncResult<T extends DriveVersion> {
 
     @Override
     public String toString() {
-        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         if (null != actionsForServer) {
-            StringBuilder.append("Actions for server:\n");
+            stringBuilder.append("Actions for server:\n");
             for (AbstractAction<T> action : actionsForServer) {
-                StringBuilder.append("  ").append(action).append('\n');
+                stringBuilder.append("  ").append(action).append('\n');
+                if (Tracer.MAX_SIZE < stringBuilder.length()) {
+                    stringBuilder.append('\n').append("[...]");
+                    break;
+                }
             }
         }
         if (null != actionsForClient) {
-            StringBuilder.append("Actions for client:\n");
+            stringBuilder.append("Actions for client:\n");
             for (AbstractAction<T> action : actionsForClient) {
-                StringBuilder.append("  ").append(action).append('\n');
+                stringBuilder.append("  ").append(action).append('\n');
+                if (Tracer.MAX_SIZE < stringBuilder.length()) {
+                    stringBuilder.append('\n').append("[...]");
+                    break;
+                }
             }
         }
-        return StringBuilder.toString();
+        return stringBuilder.toString();
     }
 
     @Override

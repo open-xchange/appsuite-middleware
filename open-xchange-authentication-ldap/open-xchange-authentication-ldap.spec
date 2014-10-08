@@ -51,6 +51,9 @@ if [ ${1:-0} -eq 2 ]; then
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ldapauth.properties
 
     ox_update_permissions "/opt/open-xchange/etc/ldapauth.properties" root:open-xchange 640
+
+    # SoftwareChange_Request-2083
+    ox_add_property useFullLoginInfo false /opt/open-xchange/etc/ldapauth.properties
 fi
 
 %clean

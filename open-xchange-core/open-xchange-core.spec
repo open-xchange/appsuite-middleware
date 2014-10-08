@@ -1051,21 +1051,33 @@ pfile=/opt/open-xchange/etc/cache.ccf
 if ! grep "jcs.region.UserPermissionBits=LTCP" > /dev/null $pfile; then
     echo -e "\n# # Pre-defined cache for user configuration\n" >> $pfile
     echo "jcs.region.UserPermissionBits=LTCP\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile
 fi
+
+# SoftwareChange_Request-2197
+PFILE=/opt/open-xchange/etc/cache.ccf
+NAMES=( jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds jcs.region.OXFolderCache.elementattributes.IdleTime jcs.region.OXFolderQueryCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.OXFolderQueryCache.elementattributes.MaxLifeSeconds jcs.region.OXFolderQueryCache.elementattributes.IdleTime jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.UserSettingMail.elementattributes.MaxLifeSeconds jcs.region.UserSettingMail.elementattributes.IdleTime jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.MailAccount.elementattributes.MaxLifeSeconds jcs.region.MailAccount.elementattributes.IdleTime jcs.region.GlobalFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds jcs.region.GlobalFolderCache.elementattributes.IdleTime )
+OLDDEFAULTS=( 180 300 180 150 300 150 180 300 180 180 300 180 180 300 180 )
+NEWDEFAULTS=( 360 -1 360 360 -1 360 360 -1 360 360 -1 360 360 -1 360 )
+for I in $(seq 1 ${#NAMES[@]}); do
+    VALUE=$(ox_read_property ${NAMES[$I-1]} $PFILE)
+    if [ "${VALUE}" = "${OLDDEFAULTS[$I-1]}" ]; then
+        ox_set_property ${NAMES[$I-1]} "${NEWDEFAULTS[$I-1]}" $PFILE
+    fi
+done
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
