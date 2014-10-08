@@ -183,7 +183,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
-                if (rename) {
+                if (rename && false == move) {
                     checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
                 }
             }
