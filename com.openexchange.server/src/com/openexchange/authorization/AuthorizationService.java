@@ -65,7 +65,7 @@ public interface AuthorizationService {
      *
      * @param ctx The context
      * @param user The user
-     * @throws OXException If user/context pair cannot be authorized
+     * @throws OXException If user/context pair cannot be authorized; e.g. user and/or context is deactivated
      */
     void authorizeUser(final Context ctx, final User user) throws OXException;
 
