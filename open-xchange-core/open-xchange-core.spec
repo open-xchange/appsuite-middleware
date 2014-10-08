@@ -1098,6 +1098,9 @@ if [ "1500" = "${VALUE}" ]; then
     ox_set_property com.openexchange.servlet.maxRate 500 /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-2224
+ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
