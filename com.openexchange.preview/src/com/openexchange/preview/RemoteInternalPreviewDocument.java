@@ -49,44 +49,19 @@
 
 package com.openexchange.preview;
 
-import java.io.InputStream;
-import java.util.List;
-import com.openexchange.conversion.Data;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
-
 /**
- * {@link InternalPreviewService} - Extends the {@link PreviewService} to specify what MIME types can be handled in what quality.
+ * {@link RemoteInternalPreviewDocument}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
+ * @since v7.6.0
  */
-public interface InternalPreviewService extends PreviewService {
+public interface RemoteInternalPreviewDocument extends PreviewDocument {
 
     /**
-     * Gets the cached preview document for specified data and output format, if available at all.
+     * Gets the preview image (thumbnail buffer).
      *
-     * @param documentData The data
-     * @param output The output format
-     * @param session The session
-     * @param pages The number of pages to be generated, if possible. If not, this argument is ignored. -1 for "all pages"
-     * @return The preview document with its content set according to given output format or null, if no cached preview is available
-     * @throws OXException If preview document cannot be generated
+     * @return The byte buffer for the image or <code>null</code> if the image is not available.
      */
-    PreviewDocument getCachedPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session, int pages) throws OXException;
+    byte[] getThumbnailBuffer();
 
-    /**
-     * Gets the preview policies of this <tt>PreviewService</tt>.
-     *
-     * @return The preview policies
-     */
-    List<PreviewPolicy> getPreviewPolicies();
-
-    /**
-     * Checks if this service is able to detect the content type of an input stream.
-     *
-     * @return <code>true</code> this service is able to detect the content type of an input stream; otherwise <code>false</code>
-     */
-    boolean canDetectContentType();
 }

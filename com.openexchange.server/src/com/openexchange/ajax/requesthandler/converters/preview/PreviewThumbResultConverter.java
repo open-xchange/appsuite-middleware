@@ -176,6 +176,11 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                 ResourceCache resourceCache = getResourceCache(contextId, userId);
                 if (resourceCache != null) {
                     CachedResource cachedPreview = getCachedResourceForContext(session, cacheKeyGenerator.generateCacheKey(), resourceCache);
+
+                    if (cachedPreview == null) {
+                        cachedPreview = getCachedResourceFromPreviewService(session, new AJAXRequestResult(result), requestData.copyOf(), previewService, getOutput());
+                    }
+
                     if (cachedPreview != null) {
                         // apply to request/response
                         applyCachedPreview(requestData, result, cachedPreview);
