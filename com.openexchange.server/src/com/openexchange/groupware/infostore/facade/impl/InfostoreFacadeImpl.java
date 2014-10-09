@@ -1247,10 +1247,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
         final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
 
-        final StringBuilder sIds = new StringBuilder().append('(');
-        Strings.join(idsToFolders.keySet(), ", ", sIds);
-        sIds.append(')');
-        String whereClause = sIds.toString();
+        Set<Integer> objectIDs = idsToFolders.keySet();
+        String whereClause;
+        if (1 == objectIDs.size()) {
+            whereClause = "infostore.id=" + objectIDs.iterator().next();
+        } else {
+            StringBuilder stringBuilder = new StringBuilder("infostore.id IN (");
+            Strings.join(objectIDs, ",", stringBuilder);
+            whereClause = stringBuilder.append(')').toString();
+        }
         List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
             whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
         List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
