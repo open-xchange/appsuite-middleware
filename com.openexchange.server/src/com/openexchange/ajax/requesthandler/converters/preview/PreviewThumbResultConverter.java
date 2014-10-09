@@ -203,16 +203,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
             if (isBlockingWorkerAllowed) {
                 // there is no cached resource but we are allowed to wait for thumbnail generation
                 // do as callable anyway
-                PreviewDocument previewDocument;
-                try {
-                    previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, THRESHOLD, false);
-                } catch (OXException e) {
-                    if (PreviewExceptionCodes.DEFAULT_THUMBNAIL.equals(e)) {
-                        setDefaulThumbnail(requestData, result);
-                        return;
-                    }
-                    throw e;
-                }
+                PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, THRESHOLD, false);
                 if (previewDocument == null) {
                     throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("PreviewDocument is null");
                 }

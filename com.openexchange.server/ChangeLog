@@ -1,3 +1,11 @@
+* 2014-10-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34812: Restored required "read_stream" permission when initializing a new Facebook OAuth account,
+                      which is basically a revert for commit 145a880b7557d89754b509deeef34c4bcc1a84d5 (bug 34281)
+ - Fix for bug 34727: Set proper full-name to Unified Mail subfolders
+ - Fix for bug 34835: Honor "CREATE-SPECIAL-USE" capability string when using the "USE" IMAP CREATE command extension
+ - Fix for bug 34702: Use a white-listed set of parameters to consider when generating thumbnail's cache key
+
 * 2014-10-07 - steffen.templin@open-xchange.com
 
  - Fix for bug 26354: Set user attributes without explicit database locking to avoid deadlocks.

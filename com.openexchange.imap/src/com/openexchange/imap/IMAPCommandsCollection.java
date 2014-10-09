@@ -1504,10 +1504,15 @@ public final class IMAPCommandsCollection {
                     final StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
                     cmdBuilder.append("(");
                     for (final String specialUse : specialUses) {
-                        if (specialUse.charAt(0) == '\\') {
-                            cmdBuilder.append('"').append(specialUse).append('"');
+                        cmdBuilder.append("/private/specialuse ");
+                        if (null == specialUse) {
+                            cmdBuilder.append("NIL");
                         } else {
-                            cmdBuilder.append(specialUse);
+                            if (specialUse.charAt(0) == '\\') {
+                                cmdBuilder.append('"').append(specialUse).append('"');
+                            } else {
+                                cmdBuilder.append(specialUse);
+                            }
                         }
                     }
                     cmdBuilder.append(")");
