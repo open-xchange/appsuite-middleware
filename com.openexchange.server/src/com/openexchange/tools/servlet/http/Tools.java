@@ -448,7 +448,7 @@ public final class Tools {
     }
 
     public static void setHeaderForFileDownload(final String userAgent, final HttpServletResponse resp, final String fileName, final String contentDisposition) throws UnsupportedEncodingException {
-        final BrowserDetector detector = new BrowserDetector(userAgent);
+        final BrowserDetector detector = BrowserDetector.detectorFor(userAgent);
         String cd = contentDisposition;
         if (cd == null) {
             cd = "attachment";
