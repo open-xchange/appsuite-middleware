@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,27 +56,27 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 
 /**
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
 public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfostoreResponse> {
 
-    private DocumentMetadata metadata;
-    private File upload;
-    private Metadata[] fields;
-    private final int id;
+    private File metadata;
+    private java.io.File upload;
+    private Field[] fields;
+    private final String id;
     private final Date lastModified;
 
-    public UpdateInfostoreRequest(int id, Date lastModified, File upload) {
+    public UpdateInfostoreRequest(String id, Date lastModified, java.io.File upload) {
         this.id = id;
         this.upload = upload;
         this.lastModified = lastModified;
     }
 
-    public UpdateInfostoreRequest(DocumentMetadata data, Metadata[] fields, File upload, Date lastModified) {
+    public UpdateInfostoreRequest(File data, Field[] fields, java.io.File upload, Date lastModified) {
         this.metadata = data;
         this.id = data.getId();
         this.lastModified = lastModified;
@@ -85,18 +84,18 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
         this.fields = fields;
     }
 
-    public UpdateInfostoreRequest(DocumentMetadata data, Metadata[] fields, Date lastModified) {
+    public UpdateInfostoreRequest(File data, Field[] fields, Date lastModified) {
         this.metadata = data;
         this.id = data.getId();
         this.lastModified = lastModified;
         this.fields = fields;
     }
 
-    public void setMetadata(DocumentMetadata metadata) {
+    public void setMetadata(File metadata) {
         this.metadata = metadata;
     }
 
-    public DocumentMetadata getMetadata() {
+    public File getMetadata() {
         return metadata;
     }
 

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,10 +65,10 @@ import com.openexchange.ajax.publish.actions.AllPublicationsResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.test.TestInit;
@@ -164,17 +163,17 @@ public class AllPublicationsTest extends AbstractPublicationTest {
 
     	FolderObject infostoreFolder = createDefaultInfostoreFolder("Folder for Publication-"+System.currentTimeMillis());
     	String infostoreModule = "infostore";
-    	
+
     	// create and upload a new Infostore item.
     	InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject infostorePublicationFolder = createDefaultInfostoreFolder("Second Folder for Publication-"+System.currentTimeMillis());
 
-        DocumentMetadata data = new DocumentMetadataImpl();
+        File data = new DefaultFile();
         data.setTitle("Infostore Item To Be Published");
         data.setDescription("Infostore Item To Be Published");
         data.setFileMIMEType("text/plain");
-        data.setFolderId(infostorePublicationFolder.getObjectID());
-        File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        data.setFolderId(String.valueOf(infostorePublicationFolder.getObjectID()));
+        java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         data.setFileName(upload.getName());
 
         infoMgr.newAction(data, upload);

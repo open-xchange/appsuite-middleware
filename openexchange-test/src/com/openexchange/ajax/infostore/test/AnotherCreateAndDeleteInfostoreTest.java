@@ -56,9 +56,9 @@ import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -73,9 +73,9 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest"+System.currentTimeMillis());
         fMgr.insertFolderOnServer(folder);
 
-        DocumentMetadata expected = new DocumentMetadataImpl();
-        expected.setCreationDate(new Date());
-        expected.setFolderId(folder.getObjectID());
+        File expected = new DefaultFile();
+        expected.setCreated(new Date());
+        expected.setFolderId(String.valueOf(folder.getObjectID()));
         expected.setTitle("InfostoreCreateDeleteTest Item");
         expected.setLastModified(new Date());
         final Map<String, Object> meta = new LinkedHashMap<String, Object>(2);
@@ -86,7 +86,7 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         infoMgr.newAction(expected);
         assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
 
-        DocumentMetadata actual = infoMgr.getAction(expected.getId());
+        File actual = infoMgr.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
 
         final Map<String, Object> actualMeta = actual.getMeta();

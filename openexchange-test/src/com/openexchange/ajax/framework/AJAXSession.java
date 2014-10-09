@@ -126,7 +126,7 @@ public class AJAXSession {
         DefaultHttpClient retval = new DefaultHttpClient(new ThreadSafeClientConnManager());
 
         HttpParams params = retval.getParams();
-        int minute = 1 * 60 * 1000;
+        int minute = 1 * 60 * 1000 * 100;
         HttpConnectionParams.setConnectionTimeout(params, minute);
         HttpConnectionParams.setSoTimeout(params, minute);
 

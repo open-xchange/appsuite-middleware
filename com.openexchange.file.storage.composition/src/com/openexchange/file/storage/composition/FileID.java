@@ -59,6 +59,12 @@ import com.openexchange.tools.id.IDMangler;
  */
 public class FileID {
 
+    /** The service identifier of the default "infostore" file storage */
+    public static final String INFOSTORE_SERVICE_ID = "com.openexchange.infostore";
+
+    /** The account identifier of the default "infostore" file storage */
+    public static final String INFOSTORE_ACCOUNT_ID = "infostore";
+
     private String serviceId;
     private String accountId;
     private String folderId;
@@ -90,13 +96,13 @@ public class FileID {
 
         int size = unmangled.size();
         if (size == 1) {
-            serviceId = "com.openexchange.infostore";
-            accountId = "infostore";
+            serviceId = INFOSTORE_SERVICE_ID;
+            accountId = INFOSTORE_ACCOUNT_ID;
             folderId = null;
             fileId = uniqueID;
         } else if (size == 2) {
-            serviceId = "com.openexchange.infostore";
-            accountId = "infostore";
+            serviceId = INFOSTORE_SERVICE_ID;
+            accountId = INFOSTORE_ACCOUNT_ID;
             folderId = unmangled.get(0);
             fileId = unmangled.get(1);
         } else {
@@ -185,18 +191,9 @@ public class FileID {
      * @return The unified identifier
      */
     public String toUniqueID() {
-        return toUniqueID(false);
-    }
-
-    public String toUniqueID(boolean preserveObsoleteFolderId) {
-        if (serviceId.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
-            if (!preserveObsoleteFolderId || folderId == null) {
-                return fileId;
-            }
-
-            return folderId + IDMangler.SECONDARY_DELIM + fileId;
+        if (INFOSTORE_SERVICE_ID.equals(serviceId) && INFOSTORE_ACCOUNT_ID.equals(accountId)) {
+            return null == folderId ? fileId : folderId + IDMangler.SECONDARY_DELIM + fileId;
         }
-
         return IDMangler.mangle(serviceId, accountId, folderId, fileId);
     }
 

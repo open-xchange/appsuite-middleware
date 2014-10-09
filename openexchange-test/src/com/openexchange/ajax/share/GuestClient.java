@@ -85,11 +85,12 @@ import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
@@ -336,7 +337,7 @@ public class GuestClient extends AJAXClient {
             checkResponse(deleteContactResponse, expectToFail);
             break;
         case FolderObject.INFOSTORE:
-            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(objectID, folderID, timestamp);
+            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(String.valueOf(objectID), String.valueOf(folderID), timestamp);
             deleteInfostoreRequest.setFailOnError(failOnError);
             DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
             checkResponse(deleteInfostoreResponse, expectToFail);
@@ -369,7 +370,7 @@ public class GuestClient extends AJAXClient {
             checkResponse(contactGetResponse, expectToFail);
             return expectToFail ? null : contactGetResponse.getContact();
         case FolderObject.INFOSTORE:
-            GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(objectID);
+            GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(String.valueOf(objectID));
             getInfostoreRequest.setFailOnError(false == expectToFail);
             GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
             checkResponse(getInfostoreResponse, expectToFail);
@@ -405,8 +406,8 @@ public class GuestClient extends AJAXClient {
             return expectToFail ? null : String.valueOf(insertContactResponse.getId());
         case FolderObject.INFOSTORE:
             byte[] data = UUIDs.toByteArray(UUID.randomUUID());
-            DocumentMetadataImpl metadata = new DocumentMetadataImpl();
-            metadata.setFolderId(folderID);
+            File metadata = new DefaultFile();
+            metadata.setFolderId(String.valueOf(folderID));
             metadata.setFileName(UUIDs.getUnformattedString(UUID.randomUUID()) + ".test");
             NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
             newRequest.setFailOnError(false == expectToFail);

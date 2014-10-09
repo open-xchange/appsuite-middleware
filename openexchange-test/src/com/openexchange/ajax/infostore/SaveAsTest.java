@@ -21,7 +21,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
 
 	public void testBasic() throws Exception {
 		final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
-		final int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
+		final String id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
 				"folder_id"			,		""+folderId,
 				"title"				,		"My Attachment",
 				"description"		,		"An attachment cum InfoItem"
@@ -68,7 +68,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
 	public void virtualFolder(int folderId) throws Exception {
 		final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
 		try {
-			final int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
+			final String id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
 					"folder_id"			,		""+folderId,
 					"title"				,		"My Attachment",
 					"description"		,		"An attachment cum InfoItem"

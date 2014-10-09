@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,15 +62,15 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class InfostoreTestManager {
 
-    private final Set<DocumentMetadata> createdEntities;
+    private final Set<File> createdEntities;
 
     private AJAXClient client;
 
@@ -80,7 +79,7 @@ public class InfostoreTestManager {
     private AbstractAJAXResponse lastResponse;
 
     public InfostoreTestManager() {
-        createdEntities = new HashSet<DocumentMetadata>();
+        createdEntities = new HashSet<File>();
     }
 
     public InfostoreTestManager(AJAXClient client) {
@@ -88,7 +87,7 @@ public class InfostoreTestManager {
         setClient(client);
     }
 
-    public Set<DocumentMetadata> getCreatedEntities() {
+    public Set<File> getCreatedEntities() {
         return this.createdEntities;
     }
 
@@ -113,19 +112,19 @@ public class InfostoreTestManager {
     }
 
     public void cleanUp() throws OXException, IOException, SAXException, JSONException {
-        List<Integer> objectIDs = new ArrayList<Integer>(createdEntities.size());
-        List<Integer> folderIDs = new ArrayList<Integer>(createdEntities.size());
-        for (DocumentMetadata metadata : createdEntities) {
-            objectIDs.add(Integer.valueOf(metadata.getId()));
-            folderIDs.add(Integer.valueOf((int)metadata.getFolderId()));
+        List<String> objectIDs = new ArrayList<String>(createdEntities.size());
+        List<String> folderIDs = new ArrayList<String>(createdEntities.size());
+        for (File metadata : createdEntities) {
+            objectIDs.add(metadata.getId());
+            folderIDs.add(metadata.getFolderId());
         }
         deleteAction(objectIDs, folderIDs, new Date(Long.MAX_VALUE));
         createdEntities.clear();
     }
 
-    private void removeFromCreatedEntities(Collection<Integer> ids) {
-        for (int id : ids) {
-            for (DocumentMetadata data : new HashSet<DocumentMetadata>(createdEntities)) {
+    private void removeFromCreatedEntities(Collection<String> ids) {
+        for (String id : ids) {
+            for (File data : new HashSet<File>(createdEntities)) {
                 if (data.getId() == id) {
                     createdEntities.remove(data);
                 }
@@ -133,7 +132,7 @@ public class InfostoreTestManager {
         }
     }
 
-    public void newAction(DocumentMetadata data) throws OXException, IOException, SAXException, JSONException {
+    public void newAction(File data) throws OXException, IOException, SAXException, JSONException {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(data);
         newRequest.setFailOnError(getFailOnError());
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
@@ -146,7 +145,7 @@ public class InfostoreTestManager {
      * The following is not beautiful, but the request/response framework
      * doesn't seem to offer a solution to do POST requests containing files.
      */
-    public void newAction(DocumentMetadata data, File upload) throws OXException, IOException, SAXException, JSONException {
+    public void newAction(File data, java.io.File upload) throws OXException, IOException, SAXException, JSONException {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(data, upload);
         newRequest.setFailOnError(getFailOnError());
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
@@ -155,21 +154,21 @@ public class InfostoreTestManager {
         createdEntities.add(data);
     }
 
-    public void updateAction(DocumentMetadata data, Metadata[] fields, Date timestamp) throws OXException, IOException, JSONException {
+    public void updateAction(File data, Field[] fields, Date timestamp) throws OXException, IOException, JSONException {
         UpdateInfostoreRequest updateRequest = new UpdateInfostoreRequest(data, fields, timestamp);
         updateRequest.setFailOnError(getFailOnError());
         UpdateInfostoreResponse updateResponse = getClient().execute(updateRequest);
         lastResponse = updateResponse;
     }
-    
-    public void updateAction(DocumentMetadata data, File file, Metadata[] fields, Date timestamp) throws OXException, IOException, JSONException {
+
+    public void updateAction(File data, java.io.File file, Field[] fields, Date timestamp) throws OXException, IOException, JSONException {
         UpdateInfostoreRequest updateRequest = new UpdateInfostoreRequest(data, fields, file, timestamp);
         updateRequest.setFailOnError(getFailOnError());
         UpdateInfostoreResponse updateResponse = getClient().execute(updateRequest);
         lastResponse = updateResponse;
     }
 
-    public void deleteAction(List<Integer> ids, List<Integer> folders, Date timestamp) throws OXException, IOException, SAXException, JSONException {
+    public void deleteAction(List<String> ids, List<String> folders, Date timestamp) throws OXException, IOException, SAXException, JSONException {
         DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(ids, folders, timestamp);
         deleteRequest.setFailOnError(getFailOnError());
         DeleteInfostoreResponse deleteResponse = getClient().execute(deleteRequest);
@@ -177,15 +176,15 @@ public class InfostoreTestManager {
         removeFromCreatedEntities(ids);
     }
 
-    public void deleteAction(int id, int folder, Date timestamp) throws OXException, IOException, SAXException, JSONException {
-        deleteAction(Arrays.asList(Integer.valueOf(id)), Arrays.asList(Integer.valueOf(folder)), timestamp);
+    public void deleteAction(String id, String folder, Date timestamp) throws OXException, IOException, SAXException, JSONException {
+        deleteAction(Arrays.asList(id), Arrays.asList(folder), timestamp);
     }
 
-    public void deleteAction(DocumentMetadata data) throws OXException, IOException, SAXException, JSONException {
-        deleteAction(data.getId(), (Long.valueOf(data.getFolderId()).intValue()), data.getLastModified());
+    public void deleteAction(File data) throws OXException, IOException, SAXException, JSONException {
+        deleteAction(data.getId(), data.getFolderId(), data.getLastModified());
     }
 
-    public DocumentMetadata getAction(int id) throws OXException, JSONException, OXException, IOException, SAXException {
+    public File getAction(String id) throws OXException, JSONException, OXException, IOException, SAXException {
         GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
         getRequest.setFailOnError(getFailOnError());
         GetInfostoreResponse getResponse = getClient().execute(getRequest);

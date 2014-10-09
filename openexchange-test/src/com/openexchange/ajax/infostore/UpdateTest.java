@@ -88,7 +88,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testUpload() throws Exception{
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final int id = clean.get(0);
+        final String id = clean.get(0);
 
         Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");
         assertNoError(res);
@@ -120,7 +120,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testUploadEmptyFile() throws IOException, JSONException, SAXException {
         final File emptyFile = File.createTempFile("infostore-new-test",".txt");
 
-        final int id = clean.get(0);
+        final String id = clean.get(0);
 
         Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), emptyFile, "text/plain");
         assertNoError(res);
@@ -140,12 +140,12 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testUniqueFilenamesOnUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final int id = clean.get(0);
+        final String id = clean.get(0);
 
         Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");
         assertNoError(res);
 
-        final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,    ((Integer)folderId).toString()));
+        final String id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,    ((Integer)folderId).toString()));
 
         clean.add(id2);
 
@@ -161,7 +161,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testUniqueFilenamesOnSwitchVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final int id = clean.get(0);
+        final String id = clean.get(0);
 
         Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("filename" , "theFile.txt"), upload, "text/plain");
         assertNoError(res);
@@ -169,7 +169,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");
         assertNoError(res);
 
-        final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc","filename","theFile.txt","folder_id" ,    ((Integer)folderId).toString()),upload,"text/plain");
+        final String id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc","filename","theFile.txt","folder_id" ,    ((Integer)folderId).toString()),upload,"text/plain");
 
         clean.add(id2);
 
@@ -200,7 +200,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         }
 
         try {
-            final int id = createNew(
+            final String id = createNew(
                     getWebConversation(),
                     getHostName(),
                     sessionId,
@@ -220,7 +220,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testSwitchVersion() throws Exception{
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final int id = clean.get(0);
+        final String id = clean.get(0);
 
         Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain"); // V1
         assertNoError(res);
@@ -247,7 +247,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testUpdateCurrentVersionByDefault() throws Exception{
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final int id = clean.get(0);
+        final String id = clean.get(0);
 
         Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain"); // V1
         assertNoError(res);
@@ -269,7 +269,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void testVersionCommentForNewVersion() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final int id = clean.get(0);
+        final String id = clean.get(0);
 
         Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("version_comment","Version Comment"), upload, "text/plain"); // V1
         assertNoError(res);

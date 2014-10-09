@@ -34,36 +34,36 @@ public class DeleteTest extends InfostoreAJAXTest {
 
 	public void testConflict() throws Exception{
 
-		final int[][] toDelete = new int[clean.size()][2];
+		final String[][] toDelete = new String[clean.size()][2];
 
 		for(int i = 0; i < toDelete.length; i++) {
-			toDelete[i][0] = folderId;
+			toDelete[i][0] = String.valueOf(folderId);
 			toDelete[i][1] = clean.get(i);
 		}
 
-		int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, 0, toDelete);
+		String[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, 0, toDelete);
 		assertEquals(toDelete.length,notDeleted.length);
 
-		Set<Integer> notDeletedExpect = new HashSet<Integer>(clean);
+		Set<String> notDeletedExpect = new HashSet<String>(clean);
 
-		for(final int i : notDeleted) {
+		for(final String i : notDeleted) {
 			assertTrue(notDeletedExpect.remove(i));
 		}
 		assertTrue(notDeletedExpect.isEmpty());
 
-		notDeletedExpect = new HashSet<Integer>(clean);
+		notDeletedExpect = new HashSet<String>(clean);
 		removeDocumentsAndFolders();
 		clean.clear();
 
 		final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), sessionId), false);
 		for(int i = 0; i < toDelete.length; i++) {
-            toDelete[i][0] = client.getValues().getInfostoreTrashFolder();
+            toDelete[i][0] = String.valueOf(client.getValues().getInfostoreTrashFolder());
         }
 		notDeleted = delete(getWebConversation(),getHostName(),sessionId, 0, toDelete);
 		assertEquals(toDelete.length,notDeleted.length);
 
 
-		for(final int i : notDeleted) {
+		for(final String i : notDeleted) {
 			assertTrue(notDeletedExpect.remove(i));
 		}
 		assertTrue(notDeletedExpect.isEmpty());
@@ -72,7 +72,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 
 
     public void testDeleteSingle() throws JSONException, IOException, SAXException {
-        final int[] notDeleted = deleteSingle(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, folderId, clean.get(clean.size()-1));
+        final String[] notDeleted = deleteSingle(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, folderId, clean.get(clean.size()-1));
         assertEquals(0, notDeleted.length);
 
     }

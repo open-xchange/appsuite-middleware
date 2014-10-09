@@ -1084,41 +1084,48 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public String copy(final String sourceId, String version, final String destFolderId, final File update, InputStream newData, final List<File.Field> fields) throws OXException {
-        final FileID source = new FileID(sourceId);
-        FolderID dest = null;
-
-        File fileMetadata = null;
-        if (destFolderId != null) {
-            dest = new FolderID(destFolderId);
+        /*
+         * check source and target account
+         */
+        FileID sourceID = new FileID(sourceId);
+        FolderID destinationID;
+        if (null != destFolderId) {
+            destinationID = new FolderID(destFolderId);
+        } else if (null != update && null != update.getFolderId()) {
+            destinationID = new FolderID(update.getFolderId());
         } else {
-            fileMetadata = new DefaultFile(getFileMetadata(sourceId, version));
-            dest = new FolderID(fileMetadata.getFolderId());
+            throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("null");
         }
-
-        if (source.getService().equals(dest.getService()) && source.getAccountId().equals(dest.getAccountId())) {
-            final FileStorageFileAccess fileAccess = getFileAccess(source.getService(), source.getAccountId());
-            final IDTuple destAddress = fileAccess.copy(
-                new IDTuple(source.getFolderId(), source.getFileId()),
-                version,
-                dest.getFolderId(),
-                update,
-                newData,
-                fields);
-            FileID newID = new FileID(source.getService(), source.getAccountId(), destAddress.getFolder(), destAddress.getId());
+        /*
+         * check for copy operation within same account
+         */
+        if (sourceID.getService().equals(destinationID.getService()) && sourceID.getAccountId().equals(destinationID.getAccountId())) {
+            File metadata;
+            if (null != update) {
+                metadata = new DefaultFile();
+                if (null != fields) {
+                    metadata.copyFrom(update, fields.toArray(new File.Field[fields.size()]));
+                } else {
+                    metadata.copyFrom(update);
+                }
+                metadata.setFolderId(null);
+                metadata.setId(null);
+            } else {
+                metadata = null;
+            }
+            IDTuple result = getFileAccess(sourceID.getService(), sourceID.getAccountId()).copy(
+                new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields);
+            FileID newID = new FileID(sourceID.getService(), sourceID.getAccountId(), result.getFolder(), result.getId());
+            FolderID newFolderID = new FolderID(sourceID.getService(), sourceID.getAccountId(), result.getFolder());
             postEvent(FileStorageEventHelper.buildCreateEvent(
-                session,
-                newID.getService(),
-                newID.getAccountId(),
-                dest.toUniqueID(),
-                newID.toUniqueID(),
+                session, newID.getService(), newID.getAccountId(), newFolderID.toUniqueID(), newID.toUniqueID(),
                 null != update ? update.getFileName() : null));
             return newID.toUniqueID();
         }
-
-        if (fileMetadata == null) {
-            fileMetadata = new DefaultFile(getFileMetadata(sourceId, version));
-        }
-
+        /*
+         * create copy in target storage
+         */
+        File fileMetadata = new DefaultFile(getFileMetadata(sourceId, version));
         if (update != null) {
             fileMetadata.copyFrom(update, fields.toArray(new File.Field[fields.size()]));
         }

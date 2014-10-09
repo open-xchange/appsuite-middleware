@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.composition;
 
+import static com.openexchange.file.storage.composition.FileID.INFOSTORE_ACCOUNT_ID;
+import static com.openexchange.file.storage.composition.FileID.INFOSTORE_SERVICE_ID;
 import java.util.List;
 import com.openexchange.tools.id.IDMangler;
 
@@ -87,8 +89,8 @@ public class FolderID {
         final List<String> unmangled = IDMangler.unmangle(uniqueID);
         final int size = unmangled.size();
         if (size == 1) {
-            service = "com.openexchange.infostore";
-            accountId = "infostore";
+            service = INFOSTORE_SERVICE_ID;
+            accountId = INFOSTORE_ACCOUNT_ID;
             folderId = uniqueID;
         } else {
             service = unmangled.get(0);
@@ -161,7 +163,7 @@ public class FolderID {
      * @return The unified identifier
      */
     public String toUniqueID() {
-        if (service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
+        if (INFOSTORE_SERVICE_ID.equals(service) && INFOSTORE_ACCOUNT_ID.equals(accountId)) {
             return folderId;
         }
         return IDMangler.mangle(service, accountId, folderId);

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,11 +74,12 @@ import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.ObjectPermission;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
@@ -95,8 +95,8 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
 
     private AJAXClient client2;
     private InfostoreTestManager itm;
-    private Map<Integer, Boolean> shareStates;
-    private Map<Integer, DocumentMetadata> allFiles;
+    private Map<String, Boolean> shareStates;
+    private Map<String, File> allFiles;
     private FolderTestManager ftm;
     private FolderObject testFolder;
 
@@ -120,21 +120,22 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             client.getValues().getUserId());
         testFolder = ftm.insertFolderOnServer(testFolder);
 
-        allFiles = new HashMap<Integer, DocumentMetadata>();
-        shareStates = new HashMap<Integer, Boolean>();
+        allFiles = new HashMap<String, File>();
+        shareStates = new HashMap<String, Boolean>();
 
         itm = new InfostoreTestManager(client);
         itm.setFailOnError(true);
-        File upload = new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "contact_image.png");
+        java.io.File upload = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "contact_image.png");
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
             boolean shared = false;
-            List<ObjectPermission> objectPermissions = null;
+            List<FileStorageObjectPermission> objectPermissions = null;
             if (r.nextBoolean()) {
-                objectPermissions = Collections.singletonList(new ObjectPermission(client2.getValues().getUserId(), false, ObjectPermission.READ));
+                objectPermissions = Collections.<FileStorageObjectPermission>singletonList(
+                    new DefaultFileStorageObjectPermission(client2.getValues().getUserId(), false, FileStorageObjectPermission.READ));
                 shared = true;
             }
-            DocumentMetadata newDocument = newDocument(testFolder.getObjectID(), objectPermissions);
+            File newDocument = newDocument(testFolder.getObjectID(), objectPermissions);
             itm.newAction(newDocument, upload);
             allFiles.put(newDocument.getId(), newDocument);
             shareStates.put(newDocument.getId(), shared);
@@ -168,9 +169,9 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         OXException exception = allResp.getException();
         assertTrue("Expected exception: InfostoreExceptionCodes.NO_READ_PERMISSION", InfostoreExceptionCodes.NO_READ_PERMISSION.equals(exception));
 
-        List<Integer> sharedFiles = new ArrayList<Integer>(10);
-        List<Integer> otherFiles = new ArrayList<Integer>(10);
-        for (Entry<Integer, Boolean> entry : shareStates.entrySet()) {
+        List<String> sharedFiles = new ArrayList<String>(10);
+        List<String> otherFiles = new ArrayList<String>(10);
+        for (Entry<String, Boolean> entry : shareStates.entrySet()) {
             if (entry.getValue().booleanValue()) {
                 sharedFiles.add(entry.getKey());
             } else {
@@ -179,7 +180,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         }
 
         List<ListItem> listItems = new ArrayList<ListItem>(sharedFiles.size());
-        for (Integer id : sharedFiles) {
+        for (String id : sharedFiles) {
             listItems.add(new ListItem(Integer.toString(testFolder.getObjectID()), id.toString()));
         }
 
@@ -195,12 +196,12 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
          * - via all request (folder 10)
          */
         listItems.clear();
-        for (Integer id : sharedFiles) {
-            GetInfostoreResponse getResp = client2.execute(new GetInfostoreRequest(id.intValue()));
-            DocumentMetadata doc = getResp.getDocumentMetadata();
+        for (String id : sharedFiles) {
+            GetInfostoreResponse getResp = client2.execute(new GetInfostoreRequest(id));
+            File doc = getResp.getDocumentMetadata();
             assertNotNull(doc);
-            assertEquals(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, (int) doc.getFolderId());
-            assertEquals(id.intValue(), doc.getId());
+            assertEquals(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Integer.valueOf(doc.getFolderId()).intValue());
+            assertEquals(id, doc.getId());
 
             listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), id.toString()));
         }
@@ -218,7 +219,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
             Metadata.ID,
             Order.ASCENDING));
-        Set<Integer> foundIds = new HashSet<Integer>(sharedFiles);
+        Set<String> foundIds = new HashSet<String>(sharedFiles);
         for (Object[] doc : allResp.getArray()) {
             int docId = Integer.parseInt((String) doc[allResp.getColumnPos(Metadata.ID)]);
             foundIds.remove(docId);
@@ -230,15 +231,15 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
          * Non-shared files must not be visible via get- and list-requests
          */
         listItems.clear();
-        for (Integer id : otherFiles) {
-            GetInfostoreRequest req = new GetInfostoreRequest(id.intValue());
+        for (String id : otherFiles) {
+            GetInfostoreRequest req = new GetInfostoreRequest(id);
             req.setFailOnError(false);
             GetInfostoreResponse getResp = client2.execute(req);
             OXException exception2 = getResp.getException();
             assertNotNull(exception2);
             // TODO: check code
 
-            listItems.add(new ListItem(allFiles.get(id.intValue())));
+            listItems.add(new ListItem(allFiles.get(id)));
         }
 
         listResp = client2.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), false));
@@ -260,7 +261,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         }
 
         listItems.clear();
-        for (Integer id : allFiles.keySet()) {
+        for (String id : allFiles.keySet()) {
             listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), id.toString()));
         }
 
@@ -271,12 +272,12 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         }
     }
 
-    private DocumentMetadata newDocument(int folderId, List<ObjectPermission> objectPermissions) throws OXException, IOException, JSONException {
-        DocumentMetadata doc = new DocumentMetadataImpl();
+    private File newDocument(int folderId, List<FileStorageObjectPermission> objectPermissions) throws OXException, IOException, JSONException {
+        File doc = new DefaultFile();
         doc.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
         doc.setDescription("Infostore Item Description");
         doc.setFileMIMEType("image/png");
-        doc.setFolderId(folderId);
+        doc.setFolderId(String.valueOf(folderId));
         doc.setObjectPermissions(objectPermissions);
         doc.setFileName("contact_image.png");
         return doc;

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
@@ -64,8 +63,9 @@ import com.openexchange.ajax.infostore.actions.DetachInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.UpdatesInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdatesInfostoreResponse;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
@@ -84,8 +84,8 @@ public class UpdatesTest extends AbstractAJAXSession {
 
     private FolderTestManager ftm;
     private FolderObject testFolder;
-    private DocumentMetadataImpl knowledgeDoc;
-    private DocumentMetadataImpl urlDoc;
+    private File knowledgeDoc;
+    private File urlDoc;
     private InfostoreTestManager itm;
 
     public UpdatesTest(String name) {
@@ -104,14 +104,14 @@ public class UpdatesTest extends AbstractAJAXSession {
             client.getValues().getUserId());
         ftm.insertFolderOnServer(testFolder);
 
-        knowledgeDoc = new DocumentMetadataImpl();
-        knowledgeDoc.setFolderId(testFolder.getObjectID());
+        knowledgeDoc = new DefaultFile();
+        knowledgeDoc.setFolderId(String.valueOf(testFolder.getObjectID()));
         knowledgeDoc.setTitle("test knowledge");
         knowledgeDoc.setDescription("test knowledge description");
         itm.newAction(knowledgeDoc);
 
-        urlDoc = new DocumentMetadataImpl();
-        urlDoc.setFolderId(testFolder.getObjectID());
+        urlDoc = new DefaultFile();
+        urlDoc.setFolderId(String.valueOf(testFolder.getObjectID()));
         urlDoc.setTitle("test url");
         urlDoc.setDescription("test url description");
         urlDoc.setURL("http://www.open-xchange.com");
@@ -134,10 +134,10 @@ public class UpdatesTest extends AbstractAJAXSession {
         AbstractColumnsResponse allResp = client.execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
 
-        DocumentMetadataImpl updateDoc = new DocumentMetadataImpl();
+        File updateDoc = new DefaultFile();
         updateDoc.setId(knowledgeDoc.getId());
         updateDoc.setTitle("test knowledge updated");
-        itm.updateAction(updateDoc, new Metadata[] { Metadata.TITLE_LITERAL }, timestamp);
+        itm.updateAction(updateDoc, new File.Field[] { File.Field.TITLE }, timestamp);
 
         UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
             testFolder.getObjectID(),
@@ -151,12 +151,12 @@ public class UpdatesTest extends AbstractAJAXSession {
         JSONArray modifiedValues = resp.getNewAndModified().iterator().next();
         assertEquals("Wrong number of modified documents", 1, resp.getNewAndModified().size());
         assertEquals("Wrong number of deleted documents", 0, resp.getDeleted().size());
-        assertEquals("Wrong document id", updateDoc.getId(), modifiedValues.getInt(0));
+        assertEquals("Wrong document id", updateDoc.getId(), modifiedValues.getString(0));
         assertEquals("Wrong document title", updateDoc.getTitle(), modifiedValues.getString(1));
 
         timestamp = itm.getLastResponse().getTimestamp();
-        itm.deleteAction(knowledgeDoc.getId(), testFolder.getObjectID(), timestamp);
-        itm.deleteAction(urlDoc.getId(), testFolder.getObjectID(), timestamp);
+        itm.deleteAction(knowledgeDoc.getId(), String.valueOf(testFolder.getObjectID()), timestamp);
+        itm.deleteAction(urlDoc.getId(), String.valueOf(testFolder.getObjectID()), timestamp);
 
         req = new UpdatesInfostoreRequest(
             testFolder.getObjectID(),
@@ -187,19 +187,19 @@ public class UpdatesTest extends AbstractAJAXSession {
         AbstractColumnsResponse allResp = client.execute(allReq);
         Date timestamp = new Date(allResp.getTimestamp().getTime() + 2);
 
-        File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        DocumentMetadataImpl updateDoc = new DocumentMetadataImpl();
+        java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        DefaultFile updateDoc = new DefaultFile();
         updateDoc.setId(knowledgeDoc.getId());
         updateDoc.setVersionComment("Comment 1");
-        itm.updateAction(updateDoc, upload, new Metadata[] { Metadata.VERSION_COMMENT_LITERAL }, timestamp);
+        itm.updateAction(updateDoc, upload, new File.Field[] { File.Field.VERSION_COMMENT }, timestamp);
         timestamp = itm.getLastResponse().getTimestamp();
 
         updateDoc.setVersionComment("Comment 2");
-        itm.updateAction(updateDoc, upload, new Metadata[] { Metadata.VERSION_COMMENT_LITERAL }, timestamp);
+        itm.updateAction(updateDoc, upload, new File.Field[] { File.Field.VERSION_COMMENT }, timestamp);
         timestamp = itm.getLastResponse().getTimestamp();
 
         updateDoc.setVersionComment("Comment 3");
-        itm.updateAction(updateDoc, upload, new Metadata[] { Metadata.VERSION_COMMENT_LITERAL }, timestamp);
+        itm.updateAction(updateDoc, upload, new File.Field[] { File.Field.VERSION_COMMENT }, timestamp);
         timestamp = itm.getLastResponse().getTimestamp();
 
         DetachInfostoreRequest detachReq = new DetachInfostoreRequest(
@@ -260,11 +260,11 @@ public class UpdatesTest extends AbstractAJAXSession {
 
     // Bug 12427
 	public void testNumberOfVersions() throws Exception {
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-		DocumentMetadataImpl updateDoc = new DocumentMetadataImpl();
+	    java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		DefaultFile updateDoc = new DefaultFile();
         updateDoc.setId(knowledgeDoc.getId());
         updateDoc.setDescription("New description");
-		itm.updateAction(updateDoc, upload, new Metadata[] { Metadata.DESCRIPTION_LITERAL }, new Date(Long.MAX_VALUE));
+		itm.updateAction(updateDoc, upload, new File.Field[] { File.Field.DESCRIPTION }, new Date(Long.MAX_VALUE));
 
 		UpdatesInfostoreRequest req = new UpdatesInfostoreRequest(
   				testFolder.getObjectID(),
@@ -278,9 +278,9 @@ public class UpdatesTest extends AbstractAJAXSession {
 
         boolean found = false;
         for (JSONArray modified : resp.getNewAndModified()) {
-        	int id = modified.getInt(0);
+        	String id = modified.getString(0);
         	int numberOfVersions = modified.getInt(1);
-        	if (id == updateDoc.getId()) {
+        	if (id.equals(updateDoc.getId())) {
         		assertEquals(1, numberOfVersions);
         		found = true;
         	}

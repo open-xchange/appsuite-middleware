@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.test;
 
-import java.io.File;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,10 +60,10 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.ZipDocumentsRequest;
 import com.openexchange.ajax.infostore.actions.ZipDocumentsRequest.IdVersionPair;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
 
@@ -96,43 +95,43 @@ public final class ZipDocumentsTest extends AbstractObjectCountTest {
             int objectsInFolder = folder.getTotal();
             assertEquals("Wrong object count", 0, objectsInFolder);
 
-            final int id1;
+            final String id1;
             {
-                DocumentMetadata expected = new DocumentMetadataImpl();
-                expected.setCreationDate(new Date());
-                expected.setFolderId(Long.parseLong(folder.getID()));
+                File expected = new DefaultFile();
+                expected.setCreated(new Date());
+                expected.setFolderId(folder.getID());
                 expected.setTitle("InfostoreCreateDeleteTest File1");
                 expected.setLastModified(new Date());
-                File file = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+                java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
                 infostoreTestManager.newAction(expected, file);
                 assertFalse("Creating an entry should work", infostoreTestManager.getLastResponse().hasError());
                 id1 = expected.getId();
 
-                DocumentMetadata actual = infostoreTestManager.getAction(expected.getId());
+                File actual = infostoreTestManager.getAction(expected.getId());
                 assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
             }
 
-            final int id2;
+            final String id2;
             {
-                DocumentMetadata expected = new DocumentMetadataImpl();
-                expected.setCreationDate(new Date());
-                expected.setFolderId(Long.parseLong(folder.getID()));
+                File expected = new DefaultFile();
+                expected.setCreated(new Date());
+                expected.setFolderId(folder.getID());
                 expected.setTitle("InfostoreCreateDeleteTest File2");
                 expected.setLastModified(new Date());
-                File file = new File(TestInit.getTestProperty("webdavPropertiesFile"));
+                java.io.File file = new java.io.File(TestInit.getTestProperty("webdavPropertiesFile"));
 
                 infostoreTestManager.newAction(expected, file);
                 assertFalse("Creating an entry should work", infostoreTestManager.getLastResponse().hasError());
                 id2 = expected.getId();
 
-                DocumentMetadata actual = infostoreTestManager.getAction(expected.getId());
+                File actual = infostoreTestManager.getAction(expected.getId());
                 assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
             }
 
             final List<IdVersionPair> pairs = new LinkedList<IdVersionPair>();
-            pairs.add(new IdVersionPair(Integer.toString(id1), null));
-            pairs.add(new IdVersionPair(Integer.toString(id2), null));
+            pairs.add(new IdVersionPair(id1, null));
+            pairs.add(new IdVersionPair(id2, null));
             ZipDocumentsRequest request = new ZipDocumentsRequest(pairs, folder.getID());
             final WebResponse webResponse = Executor.execute4Download(getSession(), request, AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL), AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
             /*

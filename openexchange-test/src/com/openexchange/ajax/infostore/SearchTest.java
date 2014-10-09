@@ -35,7 +35,7 @@ public class SearchTest extends InfostoreAJAXTest {
 		final char[] alphabet = new char[]{'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 
 		for(int i = 0; i < 26; i++) {
-			final int id = createNew(getWebConversation(),getHostName(), sessionId, m(
+			final String id = createNew(getWebConversation(),getHostName(), sessionId, m(
 				"title"	, "Test "+i,
 				"description", "this is document "+alphabet[i],
 				"folder_id" , ""+folderId
@@ -156,7 +156,7 @@ public class SearchTest extends InfostoreAJAXTest {
 	public void testVersions() throws Exception {
 		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-		final int id = clean.get(0);
+		final String id = clean.get(0);
 
 		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("title" , "File"), upload, "text/plain");
 		assertNoError(res);
@@ -177,7 +177,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     // Tests functionality that no one requested yet
     public void notestEscape() throws Exception{
-		final int id = clean.get(0);
+		final String id = clean.get(0);
 		Response res = update(getWebConversation(),getHostName(),sessionId,id, Long.MAX_VALUE, m("title" , "The mysterious ?"));
 		assertNoError(res);
 
@@ -204,7 +204,7 @@ public class SearchTest extends InfostoreAJAXTest {
 	}
 
 	public void testCategories() throws Exception {
-		final int id = clean.get(0);
+		final String id = clean.get(0);
 
 		Response res = update(getWebConversation(),getHostName(),sessionId,id, Long.MAX_VALUE, m("categories" , "[\"curiosity\", \"cat\", \"danger\"]"));
 		assertNoError(res);
@@ -260,7 +260,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     public void testBackslashFound() throws MalformedURLException, IOException, SAXException, JSONException {
         String title = "Test\\WithBackslash";
-        final int id = createNew(getWebConversation(),getHostName(), sessionId, m(
+        final String id = createNew(getWebConversation(),getHostName(), sessionId, m(
             "title" , title,
             "description", "this is document the backslasher",
             "folder_id" , ""+folderId

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.test;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,10 +57,10 @@ import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 
@@ -76,7 +75,7 @@ public final class Bug27722Test extends AbstractInfostoreTest {
     private static final int DELETED_ITEMS = 50/*00*/; // don't test that much files in continuous build
 
     private FolderObject testFolder;
-    private List<DocumentMetadata> items;
+    private List<File> items;
 
     /**
      * Initializes a new {@link Bug27722Test}.
@@ -93,13 +92,13 @@ public final class Bug27722Test extends AbstractInfostoreTest {
         testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE,
             client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
         testFolder = fMgr.insertFolderOnServer(testFolder);
-        items = new ArrayList<DocumentMetadata>(TOTAL_ITEMS);
+        items = new ArrayList<File>(TOTAL_ITEMS);
         for (int i = 0; i < TOTAL_ITEMS; i++) {
-            File tempFile = null;
+            java.io.File tempFile = null;
             try {
                 FileOutputStream outputStream = null;
                 try {
-                    tempFile = File.createTempFile("file_" + i, ".tst");
+                    tempFile = java.io.File.createTempFile("file_" + i, ".tst");
                     tempFile.deleteOnExit();
                     outputStream = new FileOutputStream(tempFile);
                     outputStream.write(UUIDs.toByteArray(UUID.randomUUID()));
@@ -108,11 +107,11 @@ public final class Bug27722Test extends AbstractInfostoreTest {
                     Streams.close(outputStream);
                 }
 
-                DocumentMetadata document = new DocumentMetadataImpl();
-                document.setFolderId(testFolder.getObjectID());
+                File document = new DefaultFile();
+                document.setFolderId(String.valueOf(testFolder.getObjectID()));
                 document.setTitle(tempFile.getName());
                 document.setFileName(tempFile.getName());
-                document.setVersion(1);
+                document.setVersion(String.valueOf(1));
                 document.setFileSize(tempFile.length());
 
                 infoMgr.newAction(document, tempFile);
@@ -135,15 +134,15 @@ public final class Bug27722Test extends AbstractInfostoreTest {
         /*
          * pick DELETED_ITEMS randomly
          */
-        List<Integer> objectIDs = new ArrayList<Integer>(DELETED_ITEMS);
-        List<Integer> folderIDs = new ArrayList<Integer>(DELETED_ITEMS);
+        List<String> objectIDs = new ArrayList<String>(DELETED_ITEMS);
+        List<String> folderIDs = new ArrayList<String>(DELETED_ITEMS);
         Random random = new Random();
         while (objectIDs.size() < DELETED_ITEMS) {
-            DocumentMetadata randomDocument = items.get(random.nextInt(TOTAL_ITEMS));
-            Integer objectID = Integer.valueOf(randomDocument.getId());
+            File randomDocument = items.get(random.nextInt(TOTAL_ITEMS));
+            String objectID = randomDocument.getId();
             if (false == objectIDs.contains(objectID)) {
                 objectIDs.add(objectID);
-                folderIDs.add(Integer.valueOf((int)randomDocument.getFolderId()));
+                folderIDs.add(randomDocument.getFolderId());
             }
         }
         /*
@@ -160,7 +159,7 @@ public final class Bug27722Test extends AbstractInfostoreTest {
         AbstractColumnsResponse allResponse = getClient().execute(allRequest);
         assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, allResponse.getArray().length);
         for (Object[] object : allResponse) {
-            Integer objectID = Integer.valueOf(object[0].toString());
+            String objectID = object[0].toString();
             assertFalse("Object not deleted", objectIDs.contains(objectID));
         }
     }

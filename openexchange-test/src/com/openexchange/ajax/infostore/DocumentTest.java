@@ -12,7 +12,7 @@ import com.openexchange.test.TestInit;
 public class DocumentTest extends InfostoreAJAXTest {
 
 	protected File upload;
-	protected int id;
+	protected String id;
 
 	public DocumentTest(final String name){
 		super(name);

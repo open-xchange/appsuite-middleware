@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.find.drive;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -74,6 +73,8 @@ import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreResponse;
 import com.openexchange.configuration.MailConfig;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.find.Document;
 import com.openexchange.find.FindExceptionCode;
@@ -92,8 +93,6 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 
 /**
  * {@link BasicDriveTest}
@@ -103,7 +102,7 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
  */
 public class BasicDriveTest extends AbstractFindTest {
 
-    private DocumentMetadata metadata;
+    private File metadata;
 
     private FolderObject testFolder;
 
@@ -126,7 +125,7 @@ public class BasicDriveTest extends AbstractFindTest {
         client = new AJAXClient(User.User1);
         MailConfig.init();
         String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
-        File file = new File(testDataDir, "BasicDriveTest.tmp");
+        java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
 
         String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
         testFolder = folderManager.generatePrivateFolder(folderName,
@@ -136,11 +135,11 @@ public class BasicDriveTest extends AbstractFindTest {
         testFolder = folderManager.insertFolderOnServer(testFolder);
 
         manager = new InfostoreTestManager(client);
-        metadata = new DocumentMetadataImpl();
+        metadata = new DefaultFile();
         metadata.setFileName(file.getName());
         metadata.setTitle(file.getName());
         metadata.setDescription("Test file for testing new find api");
-        metadata.setFolderId(testFolder.getObjectID());
+        metadata.setFolderId(String.valueOf(testFolder.getObjectID()));
         metadata.setMeta(Collections.singletonMap("key", (Object) "value"));
         manager.newAction(metadata, file);
     }
@@ -298,12 +297,12 @@ public class BasicDriveTest extends AbstractFindTest {
         SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "Test" + " " + "api"));
         List<PropDocument> documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
         assertTrue("no document found", 0 < documents.size());
-        assertNotNull("document not found", findByProperty(documents, "id", Integer.toString(metadata.getId())));
+        assertNotNull("document not found", findByProperty(documents, "id", metadata.getId()));
 
         globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file for\""));
         documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
         assertTrue("no document found", 0 < documents.size());
-        assertNotNull("document not found", findByProperty(documents, "id", Integer.toString(metadata.getId())));
+        assertNotNull("document not found", findByProperty(documents, "id", metadata.getId()));
 
         globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file murks\""));
         documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
@@ -333,16 +332,16 @@ public class BasicDriveTest extends AbstractFindTest {
                 client.getValues().getUserId(),
                 client2.getValues().getUserId()));
 
-            DocumentMetadata[] documents = new DocumentMetadata[3];
-            documents[0] = new DocumentMetadataImpl(metadata);
+            File[] documents = new File[3];
+            documents[0] = new DefaultFile(metadata);
             documents[0].setTitle(randomUID());
-            documents[0].setFolderId(folders[0].getObjectID());
-            documents[1] = new DocumentMetadataImpl(metadata);
+            documents[0].setFolderId(String.valueOf(folders[0].getObjectID()));
+            documents[1] = new DefaultFile(metadata);
             documents[1].setTitle(randomUID());
-            documents[1].setFolderId(folders[1].getObjectID());
-            documents[2] = new DocumentMetadataImpl(metadata);
+            documents[1].setFolderId(String.valueOf(folders[1].getObjectID()));
+            documents[2] = new DefaultFile(metadata);
             documents[2].setTitle(randomUID());
-            documents[2].setFolderId(folders[2].getObjectID());
+            documents[2].setFolderId(String.valueOf(folders[2].getObjectID()));
             manager.newAction(documents[0]);
             manager.newAction(documents[1]);
             manager.newAction(documents[2]);
@@ -399,9 +398,9 @@ public class BasicDriveTest extends AbstractFindTest {
             FolderObject.INFOSTORE,
             client.getValues().getPrivateInfostoreFolder(),
             client.getValues().getUserId()));
-        DocumentMetadata deletedDocument = new DocumentMetadataImpl(metadata);
+        File deletedDocument = new DefaultFile(metadata);
         deletedDocument.setTitle(randomUID());
-        deletedDocument.setFolderId(deletedFolder.getObjectID());
+        deletedDocument.setFolderId(String.valueOf(deletedFolder.getObjectID()));
         manager.newAction(deletedDocument);
         folderManager.deleteFolderOnServer(deletedFolder);
         FolderObject reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getFolder();

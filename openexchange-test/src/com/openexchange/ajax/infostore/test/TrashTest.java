@@ -62,8 +62,9 @@ import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Streams;
@@ -191,7 +192,7 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * hard-delete file
          */
-        DocumentMetadataImpl file = createRandomFile(testFolder.getObjectID());
+        File file = createRandomFile(testFolder.getObjectID());
         deleteFile(file, Boolean.TRUE);
         /*
          * check source & trash folder contents
@@ -204,7 +205,7 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * soft-delete file
          */
-        DocumentMetadataImpl file = createRandomFile(testFolder.getObjectID());
+        File file = createRandomFile(testFolder.getObjectID());
         deleteFile(file, Boolean.FALSE);
         /*
          * check source & trash folder contents
@@ -217,7 +218,7 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * soft-delete file
          */
-        DocumentMetadataImpl file = createRandomFile(testFolder.getObjectID());
+        File file = createRandomFile(testFolder.getObjectID());
         deleteFile(file, null);
         /*
          * check source & trash folder contents
@@ -230,7 +231,7 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * soft-delete file
          */
-        DocumentMetadataImpl file = createRandomFile(testFolder.getObjectID());
+        File file = createRandomFile(testFolder.getObjectID());
         deleteFile(file, null);
         /*
          * check source & trash folder contents
@@ -240,7 +241,7 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * delete file again
          */
-        file.setFolderId(client.getValues().getInfostoreTrashFolder());
+        file.setFolderId(String.valueOf(client.getValues().getInfostoreTrashFolder()));
         deleteFile(file, null);
         /*
          * check source & trash folder contents
@@ -254,12 +255,12 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * soft-delete first file
          */
-        DocumentMetadataImpl file1 = createRandomFile(testFolder.getObjectID(), filename);
+        File file1 = createRandomFile(testFolder.getObjectID(), filename);
         deleteFile(file1, null);
         /*
          * soft-delete first file
          */
-        DocumentMetadataImpl file2 = createRandomFile(testFolder.getObjectID(), filename);
+        File file2 = createRandomFile(testFolder.getObjectID(), filename);
         deleteFile(file2, null);
         /*
          * check source & trash folder contents
@@ -280,23 +281,35 @@ public class TrashTest extends AbstractInfostoreTest {
         folder.setLastModified(deleteResponse.getTimestamp());
     }
 
-    private void deleteFile(DocumentMetadataImpl file, Boolean hardDelete) throws Exception {
+    private void deleteFile(File file, Boolean hardDelete) throws Exception {
         Date timestamp = null != file.getLastModified() ? file.getLastModified() : new Date(Long.MAX_VALUE);
-        DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(file.getId(), (int) file.getFolderId(), timestamp);
+        DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(file.getId(), file.getFolderId(), timestamp);
         deleteRequest.setHardDelete(hardDelete);
         deleteRequest.setFailOnError(true);
         DeleteInfostoreResponse deleteResponse = client.execute(deleteRequest);
         JSONArray json = (JSONArray) deleteResponse.getData();
         assertEquals("file not deleted", 0, json.length());
         file.setLastModified(deleteResponse.getTimestamp());
+        if (null == hardDelete || Boolean.FALSE.equals(hardDelete)) {
+            // lookup file in trash folder to get new object ID
+            // TODO: delete response should be extended to include the new object id (soft delete is a move)
+            AllInfostoreRequest allRequest = new AllInfostoreRequest(trashFolderID, COLUMNS, Metadata.ID, Order.ASCENDING);
+            AbstractColumnsResponse allResponse = client.execute(allRequest);
+            for (Object[] object : allResponse) {
+                if (null != object[1] && String.valueOf(object[1]).equals(file.getFileName())) {
+                    file.setId(object[0].toString());
+                    break;
+                }
+            }
+        }
     }
 
-    private void assertFileExistsInFolder(int folderID, int objectID) throws Exception {
+    private void assertFileExistsInFolder(int folderID, String objectID) throws Exception {
         AllInfostoreRequest allRequest = new AllInfostoreRequest(folderID, COLUMNS, Metadata.ID, Order.ASCENDING);
         AbstractColumnsResponse allResponse = client.execute(allRequest);
         for (Object[] object : allResponse) {
-            Integer id = Integer.valueOf(object[0].toString());
-            if (id.intValue() == objectID) {
+            String id = object[0].toString();
+            if (objectID.equals(id)) {
                 return;
             }
         }
@@ -313,12 +326,12 @@ public class TrashTest extends AbstractInfostoreTest {
         fail("File " + objectID + " not found in folder: " + folderID);
     }
 
-    private void assertFileNotExistsInFolder(int folderID, int objectID) throws Exception {
+    private void assertFileNotExistsInFolder(int folderID, String objectID) throws Exception {
         AllInfostoreRequest allRequest = new AllInfostoreRequest(folderID, COLUMNS, Metadata.ID, Order.ASCENDING);
         AbstractColumnsResponse allResponse = client.execute(allRequest);
         for (Object[] object : allResponse) {
-            Integer id = Integer.valueOf(object[0].toString());
-            assertFalse("File " + objectID + " found in folder: " + folderID, objectID ==  id.intValue());
+            String id = object[0].toString();
+            assertFalse("File " + objectID + " found in folder: " + folderID, objectID.equals(id));
         }
     }
 
@@ -339,15 +352,15 @@ public class TrashTest extends AbstractInfostoreTest {
         return folder;
     }
 
-    private DocumentMetadataImpl createRandomFile(int folderID) throws Exception {
+    private File createRandomFile(int folderID) throws Exception {
         return createRandomFile(folderID, UUID.randomUUID().toString());
     }
 
-    private DocumentMetadataImpl createRandomFile(int folderID, String filename) throws Exception {
-        DocumentMetadataImpl file = new DocumentMetadataImpl();
+    private File createRandomFile(int folderID, String filename) throws Exception {
+        File file = new DefaultFile();
         file.setFileName(filename);
-        file.setFolderId(folderID);
-        file.setCreationDate(new Date());
+        file.setFolderId(String.valueOf(folderID));
+        file.setCreated(new Date());
         InputStream data = null;
         try {
             data = Streams.newByteArrayInputStream(UUIDs.toByteArray(UUID.randomUUID()));

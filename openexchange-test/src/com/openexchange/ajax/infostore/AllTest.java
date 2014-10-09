@@ -87,10 +87,10 @@ public class AllTest extends InfostoreAJAXTest {
         boolean found = false;
         for(int i = 0, size = rows.length(); i < size; i++) {
             JSONArray row = rows.getJSONArray(i);
-            int id = row.getInt(0);
+            String id = row.getString(0);
             int numberOfVersions = row.getInt(1);
 
-            if(id == clean.get(0)) {
+            if(id.equals(clean.get(0))) {
                 assertEquals(1, numberOfVersions);
                 found = true;
             }

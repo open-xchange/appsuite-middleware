@@ -60,14 +60,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreResponse> {
 
-    private DocumentMetadata metadata;
+    private com.openexchange.file.storage.File metadata;
     private final InputStream input;
 
     /**
@@ -82,7 +81,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      *
      * @param data The document
      */
-    public NewInfostoreRequest(DocumentMetadata data) {
+    public NewInfostoreRequest(com.openexchange.file.storage.File data) {
         this(data, (InputStream) null);
     }
 
@@ -92,7 +91,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      * @param upload The file data
      * @throws FileNotFoundException
      */
-    public NewInfostoreRequest(DocumentMetadata data, File upload) throws FileNotFoundException {
+    public NewInfostoreRequest(com.openexchange.file.storage.File data, File upload) throws FileNotFoundException {
         this(data, new FileInputStream(upload));
     }
 
@@ -101,17 +100,17 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      * @param data The document
      * @param input The file data
      */
-    public NewInfostoreRequest(DocumentMetadata data, InputStream input) {
+    public NewInfostoreRequest(com.openexchange.file.storage.File data, InputStream input) {
         super();
         this.metadata = data;
         this.input = input;
     }
 
-    public void setMetadata(DocumentMetadata metadata) {
+    public void setMetadata(com.openexchange.file.storage.File metadata) {
         this.metadata = metadata;
     }
 
-    public DocumentMetadata getMetadata() {
+    public com.openexchange.file.storage.File getMetadata() {
         return metadata;
     }
 

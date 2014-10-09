@@ -110,7 +110,7 @@ public class ListAction extends AbstractFileAction {
                 int i = threshhold;
                 while(i < ids.size()) {
                     FileID fileID = new FileID(ids.get(i));
-                    if(fileID.getFileId().equals(thing.getId())) {
+                    if(fileID.toUniqueID().equals(thing.getId())) {
                         threshhold = i+1;
                         break;
                     }

@@ -50,14 +50,13 @@
 package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.test.OXTestToolkit.assertSameStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.test.TestInit;
@@ -75,12 +74,12 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
-        DocumentMetadata data = new DocumentMetadataImpl();
+        File data = new DefaultFile();
         data.setTitle("roundtripper");
         data.setDescription("Round-trippin' infostore folder");
         data.setFileMIMEType("text/plain");
-        data.setFolderId(folder.getObjectID());
-        File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        data.setFolderId(String.valueOf(folder.getObjectID()));
+        java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         data.setFileName(upload.getName());
 
         infoMgr.newAction(data, upload);
@@ -107,12 +106,12 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
-        DocumentMetadata data = new DocumentMetadataImpl();
+        File data = new DefaultFile();
         data.setTitle("roundtripper2");
         data.setDescription("Round-trippin' infostore file");
         data.setFileMIMEType("text/plain");
-        data.setFolderId(folder.getObjectID());
-        File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        data.setFolderId(String.valueOf(folder.getObjectID()));
+        java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         data.setFileName(upload.getName());
 
         infoMgr.newAction(data, upload);
