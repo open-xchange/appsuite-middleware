@@ -318,16 +318,4 @@ public class JDBC4StatementWrapper implements Statement {
     public String toString() {
         return delegate.toString();
     }
-
-    @Override
-    public void closeOnCompletion() throws SQLException {
-        // TODO (KA) Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean isCloseOnCompletion() throws SQLException {
-        // TODO (KA) Auto-generated method stub
-        return false;
-    }
 }

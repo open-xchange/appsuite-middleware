@@ -1049,16 +1049,4 @@ public class JDBC4ResultSetWrapper implements ResultSet {
     public String toString() {
         return delegate.toString();
     }
-
-    @Override
-    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-        // TODO (KA) Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
-        // TODO (KA) Auto-generated method stub
-        return null;
-    }
 }
