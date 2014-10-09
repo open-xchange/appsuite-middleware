@@ -153,8 +153,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             }
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !Strings.isEmpty(eTag);
+            final String previewLanguage = getUserLanguage(session);
             if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
-                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
+                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, previewLanguage);
                 final CachedResource cachedPreview = resourceCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     /*

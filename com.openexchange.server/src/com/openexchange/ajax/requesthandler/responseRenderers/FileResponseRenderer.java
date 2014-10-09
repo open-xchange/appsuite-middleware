@@ -85,6 +85,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
+import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -764,8 +765,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
         final boolean isValidEtag = !com.openexchange.java.Strings.isEmpty(eTag);
+        final String previewLanguage = AbstractPreviewResultConverter.getUserLanguage(request.getSession());
         if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
-            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
+            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
             final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
             if (null != cachedResource) {
                 // Scaled version already cached
