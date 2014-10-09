@@ -66,6 +66,7 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.ConnectionState;
 import com.openexchange.database.internal.Pools;
@@ -416,5 +417,35 @@ public class JDBC4ConnectionReturner implements Connection {
     @Override
     public String toString() {
         return delegate.toString();
+    }
+
+    @Override
+    public void setSchema(String schema) throws SQLException {
+        // TODO (KA) Auto-generated method stub
+
+    }
+
+    @Override
+    public String getSchema() throws SQLException {
+        // TODO (KA) Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void abort(Executor executor) throws SQLException {
+        // TODO (KA) Auto-generated method stub
+
+    }
+
+    @Override
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        // TODO (KA) Auto-generated method stub
+
+    }
+
+    @Override
+    public int getNetworkTimeout() throws SQLException {
+        // TODO (KA) Auto-generated method stub
+        return 0;
     }
 }
