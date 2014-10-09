@@ -181,22 +181,26 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
     }
 
     private static PreviewDocument getFrom(PreviewImageGenerator previewFuture, long threshold) throws OXException {
+        boolean error = true;
         try {
-            return previewFuture.get(previewFuture.getAwaitThreshold(threshold), TimeUnit.MILLISECONDS);
+            PreviewDocument previewDocument = previewFuture.get(previewFuture.getAwaitThreshold(threshold), TimeUnit.MILLISECONDS);
+            error = false;
+            return previewDocument;
         } catch (InterruptedException ie) {
             // Keep interrupted state
             Thread.currentThread().interrupt();
-            previewFuture.cancel(true);
             throw PreviewExceptionCodes.ERROR.create(ie, ie.getMessage());
         } catch (ExecutionException ee) {
             // Failed to generate preview image
-            previewFuture.cancel(true);
             throw ThreadPools.launderThrowable(ee, OXException.class);
         } catch (TimeoutException te) {
             // Preview image has not been generated in time
-            previewFuture.cancel(true);
             // throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("Preview image has not been generated in time");
             return null;
+        } finally {
+            if (error) {
+                previewFuture.cancel(true);
+            }
         }
     }
 
