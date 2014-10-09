@@ -1,6 +1,7 @@
 * 2014-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 34776: Drop passed Message-ID header on draft-edit action
+ - Fix for bug 34867: Added missing import to 'com.openexchange.mailfilter.json' bundle
 
 * 2014-10-09 - steffen.templin@open-xchange.com
 
