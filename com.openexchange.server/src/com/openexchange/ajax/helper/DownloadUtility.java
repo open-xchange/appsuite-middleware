@@ -344,7 +344,7 @@ public final class DownloadUtility {
                 /*
                  * Image content requested for download...
                  */
-                final BrowserDetector browserDetector = new BrowserDetector(userAgent);
+                final BrowserDetector browserDetector = BrowserDetector.detectorFor(userAgent);
                 final boolean msieOnWindows = (browserDetector.isMSIE() && browserDetector.isWindows());
                 {
                     /*-
@@ -540,7 +540,7 @@ public final class DownloadUtility {
             }
         }
         fn = escapeBackslashAndQuote(fn);
-        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
+        if (null != userAgent && BrowserDetector.detectorFor(userAgent).isMSIE()) {
             // InternetExplorer
             appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
             return;
