@@ -905,23 +905,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public void removeDocument(final long folderId, final long date, final ServerSession session) throws OXException {
-        if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+        if (folderId == getSharedFilesFolderID(session)) {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
         }
-
-        final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
-        final List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
-            "infostore.folder_id = " + folderId,
-            Metadata.VALUES_ARRAY,
-            reuseProvider,
-            session.getContext()).asList();
-        final List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
-            "infostore.folder_id = " + folderId,
-            Metadata.VALUES_ARRAY,
-            reuseProvider,
-            session.getContext()).asList();
-        objectPermissionLoader.add(allDocuments, session.getContext(), null);
-        removeDocuments(allDocuments, allVersions, date, session, null);
+        Context context = session.getContext();
+        DBProvider provider = new ReuseReadConProvider(getProvider());
+        String whereClause = "infostore.folder_id = " + folderId;
+        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
+            whereClause, Metadata.VALUES_ARRAY, provider, context).asList();
+        if (0 < allDocuments.size()) {
+            List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
+                whereClause, Metadata.VALUES_ARRAY, provider, context).asList();
+            objectPermissionLoader.add(allDocuments, context, objectPermissionLoader.load(folderId, context));
+            removeDocuments(allDocuments, allVersions, date, session, null);
+        }
     }
 
     protected void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession sessionObj, final List<DocumentMetadata> rejected) throws OXException {
@@ -1199,19 +1196,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         if (null == ids || 0 == ids.size()) {
             return Collections.emptyList();
         }
-
-        final Map<Integer, Long> idsToFolders = new HashMap<Integer, Long>();
-        for (IDTuple idTuple : ids) {
-            try {
-                idsToFolders.put(Integer.parseInt(idTuple.getId()), Long.parseLong(idTuple.getFolder()));
-            } catch (NumberFormatException e) {
-                throw InfostoreExceptionCodes.NOT_EXIST.create();
-            }
-        }
-
         long destinationFolderID;
         try {
-            destinationFolderID = Long.valueOf(targetFolderID).longValue();
+            destinationFolderID = Long.parseLong(targetFolderID);
         } catch (NumberFormatException e) {
             throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(targetFolderID, e);
         }
@@ -1219,18 +1206,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
          * get documents to move
          */
         DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
-        int[] objectIds = new int[ids.size()];
-        for (int i = 0; i < objectIds.length; i++) {
-            try {
-                objectIds[i] = Integer.parseInt(ids.get(i).getId());
-            } catch (NumberFormatException e) {
-                throw InfostoreExceptionCodes.NOT_EXIST.create();
-            }
-        }
-        List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), objectIds, Metadata.VALUES_ARRAY);
-        objectPermissionLoader.add(allDocuments, session.getContext(), null);
-
-        // Ensure folder ids are consistent between request and existing documents
+        int[] objectIDs = Tools.getObjectIDArray(ids);
+        List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), objectIDs, Metadata.VALUES_ARRAY);
+        objectPermissionLoader.add(allDocuments, session.getContext(), Tools.getIDs(allDocuments));
+        /*
+         * Ensure folder ids are consistent between request and existing documents
+         */
+        Map<Integer, Long> idsToFolders = Tools.getIDsToFolders(ids);
         for (DocumentMetadata document : allDocuments) {
             Long requestedFolder = idsToFolders.get(document.getId());
             long expectedFolder = document.getFolderId();
@@ -1238,7 +1220,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 throw InfostoreExceptionCodes.NOT_EXIST.create();
             }
         }
-
         /*
          * perform move
          */
@@ -1260,43 +1241,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             return Collections.emptyList();
         }
 
-        final Map<Integer, Long> idsToFolders = new HashMap<Integer, Long>();
-        for (IDTuple idTuple : ids) {
-            try {
-                idsToFolders.put(Integer.parseInt(idTuple.getId()), Long.parseLong(idTuple.getFolder()));
-            } catch (NumberFormatException e) {
-                throw InfostoreExceptionCodes.NOT_EXIST.create();
-            }
-        }
-
+        final Map<Integer, Long> idsToFolders = Tools.getIDsToFolders(ids);
         final Context context = session.getContext();
         final User user = session.getUser();
         final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
-
         final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
-        List<DocumentMetadata> allVersions = null;
-        List<DocumentMetadata> allDocuments = null;
-        try {
-            final StringBuilder sIds = new StringBuilder().append('(');
-            Strings.join(idsToFolders.keySet(), ", ", sIds);
-            sIds.append(')');
 
-            allVersions = InfostoreIterator.allVersionsWhere(
-                "infostore.id IN " + sIds.toString(),
-                Metadata.VALUES_ARRAY,
-                reuseProvider,
-                context).asList();
-            allDocuments = InfostoreIterator.allDocumentsWhere(
-                "infostore.id IN " + sIds.toString(),
-                Metadata.VALUES_ARRAY,
-                reuseProvider,
-                context).asList();
-            objectPermissionLoader.add(allDocuments, context, null);
-        } catch (final OXException x) {
-            throw x;
-        } catch (final Throwable t) {
-            LOG.error("Unexpected Error:", t);
-        }
+        final StringBuilder sIds = new StringBuilder().append('(');
+        Strings.join(idsToFolders.keySet(), ", ", sIds);
+        sIds.append(')');
+        String whereClause = sIds.toString();
+        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
+            whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
+        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
+            whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
+        objectPermissionLoader.add(allDocuments, context, idsToFolders.keySet());
 
         // Ensure folder ids are consistent between request and existing documents
         for (DocumentMetadata document : allDocuments) {

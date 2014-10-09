@@ -121,12 +121,34 @@ public class Tools {
             return null;
         }
         List<Integer> ids = new ArrayList<Integer>(tuples.size());
-        for (IDTuple tuple : tuples) {
-            try {
+        try {
+            for (IDTuple tuple : tuples) {
                 ids.add(Integer.valueOf(tuple.getId()));
-            } catch (NumberFormatException e) {
-                throw InfostoreExceptionCodes.NOT_EXIST.create();
             }
+        } catch (NumberFormatException e) {
+            throw InfostoreExceptionCodes.NOT_EXIST.create();
+        }
+        return ids;
+    }
+
+    /**
+     * Gets a list containing the object identifiers of the supplied ID tuples.
+     *
+     * @param tuples The tuples to get the object identifiers for
+     * @return A list of corresponding object identifiers
+     * @throws OXException
+     */
+    public static int[] getObjectIDArray(List<IDTuple> tuples) throws OXException {
+        if (null == tuples) {
+            return null;
+        }
+        int[] ids = new int[tuples.size()];
+        try {
+            for (int i = 0; i < ids.length; i++) {
+                ids[i] = Integer.parseInt(tuples.get(i).getId());
+            }
+        } catch (NumberFormatException e) {
+            throw InfostoreExceptionCodes.NOT_EXIST.create();
         }
         return ids;
     }
@@ -157,13 +179,13 @@ public class Tools {
      * @throws OXException
      */
     public static Map<Integer, Long> getIDsToFolders(List<IDTuple> tuples) throws OXException {
-        final Map<Integer, Long> idsToFolders = new HashMap<Integer, Long>(tuples.size());
-        for (IDTuple idTuple : tuples) {
-            try {
-                idsToFolders.put(Integer.parseInt(idTuple.getId()), Long.parseLong(idTuple.getFolder()));
-            } catch (NumberFormatException e) {
-                throw InfostoreExceptionCodes.NOT_EXIST.create();
+        Map<Integer, Long> idsToFolders = new HashMap<Integer, Long>(tuples.size());
+        try {
+            for (IDTuple idTuple : tuples) {
+                idsToFolders.put(Integer.valueOf(idTuple.getId()), Long.valueOf(idTuple.getFolder()));
             }
+        } catch (NumberFormatException e) {
+            throw InfostoreExceptionCodes.NOT_EXIST.create();
         }
         return idsToFolders;
     }

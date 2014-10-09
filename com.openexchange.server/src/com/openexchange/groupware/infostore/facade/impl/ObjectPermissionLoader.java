@@ -72,6 +72,24 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
  */
 public class ObjectPermissionLoader extends DbMetadataLoader<List<ObjectPermission>> {
 
+    private static final ResultProcessor<Map<Integer, List<ObjectPermission>>> RESULT_PROCESSOR = new ResultProcessor<Map<Integer, List<ObjectPermission>>>() {
+
+        @Override
+        public Map<Integer, List<ObjectPermission>> process(ResultSet results) throws SQLException {
+            Map<Integer, List<ObjectPermission>> objectPermissions = new HashMap<Integer, List<ObjectPermission>>();
+            while (results.next()) {
+                Integer id = Integer.valueOf(results.getInt(1));
+                List<ObjectPermission> permissions = objectPermissions.get(id);
+                if (null == permissions) {
+                    permissions = new ArrayList<ObjectPermission>();
+                    objectPermissions.put(id, permissions);
+                }
+                permissions.add(new ObjectPermission(results.getInt(2), results.getBoolean(3), results.getInt(4)));
+            }
+            return objectPermissions;
+        }
+    };
+
     /**
      * Initializes a new {@link ObjectPermissionLoader}.
      *
@@ -92,7 +110,6 @@ public class ObjectPermissionLoader extends DbMetadataLoader<List<ObjectPermissi
         if (null == ids || 0 == ids.size()) {
             return Collections.emptyMap();
         }
-        final Map<Integer, List<ObjectPermission>> objectPermissions = new HashMap<Integer, List<ObjectPermission>>(ids.size());
         List<Object> parameters = new ArrayList<Object>(ids.size() + 1);
         parameters.add(Integer.valueOf(context.getContextId()));
         StringBuilder stringBuilder = new StringBuilder();
@@ -101,42 +118,39 @@ public class ObjectPermissionLoader extends DbMetadataLoader<List<ObjectPermissi
             stringBuilder.append("=?;");
             Integer id = ids.iterator().next();
             parameters.add(id);
-            objectPermissions.put(id, null);
         } else {
             Iterator<Integer> iterator = ids.iterator();
             stringBuilder.append(" IN (?");
             Integer id = iterator.next();
             parameters.add(id);
-            objectPermissions.put(id, null);
             do {
                 stringBuilder.append(",?");
                 id = iterator.next();
                 parameters.add(id);
-                objectPermissions.put(id, null);
             } while (iterator.hasNext());
             stringBuilder.append(");");
         }
         try {
-            performQuery(context, stringBuilder.toString(), new ResultProcessor<Void>() {
-
-                @Override
-                public Void process(ResultSet rs) throws SQLException {
-                    while (rs.next()) {
-                        Integer id = Integer.valueOf(rs.getInt(1));
-                        List<ObjectPermission> permissions = objectPermissions.get(id);
-                        if (null == permissions) {
-                            permissions = new ArrayList<ObjectPermission>();
-                            objectPermissions.put(id, permissions);
-                        }
-                        permissions.add(new ObjectPermission(rs.getInt(2), rs.getBoolean(3), rs.getInt(4)));
-                    }
-                    return null;
-                }
-            }, parameters.toArray(new Object[parameters.size()]));
+            return performQuery(context, stringBuilder.toString(), RESULT_PROCESSOR, parameters.toArray(new Object[parameters.size()]));
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
-        return objectPermissions;
+    }
+
+    /**
+     * Loads additional metadata for all documents in a folder and puts them into a map, ready to be used for further result processing.
+     *
+     * @param folderID The folder identifiers of the documents to load the metadata for
+     * @param context The context
+     * @return A map holding the metadata (or <code>null</code>) to a document's id
+     */
+    public Map<Integer, List<ObjectPermission>> load(long folderID, Context context) throws OXException {
+        String query = "SELECT object_id,permission_id,group_flag,bits FROM object_permission WHERE cid=? AND folder_id=?;";
+        try {
+            return performQuery(context, query, RESULT_PROCESSOR, Integer.valueOf(context.getContextId()), Integer.valueOf((int)folderID));
+        } catch (SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
     }
 
 }

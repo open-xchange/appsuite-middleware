@@ -160,6 +160,19 @@ public abstract class MetadataLoader<T> {
      *
      * @param document The documents to add the metadata for
      * @param context The context
+     * @param ids The identifiers of the documents in the timed results to pre-fetch the required metadata
+     * @return The documents with added metadata
+     * @throws OXException
+     */
+    public List<DocumentMetadata> add(List<DocumentMetadata> documents, Context context, Collection<Integer> ids) throws OXException {
+        return add(documents, context, load(ids, context));
+    }
+
+    /**
+     * Adds additional metadata to the supplied documents.
+     *
+     * @param document The documents to add the metadata for
+     * @param context The context
      * @param knownMetadata A map of known metadata, or <code>null</code> if not available
      * @return The documents with added metadata
      * @throws OXException
