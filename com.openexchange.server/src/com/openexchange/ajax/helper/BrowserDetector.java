@@ -163,7 +163,7 @@ public final class BrowserDetector {
      * Initializes a new {@link BrowserDetector}.
      *
      * @param userAgent The user-agent
-     * @deprecated Please use {@link #detectorFor(String)} method
+     * @deprecated Use {@link #detectorFor(String)} method
      */
     @Deprecated
     public BrowserDetector(String userAgent) {
