@@ -381,6 +381,7 @@ public class DefaultDispatcher implements Dispatcher {
      * @param module The module to look-up for
      * @return The factory or <code>null</code>
      */
+    @Override
     public AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
         if (null == serviceFactory) {

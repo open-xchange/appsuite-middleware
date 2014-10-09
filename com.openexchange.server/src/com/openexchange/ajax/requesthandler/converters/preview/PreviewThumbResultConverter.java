@@ -197,7 +197,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                          * Generate preview asynchronously and put to cache. Make sure to create copies of result and requestdata to use for
                          * thumbnail generation as existing instances have to be used to indicate the accepted request.
                          */
-                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(new AJAXRequestResult(result), requestData.copyOf(), session, previewService, THRESHOLD, false, cacheKeyGenerator);
+                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(new AJAXRequestResult(result), requestData.copyOf(), session, previewService, THRESHOLD, true, cacheKeyGenerator);
                         ThreadPools.getExecutorService().submit(previewAndCache);
                         indicateRequestAccepted(result, requestData);
                     }

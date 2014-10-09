@@ -1,3 +1,7 @@
+* 2014-10-09 - steffen.templin@open-xchange.com
+
+ - Fix for bug 34850: Find API now returns user input as is, i.e. clients must not interpret it as HTML.
+
 * 2014-10-09 - marcus.klein@open-xchange.com
 
  - Fix for bug 34846: Marked guard.properties as configuration file.
