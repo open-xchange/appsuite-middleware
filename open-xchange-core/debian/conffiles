@@ -13,6 +13,7 @@ opt/open-xchange/etc/findbasic.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/folderjson.properties
 opt/open-xchange/etc/folder-reserved-names
+opt/open-xchange/etc/guard.properties
 opt/open-xchange/etc/hazelcast.properties
 opt/open-xchange/etc/HTMLEntities.properties
 opt/open-xchange/etc/html-sanitizer.properties
