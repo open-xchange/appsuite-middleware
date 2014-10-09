@@ -530,7 +530,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 FileID fileID = new FileID(id);
                 if (fileID.getFolderId() == null) {
                     fileID.setFolderId(folderId);
-                    ids.add(fileID.toUniqueID(true));
+                    ids.add(fileID.toUniqueID());
                 } else {
                     ids.add(id);
                 }
