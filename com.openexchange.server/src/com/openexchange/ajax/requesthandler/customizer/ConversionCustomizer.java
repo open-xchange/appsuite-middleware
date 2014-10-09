@@ -85,7 +85,7 @@ public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCus
         if (currentFormat.equals(requestedFormat)) {
             return result;
         }
-        if (result.getType() == ResultType.NOT_FOUND) {
+        if (result.getType() == ResultType.HTTP_ERROR) {
             return result;
         }
         converter.convert(currentFormat, requestedFormat, requestData, result, session);

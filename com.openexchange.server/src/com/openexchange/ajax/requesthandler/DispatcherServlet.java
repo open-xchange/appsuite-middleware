@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
@@ -70,7 +71,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
@@ -78,6 +79,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
@@ -314,18 +317,6 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     /**
-     * The <code>ETag</code> result type.
-     */
-    private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
-
-    private static final AJAXRequestResult.ResultType NOT_FOUND = AJAXRequestResult.ResultType.NOT_FOUND;
-
-    /**
-     * The <code>direct</code> result type.
-     */
-    private static final AJAXRequestResult.ResultType DIRECT = AJAXRequestResult.ResultType.DIRECT;
-
-    /**
      * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
     private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND)));
@@ -389,21 +380,26 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Check result's type
              */
-            if (ETAG.equals(result.getType())) {
-                httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                final long expires = result.getExpires();
-                Tools.setETag(requestData.getETag(), expires > 0 ?  expires : -1L, httpResponse);
-                return;
-            }
-
-            if (NOT_FOUND.equals(result.getType())) {
-                httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (DIRECT.equals(result.getType())) {
-                // No further processing
-                return;
+            {
+                ResultType resultType = result.getType();
+                switch (resultType) {
+                case ETAG: {
+                    httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                    long expires = result.getExpires();
+                    Tools.setETag(requestData.getETag(), expires > 0 ? expires : -1L, httpResponse);
+                    return;
+                }
+                case HTTP_ERROR: {
+                    handleError(result, httpResponse);
+                    return;
+                }
+                case DIRECT: {
+                    // No further processing
+                    return;
+                }
+                default:
+                    break;
+                }
             }
             /*-
              * A common result
@@ -415,23 +411,31 @@ public class DispatcherServlet extends SessionServlet {
              * ... and send response
              */
             sendResponse(requestData, result, httpRequest, httpResponse);
-        } catch (final OXException e) {
-            if (AjaxExceptionCodes.BAD_REQUEST.equals(e) || AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
-                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (OXException e) {
+            if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
+                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
                 logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-                final Object[] logArgs = e.getLogArgs();
-                final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-                final int sc = ((Integer) logArgs[0]).intValue();
-                httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
+                Object[] logArgs = e.getLogArgs();
+                Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+                int sc = ((Integer) logArgs[0]).intValue();
+                sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
                 logException(e, LogLevel.DEBUG, sc);
                 return;
             }
+
             // Handle other OXExceptions
+
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
-                LOG.error("Unexpected error", e);
+                Throwable cause = e.getCause();
+                LOG.error("Unexpected error", null == cause ? e : cause);
             } else {
                 // Ignore special "folder not found" error
                 if (ignore(e)) {
@@ -440,13 +444,15 @@ public class DispatcherServlet extends SessionServlet {
                     logException(e);
                 }
             }
-            final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
-        } catch (final RuntimeException e) {
+
+            if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
+                writeErrorAsJsCallback(e, httpRequest, httpResponse);
+            } else {
+                handleOXException(e, httpRequest, httpResponse);
+            }
+        } catch (RuntimeException e) {
             logException(e);
-            final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
+            handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -454,20 +460,56 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void logException(final @Nullable Exception e) {
+    /**
+     * Do "error" handling in case the response status is != 200. Like writing Retry-After header for a successful 202 response or removing
+     * the default Content-Type: text/javascript we assume in {@link AJAXServlet#service()}.
+     *
+     * @param result The current {@link AJAXRequestResult}
+     * @param httpServletResponse The current {@link HttpServletResponse}
+     * @throws IOException If sending the error fails
+     */
+    private void handleError(AJAXRequestResult result, HttpServletResponse httpServletResponse) throws IOException {
+        int httpStatusCode = result.getHttpStatusCode();
+        switch (httpStatusCode) {
+        case 202: {
+            httpServletResponse.setContentType(null);
+            String retry_after = result.getHeader(RETRY_AFTER);
+            if (!Strings.isEmpty(retry_after)) {
+                httpServletResponse.addHeader(RETRY_AFTER, retry_after);
+            }
+        }
+        default:
+            break;
+        }
+        httpServletResponse.sendError(result.getHttpStatusCode());
+    }
+
+    private void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
+        // Try to write error page
+        try {
+            httpResponse.setStatus(statusCode);
+            writeErrorPage(statusCode, statusMsg, httpResponse);
+        } catch (Exception x) {
+            // Ignore
+            httpResponse.sendError(statusCode, null == statusMsg ? null : statusMsg.toString());
+            flushSafe(httpResponse);
+        }
+    }
+
+    private void logException(@Nullable Exception e) {
         logException(e, null, -1);
     }
 
-    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel) {
+    private void logException(@Nullable Exception e, @Nullable LogLevel logLevel) {
         logException(e, logLevel, -1);
     }
 
-    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel, final int statusCode) {
+    private void logException(@Nullable Exception e, @Nullable LogLevel logLevel, int statusCode) {
         if (null == e) {
             return;
         }
 
-        final String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
+        String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
 
         if (null == logLevel) {
             LOG.error(msg, e);
@@ -539,18 +581,17 @@ public class DispatcherServlet extends SessionServlet {
         throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
     }
 
-    /** ASCII-wise to upper-case */
-    private String toUpperCase(CharSequence chars) {
-        if (null == chars) {
-            return null;
+    private void flushSafe(HttpServletResponse httpResponse) {
+        try {
+            try {
+                Streams.flush(httpResponse.getWriter());
+            } catch (IllegalStateException e) {
+                // getOutputStream has already been called
+                Streams.flush(httpResponse.getOutputStream());
+            }
+        } catch (Exception e) {
+            // Ignore
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
     }
 
     /**
