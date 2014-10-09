@@ -90,6 +90,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AddedGuest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
@@ -461,7 +462,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
-            List<Share> shares = shareService.createShares(session, folderID, contentType.getModule(), guests);
+            List<Share> shares = shareService.createShares(session, new ShareTarget(contentType.getModule(), folderID), guests);
             if (null == shares || shares.size() != addedPermissions.size()) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
             }

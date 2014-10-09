@@ -116,6 +116,20 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
+    public void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(contextID, parameters);
+        try {
+            for (Share share : shares) {
+                insertShare(provider.get(), share);
+            }
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
     public void updateShare(Share share, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getWriteProvider(share.getContextID(), parameters);
         try {

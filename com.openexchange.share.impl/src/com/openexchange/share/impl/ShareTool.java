@@ -78,6 +78,7 @@ import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 
 
 /**
@@ -178,6 +179,26 @@ public class ShareTool {
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
         for (Share share : shares) {
             addModulePermissions(perms, share.getModule());
+        }
+        return Permission.toBits(perms);
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access all supplied share targets. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param targets The share targets
+     * @return The permission bits
+     * @throws OXException
+     */
+    public static int getUserPermissionBitsForTargets(List<ShareTarget> targets) throws OXException {
+        Set<Permission> perms = new HashSet<Permission>(8);
+        perms.add(Permission.DENIED_PORTAL);
+        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
+        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        for (ShareTarget target : targets) {
+            addModulePermissions(perms, target.getModule());
         }
         return Permission.toBits(perms);
     }

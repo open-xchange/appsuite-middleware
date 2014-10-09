@@ -83,6 +83,15 @@ public interface ShareStorage {
     void storeShare(Share share, StorageParameters parameters) throws OXException;
 
     /**
+     * Saves new shares in the storage.
+     *
+     * @param contextID The context ID
+     * @param shares The shares to store
+     * @param parameters The storage parameters
+     */
+    void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
+
+    /**
      * Updates an already existing share in the storage.
      *
      * @param share The share to update

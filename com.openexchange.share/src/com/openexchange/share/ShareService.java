@@ -115,16 +115,25 @@ public interface ShareService {
     Share updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
 
     /**
-     * Creates shares for a specific folder for the supplied guest users.
+     * Creates shares for a specific folder or item for the supplied guest users.
      *
      * @param session The session
-     * @param folder The identifier of the folder to remove the shares for
-     * @param module The module of the folder
+     * @param target The share target
      * @param guests The guest users for the shares
      * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
      *         in the same order as the supplied guests list
      */
-    List<Share> createShares(Session session, String folder, int module, List<AddedGuest> guests) throws OXException;
+    List<Share> createShares(Session session, ShareTarget target, List<AddedGuest> guests) throws OXException;
+
+    /**
+     * Creates shares for multiple folders or items for the supplied guest users.
+     *
+     * @param session The session
+     * @param targets The share targets
+     * @param guests The guest users for the shares
+     * @return The created shares
+     */
+    List<Share> createShares(Session session, List<ShareTarget> targets, List<AddedGuest> guests) throws OXException;
 
     /**
      * Generates a URL for every share that is passed.

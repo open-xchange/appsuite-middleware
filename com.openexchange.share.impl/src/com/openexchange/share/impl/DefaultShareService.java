@@ -83,6 +83,7 @@ import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -241,28 +242,42 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<Share> createShares(Session session, String folder, int module, List<AddedGuest> guests) throws OXException {
-        LOG.info("Adding shares to guest user(s) {} for folder {} in context {}...", guests, folder, session.getContextId());
+    public List<Share> createShares(Session session, ShareTarget target, List<AddedGuest> guests) throws OXException {
+        return createShares(session, Collections.singletonList(target), guests);
+    }
+
+    @Override
+    public List<Share> createShares(Session session, List<ShareTarget> targets, List<AddedGuest> guests) throws OXException {
+        LOG.info("Adding shares to recipient(s) {} for {} in context {}...", guests, targets, session.getContextId());
         List<Share> shares = new ArrayList<Share>(guests.size());
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
-        int permissionBits = ShareTool.getUserPermissionBits(module);
+        int permissionBits = ShareTool.getUserPermissionBitsForTargets(targets);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
+            /*
+             * prepare guest users and resulting shares
+             */
             User sharingUser = services.getService(UserService.class).getUser(
                 connectionHelper.getConnection(), session.getUserId(), context);
-            for (AddedGuest guest : guests) {
-                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, guest, session);
-                Share share = ShareTool.prepareShare(sharingUser, context.getContextId(), module, folder, guestUser.getId(),
-                    guest.getExpires(), guest.getAuthenticationMode());
-                services.getService(ShareStorage.class).storeShare(share, connectionHelper.getParameters());
-                shares.add(share);
+            List<User> guestUsers = new ArrayList<User>(guests.size());
+            for (AddedGuest recipient : guests) {
+                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, session);
+                guestUsers.add(guestUser);
+                for (ShareTarget target : targets) {
+                    shares.add(ShareTool.prepareShare(sharingUser, context.getContextId(), target.getModule(), target.getFolder(),
+                        guestUser.getId(), recipient.getExpires(), recipient.getAuthenticationMode()));
+                }
             }
+            /*
+             * store shares
+             */
+            services.getService(ShareStorage.class).storeShares(session.getContextId(), shares, connectionHelper.getParameters());
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
         }
-        LOG.info("Shares added successfully for folder {} in context {}: {}", folder, session.getContextId(), shares);
+        LOG.info("Shares added successfully for {} in context {}: {}", targets, session.getContextId(), shares);
         return shares;
     }
 
