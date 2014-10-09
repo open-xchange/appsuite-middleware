@@ -55,7 +55,6 @@ import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.java.SearchStrings;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -136,7 +135,7 @@ public class Utils {
     }
 
     private static boolean fulfillsLengthConstraint(String pattern, int minimumSearchCharacters) throws OXException {
-        if (null != pattern && 0 < minimumSearchCharacters && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
+        if (null != pattern && 0 < minimumSearchCharacters && pattern.length() < minimumSearchCharacters) {
             return false;
         }
 

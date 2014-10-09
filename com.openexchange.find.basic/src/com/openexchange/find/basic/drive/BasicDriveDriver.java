@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -88,6 +89,7 @@ import com.openexchange.find.facet.Facets;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -184,8 +186,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
-        if (!prefix.isEmpty()) {
-            List<String> prefixTokens = tokenize(prefix);
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+            List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
+            }
+
             // Add simple facets
             facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
                 .withSimpleDisplayItem(prefix)

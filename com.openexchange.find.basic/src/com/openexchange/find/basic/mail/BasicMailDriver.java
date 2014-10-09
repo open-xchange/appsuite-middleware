@@ -61,8 +61,8 @@ import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.find.common.CommonConstants.QUERY_LAST_MONTH;
 import static com.openexchange.find.common.CommonConstants.QUERY_LAST_WEEK;
 import static com.openexchange.find.common.CommonConstants.QUERY_LAST_YEAR;
-import static com.openexchange.find.common.CommonFacetType.GLOBAL;
 import static com.openexchange.find.common.CommonFacetType.DATE;
+import static com.openexchange.find.common.CommonFacetType.GLOBAL;
 import static com.openexchange.find.common.CommonStrings.LAST_MONTH;
 import static com.openexchange.find.common.CommonStrings.LAST_WEEK;
 import static com.openexchange.find.common.CommonStrings.LAST_YEAR;
@@ -76,7 +76,6 @@ import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -86,10 +85,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
@@ -216,10 +214,17 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         parameters.put(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, Boolean.TRUE);
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
         List<Facet> facets = new ArrayList<Facet>(5);
-        List<String> prefixTokens = Collections.emptyList();
-        if (!prefix.isEmpty()) {
-            prefixTokens = tokenize(prefix);
+        List<String> prefixTokens = null;
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+            prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
+            }
+
             addSimpleFacets(facets, prefix, prefixTokens);
+        } else {
+            prefixTokens = Collections.emptyList();
         }
 
         boolean toAsDefaultOption = false;

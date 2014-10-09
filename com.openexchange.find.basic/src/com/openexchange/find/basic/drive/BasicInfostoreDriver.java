@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
@@ -92,6 +93,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -182,8 +184,13 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         final String prefix = autocompleteRequest.getPrefix();
         final List<Facet> facets = new LinkedList<Facet>();
-        if (!prefix.isEmpty()) {
-            List<String> prefixTokens = tokenize(prefix);
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+            List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
+            }
+
             // Add simple factes
             facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
                 .withSimpleDisplayItem(prefix)
@@ -197,10 +204,6 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
                 .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
                 .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
                 .build());
-//            facets.add(newSimpleBuilder(DriveFacetType.FILE_CONTENT)
-//                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix)
-//                .withFilter(Filter.of(Constants.FIELD_FILE_CONTENT, prefixTokens))
-//                .build());
         }
 
         // Add static file type facet

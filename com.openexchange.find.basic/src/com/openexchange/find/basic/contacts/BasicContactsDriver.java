@@ -52,13 +52,13 @@ package com.openexchange.find.basic.contacts;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
@@ -221,21 +221,24 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          */
         List<Facet> facets = new ArrayList<Facet>();
         String prefix = autocompleteRequest.getPrefix();
-        if (false == Strings.isEmpty(prefix)) {
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             /*
              * add prefix-aware field facets
              */
-            List<String> prefixTokens = tokenize(prefix);
-            if (!prefixTokens.isEmpty()) {
-                facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withSimpleDisplayItem(prefix)
-                    .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
-                    .build());
-                facets.add(new NameFacet(prefix, prefixTokens));
-                facets.add(new EmailFacet(prefix, prefixTokens));
-                facets.add(new PhoneFacet(prefix, prefixTokens));
-                facets.add(new AddressFacet(prefix, prefixTokens));
+            List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
             }
+
+            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                .withSimpleDisplayItem(prefix)
+                .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
+                .build());
+            facets.add(new NameFacet(prefix, prefixTokens));
+            facets.add(new EmailFacet(prefix, prefixTokens));
+            facets.add(new PhoneFacet(prefix, prefixTokens));
+            facets.add(new AddressFacet(prefix, prefixTokens));
         }
         /*
          * add ContactsFacetType.CONTACT facet dynamically
