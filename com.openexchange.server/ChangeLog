@@ -1,3 +1,7 @@
+* 2014-10-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34776: Drop passed Message-ID header on draft-edit action
+
 * 2014-10-09 - steffen.templin@open-xchange.com
 
  - Fix for bug 34850: Find API now returns user input as is, i.e. clients must not interpret it as HTML.

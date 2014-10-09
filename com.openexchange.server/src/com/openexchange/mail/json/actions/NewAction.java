@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -125,12 +126,15 @@ public final class NewAction extends AbstractMailAction {
     private static final String FROM = MailJSONField.FROM.getKey();
     private static final String UPLOAD_FORMFIELD_MAIL = AJAXServlet.UPLOAD_FORMFIELD_MAIL;
 
+    private final EnumSet<ComposeType> draftTypes;
+
     /**
      * Initializes a new {@link NewAction}.
      * @param services
      */
     public NewAction(final ServiceLookup services) {
         super(services);
+        draftTypes = EnumSet.of(ComposeType.DRAFT, ComposeType.DRAFT_DELETE_ON_TRANSPORT, ComposeType.DRAFT_EDIT, ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT);
     }
 
     @Override
@@ -251,6 +255,14 @@ public final class NewAction extends AbstractMailAction {
                     return result;
                 }
                 // Normal transport
+                if (draftTypes.contains(sendType)) {
+                    for (final ComposedMailMessage cm : composedMails) {
+                        if (null != cm) {
+                            cm.removeHeader("Message-ID");
+                            cm.removeMessageId();
+                        }
+                    }
+                }
                 if (ComposeType.DRAFT.equals(sendType)) {
                     final String paramName = "deleteDraftOnTransport";
                     if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
@@ -274,6 +286,8 @@ public final class NewAction extends AbstractMailAction {
                             }
                         }
                     }
+                } else if (ComposeType.DRAFT.equals(sendType)) {
+
                 }
                 for (final ComposedMailMessage cm : composedMails) {
                     if (null != cm) {
