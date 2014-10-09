@@ -1,3 +1,7 @@
+* 2014-10-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34510: Respond with common JavaScript call-back snippet for USM user agent
+
 * 2014-09-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request 

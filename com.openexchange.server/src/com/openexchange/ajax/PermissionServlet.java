@@ -50,15 +50,10 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,10 +66,9 @@ public abstract class PermissionServlet extends SessionServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
-        ServerSession session = null;
         try {
             initializeSession(req, resp);
-            session = getSessionObject(req);
+            ServerSession session = getSessionObject(req);
             if (null != session && !hasModulePermission(session)) {
                 LOG.info("Status code 403 (FORBIDDEN): No permission to access module.");
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
@@ -82,37 +76,7 @@ public abstract class PermissionServlet extends SessionServlet {
             }
             super.service(req, resp);
         } catch (final OXException e) {
-            if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
-                LOG.debug("", e);
-                handleSessiondException(e, req, resp);
-                /*
-                 * Return JSON response
-                 */
-                final Response response = new Response();
-                response.setException(e);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final PrintWriter writer = resp.getWriter();
-                try {
-                    ResponseWriter.write(response, writer, localeFrom(session));
-                    writer.flush();
-                } catch (final JSONException e1) {
-                    log(RESPONSE_ERROR, e1);
-                    sendError(resp);
-                }
-            } else {
-                e.log(LOG);
-                final Response response = new Response(getSessionObject(req));
-                response.setException(e);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final PrintWriter writer = resp.getWriter();
-                try {
-                    ResponseWriter.write(response, writer, localeFrom(session));
-                    writer.flush();
-                } catch (final JSONException e1) {
-                    log(RESPONSE_ERROR, e1);
-                    sendError(resp);
-                }
-            }
+            handleOXException(e, req, resp);
         }
     }
 

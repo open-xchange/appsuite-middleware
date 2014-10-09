@@ -49,15 +49,18 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -68,15 +71,19 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -308,16 +315,24 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     /**
-     * The <code>ETag</code> result type.
+     * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
-    private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
-
-    private static final AJAXRequestResult.ResultType NOT_FOUND = AJAXRequestResult.ResultType.NOT_FOUND;
+    private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND)));
 
     /**
-     * The <code>direct</code> result type.
+     * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     *
+     * @param e The {@code OXException} instance to check
+     * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
-    private static final AJAXRequestResult.ResultType DIRECT = AJAXRequestResult.ResultType.DIRECT;
+    private static boolean ignore(OXException e) {
+        for (OXExceptionCode code : IGNOREES) {
+            if (code.equals(e)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
@@ -363,65 +378,74 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Check result's type
              */
-            if (ETAG.equals(result.getType())) {
+            if (ResultType.ETAG.equals(result.getType())) {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 final long expires = result.getExpires();
                 Tools.setETag(requestData.getETag(), expires > 0 ?  expires : -1L, httpResponse);
                 return;
             }
 
-            if (NOT_FOUND.equals(result.getType())) {
-                httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            if (ResultType.HTTP_ERROR.equals(result.getType())) {
+                handleError(result, httpResponse);
                 return;
             }
 
-            if (DIRECT.equals(result.getType())) {
+            if (ResultType.DIRECT.equals(result.getType())) {
                 // No further processing
                 return;
             }
-            /*
+            /*-
              * A common result
+             *
+             * Check for optional exception to log...
              */
-            OXException exception = result.getException();
-            if (exception != null) {
-                if (exception.isLoggable()) {
-                    logException(exception, LogLevel.DEBUG);
-                } else {
-                    logException(exception, LogLevel.TRACE);
-                }
-            }
+            logException(result.getException(), LogLevel.DEBUG);
+            /*
+             * ... and send response
+             */
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
+            if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
+                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
-                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                logException(e, LogLevel.DEBUG);
+                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-                final Object[] logArgs = e.getLogArgs();
-                final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-                httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
-                logException(e, LogLevel.DEBUG);
+                Object[] logArgs = e.getLogArgs();
+                Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+                int sc = ((Integer) logArgs[0]).intValue();
+                sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
+                logException(e, LogLevel.DEBUG, sc);
                 return;
             }
+
             // Handle other OXExceptions
+
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
-                LOG.error("Unexpected error", e);
+                Throwable cause = e.getCause();
+                LOG.error("Unexpected error", null == cause ? e : cause);
             } else {
                 // Ignore special "folder not found" error
-                if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
-                    logException(e, LogLevel.DEBUG);
+                if (ignore(e)) {
+                    logException(e, LogLevel.DEBUG, -1);
                 } else {
                     logException(e);
                 }
             }
-            final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
+
+            if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
+                writeErrorAsJsCallback(e, httpRequest, httpResponse);
+            } else {
+                handleOXException(e, httpRequest, httpResponse);
+            }
         } catch (final RuntimeException e) {
             logException(e);
-            final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
+            handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -429,34 +453,79 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void logException(final Exception e) {
-        logException(e, null);
+    /**
+     * Do "error" handling in case the response status is != 200. Like writing Retry-After header for a successful 202 response or removing
+     * the default Content-Type: text/javascript we assume in {@link AJAXServlet#service()}.
+     *
+     * @param result The current {@link AJAXRequestResult}
+     * @param httpServletResponse The current {@link HttpServletResponse}
+     * @throws IOException If sending the error fails
+     */
+    private void handleError(AJAXRequestResult result, HttpServletResponse httpServletResponse) throws IOException {
+        int httpStatusCode = result.getHttpStatusCode();
+        switch (httpStatusCode) {
+        case 202: {
+            httpServletResponse.setContentType(null);
+            String retry_after = result.getHeader(RETRY_AFTER);
+            if (!Strings.isEmpty(retry_after)) {
+                httpServletResponse.addHeader(RETRY_AFTER, retry_after);
+            }
+        }
+        default:
+            break;
+        }
+        httpServletResponse.sendError(result.getHttpStatusCode());
     }
 
-    private void logException(final Exception e, final LogLevel logLevel) {
-        final String msg = "Error processing request.";
+    private void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
+        // Try to write error page
+        try {
+            httpResponse.setStatus(statusCode);
+            writeErrorPage(statusCode, statusMsg, httpResponse);
+        } catch (Exception x) {
+            // Ignore
+            httpResponse.sendError(statusCode, null == statusMsg ? null : statusMsg.toString());
+            flushSafe(httpResponse);
+        }
+    }
+
+    private void logException(Exception e) {
+        logException(e, null, -1);
+    }
+
+    private void logException(Exception e, LogLevel logLevel) {
+        logException(e, logLevel, -1);
+    }
+
+    private void logException(Exception e, LogLevel logLevel, int statusCode) {
+        if (null == e) {
+            return;
+        }
+
+        String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
 
         if (null == logLevel) {
             LOG.error(msg, e);
-        } else {
-            switch (logLevel) {
-            case TRACE:
-                LOG.trace(msg, e);
-                break;
-            case DEBUG:
-                LOG.debug(msg, e);
-                break;
-            case INFO:
-                LOG.info(msg, e);
-                break;
-            case WARNING:
-                LOG.warn(msg, e);
-                break;
-            case ERROR:
-                // fall-through
-            default:
-                LOG.error(msg, e);
-            }
+            return;
+        }
+
+        switch (logLevel) {
+        case TRACE:
+            LOG.trace(msg, e);
+            break;
+        case DEBUG:
+            LOG.debug(msg, e);
+            break;
+        case INFO:
+            LOG.info(msg, e);
+            break;
+        case WARNING:
+            LOG.warn(msg, e);
+            break;
+        case ERROR:
+            // fall-through
+        default:
+            LOG.error(msg, e);
         }
     }
 
@@ -503,6 +572,19 @@ public class DispatcherServlet extends SessionServlet {
         }
         // None found
         throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
+    }
+
+    private void flushSafe(HttpServletResponse httpResponse) {
+        try {
+            try {
+                Streams.flush(httpResponse.getWriter());
+            } catch (IllegalStateException e) {
+                // getOutputStream has already been called
+                Streams.flush(httpResponse.getOutputStream());
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
     /** ASCII-wise to upper-case */

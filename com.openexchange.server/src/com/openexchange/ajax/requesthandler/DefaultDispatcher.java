@@ -59,6 +59,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
@@ -180,6 +181,18 @@ public class DefaultDispatcher implements Dispatcher {
                     return etagResult;
                 }
             }
+            /*-
+             * Validate request headers for resume
+             */
+            {
+                // If-Match header should contain "*" or ETag. If not, then return 412.
+                String ifMatch = modifiedRequestData.getHeader("If-Match");
+                if (ifMatch != null && (action instanceof ETagAwareAJAXActionService) && (("*".equals(ifMatch)) || ((ETagAwareAJAXActionService) action).checkETag(ifMatch, modifiedRequestData, session))) {
+                    final AJAXRequestResult failedResult = new AJAXRequestResult();
+                    failedResult.setHttpStatusCode(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return failedResult;
+                }
+            }
             /*
              * Check for Action annotation
              */
@@ -281,7 +294,8 @@ public class DefaultDispatcher implements Dispatcher {
 
     // private static final Pattern SPLIT_SLASH = Pattern.compile("/");
 
-    private AJAXActionServiceFactory lookupFactory(final String module) {
+    @Override
+    public AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
         if (null == serviceFactory) {
             final int pos = module.indexOf('/');
