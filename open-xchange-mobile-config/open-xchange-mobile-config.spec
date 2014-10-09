@@ -68,6 +68,10 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Tue Oct 07 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-10-09
+* Tue Oct 07 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-10-10
 * Tue Sep 30 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-10-06
 * Fri Sep 26 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
