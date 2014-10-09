@@ -68,6 +68,10 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Oct 07 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-10-09
+* Tue Oct 07 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-10-10
 * Thu Oct 02 2014 Carsten Hoeger <choeger@open-xchange.com>
 Third release candidate for 7.6.1
 * Tue Sep 30 2014 Carsten Hoeger <choeger@open-xchange.com>
