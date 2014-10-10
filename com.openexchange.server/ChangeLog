@@ -18,8 +18,8 @@
 
  - Fix for bug 34748: Added appropriate null guard prior to cleansing from session cache
  - Fix for bug 34741: Improved description for the quota properties
- - Fix for bug 34706: Use timeout-aware operations to distribute either change of local IP address, client identifier or hash string through cluster to prevent the system from
-                      increasing number of stalled threads
+ - Fix for bug 34706: Use timeout-aware operations to distribute either change of local IP address, client identifier or hash string through
+                      cluster to prevent the system from increasing number of stalled threads
  - Fix for bug 34765: Use secure value insertion through PreparedStatement
 
 * 2014-10-06 - ioannis.chouklis@open-xchange.com
