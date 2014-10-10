@@ -50,8 +50,13 @@
 package com.openexchange.share.json.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,9 +65,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Enums;
+import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.json.internal.InternalRecipient;
+import com.openexchange.share.json.internal.PermissionUpdater;
+import com.openexchange.share.json.internal.PermissionUpdaters;
 import com.openexchange.share.json.internal.RecipientType;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -107,22 +116,140 @@ public class NewAction extends AbstractShareAction {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+
+        shareTargets(targets, recipients, session);
+        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+    }
+
+    private void shareTargets(List<ShareTarget> targets, List<ShareRecipient> recipients, ServerSession session) throws OXException {
+        // TODO: start transaction here
+
         /*
          * distinguish between internal and external recipients
          */
+        List<ShareRecipient> internalRecipients = filterRecipients(recipients, RecipientType.USER, RecipientType.GROUP);
         List<ShareRecipient> externalRecipients = filterRecipients(recipients, RecipientType.ANONYMOUS, RecipientType.GUEST);
-        /*
-         * create shares & corresponding guest user entities for external recipients first
-         */
-//        getShareService().createShares(session, targets, guests);
-
+        List<Integer> guestIDs = Collections.emptyList();
+        if (!externalRecipients.isEmpty()) {
+            /*
+             * create shares & corresponding guest user entities for external recipients first
+             */
+            Map<ShareTarget, List<Share>> createdShares = getShareService().createShares(session, targets, externalRecipients);
+            guestIDs = new ArrayList<Integer>(externalRecipients.size());
+            for (Share share : createdShares.values().iterator().next()) {
+                guestIDs.add(share.getGuest());
+            }
+        }
 
         /*
          * adjust folder & object permissions of share targets
          */
+        List<InternalRecipient> finalRecipients = determineFinalRecipients(internalRecipients, externalRecipients, guestIDs);
+        Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> distinguishedTargets = distinguishTargets(targets);
+        Map<Integer, List<ShareTarget>> folders = distinguishedTargets.getFirst();
+        Map<Integer, List<ShareTarget>> objects = distinguishedTargets.getSecond();
 
+        updateFolders(folders, finalRecipients, session);
+        updateObjects(objects, finalRecipients, session);
 
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        // TODO: commit transaction
+    }
+
+    /**
+     * @param objectsByModule
+     * @param finalRecipients
+     * @throws OXException
+     */
+    private void updateObjects(Map<Integer, List<ShareTarget>> objectsByModule, List<InternalRecipient> finalRecipients, ServerSession session) throws OXException {
+        for (Entry<Integer, List<ShareTarget>> entry : objectsByModule.entrySet()) {
+            int module = entry.getKey();
+            List<ShareTarget> objects = entry.getValue();
+            PermissionUpdater updater = PermissionUpdaters.forModule(module);
+            if (updater != null) {
+                updater.updateObjects(objects, finalRecipients, session);
+            }
+
+            // TODO: throw exception
+        }
+    }
+
+    /**
+     * @param foldersByModule
+     * @param finalRecipients
+     * @throws OXException
+     */
+    private void updateFolders(Map<Integer, List<ShareTarget>> foldersByModule, List<InternalRecipient> finalRecipients, ServerSession session) throws OXException {
+        for (Entry<Integer, List<ShareTarget>> entry : foldersByModule.entrySet()) {
+            int module = entry.getKey();
+            List<ShareTarget> folders = entry.getValue();
+            PermissionUpdater updater = PermissionUpdaters.forModule(module);
+            if (updater != null) {
+                updater.updateFolders(folders, finalRecipients, session);
+            }
+
+            // TODO: throw exception
+        }
+    }
+
+    /**
+     * Takes a list of {@link ShareTarget}s and splits them up into two maps. The first map
+     * contains all folder targets mapped to their according module. The second map contains
+     * all object targets, again mapped to their according module.
+     *
+     * @param targets The targets to share
+     * @return A {@link Pair} with the folders as first and the objects as second entry.
+     */
+    private Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> distinguishTargets(List<ShareTarget> targets) {
+        Map<Integer, List<ShareTarget>> folders = new HashMap<Integer, List<ShareTarget>>();
+        Map<Integer, List<ShareTarget>> objects = new HashMap<Integer, List<ShareTarget>>();
+        for (ShareTarget target : targets) {
+            int module = target.getModule();
+            List<ShareTarget> finalTargets;
+            if (target.isFolder()) {
+                finalTargets = folders.get(module);
+                if (finalTargets == null) {
+                    finalTargets = new LinkedList<ShareTarget>();
+                    folders.put(module, finalTargets);
+                }
+            } else {
+                finalTargets = objects.get(module);
+                if (finalTargets == null) {
+                    finalTargets = new LinkedList<ShareTarget>();
+                    objects.put(module, finalTargets);
+                }
+            }
+
+            finalTargets.add(target);
+        }
+
+        return new Pair<Map<Integer,List<ShareTarget>>, Map<Integer,List<ShareTarget>>>(folders, objects);
+    }
+
+    /**
+     * Gets some internal recipients as well as external ones and their according guest IDs and
+     * combines them into a single list of internal recipients.
+     *
+     * @param internalRecipients
+     * @param externalRecipients
+     * @param guestIDs
+     * @return
+     */
+    private List<InternalRecipient> determineFinalRecipients(List<ShareRecipient> internalRecipients, List<ShareRecipient> externalRecipients, List<Integer> guestIDs) {
+        List<InternalRecipient> finalRecipients = new ArrayList<InternalRecipient>(internalRecipients.size() + externalRecipients.size());
+        for (ShareRecipient internal : internalRecipients) {
+            finalRecipients.add((InternalRecipient) internal);
+        }
+
+        for (int i = 0; i < externalRecipients.size(); i++) {
+            ShareRecipient external = externalRecipients.get(i);
+            InternalRecipient internal = new InternalRecipient();
+            internal.setId(guestIDs.get(i));
+            internal.setGroup(false);
+            internal.setBits(external.getBits());
+            finalRecipients.add(internal);
+        }
+
+        return finalRecipients;
     }
 
     /**
