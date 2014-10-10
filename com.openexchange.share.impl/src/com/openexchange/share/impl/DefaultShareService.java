@@ -240,13 +240,13 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public List<Share> createShares(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
-        return createShares(session, Collections.singletonList(target), recipients);
+        return createShares(session, Collections.singletonList(target), recipients).get(target);
     }
 
     @Override
-    public List<Share> createShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
+    public Map<ShareTarget, List<Share>> createShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
         LOG.info("Adding shares to recipient(s) {} for {} in context {}...", recipients, targets, session.getContextId());
-        List<Share> shares = new ArrayList<Share>(recipients.size());
+        Map<ShareTarget, List<Share>> shares = new HashMap<ShareTarget, List<Share>>(targets.size());
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
         int permissionBits = ShareTool.getUserPermissionBitsForTargets(targets);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
@@ -258,17 +258,25 @@ public class DefaultShareService implements ShareService {
             User sharingUser = services.getService(UserService.class).getUser(
                 connectionHelper.getConnection(), session.getUserId(), context);
             List<User> guestUsers = new ArrayList<User>(recipients.size());
+            List<Share> sharesToCreate = new ArrayList<Share>();
             for (ShareRecipient recipient : recipients) {
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, session);
                 guestUsers.add(guestUser);
                 for (ShareTarget target : targets) {
-                    shares.add(ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, recipient));
+                    List<Share> sharesPerTarget = shares.get(target);
+                    if (null == sharesPerTarget) {
+                        sharesPerTarget = new ArrayList<Share>();
+                        shares.put(target, sharesPerTarget);
+                    }
+                    Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, recipient);
+                    sharesToCreate.add(share);
+                    sharesPerTarget.add(share);
                 }
             }
             /*
              * store shares
              */
-            services.getService(ShareStorage.class).storeShares(session.getContextId(), shares, connectionHelper.getParameters());
+            services.getService(ShareStorage.class).storeShares(session.getContextId(), sharesToCreate, connectionHelper.getParameters());
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
