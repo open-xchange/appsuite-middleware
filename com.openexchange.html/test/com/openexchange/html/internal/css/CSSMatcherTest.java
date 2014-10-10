@@ -192,7 +192,7 @@ public class CSSMatcherTest {
         assertTrue(checkCSSElements);
     }
 
-    private String bug34659CSS = "<style type=\"text/css\">                                                                                                          \n" +
+    private final String bug34659CSS = "<style type=\"text/css\">                                                                                                          \n" +
         "        /* Client-specific Styles */                                                                                                                        \n" +
         "        #outlook a{padding:0;} /* Force Outlook to provide a \"view in browser\" button. */                                                                 \n" +
         "        body{width:100% !important;} .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */              \n" +
@@ -318,6 +318,24 @@ public class CSSMatcherTest {
         String content = "#123456  {width: 100%;}".replaceAll("\\s+", " ");
 
         Assert.assertTrue("Processed CSS does not contain desired content " + content, convertedCss.contains(content));
+    }
+
+    @Test
+    public void testDoCheckCss_bug34806() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("font-family:\"MS Mincho\";\n" +
+            "    panose-1:2 2 6 9 4 2 5 8 3 4;\n" +
+            "    mso-font-alt:\"MS \u660e\u671d\";\n" +
+            "    mso-font-charset:128;\n" +
+            "    mso-generic-font-family:modern;\n" +
+            "    mso-font-pitch:fixed;\n" +
+            "    mso-font-signature:-536870145 1791491579 18 0 131231 0;"));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+
+        String content = "font-family: \"MS Mincho\";";
+        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
     }
 
     @Test

@@ -769,11 +769,7 @@ public final class CSSMatcher {
         return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
     }
 
-    private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
-        "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]]+);?",
-        Pattern.CASE_INSENSITIVE);
-    //private static final Pattern PATTERN_START_STYLE_LINE = Pattern.compile(
-    //    "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]])");
+    private static final Pattern PATTERN_STYLE_LINE = Pattern.compile("([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}\\p{L}&&[^;{}]]+);?", Pattern.CASE_INSENSITIVE);
 
     /**
      * Corrects rgb functions; e.g.<br>
