@@ -349,7 +349,7 @@ public class RoundtripTest extends AbstractRMITest {
         DocumentMetadata meta = new DocumentMetadataImpl();
         meta.setFileName(infostore.getName());
         meta.setFolderId(userClient.getValues().getPrivateInfostoreFolder());
-        NewInfostoreRequest request = new NewInfostoreRequest(meta, infostore);
+        NewInfostoreRequest request = new NewInfostoreRequest(new com.openexchange.file.storage.infostore.InfostoreFile(meta), infostore);
         userClient.execute(request);
 
         DynamicFormDescription form = new DynamicFormDescription();
