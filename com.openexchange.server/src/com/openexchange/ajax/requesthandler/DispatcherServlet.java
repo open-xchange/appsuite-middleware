@@ -433,7 +433,12 @@ public class DispatcherServlet extends SessionServlet {
                 Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 int sc = ((Integer) logArgs[0]).intValue();
                 sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
-                logException(e, LogLevel.DEBUG, sc);
+                Throwable cause = e.getNonOXExceptionCause();
+                if (null == cause) {
+                    logException(e, LogLevel.DEBUG, sc);
+                } else {
+                    logException(e);
+                }
                 return;
             }
 
