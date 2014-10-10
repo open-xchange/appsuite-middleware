@@ -6,9 +6,11 @@
         <ReleaseDate>11.09.2013</ReleaseDate>
         <URL>${OXUPDATER.url()}</URL>
         <MD5>${OXUPDATER.md5()}</MD5>
+        <MSIURL>${OXUPDATER.url()}</MSIURL>
+        <MSIMD5>${OXUPDATER.md5()}</MSIMD5>
         <InfoUrl></InfoUrl>
         <Icon>${ICON}</Icon>
-        <InstallParams></InstallParams> 
+        <InstallParams>UPDATESERVERURL="${UPDATE_SERVER}" ALLOWURLCHANGE=1 INFSERVERURL="${INF_SERVER}" INFUSERNAME="${INF_USER}" INFDRIVELETTER=M: INFSTARTUP=1</InstallParams> 
         <Importance>200</Importance> 
     </Product>
 
