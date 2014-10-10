@@ -932,12 +932,23 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     private void parseAddress0(final String address) throws AddressException {
-        // use our address parsing utility routine to parse the string
-        InternetAddress[] a = parse(address, true);
+        InternetAddress[] a;
+        try {
+            // use our address parsing utility routine to parse the string
+            a = parse(address, true);
 
-        // if we got back anything other than a single address, it's an error
-        if (a.length != 1) {
+            // if we got back anything other than a single address, it's an error
+            if (a.length != 1) {
+                a = parse(address, true, false, false);
+                if (a.length != 1) {
+                    throw new AddressException("Illegal address", address);
+                }
+            }
+        } catch (AddressException e) {
+            // use our address parsing utility routine to parse the string
             a = parse(address, true, false, false);
+
+            // if we got back anything other than a single address, it's an error
             if (a.length != 1) {
                 throw new AddressException("Illegal address", address);
             }
