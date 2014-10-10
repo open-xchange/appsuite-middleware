@@ -1,3 +1,21 @@
+open-xchange-push-imapidle (7.6.0-24) stable; urgency=low
+
+  * Build for patch 2014-10-13
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 09 Oct 2014 10:58:11 +0200
+
+open-xchange-push-imapidle (7.6.0-23) stable; urgency=low
+
+  * Build for patch 2014-10-09
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 07 Oct 2014 15:20:04 +0200
+
+open-xchange-push-imapidle (7.6.0-22) stable; urgency=low
+
+  * Build for patch 2014-10-10
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 07 Oct 2014 14:43:55 +0200
+
 open-xchange-push-imapidle (7.6.0-21) stable; urgency=medium
 
   * Build for patch 2014-10-06
