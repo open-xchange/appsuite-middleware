@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-09
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
