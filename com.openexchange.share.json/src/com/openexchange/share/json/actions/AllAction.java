@@ -75,7 +75,7 @@ import com.openexchange.user.UserService;
  * {@link AllAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class AllAction extends AbstractShareAction {
 

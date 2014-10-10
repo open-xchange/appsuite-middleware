@@ -62,7 +62,7 @@ import com.openexchange.share.impl.DefaultShareService;
  * {@link ShareMBeanImpl}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 

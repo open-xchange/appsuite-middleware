@@ -94,7 +94,7 @@ import com.openexchange.user.UserService;
  * {@link MailSender}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class MailSender {
 

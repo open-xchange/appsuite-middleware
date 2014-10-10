@@ -57,11 +57,13 @@ import com.openexchange.ajax.osgi.AbstractServletActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.servlet.handler.AbstractShareHandler;
+import com.openexchange.share.servlet.handler.LoginShareHandler;
 import com.openexchange.share.servlet.handler.RedirectingShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
@@ -73,6 +75,7 @@ import com.openexchange.user.UserService;
  * {@link ShareServletActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
 public class ShareServletActivator extends AbstractServletActivator {
 
@@ -93,6 +96,7 @@ public class ShareServletActivator extends AbstractServletActivator {
          */
         RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry = new RankingAwareNearRegistryServiceTracker<ShareHandler>(context, ShareHandler.class);
         rememberTracker(shareHandlerRegistry);
+        trackService(HostnameService.class);
         openTrackers();
         /*
          * Initialize login configuration for shares
@@ -104,6 +108,12 @@ public class ShareServletActivator extends AbstractServletActivator {
          */
         {
             ShareHandler handler = new RedirectingShareHandler();
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put(Constants.SERVICE_RANKING, Integer.valueOf(handler.getRanking()));
+            registerService(ShareHandler.class, handler);
+        }
+        {
+            ShareHandler handler = new LoginShareHandler();
             Dictionary<String, Object> props = new Hashtable<String, Object>(2);
             props.put(Constants.SERVICE_RANKING, Integer.valueOf(handler.getRanking()));
             registerService(ShareHandler.class, handler);

@@ -67,7 +67,7 @@ import com.openexchange.share.json.actions.UpdateAction;
  * {@link ShareActionFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class ShareActionFactory implements AJAXActionServiceFactory {
 

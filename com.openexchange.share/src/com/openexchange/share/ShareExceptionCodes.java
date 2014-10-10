@@ -63,6 +63,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link ShareExceptionCodes}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
 public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
 
@@ -92,6 +93,9 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     /** You don't have sufficient permissions to edit the share. || User %1$d has no edit permissions for share \"%2$s\" in context %3$d. */
     NO_EDIT_PERMISSIONS("User %1$d has no delete permissions for share \"%2$s\" in context %3$d.",
         ShareExceptionMessages.NO_EDIT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 8),
+
+    /** An I/O error occurred: %1$s */
+    IO_ERROR("An I/O error occurred: %1$s", null, Category.CATEGORY_ERROR, 4),
 
     ;
 

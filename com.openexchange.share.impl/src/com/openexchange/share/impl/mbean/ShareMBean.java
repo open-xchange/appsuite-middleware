@@ -58,7 +58,7 @@ import com.openexchange.share.Share;
  * {@link ShareMBean}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public interface ShareMBean {
 

@@ -50,32 +50,28 @@
 package com.openexchange.share.servlet.handler;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Strings;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.UserService;
 
 
 /**
  * {@link LoginShareHandler} - The share handler that redirects to standard login page.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
 public class LoginShareHandler extends AbstractShareHandler {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginShareHandler.class);
 
     /**
      * Initializes a new {@link LoginShareHandler}.
@@ -84,6 +80,40 @@ public class LoginShareHandler extends AbstractShareHandler {
      */
     public LoginShareHandler() {
         super();
+    }
+
+    private String getLoginPageLink(int userId, int contextId, HttpServletRequest request) {
+        // By property
+        {
+            ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
+            String sLink = configService.getProperty("com.openexchange.share.loginLink");
+
+            if (false == Strings.isEmpty(sLink)) {
+                return sLink;
+            }
+        }
+
+        // By HostnameService or given HTTP request
+        String serverName = null;
+        {
+            HostnameService hostnameService = ShareServiceLookup.getService(HostnameService.class);
+            if (null != hostnameService) {
+                try {
+                    String hostName = hostnameService.getHostname(userId, contextId);
+                    if (false == Strings.isEmpty(hostName)) {
+                        // Set server name as returned by HostnameService
+                        serverName = hostName;
+                    }
+                } catch (Exception e) {
+                    // Unable to check for proper host name
+                }
+            }
+            if (null == serverName) {
+                serverName = request.getServerName();
+            }
+        }
+
+        return serverName + "/signin";
     }
 
     @Override
@@ -111,108 +141,47 @@ public class LoginShareHandler extends AbstractShareHandler {
         }
 
         try {
-            ShareLoginConfiguration shareLoginConfig = getShareLoginConfiguration();
-            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
-
             int contextId = share.getContextID();
             int guestId = share.getGuest();
+            String loginPageLink = getLoginPageLink(guestId, contextId, request);
 
-            // TODO: Jump to APp Suite UI login page
+            String mail;
+            {
+                // Special anonymous guests do not have a E-Mail address applied
+                UserService service = ShareServiceLookup.getService(UserService.class);
+                User user = service.getUser(guestId, contextId);
+                mail = user.getMail();
+            }
+
+            // Build URL
+            StringBuilder url = new StringBuilder(loginPageLink);
+
+            // Start fragment portion
+            url.append('#').append("share=").append(urlEncode(share.getToken()));
+            if (Strings.isEmpty(mail)) {
+                url.append('&').append("login_type=anonymous");
+            } else {
+                url.append('&').append("login_type=guest");
+                url.append('&').append("login_name=").append(urlEncode(share.getToken()));
+            }
+
+            // Do the redirect
+            response.sendRedirect(url.toString());
 
             return true;
+        } catch (IOException e) {
+            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    /**
-     * Handles the given resolved share.
-     *
-     * @param resolvedShare The resolved share
-     * @throws OXException If handling the resolved share fails
-     * @throws IOException If an I/O error occurs
-     */
-    protected void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException {
+    private String urlEncode(final String s) {
         try {
-            /*
-             * prepare response
-             */
-            HttpServletRequest request = resolvedShare.getRequest();
-            HttpServletResponse response = resolvedShare.getResponse();
-            Tools.disableCaching(response);
-            LoginServlet.addHeadersAndCookies(resolvedShare.getLoginResult(), response);
-            LoginServlet.writeSecretCookie(request, response, resolvedShare.getSession(), resolvedShare.getSession().getHash(), request.isSecure(), request.getServerName(), resolvedShare.getLoginConfig());
-            /*
-             * construct & send redirect
-             */
-            String url = getRedirectURL(resolvedShare.getSession(), resolvedShare.getUser(), resolvedShare.getShare(), resolvedShare.getLoginConfig());
-            LOG.info("Redirecting share {} to {}...", resolvedShare.getShare().getToken(), url);
-            response.sendRedirect(url);
-        } catch (RuntimeException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            return URLEncoder.encode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
         }
-    }
-
-    // --------------------------------------------------------------------------------------------------------- //
-
-    private static final Pattern P_UIWEBPATH = Pattern.compile("[uiwebpath]", Pattern.LITERAL);
-    private static final Pattern P_USER = Pattern.compile("[user]", Pattern.LITERAL);
-    private static final Pattern P_USER_ID = Pattern.compile("[user_id]", Pattern.LITERAL);
-    private static final Pattern P_LANGUAGE = Pattern.compile("[language]", Pattern.LITERAL);
-    private static final Pattern P_MODULE = Pattern.compile("[module]", Pattern.LITERAL);
-    private static final Pattern P_FOLDER = Pattern.compile("[folder]", Pattern.LITERAL);
-    private static final Pattern P_ITEM = Pattern.compile("[item]", Pattern.LITERAL);
-    private static final Pattern P_STORE = Pattern.compile("[store]", Pattern.LITERAL);
-
-    /**
-     * Constructs the redirect URL pointing to the share in the web interface.
-     *
-     * @param session The session
-     * @param user The user
-     * @param share The share
-     * @param loginConfig The login configuration to use
-     * @return The redirect URL
-     */
-    protected static String getRedirectURL(Session session, User user, Share share, LoginConfiguration loginConfig) {
-        ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-        boolean isFolderShare = share.isFolder();
-
-        String redirectLink;
-        if (isFolderShare) {
-            redirectLink = configService.getProperty("com.openexchange.share.loginLinkFolder",
-                "/[uiwebpath]#store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
-        } else {
-            redirectLink = configService.getProperty("com.openexchange.share.loginLinkItem",
-                "/[uiwebpath]#store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
-        }
-
-        {
-            String uiWebPath = loginConfig.getUiWebPath(); // uiWebPath = "/ox6/index.html";
-            redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
-        }
-        redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
-        redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
-        redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
-        redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(Module.getForFolderConstant(share.getModule()).getName()));
-        redirectLink = P_FOLDER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(share.getFolder()));
-        if (false == isFolderShare) {
-            redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(share.getItem()));
-        }
-        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin() ? "true" : "false");
-        return redirectLink;
-    }
-
-    private static String trimSlashes(String path) {
-        String pazz = path;
-        if (null != pazz && 0 < pazz.length()) {
-            if ('/' == pazz.charAt(0)) {
-                pazz = pazz.substring(1);
-            }
-            if (0 < pazz.length() && '/' == pazz.charAt(pazz.length() - 1)) {
-                pazz = pazz.substring(0, pazz.length() - 1);
-            }
-        }
-        return pazz;
     }
 
 }

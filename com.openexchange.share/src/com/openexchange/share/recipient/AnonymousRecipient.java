@@ -53,6 +53,7 @@ package com.openexchange.share.recipient;
  * {@link AnonymousRecipient}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
 public class AnonymousRecipient extends ShareRecipient {
 

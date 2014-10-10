@@ -77,6 +77,7 @@ import com.openexchange.tools.servlet.http.Tools;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
 public class RedirectingShareHandler extends AbstractShareHandler {
 
@@ -138,7 +139,7 @@ public class RedirectingShareHandler extends AbstractShareHandler {
             handleResolvedShare(new ResolvedShare(share, loginResult, loginConfig, request, response));
             return true;
         } catch (IOException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -198,16 +199,18 @@ public class RedirectingShareHandler extends AbstractShareHandler {
      * @return The redirect URL
      */
     protected static String getRedirectURL(Session session, User user, Share share, LoginConfiguration loginConfig) {
-        ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
         boolean isFolderShare = share.isFolder();
 
         String redirectLink;
-        if (isFolderShare) {
-            redirectLink = configService.getProperty("com.openexchange.share.redirectLinkFolder",
-                "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
-        } else {
-            redirectLink = configService.getProperty("com.openexchange.share.redirectLinkItem",
-                "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
+        {
+            ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
+            if (isFolderShare) {
+                redirectLink = configService.getProperty("com.openexchange.share.redirectLinkFolder",
+                    "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
+            } else {
+                redirectLink = configService.getProperty("com.openexchange.share.redirectLinkItem",
+                    "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
+            }
         }
 
         {
