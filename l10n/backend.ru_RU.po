@@ -6,16 +6,16 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-23 20:52+0000\n"
+"PO-Revision-Date: 2014-10-09 11:21+0100\n"
 "Last-Translator: \n"
 "Language-Team: Russian <kde-i18n-doc@kde.org>\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.0\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.6.9\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -1593,6 +1593,17 @@ msgstr "Доступна новая версия приложения клиен
 msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr "Недопустимый шаблон: «%1$s». Исправьте и повторите попытку."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr "Название файла «%1$s» конфликтует с таким же названием папки в «%2$s»"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "Путь «%1$s» конфликтует с таким же названием файла в «%2$s»."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5135,10 +5146,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Фамилия не указана."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr "Недостаточно разрешений для изменения объектов в папке «%2$s»."
+msgid "You are not allowed to modify that contact"
+msgstr "Вам не разрешено изменение этого контакта"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -10803,6 +10812,11 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Зулу"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr "Недостаточно разрешений для изменения объектов в папке «%2$s»."
+
 #~ msgid "in appointments"
 #~ msgstr "во встречах"
 
@@ -13561,9 +13575,6 @@ msgstr "Зулу"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Необходимо указать фамилию."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "Вы не можете изменять контакт %1$d в контексте %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Не удалось загрузить объекты (контекст %1$d, пользователь %2$d)."
 
@@ -14749,9 +14760,6 @@ msgstr "Зулу"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Конфликт параметра."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Конфликт параметров «%1$s» и «%2$s»."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "Конфигурация сервера запрещает выполнение действия «%1$s»."
