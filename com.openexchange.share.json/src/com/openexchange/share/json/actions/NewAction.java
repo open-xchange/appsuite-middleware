@@ -278,8 +278,8 @@ public class NewAction extends AbstractShareAction {
         }
         int bits = jsonRecipient.getInt("bits");
         recipient.setBits(bits);
-        if (jsonRecipient.hasAndNotNull("start_date")) {
-            recipient.setActivationDate(new Date(jsonRecipient.getLong("start_date")));
+        if (jsonRecipient.hasAndNotNull("activation_date")) {
+            recipient.setActivationDate(new Date(jsonRecipient.getLong("activation_date")));
         }
         if (jsonRecipient.hasAndNotNull("expiry_date")) {
             recipient.setExpiryDate(new Date(jsonRecipient.getLong("expiry_date")));

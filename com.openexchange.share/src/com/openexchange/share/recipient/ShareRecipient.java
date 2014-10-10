@@ -125,4 +125,46 @@ public abstract class ShareRecipient {
         this.expiryDate = expiryDate;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((activationDate == null) ? 0 : activationDate.hashCode());
+        result = prime * result + bits;
+        result = prime * result + ((expiryDate == null) ? 0 : expiryDate.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof ShareRecipient)) {
+            return false;
+        }
+        ShareRecipient other = (ShareRecipient) obj;
+        if (activationDate == null) {
+            if (other.activationDate != null) {
+                return false;
+            }
+        } else if (!activationDate.equals(other.activationDate)) {
+            return false;
+        }
+        if (bits != other.bits) {
+            return false;
+        }
+        if (expiryDate == null) {
+            if (other.expiryDate != null) {
+                return false;
+            }
+        } else if (!expiryDate.equals(other.expiryDate)) {
+            return false;
+        }
+        return true;
+    }
+
 }

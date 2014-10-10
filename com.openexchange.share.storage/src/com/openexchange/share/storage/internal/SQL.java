@@ -193,6 +193,12 @@ public class SQL {
         "WHERE expiryDate IS NOT NULL AND expiryDate > ?";
     ;
 
+    /**
+     * Gets a numerical value for the supplied authentication mode.
+     *
+     * @param authenticationMode The mode
+     * @return The number
+     */
     public static int encodeAuthenticationMode(AuthenticationMode authenticationMode) {
         switch (authenticationMode) {
         case ANONYMOUS:
@@ -206,6 +212,12 @@ public class SQL {
         }
     }
 
+    /**
+     * Gets the authentication mode for a numerical value.
+     *
+     * @param encoded The numerical value
+     * @return The authentication mode
+     */
     public static AuthenticationMode decodeAuthenticationMode(int encoded) {
         switch (encoded) {
         case 0:

@@ -49,8 +49,6 @@
 
 package com.openexchange.share.recipient;
 
-
-
 /**
  * Describes a guest user to which a item or folder shall be shared.
  *
@@ -157,6 +155,68 @@ public class GuestRecipient extends ShareRecipient {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((contactFolder == null) ? 0 : contactFolder.hashCode());
+        result = prime * result + ((contactID == null) ? 0 : contactID.hashCode());
+        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+        result = prime * result + ((emailAddress == null) ? 0 : emailAddress.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof GuestRecipient)) {
+            return false;
+        }
+        GuestRecipient other = (GuestRecipient) obj;
+        if (contactFolder == null) {
+            if (other.contactFolder != null) {
+                return false;
+            }
+        } else if (!contactFolder.equals(other.contactFolder)) {
+            return false;
+        }
+        if (contactID == null) {
+            if (other.contactID != null) {
+                return false;
+            }
+        } else if (!contactID.equals(other.contactID)) {
+            return false;
+        }
+        if (displayName == null) {
+            if (other.displayName != null) {
+                return false;
+            }
+        } else if (!displayName.equals(other.displayName)) {
+            return false;
+        }
+        if (emailAddress == null) {
+            if (other.emailAddress != null) {
+                return false;
+            }
+        } else if (!emailAddress.equals(other.emailAddress)) {
+            return false;
+        }
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+        return true;
     }
 
 }
