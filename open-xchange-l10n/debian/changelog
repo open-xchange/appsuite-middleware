@@ -22,6 +22,12 @@ open-xchange-l10n (7.6.1-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Jun 2014 11:39:50 +0200
 
+open-xchange-l10n (7.6.0-24) stable; urgency=low
+
+  * Build for patch 2014-10-13
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 09 Oct 2014 10:57:48 +0200
+
 open-xchange-l10n (7.6.0-23) stable; urgency=low
 
   * Build for patch 2014-10-09

@@ -39,8 +39,6 @@ public class ExceptionUtils {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionUtils.class);
 
-    private static final String MARKER = " ---=== /!\\ ===--- ";
-
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
      *
@@ -118,4 +116,5 @@ public class ExceptionUtils {
         }
         return new Pair<Boolean, String>(Boolean.valueOf(heapDumpOnOOm), path);
     }
+
 }
