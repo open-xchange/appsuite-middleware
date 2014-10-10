@@ -1,6 +1,12 @@
+* 2014-10-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34861: Use shorter call-back URL as IE seems to cut off call-back URL if certain size is exceeded
+ - Fix for bug 34755: Support unquoted, mime-encoded personal part in an E-Mail address string
+
 * 2014-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 34776: Drop passed Message-ID header on draft-edit action
+ - Fix for bug 34867: Added missing import to 'com.openexchange.mailfilter.json' bundle
 
 * 2014-10-09 - steffen.templin@open-xchange.com
 

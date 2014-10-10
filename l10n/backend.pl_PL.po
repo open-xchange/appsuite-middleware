@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.pl_PL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-29 14:44+0200\n"
+"PO-Revision-Date: 2014-10-08 09:35+0200\n"
 "Last-Translator: \n"
 "Language-Team: Polish <>\n"
 "Language: pl\n"
@@ -907,11 +907,11 @@ msgstr "Wyszukiwanie LDAP dla obiektu użytkownika \"%s\" nie zwróciło żadnyc
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
-msgstr "Wyświetlana nazwa"
+msgstr "Nazwa wyświetlana"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:63
 msgid "Name"
-msgstr "Imię i nazwisko"
+msgstr "Nazwa"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:64
 msgid "Last name"
@@ -1047,7 +1047,7 @@ msgstr "Informacje"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:97
 msgid "Manager"
-msgstr "Przełożony"
+msgstr "Menedżer"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:98
 msgid "Assistant"
@@ -1499,7 +1499,7 @@ msgstr "Nie masz uprawnień do utworzenia katalogów w lokalizacji \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:74
 msgid "The allowed quota is reached."
-msgstr "Osiągnięto dozwolony przydział."
+msgstr "Dozwolony przydział został wyczerpany."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:75
 msgid "The path \"%1$s\" is invalid."
@@ -1560,6 +1560,17 @@ msgstr "Dostępna jest nowsza wersja aplikacji klienckiej do pobrania."
 msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr "Wzór \"%1$s\" jest niepoprawny. Użyj poprawnego wzoru i spróbuj ponownie."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr "Nazwa pliku \"%1$s\" powoduje konflikt z katalogiem o takiej samej nazwie w lokalizacji \"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "Ścieżka \"%1$s\" powoduje konflikt z plikiem o takiej samej nazwie w lokalizacji \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -4960,10 +4971,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Żądana wartość \"Nazwisko\" nie została podana."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr "Nie masz odpowiednich uprawnień do dostępu do zmiany obiektów w folderze \"%2$s.\""
+msgid "You are not allowed to modify that contact"
+msgstr "Nie masz uprawnień do modyfikacji tego kontaktu"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -5046,7 +5055,7 @@ msgstr "Publiczny magazyn informacji"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:82
 msgid "Trash infostore"
-msgstr "Usunięte pliki"
+msgstr "Kosz magazynu informacji"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:84
 msgid "Other task folders"
@@ -5136,7 +5145,7 @@ msgstr "Wersje robocze"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
-msgstr "Elementy wysłane"
+msgstr "Obiety wysłane"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -10127,6 +10136,13 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Nie masz odpowiednich uprawnień do dostępu do zmiany obiektów w folderze "
+#~ "\"%2$s.\""
 
 #~ msgid "in appointments"
 #~ msgstr "w spotkaniach"
