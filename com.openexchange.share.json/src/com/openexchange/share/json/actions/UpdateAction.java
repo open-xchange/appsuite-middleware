@@ -88,8 +88,8 @@ public class UpdateAction extends AbstractShareAction {
         share.setToken(token);
         try {
             JSONObject jsonObject = (JSONObject) requestData.requireData();
-            if (jsonObject.has("expires")) {
-                share.setExpires(new Date(jsonObject.getLong("expires")));
+            if (jsonObject.has("expiry_date")) {
+                share.setExpiryDate(new Date(jsonObject.getLong("expiry_date")));
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

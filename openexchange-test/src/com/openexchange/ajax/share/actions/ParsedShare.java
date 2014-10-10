@@ -52,6 +52,7 @@ package com.openexchange.ajax.share.actions;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.java.Enums;
 import com.openexchange.share.AuthenticationMode;
 
 /**
@@ -108,7 +109,7 @@ public class ParsedShare {
         }
         guest = json.optInt("guest");
         if (json.has("authentication")) {
-            authentication = AuthenticationMode.fromID(json.getInt("authentication"));
+            authentication = Enums.parse(AuthenticationMode.class, json.getString("authentication"));
         }
         guestMailAddress = json.optString("guest_mail_address");
         guestDisplayName = json.optString("guest_display_name");

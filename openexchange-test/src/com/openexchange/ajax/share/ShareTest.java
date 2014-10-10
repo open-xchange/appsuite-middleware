@@ -87,8 +87,8 @@ import com.openexchange.share.AuthenticationMode;
 public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
-        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret", AuthenticationMode.DIGEST),
-        createNamedGuestPermission("horst@example.com", "Horst Example", "secret", AuthenticationMode.BASIC),
+        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret", AuthenticationMode.GUEST_PASSWORD),
+        createNamedGuestPermission("horst@example.com", "Horst Example", "secret", AuthenticationMode.GUEST_PASSWORD),
         createAnonymousAuthorPermission(),
         createAnonymousGuestPermission()
     };

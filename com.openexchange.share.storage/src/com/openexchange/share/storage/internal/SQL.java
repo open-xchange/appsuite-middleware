@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.share.AuthenticationMode;
 
 /**
  * {@link SQL}
@@ -74,7 +75,8 @@ public class SQL {
             "createdBy int(10) unsigned NOT NULL," +
             "lastModified bigint(64) NOT NULL," +
             "modifiedBy int(10) unsigned NOT NULL," +
-            "expires bigint(64) DEFAULT NULL," +
+            "expiryDate bigint(64) DEFAULT NULL," +
+            "activationDate bigint(64) DEFAULT NULL," +
             "guest int(10) unsigned NOT NULL," +
             "auth tinyint(3) unsigned NOT NULL," +
             "PRIMARY KEY (cid,token)," +
@@ -94,55 +96,55 @@ public class SQL {
     };
 
     public static final String SELECT_SHARE_STMT =
-        "SELECT module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "SELECT module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
         "FROM share " +
         "WHERE cid=? AND token=?;"
     ;
 
     public static final String SELECT_SHARES_CREATED_BY_STMT =
-        "SELECT token,module,folder,item,created,lastModified,modifiedBy,expires,guest,auth " +
+        "SELECT token,module,folder,item,created,lastModified,modifiedBy,expiryDate,guest,auth " +
         "FROM share " +
         "WHERE cid=? AND createdBy=?;"
     ;
 
     public static final String SELECT_SHARES_BY_FOLDER_STMT =
-        "SELECT token,module,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "SELECT token,module,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
         "FROM share " +
         "WHERE cid=? AND folder=?;"
     ;
 
     public static final String SELECT_SHARES_BY_CONTEXT_STMT =
-        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
         "FROM share " +
         "WHERE cid=?;"
     ;
 
     public static final String SELECT_SHARES_BY_ITEM_STMT =
-        "SELECT token,module,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "SELECT token,module,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
         "FROM share " +
         "WHERE cid=? AND folder=? AND item=?;"
     ;
 
     public static final String SELECT_SHARES_EXPIRED_AFTER_STMT =
-        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
         "FROM share " +
-        "WHERE cid=? AND expires IS NOT NULL AND expires>?;"
+        "WHERE cid=? AND expiryDate IS NOT NULL AND expiryDate>?;"
     ;
 
     public static final String SELECT_SHARES_FOR_GUEST_STMT =
-        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,auth " +
+        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,auth " +
         "FROM share " +
         "WHERE cid=? AND guest=?;"
     ;
 
     public static final String INSERT_SHARE_STMT =
-        "INSERT INTO share (token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth) " +
+        "INSERT INTO share (token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth) " +
         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);"
     ;
 
     public static final String UPDATE_SHARE_STMT =
         "UPDATE share " +
-        "SET module=?,folder=?,item=?,created=?,createdBy=?,lastModified=?,modifiedBy=?,expires=?,guest=?,auth=?) " +
+        "SET module=?,folder=?,item=?,created=?,createdBy=?,lastModified=?,modifiedBy=?,expiryDate=?,guest=?,auth=?) " +
         "WHERE cid=? AND token=?;"
     ;
 
@@ -179,18 +181,43 @@ public class SQL {
 
     public static final String SELECT_SHARES_BY_TOKENS_STMT(int length) {
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        sb.append("SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
                   "FROM share " +
                   "WHERE cid = ? AND token");
         return appendPlaceholders(sb, length).append(";").toString();
     }
 
     public static final String SELECT_EXPIRED_SHARES_STMT =
-        "SELECT token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "SELECT token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
         "FROM share " +
-        "WHERE expires IS NOT NULL AND expires > ?";
+        "WHERE expiryDate IS NOT NULL AND expiryDate > ?";
     ;
 
+    public static int encodeAuthenticationMode(AuthenticationMode authenticationMode) {
+        switch (authenticationMode) {
+        case ANONYMOUS:
+            return 0;
+        case ANONYMOUS_PASSWORD:
+            return 1;
+        case GUEST_PASSWORD:
+            return 2;
+        default:
+            throw new IllegalArgumentException("authenticationMode");
+        }
+    }
+
+    public static AuthenticationMode decodeAuthenticationMode(int encoded) {
+        switch (encoded) {
+        case 0:
+            return AuthenticationMode.ANONYMOUS;
+        case 1:
+            return AuthenticationMode.ANONYMOUS_PASSWORD;
+        case 2:
+            return AuthenticationMode.GUEST_PASSWORD;
+        default:
+            throw new IllegalArgumentException("encoded");
+        }
+    }
 
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {

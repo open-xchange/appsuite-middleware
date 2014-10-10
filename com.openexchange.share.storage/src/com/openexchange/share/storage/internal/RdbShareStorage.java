@@ -260,14 +260,14 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(i++, share.getCreatedBy());
             stmt.setLong(i++, share.getLastModified().getTime());
             stmt.setInt(i++, share.getModifiedBy());
-            Date expires = share.getExpires();
+            Date expires = share.getExpiryDate();
             if (expires == null) {
                 stmt.setNull(i++, Types.BIGINT);
             } else {
                 stmt.setLong(i++, expires.getTime());
             }
             stmt.setInt(i++, share.getGuest());
-            stmt.setInt(i++, share.getAuthentication().getID());
+            stmt.setInt(i++, SQL.encodeAuthenticationMode(share.getAuthentication()));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -290,14 +290,14 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(i++, share.getCreatedBy());
             stmt.setLong(i++, share.getLastModified().getTime());
             stmt.setInt(i++, share.getModifiedBy());
-            Date expires = share.getExpires();
+            Date expires = share.getExpiryDate();
             if (expires == null) {
                 stmt.setNull(i++, Types.BIGINT);
             } else {
                 stmt.setLong(i++, expires.getTime());
             }
             stmt.setInt(i++, share.getGuest());
-            stmt.setInt(i++, share.getAuthentication().getID());
+            stmt.setInt(i++, SQL.encodeAuthenticationMode(share.getAuthentication()));
             stmt.setBytes(i++, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
             stmt.setInt(i++, share.getContextID());
             return logExecuteUpdate(stmt);
@@ -326,10 +326,10 @@ public class RdbShareStorage implements ShareStorage {
                 share.setModifiedBy(resultSet.getInt(7));
                 long expires = resultSet.getLong(8);
                 if (false == resultSet.wasNull()) {
-                    share.setExpires(new Date(expires));
+                    share.setExpiryDate(new Date(expires));
                 }
                 share.setGuest(resultSet.getInt(9));
-                share.setAuthentication(resultSet.getInt(10));
+                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(10)));
                 return share;
             } else {
                 return null;
@@ -374,10 +374,10 @@ public class RdbShareStorage implements ShareStorage {
                 share.setModifiedBy(resultSet.getInt(7));
                 long expires = resultSet.getLong(8);
                 if (false == resultSet.wasNull()) {
-                    share.setExpires(new Date(expires));
+                    share.setExpiryDate(new Date(expires));
                 }
                 share.setGuest(resultSet.getInt(9));
-                share.setAuthentication(resultSet.getInt(10));
+                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(10)));
                 shares.add(share);
             }
         } finally {
@@ -406,10 +406,10 @@ public class RdbShareStorage implements ShareStorage {
                 share.setModifiedBy(resultSet.getInt(8));
                 long expires = resultSet.getLong(9);
                 if (false == resultSet.wasNull()) {
-                    share.setExpires(new Date(expires));
+                    share.setExpiryDate(new Date(expires));
                 }
                 share.setGuest(resultSet.getInt(10));
-                share.setAuthentication(resultSet.getInt(11));
+                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(11)));
                 shares.add(share);
             }
         } finally {
@@ -439,10 +439,10 @@ public class RdbShareStorage implements ShareStorage {
                 share.setModifiedBy(resultSet.getInt(7));
                 long expires = resultSet.getLong(8);
                 if (false == resultSet.wasNull()) {
-                    share.setExpires(new Date(expires));
+                    share.setExpiryDate(new Date(expires));
                 }
                 share.setGuest(resultSet.getInt(9));
-                share.setAuthentication(resultSet.getInt(10));
+                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(10)));
                 shares.add(share);
             }
         } finally {
@@ -473,10 +473,10 @@ public class RdbShareStorage implements ShareStorage {
                 share.setModifiedBy(resultSet.getInt(6));
                 long expires = resultSet.getLong(7);
                 if (false == resultSet.wasNull()) {
-                    share.setExpires(new Date(expires));
+                    share.setExpiryDate(new Date(expires));
                 }
                 share.setGuest(resultSet.getInt(8));
-                share.setAuthentication(resultSet.getInt(9));
+                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(9)));
                 shares.add(share);
             }
         } finally {
@@ -507,9 +507,9 @@ public class RdbShareStorage implements ShareStorage {
                 share.setCreatedBy(rs.getInt(6));
                 share.setLastModified(new Date(rs.getLong(7)));
                 share.setModifiedBy(rs.getInt(8));
-                share.setExpires(new Date(rs.getLong(9)));
+                share.setExpiryDate(new Date(rs.getLong(9)));
                 share.setGuest(rs.getInt(10));
-                share.setAuthentication(rs.getInt(11));
+                share.setAuthentication(SQL.decodeAuthenticationMode(rs.getInt(11)));
                 result.add(share);
             }
         } finally {
@@ -537,9 +537,9 @@ public class RdbShareStorage implements ShareStorage {
                 share.setCreatedBy(resultSet.getInt(6));
                 share.setLastModified(new Date(resultSet.getLong(7)));
                 share.setModifiedBy(resultSet.getInt(8));
-                share.setExpires(new Date(resultSet.getLong(9)));
+                share.setExpiryDate(new Date(resultSet.getLong(9)));
                 share.setGuest(resultSet.getInt(10));
-                share.setAuthentication(resultSet.getInt(11));
+                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(11)));
                 shares.add(share);
             }
         } finally {
@@ -570,9 +570,9 @@ public class RdbShareStorage implements ShareStorage {
                 share.setModifiedBy(resultSet.getInt(8));
                 long expires = resultSet.getLong(9);
                 if (false == resultSet.wasNull()) {
-                    share.setExpires(new Date(expires));
+                    share.setExpiryDate(new Date(expires));
                 }
-                share.setAuthentication(resultSet.getInt(10));
+                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(10)));
                 shares.add(share);
             }
         } finally {

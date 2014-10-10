@@ -153,14 +153,14 @@ public class GuestShareResultConverter implements ResultConverter {
             if (0 != share.getModifiedBy()) {
                 json.put("modified_by", share.getModifiedBy());
             }
-            Date expires = share.getExpires();
+            Date expires = share.getExpiryDate();
             if (null != expires) {
-                json.put("expires", share.getExpires().getTime());
+                json.put("expires", share.getExpiryDate().getTime());
             }
             if (0 != share.getGuest()) {
                 json.put("guest", share.getGuest());
             }
-            json.put("authentication", share.getAuthentication().getID());
+            json.put("authentication", share.getAuthentication().toString().toLowerCase());
             User guest = guestShare.getGuest();
             if (null != guest) {
                 json.putOpt("guest_mail_address", guest.getMail());

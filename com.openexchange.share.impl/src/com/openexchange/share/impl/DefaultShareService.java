@@ -224,7 +224,7 @@ public class DefaultShareService implements ShareService {
              * prepare update
              */
             DefaultShare updatedShare = new DefaultShare(storedShare);
-            updatedShare.setExpires(updatedShare.getExpires());
+            updatedShare.setExpiryDate(updatedShare.getExpiryDate());
             updatedShare.setLastModified(new Date());
             updatedShare.setModifiedBy(session.getUserId());
             /*
@@ -262,8 +262,7 @@ public class DefaultShareService implements ShareService {
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, session);
                 guestUsers.add(guestUser);
                 for (ShareTarget target : targets) {
-                    shares.add(ShareTool.prepareShare(sharingUser, context.getContextId(), target.getModule(), target.getFolder(),
-                        guestUser.getId(), recipient.getExpiryDate(), null)); //TODO: start date, auth?
+                    shares.add(ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, recipient));
                 }
             }
             /*
@@ -443,7 +442,7 @@ public class DefaultShareService implements ShareService {
         if (null != expiredShares && 0 < expiredShares.size()) {
             if (LOG.isInfoEnabled()) {
                 for (Share share : expiredShares) {
-                    LOG.info("Detected expired share ({}): {}", share.getExpires(), share);
+                    LOG.info("Detected expired share ({}): {}", share.getExpiryDate(), share);
                 }
             }
             ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
@@ -467,7 +466,7 @@ public class DefaultShareService implements ShareService {
      */
     private Share removeExpired(Share share) throws OXException {
         if (null != share && share.isExpired()) {
-            LOG.info("Detected expired share ({}): {}", share.getExpires(), share);
+            LOG.info("Detected expired share ({}): {}", share.getExpiryDate(), share);
             ConnectionHelper connectionHelper = new ConnectionHelper(share.getContextID(), services, true);
             try {
                 connectionHelper.start();

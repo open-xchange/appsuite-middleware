@@ -131,11 +131,25 @@ public interface Share {
     int getModifiedBy();
 
     /**
+     * If defined, gets the date when this share becomes active, i.e. it should be accessible.
+     *
+     * @return The activation date of the share, or <code>null</code> if not defined
+     */
+    Date getActivationDate();
+
+    /**
+     * Gets a value indicating whether this share is active or not.
+     *
+     * @return <code>true</code> if the share is active, <code>false</code>, otherwise
+     */
+    boolean isActive();
+
+    /**
      * If defined, gets the date when this share expires, i.e. it should be no longer accessible.
      *
      * @return The expiry date of the share, or <code>null</code> if not defined
      */
-    Date getExpires();
+    Date getExpiryDate();
 
     /**
      * Gets a value indicating whether this share is expired or not.

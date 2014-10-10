@@ -157,7 +157,7 @@ public class AggregateSharesTest extends ShareTest {
          * prepare guest permission
          */
         String name = randomUID();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret", AuthenticationMode.BASIC);
+        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret", AuthenticationMode.GUEST_PASSWORD);
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */
@@ -241,7 +241,7 @@ public class AggregateSharesTest extends ShareTest {
          * prepare guest permission
          */
         String name = randomUID();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret", AuthenticationMode.BASIC);
+        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret", AuthenticationMode.GUEST_PASSWORD);
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */

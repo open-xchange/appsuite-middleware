@@ -71,9 +71,10 @@ public class DefaultShare implements Share, Serializable {
     private int createdBy;
     private Date lastModified;
     private int modifiedBy;
-    private Date expires;
+    private Date expiryDate;
+    private Date activationDate;
     private int guest;
-    private int authentication;
+    private AuthenticationMode authentication;
 
     /**
      * Initializes a new {@link DefaultShare}.
@@ -98,11 +99,10 @@ public class DefaultShare implements Share, Serializable {
         createdBy = share.getCreatedBy();
         lastModified = share.getLastModified();
         modifiedBy = share.getModifiedBy();
-        expires = share.getExpires();
+        expiryDate = share.getExpiryDate();
+        activationDate = share.getActivationDate();
         guest = share.getGuest();
-        if (null != share.getAuthentication()) {
-            authentication = share.getAuthentication().getID();
-        }
+        authentication = share.getAuthentication();
     }
 
     @Override
@@ -155,14 +155,29 @@ public class DefaultShare implements Share, Serializable {
         return modifiedBy;
     }
 
+    /**
+     * Gets the activationDate
+     *
+     * @return The activationDate
+     */
     @Override
-    public Date getExpires() {
-        return expires;
+    public Date getActivationDate() {
+        return activationDate;
+    }
+
+    @Override
+    public boolean isActive() {
+        return null != activationDate && activationDate.before(new Date());
+    }
+
+    @Override
+    public Date getExpiryDate() {
+        return expiryDate;
     }
 
     @Override
     public boolean isExpired() {
-        return expires != null && new Date().after(expires);
+        return expiryDate != null && new Date().after(expiryDate);
     }
 
     @Override
@@ -172,7 +187,7 @@ public class DefaultShare implements Share, Serializable {
 
     @Override
     public AuthenticationMode getAuthentication() {
-        return AuthenticationMode.fromID(authentication);
+        return authentication;
     }
 
     /**
@@ -257,12 +272,12 @@ public class DefaultShare implements Share, Serializable {
     }
 
     /**
-     * Sets the expires
+     * Sets the expiryDate
      *
-     * @param expires The expires to set
+     * @param expires The expiryDate to set
      */
-    public void setExpires(Date expires) {
-        this.expires = expires;
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     /**
@@ -279,8 +294,17 @@ public class DefaultShare implements Share, Serializable {
      *
      * @param authentication The authentication to set
      */
-    public void setAuthentication(int authentication) {
+    public void setAuthentication(AuthenticationMode authentication) {
         this.authentication = authentication;
+    }
+
+    /**
+     * Sets the activationDate
+     *
+     * @param activationDate The activationDate to set
+     */
+    public void setActivationDate(Date activationDate) {
+        this.activationDate = activationDate;
     }
 
     @Override

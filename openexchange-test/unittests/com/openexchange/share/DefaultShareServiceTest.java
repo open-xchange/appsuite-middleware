@@ -66,6 +66,8 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -206,25 +208,19 @@ public class DefaultShareServiceTest extends TestCase {
             OXFolderAccess access = new OXFolderAccess(ctx);
             FolderObject share1 = access.getDefaultFolder(user.getId(), FolderObject.CONTACT);
             int count = new Random().nextInt(5);
-            List<AddedGuest> guests = new ArrayList<AddedGuest>(count);
+            List<ShareRecipient> guests = new ArrayList<ShareRecipient>(count);
             for (int i = 1; i <= count; i++) {
-                AddedGuest g = new AddedGuest();
-                g.setAuthenticationMode(AuthenticationMode.ANONYMOUS);
-                g.setDisplayName("Guest " + i);
-                guests.add(g);
+                guests.add(new AnonymousRecipient());
             }
-            service.createShares(session, String.valueOf(share1.getObjectID()), share1.getModule(), guests);
+            service.createShares(session, new ShareTarget(share1.getModule(), String.valueOf(share1.getObjectID())), guests);
 
             FolderObject share2 = access.getDefaultFolder(user.getId(), FolderObject.CALENDAR);
             count = new Random().nextInt(5);
-            guests = new ArrayList<AddedGuest>(count);
+            guests = new ArrayList<ShareRecipient>(count);
             for (int i = 1; i <= count; i++) {
-                AddedGuest g = new AddedGuest();
-                g.setAuthenticationMode(AuthenticationMode.ANONYMOUS);
-                g.setDisplayName("Guest " + i);
-                guests.add(g);
+                guests.add(new AnonymousRecipient());
             }
-            service.createShares(session, String.valueOf(share2.getObjectID()), share2.getModule(), guests);
+            service.createShares(session, new ShareTarget(share2.getModule(), String.valueOf(share2.getObjectID())), guests);
         }
     }
 

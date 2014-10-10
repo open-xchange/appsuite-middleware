@@ -50,11 +50,9 @@
 package com.openexchange.share.servlet.auth;
 
 import static com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization;
-import static com.openexchange.tools.servlet.http.Authorization.checkForDigestAuthorization;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fields.Header;
@@ -63,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.share.Share;
@@ -71,7 +68,6 @@ import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
-import com.openexchange.tools.webdav.digest.DigestUtility;
 
 /**
  * {@link ShareLoginMethod}
@@ -106,11 +102,11 @@ public class ShareLoginMethod implements LoginMethodClosure {
         case ANONYMOUS:
             authenticated = anonymous(loginResult);
             break;
-        case BASIC:
-            authenticated = basic(loginResult);
+        case ANONYMOUS_PASSWORD:
+            authenticated = basic(loginResult, true);
             break;
-        case DIGEST:
-            authenticated = digest(loginResult);
+        case GUEST_PASSWORD:
+            authenticated = basic(loginResult, false);
             break;
         default:
             throw new UnsupportedOperationException(String.valueOf(share.getAuthentication()));
@@ -127,7 +123,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
         return new ShareAuthenticated(user, context);
     }
 
-    private ShareAuthenticated basic(LoginResultImpl loginResult) throws OXException {
+    private ShareAuthenticated basic(LoginResultImpl loginResult, boolean ignoreUsername) throws OXException {
         String authHeader = getAuthHeader(loginResult);
         if (false == checkForBasicAuthorization(authHeader)) {
             return null;
@@ -136,25 +132,11 @@ public class ShareLoginMethod implements LoginMethodClosure {
         if (null == credentials || false == Authorization.checkLogin(credentials.getPassword())) {
             return null;
         }
-        if (Strings.isEmpty(credentials.getLogin()) || false == credentials.getLogin().equalsIgnoreCase(user.getMail()) ||
-            Strings.isEmpty(credentials.getPassword()) || false == credentials.getPassword().equals(decrypt(user.getUserPassword()))) {
+        if (Strings.isEmpty(credentials.getPassword()) || false == credentials.getPassword().equals(decrypt(user.getUserPassword()))) {
             return null;
         }
-        return new ShareAuthenticated(user, context);
-    }
-
-    private ShareAuthenticated digest(LoginResultImpl loginResult) throws OXException {
-        String authHeader = getAuthHeader(loginResult);
-        if (false == checkForDigestAuthorization(authHeader)) {
-            return null;
-        }
-        com.openexchange.tools.webdav.digest.Authorization parsed = DigestUtility.getInstance().parseDigestAuthorization(authHeader);
-        String username = parsed.getUser();
-        if (Strings.isEmpty(username) || false == username.equalsIgnoreCase(user.getMail())) {
-            return null;
-        }
-        String serverDigest = DigestUtility.getInstance().generateServerDigest(authHeader, "GET", decrypt(user.getUserPassword()));
-        if (null == serverDigest || false == serverDigest.equals(parsed.getResponse())) {
+        if (false == ignoreUsername &&
+            (Strings.isEmpty(credentials.getLogin()) || false == credentials.getLogin().equalsIgnoreCase(user.getMail()))) {
             return null;
         }
         return new ShareAuthenticated(user, context);
@@ -166,18 +148,9 @@ public class ShareLoginMethod implements LoginMethodClosure {
 
     public void sendUnauthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {
         switch (share.getAuthentication()) {
-        case BASIC:
+        case ANONYMOUS_PASSWORD:
+        case GUEST_PASSWORD:
             response.setHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\", encoding=\"UTF-8\"");
-            break;
-        case DIGEST:
-            response.setHeader("WWW-Authenticate", new StringBuilder()
-                .append("Digest realm=\"").append(getRealm()).append("\", ")
-                .append("qop=\"auth,auth-int\", ")
-                .append("nonce=\"").append(DigestUtility.getInstance().generateNOnce(request)).append("\", ")
-                .append("opaque=\"").append(UUIDs.getUnformattedString(UUID.randomUUID())).append("\", ")
-                .append("stale=\"false\", ")
-                .append("algorithm=\"MD5\"")
-            .toString());
             break;
         default:
             break;

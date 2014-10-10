@@ -75,6 +75,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -221,32 +222,43 @@ public class ShareTool {
     }
 
     /**
-     * Prepares a new share for a folder.
+     * Prepares a new share.
      *
-     * @param sharingUser The sharing user
      * @param contextID The context ID
-     * @param module The module ID
-     * @param folder The folder ID
-     * @param guest The guest ID
-     * @param expires The expiry date, or <code>null</code> if not defined
-     * @param authenticationMode The authentication mode
+     * @param sharingUser The sharing user
+     * @param guestUserID The guest user ID
+     * @param target The share target
+     * @param recipient The recipient
      * @return The share
      */
-    public static Share prepareShare(User sharingUser, int contextID, int module, String folder, int guest, Date expires, AuthenticationMode authenticationMode) {
+    public static Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target, ShareRecipient recipient) {
         Date now = new Date();
         DefaultShare share = new DefaultShare();
         share.setToken(ShareTool.generateToken(contextID));
-        share.setAuthentication(authenticationMode.getID());
-        share.setExpires(expires);
+        share.setAuthentication(getAuthenticationMode(recipient));
+        share.setExpiryDate(recipient.getExpiryDate());
+        share.setActivationDate(recipient.getActivationDate());
         share.setContextID(contextID);
         share.setCreated(now);
         share.setLastModified(now);
         share.setCreatedBy(sharingUser.getId());
         share.setModifiedBy(sharingUser.getId());
-        share.setGuest(guest);
-        share.setModule(module);
-        share.setFolder(folder);
+        share.setGuest(guestUserID);
+        share.setModule(target.getModule());
+        share.setFolder(target.getFolder());
+        share.setItem(target.getItem());
         return share;
+    }
+
+    private static AuthenticationMode getAuthenticationMode(ShareRecipient recipient) {
+        if (AnonymousRecipient.class.isInstance(recipient)) {
+            return null == ((AnonymousRecipient) recipient).getPassword() ?
+                AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
+        }
+        if (GuestRecipient.class.isInstance(recipient)) {
+            return AuthenticationMode.GUEST_PASSWORD;
+        }
+        throw new IllegalArgumentException("recipient");
     }
 
     /**

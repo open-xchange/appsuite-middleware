@@ -60,49 +60,17 @@ public enum AuthenticationMode {
     /**
      * Access is granted without providing additional authentication information.
      */
-    ANONYMOUS(0),
+    ANONYMOUS,
 
     /**
-     * Access is granted if the client provides a Base64-encoded string that contains a user name and password of the guest user entity.
+     * Access is granted for anonymous guest users providing a password / pin code.
      */
-    BASIC(1),
+    ANONYMOUS_PASSWORD,
 
     /**
-     * Access is granted if the client provides the correct message digest of his credentials.
+     * Access is granted for guest users providing a user name and password.
      */
-    DIGEST(2),
+    GUEST_PASSWORD,
 
     ;
-
-    /**
-     * Gets the share authentication based on it's identifier.
-     *
-     * @param id The ID to get the authentication for
-     * @return The share authentication
-     */
-    public static AuthenticationMode fromID(int id) {
-        for (AuthenticationMode auth : AuthenticationMode.values()) {
-            if (auth.id == id) {
-                return auth;
-            }
-        }
-        throw new IllegalArgumentException(String.valueOf(id));
-    }
-
-
-    private final int id;
-
-    private AuthenticationMode(int id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets the authentication ID.
-     *
-     * @return The ID
-     */
-    public int getID() {
-        return id;
-    }
-
 }

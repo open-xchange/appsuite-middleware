@@ -107,7 +107,7 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
                 jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestPerm.getContactFolderID());
                 jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestPerm.getContactID());
                 if (null != guestPerm.getExpires()) {
-                    jsonPermission.put(FolderField.EXPIRES.getName(), guestPerm.getExpires().getTime());
+                    jsonPermission.put(FolderField.EXPIRY_DATE.getName(), guestPerm.getExpires().getTime());
                 }
             } else {
                 jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
