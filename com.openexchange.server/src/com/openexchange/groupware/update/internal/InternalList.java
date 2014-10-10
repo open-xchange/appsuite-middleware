@@ -758,8 +758,18 @@ public final class InternalList {
         // Adds the 'full_time' column to the tasks tables
         list.add(new com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.6.2 starts here. +++++++++++++++++++++++++++++++++
+
+        // +++++++++++++++++++++++++++++++++ Version 7.8.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Adds the column 'guestCreatedBy' to the tables 'user' and 'del_user'
+        list.add(new com.openexchange.groupware.update.tasks.UserAddGuestCreatedByTask());
+
         // Create table for object permissions
         list.add(new com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableTask());
+
+        // Extends "user" table by the (`cid`, `guestCreatedBy`) index
+        list.add(new com.openexchange.groupware.update.tasks.AddGuestCreatedByIndexForUserTable());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

@@ -110,7 +110,8 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "loginShell VARCHAR(128) NOT NULL,"
        + "guestCreatedBy INT4 UNSIGNED NOT NULL DEFAULT 0,"
        + "PRIMARY KEY (cid, id),"
-       + "INDEX (cid, mail(255))"
+       + "INDEX `mailIndex` (cid, mail(255)),"
+       + "INDEX `guestCreatedByIndex` (cid, guestCreatedBy)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     private static final String createDelUserTable = "CREATE TABLE del_user ("
@@ -160,7 +161,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
         + "value TEXT NOT NULL,"
         + "uuid BINARY(16) NOT NULL,"
         + "PRIMARY KEY (cid, uuid),"
-        + "INDEX (cid,name,value(20)),"
+        + "INDEX `attributeIndex` (cid,name,value(20)),"
         + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 

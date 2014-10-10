@@ -51,74 +51,64 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.WorkingLevel;
-import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link UserAddGuestCreatedByTask}
+ * {@link AddGuestCreatedByIndexForUserTable} - Extends "user" table by the <code>(`cid`, `guestCreatedBy`)</code> index.
  *
- * Adds the column 'guestCreatedBy' to the tables 'user' and 'del_user'
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UserAddGuestCreatedByTask extends UpdateTaskAdapter {
+public class AddGuestCreatedByIndexForUserTable extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link UserAddGuestCreatedByTask}.
+     * Initializes a new {@link AddGuestCreatedByIndexForUserTable}.
      */
-    public UserAddGuestCreatedByTask() {
+    public AddGuestCreatedByIndexForUserTable() {
         super();
     }
 
     @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BLOCKING, WorkingLevel.SCHEMA);
+    public void perform(PerformParameters params) throws OXException {
+        Logger log = org.slf4j.LoggerFactory.getLogger(AddGuestCreatedByIndexForUserTable.class);
+        log.info("Performing update task {}", AddGuestCreatedByIndexForUserTable.class.getSimpleName());
+
+        int ctxId = params.getContextId();
+        Connection con = Database.getNoTimeout(ctxId, true);
+        boolean rollback = false;
+        try {
+            startTransaction(con);
+            rollback = true;
+            if (null == Tools.existsIndex(con, "user", new String[] { "cid", "guestCreatedBy"})) {
+                Tools.createIndex(con, "user", "guestCreatedByIndex", new String[] { "cid", "guestCreatedBy"}, false);
+            }
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.backNoTimeout(ctxId, true, con);
+        }
+
+        log.info("{} successfully performed.", AddGuestCreatedByIndexForUserTable.class.getSimpleName());
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] { UserClearDelTablesTask.class.getName() };
+        return new String[] { UserAddGuestCreatedByTask.class.getName() };
     }
-
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Logger log = org.slf4j.LoggerFactory.getLogger(UserAddGuestCreatedByTask.class);
-        log.info("Performing update task {}", UserAddGuestCreatedByTask.class.getSimpleName());
-
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
-        boolean committed = false;
-        try {
-            connection.setAutoCommit(false);
-            Column guestCreatedByColumn = new Column("guestCreatedBy", "int(10) unsigned NOT NULL DEFAULT 0");
-            Tools.checkAndAddColumns(connection, "user", guestCreatedByColumn);
-            Tools.checkAndAddColumns(connection, "del_user", guestCreatedByColumn);
-            connection.commit();
-            committed = true;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (false == committed) {
-                rollback(connection);
-            }
-            autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
-        }
-
-        log.info("{} successfully performed.", UserAddGuestCreatedByTask.class.getSimpleName());
-    }
-
 }
