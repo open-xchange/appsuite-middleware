@@ -106,4 +106,13 @@ public class QuotedInternetAddressTest extends TestCase {
 
     }
 
+    public void testBug34755() throws Exception {
+        String s = "=?windows-1252?Q?Kr=F6ning=2C_User?= <user4@ox.microdoc.de>";
+        QuotedInternetAddress addr = new QuotedInternetAddress(s);
+
+        assertEquals("Display name does not match \"Kr\u00f6ning, User\"", "Kr\u00f6ning, User", addr.getPersonal());
+        assertEquals("Address does not match \"user4@ox.microdoc.de\"", "user4@ox.microdoc.de", addr.getAddress());
+
+    }
+
 }

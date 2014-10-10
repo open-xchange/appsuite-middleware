@@ -401,6 +401,16 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Gets the possible cause that is no Open-Xchange error.
+     *
+     * @return The possible non-OXException cause or <code>null</code>
+     */
+    public Throwable getNonOXExceptionCause() {
+        Throwable cause = getCause();
+        return cause instanceof OXException ? ((OXException) cause).getNonOXExceptionCause() : cause;
+    }
+
+    /**
      * Gets the numeric code.
      *
      * @return The code

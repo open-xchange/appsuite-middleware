@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-28 00:59+0200\n"
+"PO-Revision-Date: 2014-10-08 00:43+0200\n"
 "Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
 "Language-Team: Spanish <es@bureau-cornavin.com>\n"
 "Language: es\n"
@@ -1627,6 +1627,20 @@ msgid ""
 msgstr ""
 "El patrón \"%1$s\" no es válido; por favor, use un patrón válido e inténtelo "
 "de nuevo."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"El nombre de archivo \"%1$s\" entra en conflicto con un directorio del mismo "
+"nombre en \"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"La ruta \"%1$s\" entra en conflicto con otra del mismo nombre en \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5189,8 +5203,7 @@ msgid ""
 "appointment."
 msgstr ""
 "No pueden utilizar distintas etiquetas de privado para un sólo elemento de "
-"una "
-"cita frecuente."
+"una cita frecuente."
 
 #. *
 #. * You can not use the private flag in a non private folder.
@@ -5372,12 +5385,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "No se ha proporcionado el valor requerido \"apellidos\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"No tiene los permisos adecuados para modificar objetos en la carpeta \"%2$s"
-"\"."
+msgid "You are not allowed to modify that contact"
+msgstr "No le está permitido modificar este contacto."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -7212,8 +7221,8 @@ msgstr ""
 msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr ""
-"La nueva contraseña no se encuentra. Por favor introduzca su nueva contraseña "
-"e inténtelo de nuevo."
+"La nueva contraseña no se encuentra. Por favor introduzca su nueva "
+"contraseña e inténtelo de nuevo."
 
 #. *
 #. * User is missing for the reminder.
@@ -7447,8 +7456,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
 msgstr ""
-"No se pueden mover tareas con etiqueta privada a una carpeta pública "
-"\"%1$s\"."
+"No se pueden mover tareas con etiqueta privada a una carpeta pública \"%1$s"
+"\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
@@ -7518,9 +7527,8 @@ msgid ""
 "migrated to the Remember Executed Update Tasks concept on schema \"%1$s\"."
 msgstr ""
 "La versión no puede modificarse si la administración de las tareas de "
-"actualización "
-"ha sido migrada a un concepto de recordatorio de tareas de actualización "
-"ejecutadas en el esquema \"%1$s\"."
+"actualización ha sido migrada a un concepto de recordatorio de tareas de "
+"actualización ejecutadas en el esquema \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:72
 msgid ""
@@ -11220,6 +11228,13 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulú"
+
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "No tiene los permisos adecuados para modificar objetos en la carpeta "
+#~ "\"%2$s\"."
 
 #~ msgid "in appointments"
 #~ msgstr "en citas"

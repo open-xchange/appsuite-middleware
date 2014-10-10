@@ -9,9 +9,9 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-23 21:03+0200\n"
-"Last-Translator: Nicolas Ternisien <nicolas@bureau-cornavin.com>\n"
-"Language-Team: French <kde-i18n-doc@kde.org>\n"
+"PO-Revision-Date: 2014-10-09 23:27+0900\n"
+"Last-Translator: Sandrine <sandrine@bureau-cornavin.fr>\n"
+"Language-Team: French <>\n"
 "Language: fr_CA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1656,6 +1656,21 @@ msgid ""
 msgstr ""
 "Le motif « %1$s » n'est pas valable. Veuillez utiliser un motif valable et "
 "réessayer."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Le nom de fichier « %1$s » est en conflit avec un répertoire du même nom "
+"à l'emplacement « %2$s »."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"Le chemin « %1$s » est en conflit avec un fichier du même nom à "
+"l'emplacement « %2$s »."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5451,12 +5466,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "La valeur « Nom de famille » requise n'a pas été indiquée."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"Vous n'avez pas les droits appropriés pour modifier des objets dans le "
-"dossier « %2$s »."
+msgid "You are not allowed to modify that contact"
+msgstr "Vous n'êtes pas autorisé à modifier ce contact."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -7275,8 +7286,8 @@ msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
 msgstr ""
-"Le mot de passe actuel n'est pas valable. Veuillez saisir le bon mot de passe "
-"et réessayer."
+"Le mot de passe actuel n'est pas valable. Veuillez saisir le bon mot de "
+"passe et réessayer."
 
 #. *
 #. * The current password is missing. Please enter your current password and try again.
@@ -7296,8 +7307,8 @@ msgstr ""
 msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr ""
-"Le nouveau mot de passe est manquant. Veuillez saisir le nouveau mot de passe "
-"et réessayer."
+"Le nouveau mot de passe est manquant. Veuillez saisir le nouveau mot de "
+"passe et réessayer."
 
 #. *
 #. * User is missing for the reminder.
@@ -11342,6 +11353,13 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zoulou"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits appropriés pour modifier des objets dans le "
+#~ "dossier « %2$s »."
+
 #~ msgid "in appointments"
 #~ msgstr "dans les rendez-vous"
 
@@ -14348,10 +14366,6 @@ msgstr "Zoulou"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Votre nom est obligatoire. Veuillez le saisir."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr ""
-#~ "Vous n'êtes pas autorisé à modifier le contact %1$d dans le contexte %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Impossible de charger les objets. Contexte %1$d utilisateur %2$d"
 
@@ -15670,9 +15684,6 @@ msgstr "Zoulou"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Un conflit de paramètres est survenu."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Le paramètre « %1$s » est en conflit avec le paramètre « %2$s »."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr ""

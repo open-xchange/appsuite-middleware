@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-23 09:01+0000\n"
+"PO-Revision-Date: 2014-10-09 19:45+0000\n"
 "Last-Translator: Jacob Sparre Andersen <jacob@jacob-sparre.dk>\n"
 "Language-Team: Danish <da@bureau-cornavin.com>\n"
 "Language: da\n"
@@ -1600,6 +1600,18 @@ msgid ""
 msgstr ""
 "Mønsteret \"%1$s\" er ugyldigt.  Brug venligst et gyldigt mønster og prøv "
 "igen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Filnavnet \"%1$s\" er i konflikt med et katalog med samme navn i \"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "Stien \"%1$s\" er i konflikt med en fil med samme navn i \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5219,10 +5231,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Påkrævet værdi \"efternavn\" blev ikke givet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr "Du har ikke ret til at ændre objekter i mappen \"%2$s\"."
+msgid "You are not allowed to modify that contact"
+msgstr "Du har ikke lov til at ændre den kontakt"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -6731,8 +6741,8 @@ msgstr ""
 msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr ""
-"Ny adgangskode mangler.  Indtast venligst din ønskede nye adgangskode og prøv "
-"igen."
+"Ny adgangskode mangler.  Indtast venligst din ønskede nye adgangskode og "
+"prøv igen."
 
 #. *
 #. * User is missing for the reminder.
@@ -10661,6 +10671,11 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr "Du har ikke ret til at ændre objekter i mappen \"%2$s\"."
 
 #~ msgid "in appointments"
 #~ msgstr "i aftaler"

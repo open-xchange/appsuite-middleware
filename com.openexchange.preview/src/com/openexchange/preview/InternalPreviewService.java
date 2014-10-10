@@ -49,7 +49,11 @@
 
 package com.openexchange.preview;
 
+import java.io.InputStream;
 import java.util.List;
+import com.openexchange.conversion.Data;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
@@ -59,6 +63,18 @@ import java.util.List;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface InternalPreviewService extends PreviewService {
+
+    /**
+     * Gets the cached preview document for specified data and output format, if available at all.
+     *
+     * @param documentData The data
+     * @param output The output format
+     * @param session The session
+     * @param pages The number of pages to be generated, if possible. If not, this argument is ignored. -1 for "all pages"
+     * @return The preview document with its content set according to given output format or null, if no cached preview is available
+     * @throws OXException If preview document cannot be generated
+     */
+    PreviewDocument getCachedPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session, int pages) throws OXException;
 
     /**
      * Gets the preview policies of this <tt>PreviewService</tt>.
@@ -73,5 +89,4 @@ public interface InternalPreviewService extends PreviewService {
      * @return <code>true</code> this service is able to detect the content type of an input stream; otherwise <code>false</code>
      */
     boolean canDetectContentType();
-
 }

@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-29 20:16+0100\n"
+"PO-Revision-Date: 2014-10-08 21:20+0100\n"
 "Last-Translator: \n"
 "Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
 "Language: ro\n"
@@ -1618,6 +1618,20 @@ msgid ""
 msgstr ""
 "Modelul \"%1$s\" este incorect. Utilizați un model corect și încercați din "
 "nou."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Numele de fișier \"%1$s\" intră în conflict cu un director cu același nume "
+"din \"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"Calea \"%1$s\" intră în conflict cu un fișier cu același nume din \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5316,12 +5330,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Valoarea obligatorie \"nume\" nu a fost furnizată."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"Nu aveți permisiunile necesare pentru a modifica obiectele din dosarul \"%2$s"
-"\"."
+msgid "You are not allowed to modify that contact"
+msgstr "Nu aveți permisiune pentru a modifica acest contact"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -11099,6 +11109,13 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Nu aveți permisiunile necesare pentru a modifica obiectele din dosarul "
+#~ "\"%2$s\"."
+
 #~ msgid "in appointments"
 #~ msgstr "în întâlniri"
 
@@ -13995,10 +14012,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Numele este obligatoriu. Introduceți o valoare."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr ""
-#~ "Nu aveți permisiune pentru a modifica contactul %1$d în contextul %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Nu s-au putut încărca obiectele. Context %1$d utilizator %2$d"
 
@@ -15258,9 +15271,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "A apărut un conflict de parametri."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parametrul \"%1$s\" intră în conflict cu parametrul \"%2$s\"."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "Acțiunea \"%1$s\" este dezactivată din configurațai serverului"

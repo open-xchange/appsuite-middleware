@@ -88,7 +88,7 @@ public interface Dispatcher {
      * @param module The module to look-up by
      * @return The factory or <code>null</code>
      */
-    AJAXActionServiceFactory lookupFactory(final String module);
+    AJAXActionServiceFactory lookupFactory(String module);
 
     /**
      * Begins a dispatcher cycle.

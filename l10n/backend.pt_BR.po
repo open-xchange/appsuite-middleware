@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-26 09:08-0300\n"
+"PO-Revision-Date: 2014-10-09 09:36-0300\n"
 "Last-Translator: Bianca Oliveira <biatopeira@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <kde-i18n-pt_BR@kde.org>\n"
 "Language: pt_BR\n"
@@ -1621,6 +1621,20 @@ msgid ""
 msgstr ""
 "O padrão \"%1$s\" é inválido. Por favor, use um padrão válido e tente "
 "novamente."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"O nome do arquivo \"%1$s\" está em conflito com um diretório de mesmo nome em "
+"\"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"O caminho \"%1$s\" está em conflito com um arquivo de mesmo nome em \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5340,12 +5354,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "O valor requerido \"sobrenome\" não foi fornecido."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"Você não tem as permissões apropriadas para alterar objetos na pasta \"%2$s"
-"\"."
+msgid "You are not allowed to modify that contact"
+msgstr "Você não tem permissão para modificar esse contato"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -11138,6 +11148,13 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Você não tem as permissões apropriadas para alterar objetos na pasta "
+#~ "\"%2$s\"."
 
 #~ msgid "in appointments"
 #~ msgstr "nos compromissos"

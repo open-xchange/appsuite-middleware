@@ -120,6 +120,8 @@ public abstract class SessionServlet extends AJAXServlet {
         final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
         String sessionId = null;
         try {
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             initializeSession(req, resp);
             ServerSession session = SessionUtility.getSessionObject(req, true);
             if (null != session) {

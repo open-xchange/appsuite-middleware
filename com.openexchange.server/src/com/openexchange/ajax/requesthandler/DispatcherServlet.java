@@ -348,8 +348,12 @@ public class DispatcherServlet extends SessionServlet {
      * @throws IOException If an I/O error occurs
      */
     public void handle(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws IOException {
+        /*-
+         * No needed because SessionServlet.service() does already perform it
+         *
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        */
         Tools.disableCaching(httpResponse);
 
         AJAXState state = null;
@@ -415,8 +419,7 @@ public class DispatcherServlet extends SessionServlet {
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (OXException e) {
             if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
-                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                flushSafe(httpResponse);
+                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
                 logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -430,7 +433,12 @@ public class DispatcherServlet extends SessionServlet {
                 Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 int sc = ((Integer) logArgs[0]).intValue();
                 sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
-                logException(e, LogLevel.DEBUG, sc);
+                Throwable cause = e.getNonOXExceptionCause();
+                if (null == cause) {
+                    logException(e, LogLevel.DEBUG, sc);
+                } else {
+                    logException(e);
+                }
                 return;
             }
 

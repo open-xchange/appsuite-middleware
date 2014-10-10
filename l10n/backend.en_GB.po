@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-27 12:20-0600\n"
+"PO-Revision-Date: 2014-10-07 20:30-0600\n"
 "Last-Translator: \n"
 "Language-Team: British English <kde-i18n-doc@kde.org>\n"
 "Language: en_GB\n"
@@ -1610,6 +1610,19 @@ msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"The file name \"%1$s\" conflicts with an equally named directory at "
+"\"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "The path \"%1$s\" conflicts with an equally named file at \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5255,12 +5268,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Required  value \"last name\" was not supplied."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"You do not have the appropriate permissions to change objects in the folder "
-"\"%2$s\"."
+msgid "You are not allowed to modify that contact"
+msgstr "You are not allowed to modify that contact"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -11004,6 +11013,13 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "You do not have the appropriate permissions to change objects in the "
+#~ "folder \"%2$s\"."
+
 #~ msgid "in appointments"
 #~ msgstr "in appointments"
 
@@ -13789,9 +13805,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Your last name is mandatory. Please enter it."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "You are not allowed to modify contact %1$d in context %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Unable to load objects. Context %1$d user %2$d"
 
@@ -14987,9 +15000,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "A parameter conflict occurred."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "The action \"%1$s\" is disabled due to server configuration"
