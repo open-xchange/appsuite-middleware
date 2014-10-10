@@ -63,6 +63,7 @@ import com.openexchange.share.Share;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
 public class ResolvedShare {
 

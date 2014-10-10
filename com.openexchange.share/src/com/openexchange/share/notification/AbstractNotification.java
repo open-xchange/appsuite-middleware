@@ -58,7 +58,7 @@ import com.openexchange.share.Share;
  * {@link ShareNotification}s.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public abstract class AbstractNotification<T> implements ShareNotification<T> {
 

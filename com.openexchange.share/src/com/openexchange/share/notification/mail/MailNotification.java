@@ -64,7 +64,7 @@ import com.openexchange.share.notification.ShareNotification;
  * A {@link ShareNotification} that uses E-Mail as notification mechanism.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class MailNotification extends AbstractNotification<InternetAddress> {
 

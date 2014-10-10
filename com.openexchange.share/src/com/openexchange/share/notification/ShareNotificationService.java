@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
  * A service to notify arbitrary recipients about available shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public interface ShareNotificationService {
 

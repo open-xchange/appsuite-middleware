@@ -53,7 +53,7 @@ package com.openexchange.share.recipient;
  * Describes a guest user to which a item or folder shall be shared.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class GuestRecipient extends ShareRecipient {
 

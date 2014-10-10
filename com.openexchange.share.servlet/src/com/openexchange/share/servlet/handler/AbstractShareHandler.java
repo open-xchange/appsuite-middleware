@@ -57,7 +57,7 @@ import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
  * {@link AbstractShareHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public abstract class AbstractShareHandler implements ShareHandler {
 

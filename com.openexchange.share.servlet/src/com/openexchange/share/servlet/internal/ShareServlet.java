@@ -68,7 +68,7 @@ import com.openexchange.tools.servlet.RateLimitedException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class ShareServlet extends HttpServlet {
 
