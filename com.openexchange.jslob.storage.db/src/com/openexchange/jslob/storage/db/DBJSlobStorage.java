@@ -459,14 +459,21 @@ public final class DBJSlobStorage implements JSlobStorage {
             final String serviceId = id.getServiceId();
             final int user = id.getUser();
             stmt = con.prepareStatement("SELECT data, id FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id IN " + getInString(ids));
-            stmt.setLong(1, contextId);
-            stmt.setLong(2, user);
-            stmt.setString(3, serviceId);
+            int pos = 1;
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, user);
+            stmt.setString(pos++, serviceId);
+
+            int size = ids.size();
+            for (int i = 0; i < size; i++) {
+                stmt.setString(pos++, ids.get(i).getId());
+            }
+
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final int size = ids.size();
+
             final Map<String, JSlob> map = new HashMap<String, JSlob>(size);
             do {
                 final String sId = rs.getString(2);
@@ -500,9 +507,9 @@ public final class DBJSlobStorage implements JSlobStorage {
     private String getInString(final List<JSlobId> ids) {
         final int size = ids.size();
         final StringAllocator sb = new StringAllocator(size << 2);
-        sb.append('(').append('\'').append(ids.get(0).getId()).append('\'');
+        sb.append('(').append('?');
         for (int i = 1; i < size; i++) {
-            sb.append(',').append('\'').append(ids.get(i).getId()).append('\'');
+            sb.append(',').append('?');
         }
         return sb.append(')').toString();
     }
