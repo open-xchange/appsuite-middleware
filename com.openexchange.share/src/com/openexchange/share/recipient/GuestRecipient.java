@@ -47,23 +47,116 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.share.recipient;
 
-import com.openexchange.share.recipient.ShareRecipient;
+
 
 /**
- * {@link GuestPermission}
+ * Describes a guest user to which a item or folder shall be shared.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface GuestPermission extends Permission {
+public class GuestRecipient extends ShareRecipient {
+
+    private String emailAddress;
+    private String displayName;
+    private String contactID;
+    private String contactFolder;
+    private String password;
+
+    public GuestRecipient() {
+        super();
+    }
 
     /**
-     * Gets the share recipient.
+     * Gets the emailAddress
      *
-     * @return The share recipient
+     * @return The emailAddress
      */
-    ShareRecipient getRecipient();
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    /**
+     * Sets the emailAddress
+     *
+     * @param emailAddress The emailAddress to set
+     */
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    /**
+     * Gets the displayName
+     *
+     * @return The displayName
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Sets the displayName
+     *
+     * @param displayName The displayName to set
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * Gets the contactID
+     *
+     * @return The contactID
+     */
+    public String getContactID() {
+        return contactID;
+    }
+
+    /**
+     * Sets the contactID
+     *
+     * @param contactID The contactID to set
+     */
+    public void setContactID(String contactID) {
+        this.contactID = contactID;
+    }
+
+    /**
+     * Gets the contactFolder
+     *
+     * @return The contactFolder
+     */
+    public String getContactFolder() {
+        return contactFolder;
+    }
+
+    /**
+     * Sets the contactFolder
+     *
+     * @param contactFolder The contactFolder to set
+     */
+    public void setContactFolder(String contactFolder) {
+        this.contactFolder = contactFolder;
+    }
+
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 }

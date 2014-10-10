@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link ShareService}
@@ -119,21 +120,21 @@ public interface ShareService {
      *
      * @param session The session
      * @param target The share target
-     * @param guests The guest users for the shares
-     * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
-     *         in the same order as the supplied guests list
+     * @param recipients The recipients for the shares
+     * @return The created shares, where each share corresponds to a recipients that has been added through the creation of the shares,
+     *         in the same order as the supplied recipient list
      */
-    List<Share> createShares(Session session, ShareTarget target, List<AddedGuest> guests) throws OXException;
+    List<Share> createShares(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Creates shares for multiple folders or items for the supplied guest users.
      *
      * @param session The session
      * @param targets The share targets
-     * @param guests The guest users for the shares
+     * @param recipients The recipients for the shares
      * @return The created shares
      */
-    List<Share> createShares(Session session, List<ShareTarget> targets, List<AddedGuest> guests) throws OXException;
+    List<Share> createShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Generates a URL for every share that is passed.

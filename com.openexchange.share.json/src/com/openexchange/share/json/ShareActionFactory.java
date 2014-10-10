@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.json.actions.AllAction;
 import com.openexchange.share.json.actions.DeleteAction;
+import com.openexchange.share.json.actions.NewAction;
 import com.openexchange.share.json.actions.NotifyAction;
 import com.openexchange.share.json.actions.UpdateAction;
 
@@ -82,6 +83,7 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
         actions.put("notify", new NotifyAction(services));
         actions.put("delete", new DeleteAction(services));
         actions.put("update", new UpdateAction(services));
+        actions.put("new", new NewAction(services));
     }
 
     @Override

@@ -47,23 +47,61 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.share.json.internal;
 
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * {@link GuestPermission}
+ * {@link InternalRecipient}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface GuestPermission extends Permission {
+public class InternalRecipient extends ShareRecipient {
+
+    private boolean group;
+    private int id;
 
     /**
-     * Gets the share recipient.
-     *
-     * @return The share recipient
+     * Initializes a new {@link InternalRecipient}.
      */
-    ShareRecipient getRecipient();
+    public InternalRecipient() {
+        super();
+    }
+
+    /**
+     * Gets the group
+     *
+     * @return The group
+     */
+    public boolean isGroup() {
+        return group;
+    }
+
+    /**
+     * Sets the group
+     *
+     * @param group The group to set
+     */
+    public void setGroup(boolean group) {
+        this.group = group;
+    }
+
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Sets the id
+     *
+     * @param id The id to set
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
 
 }

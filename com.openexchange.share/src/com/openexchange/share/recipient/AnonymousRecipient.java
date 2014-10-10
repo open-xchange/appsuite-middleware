@@ -47,23 +47,40 @@
  *
  */
 
-package com.openexchange.folderstorage;
-
-import com.openexchange.share.recipient.ShareRecipient;
+package com.openexchange.share.recipient;
 
 /**
- * {@link GuestPermission}
+ * {@link AnonymousRecipient}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface GuestPermission extends Permission {
+public class AnonymousRecipient extends ShareRecipient {
+
+    private String password;
 
     /**
-     * Gets the share recipient.
-     *
-     * @return The share recipient
+     * Initializes a new {@link AnonymousRecipient}.
      */
-    ShareRecipient getRecipient();
+    public AnonymousRecipient() {
+        super();
+    }
+
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 }

@@ -47,23 +47,82 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.share.recipient;
 
-import com.openexchange.share.recipient.ShareRecipient;
+import java.util.Date;
+
 
 /**
- * {@link GuestPermission}
+ * Describes a guest user to which a item or folder shall be shared.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface GuestPermission extends Permission {
+public abstract class ShareRecipient {
+
+    private int bits;
+    private Date activationDate;
+    private Date expiryDate;
 
     /**
-     * Gets the share recipient.
-     *
-     * @return The share recipient
+     * Initializes a new {@link ShareRecipient}.
      */
-    ShareRecipient getRecipient();
+    protected ShareRecipient() {
+        super();
+    }
+
+    /**
+     * Gets the bits
+     *
+     * @return The bits
+     */
+    public int getBits() {
+        return bits;
+    }
+
+    /**
+     * Sets the bits
+     *
+     * @param bits The bits to set
+     */
+    public void setBits(int bits) {
+        this.bits = bits;
+    }
+
+    /**
+     * Gets the activationDate
+     *
+     * @return The activationDate
+     */
+    public Date getActivationDate() {
+        return activationDate;
+    }
+
+    /**
+     * Sets the activationDate
+     *
+     * @param activationDate The activationDate to set
+     */
+    public void setActivationDate(Date activationDate) {
+        this.activationDate = activationDate;
+    }
+
+    /**
+     * Gets the expiryDate
+     *
+     * @return The expiryDate
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * Sets the expiryDate
+     *
+     * @param expiryDate The expiryDate to set
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
 
 }

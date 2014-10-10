@@ -64,29 +64,26 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.AddedGuest;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -242,14 +239,14 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<Share> createShares(Session session, ShareTarget target, List<AddedGuest> guests) throws OXException {
-        return createShares(session, Collections.singletonList(target), guests);
+    public List<Share> createShares(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
+        return createShares(session, Collections.singletonList(target), recipients);
     }
 
     @Override
-    public List<Share> createShares(Session session, List<ShareTarget> targets, List<AddedGuest> guests) throws OXException {
-        LOG.info("Adding shares to recipient(s) {} for {} in context {}...", guests, targets, session.getContextId());
-        List<Share> shares = new ArrayList<Share>(guests.size());
+    public List<Share> createShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
+        LOG.info("Adding shares to recipient(s) {} for {} in context {}...", recipients, targets, session.getContextId());
+        List<Share> shares = new ArrayList<Share>(recipients.size());
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
         int permissionBits = ShareTool.getUserPermissionBitsForTargets(targets);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
@@ -260,13 +257,13 @@ public class DefaultShareService implements ShareService {
              */
             User sharingUser = services.getService(UserService.class).getUser(
                 connectionHelper.getConnection(), session.getUserId(), context);
-            List<User> guestUsers = new ArrayList<User>(guests.size());
-            for (AddedGuest recipient : guests) {
+            List<User> guestUsers = new ArrayList<User>(recipients.size());
+            for (ShareRecipient recipient : recipients) {
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, session);
                 guestUsers.add(guestUser);
                 for (ShareTarget target : targets) {
                     shares.add(ShareTool.prepareShare(sharingUser, context.getContextId(), target.getModule(), target.getFolder(),
-                        guestUser.getId(), recipient.getExpires(), recipient.getAuthenticationMode()));
+                        guestUser.getId(), recipient.getExpiryDate(), null)); //TODO: start date, auth?
                 }
             }
             /*
@@ -525,20 +522,21 @@ public class DefaultShareService implements ShareService {
      * @param context The context
      * @param sharingUser The sharing user
      * @param permissionBits The permission bits to apply to the guest user
-     * @param guest The guest description
+     * @param recipient The recipient description
      * @return The guest user
      * @throws OXException
      */
-    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, AddedGuest guest, Session session) throws OXException {
+    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, Session session) throws OXException {
         UserService userService = services.getService(UserService.class);
-        if (AuthenticationMode.ANONYMOUS != guest.getAuthenticationMode() && services.getService(
+        if (GuestRecipient.class.isInstance(recipient) && services.getService(
             ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", true)) {
             /*
              * re-use existing, non-anonymous guest user if possible
              */
+            GuestRecipient guestRecipient = (GuestRecipient) recipient;
             User existingGuestUser = null;
             try {
-                existingGuestUser = userService.searchUser(guest.getMailAddress(), context, false, true, true);
+                existingGuestUser = userService.searchUser(guestRecipient.getEmailAddress(), context, false, true, true);
             } catch (OXException e) {
                 if (false == LdapExceptionCode.NO_USER_BY_MAIL.equals(e)) {
                     throw e;
@@ -558,40 +556,19 @@ public class DefaultShareService implements ShareService {
         /*
          * create new guest user
          */
-        // TODO create contact
-        ContactService contactService = services.getService(ContactService.class);
-        if (null == contactService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactService.class);
-        }
-        String guestMailAddress = guest.getMailAddress();
-        Contact contact = null;
-        ContactSearchObject searchObject = new ContactSearchObject();
-        searchObject.setEmail1(guestMailAddress);
-        SearchIterator<Contact> it = contactService.searchContacts(session, searchObject);
-        if (it.hasNext()) {
-            contact = it.next();
+        UserImpl guestUser;
+        if (AnonymousRecipient.class.isInstance(recipient)) {
+            guestUser = ShareTool.prepareGuestUser(services, sharingUser, (AnonymousRecipient) recipient);
+        } else if (GuestRecipient.class.isInstance(recipient)) {
+            guestUser = ShareTool.prepareGuestUser(services, sharingUser, (GuestRecipient) recipient);
         } else {
-            contact = new Contact();
-            contact.setDisplayName(guest.getDisplayName());
-            contact.setEmail1(guestMailAddress);
+            throw new UnsupportedOperationException("unsupported share recipient: " + recipient);
         }
-        contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
-        contact.setCreatedBy(sharingUser.getId());
-        contactService.createContact(session, String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID), contact);
-        UserImpl guestUser = ShareTool.prepareGuestUser(services, sharingUser, guest, contact.getObjectID());
         int guestID = userService.createUser(connection, context, guestUser);
-        // TODO update contact, guestId = internal user id
-        contact.setInternalUserId(guestID);
-        contactService.updateContact(
-            session,
-            String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID),
-            String.valueOf(contact.getObjectID()),
-            contact,
-            new Date());
         guestUser.setId(guestID);
         services.getService(UserPermissionService.class).saveUserPermissionBits(
             connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
-        if (AuthenticationMode.ANONYMOUS == guest.getAuthenticationMode()) {
+        if (AnonymousRecipient.class.isInstance(recipient)) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {
             LOG.info("Created guest user {} with permissions {} in context {}: {}",

@@ -50,13 +50,10 @@
 package com.openexchange.share.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -66,19 +63,18 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.AddedGuest;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Share;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
 
 
 /**
@@ -254,39 +250,49 @@ public class ShareTool {
     }
 
     /**
-     * Prepares a guest user instance.
+     * Prepares an anonymous guest user instance.
      *
      * @param services The service lookup reference
      * @param sharingUser The sharing user
-     * @param guest The guest description
+     * @param recipient The recipient description
      * @return The guest user
      * @throws OXException
      */
-    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, AddedGuest guest, int contactId) throws OXException {
+    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, AnonymousRecipient recipient) throws OXException {
+        UserImpl guestUser = prepareGuestUser(sharingUser);
+        guestUser.setDisplayName("Guest");
+        guestUser.setMail("");
+        if (null != recipient.getPassword()) {
+            guestUser.setUserPassword(recipient.getPassword());
+            guestUser.setPasswordMech("{CRYPTO_SERVICE}");
+        }
+        return guestUser;
+    }
+
+    /**
+     * Prepares a (named) guest user instance.
+     *
+     * @param services The service lookup reference
+     * @param sharingUser The sharing user
+     * @param recipient The recipient description
+     * @return The guest user
+     * @throws OXException
+     */
+    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, GuestRecipient recipient) throws OXException {
+        UserImpl guestUser = prepareGuestUser(sharingUser);
+        guestUser.setDisplayName(recipient.getDisplayName());
+        guestUser.setMail(recipient.getEmailAddress());
+        guestUser.setUserPassword(recipient.getPassword());
+        guestUser.setPasswordMech("{CRYPT}");
+        return guestUser;
+    }
+
+    private static UserImpl prepareGuestUser(User sharingUser) throws OXException {
         UserImpl guestUser = new UserImpl();
         guestUser.setCreatedBy(sharingUser.getId());
         guestUser.setPreferredLanguage(sharingUser.getPreferredLanguage());
         guestUser.setTimeZone(sharingUser.getTimeZone());
-        guestUser.setDisplayName(guest.getDisplayName());
         guestUser.setMailEnabled(true);
-        guestUser.setPasswordMech("{CRYPTO_SERVICE}");
-        guestUser.setContactId(contactId);
-        AuthenticationMode authenticationMode = guest.getAuthenticationMode();
-        if (authenticationMode != null && authenticationMode != AuthenticationMode.ANONYMOUS) {
-            guestUser.setMail(guest.getMailAddress());
-            guestUser.setUserPassword(services.getService(ShareCryptoService.class).encrypt(guest.getPassword()));
-        } else {
-            guestUser.setMail(""); // not null
-        }
-        if (false == Strings.isEmpty(guest.getContactID()) && false == Strings.isEmpty(guest.getContactFolderID())) {
-            Map<String, Set<String>> attributes = guestUser.getAttributes();
-            if (null == attributes) {
-                attributes = new HashMap<String, Set<String>>(2);
-            }
-            attributes.put("com.openexchange.user.guestContactFolderID", Collections.singleton(guest.getContactFolderID()));
-            attributes.put("com.openexchange.user.guestContactID", Collections.singleton(guest.getContactID()));
-            guestUser.setAttributes(attributes);
-        }
         return guestUser;
     }
 

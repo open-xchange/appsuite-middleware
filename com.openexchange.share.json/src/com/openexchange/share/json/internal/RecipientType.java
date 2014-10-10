@@ -47,23 +47,39 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.share.json.internal;
 
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * {@link GuestPermission}
+ * {@link RecipientType}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface GuestPermission extends Permission {
+public enum RecipientType {
 
-    /**
-     * Gets the share recipient.
-     *
-     * @return The share recipient
-     */
-    ShareRecipient getRecipient();
+    USER,
+
+    GROUP,
+
+    GUEST,
+
+    ANONYMOUS
+    ;
+
+    public static RecipientType of(ShareRecipient recipient) {
+        if (InternalRecipient.class.isInstance(recipient)) {
+            return ((InternalRecipient) recipient).isGroup() ? GROUP : USER;
+        }
+        if (AnonymousRecipient.class.isInstance(recipient)) {
+            return ANONYMOUS;
+        }
+        if (GuestRecipient.class.isInstance(recipient)) {
+            return GUEST;
+        }
+        return null;
+    }
 
 }

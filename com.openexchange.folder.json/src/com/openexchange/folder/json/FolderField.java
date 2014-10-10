@@ -183,7 +183,11 @@ public enum FolderField {
     /**
      * The date when an external permission should expire
      */
-    EXPIRES(-1, "expires"),
+    EXPIRY_DATE(-1, "expiry_date"),
+    /**
+     * The date when an external permission should become active
+     */
+    ACTIVATION_DATE(-1, "activation_date"),
     /**
      * Display name for an external permission
      */

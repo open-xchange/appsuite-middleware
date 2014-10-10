@@ -49,9 +49,8 @@
 
 package com.openexchange.folder.json.parser;
 
-import java.util.Date;
 import com.openexchange.folderstorage.GuestPermission;
-import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link ParsedGuestPermission}
@@ -63,13 +62,7 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
 
     private static final long serialVersionUID = 7203618073266628866L;
 
-    private String mailAddress;
-    private String contactID;
-    private String contactFolderID;
-    private String displayName;
-    private AuthenticationMode authenticationMode;
-    private String password;
-    private Date expires;
+    private ShareRecipient recipient;
 
     /**
      * Initializes an empty {@link ParsedGuestPermission}.
@@ -79,156 +72,12 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
     }
 
     @Override
-    public String getEmailAddress() {
-        return mailAddress;
+    public ShareRecipient getRecipient() {
+        return recipient;
     }
 
-
-    public void setEmailAddress(String mailAddress) {
-        this.mailAddress = mailAddress;
-    }
-
-    @Override
-    public String getContactID() {
-        return contactID;
-    }
-
-    public void setContactID(String contactID) {
-        this.contactID = contactID;
-    }
-
-    @Override
-    public String getContactFolderID() {
-        return contactFolderID;
-    }
-
-    public void setContactFolderID(String contactFolderID) {
-        this.contactFolderID = contactFolderID;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
-    public AuthenticationMode getAuthenticationMode() {
-        return authenticationMode;
-    }
-
-    /**
-     * Sets the authenticationMode
-     *
-     * @param authenticationMode The authenticationMode to set
-     */
-    public void setAuthenticationMode(AuthenticationMode authenticationMode) {
-        this.authenticationMode = authenticationMode;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets the password
-     *
-     * @param password The password to set
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public Date getExpires() {
-        return expires;
-    }
-
-    /**
-     * Sets the expires
-     *
-     * @param expires The expires to set
-     */
-    public void setExpires(Date expires) {
-        this.expires = expires;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((authenticationMode == null) ? 0 : authenticationMode.hashCode());
-        result = prime * result + ((contactFolderID == null) ? 0 : contactFolderID.hashCode());
-        result = prime * result + ((contactID == null) ? 0 : contactID.hashCode());
-        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
-        result = prime * result + ((mailAddress == null) ? 0 : mailAddress.hashCode());
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((expires == null) ? 0 : expires.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof ParsedGuestPermission)) {
-            return false;
-        }
-        ParsedGuestPermission other = (ParsedGuestPermission) obj;
-        if (authenticationMode != other.authenticationMode) {
-            return false;
-        }
-        if (contactFolderID == null) {
-            if (other.contactFolderID != null) {
-                return false;
-            }
-        } else if (!contactFolderID.equals(other.contactFolderID)) {
-            return false;
-        }
-        if (contactID == null) {
-            if (other.contactID != null) {
-                return false;
-            }
-        } else if (!contactID.equals(other.contactID)) {
-            return false;
-        }
-        if (displayName == null) {
-            if (other.displayName != null) {
-                return false;
-            }
-        } else if (!displayName.equals(other.displayName)) {
-            return false;
-        }
-        if (mailAddress == null) {
-            if (other.mailAddress != null) {
-                return false;
-            }
-        } else if (!mailAddress.equals(other.mailAddress)) {
-            return false;
-        }
-        if (password == null) {
-            if (other.password != null) {
-                return false;
-            }
-        } else if (!password.equals(other.password)) {
-            return false;
-        }
-        if (expires == null) {
-            if (other.expires != null) {
-                return false;
-            }
-        } else if (!expires.equals(other.expires)) {
-            return false;
-        }
-        return true;
+    public void setRecipient(ShareRecipient recipient) {
+        this.recipient = recipient;
     }
 
 }

@@ -18,4 +18,5 @@ Import-Package: com.google.common.base,
  org.slf4j
 Export-Package: com.openexchange.share,
  com.openexchange.share.notification,
- com.openexchange.share.notification.mail
+ com.openexchange.share.notification.mail,
+ com.openexchange.share.recipient

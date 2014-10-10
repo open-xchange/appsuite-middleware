@@ -87,10 +87,10 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.AddedGuest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
@@ -455,9 +455,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *         in the same order as the supplied guest permissions list
      */
     protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
-        List<AddedGuest> guests = new ArrayList<AddedGuest>(addedPermissions.size());
+        List<ShareRecipient> guests = new ArrayList<ShareRecipient>(addedPermissions.size());
         for (GuestPermission permission : addedPermissions) {
-            guests.add(createGuest(permission));
+            guests.add(permission.getRecipient());
         }
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
@@ -473,24 +473,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
-    }
-
-    /**
-     * Creates a guest using the properties found in the supplied guest permissions.
-     *
-     * @param permission The guest permissions to create the guest for
-     * @return The guest
-     */
-    private static AddedGuest createGuest(GuestPermission permission) {
-        AddedGuest guest = new AddedGuest();
-        guest.setAuthenticationMode(permission.getAuthenticationMode());
-        guest.setContactFolderID(permission.getContactFolderID());
-        guest.setContactID(permission.getContactID());
-        guest.setDisplayName(permission.getDisplayName());
-        guest.setExpires(permission.getExpires());
-        guest.setMailAddress(permission.getEmailAddress());
-        guest.setPassword(permission.getPassword());
-        return guest;
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {

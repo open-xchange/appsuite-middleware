@@ -64,8 +64,9 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.java.Enums;
-import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -210,29 +211,36 @@ public final class FolderParser {
                     /*
                      * parse as newly added external permission
                      */
-                    ParsedGuestPermission perm = new ParsedGuestPermission();
-                    String authValue = jPerm.getString(FolderField.GUEST_AUTH.getName());
-                    try {
-                        perm.setAuthenticationMode(Enums.parse(AuthenticationMode.class, authValue));
-                    } catch (IllegalArgumentException e) {
-                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, FolderField.GUEST_AUTH.getName(), authValue);
-                    }
-                    if (jPerm.hasAndNotNull(FolderField.EXPIRES.getName())) {
-                        perm.setExpires(new Date(jPerm.getLong(FolderField.EXPIRES.getName())));
-                    }
-                    if (AuthenticationMode.ANONYMOUS != perm.getAuthenticationMode()) {
+                    ShareRecipient recipient;
+                    String type = jPerm.getString("type");
+                    if ("anonymous".equalsIgnoreCase(type)) {
+                        AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
+                        anonymousRecipient.setPassword(jPerm.optString(FolderField.PASSWORD.getName(), null));
+                        recipient = anonymousRecipient;
+                    } else if ("guest".equalsIgnoreCase(type)) {
+                        GuestRecipient guestRecipient = new GuestRecipient();
+                        guestRecipient.setPassword(jPerm.optString(FolderField.PASSWORD.getName(), null));
                         if (false == jPerm.hasAndNotNull(FolderField.MAIL_ADDRESS.getName())) {
                             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.MAIL_ADDRESS.getName());
                         }
-                        perm.setEmailAddress(jPerm.getString(FolderField.MAIL_ADDRESS.getName()));
-                        if (false == jPerm.hasAndNotNull(FolderField.PASSWORD.getName())) {
-                            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.PASSWORD.getName());
-                        }
-                        perm.setPassword(jPerm.optString(FolderField.PASSWORD.getName(), null));
-                        perm.setDisplayName(jPerm.optString(FolderField.DISPLAY_NAME.getName(), null));
-                        perm.setContactID(jPerm.optString(FolderField.CONTACT_ID.getName(), null));
-                        perm.setContactFolderID(jPerm.optString(FolderField.CONTACT_FOLDER_ID.getName(), null));
+                        guestRecipient.setEmailAddress(jPerm.getString(FolderField.MAIL_ADDRESS.getName()));
+                        guestRecipient.setPassword(jPerm.optString(FolderField.PASSWORD.getName(), null));
+                        guestRecipient.setDisplayName(jPerm.optString(FolderField.DISPLAY_NAME.getName(), null));
+                        guestRecipient.setContactID(jPerm.optString(FolderField.CONTACT_ID.getName(), null));
+                        guestRecipient.setContactFolder(jPerm.optString(FolderField.CONTACT_FOLDER_ID.getName(), null));
+                        recipient = guestRecipient;
+                    } else {
+                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
                     }
+                    if (jPerm.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
+                        recipient.setExpiryDate(new Date(jPerm.getLong(FolderField.EXPIRY_DATE.getName())));
+                    }
+                    if (jPerm.hasAndNotNull(FolderField.ACTIVATION_DATE.getName())) {
+                        recipient.setActivationDate(new Date(jPerm.getLong(FolderField.ACTIVATION_DATE.getName())));
+                    }
+                    recipient.setBits(jPerm.getInt(FolderField.BITS.getName()));
+                    ParsedGuestPermission perm = new ParsedGuestPermission();
+                    perm.setRecipient(recipient);
                     oclPerm = perm;
                 } else {
                     throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
