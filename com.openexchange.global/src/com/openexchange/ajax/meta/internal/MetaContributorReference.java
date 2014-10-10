@@ -49,14 +49,26 @@
 
 package com.openexchange.ajax.meta.internal;
 
+import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.ajax.meta.MetaContributionConstants;
 import com.openexchange.ajax.meta.MetaContributor;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.session.Session;
 
 /**
@@ -214,8 +226,89 @@ public class MetaContributorReference implements MetaContributor {
             contributor.contributeTo(meta, id, session);
         } catch (Throwable t) {
             // log/handle any Throwable thrown by the listener
+            handleThrowable(t);
             LOG.error("Entity contribution failed", t);
         }
+    }
+
+    private void handleThrowable(final Throwable t) {
+        if (t instanceof ThreadDeath) {
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}Thread death{}", marker, marker, t);
+            throw (ThreadDeath) t;
+        }
+        if (t instanceof OutOfMemoryError) {
+            OutOfMemoryError oom = (OutOfMemoryError) t;
+            String message = oom.getMessage();
+            if ("unable to create new native thread".equalsIgnoreCase(message)) {
+                // Dump all the threads to the log
+                Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
+                String ls = Strings.getLineSeparator();
+                LOG.info("{}Threads: {}", ls, threads.size());
+                StringBuilder sb = new StringBuilder(2048);
+                for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
+                    Thread thread = mapEntry.getKey();
+                    sb.setLength(0);
+                    sb.append("        Thread: ").append(thread).append(ls);
+                    for (StackTraceElement elem : mapEntry.getValue()) {
+                        sb.append(elem).append(ls);
+                    }
+                    LOG.info(sb.toString());
+                }
+                sb = null; // Might help GC
+                LOG.info("{}    Thread dump finished{}", ls, ls);
+            } else if ("Java heap space".equalsIgnoreCase(message)) {
+                try {
+                    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+                    Pair<Boolean, String> heapDumpArgs = checkHeapDumpArguments();
+
+                    // Is HeapDumpOnOutOfMemoryError enabled?
+                    if (!heapDumpArgs.getFirst().booleanValue() && !Boolean.TRUE.equals(System.getProperties().get("__heap_dump_created"))) {
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
+                        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                        // Either "/tmp" or path configured through "-XX:HeapDumpPath" JVM argument
+                        String path = null == heapDumpArgs.getSecond() ? "/tmp" : heapDumpArgs.getSecond();
+                        String fn = path + "/" + dateFormat.format(new Date()) + "-heap.hprof";
+
+                        String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
+                        server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
+                        System.getProperties().put("__heap_dump_created", Boolean.TRUE);
+                        LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
+                    }
+                } catch (Exception e) {
+                    // Failed for any reason...
+                }
+            }
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
+            throw oom;
+        }
+        if (t instanceof VirtualMachineError) {
+            String marker = " ---=== /!\\ ===--- ";
+            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
+            throw (VirtualMachineError) t;
+        }
+    }
+
+    private static Pair<Boolean, String> checkHeapDumpArguments() {
+        RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+        List<String> arguments = runtimeMxBean.getInputArguments();
+        boolean heapDumpOnOOm = false;
+        String path = null;
+        for (String argument : arguments) {
+            if ("-XX:+HeapDumpOnOutOfMemoryError".equals(argument)) {
+                heapDumpOnOOm = true;
+            } else if (argument.startsWith("-XX:HeapDumpPath=")) {
+                path = argument.substring(17).trim();
+                File file = new File(path);
+                if (!file.exists() || !file.canWrite()) {
+                   path = null;
+                }
+            }
+        }
+        return new Pair<Boolean, String>(Boolean.valueOf(heapDumpOnOOm), path);
     }
 
 }

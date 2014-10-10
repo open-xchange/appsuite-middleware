@@ -71,7 +71,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -258,8 +260,15 @@ public final class LoginTools {
         if (conf.isInsecure()) {
             String oldIP = session.getLocalIp();
             if (null != newIP && !newIP.equals(oldIP)) {
-                LOG.info("Updating sessions IP address. authID: {}, sessionID: {}, old ip: {}, new ip: {}", session.getAuthId(), session.getSessionID(), oldIP, newIP);
-                session.setLocalIp(newIP);
+                LOG.info("Updating session's IP address. authID: {}, sessionID: {}, old IP address: {}, new IP address: {}", session.getAuthId(), session.getSessionID(), oldIP, newIP);
+                SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                if (null != service) {
+                    try {
+                        service.setLocalIp(session.getSessionID(), newIP);
+                    } catch (OXException e) {
+                        LOG.info("Failed to update session's IP address. authID: {}, sessionID: {}, old IP address: {}, new IP address: {}", session.getAuthId(), session.getSessionID(), oldIP, newIP, e);
+                    }
+                }
             }
         }
     }
