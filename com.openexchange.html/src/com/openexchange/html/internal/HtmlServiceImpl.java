@@ -1636,7 +1636,7 @@ public final class HtmlServiceImpl implements HtmlService {
             if (isValidCondition(condition)) {
                 sb.append(CC_START_IF).append(condition);
                 final String wrappedContent = m.group(3);
-                if (!wrappedContent.startsWith("-->", 0)) {
+                if (!wrappedContent.startsWith("-->", 0) && !condition.endsWith("-->")) {
                     sb.append(CC_END_IF);
                 }
                 sb.append(wrappedContent);
