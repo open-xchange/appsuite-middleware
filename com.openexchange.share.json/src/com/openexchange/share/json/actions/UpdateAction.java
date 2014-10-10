@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link UpdateAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class UpdateAction extends AbstractShareAction {
 

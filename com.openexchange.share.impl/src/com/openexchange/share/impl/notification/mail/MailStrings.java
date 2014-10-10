@@ -56,7 +56,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * Translatable Strings to compose share notification mails.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class MailStrings implements LocalizableStrings {
 

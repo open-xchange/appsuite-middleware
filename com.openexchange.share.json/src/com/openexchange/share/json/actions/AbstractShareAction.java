@@ -62,7 +62,7 @@ import com.openexchange.share.ShareService;
  * {@link AbstractShareAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public abstract class AbstractShareAction implements AJAXActionService {
 

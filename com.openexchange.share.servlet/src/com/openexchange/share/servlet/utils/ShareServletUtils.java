@@ -77,7 +77,7 @@ import com.openexchange.user.UserService;
  * {@link ShareServletUtils} - Utilities for Share Servlet layer.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public final class ShareServletUtils {
 
