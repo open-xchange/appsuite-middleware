@@ -52,6 +52,7 @@ package com.openexchange.file.storage.composition.internal;
 import static com.openexchange.file.storage.composition.internal.IDManglingFileCustomizer.fixIDs;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,6 +82,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -115,6 +117,10 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -126,6 +132,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tx.AbstractService;
 import com.openexchange.tx.TransactionAwares;
 import com.openexchange.tx.TransactionException;
+import com.openexchange.tx.TransactionState;
 
 /**
  * {@link AbstractCompositingIDBasedFileAccess}
@@ -737,6 +744,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
         @Override
         public final V call(final FileStorageFileAccess access) throws OXException {
+            boolean tsOwner = !TransactionState.isInitialized();
+            if (tsOwner) {
+                TransactionState.init();
+            }
             boolean rollback = false;
             try {
                 // Start transaction
@@ -754,6 +765,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                     TransactionAwares.rollbackSafe(access);
                 }
                 TransactionAwares.finishSafe(access);
+                if (tsOwner) {
+                    TransactionState.cleanUp();
+                }
             }
         }
 
@@ -766,6 +780,70 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
          */
         protected abstract V callInTransaction(FileStorageFileAccess access) throws OXException;
 
+    }
+
+    private List<FileStorageGuestObjectPermission> stripGuestPermissions(File document) {
+        List<FileStorageObjectPermission> objectPermissions = document.getObjectPermissions();
+        if (objectPermissions != null && !objectPermissions.isEmpty()) {
+            List<FileStorageGuestObjectPermission> guestPermissions = new ArrayList<FileStorageGuestObjectPermission>(objectPermissions.size());
+            List<FileStorageObjectPermission> userPermissions = new ArrayList<FileStorageObjectPermission>(objectPermissions.size());
+            for (FileStorageObjectPermission fsop : objectPermissions) {
+                if (FileStorageGuestObjectPermission.class.isAssignableFrom(fsop.getClass())) {
+                    guestPermissions.add((FileStorageGuestObjectPermission) fsop);
+                } else {
+                    userPermissions.add(fsop);
+                }
+            }
+
+            document.setObjectPermissions(userPermissions);
+            return guestPermissions;
+        }
+
+        return Collections.emptyList();
+    }
+
+    private boolean handleNewGuestPermissions(File document, List<FileStorageGuestObjectPermission> guestPermissions) throws OXException {
+        if (guestPermissions != null && !guestPermissions.isEmpty()) {
+            List<ShareRecipient> shareRecipients = new ArrayList<ShareRecipient>(guestPermissions.size());
+            for (FileStorageGuestObjectPermission guestPermission : guestPermissions) {
+                shareRecipients.add(guestPermission.toShareRecipient());
+            }
+
+            Connection con = null;
+            if (TransactionState.isInitialized()) {
+                Object object = TransactionState.get(TransactionState.WRITE_CON);
+                if (object != null && object instanceof Connection) {
+                    con = (Connection) object;
+                }
+            }
+
+            List<FileStorageObjectPermission> allPermissions = new ArrayList<FileStorageObjectPermission>(shareRecipients.size());
+            try {
+                session.setParameter(Connection.class.getName(), con);
+                ShareService shareService = Services.getService(ShareService.class);
+                ShareTarget shareTarget = new ShareTarget(8, document.getFolderId(), document.getId()); // TODO: no module constant accessible
+                List<Share> shares = shareService.createShares(session, shareTarget, shareRecipients);
+                for (int i = 0; i < guestPermissions.size(); i++) {
+                    FileStorageGuestObjectPermission guestPermission = guestPermissions.get(0);
+                    Share share = shares.get(i);
+                    allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuest(), false, guestPermission.getPermissions()));
+                }
+
+                List<FileStorageObjectPermission> objectPermissions = document.getObjectPermissions();
+                if (objectPermissions != null) {
+                    for (FileStorageObjectPermission objectPermission : objectPermissions) {
+                        allPermissions.add(objectPermission);
+                    }
+                }
+
+                document.setObjectPermissions(allPermissions);
+                return true;
+            } finally {
+                session.setParameter(Connection.class.getName(), null);
+            }
+        }
+
+        return false;
     }
 
     protected void save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation<Void> saveDelegation) throws OXException {
@@ -781,6 +859,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 }
                 targetFolderID = new FolderID(folderId);
             }
+
             document.setFolderId(targetFolderID.getFolderId());
             FileStorageFileAccess fileAccess = getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId());
             saveDelegation.call(fileAccess);
@@ -791,16 +870,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 document.getId());
             document.setId(newID.toUniqueID());
             document.setFolderId(targetFolderID.toUniqueID());
-
-            // TODO: only if FileStorageFileAccess supports object permissions
-            List<FileStorageObjectPermission> objectPermissions = document.getObjectPermissions();
-            if (objectPermissions != null && !objectPermissions.isEmpty()) {
-                for (FileStorageObjectPermission fsop : objectPermissions) {
-                    if (FileStorageGuestObjectPermission.class.isAssignableFrom(fsop.getClass())) {
-                        // TODO: implement me
-                    }
-                }
-            }
 
             postEvent(FileStorageEventHelper.buildCreateEvent(
                 session,
@@ -978,7 +1047,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
             @Override
             protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
+                List<FileStorageGuestObjectPermission> guestPermissions = stripGuestPermissions(document);
                 access.saveDocument(document, data, sequenceNumber);
+                if (handleNewGuestPermissions(document, guestPermissions)) {
+                    access.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                }
                 return null;
             }
 
@@ -991,7 +1064,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
             @Override
             protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
+                List<FileStorageGuestObjectPermission> guestPermissions = stripGuestPermissions(document);
                 access.saveDocument(document, data, sequenceNumber, modifiedColumns);
+                if (handleNewGuestPermissions(document, guestPermissions)) {
+                    access.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                }
                 return null;
             }
 
@@ -1004,6 +1081,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
             @Override
             protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
+                List<FileStorageGuestObjectPermission> guestPermissions = stripGuestPermissions(document);
                 if (access instanceof FileStorageIgnorableVersionFileAccess) {
                     ((FileStorageIgnorableVersionFileAccess) access).saveDocument(
                         document,
@@ -1013,6 +1091,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                         ignoreVersion);
                 } else {
                     access.saveDocument(document, data, sequenceNumber, modifiedColumns);
+                }
+                if (handleNewGuestPermissions(document, guestPermissions)) {
+                    access.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
                 }
                 return null;
             }
@@ -1036,10 +1117,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
             @Override
             protected Void callInTransaction(FileStorageFileAccess fileAccess) throws OXException {
+                List<FileStorageGuestObjectPermission> guestPermissions = stripGuestPermissions(document);
                 if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
                     throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
                 }
                 ((FileStorageRandomFileAccess) fileAccess).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
+                if (handleNewGuestPermissions(document, guestPermissions)) {
+                    fileAccess.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                }
                 return null;
             }
 
@@ -1062,7 +1147,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
             @Override
             protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
+                List<FileStorageGuestObjectPermission> guestPermissions = stripGuestPermissions(document);
                 access.saveFileMetadata(document, sequenceNumber);
+                if (handleNewGuestPermissions(document, guestPermissions)) {
+                    access.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                }
                 return null;
             }
 
@@ -1075,7 +1164,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
             @Override
             protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
+                List<FileStorageGuestObjectPermission> guestPermissions = stripGuestPermissions(document);
                 access.saveFileMetadata(document, sequenceNumber, modifiedColumns);
+                if (handleNewGuestPermissions(document, guestPermissions)) {
+                    access.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                }
                 return null;
             }
 

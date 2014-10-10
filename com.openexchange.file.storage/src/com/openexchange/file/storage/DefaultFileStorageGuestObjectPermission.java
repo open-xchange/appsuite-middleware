@@ -51,6 +51,9 @@ package com.openexchange.file.storage;
 
 import java.util.Date;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -150,6 +153,32 @@ public class DefaultFileStorageGuestObjectPermission extends DefaultFileStorageO
      */
     public void setExpires(Date expires) {
         this.expires = expires;
+    }
+
+    @Override
+    public ShareRecipient toShareRecipient() {
+        ShareRecipient r;
+        if (AuthenticationMode.ANONYMOUS == authenticationMode) {
+            AnonymousRecipient ar = new AnonymousRecipient();
+            ar.setPassword(password);
+            r = ar;
+        } else {
+            GuestRecipient gr = new GuestRecipient();
+            gr.setContactFolder(contactFolderID);
+            gr.setContactID(contactID);
+            gr.setPassword(password);
+            gr.setDisplayName(displayName);
+            gr.setEmailAddress(mailAddress);
+            gr.setPassword(password);
+            r = gr;
+        }
+
+        r.setBits(getPermissions());
+        r.setActivationDate(new Date()); // FIXME
+        r.setExpiryDate(expires);
+
+
+        return r;
     }
 
 }

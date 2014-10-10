@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.util.Date;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -109,5 +110,12 @@ public interface FileStorageGuestObjectPermission extends FileStorageObjectPermi
      * @return The expiry date of the share, or <code>null</code> if not defined
      */
     Date getExpires();
+
+    /**
+     * Converts this object to a {@link ShareRecipient} instance.
+     *
+     * @return The share recipient instance
+     */
+    ShareRecipient toShareRecipient();
 
 }
