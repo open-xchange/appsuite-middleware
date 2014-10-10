@@ -57,6 +57,7 @@ import com.openexchange.ajax.osgi.AbstractServletActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
@@ -95,6 +96,7 @@ public class ShareServletActivator extends AbstractServletActivator {
          */
         RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry = new RankingAwareNearRegistryServiceTracker<ShareHandler>(context, ShareHandler.class);
         rememberTracker(shareHandlerRegistry);
+        trackService(HostnameService.class);
         openTrackers();
         /*
          * Initialize login configuration for shares
