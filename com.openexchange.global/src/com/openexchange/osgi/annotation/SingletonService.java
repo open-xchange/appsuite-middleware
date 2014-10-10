@@ -54,7 +54,7 @@ import java.lang.annotation.RetentionPolicy;
 
 
 /**
- * {@link SingletonService} - Annotates a service to be a singletone one.
+ * {@link SingletonService} - Annotates a service to be a singleton one.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
