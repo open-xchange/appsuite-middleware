@@ -1,3 +1,7 @@
+* 2014-10-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34861: Use shorter call-back URL as IE seems to cut off call-back URL if certain size is exceeded
+
 * 2014-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 34776: Drop passed Message-ID header on draft-edit action
