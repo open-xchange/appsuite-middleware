@@ -67,6 +67,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -78,6 +79,7 @@ import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -92,9 +94,12 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.ContentTypeChecker;
+import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
+import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.RemoteInternalPreviewDocument;
 import com.openexchange.preview.RemoteInternalPreviewService;
 import com.openexchange.preview.cache.CachedPreviewDocument;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -598,6 +603,103 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             }
         }
         return cachedResource;
+    }
+
+    /**
+     * Try to get a cached resource from preview service.
+     *
+     * @param session The current session
+     * @param cacheKey The cacheKey
+     * @param resourceCache The resourceCache to use
+     * @return Null or the found {@link CachedResource}
+     */
+    public static CachedResource getCachedResourceFromPreviewService(ServerSession session, AJAXRequestResult result, AJAXRequestData requestData, PreviewService previewService, PreviewOutput output) {
+        final Object resultObject = result.getResultObject();
+        final String mimeType = ((null != resultObject) && (resultObject instanceof IFileHolder)) ? MimeType2ExtMap.getContentType(((IFileHolder) resultObject).getName(), null) : null;
+        PreviewService candidate = (previewService instanceof RemoteInternalPreviewService ? previewService : null);
+        CachedResource ret = null;
+
+        if ((null == candidate) && (previewService instanceof Delegating) && (null != mimeType)) {
+            // Determine candidate
+            try {
+                candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, output);
+            } catch (OXException e) {
+                LOGGER.debug("Error while trying to look up CachedResource from RemoteInternalPeviewService in context {}", e);
+            }
+
+            if ((null != candidate) && !(candidate instanceof RemoteInternalPreviewService)) {
+                candidate = null;
+            }
+        }
+
+        if (null != candidate) {
+            IFileHolder fileHolder = null;
+
+            // Check file holder's content
+            try {
+                if (!(resultObject instanceof IFileHolder)) {
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                }
+
+                fileHolder = (IFileHolder) resultObject;
+
+                if (0 == fileHolder.getLength()) {
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
+                }
+
+                // Prepare properties for preview generation
+                final DataProperties dataProperties = new DataProperties(12);
+                final String srcMimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
+
+                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, srcMimeType);
+                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+                dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
+                dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
+                dataProperties.put("PreviewWidth", requestData.getParameter("width"));
+                dataProperties.put("PreviewHeight", requestData.getParameter("height"));
+                dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
+                dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
+                dataProperties.put("PreviewLanguage", getUserLanguage(session));
+
+                // Generate preview
+                final Data<InputStream> data = new SimpleData<InputStream>(fileHolder.getStream(), dataProperties);
+                final PreviewDocument previewDocument = ((RemoteInternalPreviewService) candidate).getCachedPreviewFor(data, output, session, 1);
+
+                if (null != previewDocument) {
+                    byte[] thumbnailBuffer = null;
+
+                    // we like to have the result as a byte buffer
+                    if (previewDocument instanceof RemoteInternalPreviewDocument) {
+                        thumbnailBuffer = ((RemoteInternalPreviewDocument) previewDocument).getThumbnailBuffer();
+                    } else {
+                        final InputStream thumbnailStm = previewDocument.getThumbnail();
+
+                        if (null != thumbnailStm) {
+                            try {
+                                thumbnailBuffer = IOUtils.toByteArray(thumbnailStm);
+                            } catch (IOException e) {
+                                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+                            } finally {
+                                IOUtils.closeQuietly(thumbnailStm);
+                            }
+                        }
+                    }
+
+                    if (null != thumbnailBuffer) {
+                        final Map<String, String> metadata = previewDocument.getMetaData();
+                        final String fileName = metadata.get("resourcename");
+                        final String contentType = metadata.get("content-type");
+
+                        ret = new CachedResource(thumbnailBuffer, fileName, contentType, thumbnailBuffer.length);
+                    }
+                }
+            } catch (OXException e) {
+                LOGGER.debug("Error while trying to look up CachedResource from RemotePreviewService", e);
+            }
+        }
+
+        return ret;
     }
 
     /**
