@@ -6,9 +6,9 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-23 18:31+0200\n"
+"PO-Revision-Date: 2014-10-08 18:21+0200\n"
 "Last-Translator: Arve Eriksson <031299870@telia.com>\n"
-"Language-Team: Swedish <ox@bureau-cornavin.com>\n"
+"Language-Team: Swedish <kde-i18n-doc@kde.org>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1602,6 +1602,20 @@ msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr ""
 "Mönstret \"%1$s\" är ogiltigt. Använd ett giltigt mönster och försök igen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Filnamnet \"%1$s\" står i konflikt med en mapp med samma namn i "
+"\"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"Sökvägen \"%1$s\" står i konflikt med en fil med samma namn i \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5234,11 +5248,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Önskat värde \"efternamn\" angavs inte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"Du har inte tillräckliga rättigheter för att ändra objekt i mappen \"%2$s\"."
+msgid "You are not allowed to modify that contact"
+msgstr "Du har inte behörighet att ändra kontakten"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -7034,8 +7045,7 @@ msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
 msgstr ""
-"Nuvarande lösenord saknas. Skriv in ditt nuvarande lösenord och "
-"försök igen."
+"Nuvarande lösenord saknas. Skriv in ditt nuvarande lösenord och försök igen."
 
 #. *
 #. * The new password is missing. Please enter your new password and try again.
@@ -10984,6 +10994,13 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Du har inte tillräckliga rättigheter för att ändra objekt i mappen \"%2$s"
+#~ "\"."
+
 #~ msgid "in appointments"
 #~ msgstr "i möten"
 
@@ -13798,9 +13815,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Ditt efternamn är obligatoriskt. Skriv in det."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "Du har inte behörighet att ändra kontakten %1$d i kontext %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Kunde inte ladda objekt. Kontext %1$d användare %2$d"
 
@@ -15025,9 +15039,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "En parameterkonflikt inträffade."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parametern \"%1$s\" står i konflikt med parametern \"%2$s\"."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "Åtgärden \"%1$s\" är avaktiverad på grund av serverinställningar"

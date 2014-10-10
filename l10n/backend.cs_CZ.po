@@ -11,9 +11,9 @@ msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-28 11:35+0200\n"
+"PO-Revision-Date: 2014-10-09 19:34+0200\n"
 "Last-Translator: Robert Krátký <rkratky@gmail.com>\n"
-"Language-Team: Czech <kde-i18n-doc@kde.org>\n"
+"Language-Team: Czech <>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1613,6 +1613,18 @@ msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr ""
 "Zadání „%1$s“ není platné. Použijte, prosím, platné zadání a zkuste to znovu."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Název souboru „%1$s“ je v konfliktu se stejně pojmenovaným adresářem „%2$s“."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "Cesta „%1$s“ je v konfliktu se stejně pojmenovaným souborem „%2$s“."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5231,10 +5243,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Požadovaná hodnota „příjmení“ nebyla zadána."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr "Nemáte příslušná oprávnění ke změně objektů ve složce „%2$s“."
+msgid "You are not allowed to modify that contact"
+msgstr "Nemáte oprávnění k úpravě tohoto kontaktu"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -7020,7 +7030,8 @@ msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
 msgstr ""
-"Aktuální heslo není správné. Zadejte, prosím, správné heslo a zkuste to znovu."
+"Aktuální heslo není správné. Zadejte, prosím, správné heslo a zkuste to "
+"znovu."
 
 #. *
 #. * The current password is missing. Please enter your current password and try again.
@@ -10939,6 +10950,11 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr "Nemáte příslušná oprávnění ke změně objektů ve složce „%2$s“."
+
 #~ msgid "in appointments"
 #~ msgstr "ve schůzkách"
 
@@ -13724,9 +13740,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Vaše příjmení je povinný údaj. Zadejte ho, prosím."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "Nemáte oprávnění k úpravě kontaktu %1$d v kontextu %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Nemohu načíst objekty. kontext %1$d uživatel %2$d"
 
@@ -14933,9 +14946,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Došlo ke konfliktu parametrů."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parametr „%1$s“ je v konfliktu s parametrem „%2$s“."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "Činnost „%1$s“ není možná kvůli konfiguraci serveru"
