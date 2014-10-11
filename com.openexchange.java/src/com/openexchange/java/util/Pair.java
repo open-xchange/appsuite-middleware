@@ -58,36 +58,60 @@ package com.openexchange.java.util;
  */
 public class Pair<T, V> {
 
-    private T first = null;
+    private T first;
+    private V second;
 
-    private V second = null;
-
+    /**
+     * Initializes a new empty {@link Pair}.
+     */
     public Pair() {
-        super();
+        this(null, null);
     }
 
+    /**
+     * Initializes a new {@link Pair}.
+     *
+     * @param first The first value
+     * @param second The second value
+     */
     public Pair(T first, V second) {
         super();
         this.first = first;
         this.second = second;
     }
 
-
+    /**
+     * Gets the first value
+     *
+     * @return The 1st value
+     */
     public T getFirst() {
         return first;
     }
 
-
+    /**
+     * Sets the first value
+     *
+     * @param first The 1st value
+     */
     public void setFirst(T first) {
         this.first = first;
     }
 
-
+    /**
+     * Gets the second value
+     *
+     * @return The 2nd value
+     */
     public V getSecond() {
         return second;
     }
 
-
+    /**
+     * Sets the second value
+     *
+     * @param second The 2nd value
+     */
     public void setSecond(V second) {
         this.second = second;
     }
@@ -103,23 +127,27 @@ public class Pair<T, V> {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (!(obj instanceof Pair)) {
             return false;
-        if (getClass() != obj.getClass())
-            return false;
+        }
         Pair<?, ?> other = (Pair<?, ?>) obj;
         if (first == null) {
-            if (other.first != null)
+            if (other.first != null) {
                 return false;
-        } else if (!first.equals(other.first))
+            }
+        } else if (!first.equals(other.first)) {
             return false;
+        }
         if (second == null) {
-            if (other.second != null)
+            if (other.second != null) {
                 return false;
-        } else if (!second.equals(other.second))
+            }
+        } else if (!second.equals(other.second)) {
             return false;
+        }
         return true;
     }
 

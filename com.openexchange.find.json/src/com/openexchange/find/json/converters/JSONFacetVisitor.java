@@ -49,7 +49,6 @@
 
 package com.openexchange.find.json.converters;
 
-import static com.openexchange.ajax.AJAXUtility.sanitizeParam;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONArray;
@@ -112,7 +111,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
+            result.put("name", translator.translate(locale, type.getDisplayName()));
 
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
@@ -135,7 +134,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
+            result.put("name", translator.translate(locale, type.getDisplayName()));
 
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());

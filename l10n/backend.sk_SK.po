@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-23 12:46+0200\n"
+"PO-Revision-Date: 2014-10-07 14:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -1607,6 +1607,18 @@ msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr ""
 "Vzor „%1$s“ je neplatný. Prosím, použite platný vzor a skúste to znova."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Názov súboru „%1$s“ je v konflikte s rovnako pomenovaným adresárom „%2$s“."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "Parameter „%1$s“ je v konflite s rovnako pomenovaným súborom „%2$s“."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5267,10 +5279,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Požadovaná hodnota „Priezvisko“ nebola zadaná."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie na zmenu objektov v priečinku „%1$s“."
+msgid "You are not allowed to modify that contact"
+msgstr "Nemáte oprávnenie meniť tento kontakt"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -7043,8 +7053,7 @@ msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
 msgstr ""
-"Aktuálne heslo je príliš slabé. Prosím, skúste to znova s zložitejším "
-"heslom."
+"Aktuálne heslo je príliš slabé. Prosím, skúste to znova s zložitejším heslom."
 
 #. *
 #. * The current password is missing. Please enter your current password and try again.
@@ -10998,6 +11007,11 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr "Nemáte príslušné oprávnenie na zmenu objektov v priečinku „%1$s“."
+
 #~ msgid "in appointments"
 #~ msgstr "v schôdzkach"
 
@@ -13821,9 +13835,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Vaše priezvisko je povinné. Prosím, zadajte ho."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "Nemáte oprávnenie meniť kontakt %1$d v kontexte %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Nie je možné načítať objekty. Kontext %1$d, používateľ %2$d"
 
@@ -15066,9 +15077,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Vuskytol sa konflikt parametrov."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parameter „%1$s“ je v konflite s parametrom „%2$s“."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "Operácia „%1$s“ je vypnutá kvôli konfigurácii servera"

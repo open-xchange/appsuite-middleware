@@ -51,13 +51,22 @@ package com.openexchange.authorization;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
- *
+ * The service to authorize a given user/context pair.
  */
+@SingletonService
 public interface AuthorizationService {
 
-    public void authorizeUser(final Context ctx, final User user) throws OXException;
+    /**
+     * Authorize the given user/context pair
+     *
+     * @param ctx The context
+     * @param user The user
+     * @throws OXException If user/context pair cannot be authorized; e.g. user and/or context is deactivated
+     */
+    void authorizeUser(final Context ctx, final User user) throws OXException;
 
 }

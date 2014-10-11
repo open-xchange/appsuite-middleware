@@ -253,51 +253,61 @@ public final class SessionUtility {
      * @param sessiondService The SessionD service
      * @param mayUseFallbackSession <code>true</code> if request is allowed to use fall-back session, otherwise <code>false</code>
      * @param mayPerformPublicSessionAuth <code>true</code> if public session authentication is allowed for specified request, otherwise <code>false</code>
+     * @return <code>true</code> if an appropriate public session is found; otherwise <code>false</code>
      * @throws OXException If public session cannot be created
      */
-    public static void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
+    public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies != null) {
             final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
             if (null != cookie) {
-                handlePublicSessionCookie(req, session, sessiondService, cookie.getValue(), false);
-            } else {
-                final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
-                if (null != publicSessionId) {
-                    handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth);
-                } else {
-                    if (mayUseFallbackSession && isChangeableUserAgent(req.getHeader(USER_AGENT))) {
-                        for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
-                            if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
-                                handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
-                                return;
-                            }
-                        }
+                return handlePublicSessionCookie(req, session, sessiondService, cookie.getValue(), false);
+            }
+
+            // No such cookie
+            final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+            if (null != publicSessionId) {
+                return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth);
+            }
+
+            // No such "public_session" parameter
+            if (mayUseFallbackSession && isChangeableUserAgent(req.getHeader(USER_AGENT))) {
+                for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                    if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
+                        return handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
                     }
                 }
             }
         }
+
+        // No public session found
+        return false;
     }
 
-    private static void handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final String altId, final boolean publicSessionAuth) throws OXException {
+    private static boolean handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final String altId, final boolean publicSessionAuth) throws OXException {
         if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
             // same session (thus already verified)
             rememberPublicSession(req, session);
-        } else {
-            // Lookup session by alternative id
-            final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
-            if (publicSession != null) {
-                try {
-                    if (false == publicSessionAuth) {
-                        checkSecret(hashSource, req, publicSession, false);
-                    }
-                    verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
-                    rememberPublicSession(req, publicSession);
-                } catch (final OXException e) {
-                    // Verification of public session failed
+            return true;
+        }
+
+        // Lookup session by alternative id
+        final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
+        if (publicSession != null) {
+            try {
+                if (false == publicSessionAuth) {
+                    checkSecret(hashSource, req, publicSession, false);
                 }
+                verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
+                rememberPublicSession(req, publicSession);
+                return true;
+            } catch (final OXException e) {
+                // Verification of public session failed
             }
         }
+
+        // Look-up failed
+        return false;
     }
 
     /**

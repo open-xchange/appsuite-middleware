@@ -85,9 +85,6 @@ public final class Constants {
     /** The field for file size */
     public static final String FIELD_FILE_SIZE = "file_size";
 
-    /** The field for date */
-    public final static String FIELD_DATE = "date";
-
     // ---------------------------------------------------------------------------------------------------------- //
 
     /** The fields to query for */

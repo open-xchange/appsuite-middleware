@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,19 +47,21 @@
  *
  */
 
-package com.openexchange.osgi.annotation;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
+package com.openexchange.preview;
 
 /**
- * {@link SingletonService} - Annotates a service to be a singleton one.
+ * {@link RemoteInternalPreviewDocument}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
+ * @since v7.6.0
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface SingletonService {
-    // marker annotation with no members
+public interface RemoteInternalPreviewDocument extends PreviewDocument {
+
+    /**
+     * Gets the preview image (thumbnail buffer).
+     *
+     * @return The byte buffer for the image or <code>null</code> if the image is not available.
+     */
+    byte[] getThumbnailBuffer();
+
 }

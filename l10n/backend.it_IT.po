@@ -1,16 +1,15 @@
 # #-#-#-#-#  server.it_IT.po (server)  #-#-#-#-#
 # #-#-#-#-#  errors.it_IT.po (errors)  #-#-#-#-#
 # Daniele Ricciulli <daniele@bureau-cornavin.com>, 2009.
-# Vincenzo Reale <vincenzo@bureau-cornavin.com>, 2010, 2011, 2012.
 # Monica Raggioli <monica@bureau-cornavin.com>, 2011, 2012.
 # Antje Faber, 2012.
-# Vincenzo Reale <vincenzo@bureau-cornavin.com>, 2011, 2012, 2013, 2014.
+# Vincenzo Reale <vincenzo@bureau-cornavin.com>, 2010, 2011, 2012, 2013, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-23 15:56+0200\n"
+"PO-Revision-Date: 2014-10-07 23:45+0200\n"
 "Last-Translator: Vincenzo Reale <vincenzo@bureau-cornavin.com>\n"
 "Language-Team: Italian <it@bureau-cornavin.com>\n"
 "Language: it\n"
@@ -1630,6 +1629,21 @@ msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr ""
 "Il modello \"%1$s\" non è valido. Utilizza un modello valido e prova ancora."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Il nome file \"%1$s\" è in conflitto con una cartella con lo stesso nome in "
+"\"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"Il percorso \"%1$s\" è in conflitto con un file con lo stesso nome in \"%"
+"2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -4908,7 +4922,7 @@ msgstr "Il gruppo contiene dati non validi."
 #. You are not allowed to create groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:87
 msgid "You are not allowed to create groups."
-msgstr "Non si è abilitati a creare gruppi."
+msgstr "Non ti è consentito creare gruppi."
 
 #. Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh
 #. or synchronize and try again.
@@ -4925,12 +4939,12 @@ msgstr ""
 #. You are not allowed to change groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:95
 msgid "You are not allowed to change groups."
-msgstr "Non si è abilitati a modificare i gruppi."
+msgstr "Non ti è consentito modificare gruppi."
 
 #. You are not allowed to delete groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:98
 msgid "You are not allowed to delete groups."
-msgstr "Non si è abilitati a eliminare gruppi."
+msgstr "Non ti è consentito eliminare gruppi."
 
 #. Group "%1$s" can not be deleted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:101
@@ -5374,12 +5388,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Il valore richiesto \"cognome\" non è stato fornito."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"Non disponi dei permessi appropriati per modificare gli oggetti nella "
-"cartella \"%2$s\"."
+msgid "You are not allowed to modify that contact"
+msgstr "Non ti è consentito modificare il contatto"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -7185,8 +7195,8 @@ msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
 msgstr ""
-"La password attuale non è corretta. Digita la password corretta "
-"e prova ancora."
+"La password attuale non è corretta. Digita la password corretta e prova "
+"ancora."
 
 #. *
 #. * The current password is missing. Please enter your current password and try again.
@@ -11215,6 +11225,13 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Non disponi dei permessi appropriati per modificare gli oggetti nella "
+#~ "cartella \"%2$s\"."
+
 #~ msgid "in appointments"
 #~ msgstr "negli appuntamenti"
 
@@ -14146,9 +14163,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Il cognome è obbligatorio. Inseriscilo."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "Non sei abilitato a modificare il contatto %1$d nel contesto %2$d."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Impossibile caricare oggetti: contesto %1$d utente %2$d"
 
@@ -15434,9 +15448,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Si è verificato un conflitto di parametri."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parametro \"%1$s\" è in conflitto con il parametro \"%2$s\"."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr ""

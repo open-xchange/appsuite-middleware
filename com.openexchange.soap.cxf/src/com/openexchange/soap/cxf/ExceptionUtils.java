@@ -56,15 +56,20 @@ public class ExceptionUtils {
             if ("unable to create new native thread".equalsIgnoreCase(message)) {
                 // Dump all the threads to the log
                 Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
-                LOG.info("{}Threads: {}", Strings.getLineSeparator(), threads.size());
+                String ls = Strings.getLineSeparator();
+                LOG.info("{}Threads: {}", ls, threads.size());
+                StringBuilder sb = new StringBuilder(2048);
                 for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
                     Thread thread = mapEntry.getKey();
-                    LOG.info("        thread: {}", thread);
-                    for (final StackTraceElement stackTraceElement : mapEntry.getValue()) {
-                        LOG.info(stackTraceElement.toString());
+                    sb.setLength(0);
+                    sb.append("        Thread: ").append(thread).append(ls);
+                    for (StackTraceElement elem : mapEntry.getValue()) {
+                        sb.append(elem).append(ls);
                     }
+                    LOG.info(sb.toString());
                 }
-                LOG.info("{}    Thread dump finished{}", Strings.getLineSeparator(), Strings.getLineSeparator());
+                sb = null; // Might help GC
+                LOG.info("{}    Thread dump finished{}", ls, ls);
             } else if ("Java heap space".equalsIgnoreCase(message)) {
                 try {
                     MBeanServer server = ManagementFactory.getPlatformMBeanServer();

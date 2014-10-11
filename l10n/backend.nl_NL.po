@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: errors.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-24 21:25+0200\n"
+"PO-Revision-Date: 2014-10-08 23:21+0200\n"
 "Last-Translator: Ivar Snaaijer\n"
 "Language-Team: Dutch <kde-i18n-doc@kde.org>\n"
 "Language: nl\n"
@@ -1626,6 +1626,20 @@ msgid ""
 msgstr ""
 "Het patroon \"%1$s\" is ongeldig. Gebruik een geldig patroon en probeer "
 "opnieuw."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"De bestandsnaam \"%1$s\" is conflicterend met een bestand met de zelfde naam "
+"in \"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"Het pad \"%1$s\" is conflicterend met een map met de zelfde naam in \"%2$s\"."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5336,12 +5350,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Vereiste waarde \"Achternaam\" is niet opgegeven."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"U heeft niet de juiste rechten om de objecten in de map \"%2$s\" te "
-"veranderen."
+msgid "You are not allowed to modify that contact"
+msgstr "U mag dit contactpersoon niet aanpassen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -11172,6 +11182,13 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zoeloe"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "U heeft niet de juiste rechten om de objecten in de map \"%2$s\" te "
+#~ "veranderen."
+
 #~ msgid "in appointments"
 #~ msgstr "in afspraken"
 
@@ -14050,9 +14067,6 @@ msgstr "Zoeloe"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Uw achternaam is verplicht. Voer deze a.u.b. in."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "U mag contactpersoon %1$d in context %2$d niet aanpassen."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Niet in staat objecten te laden. Context %1$d gebruiker %2$d"
 
@@ -15292,9 +15306,6 @@ msgstr "Zoeloe"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Er is een parameter conflict ontstaan."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parameter \"%1$s\" conflicteerd met parameter \"%2$s\"."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr ""

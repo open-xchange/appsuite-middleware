@@ -95,9 +95,9 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     public void visit(SimpleDisplayItem item) {
         String displayName;
         if (item.isLocalizable()) {
-            displayName = sanitizeParam(translator.translate(locale, item.getDisplayName()));
+            displayName = translator.translate(locale, item.getDisplayName());
         } else {
-            displayName = sanitizeParam(item.getDisplayName());
+            displayName = item.getDisplayName();
         }
 
         result = new Pair<String, Object>("name", displayName);
@@ -108,8 +108,8 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         JSONObject jItem = new JSONObject();
         result = new Pair<String, Object>("item", jItem);
         try {
-            jItem.put("name", sanitizeParam(item.getDisplayName()));
-            jItem.put("detail", sanitizeParam(item.getDetail()));
+            jItem.put("name", item.getDisplayName());
+            jItem.put("detail", item.getDetail());
             if (item.hasImageData()) {
                 try {
                     String imageUrl = item.getImageDataSource().generateUrl(item.getImageLocation(), session);
@@ -128,8 +128,8 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         JSONObject jItem = new JSONObject();
         result = new Pair<String, Object>("item", jItem);
         try {
-            jItem.put("name", sanitizeParam(item.getArgument()));
-            jItem.put("detail", sanitizeParam(translator.translate(locale, item.getSuffix())));
+            jItem.put("name", item.getArgument());
+            jItem.put("detail", translator.translate(locale, item.getSuffix()));
         } catch (JSONException e) {
             exception = e;
         }

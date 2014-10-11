@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCustomizerFactory {
 
-    private Converter converter = null;
+    private final Converter converter;
 
     public ConversionCustomizer(final Converter converter) {
         this.converter = converter;

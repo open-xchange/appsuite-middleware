@@ -11,15 +11,15 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-28 12:02+0200\n"
-"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
+"PO-Revision-Date: 2014-10-08 20:04+0200\n"
+"Last-Translator: Kálmán Kéménczy <kkemenczy@gmail.com>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Lokalize 1.5\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -1611,6 +1611,18 @@ msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr ""
 "A minta („%1$s”) érvénytelen. Használjon érvényes mintát, és próbálja újra."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"A(z) „%1$s” fájlnév ütközik a(z) „%2$s\" mappában található könyvtárnévvel."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "A(z) „%1$s” útvonal ütközik a(z) „%2$s” mappában lévő fájlnévvel."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5252,12 +5264,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "A szükséges „utónév” érték nem lett megadva."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"Nincs megfelelő jogosultsága objektumok módosításához ebben a mappában: "
-"„%2$s”."
+msgid "You are not allowed to modify that contact"
+msgstr "Nem jogosult a kapcsolat módosítására"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -7056,7 +7064,8 @@ msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
 msgstr ""
-"A jelenlegi jelszó helytelen. Írja be a jelenlegi jelszavát, és próbálja újra."
+"A jelenlegi jelszó helytelen. Írja be a jelenlegi jelszavát, és próbálja "
+"újra."
 
 #. *
 #. * The current password is missing. Please enter your current password and try again.
@@ -11022,6 +11031,13 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Nincs megfelelő jogosultsága objektumok módosításához ebben a mappában: "
+#~ "„%2$s”."
+
 #~ msgid "in appointments"
 #~ msgstr "a találkozók között"
 
@@ -13859,10 +13875,6 @@ msgstr "Zulu"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "A vezetéknév kötelező. Kérem adja meg."
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr ""
-#~ "Nem jogosult a(z) %1$d kapcsolat módosítására a(z) %2$d kontextusban."
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Nem tölthetők be az objektumok. Kontextus: %1$d, felhasználó: %2$d"
 
@@ -15118,9 +15130,6 @@ msgstr "Zulu"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Paraméterütközés történt."
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "A(z) „%1$s” paraméter ütközik a(z) „%2$s” paraméterrel."
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "A(z) „%1$s” művelet a kiszolgáló beállításai miatt letiltva"

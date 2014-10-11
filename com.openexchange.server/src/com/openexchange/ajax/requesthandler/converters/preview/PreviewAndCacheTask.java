@@ -139,10 +139,6 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
             try {
                 previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, threshold, respectLanguage, cacheKey);
             } catch (OXException e) {
-                if (PreviewExceptionCodes.DEFAULT_THUMBNAIL.equals(e)) {
-                    // Nothing to sync to cache
-                    return null;
-                }
                 if (PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.equals(e)) {
                     // Thumbnail has not been generated in time
                     LOG.debug("Thumbnail has not been generated in time.", e);
@@ -156,13 +152,13 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
                 throw e;
             }
 
-            if (previewDocument != null) {
+            if (previewDocument != null && previewDocument != PreviewConst.DEFAULT_PREVIEW_DOCUMENT) {
                 InputStream thumbnail = previewDocument.getThumbnail();
                 if (thumbnail != null) {
                     try {
                         byte[] thumbnailBytes = Streams.stream2bytes(thumbnail);
                         String fileName = previewDocument.getMetaData().get("resourcename");
-                        syncToCache(session, thumbnailBytes, fileName, resourceCache, cacheKey);
+                        syncToCache(thumbnailBytes, cacheKey, fileName, resourceCache, session);
                     } catch (IOException ioex) {
                         throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
                     }
@@ -179,14 +175,14 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
 
     /**
      * Puts a resource into the {@link ResourceCache}.
-     *
-     * @param session The current {@link ServerSession}
      * @param input The resource we are caching
      * @param fileName The name of the resource we are caching
      * @param resourceCache The {@link ResourceCache to use}
+     * @param session The current {@link ServerSession}
+     *
      * @throws OXException if caching fails
      */
-    private void syncToCache(ServerSession session, byte[] input, String fileName, ResourceCache resourceCache, String cacheKey) throws OXException {
+    private void syncToCache(byte[] input, String cacheKey, String fileName, ResourceCache resourceCache, ServerSession session) throws OXException {
         if (null != resourceCache && null != cacheKey) {
             try {
                 final CachedResource preview = new CachedResource(input, fileName, "image/jpeg", input.length);

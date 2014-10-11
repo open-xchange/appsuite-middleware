@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-28 00:37+1000\n"
+"PO-Revision-Date: 2014-10-08 11:19+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -1570,6 +1570,17 @@ msgstr "您的客户端应用程序有一个更新版本可以下载"
 msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr "模式 \"%1$s\" 无效，请使用有效模式再试。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr "文件名称 \"%1$s\" 在 \"%2$s\" 里，与一个同名称的文件夹冲突。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr "路径 \"%1$s\" 在 \"%2$s\" 里，与一个同名称的文件冲突。"
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
@@ -5026,10 +5037,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "未提供需要的值“姓氏”。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr "您没有更改文件夹 \"%2$s\" 里对象的适当权限。"
+msgid "You are not allowed to modify that contact"
+msgstr "您不被允许更改该联系人"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -10587,6 +10596,11 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "祖鲁"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr "您没有更改文件夹 \"%2$s\" 里对象的适当权限。"
+
 #~ msgid "in appointments"
 #~ msgstr "（从约会里）"
 
@@ -13205,9 +13219,6 @@ msgstr "祖鲁"
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "您的姓氏是必填的。请输入它。"
 
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "不允许您在环境 %2$d 中修改联系人 %1$d。"
-
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "无法加载对象。环境 %1$d 用户 %2$d"
 
@@ -14312,9 +14323,6 @@ msgstr "祖鲁"
 
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "出现一个参数冲突。"
-
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "参数 \"%1$s\" 与参数 \"%2$s\" 冲突。"
 
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr "服务器配置禁用了操作 \"%1$s\""
