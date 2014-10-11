@@ -49,14 +49,17 @@
 
 package com.openexchange.authentication.database.osgi;
 
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import com.openexchange.context.ContextService;
+import com.openexchange.authentication.BasicAuthenticationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
 
+/**
+ * {@link Activator} - The activator for database authentication service.
+ */
 public class Activator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link Activator}.
+     */
     public Activator() {
         super();
     }
@@ -68,14 +71,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + UserService.class.getName() + "))");
-        track(filter, new AuthenticationRegisterer(context));
+        track(BasicAuthenticationService.class, new AuthenticationRegisterer(context));
         openTrackers();
     }
 
-    @Override
-    public void stopBundle() {
-        closeTrackers();
-        cleanUp();
-    }
 }

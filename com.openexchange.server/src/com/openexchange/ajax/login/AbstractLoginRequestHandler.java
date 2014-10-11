@@ -50,21 +50,17 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
-
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.SessionUtility;
@@ -114,7 +110,17 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
     }
 
     /**
-     * @return a boolean value indicated if an auto login should proceed afterwards
+     * Invokes given {@link LoginClosure}'s {@link LoginClosure#doLogin(HttpServletRequest) doLogin()} method to obtain a session.
+     * <p>
+     * Having the session further ramp-up operations are performed and finally an appropriate JSON result object is composed that gets written to passed HTTP response.
+     *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @param login The login closure to invoke
+     * @param conf The login configuration
+     * @return <code>true</code> if an auto-login should proceed afterwards; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an Open-Xchange error occurs
      */
     protected boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
         Tools.disableCaching(resp);

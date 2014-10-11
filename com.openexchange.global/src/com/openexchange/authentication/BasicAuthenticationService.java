@@ -47,26 +47,20 @@
  *
  */
 
-package com.openexchange.ajax.login;
+package com.openexchange.authentication;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.login.LoginResult;
+import com.openexchange.osgi.annotation.SingletonService;
+
 
 /**
- * {@link LoginClosure}
+ * {@link BasicAuthenticationService} - The special basic authentication service.
+ * <p>
+ * Especially used to authenticate guest users.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public interface LoginClosure {
-
-    /**
-     * Performs the login for specified HTTP request
-     *
-     * @param request The HTTP request to perform the login for
-     * @return The login result
-     * @throws OXException If login attempt fails for any reason
-     */
-    LoginResult doLogin(HttpServletRequest request) throws OXException;
+@SingletonService
+public interface BasicAuthenticationService extends AuthenticationService {
+    // No additional methods
 }

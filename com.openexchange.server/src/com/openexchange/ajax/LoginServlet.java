@@ -79,6 +79,7 @@ import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.AutoLogin;
 import com.openexchange.ajax.login.FormLogin;
+import com.openexchange.ajax.login.GuestLogin;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.Login;
 import com.openexchange.ajax.login.LoginConfiguration;
@@ -646,6 +647,7 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf, rampUpServices));
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
+        handlerMap.put(ACTION_GUEST, new GuestLogin(conf, rampUpServices));
     }
 
     @Override

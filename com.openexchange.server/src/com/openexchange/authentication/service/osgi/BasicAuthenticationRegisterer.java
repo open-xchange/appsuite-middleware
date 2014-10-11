@@ -47,63 +47,100 @@
  *
  */
 
-package com.openexchange.authentication.database.osgi;
+package com.openexchange.authentication.service.osgi;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.BasicAuthenticationService;
-import com.openexchange.authentication.database.impl.DatabaseAuthentication;
+import com.openexchange.authentication.basic.DefaultBasicAuthentication;
+import com.openexchange.authentication.service.Authentication;
+import com.openexchange.context.ContextService;
+import com.openexchange.user.UserService;
 
 /**
  * Dependently registers the AuthenticationService.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<BasicAuthenticationService,BasicAuthenticationService> {
+public final class BasicAuthenticationRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthenticationRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticationRegisterer.class);
 
     private final BundleContext context;
+    private final Lock lock;
 
-    private volatile ServiceRegistration<AuthenticationService> registration;
+    private ServiceRegistration<BasicAuthenticationService> registration;
+    private ContextService contextService;
+    private UserService userService;
 
     /**
-     * Initializes a new {@link AuthenticationRegisterer}.
+     * Initializes a new {@link BasicAuthenticationRegisterer}.
      *
      * @param context The bundle context
      */
-    public AuthenticationRegisterer(BundleContext context) {
+    public BasicAuthenticationRegisterer(BundleContext context) {
         super();
         this.context = context;
+        lock = new ReentrantLock();
     }
 
     @Override
-    public BasicAuthenticationService addingService(ServiceReference<BasicAuthenticationService> reference) {
-        BasicAuthenticationService basicAuthenticationService = context.getService(reference);
-        registration = context.registerService(AuthenticationService.class, new DatabaseAuthentication(basicAuthenticationService), null);
-        LOG.info("Registered database authentication service.");
-        return basicAuthenticationService;
+    public Object addingService(final ServiceReference<Object> reference) {
+        Object obj = context.getService(reference);
+        lock.lock();
+        try {
+            if (obj instanceof ContextService) {
+                contextService = (ContextService) obj;
+            }
+            if (obj instanceof UserService) {
+                userService = (UserService) obj;
+            }
+            boolean needsRegistration = null != contextService && null != userService && registration == null;
+            if (needsRegistration) {
+                LOG.info("Registering default basic authentication service.");
+                DefaultBasicAuthentication basicAuthentication = new DefaultBasicAuthentication(contextService, userService);
+                registration = context.registerService(BasicAuthenticationService.class, basicAuthentication, null);
+                Authentication.setBasicService(basicAuthentication);
+            }
+        } finally {
+            lock.unlock();
+        }
+        return obj;
     }
 
     @Override
-    public void modifiedService(ServiceReference<BasicAuthenticationService> reference, BasicAuthenticationService service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference<BasicAuthenticationService> reference, BasicAuthenticationService service) {
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
+        ServiceRegistration<?> unregister = null;
+        lock.lock();
         try {
-            ServiceRegistration<AuthenticationService> registration = this.registration;
-            if (null != registration) {
-                registration.unregister();
+            if (service instanceof ContextService) {
+                contextService = null;
+            }
+            if (service instanceof UserService) {
+                userService = null;
+            }
+            if (registration != null && (contextService == null || userService == null)) {
+                unregister = registration;
                 this.registration = null;
             }
+            if (null != unregister) {
+                LOG.info("Unregistering default basic authentication service.");
+                unregister.unregister();
+                Authentication.setBasicService(null);
+            }
         } finally {
-            context.ungetService(reference);
+            lock.unlock();
         }
+        context.ungetService(reference);
     }
 
 }

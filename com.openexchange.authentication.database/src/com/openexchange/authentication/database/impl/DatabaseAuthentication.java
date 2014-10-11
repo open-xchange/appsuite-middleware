@@ -49,132 +49,40 @@
 
 package com.openexchange.authentication.database.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.COMMUNICATION;
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.BasicAuthenticationService;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
-import com.openexchange.user.UserService;
 
 /**
  * This implementation authenticates the user against the database.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DatabaseAuthentication implements AuthenticationService {
 
-    private static final class AuthenticatedImpl implements Authenticated {
-
-        private final String[] splitted;
-
-        protected AuthenticatedImpl(String[] splitted) {
-            this.splitted = splitted;
-        }
-
-        @Override
-        public String getContextInfo() {
-            return splitted[0];
-        }
-
-        @Override
-        public String getUserInfo() {
-            return splitted[1];
-        }
-    } // End of class AuthenticatedImpl
-
-    private final ContextService contextService;
-
-    private final UserService userService;
+    private final BasicAuthenticationService basicAuthService;
 
     /**
      * Default constructor.
      */
-    public DatabaseAuthentication(final ContextService contextService,
-        final UserService userService) {
+    public DatabaseAuthentication(BasicAuthenticationService basicAuthService) {
         super();
-        this.contextService = contextService;
-        this.userService = userService;
+        this.basicAuthService = basicAuthService;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Authenticated handleLoginInfo(final LoginInfo loginInfo)
-        throws OXException {
-        final String password = loginInfo.getPassword();
-        if (null == password || 0 == password.length()) {
-            throw INVALID_CREDENTIALS.create();
-        }
-        final String[] splitted = split(loginInfo.getUsername());
-        try {
-            final int ctxId;
-            try {
-                ctxId = contextService.getContextId(splitted[0]);
-            } catch (final OXException e) {
-                throw COMMUNICATION.create(e);
-            }
-            if (ContextStorage.NOT_FOUND == ctxId) {
-                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
-            }
-            final Context ctx = contextService.getContext(ctxId);
-            final int userId;
-            try {
-                userId = userService.getUserId(splitted[1], ctx);
-            } catch (final OXException e) {
-                if (UserExceptionCode.PROPERTY_MISSING.getPrefix().equals(e.getPrefix()) && LdapExceptionCode.USER_NOT_FOUND.getNumber() == e.getCode()) {
-                    throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(splitted[1]);
-                }
-                throw e;
-            }
-            final User user = userService.getUser(userId, ctx);
-            if (!userService.authenticate(user, password)) {
-                throw INVALID_CREDENTIALS.create();
-            }
-        } catch (final OXException e) {
-            throw e;
-        }
-        return new AuthenticatedImpl(splitted);
+    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
+        return basicAuthService.handleLoginInfo(loginInfo);
     }
 
     @Override
     public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
-        throw LoginExceptionCodes.NOT_SUPPORTED.create(DatabaseAuthentication.class.getName());
+        return basicAuthService.handleAutoLoginInfo(loginInfo);
     }
 
-    /**
-     * Splits user name and context.
-     * @param loginInfo combined information seperated by an @ sign.
-     * @return a string array with context and user name (in this order).
-     */
-    private String[] split(final String loginInfo) {
-        return split(loginInfo, '@');
-    }
-
-    /**
-     * Splits user name and context.
-     * @param loginInfo combined information seperated by an @ sign.
-     * @param separator for spliting user name and context.
-     * @return a string array with context and user name (in this order).
-     * @throws OXException if no seperator is found.
-     */
-    private String[] split(final String loginInfo, final char separator) {
-        final int pos = loginInfo.lastIndexOf(separator);
-        final String[] splitted;
-        if (-1 == pos) {
-            splitted = new String[] { "defaultcontext", loginInfo };
-        } else {
-            splitted = new String[] { loginInfo.substring(pos + 1), loginInfo.substring(0, pos) };
-        }
-        return splitted;
-    }
 }
