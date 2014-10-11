@@ -139,7 +139,11 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @exception AddressException If the parse failed
      */
     public static InternetAddress[] parse(final String addresslist, final boolean strict) throws AddressException {
-        return parse(addresslist, strict, false, true);
+        try {
+            return parse(addresslist, strict, false, true);
+        } catch (AddressException e) {
+            return parse(addresslist, strict, false, false);
+        }
     }
 
     /**
@@ -158,7 +162,11 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @exception AddressException If the parse failed
      */
     public static InternetAddress[] parseHeader(final String addresslist, final boolean strict) throws AddressException {
-        return parse(addresslist, strict, true, true);
+        try {
+            return parse(addresslist, strict, true, true);
+        } catch (AddressException e) {
+            return parse(addresslist, strict, true, false);
+        }
     }
 
     /*
