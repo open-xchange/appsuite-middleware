@@ -346,7 +346,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             ServerServiceRegistry.getServize(ConfigViewFactory.class, true),
             ServerServiceRegistry.getServize(DatabaseService.class, true));
         if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
-            usage = getFileStorage(session.getContext()).getUsage();
+            usage = getUsedQuota(session.getContext());
         }
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.FILE);
     }
