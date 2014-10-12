@@ -78,6 +78,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.log.LogProperties;
+import com.openexchange.login.LoginJsonEnhancer;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
@@ -190,6 +191,9 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             // Write response
             JSONObject json = new JSONObject(12);
             LoginWriter.write(result, json);
+            if (result instanceof LoginJsonEnhancer) {
+                ((LoginJsonEnhancer) result).enhanceJson(json);
+            }
 
             // Handle initial multiple
             {

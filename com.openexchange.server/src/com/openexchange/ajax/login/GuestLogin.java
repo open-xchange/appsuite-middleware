@@ -81,6 +81,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.AbstractJsonEnhancingLoginResult;
 import com.openexchange.login.internal.AddSessionParameterImpl;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
@@ -143,7 +144,7 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                     }
 
                     // Get the share
-                    Share share = shareService.resolveToken(token);
+                    final Share share = shareService.resolveToken(token);
 
                     BasicAuthenticationService basicService = Authentication.getBasicService();
                     if (null == basicService) {
@@ -238,7 +239,20 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                     }
 
                     // Generate the login result
-                    LoginResultImpl retval = new LoginResultImpl();
+                    LoginResultImpl retval = new AbstractJsonEnhancingLoginResult() {
+
+                        @Override
+                        protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
+                            jLoginResult.put("folder", share.getFolder());
+
+                            jLoginResult.put("module", share.getModule());
+
+                            String item = share.getItem();
+                            if (null != item) {
+                                jLoginResult.put("item", item);
+                            }
+                        }
+                    };
                     retval.setContext(context);
                     retval.setUser(user);
                     retval.setRequest(request);
