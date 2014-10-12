@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginResult;
 
 /**
- * {@link LoginClosure}
+ * {@link LoginClosure} - Specifies how the actual login is performed.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
@@ -62,11 +62,12 @@ import com.openexchange.login.LoginResult;
 public interface LoginClosure {
 
     /**
-     * Performs the login for specified HTTP request
+     * Performs the login for specified HTTP request.
      *
      * @param request The HTTP request to perform the login for
      * @return The login result
      * @throws OXException If login attempt fails for any reason
      */
     LoginResult doLogin(HttpServletRequest request) throws OXException;
+
 }

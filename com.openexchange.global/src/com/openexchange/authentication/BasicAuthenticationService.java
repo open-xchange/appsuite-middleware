@@ -49,8 +49,8 @@
 
 package com.openexchange.authentication;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
-
 
 /**
  * {@link BasicAuthenticationService} - The special basic authentication service.
@@ -62,5 +62,16 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface BasicAuthenticationService extends AuthenticationService {
-    // No additional methods
+
+    /**
+     * This method maps the login information from the login screen to the both parts needed to resolve the context and the user of that
+     * context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return An {@link Authenticated} instance that is rather used to perform additional modifications through implementing
+     *         {@link SessionEnhancement} and/or {@link ResponseEnhancement}
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    Authenticated handleLoginInfo(int userId, int contextId) throws OXException;
 }

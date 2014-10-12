@@ -57,16 +57,24 @@ import com.openexchange.sessiond.AddSessionParameter;
 /**
  * Implements {@link AddSessionParameter}.
  */
-final class AddSessionParameterImpl implements AddSessionParameter {
+public final class AddSessionParameterImpl implements AddSessionParameter {
 
-    private final String username;
+    private final String userName;
     private final LoginRequest request;
     private final User user;
     private final Context ctx;
 
-    AddSessionParameterImpl(final String username, final LoginRequest request, final User user, final Context ctx) {
+    /**
+     * Initializes a new {@link AddSessionParameterImpl}.
+     *
+     * @param userName The user name
+     * @param request The associated login request
+     * @param user The resolved user
+     * @param ctx The resolved context
+     */
+    public AddSessionParameterImpl(final String userName, final LoginRequest request, final User user, final Context ctx) {
         super();
-        this.username = username;
+        this.userName = userName;
         this.request = request;
         this.user = user;
         this.ctx = ctx;
@@ -89,7 +97,7 @@ final class AddSessionParameterImpl implements AddSessionParameter {
 
     @Override
     public String getUserLoginInfo() {
-        return username;
+        return userName;
     }
 
     @Override
@@ -126,5 +134,5 @@ final class AddSessionParameterImpl implements AddSessionParameter {
     public boolean isTransient() {
         return request.isTransient();
     }
-    
+
 }

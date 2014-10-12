@@ -122,7 +122,24 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      * @throws IOException If an I/O error occurs
      * @throws OXException If an Open-Xchange error occurs
      */
-    protected boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
+    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
+        return loginOperation(req, resp, login, null, conf);
+    }
+
+    /**
+     * Invokes given {@link LoginClosure}'s {@link LoginClosure#doLogin(HttpServletRequest) doLogin()} method to obtain a session.
+     * <p>
+     * Having the session further ramp-up operations are performed and finally an appropriate JSON result object is composed that gets written to passed HTTP response.
+     *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @param login The login closure to invoke
+     * @param conf The login configuration
+     * @return <code>true</code> if an auto-login should proceed afterwards; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginCookiesSetter cookiesSetter, LoginConfiguration conf) throws IOException, OXException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
 
@@ -262,10 +279,18 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 ResponseWriter.write(response, resp.getWriter(), locale);
                 return false;
             }
-            final Session session = result.getSession();
+
+            Session session = result.getSession();
             // Store associated session
             SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
-            LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+
+            // Set cookies
+            if (null == cookiesSetter) {
+                LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+            } else {
+                cookiesSetter.setLoginCookies(session, req, resp, conf);
+            }
+
             // Login response is unfortunately not conform to default responses.
             if (req.getParameter("callback") != null && LoginServlet.ACTION_LOGIN.equals(req.getParameter("action"))) {
                 APIResponseRenderer.writeResponse(response, LoginServlet.ACTION_LOGIN, req, resp);

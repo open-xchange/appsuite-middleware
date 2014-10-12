@@ -255,7 +255,13 @@ public final class LoginPerformer {
         }
     }
 
-    private static void sanityChecks(LoginRequest request) throws OXException {
+    /**
+     * Performs sanity checks
+     *
+     * @param request The request to check
+     * @throws OXException If a sanity check fails
+     */
+    public static void sanityChecks(LoginRequest request) throws OXException {
         // Check if somebody is using the User-Agent as client parameter
         String client = request.getClient();
         if (null != client && client.equals(request.getUserAgent())) {
@@ -263,7 +269,15 @@ public final class LoginPerformer {
         }
     }
 
-    private static void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
+    /**
+     * Checks given request's client
+     *
+     * @param request The request
+     * @param user The resolved user
+     * @param ctx The resolved context
+     * @throws OXException If check fails
+     */
+    public static void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
         final String client = request.getClient();
         // Check for OLOX v2.0
         if ("USM-JSON".equalsIgnoreCase(client)) {
@@ -281,15 +295,19 @@ public final class LoginPerformer {
      *
      * @param contextInfo The context info (as usually supplied in the login name)
      * @return The context
-     * @throws OXException
+     * @throws OXException If context look-up fails
      */
-    public static Context findContext(final String contextInfo) throws OXException {
-        final ContextStorage contextStor = ContextStorage.getInstance();
-        final int contextId = contextStor.getContextId(contextInfo);
+    public static Context findContext(String contextInfo) throws OXException {
+        ContextStorage contextStor = ContextStorage.getInstance();
+        int contextId = contextStor.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
             throw ContextExceptionCodes.NO_MAPPING.create(contextInfo);
         }
-        return getContext(contextId);
+        Context context = contextStor.getContext(contextId);
+        if (null == context) {
+            throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
+        }
+        return context;
     }
 
     /**
@@ -297,10 +315,10 @@ public final class LoginPerformer {
      *
      * @param ctx The context
      * @param userInfo The user info (as usually supplied in the login name)
-     * @return The context
-     * @throws OXException
+     * @return The user
+     * @throws OXException If user look-up fails
      */
-    public static User findUser(final Context ctx, final String userInfo) throws OXException {
+    public static User findUser(Context ctx, String userInfo) throws OXException {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         final UserStorage us = UserStorage.getInstance();
         int userId = 0;
@@ -382,7 +400,12 @@ public final class LoginPerformer {
         return session;
     }
 
-    private static void triggerLoginHandlers(final LoginResult login) {
+    /**
+     * Triggers the login handlers
+     *
+     * @param login The login
+     */
+    public static void triggerLoginHandlers(final LoginResult login) {
         final ThreadPoolService executor = ThreadPools.getThreadPool();
         if (null == executor) {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {

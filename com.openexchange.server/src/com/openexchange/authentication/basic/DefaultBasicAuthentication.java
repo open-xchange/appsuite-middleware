@@ -105,6 +105,13 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
         this.userService = userService;
     }
 
+    @Override
+    public Authenticated handleLoginInfo(int userId, int contextId) throws OXException {
+        Context ctx = contextService.getContext(contextId);
+        User user = userService.getUser(userId, ctx);
+        return new AuthenticatedImpl(new String[] {ctx.getLoginInfo()[0], user.getLoginInfo()});
+    }
+
     /**
      * {@inheritDoc}
      */

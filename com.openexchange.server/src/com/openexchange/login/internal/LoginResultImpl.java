@@ -81,11 +81,21 @@ public final class LoginResultImpl implements LoginResult {
     private Header[] headers;
     private String serverToken;
 
-    LoginResultImpl() {
+    /**
+     * Initializes a new empty {@link LoginResultImpl}.
+     */
+    public LoginResultImpl() {
         super();
         warnings = new LinkedList<OXException>();
     }
 
+    /**
+     * Initializes a new {@link LoginResultImpl}.
+     *
+     * @param session The session
+     * @param context The resolved context
+     * @param user The resolved user
+     */
     public LoginResultImpl(final Session session, final Context context, final User user) {
         super();
         this.session = session;
@@ -104,7 +114,7 @@ public final class LoginResultImpl implements LoginResult {
      *
      * @param request The login request
      */
-    void setRequest(final LoginRequest request) {
+    public void setRequest(final LoginRequest request) {
         this.request = request;
     }
 
@@ -155,7 +165,7 @@ public final class LoginResultImpl implements LoginResult {
      *
      * @param cookies The cookies
      */
-    void setCookies(Cookie[] cookies) {
+    public void setCookies(Cookie[] cookies) {
         this.cookies = cookies;
     }
 
@@ -169,7 +179,7 @@ public final class LoginResultImpl implements LoginResult {
      *
      * @param headers The headers
      */
-    void setHeaders(Header[] headers) {
+    public void setHeaders(Header[] headers) {
         this.headers = headers;
     }
 

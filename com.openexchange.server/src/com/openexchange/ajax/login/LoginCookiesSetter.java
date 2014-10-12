@@ -47,31 +47,31 @@
  *
  */
 
-package com.openexchange.authentication;
+package com.openexchange.ajax.login;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * This data must be available to the application after a user has been authenticated. It is used to assign the according context and user
- * information.
- * <p>
- * If you want to influence the session, the {@link Authenticated} instance may also implement {@link SessionEnhancement}.
+ * {@link LoginCookiesSetter} - Sets the login cookies.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @see SessionEnhancement
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public interface Authenticated {
+public interface LoginCookiesSetter {
 
     /**
-     * Gets the context information used to look-up the associated context.
+     * Sets the login cookies.
      *
-     * @return The context information
+     * @param session The created session
+     * @param httpRequest The HTTP request
+     * @param httpResponse The HTTP response
+     * @param loginConfiguration The default login configuration as used for regular logins
+     * @throws OXException If operation fails
      */
-    String getContextInfo();
-
-    /**
-     * Gets the user information used to look-up the associated user.
-     *
-     * @return The user information
-     */
-    String getUserInfo();
+    void setLoginCookies(Session session, HttpServletRequest httpRequest, HttpServletResponse httpResponse, LoginConfiguration loginConfiguration) throws OXException;
 
 }
