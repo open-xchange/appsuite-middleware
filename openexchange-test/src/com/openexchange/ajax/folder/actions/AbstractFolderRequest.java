@@ -98,9 +98,7 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
             final JSONObject jsonPermission = new JSONObject();
             if (OCLGuestPermission.class.isInstance(perm)) {
                 OCLGuestPermission guestPerm = (OCLGuestPermission) perm;
-                if (null != guestPerm.getAuthenticationMode()) {
-                    jsonPermission.put(FolderField.GUEST_AUTH.getName(), guestPerm.getAuthenticationMode().toString());
-                }
+                jsonPermission.put("type", guestPerm.getType());
                 jsonPermission.putOpt(FolderField.MAIL_ADDRESS.getName(), guestPerm.getEmailAddress());
                 jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestPerm.getPassword());
                 jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestPerm.getDisplayName());

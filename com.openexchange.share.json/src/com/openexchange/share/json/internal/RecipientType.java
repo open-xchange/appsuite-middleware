@@ -51,6 +51,7 @@ package com.openexchange.share.json.internal;
 
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**

@@ -51,7 +51,6 @@ package com.openexchange.share.recipient;
 
 import java.util.Date;
 
-
 /**
  * Describes a guest user to which a item or folder shall be shared.
  *
@@ -70,6 +69,13 @@ public abstract class ShareRecipient {
     protected ShareRecipient() {
         super();
     }
+
+    /**
+     * Gets the recipient type.
+     *
+     * @return The type
+     */
+    public abstract RecipientType getType();
 
     /**
      * Gets the bits

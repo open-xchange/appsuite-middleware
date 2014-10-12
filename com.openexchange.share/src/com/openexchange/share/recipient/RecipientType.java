@@ -47,61 +47,33 @@
  *
  */
 
-package com.openexchange.share.json.internal;
-
-import com.openexchange.share.recipient.ShareRecipient;
+package com.openexchange.share.recipient;
 
 /**
- * {@link InternalRecipient}
+ * {@link RecipientType}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InternalRecipient extends ShareRecipient {
-
-    private boolean group;
-    private int id;
+public enum RecipientType {
 
     /**
-     * Initializes a new {@link InternalRecipient}.
+     * An already existing internal user
      */
-    public InternalRecipient() {
-        super();
-    }
+    USER,
 
     /**
-     * Gets the group
-     *
-     * @return The group
+     * An already existing internal group
      */
-    public boolean isGroup() {
-        return group;
-    }
+    GROUP,
 
     /**
-     * Sets the group
-     *
-     * @param group The group to set
+     * A named external guest
      */
-    public void setGroup(boolean group) {
-        this.group = group;
-    }
+    GUEST,
 
     /**
-     * Gets the id
-     *
-     * @return The id
+     * An anonymous external guest
      */
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * Sets the id
-     *
-     * @param id The id to set
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
+    ANONYMOUS
 
 }

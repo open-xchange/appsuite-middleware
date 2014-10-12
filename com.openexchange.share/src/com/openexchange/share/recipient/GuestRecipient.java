@@ -67,6 +67,11 @@ public class GuestRecipient extends ShareRecipient {
         super();
     }
 
+    @Override
+    public RecipientType getType() {
+        return RecipientType.GROUP;
+    }
+
     /**
      * Gets the emailAddress
      *

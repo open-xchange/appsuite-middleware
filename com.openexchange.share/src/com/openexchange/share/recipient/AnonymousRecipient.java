@@ -66,6 +66,11 @@ public class AnonymousRecipient extends ShareRecipient {
         super();
     }
 
+    @Override
+    public RecipientType getType() {
+        return RecipientType.ANONYMOUS;
+    }
+
     /**
      * Gets the password
      *

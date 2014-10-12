@@ -51,7 +51,6 @@ package com.openexchange.ajax.folder.actions;
 
 import java.util.Date;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.AuthenticationMode;
 
 /**
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -64,7 +63,7 @@ public class OCLGuestPermission extends OCLPermission {
     private String contactID;
     private String contactFolderID;
     private String displayName;
-    private AuthenticationMode authenticationMode;
+    private String type;
     private String password;
     private Date expires;
 
@@ -108,12 +107,12 @@ public class OCLGuestPermission extends OCLPermission {
         this.displayName = displayName;
     }
 
-    public AuthenticationMode getAuthenticationMode() {
-        return authenticationMode;
+    public String getType() {
+        return type;
     }
 
-    public void setAuthenticationMode(AuthenticationMode authenticationMode) {
-        this.authenticationMode = authenticationMode;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getPassword() {

@@ -70,7 +70,6 @@ import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.AuthenticationMode;
 
 /**
  * {@link AggregateSharesTest}
@@ -157,7 +156,7 @@ public class AggregateSharesTest extends ShareTest {
          * prepare guest permission
          */
         String name = randomUID();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret", AuthenticationMode.GUEST_PASSWORD);
+        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret");
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */
@@ -241,7 +240,7 @@ public class AggregateSharesTest extends ShareTest {
          * prepare guest permission
          */
         String name = randomUID();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret", AuthenticationMode.GUEST_PASSWORD);
+        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret");
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */

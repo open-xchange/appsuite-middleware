@@ -47,27 +47,64 @@
  *
  */
 
-package com.openexchange.share.json.internal;
-
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.tools.session.ServerSession;
-
+package com.openexchange.share.recipient;
 
 /**
- * {@link PermissionUpdater}
+ * {@link InternalRecipient}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface PermissionUpdater {
+public class InternalRecipient extends ShareRecipient {
 
-    int getModule();
+    private boolean group;
+    private int entity;
 
-    void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session) throws OXException;
+    /**
+     * Initializes a new {@link InternalRecipient}.
+     */
+    public InternalRecipient() {
+        super();
+    }
 
-    void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, ServerSession session) throws OXException;
+    @Override
+    public RecipientType getType() {
+        return group ? RecipientType.GROUP : RecipientType.USER;
+    }
+
+    /**
+     * Gets the group
+     *
+     * @return The group
+     */
+    public boolean isGroup() {
+        return group;
+    }
+
+    /**
+     * Sets the group
+     *
+     * @param group The group to set
+     */
+    public void setGroup(boolean group) {
+        this.group = group;
+    }
+
+    /**
+     * Gets the entity
+     *
+     * @return The entity
+     */
+    public int getEntity() {
+        return entity;
+    }
+
+    /**
+     * Sets the entity
+     *
+     * @param entity The entity to set
+     */
+    public void setEntity(int entity) {
+        this.entity = entity;
+    }
 
 }

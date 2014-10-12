@@ -69,12 +69,12 @@ import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.json.internal.InternalRecipient;
 import com.openexchange.share.json.internal.PermissionUpdater;
 import com.openexchange.share.json.internal.PermissionUpdaters;
 import com.openexchange.share.json.internal.RecipientType;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -243,7 +243,7 @@ public class NewAction extends AbstractShareAction {
         for (int i = 0; i < externalRecipients.size(); i++) {
             ShareRecipient external = externalRecipients.get(i);
             InternalRecipient internal = new InternalRecipient();
-            internal.setId(guestIDs.get(i));
+            internal.setEntity(guestIDs.get(i).intValue());
             internal.setGroup(false);
             internal.setBits(external.getBits());
             finalRecipients.add(internal);
@@ -363,7 +363,7 @@ public class NewAction extends AbstractShareAction {
             if (false == jsonRecipient.hasAndNotNull("id")) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
             }
-            internalRecipient.setId(jsonRecipient.getInt("id"));
+            internalRecipient.setEntity(jsonRecipient.getInt("id"));
             recipient = internalRecipient;
             break;
         case ANONYMOUS:
