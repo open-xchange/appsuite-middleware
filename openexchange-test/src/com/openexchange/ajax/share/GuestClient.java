@@ -431,6 +431,7 @@ public class GuestClient extends AJAXClient {
             appointment.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
             appointment.setStartDate(new Date());
             appointment.setEndDate(new Date(appointment.getStartDate().getTime() + 60 * 1000 * 60));
+            appointment.setIgnoreConflicts(true);
             AppointmentInsertResponse insertAppointmentResponse = execute(
                 new com.openexchange.ajax.appointment.action.InsertRequest(appointment, timeZone, failOnError));
             checkResponse(insertAppointmentResponse, expectToFail);

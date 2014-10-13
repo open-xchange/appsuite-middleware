@@ -71,6 +71,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -275,7 +276,7 @@ public class ShareTool {
         guestUser.setDisplayName("Guest");
         guestUser.setMail("");
         if (null != recipient.getPassword()) {
-            guestUser.setUserPassword(recipient.getPassword());
+            guestUser.setUserPassword(services.getService(ShareCryptoService.class).encrypt(recipient.getPassword()));
             guestUser.setPasswordMech("{CRYPTO_SERVICE}");
         } else {
             guestUser.setPasswordMech("");
