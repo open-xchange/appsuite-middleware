@@ -89,7 +89,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
         createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
         createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
-        createAnonymousAuthorPermission(),
+        createAnonymousAuthorPermission("secret"),
         createAnonymousGuestPermission()
     };
 
@@ -282,8 +282,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param share The share
      * @return An authenticate guest client being able to access the share
      */
-    protected GuestClient resolveShare(ParsedShare share) throws Exception {
-        return new GuestClient(share);
+    protected GuestClient resolveShare(ParsedShare share, String password) throws Exception {
+        return new GuestClient(share, password);
     }
 
     /**
@@ -341,22 +341,31 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return guestPermission;
     }
 
-    protected static OCLGuestPermission createAnonymousGuestPermission() {
-        OCLGuestPermission guestPermission = createAnonymousPermission();
+    protected static OCLGuestPermission createAnonymousGuestPermission(String password) {
+        OCLGuestPermission guestPermission = createAnonymousPermission(password);
         guestPermission.setAllPermission(
             OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         return guestPermission;
     }
 
-    protected static OCLGuestPermission createAnonymousAuthorPermission() {
-        OCLGuestPermission guestPermission = createAnonymousPermission();
+    protected static OCLGuestPermission createAnonymousAuthorPermission(String password) {
+        OCLGuestPermission guestPermission = createAnonymousPermission(password);
         guestPermission.setAllPermission(
             OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         return guestPermission;
     }
 
-    protected static OCLGuestPermission createAnonymousPermission() {
+    protected static OCLGuestPermission createAnonymousGuestPermission() {
+        return createAnonymousGuestPermission(null);
+    }
+
+    protected static OCLGuestPermission createAnonymousAuthorPermission() {
+        return createAnonymousAuthorPermission(null);
+    }
+
+    protected static OCLGuestPermission createAnonymousPermission(String password) {
         OCLGuestPermission guestPermission = new OCLGuestPermission();
+        guestPermission.setPassword(password);
         guestPermission.setType(RecipientType.ANONYMOUS.toString().toLowerCase());
         guestPermission.setGroupPermission(false);
         guestPermission.setFolderAdmin(false);

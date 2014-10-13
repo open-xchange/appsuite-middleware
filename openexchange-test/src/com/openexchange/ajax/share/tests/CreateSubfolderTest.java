@@ -147,7 +147,7 @@ public class CreateSubfolderTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share);
+        GuestClient guestClient = resolveShare(share, guestPermission.getPassword());
         guestClient.checkShareModuleAvailable();
         /*
          * create subfolder as guest
@@ -227,7 +227,7 @@ public class CreateSubfolderTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share);
+        GuestClient guestClient = resolveShare(share, guestPermission.getPassword());
         guestClient.checkShareModuleAvailable();
         /*
          * create subfolder as guest

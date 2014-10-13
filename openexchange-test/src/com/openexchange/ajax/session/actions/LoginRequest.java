@@ -61,27 +61,61 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     private static final String PARAM_PASSWORD = "password";
 
     private static final String PARAM_NAME = "name";
-    
+
     private static final String PARAM_TOKEN = "token";
-    
+
     private static final String PARAM_SECRET = "secret";
 
     private final boolean failOnError;
 
     /**
+     * Creates a new guest login request used to access a share.
+     *
+     * @param share The share's token
+     * @param login The login name
+     * @param password The password
+     * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
+     * @return The login request
+     */
+    public static LoginRequest createGuestLoginRequest(String share, String login, String password, boolean failOnError) {
+        return new LoginRequest(new Parameter[] {
+            new Parameter("action", "guest_login"),
+            new Parameter("share", share),
+            new Parameter("login", share),
+            new Parameter("password", share)
+        }, failOnError);
+    }
+
+    /**
+     * Creates a new anonymous login request used to access a share.
+     *
+     * @param share The share's token
+     * @param password The password
+     * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
+     * @return The login request
+     */
+    public static LoginRequest createAnonymousLoginRequest(String share, String password, boolean failOnError) {
+        return new LoginRequest(new Parameter[] {
+            new Parameter("action", "anonymous_login"),
+            new Parameter("share", share),
+            new Parameter("password", share)
+        }, failOnError);
+    }
+
+    /**
      * Constructor for Login with token. Initializes a new {@link LoginRequest}.
      */
     public LoginRequest(TokenLoginParameters parameters, boolean failOnError) {
-        super(new Parameter[] {
+        this(new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_REDEEM_TOKEN),
             new URLParameter(LoginFields.AUTHID_PARAM, parameters.getAuthId()),
             new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient()),
             new URLParameter(LoginFields.VERSION_PARAM, parameters.getVersion()),
             new FieldParameter(PARAM_TOKEN, parameters.getToken()),
-            new FieldParameter(PARAM_SECRET, parameters.getSecret())});
-        this.failOnError = failOnError;
+            new FieldParameter(PARAM_SECRET, parameters.getSecret())
+        }, failOnError);
     }
-    
+
     public LoginRequest(TokenLoginParameters parameters) {
         this(parameters, true);
     }
@@ -91,14 +125,24 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     }
 
     public LoginRequest(String login, String password, String authId, String client, String version, boolean failOnError) {
-        super(new Parameter[] {
+        this(new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
             new URLParameter(LoginFields.AUTHID_PARAM, authId),
             new URLParameter(LoginFields.CLIENT_PARAM, client),
             new URLParameter(LoginFields.VERSION_PARAM, version),
             new FieldParameter(PARAM_NAME, login),
             new FieldParameter(PARAM_PASSWORD, password)
-        });
+        }, failOnError);
+    }
+
+    /**
+     * Initializes a new {@link LoginRequest}.
+     *
+     * @param parameters The request parameters
+     * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
+     */
+    protected LoginRequest(Parameter[] parameters, boolean failOnError) {
+        super(parameters);
         this.failOnError = failOnError;
     }
 
@@ -109,7 +153,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     public LoginResponseParser getParser() {
         return new LoginResponseParser(failOnError);
     }
-    
+
     public static class TokenLoginParameters {
 
         String token, secret, authId, client, version;
