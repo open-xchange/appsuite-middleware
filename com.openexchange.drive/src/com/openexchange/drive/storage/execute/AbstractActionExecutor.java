@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.storage.execute;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.drive.DriveVersion;
@@ -87,6 +88,9 @@ public abstract class AbstractActionExecutor<T extends DriveVersion> implements 
      * @param action The action to add.
      */
     protected void addNewActionForClient(AbstractAction<T> action) {
+        if (null == newActionsForClient) {
+            newActionsForClient = new ArrayList<AbstractAction<T>>();
+        }
         newActionsForClient.add(action);
     }
 
@@ -96,6 +100,9 @@ public abstract class AbstractActionExecutor<T extends DriveVersion> implements 
      * @param actions The actions to add.
      */
     protected void addNewActionsForClient(Collection<? extends AbstractAction<T>> actions) {
+        if (null == newActionsForClient) {
+            newActionsForClient = new ArrayList<AbstractAction<T>>();
+        }
         newActionsForClient.addAll(actions);
     }
 
