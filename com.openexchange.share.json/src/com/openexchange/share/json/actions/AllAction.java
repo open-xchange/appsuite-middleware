@@ -116,7 +116,7 @@ public class AllAction extends AbstractShareAction {
             Share share = shares.get(i);
             String shareURL = shareURLs.get(i);
             User guestUser = guestUsersByID.get(Integer.valueOf(share.getGuest()));
-            String guestPassword = AuthenticationMode.ANONYMOUS != share.getAuthentication() ?
+            String guestPassword = AuthenticationMode.ANONYMOUS_PASSWORD == share.getAuthentication() ?
                 cryptoService.decrypt(guestUser.getUserPassword()) : null;
             guestShares.add(new GuestShare(share, guestUser, guestPassword, shareURL));
         }
