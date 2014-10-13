@@ -226,6 +226,10 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                         if (!userService.authenticate(user, loginInfo.getPassword())) {
                             throw INVALID_CREDENTIALS.create();
                         }
+
+                        if (!loginInfo.getUsername().equals(user.getMail())) {
+                            throw INVALID_CREDENTIALS.create();
+                        }
                     }
 
                     Authenticated  authenticated = basicService.handleLoginInfo(share.getGuest(), share.getContextID());
