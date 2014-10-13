@@ -190,6 +190,13 @@ public interface Session {
     static final String PARAM_PUBLICATION = "__session.publication".intern();
 
     /**
+     * The parameter to indicate a guest session.
+     *
+     * @type <code>java.lang.Boolean</code>
+     */
+    public static final String PARAM_GUEST = "__session.guest".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();

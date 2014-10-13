@@ -89,6 +89,7 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
         public String getUserInfo() {
             return splitted[1];
         }
+
     } // End of class AuthenticatedImpl
 
     // ------------------------------------------------------------------------------------------------------------------------------- //

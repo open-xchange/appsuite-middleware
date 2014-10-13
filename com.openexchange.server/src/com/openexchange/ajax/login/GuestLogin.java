@@ -73,6 +73,7 @@ import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -80,7 +81,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.AbstractJsonEnhancingLoginResult;
 import com.openexchange.login.internal.AddSessionParameterImpl;
@@ -245,7 +245,7 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                     authService.authorizeUser(context, user);
 
                     // Parse & check the HTTP request
-                    LoginRequest request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false, conf.getDefaultClient(), conf.isCookieForceHTTPS(), false);
+                    LoginRequestImpl request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false, conf.getDefaultClient(), conf.isCookieForceHTTPS(), false);
                     LoginPerformer.sanityChecks(request);
                     LoginPerformer.checkClient(request, user, context);
 
@@ -260,11 +260,17 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                                 throw ServiceExceptionCode.absentService(SessiondService.class);
                             }
                         }
+                        {
+                            ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                            boolean tranzient = null == service || service.getBoolProperty("com.openexchange.share.transientSessions", true);
+                            request.setTransient(tranzient);
+                        }
                         session = sessiondService.addSession(new AddSessionParameterImpl(loginInfo.getUsername(), request, user, context));
                         if (null == session) {
                             // Session could not be created
                             throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
                         }
+                        session.setParameter(Session.PARAM_GUEST, Boolean.TRUE);
                         if (SessionEnhancement.class.isInstance(authenticated)) {
                             ((SessionEnhancement) authenticated).enhanceSession(session);
                         }
