@@ -63,18 +63,18 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link TransactionTest}
+ * {@link FolderTransactionTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class TransactionTest extends ShareTest {
+public class FolderTransactionTest extends ShareTest {
 
     /**
-     * Initializes a new {@link TransactionTest}.
+     * Initializes a new {@link FolderTransactionTest}.
      *
      * @param name
      */
-    public TransactionTest(String name) {
+    public FolderTransactionTest(String name) {
         super(name);
     }
 

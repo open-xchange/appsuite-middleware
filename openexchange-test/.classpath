@@ -128,5 +128,6 @@
 	<classpathentry kind="src" path="/com.openexchange.google.api.client"/>
 	<classpathentry kind="src" path="/com.openexchange.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.composition"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

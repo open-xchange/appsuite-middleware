@@ -82,7 +82,6 @@ public class NewTest extends ShareTest {
     private FolderObject calendar;
     private FolderObject contacts;
     private FolderObject infostore;
-//    private FolderObject tasks;
     private AJAXClient client2;
     private InfostoreTestManager itm;
     private DefaultFile file;
@@ -108,10 +107,9 @@ public class NewTest extends ShareTest {
 
         file = new DefaultFile();
         file.setFolderId(String.valueOf(infostore.getObjectID()));
-        file.setTitle("test knowledge");
-        file.setDescription("test knowledge description");
+        file.setTitle("NewTest" + System.currentTimeMillis());
+        file.setDescription(file.getTitle());
         itm.newAction(file);
-        //        tasks = insertPrivateFolder(EnumAPI.OX_NEW, Module.TASK.getFolderConstant(), values.getPrivateTaskFolder());
     }
 
     public void testShareMultipleFoldersInternally() throws Exception {

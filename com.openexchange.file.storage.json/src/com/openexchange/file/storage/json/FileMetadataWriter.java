@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.java.Strings;
@@ -166,7 +167,23 @@ public class FileMetadataWriter {
                     List<?> list = (List<?>) value;
                     JSONArray jPermissions = new JSONArray(list.size());
                     for (Object obj : list) {
-                        if (obj instanceof FileStorageObjectPermission) {
+                        if (obj instanceof FileStorageGuestObjectPermission) {
+                            FileStorageGuestObjectPermission permission = (FileStorageGuestObjectPermission) obj;
+                            JSONObject json = new JSONObject(3);
+                            try {
+                                json.put("guest_auth", permission.getAuthenticationMode().name().toLowerCase());
+                                json.put("mail_address", permission.getEmailAddress());
+                                json.put("password", permission.getPassword());
+                                json.put("display_name", permission.getDisplayName());
+                                json.put("contact_id", permission.getContactID());
+                                json.put("contact_folder", permission.getContactFolderID());
+                                json.put("bits", permission.getPermissions());
+                                jPermissions.put(json);
+                            } catch (JSONException e) {
+                                LOG.error("", e);
+                                return null;
+                            }
+                        } else if (obj instanceof FileStorageObjectPermission) {
                             FileStorageObjectPermission permission = (FileStorageObjectPermission) obj;
                             JSONObject json = new JSONObject(3);
                             try {
