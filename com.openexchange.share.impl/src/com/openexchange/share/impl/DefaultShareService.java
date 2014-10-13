@@ -114,7 +114,7 @@ public class DefaultShareService implements ShareService {
     public Share resolveToken(String token) throws OXException {
         int contextID = ShareTool.extractContextId(token);
         Share share = services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
-        return removeExpired(share);
+        return filterInactive(removeExpired(share));
     }
 
     @Override
@@ -486,6 +486,17 @@ public class DefaultShareService implements ShareService {
             return null;
         }
         return share;
+    }
+
+    /**
+     * Removes the share in case it is not active.
+     *
+     * @param share The share
+     * @return The share, if it is not active, or <code>null</code>, otherwise
+     * @throws OXException
+     */
+    private Share filterInactive(Share share) throws OXException {
+        return null == share || false == share.isActive() ? null : share;
     }
 
     /**
