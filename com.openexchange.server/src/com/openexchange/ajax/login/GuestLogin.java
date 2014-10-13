@@ -169,7 +169,7 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                         final String pass;
 
                         String body = AJAXServlet.getBody(httpRequest);
-                        if (null == body) {
+                        if (Strings.isEmpty(body)) {
                             // By parameters
                             login = httpRequest.getParameter(LoginFields.NAME_PARAM);
                             if (Strings.isEmpty(login)) {
