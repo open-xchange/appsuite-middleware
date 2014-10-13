@@ -7790,6 +7790,14 @@ msgstr ""
 msgid "You don't have sufficient permissions to edit the share."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:76
+msgid "Module %1$s does not support sharing of items."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:78
+msgid "Module %1$s does not support sharing of folders."
+msgstr ""
+
 #. *
 #. * No recipient(s) has been defined for new message
 #.
