@@ -71,7 +71,7 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     DB_ERROR("Unexpected database error: \"%1$s\"", SQL_ERROR_MSG, Category.CATEGORY_WARNING, 1),
 
     /** The requested share does not exist. || A share with token \"%1$s\" does not exist. */
-    UNKNWON_SHARE("A share with token \"%1$s\" does not exist.", UNKNOWN_SHARE_MSG, Category.CATEGORY_USER_INPUT, 2),
+    UNKNOWN_SHARE("A share with token \"%1$s\" does not exist.", UNKNOWN_SHARE_MSG, Category.CATEGORY_USER_INPUT, 2),
 
     /** The link \"%1$s\" is invalid. */
     INVALID_LINK("A share with token \"%1$s\" does not exist.", INVALID_LINK_MSG, Category.CATEGORY_USER_INPUT, 3),

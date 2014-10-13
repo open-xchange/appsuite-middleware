@@ -92,6 +92,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -99,20 +100,20 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.user.UserService;
 
 /**
- * {@link GuestLogin}
+ * {@link AnonymousLogin}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GuestLogin extends AbstractLoginRequestHandler {
+public class AnonymousLogin extends AbstractLoginRequestHandler {
 
     private final LoginConfiguration conf;
 
     /**
-     * Initializes a new {@link GuestLogin}.
+     * Initializes a new {@link AnonymousLogin}.
      *
      * @param login
      */
-    public GuestLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+    public AnonymousLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
         super(rampUp);
         this.conf = conf;
     }
@@ -153,7 +154,7 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                     }
 
                     // Check for matching authentication mode
-                    if (AuthenticationMode.GUEST_PASSWORD != share.getAuthentication()) {
+                    if (AuthenticationMode.ANONYMOUS_PASSWORD != share.getAuthentication()) {
                         throw INVALID_CREDENTIALS.create();
                     }
 
@@ -165,17 +166,11 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                     // Get the login info from JSON body
                     LoginInfo loginInfo;
                     {
-                        final String login;
                         final String pass;
 
                         String body = AJAXServlet.getBody(httpRequest);
                         if (null == body) {
                             // By parameters
-                            login = httpRequest.getParameter(LoginFields.NAME_PARAM);
-                            if (Strings.isEmpty(login)) {
-                                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.NAME_PARAM);
-                            }
-
                             pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
                             if (Strings.isEmpty(pass)) {
                                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
@@ -184,7 +179,6 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                             // By request body
                             JSONObject jBody = new JSONObject(body);
                             pass = jBody.getString("password");
-                            login = jBody.getString("login");
                         }
 
                         loginInfo = new LoginInfo() {
@@ -194,7 +188,7 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                             }
                             @Override
                             public String getUsername() {
-                                return login;
+                                return "anonymous";
                             }
                             @Override
                             public Map<String, Object> getProperties() {
@@ -222,8 +216,15 @@ public class GuestLogin extends AbstractLoginRequestHandler {
                             throw ServiceExceptionCode.absentService(UserService.class);
                         }
 
+                        ShareCryptoService cryptoService = ServerServiceRegistry.getInstance().getService(ShareCryptoService.class);
+                        if (null == cryptoService) {
+                            throw ServiceExceptionCode.absentService(ShareCryptoService.class);
+                        }
+
                         user = userService.getUser(share.getGuest(), context);
-                        if (!userService.authenticate(user, loginInfo.getPassword())) {
+                        String decryptedPassword = cryptoService.decrypt(user.getUserPassword());
+
+                        if (!decryptedPassword.equals(loginInfo.getPassword())) {
                             throw INVALID_CREDENTIALS.create();
                         }
                     }

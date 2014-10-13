@@ -103,7 +103,7 @@ public class NotifyAction extends AbstractShareAction {
         ShareService shareService = getShareService();
         Share share = shareService.resolveToken(token);
         if (share == null) {
-            throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
 
         List<String> urls = generateShareURLs(Collections.singletonList(share), requestData);

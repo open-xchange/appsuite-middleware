@@ -168,7 +168,7 @@ public class DefaultShareService implements ShareService {
             for (String token : tokens) {
                 Share share = ShareTool.findShare(shares, token);
                 if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
-                    throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+                    throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
                 }
                 if (session.getUserId() != share.getCreatedBy()) {
                     throw ShareExceptionCodes.NO_DELETE_PERMISSIONS.create(
@@ -198,7 +198,7 @@ public class DefaultShareService implements ShareService {
     public Share updateShare(Session session, Share share, Date clientTimestamp) throws OXException {
         String token = share.getToken();
         if (Strings.isEmpty(token)) {
-            throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
@@ -209,7 +209,7 @@ public class DefaultShareService implements ShareService {
             Share storedShare = services.getService(ShareStorage.class).loadShare(
                 session.getContextId(), token, connectionHelper.getParameters());
             if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
-                throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
             if (session.getUserId() != share.getCreatedBy()) {
                 throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(
@@ -381,7 +381,7 @@ public class DefaultShareService implements ShareService {
     public void removeShares(int contextId, List<String> tokens) throws OXException {
         for (String token : tokens) {
             if (ShareTool.extractContextId(token) != contextId) {
-                throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
         }
         ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
