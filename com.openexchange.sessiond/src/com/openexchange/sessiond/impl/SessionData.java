@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -203,7 +202,7 @@ final class SessionData {
         wlongTermLock.lock();
         try {
             longTermList.addFirst(new SessionMap(256));
-            final List<SessionControl> retval = new ArrayList<SessionControl>(longTermList.removeLast().values());
+            final List<SessionControl> retval = new LinkedList<SessionControl>(longTermList.removeLast().values());
             for (final SessionControl sessionControl : retval) {
                 final SessionImpl session = sessionControl.getSession();
                 longTermUserGuardian.remove(session.getUserId(), session.getContextId());
@@ -259,7 +258,7 @@ final class SessionData {
 
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
         // Removing sessions is a write operation.
-        final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new LinkedList<SessionControl>();
         wlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -296,7 +295,7 @@ final class SessionData {
 
     List<SessionControl> removeContextSessions(final int contextId) {
         // Removing sessions is a write operation.
-        final List<SessionControl> list = new ArrayList<SessionControl>();
+        final List<SessionControl> list = new LinkedList<SessionControl>();
         wlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -413,7 +412,7 @@ final class SessionData {
 
     SessionControl[] getUserSessions(final int userId, final int contextId) {
         // A read-only access to session list
-        final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new LinkedList<SessionControl>();
         // Short term ones
         rlock.lock();
         try {
@@ -739,7 +738,7 @@ final class SessionData {
 
     List<SessionControl> getShortTermSessions() {
         // A read.only access
-        final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new LinkedList<SessionControl>();
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -752,7 +751,7 @@ final class SessionData {
     }
 
     List<SessionControl> getLongTermSessions() {
-        final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new LinkedList<SessionControl>();
         rlongTermLock.lock();
         try {
             for (final SessionMap longTermMap : longTermList) {

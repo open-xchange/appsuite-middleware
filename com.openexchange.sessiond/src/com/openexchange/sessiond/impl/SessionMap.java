@@ -52,6 +52,8 @@ package com.openexchange.sessiond.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -87,6 +89,41 @@ public final class SessionMap {
         sessionIdMap = new HashMap<String, SessionControl>(initialCapacity);
         alternativeIdMap = new HashMap<String, SessionControl>(initialCapacity);
     }
+
+    /**
+     * Drops expired sessions from this session map
+     *
+     * @param idleTime The idle time
+     */
+    public List<SessionControl> dropExpired(long idleTime) {
+        final Lock rlock = rwLock.readLock();
+        rlock.lock();
+        try {
+            List<SessionControl> sessions = new LinkedList<SessionControl>();
+            boolean added = false;
+            for (SessionControl sc : sessionIdMap.values()) {
+                if (sc.isElapsed(idleTime)) {
+                    sessions.add(sc);
+                    added = true;
+                }
+            }
+            if (added) {
+                for (SessionControl sc : sessions) {
+                    Session session = sc.getSession();
+                    sessionIdMap.remove(session.getSessionID());
+                    String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+                    if (null != altId) {
+                        alternativeIdMap.remove(altId);
+                    }
+                }
+            }
+            return sessions;
+        } finally {
+            rlock.unlock();
+        }
+    }
+
+    // -------------------------------------------------------------------------------
 
     /**
      * Gets the map's size.
