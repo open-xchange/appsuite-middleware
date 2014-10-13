@@ -69,6 +69,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
@@ -566,6 +567,26 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         } else {
             saveDocument(document, data, sequenceNumber, nonNull(document), session);
+        }
+    }
+
+    private long getUsedQuota(final Context context) throws OXException {
+        Connection readCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            readCon = getReadConnection(context);
+            stmt = readCon.prepareStatement("SELECT COUNT(id) from infostore where cid=?");
+            stmt.setLong(1, context.getContextId());
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getLong(1) : -1L;
+        } catch (final SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != readCon) {
+                releaseReadConnection(context, readCon);
+            }
         }
     }
 
