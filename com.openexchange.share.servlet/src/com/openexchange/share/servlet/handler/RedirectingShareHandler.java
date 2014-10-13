@@ -143,7 +143,7 @@ public class RedirectingShareHandler extends AbstractShareHandler {
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (keepSession()) {
+            if (false == keepSession()) {
                 ShareServletUtils.logout(session);
             }
         }

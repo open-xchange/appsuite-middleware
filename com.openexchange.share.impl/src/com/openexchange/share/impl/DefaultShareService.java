@@ -61,10 +61,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
@@ -633,10 +631,6 @@ public class DefaultShareService implements ShareService {
                 userService.deleteUser(connectionHelper.getConnection(), context, guestID);
                 LOG.info("Deleted {} guest user(s) in context {}: {}", guestIDs.length, contextID, Arrays.toString(guestIDs));
                 deletedGuestIDs.add(Integer.valueOf(guestID));
-
-                // TODO remove guest contact
-                ContactService contactService = services.getService(ContactService.class);
-                contactService.deleteContact(session, String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID), String.valueOf(guestID), new Date());
             }
         }
         return I2i(deletedGuestIDs);

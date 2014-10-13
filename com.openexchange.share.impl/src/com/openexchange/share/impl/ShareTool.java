@@ -277,6 +277,8 @@ public class ShareTool {
         if (null != recipient.getPassword()) {
             guestUser.setUserPassword(recipient.getPassword());
             guestUser.setPasswordMech("{CRYPTO_SERVICE}");
+        } else {
+            guestUser.setPasswordMech("");
         }
         return guestUser;
     }

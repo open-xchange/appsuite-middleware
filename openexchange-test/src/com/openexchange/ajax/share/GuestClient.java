@@ -327,29 +327,28 @@ public class GuestClient extends AJAXClient {
 
     private void deleteItem(FolderObject folder, String id, boolean expectToFail) throws Exception {
         int folderID = folder.getObjectID();
-        int objectID = Integer.parseInt(id);
         Date timestamp = getFutureTimestamp();
         boolean failOnError = false == expectToFail;
         switch (folder.getModule()) {
         case FolderObject.CONTACT:
             CommonDeleteResponse deleteContactResponse = execute(
-                new com.openexchange.ajax.contact.action.DeleteRequest(folderID, objectID, timestamp, failOnError));
+                new com.openexchange.ajax.contact.action.DeleteRequest(folderID, Integer.parseInt(id), timestamp, failOnError));
             checkResponse(deleteContactResponse, expectToFail);
             break;
         case FolderObject.INFOSTORE:
-            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(String.valueOf(objectID), String.valueOf(folderID), timestamp);
+            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(id, String.valueOf(folderID), timestamp);
             deleteInfostoreRequest.setFailOnError(failOnError);
             DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
             checkResponse(deleteInfostoreResponse, expectToFail);
             break;
         case FolderObject.TASK:
             CommonDeleteResponse deleteTaskResponse = execute(
-                new com.openexchange.ajax.task.actions.DeleteRequest(folderID, objectID, timestamp, failOnError));
+                new com.openexchange.ajax.task.actions.DeleteRequest(folderID, Integer.parseInt(id), timestamp, failOnError));
             checkResponse(deleteTaskResponse, expectToFail);
             break;
         case FolderObject.CALENDAR:
             CommonDeleteResponse deleteAppointmentResponse = execute(
-                new com.openexchange.ajax.appointment.action.DeleteRequest(objectID, folderID, timestamp, failOnError));
+                new com.openexchange.ajax.appointment.action.DeleteRequest(Integer.parseInt(id), folderID, timestamp, failOnError));
             checkResponse(deleteAppointmentResponse, expectToFail);
             break;
         default:
@@ -360,29 +359,28 @@ public class GuestClient extends AJAXClient {
 
     private Object getItem(FolderObject folder, String id, boolean expectToFail) throws Exception {
         int folderID = folder.getObjectID();
-        int objectID = Integer.parseInt(id);
         boolean failOnError = false == expectToFail;
         TimeZone timeZone = TimeZones.UTC;
         switch (folder.getModule()) {
         case FolderObject.CONTACT:
             com.openexchange.ajax.contact.action.GetResponse contactGetResponse = execute(
-                new com.openexchange.ajax.contact.action.GetRequest(folderID, objectID, timeZone, failOnError));
+                new com.openexchange.ajax.contact.action.GetRequest(folderID, Integer.parseInt(id), timeZone, failOnError));
             checkResponse(contactGetResponse, expectToFail);
             return expectToFail ? null : contactGetResponse.getContact();
         case FolderObject.INFOSTORE:
-            GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(String.valueOf(objectID));
+            GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(id);
             getInfostoreRequest.setFailOnError(false == expectToFail);
             GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
             checkResponse(getInfostoreResponse, expectToFail);
             return expectToFail ? null : getInfostoreResponse.getDocumentMetadata();
         case FolderObject.TASK:
             com.openexchange.ajax.task.actions.GetResponse getTaskResponse = execute(
-                new com.openexchange.ajax.task.actions.GetRequest(folderID, objectID, failOnError));
+                new com.openexchange.ajax.task.actions.GetRequest(folderID, Integer.parseInt(id), failOnError));
             checkResponse(getTaskResponse, expectToFail);
             return expectToFail ? null : getTaskResponse.getTask(timeZone);
         case FolderObject.CALENDAR:
             com.openexchange.ajax.appointment.action.GetResponse getAppointmentResponse = execute(
-                new com.openexchange.ajax.appointment.action.GetRequest(folderID, objectID, failOnError));
+                new com.openexchange.ajax.appointment.action.GetRequest(folderID, Integer.parseInt(id), failOnError));
             checkResponse(getAppointmentResponse, expectToFail);
             return expectToFail ? null : getAppointmentResponse.getAppointment(timeZone);
         default:

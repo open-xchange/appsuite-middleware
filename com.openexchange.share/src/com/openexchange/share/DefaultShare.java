@@ -167,7 +167,7 @@ public class DefaultShare implements Share, Serializable {
 
     @Override
     public boolean isActive() {
-        return null != activationDate && activationDate.before(new Date());
+        return null == activationDate || activationDate.before(new Date());
     }
 
     @Override
