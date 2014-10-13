@@ -1,7 +1,11 @@
+* 2014-10-13 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34888: Ignore data truncation errors on ALTER TABLE for tasks table modifying target and actual costs.
+
 * 2014-10-12 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 34896: Initialize member before first accessing it 
- - Fix for bug 34897: Consider number of files in context for "amount"-type quota 
+ - Fix for bug 34896: Initialize member before first accessing it
+ - Fix for bug 34897: Consider number of files in context for "amount"-type quota
 
 * 2014-10-10 - thorben.betten@open-xchange.com
 

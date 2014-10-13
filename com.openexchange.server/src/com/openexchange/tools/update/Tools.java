@@ -795,10 +795,28 @@ public final class Tools {
      * @throws SQLException If operation fails
      */
     public static void modifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        modifyColumns(con, tableName, false, cols);
+    }
+
+    /**
+     * Modifies specified columns in given table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param ignore adds the keyword IGNORE to the SQL statement to ignore e.g. data truncation.
+     * @param cols The new column definitions to change to
+     * @throws SQLException If operation fails
+     */
+    public static void modifyColumns(final Connection con, final String tableName, boolean ignore, final Column... cols) throws SQLException {
         if (null == cols || cols.length == 0) {
             return;
         }
-        final StringBuilder sql = new StringBuilder("ALTER TABLE ");
+        final StringBuilder sql = new StringBuilder();
+        if (ignore) {
+            sql.append("ALTER IGNORE TABLE ");
+        } else {
+            sql.append("ALTER TABLE ");
+        }
         sql.append(tableName);
         sql.append(" MODIFY COLUMN ");
         sql.append(cols[0].getName());
@@ -828,6 +846,19 @@ public final class Tools {
      * @throws SQLException If operation fails
      */
     public static void checkAndModifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        checkAndModifyColumns(con, tableName, false, cols);
+    }
+
+    /**
+     * Checks existence of specified columns and modifies them in table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param ignore adds the keyword IGNORE to the SQL statement to ignore e.g. data truncation.
+     * @param cols The columns to modify
+     * @throws SQLException If operation fails
+     */
+    public static void checkAndModifyColumns(final Connection con, final String tableName, boolean ignore, final Column... cols) throws SQLException {
         final List<Column> toDo = new ArrayList<Column>();
         for (final Column col : cols) {
             if (!col.getDefinition().contains(getColumnTypeName(con, tableName, col.getName()))) {
@@ -835,7 +866,7 @@ public final class Tools {
             }
         }
         if (!toDo.isEmpty()) {
-            modifyColumns(con, tableName, toDo.toArray(new Column[toDo.size()]));
+            modifyColumns(con, tableName, ignore, toDo.toArray(new Column[toDo.size()]));
         }
     }
 }
