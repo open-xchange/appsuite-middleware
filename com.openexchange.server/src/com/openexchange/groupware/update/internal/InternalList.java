@@ -746,9 +746,6 @@ public final class InternalList {
         // Adds permissions to system- and root-folders for the virtual guest group.
         list.add(new com.openexchange.groupware.update.tasks.FolderPermissionAddGuestGroup());
 
-        // Adds the column 'guestCreatedBy' to the tables 'user' and 'del_user'
-        list.add(new com.openexchange.groupware.update.tasks.UserAddGuestCreatedByTask());
-
         // (Re-)adds indexes in prg_contacts for "auto-complete" queries
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearchV2());
 
