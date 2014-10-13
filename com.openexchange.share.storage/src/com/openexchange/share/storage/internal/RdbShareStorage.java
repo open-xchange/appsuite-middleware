@@ -406,7 +406,7 @@ public class RdbShareStorage implements ShareStorage {
         if (1 == tokens.length) {
             stringBuilder.append("=?;");
         } else {
-            stringBuilder.append(" IN (").append(MAPPER.getParameters(ShareField.values().length)).append(");");
+            stringBuilder.append(" IN (").append(MAPPER.getParameters(tokens.length)).append(");");
         }
         ResultSet resultSet = null;
         PreparedStatement stmt = null;
