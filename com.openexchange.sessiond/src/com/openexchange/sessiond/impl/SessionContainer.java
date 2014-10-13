@@ -85,6 +85,15 @@ final class SessionContainer {
     }
 
     /**
+     * Drops expired sessions from this session map
+     *
+     * @param idleTime The idle time
+     */
+    protected List<SessionControl> dropExpired(long idleTime) {
+        return sessionMap.dropExpired(idleTime);
+    }
+
+    /**
      * Gets the current number of sessions held by this container
      *
      * @return The current number of sessions held by this container
