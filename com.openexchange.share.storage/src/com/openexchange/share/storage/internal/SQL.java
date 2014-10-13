@@ -53,7 +53,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.share.AuthenticationMode;
 
 /**
  * {@link SQL}
@@ -61,6 +60,11 @@ import com.openexchange.share.AuthenticationMode;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SQL {
+
+    /**
+     * The DB mapper for shares
+     */
+    public static final ShareMapper MAPPER = new ShareMapper();
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SQL.class);
 
@@ -95,142 +99,6 @@ public class SQL {
         return new UpdateTaskV2[] { new ShareCreateTableTask() };
     };
 
-    public static final String SELECT_SHARE_STMT =
-        "SELECT module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
-        "FROM share " +
-        "WHERE cid=? AND token=?;"
-    ;
-
-    public static final String SELECT_SHARES_CREATED_BY_STMT =
-        "SELECT token,module,folder,item,created,lastModified,modifiedBy,expiryDate,guest,auth " +
-        "FROM share " +
-        "WHERE cid=? AND createdBy=?;"
-    ;
-
-    public static final String SELECT_SHARES_BY_FOLDER_STMT =
-        "SELECT token,module,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
-        "FROM share " +
-        "WHERE cid=? AND folder=?;"
-    ;
-
-    public static final String SELECT_SHARES_BY_CONTEXT_STMT =
-        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
-        "FROM share " +
-        "WHERE cid=?;"
-    ;
-
-    public static final String SELECT_SHARES_BY_ITEM_STMT =
-        "SELECT token,module,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
-        "FROM share " +
-        "WHERE cid=? AND folder=? AND item=?;"
-    ;
-
-    public static final String SELECT_SHARES_EXPIRED_AFTER_STMT =
-        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
-        "FROM share " +
-        "WHERE cid=? AND expiryDate IS NOT NULL AND expiryDate>?;"
-    ;
-
-    public static final String SELECT_SHARES_FOR_GUEST_STMT =
-        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,auth " +
-        "FROM share " +
-        "WHERE cid=? AND guest=?;"
-    ;
-
-    public static final String INSERT_SHARE_STMT =
-        "INSERT INTO share (token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth) " +
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);"
-    ;
-
-    public static final String UPDATE_SHARE_STMT =
-        "UPDATE share " +
-        "SET module=?,folder=?,item=?,created=?,createdBy=?,lastModified=?,modifiedBy=?,expiryDate=?,guest=?,auth=?) " +
-        "WHERE cid=? AND token=?;"
-    ;
-
-    public static final String DELETE_SHARE_STMT =
-        "DELETE FROM share " +
-        "WHERE cid=? AND token=?;"
-    ;
-
-    public static final String DELETE_SHARES_IN_CONTEXT_STMT =
-        "DELETE FROM share " +
-        "WHERE cid=?;"
-    ;
-
-    public static final String DELETE_SHARES_FOR_GUEST_STMT =
-        "DELETE FROM share " +
-        "WHERE cid=? AND guest=?;"
-    ;
-
-    public static final String REASSIGN_SHARES_STMT =
-        "UPDATE share " +
-        "SET createdBy=? " +
-        "WHERE cid=? AND createdBy=?;"
-    ;
-
-    /**
-     * DELETE FROM share
-     * WHERE cid=? AND token IN (...);"
-     */
-    public static final String DELETE_SHARES_STMT(int length) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("DELETE FROM share WHERE cid=? AND token");
-        return appendPlaceholders(stringBuilder, length).append(';').toString();
-    }
-
-    public static final String SELECT_SHARES_BY_TOKENS_STMT(int length) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
-                  "FROM share " +
-                  "WHERE cid = ? AND token");
-        return appendPlaceholders(sb, length).append(";").toString();
-    }
-
-    public static final String SELECT_EXPIRED_SHARES_STMT =
-        "SELECT token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expiryDate,guest,auth " +
-        "FROM share " +
-        "WHERE expiryDate IS NOT NULL AND expiryDate > ?";
-    ;
-
-    /**
-     * Gets a numerical value for the supplied authentication mode.
-     *
-     * @param authenticationMode The mode
-     * @return The number
-     */
-    public static int encodeAuthenticationMode(AuthenticationMode authenticationMode) {
-        switch (authenticationMode) {
-        case ANONYMOUS:
-            return 0;
-        case ANONYMOUS_PASSWORD:
-            return 1;
-        case GUEST_PASSWORD:
-            return 2;
-        default:
-            throw new IllegalArgumentException("authenticationMode");
-        }
-    }
-
-    /**
-     * Gets the authentication mode for a numerical value.
-     *
-     * @param encoded The numerical value
-     * @return The authentication mode
-     */
-    public static AuthenticationMode decodeAuthenticationMode(int encoded) {
-        switch (encoded) {
-        case 0:
-            return AuthenticationMode.ANONYMOUS;
-        case 1:
-            return AuthenticationMode.ANONYMOUS_PASSWORD;
-        case 2:
-            return AuthenticationMode.GUEST_PASSWORD;
-        default:
-            throw new IllegalArgumentException("encoded");
-        }
-    }
-
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
@@ -251,30 +119,6 @@ public class SQL {
             LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         }
-    }
-
-    /**
-     * Appends a SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
-     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
-     *
-     * @param stringBuilder The string builder to append the clause
-     * @param count The number of placeholders to append
-     * @return The string builder
-     */
-    private static StringBuilder appendPlaceholders(StringBuilder stringBuilder, int count) {
-        if (0 >= count) {
-            throw new IllegalArgumentException("count");
-        }
-        if (1 == count) {
-            stringBuilder.append("=?");
-        } else {
-            stringBuilder.append(" IN (?");
-            for (int i = 1; i < count; i++) {
-                stringBuilder.append(",?");
-            }
-            stringBuilder.append(')');
-        }
-        return stringBuilder;
     }
 
     private SQL() {

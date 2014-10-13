@@ -52,7 +52,7 @@ package com.openexchange.groupware.tools.mappings.database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapper;
 
@@ -77,17 +77,29 @@ public interface DbMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
 	E getMappedField(String columnLabel);
 
-	/**
-	 * Creates a new object and sets all properties of the supplied fields
-	 * from the result set.
-	 *
-	 * @param resultSet the result set to create the object from
-	 * @param fields the fields present in the result set
-	 * @return the object
-	 * @throws OXException
-	 * @throws SQLException
-	 */
-	O fromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException;
+    /**
+     * Creates a new object and sets all properties of the supplied fields
+     * from the result set.
+     *
+     * @param resultSet the result set to create the object from
+     * @param fields the fields present in the result set
+     * @return the object
+     * @throws OXException
+     * @throws SQLException
+     */
+    O fromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException;
+
+    /**
+     * Creates a list of new objects and sets all properties of the supplied
+     * fields from the result set.
+     *
+     * @param resultSet the result set to create the object from
+     * @param fields the fields present in the result set
+     * @return the object
+     * @throws OXException
+     * @throws SQLException
+     */
+    List<O> listFromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException;
 
 	/**
 	 * Sets all parameters of the supplied fields in the statement to the

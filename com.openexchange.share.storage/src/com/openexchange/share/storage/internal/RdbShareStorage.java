@@ -49,16 +49,17 @@
 
 package com.openexchange.share.storage.internal;
 
+import static com.openexchange.share.storage.internal.SQL.MAPPER;
 import static com.openexchange.share.storage.internal.SQL.logExecuteQuery;
 import static com.openexchange.share.storage.internal.SQL.logExecuteUpdate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -107,7 +108,7 @@ public class RdbShareStorage implements ShareStorage {
     public void storeShare(Share share, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getWriteProvider(share.getContextID(), parameters);
         try {
-            insertShare(provider.get(), share);
+            insertShare(provider.get(), new DefaultShare(share));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -120,7 +121,7 @@ public class RdbShareStorage implements ShareStorage {
         ConnectionProvider provider = getWriteProvider(contextID, parameters);
         try {
             for (Share share : shares) {
-                insertShare(provider.get(), share);
+                insertShare(provider.get(), new DefaultShare(share));
             }
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -131,9 +132,12 @@ public class RdbShareStorage implements ShareStorage {
 
     @Override
     public void updateShare(Share share, StorageParameters parameters) throws OXException {
+        EnumSet<ShareField> updatableFields = EnumSet.allOf(ShareField.class);
+        updatableFields.remove(ShareField.CONTEXT_ID);
+        updatableFields.remove(ShareField.TOKEN);
         ConnectionProvider provider = getWriteProvider(share.getContextID(), parameters);
         try {
-            updateShare(provider.get(), share);
+            updateShare(provider.get(), new DefaultShare(share), updatableFields.toArray(new ShareField[updatableFields.size()]));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -162,7 +166,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectSharesCreatedBy(provider.get(), contextID, createdBy);
+            return new ArrayList<Share>(selectSharesCreatedBy(provider.get(), contextID, createdBy));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -174,7 +178,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectSharesByTokens(provider.get(), contextID, tokens.toArray(new String[tokens.size()]));
+            return new ArrayList<Share>(selectSharesByTokens(provider.get(), contextID, tokens.toArray(new String[tokens.size()])));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -186,7 +190,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesForFolder(int contextID, String folder, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectSharesByFolder(provider.get(), contextID, folder);
+            return new ArrayList<Share>(selectSharesByFolder(provider.get(), contextID, folder));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -198,7 +202,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesForItem(int contextID, String folder, String item, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectSharesByItem(provider.get(), contextID, folder, item);
+            return new ArrayList<Share>(selectSharesByItem(provider.get(), contextID, folder, item));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -210,7 +214,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectSharesForContext(provider.get(), contextID);
+            return new ArrayList<Share>(selectSharesForContext(provider.get(), contextID));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -222,7 +226,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectSharesExpiredAfter(provider.get(), contextID, expires.getTime());
+            return new ArrayList<Share>(selectSharesExpiredAfter(provider.get(), contextID, expires.getTime()));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -234,7 +238,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectSharesForGuest(provider.get(), contextID, guestID);
+            return new ArrayList<Share>(selectSharesForGuest(provider.get(), contextID, guestID));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -242,107 +246,71 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
-    private static int insertShare(Connection connection, Share share) throws SQLException {
+    private static int insertShare(Connection connection, DefaultShare share) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("INSERT INTO share (").append(MAPPER.getColumns(ShareField.values())).append(") VALUES (")
+            .append(MAPPER.getParameters(ShareField.values().length)).append(");")
+        ;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.INSERT_SHARE_STMT);
-            int i = 1;
-            stmt.setBytes(i++, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
-            stmt.setInt(i++, share.getContextID());
-            stmt.setInt(i++, share.getModule());
-            stmt.setString(i++, share.getFolder());
-            if (share.isFolder()) {
-                stmt.setNull(i++, Types.VARCHAR);
-            } else {
-                stmt.setString(i++, share.getItem());
-            }
-            stmt.setLong(i++, share.getCreated().getTime());
-            stmt.setInt(i++, share.getCreatedBy());
-            stmt.setLong(i++, share.getLastModified().getTime());
-            stmt.setInt(i++, share.getModifiedBy());
-            Date expires = share.getExpiryDate();
-            if (expires == null) {
-                stmt.setNull(i++, Types.BIGINT);
-            } else {
-                stmt.setLong(i++, expires.getTime());
-            }
-            stmt.setInt(i++, share.getGuest());
-            stmt.setInt(i++, SQL.encodeAuthenticationMode(share.getAuthentication()));
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            MAPPER.setParameters(stmt, share, ShareField.values());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int updateShare(Connection connection, Share share) throws SQLException {
+    private static int updateShare(Connection connection, DefaultShare share, ShareField[] fields) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("UPDATE share SET ").append(MAPPER.getAssignments(fields)).append(' ')
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel()).append("=?;")
+        ;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.UPDATE_SHARE_STMT);
-            int i = 1;
-            stmt.setInt(i++, share.getModule());
-            stmt.setString(i++, share.getFolder());
-            if (share.isFolder()) {
-                stmt.setNull(i++, Types.VARCHAR);
-            } else {
-                stmt.setString(i++, share.getItem());
-            }
-            stmt.setLong(i++, share.getCreated().getTime());
-            stmt.setInt(i++, share.getCreatedBy());
-            stmt.setLong(i++, share.getLastModified().getTime());
-            stmt.setInt(i++, share.getModifiedBy());
-            Date expires = share.getExpiryDate();
-            if (expires == null) {
-                stmt.setNull(i++, Types.BIGINT);
-            } else {
-                stmt.setLong(i++, expires.getTime());
-            }
-            stmt.setInt(i++, share.getGuest());
-            stmt.setInt(i++, SQL.encodeAuthenticationMode(share.getAuthentication()));
-            stmt.setBytes(i++, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
-            stmt.setInt(i++, share.getContextID());
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            MAPPER.setParameters(stmt, share, fields);
+            stmt.setInt(1 + fields.length, share.getContextID());
+            stmt.setBytes(2 + fields.length, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
             return logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static DefaultShare selectShare(Connection connection, int cid, String token) throws SQLException {
+    private static DefaultShare selectShare(Connection connection, int cid, String token) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel()).append("=?;")
+        ;
         PreparedStatement stmt = null;
+        ResultSet resultSet = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SHARE_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             stmt.setBytes(2, UUIDs.toByteArray(UUIDs.fromUnformattedString(token)));
-            ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
-                DefaultShare share = new DefaultShare();
-                share.setToken(token);
-                share.setContextID(cid);
-                share.setModule(resultSet.getInt(1));
-                share.setFolder(resultSet.getString(2));
-                share.setItem(resultSet.getString(3));
-                share.setCreated(new Date(resultSet.getLong(4)));
-                share.setCreatedBy(resultSet.getInt(5));
-                share.setLastModified(new Date(resultSet.getLong(6)));
-                share.setModifiedBy(resultSet.getInt(7));
-                long expires = resultSet.getLong(8);
-                if (false == resultSet.wasNull()) {
-                    share.setExpiryDate(new Date(expires));
-                }
-                share.setGuest(resultSet.getInt(9));
-                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(10)));
-                return share;
-            } else {
-                return null;
-            }
+            resultSet = logExecuteQuery(stmt);
+            return resultSet.next() ? MAPPER.fromResultSet(resultSet, ShareField.values()) : null;
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
 
-    private static int deleteShares(Connection connection, int cid, List<String> tokens) throws SQLException {
+    private static int deleteShares(Connection connection, int cid, List<String> tokens) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM share WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel())
+        ;
+        if (1 == tokens.size()) {
+            stringBuilder.append("=?;");
+        } else {
+            stringBuilder.append(" IN (").append(MAPPER.getParameters(tokens.size())).append(");");
+        }
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.DELETE_SHARES_STMT(tokens.size()));
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             for (int i = 0; i < tokens.size(); i++) {
                 stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens.get(i))));
@@ -353,232 +321,145 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
-    private static List<Share> selectSharesCreatedBy(Connection connection, int cid, int createdBy) throws SQLException {
-        List<Share> shares = new ArrayList<Share>();
+    private static List<DefaultShare> selectSharesCreatedBy(Connection connection, int cid, int createdBy) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
+        ;
+        ResultSet resultSet = null;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SHARES_CREATED_BY_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             stmt.setInt(2, createdBy);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                DefaultShare share = new DefaultShare();
-                share.setContextID(cid);
-                share.setCreatedBy(createdBy);
-                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
-                share.setModule(resultSet.getInt(2));
-                share.setFolder(resultSet.getString(3));
-                share.setItem(resultSet.getString(4));
-                share.setCreated(new Date(resultSet.getLong(5)));
-                share.setLastModified(new Date(resultSet.getLong(6)));
-                share.setModifiedBy(resultSet.getInt(7));
-                long expires = resultSet.getLong(8);
-                if (false == resultSet.wasNull()) {
-                    share.setExpiryDate(new Date(expires));
-                }
-                share.setGuest(resultSet.getInt(9));
-                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(10)));
-                shares.add(share);
-            }
+            resultSet = logExecuteQuery(stmt);
+            return MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
-        return shares;
     }
 
-    private List<Share> selectSharesForContext(Connection connection, int contextID) throws SQLException {
-        List<Share> shares = new ArrayList<Share>();
+    private List<DefaultShare> selectSharesForContext(Connection connection, int cid) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?;")
+        ;
+        ResultSet resultSet = null;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SHARES_BY_CONTEXT_STMT);
-            stmt.setInt(1, contextID);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                DefaultShare share = new DefaultShare();
-                share.setContextID(contextID);
-                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
-                share.setModule(resultSet.getInt(2));
-                share.setFolder(resultSet.getString(3));
-                share.setItem(resultSet.getString(4));
-                share.setCreated(new Date(resultSet.getLong(5)));
-                share.setCreatedBy(resultSet.getInt(6));
-                share.setLastModified(new Date(resultSet.getLong(7)));
-                share.setModifiedBy(resultSet.getInt(8));
-                long expires = resultSet.getLong(9);
-                if (false == resultSet.wasNull()) {
-                    share.setExpiryDate(new Date(expires));
-                }
-                share.setGuest(resultSet.getInt(10));
-                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(11)));
-                shares.add(share);
-            }
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, cid);
+            resultSet = logExecuteQuery(stmt);
+            return MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
-        return shares;
     }
 
-    private static List<Share> selectSharesByFolder(Connection connection, int cid, String folder) throws SQLException {
-        List<Share> shares = new ArrayList<Share>();
+    private static List<DefaultShare> selectSharesByFolder(Connection connection, int cid, String folder) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?;")
+        ;
+        ResultSet resultSet = null;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SHARES_BY_FOLDER_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             stmt.setString(2, folder);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                DefaultShare share = new DefaultShare();
-                share.setContextID(cid);
-                share.setFolder(folder);
-                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
-                share.setModule(resultSet.getInt(2));
-                share.setItem(resultSet.getString(3));
-                share.setCreated(new Date(resultSet.getLong(4)));
-                share.setCreatedBy(resultSet.getInt(5));
-                share.setLastModified(new Date(resultSet.getLong(6)));
-                share.setModifiedBy(resultSet.getInt(7));
-                long expires = resultSet.getLong(8);
-                if (false == resultSet.wasNull()) {
-                    share.setExpiryDate(new Date(expires));
-                }
-                share.setGuest(resultSet.getInt(9));
-                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(10)));
-                shares.add(share);
-            }
+            resultSet = logExecuteQuery(stmt);
+            return MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
-        return shares;
     }
 
-    private static List<Share> selectSharesByItem(Connection connection, int cid, String folder, String item) throws SQLException {
-        List<Share> shares = new ArrayList<Share>();
+    private static List<DefaultShare> selectSharesByItem(Connection connection, int cid, String folder, String item) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;")
+        ;
+        ResultSet resultSet = null;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SHARES_BY_ITEM_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             stmt.setString(2, folder);
             stmt.setString(3, item);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                DefaultShare share = new DefaultShare();
-                share.setContextID(cid);
-                share.setFolder(folder);
-                share.setItem(item);
-                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
-                share.setModule(resultSet.getInt(2));
-                share.setCreated(new Date(resultSet.getLong(3)));
-                share.setCreatedBy(resultSet.getInt(4));
-                share.setLastModified(new Date(resultSet.getLong(5)));
-                share.setModifiedBy(resultSet.getInt(6));
-                long expires = resultSet.getLong(7);
-                if (false == resultSet.wasNull()) {
-                    share.setExpiryDate(new Date(expires));
-                }
-                share.setGuest(resultSet.getInt(8));
-                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(9)));
-                shares.add(share);
-            }
+            resultSet = logExecuteQuery(stmt);
+            return MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
-        return shares;
     }
 
-    private static List<Share> selectSharesByTokens(Connection connection, int cid, String[] tokens) throws SQLException {
-        List<Share> result = new ArrayList<Share>(tokens.length);
+    private static List<DefaultShare> selectSharesByTokens(Connection connection, int cid, String[] tokens) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel())
+        ;
+        if (1 == tokens.length) {
+            stringBuilder.append("=?;");
+        } else {
+            stringBuilder.append(" IN (").append(MAPPER.getParameters(ShareField.values().length)).append(");");
+        }
+        ResultSet resultSet = null;
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SHARES_BY_TOKENS_STMT(tokens.length));
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             for (int i = 0; i < tokens.length; i++) {
                 stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens[i])));
             }
-            rs = logExecuteQuery(stmt);
-            while (rs.next()) {
-                DefaultShare share = new DefaultShare();
-                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(rs.getBytes(1))));
-                share.setContextID(cid);
-                share.setModule(rs.getInt(2));
-                share.setFolder(rs.getString(3));
-                share.setItem(rs.getString(4));
-                share.setCreated(new Date(rs.getLong(5)));
-                share.setCreatedBy(rs.getInt(6));
-                share.setLastModified(new Date(rs.getLong(7)));
-                share.setModifiedBy(rs.getInt(8));
-                share.setExpiryDate(new Date(rs.getLong(9)));
-                share.setGuest(rs.getInt(10));
-                share.setAuthentication(SQL.decodeAuthenticationMode(rs.getInt(11)));
-                result.add(share);
-            }
+            resultSet = logExecuteQuery(stmt);
+            return MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
-        return result;
     }
 
-    private static List<Share> selectSharesExpiredAfter(Connection connection, int cid, long expired) throws SQLException {
-        List<Share> shares = new ArrayList<Share>();
+    private static List<DefaultShare> selectSharesExpiredAfter(Connection connection, int cid, long expired) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.EXPIRY_DATE).getColumnLabel()).append("<? ")
+            .append("AND ").append(MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;")
+        ;
+        ResultSet resultSet = null;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SHARES_EXPIRED_AFTER_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             stmt.setLong(2, expired);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                DefaultShare share = new DefaultShare();
-                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
-                share.setContextID(cid);
-                share.setModule(resultSet.getInt(2));
-                share.setFolder(resultSet.getString(3));
-                share.setItem(resultSet.getString(4));
-                share.setCreated(new Date(resultSet.getLong(5)));
-                share.setCreatedBy(resultSet.getInt(6));
-                share.setLastModified(new Date(resultSet.getLong(7)));
-                share.setModifiedBy(resultSet.getInt(8));
-                share.setExpiryDate(new Date(resultSet.getLong(9)));
-                share.setGuest(resultSet.getInt(10));
-                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(11)));
-                shares.add(share);
-            }
+            resultSet = logExecuteQuery(stmt);
+            return MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
-        return shares;
     }
 
-    private static List<Share> selectSharesForGuest(Connection connection, int cid, int guestID) throws SQLException {
-        List<Share> shares = new ArrayList<Share>();
+    private static List<DefaultShare> selectSharesForGuest(Connection connection, int cid, int guestID) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(MAPPER.get(ShareField.GUEST_ID).getColumnLabel()).append("=?;")
+        ;
+        ResultSet resultSet = null;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SHARES_FOR_GUEST_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             stmt.setInt(2, guestID);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                DefaultShare share = new DefaultShare();
-                share.setContextID(cid);
-                share.setGuest(guestID);
-                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
-                share.setModule(resultSet.getInt(2));
-                share.setFolder(resultSet.getString(3));
-                share.setItem(resultSet.getString(4));
-                share.setCreated(new Date(resultSet.getLong(5)));
-                share.setCreatedBy(resultSet.getInt(6));
-                share.setLastModified(new Date(resultSet.getLong(7)));
-                share.setModifiedBy(resultSet.getInt(8));
-                long expires = resultSet.getLong(9);
-                if (false == resultSet.wasNull()) {
-                    share.setExpiryDate(new Date(expires));
-                }
-                share.setAuthentication(SQL.decodeAuthenticationMode(resultSet.getInt(10)));
-                shares.add(share);
-            }
+            resultSet = logExecuteQuery(stmt);
+            return MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
-        return shares;
     }
 
     private ConnectionProvider getReadProvider(int contextId, StorageParameters parameters) throws OXException {

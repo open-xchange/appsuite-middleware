@@ -95,10 +95,12 @@ public class ShareStorageDeleteListener implements DeleteListener {
         }
     }
 
-    private static int deleteSharesInContext(Connection connection, int cid) throws SQLException {
+    private static int deleteSharesInContext(Connection connection, int cid) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM share WHERE ").append(SQL.MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?;");
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.DELETE_SHARES_IN_CONTEXT_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             return logExecuteUpdate(stmt);
         } finally {
@@ -106,10 +108,14 @@ public class ShareStorageDeleteListener implements DeleteListener {
         }
     }
 
-    private static int deleteSharesForGuest(Connection connection, int cid, int guest) throws SQLException {
+    private static int deleteSharesForGuest(Connection connection, int cid, int guest) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM share WHERE ").append(SQL.MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SQL.MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
+        ;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.DELETE_SHARES_FOR_GUEST_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             stmt.setInt(2, guest);
             return logExecuteUpdate(stmt);
@@ -118,10 +124,15 @@ public class ShareStorageDeleteListener implements DeleteListener {
         }
     }
 
-    private static int reassignShares(Connection connection, int cid, int createdBy, int newCreatedBy) throws SQLException {
+    private static int reassignShares(Connection connection, int cid, int createdBy, int newCreatedBy) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("UPDATE share SET ").append(SQL.MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=? ")
+            .append("WHERE ").append(SQL.MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SQL.MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
+        ;
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.REASSIGN_SHARES_STMT);
+            stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, newCreatedBy);
             stmt.setInt(2, cid);
             stmt.setInt(3, createdBy);
