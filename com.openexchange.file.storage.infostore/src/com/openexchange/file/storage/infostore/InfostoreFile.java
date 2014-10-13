@@ -359,19 +359,13 @@ public class InfostoreFile extends AbstractFile implements File {
 
     @Override
     public List<FileStorageObjectPermission> getObjectPermissions() {
-
-
-
-
-        // TODO Auto-generated method stub
-        return null;
+        return PermissionHelper.getFileStorageObjectPermissions(document.getObjectPermissions());
     }
 
 
     @Override
     public void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions) {
-        // TODO Auto-generated method stub
-
+        document.setObjectPermissions(PermissionHelper.getObjectPermissions(objectPermissions));
     }
 
 

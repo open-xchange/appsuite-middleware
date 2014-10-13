@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -64,8 +65,8 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -94,7 +95,7 @@ public class FileStorageUpdater extends AbstractUpdater {
 
     @Override
     public void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
-        IDBasedFileAccess fileAccess = getFileAccess();
+        IDBasedFileAccess fileAccess = getFileAccess(session);
         try {
             fileAccess.startTransaction();
             for (ShareTarget target : objects) {
@@ -108,7 +109,7 @@ public class FileStorageUpdater extends AbstractUpdater {
                     fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
                 }
 
-                File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+                File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
                 mergePermissions(file, finalRecipients);
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
@@ -153,13 +154,9 @@ public class FileStorageUpdater extends AbstractUpdater {
         file.setObjectPermissions(newPermissions);
     }
 
-    private IDBasedFileAccess getFileAccess() throws OXException {
-        IDBasedFileAccess service = services.getService(IDBasedFileAccess.class);
-        if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccess.class.getName());
-        }
-
-        return service;
+    private IDBasedFileAccess getFileAccess(ServerSession session) throws OXException {
+        IDBasedFileAccessFactory factory = getService(IDBasedFileAccessFactory.class);
+        return factory.createAccess(session);
     }
 
 }

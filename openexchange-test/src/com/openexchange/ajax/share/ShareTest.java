@@ -191,6 +191,18 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject getFolder(EnumAPI api, int objectID) throws Exception {
+        return getFolder(api, objectID, client);
+    }
+
+    /**
+     * Gets a folder by ID with the given client.
+     *
+     * @param api The folder API to use
+     * @param objectID The ID of the folder to get
+     * @return The folder
+     * @throws Exception
+     */
+    protected FolderObject getFolder(EnumAPI api, int objectID, AJAXClient client) throws Exception {
         GetResponse getResponse = client.execute(new GetRequest(api, objectID));
         FolderObject folder = getResponse.getFolder();
         folder.setLastModified(getResponse.getTimestamp());

@@ -124,7 +124,7 @@ public class NewAction extends AbstractShareAction {
         }
 
         shareTargets(targets, recipients, session);
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return new AJAXRequestResult(new JSONObject(), "json");
     }
 
     private void shareTargets(List<ShareTarget> targets, List<ShareRecipient> recipients, ServerSession session) throws OXException {
@@ -186,12 +186,12 @@ public class NewAction extends AbstractShareAction {
             int module = entry.getKey();
             List<ShareTarget> objects = entry.getValue();
             PermissionUpdater updater = PermissionUpdaters.forModule(module);
-            if (updater != null) {
-                updater.updateObjects(objects, finalRecipients, session, writeCon);
+            if (updater == null) {
+                Module m = Module.getForFolderConstant(module);
+                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
             }
 
-            Module m = Module.getForFolderConstant(module);
-            throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
+            updater.updateObjects(objects, finalRecipients, session, writeCon);
         }
     }
 
@@ -201,12 +201,12 @@ public class NewAction extends AbstractShareAction {
             int module = entry.getKey();
             List<ShareTarget> folders = entry.getValue();
             PermissionUpdater updater = PermissionUpdaters.forModule(module);
-            if (updater != null) {
-                updater.updateFolders(folders, finalRecipients, session, writeCon);
+            if (updater == null) {
+                Module m = Module.getForFolderConstant(module);
+                throw ShareExceptionCodes.SHARING_FOLDERS_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
             }
 
-            Module m = Module.getForFolderConstant(module);
-            throw ShareExceptionCodes.SHARING_FOLDERS_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
+            updater.updateFolders(folders, finalRecipients, session, writeCon);
         }
     }
 

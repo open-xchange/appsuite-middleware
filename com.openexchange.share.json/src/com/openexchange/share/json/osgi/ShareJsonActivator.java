@@ -54,9 +54,10 @@ import java.util.List;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.sessiond.SessiondService;
@@ -94,14 +95,15 @@ public class ShareJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class };
+            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.share.json\"");
-        trackService(IDBasedFileAccess.class);
+        trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
+        openTrackers();
 
         PermissionUpdaters.put(new FileStorageUpdater(this));
         PermissionUpdaters.put(newFolderUpdater(Module.CALENDAR));

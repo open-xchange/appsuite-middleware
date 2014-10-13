@@ -47,46 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.share;
+package com.openexchange.ajax.share.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
-import com.openexchange.ajax.share.tests.AggregateSharesTest;
-import com.openexchange.ajax.share.tests.AllTest;
-import com.openexchange.ajax.share.tests.CreateSubfolderTest;
-import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
-import com.openexchange.ajax.share.tests.DeleteTest;
-import com.openexchange.ajax.share.tests.ExpiredSharesTest;
-import com.openexchange.ajax.share.tests.NewTest;
-import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
-import com.openexchange.ajax.share.tests.TransactionTest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+
 
 /**
- * {@link ShareAJAXSuite}
+ * {@link NewResponse}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ShareAJAXSuite extends TestSuite {
+public class NewResponse extends AbstractAJAXResponse {
 
     /**
-     * Gets all share tests in a suite.
-     *
-     * @return The test suite.
+     * Initializes a new {@link NewResponse}.
+     * @param response
      */
-    public static Test suite() {
-        TestSuite tests = new TestSuite(ShareAJAXSuite.class.getName());
-        tests.addTestSuite(CreateWithGuestPermissionTest.class);
-        tests.addTestSuite(AddGuestPermissionTest.class);
-        tests.addTestSuite(RemoveGuestPermissionTest.class);
-        tests.addTestSuite(ExpiredSharesTest.class);
-        tests.addTestSuite(CreateSubfolderTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(TransactionTest.class);
-        tests.addTestSuite(AggregateSharesTest.class);
-        tests.addTestSuite(NewTest.class);
-        return tests;
+    protected NewResponse(Response response) {
+        super(response);
     }
 
 }

@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
@@ -160,6 +161,30 @@ public class FileMetadataWriter {
                     LOG.error("", e);
                     return null;
                 }
+            case OBJECT_PERMISSIONS:
+                if (value != null && value instanceof List<?>) {
+                    List<?> list = (List<?>) value;
+                    JSONArray jPermissions = new JSONArray(list.size());
+                    for (Object obj : list) {
+                        if (obj instanceof FileStorageObjectPermission) {
+                            FileStorageObjectPermission permission = (FileStorageObjectPermission) obj;
+                            JSONObject json = new JSONObject(3);
+                            try {
+                                json.put("entity", permission.getEntity());
+                                json.put("group", permission.isGroup());
+                                json.put("bits", permission.getPermissions());
+                                jPermissions.put(json);
+                            } catch (JSONException e) {
+                                LOG.error("", e);
+                                return null;
+                            }
+                        }
+                    }
+
+                    return jPermissions;
+                }
+
+                return null;
             default: // do nothing;
             }
 

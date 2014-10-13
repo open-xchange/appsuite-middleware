@@ -119,7 +119,7 @@ public class ShareTarget {
      * @return <code>true</code> if the share points to a folder, <code>false</code>, otherwise
      */
     public boolean isFolder() {
-        return null != item;
+        return null == item;
     }
 
     @Override
