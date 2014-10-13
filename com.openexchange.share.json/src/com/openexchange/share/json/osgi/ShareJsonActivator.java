@@ -49,16 +49,30 @@
 
 package com.openexchange.share.json.osgi;
 
+import java.sql.Connection;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.json.GuestShareResultConverter;
 import com.openexchange.share.json.ShareActionFactory;
+import com.openexchange.share.json.internal.AbstractUpdater;
+import com.openexchange.share.json.internal.FileStorageUpdater;
+import com.openexchange.share.json.internal.PermissionUpdater;
+import com.openexchange.share.json.internal.PermissionUpdaters;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.recipient.InternalRecipient;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -86,8 +100,30 @@ public class ShareJsonActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.share.json\"");
+        trackService(IDBasedFileAccess.class);
+        trackService(FolderService.class);
+
+        PermissionUpdaters.put(new FileStorageUpdater(this));
+        PermissionUpdaters.put(newFolderUpdater(Module.CALENDAR));
+        PermissionUpdaters.put(newFolderUpdater(Module.CONTACTS));
+        PermissionUpdaters.put(newFolderUpdater(Module.TASK));
+
         registerModule(new ShareActionFactory(this), "share/management");
         registerService(ResultConverter.class, new GuestShareResultConverter());
+    }
+
+    private PermissionUpdater newFolderUpdater(final Module module) {
+        return new AbstractUpdater(this) {
+            @Override
+            public int getModule() {
+                return module.getFolderConstant();
+            }
+
+            @Override
+            public void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
+                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
+            }
+        };
     }
 
 }

@@ -73,6 +73,10 @@ public final class ShareExceptionMessages implements LocalizableStrings {
 
     public static final String NO_EDIT_PERMISSIONS_MSG = "You don't have sufficient permissions to edit the share.";
 
+    public static final String SHARING_ITEMS_NOT_SUPPORTED = "Module %1$s does not support sharing of items.";
+
+    public static final String SHARING_FOLDERS_NOT_SUPPORTED = "Module %1$s does not support sharing of folders.";
+
     /**
      * Prevent instantiation.
      */

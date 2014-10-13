@@ -49,6 +49,7 @@
 
 package com.openexchange.share.json.internal;
 
+import java.sql.Connection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareTarget;
@@ -66,8 +67,8 @@ public interface PermissionUpdater {
 
     int getModule();
 
-    void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session) throws OXException;
+    void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException;
 
-    void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, ServerSession session) throws OXException;
+    void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException;
 
 }

@@ -49,6 +49,9 @@
 
 package com.openexchange.share.json.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * {@link PermissionUpdaters}
@@ -58,8 +61,14 @@ package com.openexchange.share.json.internal;
  */
 public class PermissionUpdaters {
 
+    private static final Map<Integer, PermissionUpdater> UPDATERS = new HashMap<Integer, PermissionUpdater>();
+
     public static PermissionUpdater forModule(int module) {
-        return null;
+        return UPDATERS.get(module);
+    }
+
+    public static void put(PermissionUpdater updater) {
+        UPDATERS.put(updater.getModule(), updater);
     }
 
 }

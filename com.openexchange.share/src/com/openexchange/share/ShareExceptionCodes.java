@@ -95,8 +95,22 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
         ShareExceptionMessages.NO_EDIT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 8),
 
     /** An I/O error occurred: %1$s */
-    IO_ERROR("An I/O error occurred: %1$s", null, Category.CATEGORY_ERROR, 4),
+    IO_ERROR("An I/O error occurred: %1$s", null, Category.CATEGORY_ERROR, 9),
 
+    /**
+     * An SQL error occurred: %1$s
+     */
+    SQL_ERROR("An SQL error occurred: %1$s", null, Category.CATEGORY_ERROR, 10),
+
+    /**
+     * Module %1$s does not support sharing of items.
+     */
+    SHARING_ITEMS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 11),
+
+    /**
+     * Module %1$s does not support sharing of folders.
+     */
+    SHARING_FOLDERS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 12),
     ;
 
     private static final String PREFIX = "SHR";
