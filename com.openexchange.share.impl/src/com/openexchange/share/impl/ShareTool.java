@@ -49,6 +49,8 @@
 
 package com.openexchange.share.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -67,6 +69,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
@@ -297,8 +300,15 @@ public class ShareTool {
         UserImpl guestUser = prepareGuestUser(sharingUser);
         guestUser.setDisplayName(recipient.getDisplayName());
         guestUser.setMail(recipient.getEmailAddress());
-        guestUser.setUserPassword(recipient.getPassword());
-        guestUser.setPasswordMech("{CRYPT}");
+        guestUser.setLoginInfo(recipient.getEmailAddress());
+        guestUser.setPasswordMech(PasswordMechanism.MECH_BCRYPT);
+        try {
+            guestUser.setUserPassword(PasswordMechanism.getEncodedPassword(PasswordMechanism.MECH_BCRYPT, recipient.getPassword()));
+        } catch (UnsupportedEncodingException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
         return guestUser;
     }
 

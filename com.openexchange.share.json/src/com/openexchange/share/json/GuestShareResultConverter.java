@@ -62,7 +62,10 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -74,11 +77,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GuestShareResultConverter implements ResultConverter {
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link GuestShareResultConverter}.
+     *
+     * @param services The service lookup
      */
-    public GuestShareResultConverter() {
+    public GuestShareResultConverter(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -125,7 +133,7 @@ public class GuestShareResultConverter implements ResultConverter {
      * @param timeZone The client timezone
      * @return The serialized guest shares
      */
-    private static JSONArray convert(List<GuestShare> shares, TimeZone timeZone) throws OXException {
+    private JSONArray convert(List<GuestShare> shares, TimeZone timeZone) throws OXException {
         JSONArray jsonArray = new JSONArray(shares.size());
         for (GuestShare share : shares) {
             jsonArray.put(convert(share, timeZone));
@@ -140,7 +148,7 @@ public class GuestShareResultConverter implements ResultConverter {
      * @param timeZone The client timezone
      * @return The serialized guest share
      */
-    private static JSONObject convert(GuestShare guestShare, TimeZone timeZone) throws OXException {
+    private JSONObject convert(GuestShare guestShare, TimeZone timeZone) throws OXException {
         try {
             JSONObject json = new JSONObject();
             /*
@@ -173,7 +181,7 @@ public class GuestShareResultConverter implements ResultConverter {
      * @return The serialized share target
      * @throws JSONException
      */
-    private static JSONObject serializeShareTarget(GuestShare guestShare) throws JSONException {
+    private JSONObject serializeShareTarget(GuestShare guestShare) throws JSONException {
         JSONObject jsonTarget = new JSONObject(3);
         Module module = Module.getForFolderConstant(guestShare.getShare().getModule());
         jsonTarget.putOpt("module", null != module ? module.getName() : null);
@@ -188,8 +196,9 @@ public class GuestShareResultConverter implements ResultConverter {
      * @param guestShare The guest share to serialize the share recipient for
      * @param timeZone The client timezone
      * @return The serialized share recipient
+     * @throws OXException
      */
-    private static JSONObject serializeShareRecipient(GuestShare guestShare, TimeZone timeZone) throws JSONException {
+    private JSONObject serializeShareRecipient(GuestShare guestShare, TimeZone timeZone) throws JSONException, OXException {
         JSONObject jsonRecipient = new JSONObject(8);
         switch (guestShare.getShare().getAuthentication()) {
         case ANONYMOUS:
@@ -197,7 +206,10 @@ public class GuestShareResultConverter implements ResultConverter {
             break;
         case ANONYMOUS_PASSWORD:
             jsonRecipient.put("type", RecipientType.ANONYMOUS.toString().toLowerCase());
-            jsonRecipient.put("password", guestShare.getGuest().getUserPassword());
+            String cryptedPassword = guestShare.getGuest().getUserPassword();
+            if (false == Strings.isEmpty(cryptedPassword)) {
+                jsonRecipient.put("password", services.getService(ShareCryptoService.class).decrypt(cryptedPassword));
+            }
             break;
         case GUEST_PASSWORD:
             jsonRecipient.put("type", RecipientType.GUEST.toString().toLowerCase());
