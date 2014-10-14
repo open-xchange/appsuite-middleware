@@ -72,6 +72,7 @@ import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.webdav.acl.PrincipalProtocol;
 import com.openexchange.webdav.acl.PrincipalWebdavFactory;
 import com.openexchange.webdav.acl.UserPrincipalResource;
@@ -195,13 +196,7 @@ public class PrinicpalPropertySearchReport extends WebdavPropfindAction {
             } catch (OXException e) {
                 LOG.warn("error searching users", e);
             } finally {
-                if (null != searchIterator) {
-                    try {
-                        searchIterator.close();
-                    } catch (OXException e) {
-                        // ignore
-                    }
-                }
+                SearchIterators.close(searchIterator);
             }
         }
         /*

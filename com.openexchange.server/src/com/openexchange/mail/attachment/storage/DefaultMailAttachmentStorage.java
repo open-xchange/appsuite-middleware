@@ -99,6 +99,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -515,11 +516,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             }
             return ret;
         } finally {
-            try {
-                searchIterator.close();
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
+            SearchIterators.close(searchIterator);
         }
     }
 

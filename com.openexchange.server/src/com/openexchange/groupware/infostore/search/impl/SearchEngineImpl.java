@@ -67,6 +67,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -703,25 +704,12 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
 
         @Override
-        public void close() throws OXException {
+        public void close() {
             next = null;
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                rs = null;
-            } catch (final SQLException e) {
-                LOG.debug("", e);
-            }
 
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                stmt = null;
-            } catch (final SQLException e) {
-                LOG.debug("", e);
-            }
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+            rs = null;
 
             if (null != readCon) {
                 s.releaseReadConnection(ctx, readCon);

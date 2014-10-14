@@ -70,6 +70,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 
@@ -174,11 +175,7 @@ public class CopyAction extends ContactAction {
                 }
                 throw e;
             } finally {
-                try {
-                    iterator.close();
-                } catch (final SearchIteratorException e) {
-                    LOG.error("SearchIterator could not be closed", e);
-                }
+                SearchIterators.close(iterator);
                 try {
                     attachmentBase.finish();
                 } catch (final OXException e) {

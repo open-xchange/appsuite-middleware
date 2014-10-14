@@ -118,7 +118,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         // Nothing to do
     }
 

@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * {@link ResultIterator} - Search iterator for contacts fetched through the
@@ -252,13 +253,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 			} catch (OXException e) {
 				LOG.warn("Error resolving referenced members for distribution list", e);
 			} finally {
-				if (null != searchIterator) {
-					try {
-						searchIterator.close();
-					} catch (OXException e) {
-						LOG.warn(e.toString());
-					}
-				}
+			    SearchIterators.close(searchIterator);
 			}
 		}
 		return contacts;
@@ -314,8 +309,8 @@ public class ResultIterator implements SearchIterator<Contact> {
 	}
 
 	@Override
-	public void close() throws OXException {
-		delegate.close();
+	public void close() {
+	    SearchIterators.close(delegate);
 	}
 
 	@Override

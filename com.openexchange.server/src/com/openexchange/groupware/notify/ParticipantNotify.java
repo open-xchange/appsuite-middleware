@@ -155,6 +155,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -1110,11 +1111,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         }
                         LOG.error("File attachment(s) cannot be added.", e);
                     } finally {
-                        try {
-                            iterator.close();
-                        } catch (final OXException e) {
-                            LOG.debug("SearchIterator could not be closed", e);
-                        }
+                        SearchIterators.close(iterator);
                         try {
                             attachmentBase.finish();
                         } catch (final OXException e) {

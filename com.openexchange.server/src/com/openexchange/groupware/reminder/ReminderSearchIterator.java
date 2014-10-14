@@ -55,11 +55,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
@@ -110,20 +110,9 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
     }
 
     @Override
-    public void close() throws SearchIteratorException, OXException {
-        try {
-            if (rs != null) {
-                rs.close();
-            }
-
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-
-            DBPool.closeReaderSilent(ctx,readCon);
-        } catch (final SQLException exc) {
-            throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
-        }
+    public void close() {
+        Databases.closeSQLStuff(rs, preparedStatement);
+        DBPool.closeReaderSilent(ctx, readCon);
     }
 
     @Override

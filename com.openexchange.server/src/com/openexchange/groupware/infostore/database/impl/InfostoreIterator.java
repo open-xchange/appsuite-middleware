@@ -178,19 +178,16 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     private final String query;
     private boolean queried;
     private boolean initNext;
+    private PreparedStatement stmt;
+    private Connection con;
     private ResultSet rs;
     private boolean next;
     private OXException exception;
     private final List<OXException> warnings;
-
-    private final Context ctx;
-
-    private final Metadata[] fields;
-
-    private final FieldChooser chooser;
-
     private DocumentCustomizer cutomizer;
-
+    private final Context ctx;
+    private final Metadata[] fields;
+    private final FieldChooser chooser;
 
     protected InfostoreIterator(final String query,final DBProvider provider, final Context ctx, final Metadata[] fields, final FieldChooser chooser, final Object...args){
         this.warnings =  new ArrayList<OXException>(2);
@@ -203,20 +200,18 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
     @Override
-    public void close() throws OXException {
-        if(rs == null) {
+    public void close() {
+        if (rs == null) {
             return;
         }
-        Connection con;
-        Statement stmt = null;
+
         try {
-            stmt = rs.getStatement();
-            con = stmt.getConnection();
             DBUtils.closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(ctx, con);
+        } finally {
+            con = null;
+            stmt = null;
             rs = null;
-        } catch (final SQLException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         }
     }
 
@@ -268,6 +263,8 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         initNext=true;
         Connection con = null;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean close = true;
         try{
             con = provider.getReadConnection(ctx);
             stmt = con.prepareStatement(query);
@@ -276,8 +273,11 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                 stmt.setObject(i++,arg);
             }
             LOG.trace("{}", stmt);
-            //System.out.println(stmt.toString());
             rs = stmt.executeQuery();
+            close = false;
+            this.stmt = stmt;
+            this.rs = rs;
+            this.con = con;
         } catch (final SQLException x) {
             if(stmt != null) {
                 DBUtils.closeSQLStuff(null, stmt);
@@ -288,6 +288,11 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt, query));
         } catch (final OXException e) {
             this.exception =e;
+        } finally {
+            if (close) {
+                DBUtils.closeSQLStuff(rs, stmt);
+                provider.releaseReadConnection(ctx, con);
+            }
         }
     }
 

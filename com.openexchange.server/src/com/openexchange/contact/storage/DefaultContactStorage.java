@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
@@ -79,6 +78,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * {@link DefaultContactStorage}
@@ -344,13 +344,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
      * @param searchIterator The search iterator to close, or <code>null</code>
      */
     protected static <T> void close(SearchIterator<T> searchIterator) {
-        if (null != searchIterator) {
-            try {
-                searchIterator.close();
-            } catch (OXException e) {
-                LOG.warn("error closing search iterator", e);
-            }
-        }
+        SearchIterators.close(searchIterator);
     }
 
     /**

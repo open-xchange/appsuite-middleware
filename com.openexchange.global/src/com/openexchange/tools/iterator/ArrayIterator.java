@@ -88,7 +88,7 @@ public class ArrayIterator<T> implements SearchIterator<T> {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         // Does not apply to array-backed iterator
     }
 

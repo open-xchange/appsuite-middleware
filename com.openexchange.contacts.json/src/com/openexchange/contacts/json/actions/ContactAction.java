@@ -63,6 +63,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -147,13 +148,7 @@ public abstract class ContactAction implements AJAXActionService {
      * @throws OXException
      */
     protected static <T> void close(SearchIterator<T> searchIterator) {
-    	if (null != searchIterator) {
-    	    try {
-    	        searchIterator.close();
-    	    } catch (OXException e) {
-    	        LOG.warn("error closing search iterator", e);
-    	    }
-    	}
+        SearchIterators.close(searchIterator);
     }
 
     /**

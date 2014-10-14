@@ -286,7 +286,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                 }
 
                 @Override
-                public void close() throws OXException {
+                public void close() {
                     // Nothing to do.
                 }
 

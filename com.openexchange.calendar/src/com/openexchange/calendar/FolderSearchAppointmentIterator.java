@@ -55,6 +55,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -64,21 +65,21 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class FolderSearchAppointmentIterator implements SearchIterator<CalendarDataObject> {
 
-    private SearchIterator<CalendarDataObject> delegate;
+    private final SearchIterator<CalendarDataObject> delegate;
 
-    private CalendarFolderObject cfo;
+    private final CalendarFolderObject cfo;
 
     private CalendarDataObject next;
 
-    private int userId;
+    private final int userId;
 
-    private OXFolderAccess folderAccess;
+    private final OXFolderAccess folderAccess;
 
-    private Set<Integer> searchFolder;
+    private final Set<Integer> searchFolder;
 
     /**
      * Initializes a new {@link FolderSearchAppointmentIterator}.
-     * 
+     *
      * @param cci
      * @param searchFolder
      */
@@ -109,8 +110,8 @@ public class FolderSearchAppointmentIterator implements SearchIterator<CalendarD
     }
 
     @Override
-    public void close() throws OXException {
-        delegate.close();
+    public void close() {
+        SearchIterators.close(delegate);
     }
 
     @Override

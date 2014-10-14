@@ -84,7 +84,7 @@ import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -249,11 +249,7 @@ public class ICalExporter implements Exporter {
                     icalText = emitter.writeAppointments(appointments, sessObj.getContext(), errors, warnings);
                     log(errors, warnings);
                 } finally {
-                    try {
-                        searchIterator.close();
-                    } catch (final SearchIteratorException e) {
-                        LOG.error("", e);
-                    }
+                    SearchIterators.close(searchIterator);
                 }
 
             } else if (fo.getModule() == FolderObject.TASK) {
@@ -273,11 +269,7 @@ public class ICalExporter implements Exporter {
                     icalText = emitter.writeTasks(tasks, errors, warnings, sessObj.getContext());
                     log(errors, warnings);
                 } finally {
-                    try {
-                        searchIterator.close();
-                    } catch (final SearchIteratorException e) {
-                        LOG.error("", e);
-                    }
+                    SearchIterators.close(searchIterator);
                 }
             } else {
                 throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);

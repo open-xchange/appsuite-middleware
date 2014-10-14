@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIterators;
 
 public abstract class AbstractTimedResult<T> implements TimedResult<T> {
 
@@ -100,8 +101,8 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
         }
 
         @Override
-        public void close() throws OXException {
-            results.close();
+        public void close() {
+            SearchIterators.close(results);
         }
 
         @Override

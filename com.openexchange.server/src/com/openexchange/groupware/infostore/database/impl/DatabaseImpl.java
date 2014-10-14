@@ -63,6 +63,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -1601,23 +1602,15 @@ public class DatabaseImpl extends DBService {
         }
 
         @Override
-        public void close() throws OXException {
+        public void close() {
             next = null;
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                rs = null;
-                stmt = null;
-            } catch (final SQLException e) {
-                throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                if (readCon != null) {
-                    d.releaseReadConnection(ctx, readCon);
-                }
+
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            if (readCon != null) {
+                d.releaseReadConnection(ctx, readCon);
             }
         }
 

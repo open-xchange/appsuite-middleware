@@ -227,7 +227,7 @@ public class FacebookServiceImpl implements FacebookService {
             }
 
             @Override
-            public void close() throws OXException {
+            public void close() {
                 //
             }
 

@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * This is a delegating iterator for converting the {@link SearchIterator} specialized for {@link CalendarDataObject}s into a
@@ -75,8 +76,8 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
     }
 
     @Override
-    public void close() throws OXException {
-        delegate.close();
+    public void close() {
+        SearchIterators.close(delegate);
     }
 
     @Override

@@ -65,6 +65,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -165,13 +166,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
         } catch (final OXException e) {
             rollback(e);
         } finally {
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    e.log(LOG);
-                }
-            }
+            SearchIterators.close(iter);
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {

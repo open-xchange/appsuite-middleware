@@ -68,6 +68,7 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * {@link Tools}
@@ -155,13 +156,7 @@ public final class Tools  {
     }
 
     public static void close(SearchIterator<?> searchIterator) {
-        if (null != searchIterator) {
-            try {
-                searchIterator.close();
-            } catch (OXException e) {
-                LOG.warn("Error closing SearchIterator conext", e);
-            }
-        }
+        SearchIterators.close(searchIterator);
     }
 
     public static Locale getLocale(SortOptions sortOptions) {

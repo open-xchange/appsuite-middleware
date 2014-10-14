@@ -106,6 +106,7 @@ import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -1166,9 +1167,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
 
         @Override
-        public void close() throws OXException {
+        public void close() {
             if (delegate != null) {
-                delegate.close();
+                SearchIterators.close(delegate);
                 return;
             }
             closeSQLStuff(rs, stmt);

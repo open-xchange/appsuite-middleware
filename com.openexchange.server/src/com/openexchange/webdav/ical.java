@@ -99,6 +99,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -242,13 +243,7 @@ public final class ical extends PermissionServlet {
             } catch (final OXException e) {
                 LOG.error("", e);
             } finally {
-                if (null != iter) {
-                    try {
-                        iter.close();
-                    } catch (final OXException e) {
-                        LOG.error("", e);
-                    }
-                }
+                SearchIterators.close(iter);
             }
             final TasksSQLInterface taskInterface = new TasksSQLImpl(sessionObj);
             SearchIterator<Task> itTask = null;
@@ -271,13 +266,7 @@ public final class ical extends PermissionServlet {
             } catch (final OXException e) {
                 LOG.error("", e);
             } finally {
-                if (null != itTask) {
-                    try {
-                        itTask.close();
-                    } catch (final OXException e) {
-                        LOG.error("", e);
-                    }
-                }
+                SearchIterators.close(itTask);
             }
 
             resp.setStatus(HttpServletResponse.SC_OK);

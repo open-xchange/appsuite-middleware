@@ -1600,7 +1600,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         if (co_rs != null) {
             try {
                 co_rs.close();

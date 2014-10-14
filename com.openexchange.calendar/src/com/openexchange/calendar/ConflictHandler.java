@@ -75,6 +75,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * ConflictHandler
@@ -264,22 +265,10 @@ public class ConflictHandler {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             if (close_connection) {
-                if (null != si) {
-                    try {
-                        si.close();
-                    } catch (final OXException sie) {
-                        LOG.error("Error closing SearchIterator" ,sie);
-                    }
-                }
+                SearchIterators.close(si);
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                if (null != private_folder_information) {
-                    try {
-                        private_folder_information.close();
-                    } catch (final OXException e) {
-                        // Ignore
-                    }
-                }
+                SearchIterators.close(private_folder_information);
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -402,21 +391,11 @@ public class ConflictHandler {
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
-            if (close_connection && si != null) {
-                try {
-                    si.close();
-                } catch (final OXException sie) {
-                    LOG.error("Error closing SearchIterator" ,sie);
-                }
+            if (close_connection) {
+                SearchIterators.close(si);
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                if (null != private_folder_information) {
-                    try {
-                        private_folder_information.close();
-                    } catch (final OXException e) {
-                        // Ignore
-                    }
-                }
+                SearchIterators.close(private_folder_information);
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -505,21 +484,11 @@ public class ConflictHandler {
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
-            if (close_connection && si != null) {
-                try {
-                    si.close();
-                } catch (final OXException sie) {
-                    LOG.error("Error closing SearchIterator" ,sie);
-                }
+            if (close_connection) {
+                SearchIterators.close(si);
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                if (null != private_folder_information) {
-                    try {
-                        private_folder_information.close();
-                    } catch (final OXException e) {
-                        // Ignore
-                    }
-                }
+                SearchIterators.close(private_folder_information);
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);

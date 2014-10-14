@@ -77,6 +77,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * CachedCalendarIterator
@@ -186,12 +187,12 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
     }
 
     @Override
-    public final void close() throws OXException {
+    public final void close() {
         if (closed) {
             return;
         }
         closed = true;
-        non_cached_iterator.close();
+        SearchIterators.close(non_cached_iterator);
     }
 
     @Override

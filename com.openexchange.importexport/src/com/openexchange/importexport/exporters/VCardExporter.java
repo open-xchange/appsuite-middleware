@@ -73,7 +73,7 @@ import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -298,11 +298,7 @@ public class VCardExporter implements Exporter {
                     // versitWriter.flush();
                 } finally {
                     closeVersitResources(oxContainerConverter, versitWriter);
-                    try {
-                        searchIterator.close();
-                    } catch (final SearchIteratorException e) {
-                        LOG.error("", e);
-                    }
+                    SearchIterators.close(searchIterator);
                 }
             } else {
                 final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, fields);
@@ -314,11 +310,7 @@ public class VCardExporter implements Exporter {
                     // versitWriter.flush();
                 } finally {
                     closeVersitResources(oxContainerConverter, versitWriter);
-                    try {
-                        searchIterator.close();
-                    } catch (final SearchIteratorException e) {
-                        LOG.error("", e);
-                    }
+                    SearchIterators.close(searchIterator);
                 }
             }
         } else {

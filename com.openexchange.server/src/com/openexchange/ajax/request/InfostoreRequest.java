@@ -97,6 +97,7 @@ import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -507,13 +508,7 @@ public class InfostoreRequest extends CommonRequest {
             handle(t, session);
 
         } finally {
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-            }
+            SearchIterators.close(iter);
         }
     }
 
@@ -583,13 +578,7 @@ public class InfostoreRequest extends CommonRequest {
             handle(t, session);
             return;
         } finally {
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-            }
+            SearchIterators.close(iter);
             try {
                 infostore.finish();
             } catch (final OXException e1) {
@@ -696,8 +685,8 @@ public class InfostoreRequest extends CommonRequest {
             }
 
             @Override
-            public void close() throws OXException {
-                iter.close();
+            public void close() {
+                SearchIterators.close(iter);
             }
 
             @Override
@@ -738,13 +727,12 @@ public class InfostoreRequest extends CommonRequest {
             }
 
             private void scrollToNext() throws OXException {
-                while(iter.hasNext()) {
+                while (iter.hasNext()) {
                     next = iter.next();
-                    if(next.getVersion() != 0) {
+                    if (next.getVersion() != 0) {
                         return;
-                    } else {
-                        next = null;
                     }
+                    next = null;
                 }
             }
 

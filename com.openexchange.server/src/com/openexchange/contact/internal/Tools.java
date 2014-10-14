@@ -90,6 +90,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
@@ -501,13 +502,7 @@ public final class Tools {
 	 * @param searchIterator The iterator to close
 	 */
 	public static void close(SearchIterator<?> searchIterator) {
-        if (null != searchIterator) {
-            try {
-                searchIterator.close();
-            } catch (OXException e) {
-                LOG.warn("error closing iterator", e);
-            }
-        }
+	    SearchIterators.close(searchIterator);
 	}
 
 	/**

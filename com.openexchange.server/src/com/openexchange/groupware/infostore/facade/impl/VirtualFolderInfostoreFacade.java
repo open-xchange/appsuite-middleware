@@ -273,7 +273,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                 }
 
                 @Override
-                public void close() throws OXException {
+                public void close() {
                     // Nothing to do.
                 }
 
@@ -285,10 +285,6 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                 @Override
                 public boolean hasNext() throws OXException {
                     return false;
-                }
-
-                public boolean hasSize() {
-                    return true;
                 }
 
                 @Override

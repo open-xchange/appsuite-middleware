@@ -59,7 +59,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -792,13 +791,8 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		}
 
 		private static void close(final SearchIterator<Contact> iterator) {
-			if (null != iterator) {
-				try {
-					iterator.close();
-				} catch (final OXException e) {
-					LOG.error("", e);
-				}
-			}
+		    SearchIterators.close(iterator);
 		}
 	}
+
 }

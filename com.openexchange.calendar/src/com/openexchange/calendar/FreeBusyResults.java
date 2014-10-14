@@ -74,6 +74,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -347,7 +348,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         al = null;
         title = null;
         rrs = null;
@@ -356,13 +357,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     public final void myclose() {
         recColl.closeResultSet(rs);
         recColl.closePreparedStatement(prep);
-        if (null != private_folder_information) {
-            try {
-                private_folder_information.close();
-            } catch (final OXException e) {
-                // Ignore
-            }
-        }
+        SearchIterators.close(private_folder_information);
         if (con != null) {
             DBPool.push(c, con);
         }
