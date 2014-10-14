@@ -64,15 +64,11 @@ import com.openexchange.tools.iterator.SearchIterator;
 class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
     private ReminderObject next;
-
+    private boolean closed = false;
     private final ResultSet rs;
-
     private final PreparedStatement preparedStatement;
-
     private final Connection readCon;
-
     private final List<OXException> warnings;
-
     private final Context ctx;
 
     ReminderSearchIterator(final Context ctx, final PreparedStatement preparedStatement, final ResultSet rs, final Connection readCon) throws OXException {
@@ -93,14 +89,18 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
 
     @Override
     public boolean hasNext() throws OXException {
-        return next != null;
+        return closed ? false : next != null;
     }
 
     @Override
     public ReminderObject next() throws OXException {
         final ReminderObject reminderObj = next;
         try {
-            next = ReminderHandler.result2Object(ctx, rs, preparedStatement, false);
+            if (closed) {
+                next = null;
+            } else {
+                next = ReminderHandler.result2Object(ctx, rs, preparedStatement, false);
+            }
         } catch (final OXException exc) {
             next = null;
         } catch (final SQLException exc) {
@@ -113,6 +113,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
     public void close() {
         Databases.closeSQLStuff(rs, preparedStatement);
         DBPool.closeReaderSilent(ctx, readCon);
+        closed = true;
     }
 
     @Override

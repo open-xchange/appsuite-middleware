@@ -3037,22 +3037,23 @@ public class CalendarMySQL implements CalendarSqlImp {
         cdao.setParentFolderID(cdao.getActionFolder());
 
         if (cdao.getFolderMove()) {
-
             /*
              * Update reminders' folder ID on move operation
              */
-            final ReminderService reminderInterface = new ReminderHandler(ctx);
+            ReminderService reminderInterface = new ReminderHandler(ctx);
 
-            final SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID());
-            final List<ReminderObject> toUpdate = new ArrayList<ReminderObject>();
-            try {
-                while (it.hasNext()) {
-                    toUpdate.add((ReminderObject) it.next());
+            List<ReminderObject> toUpdate = new LinkedList<ReminderObject>();
+            {
+                SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID());
+                try {
+                    while (it.hasNext()) {
+                        toUpdate.add((ReminderObject) it.next());
+                    }
+                } finally {
+                    SearchIterators.close(it);
                 }
-            } finally {
-                SearchIterators.close(it);
             }
-            for (final ReminderObject reminder : toUpdate) {
+            for (ReminderObject reminder : toUpdate) {
                 // Check for public->private move
                 if (edao.getFolderType() == FolderObject.PUBLIC && cdao.getFolderType() == FolderObject.PRIVATE) {
                     if (reminder.getUser() == so.getUserId()) {

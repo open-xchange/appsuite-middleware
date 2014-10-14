@@ -1,3 +1,7 @@
+* 2014-10-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34920: Do not close SQL resources on SearchIterator creation
+
 * 2014-10-13 - marcus.klein@open-xchange.com
 
  - Fix for bug 34888: Ignore data truncation errors on ALTER TABLE for tasks table modifying target and actual costs.

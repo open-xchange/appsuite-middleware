@@ -57,40 +57,26 @@ package com.openexchange.tools.servlet;
 public final class RateLimitedException extends RuntimeException {
 
     private static final long serialVersionUID = 5342199025241682441L;
+    private final int retryAfter;
 
     /**
-     * Initializes a new {@link RateLimitedException}.
+     * Gets the retryAfter
+     *
+     * @return The retryAfter
      */
-    public RateLimitedException() {
-        super();
+    public int getRetryAfter() {
+        return retryAfter;
     }
 
     /**
      * Initializes a new {@link RateLimitedException}.
      *
      * @param message The message
+     * @param retryAfter The time in seconds to wait before retrying
      */
-    public RateLimitedException(final String message) {
+    public RateLimitedException(final String message, final int retryAfter) {
         super(message);
-    }
-
-    /**
-     * Initializes a new {@link RateLimitedException}.
-     *
-     * @param cause The cause
-     */
-    public RateLimitedException(final Throwable cause) {
-        super(cause);
-    }
-
-    /**
-     * Initializes a new {@link RateLimitedException}.
-     *
-     * @param message The message
-     * @param cause The cause
-     */
-    public RateLimitedException(final String message, final Throwable cause) {
-        super(message, cause);
+        this.retryAfter = retryAfter; 
     }
 
 }
