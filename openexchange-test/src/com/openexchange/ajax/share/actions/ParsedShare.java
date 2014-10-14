@@ -52,8 +52,16 @@ package com.openexchange.ajax.share.actions;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
+import com.openexchange.folder.json.FolderField;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Enums;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link ParsedShare}
@@ -63,20 +71,15 @@ import com.openexchange.share.AuthenticationMode;
 public class ParsedShare {
 
     private String token;
-    private int module;
-    private String folder;
-    private String item;
+    private String shareURL;
+    private AuthenticationMode authentication;
     private Date created;
     private int createdBy;
     private Date lastModified;
     private int modifiedBy;
-    private Date expires;
+    private ShareTarget target;
+    private ShareRecipient recipient;
     private int guest;
-    private AuthenticationMode authentication;
-    private String guestMailAddress;
-    private String guestDisplayName;
-    private String guestPassword;
-    private String shareURL;
 
     /**
      * Initializes a new {@link ParsedShare}.
@@ -93,9 +96,10 @@ public class ParsedShare {
     public ParsedShare(JSONObject json) throws JSONException {
         super();
         token = json.optString("token");
-        module = json.optInt("module");
-        folder = json.optString("folder");
-        item = json.optString("item");
+        shareURL = json.optString("share_url");
+        if (json.has("authentication")) {
+            authentication = Enums.parse(AuthenticationMode.class, json.getString("authentication"));
+        }
         if (json.has("created")) {
             created = new Date(json.getLong("created"));
         }
@@ -104,17 +108,48 @@ public class ParsedShare {
             lastModified = new Date(json.getLong("last_modified"));
         }
         modifiedBy = json.optInt("modified_by");
-        if (json.has("expires")) {
-            expires = new Date(json.getLong("expires"));
+        if (json.has("target")) {
+            JSONObject jsonTarget = json.getJSONObject("target");
+            target = new ShareTarget(
+                Module.getModuleInteger(jsonTarget.optString("module")), jsonTarget.optString("folder"), jsonTarget.optString("item"));
         }
-        guest = json.optInt("guest");
-        if (json.has("authentication")) {
-            authentication = Enums.parse(AuthenticationMode.class, json.getString("authentication"));
+        if (json.has("recipient")) {
+            JSONObject jsonObject = json.getJSONObject("recipient");
+            switch (Enums.parse(RecipientType.class, jsonObject.getString("type"))) {
+            case ANONYMOUS:
+                AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
+                anonymousRecipient.setPassword(jsonObject.optString("password"));
+                recipient = anonymousRecipient;
+                break;
+            case GUEST:
+                GuestRecipient guestRecipient = new GuestRecipient();
+                guestRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
+                if (false == jsonObject.hasAndNotNull(FolderField.EMAIL_ADDRESS.getName())) {
+                    throw new JSONException("missing email address");
+                }
+                guestRecipient.setEmailAddress(jsonObject.getString(FolderField.EMAIL_ADDRESS.getName()));
+                guestRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
+                guestRecipient.setDisplayName(jsonObject.optString(FolderField.DISPLAY_NAME.getName(), null));
+                guestRecipient.setContactID(jsonObject.optString(FolderField.CONTACT_ID.getName(), null));
+                guestRecipient.setContactFolder(jsonObject.optString(FolderField.CONTACT_FOLDER_ID.getName(), null));
+                recipient = guestRecipient;
+                break;
+            default:
+                Assert.fail("Unknown recipient type");
+                break;
+            }
+            if (jsonObject.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
+                recipient.setExpiryDate(new Date(jsonObject.getLong(FolderField.EXPIRY_DATE.getName())));
+            }
+            if (jsonObject.hasAndNotNull(FolderField.ACTIVATION_DATE.getName())) {
+                recipient.setActivationDate(new Date(jsonObject.getLong(FolderField.ACTIVATION_DATE.getName())));
+            }
+            if (false == jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
+                throw new JSONException("missing permission bits");
+            }
+            recipient.setBits(jsonObject.getInt(FolderField.BITS.getName()));
+            guest = jsonObject.getInt(FolderField.ENTITY.getName());
         }
-        guestMailAddress = json.optString("guest_mail_address");
-        guestDisplayName = json.optString("guest_display_name");
-        guestPassword = json.optString("guest_password");
-        shareURL = json.optString("share_url");
     }
 
     public String getToken() {
@@ -123,30 +158,6 @@ public class ParsedShare {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public int getModule() {
-        return module;
-    }
-
-    public void setModule(int module) {
-        this.module = module;
-    }
-
-    public String getFolder() {
-        return folder;
-    }
-
-    public void setFolder(String folder) {
-        this.folder = folder;
-    }
-
-    public String getItem() {
-        return item;
-    }
-
-    public void setItem(String item) {
-        this.item = item;
     }
 
     public Date getCreated() {
@@ -181,14 +192,6 @@ public class ParsedShare {
         this.modifiedBy = modifiedBy;
     }
 
-    public int getGuest() {
-        return guest;
-    }
-
-    public void setGuest(int guest) {
-        this.guest = guest;
-    }
-
     public AuthenticationMode getAuthentication() {
         return authentication;
     }
@@ -197,40 +200,43 @@ public class ParsedShare {
         this.authentication = authentication;
     }
 
-    public String getGuestMailAddress() {
-        return guestMailAddress;
-    }
-
-    public void setGuestMailAddress(String guestMailAddress) {
-        this.guestMailAddress = guestMailAddress;
-    }
-
-    public String getGuestDisplayName() {
-        return guestDisplayName;
-    }
-
-    public void setGuestDisplayName(String guestDisplayName) {
-        this.guestDisplayName = guestDisplayName;
-    }
-
-    public String getGuestPassword() {
-        return guestPassword;
-    }
-
-    public void setGuestPassword(String guestPassword) {
-        this.guestPassword = guestPassword;
-    }
-
-    public Date getExpires() {
-        return expires;
-    }
-
     public String getShareURL() {
         return shareURL;
     }
 
     public void setShareURL(String shareURL) {
         this.shareURL = shareURL;
+    }
+
+    /**
+     * Gets the target
+     *
+     * @return The target
+     */
+    public ShareTarget getTarget() {
+        return target;
+    }
+
+    /**
+     * Gets the recipient
+     *
+     * @return The recipient
+     */
+    public ShareRecipient getRecipient() {
+        return recipient;
+    }
+
+    public int getGuest() {
+        return guest;
+    }
+
+    /**
+     * Sets the target
+     *
+     * @param target The target to set
+     */
+    public void setTarget(ShareTarget target) {
+        this.target = target;
     }
 
 }

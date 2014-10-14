@@ -140,11 +140,11 @@ public class FileStorageTransactionTest extends ShareTest {
         List<ParsedShare> fileShares = new ArrayList<ParsedShare>(sharedFiles.size());
         for (DefaultFile file : sharedFiles) {
             for (ParsedShare share : allShares) {
-                if (share.getItem() == null) {
+                if (share.getTarget().getItem() == null) {
                     continue;
                 }
 
-                if (share.getModule() == FolderObject.INFOSTORE && share.getFolder().equals(Integer.toString(testFolder.getObjectID())) && new FileID(file.getId()).getFileId().equals(share.getItem())) {
+                if (share.getTarget().getModule() == FolderObject.INFOSTORE && share.getTarget().getFolder().equals(Integer.toString(testFolder.getObjectID())) && new FileID(file.getId()).getFileId().equals(share.getTarget().getItem())) {
                     fileShares.add(share);
                     break;
                 }
@@ -155,8 +155,8 @@ public class FileStorageTransactionTest extends ShareTest {
 
         for (ParsedShare share : fileShares) {
             GuestClient guestClient = new GuestClient(share, null);
-            File file = guestClient.execute(new GetInfostoreRequest(share.getItem())).getDocumentMetadata();
-            assertEquals(share.getItem(), new FileID(file.getId()).getFileId());
+            File file = guestClient.execute(new GetInfostoreRequest(share.getTarget().getItem())).getDocumentMetadata();
+            assertEquals(share.getTarget().getItem(), new FileID(file.getId()).getFileId());
             AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(
                 FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
                 Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
@@ -165,7 +165,7 @@ public class FileStorageTransactionTest extends ShareTest {
 
             Object[][] docs = allResp.getArray();
             assertEquals(1, docs.length);
-            assertEquals(share.getItem(), new FileID((String) docs[0][allResp.getColumnPos(Metadata.ID)]).getFileId());
+            assertEquals(share.getTarget().getItem(), new FileID((String) docs[0][allResp.getColumnPos(Metadata.ID)]).getFileId());
         }
 
     }

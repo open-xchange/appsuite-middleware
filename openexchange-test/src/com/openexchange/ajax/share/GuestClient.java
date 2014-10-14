@@ -103,6 +103,8 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link GuestClient}
@@ -136,7 +138,7 @@ public class GuestClient extends AJAXClient {
     public GuestClient(ParsedShare share, String password, boolean failOnNonRedirect) throws Exception {
         super(new AJAXSession(), true);
         getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-        this.shareResponse = resolve(share, failOnNonRedirect);
+        this.shareResponse = resolve(share, password, failOnNonRedirect);
         if (null != shareResponse.getLoginType()) {
             LoginResponse loginResponse = login(shareResponse, password);
             extractShareTarget(loginResponse);
@@ -480,11 +482,15 @@ public class GuestClient extends AJAXClient {
      * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
      * @return The share response
      */
-    private ResolveShareResponse resolve(ParsedShare share, boolean failOnNonRedirect) throws Exception {
-        if (AuthenticationMode.ANONYMOUS == share.getAuthentication()) {
-            setCredentials(null);
-        } else {
-            setCredentials(share.getGuestMailAddress(), share.getGuestPassword());
+    private ResolveShareResponse resolve(ParsedShare share, String password, boolean failOnNonRedirect) throws Exception {
+        if (RecipientType.ANONYMOUS == share.getRecipient().getType()) {
+            if (AuthenticationMode.ANONYMOUS == share.getAuthentication()) {
+                setCredentials(null);
+            } else {
+                setCredentials("guest", password);
+            }
+        } else if (RecipientType.GUEST == share.getRecipient().getType()) {
+            setCredentials(((GuestRecipient)share.getRecipient()).getEmailAddress(), password);
         }
         ResolveShareResponse response = Executor.execute(this, new ResolveShareRequest(share, failOnNonRedirect));
         getSession().setId(response.getSessionID());

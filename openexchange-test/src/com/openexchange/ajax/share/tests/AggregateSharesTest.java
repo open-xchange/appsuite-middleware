@@ -221,18 +221,18 @@ public class AggregateSharesTest extends ShareTest {
          * check access to shares via link to folder A
          */
         GuestClient guestClientA = resolveShare(shareA, guestPermission.getPassword());
-        guestClientA.checkModuleAvailable(shareA.getModule());
-        guestClientA.checkModuleAvailable(shareB.getModule());
-        guestClientA.checkFolderAccessible(shareA.getFolder(), guestPermission);
-        guestClientA.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        guestClientA.checkModuleAvailable(shareA.getTarget().getModule());
+        guestClientA.checkModuleAvailable(shareB.getTarget().getModule());
+        guestClientA.checkFolderAccessible(shareA.getTarget().getFolder(), guestPermission);
+        guestClientA.checkFolderAccessible(shareB.getTarget().getFolder(), guestPermission);
         /*
          * check access to shares via link to folder B
          */
         GuestClient guestClientB = resolveShare(shareB, guestPermission.getPassword());
-        guestClientB.checkModuleAvailable(shareA.getModule());
-        guestClientB.checkModuleAvailable(shareB.getModule());
-        guestClientB.checkFolderAccessible(shareA.getFolder(), guestPermission);
-        guestClientB.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        guestClientB.checkModuleAvailable(shareA.getTarget().getModule());
+        guestClientB.checkModuleAvailable(shareB.getTarget().getModule());
+        guestClientB.checkFolderAccessible(shareA.getTarget().getFolder(), guestPermission);
+        guestClientB.checkFolderAccessible(shareB.getTarget().getFolder(), guestPermission);
     }
 
     private void testRemoveAggregateShares(EnumAPI api, AJAXClient client1, int module1, AJAXClient client2, int module2) throws Exception {
@@ -303,18 +303,18 @@ public class AggregateSharesTest extends ShareTest {
          * check access to shares via link to folder A
          */
         GuestClient guestClientA = resolveShare(shareA, guestPermission.getPassword());
-        guestClientA.checkModuleAvailable(shareA.getModule());
-        guestClientA.checkModuleAvailable(shareB.getModule());
-        guestClientA.checkFolderAccessible(shareA.getFolder(), guestPermission);
-        guestClientA.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        guestClientA.checkModuleAvailable(shareA.getTarget().getModule());
+        guestClientA.checkModuleAvailable(shareB.getTarget().getModule());
+        guestClientA.checkFolderAccessible(shareA.getTarget().getFolder(), guestPermission);
+        guestClientA.checkFolderAccessible(shareB.getTarget().getFolder(), guestPermission);
         /*
          * check access to shares via link to folder B
          */
         GuestClient guestClientB = resolveShare(shareB, guestPermission.getPassword());
-        guestClientB.checkModuleAvailable(shareA.getModule());
-        guestClientB.checkModuleAvailable(shareB.getModule());
-        guestClientB.checkFolderAccessible(shareA.getFolder(), guestPermission);
-        guestClientB.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        guestClientB.checkModuleAvailable(shareA.getTarget().getModule());
+        guestClientB.checkModuleAvailable(shareB.getTarget().getModule());
+        guestClientB.checkFolderAccessible(shareA.getTarget().getFolder(), guestPermission);
+        guestClientB.checkFolderAccessible(shareB.getTarget().getFolder(), guestPermission);
         /*
          * update folder A, revoke guest permissions
          */
@@ -337,15 +337,15 @@ public class AggregateSharesTest extends ShareTest {
         guestClientA.checkSessionAlive(false);
         // FIXME: capabilities are cached and not invalidated
         // guestClientA.checkModuleNotAvailable(module1);
-        guestClientA.checkModuleAvailable(shareB.getModule());
-        guestClientA.checkFolderNotAccessible(shareA.getFolder());
-        guestClientA.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        guestClientA.checkModuleAvailable(shareB.getTarget().getModule());
+        guestClientA.checkFolderNotAccessible(shareA.getTarget().getFolder());
+        guestClientA.checkFolderAccessible(shareB.getTarget().getFolder(), guestPermission);
         guestClientB.checkSessionAlive(false);
         // FIXME: capabilities are cached and not invalidated
         // guestClientB.checkModuleNotAvailable(module1);
-        guestClientB.checkModuleAvailable(shareB.getModule());
-        guestClientB.checkFolderNotAccessible(shareA.getFolder());
-        guestClientB.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        guestClientB.checkModuleAvailable(shareB.getTarget().getModule());
+        guestClientB.checkFolderNotAccessible(shareA.getTarget().getFolder());
+        guestClientB.checkFolderAccessible(shareB.getTarget().getFolder(), guestPermission);
         /*
          * check if share link to folder A still accessible
          */

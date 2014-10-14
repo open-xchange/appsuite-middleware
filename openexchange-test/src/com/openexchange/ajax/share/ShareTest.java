@@ -264,7 +264,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static ParsedShare discoverShare(List<ParsedShare> shares, int folderID, int guest) throws OXException, IOException, JSONException {
         String folder = String.valueOf(folderID);
         for (ParsedShare share : shares) {
-            if (folder.equals(share.getFolder()) && guest == share.getGuest()) {
+            if (folder.equals(share.getTarget().getFolder()) && guest == share.getGuest()) {
                 return share;
             }
         }
