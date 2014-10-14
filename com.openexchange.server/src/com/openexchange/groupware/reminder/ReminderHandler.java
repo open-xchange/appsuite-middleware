@@ -74,7 +74,6 @@ import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -649,10 +648,11 @@ public class ReminderHandler implements ReminderService {
 
     @Override
     public SearchIterator<ReminderObject> listModifiedReminder(final int userId, final Date lastModified) throws OXException {
-        final Connection readCon = DBPool.pickup(context);
+        Connection readCon = DBPool.pickup(context);
 
         PreparedStatement ps = null;
         ResultSet rs = null;
+        boolean close = true;
         try {
             ps = readCon.prepareStatement(SQL.sqlModified);
             ps.setInt(1, context.getContextId());
@@ -660,15 +660,16 @@ public class ReminderHandler implements ReminderService {
             ps.setTimestamp(3, new Timestamp(lastModified.getTime()));
 
             rs = ps.executeQuery();
-            return new ReminderSearchIterator(context, ps, rs, readCon);
-        } catch (final SearchIteratorException exc) {
-            DBUtils.closeSQLStuff(rs, ps);
-            DBPool.closeReaderSilent(context, readCon);
-            throw exc;
+            ReminderSearchIterator iter = new ReminderSearchIterator(context, ps, rs, readCon);
+            close = false;
+            return iter;
         } catch (final SQLException exc) {
-            DBUtils.closeSQLStuff(rs, ps);
-            DBPool.closeReaderSilent(context, readCon);
             throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
+        } finally {
+            if (close) {
+                DBUtils.closeSQLStuff(rs, ps);
+                DBPool.closeReaderSilent(context, readCon);
+            }
         }
     }
 
