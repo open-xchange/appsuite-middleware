@@ -51,23 +51,34 @@ package com.openexchange.ajax.share.tests;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.ajax.infostore.actions.ListInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
+import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
+import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.NewRequest;
+import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -79,12 +90,25 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class NewTest extends ShareTest {
 
-    private FolderObject calendar;
-    private FolderObject contacts;
-    private FolderObject infostore;
+    private static final int NUM_FILES = 5;
+
+    private static final int FOLDER_READ_PERMISSION = Permissions.createPermissionBits(
+        Permission.READ_FOLDER,
+        Permission.READ_ALL_OBJECTS,
+        Permission.NO_PERMISSIONS,
+        Permission.NO_PERMISSIONS,
+        false);
+
     private AJAXClient client2;
     private InfostoreTestManager itm;
-    private DefaultFile file;
+
+    private FolderObject calendar;
+    private FolderObject contacts;
+    private FolderObject tasks;
+    private FolderObject infostore;
+    private FolderObject infostore2;
+    private List<DefaultFile> files;
+
 
     /**
      * Initializes a new {@link NewTest}.
@@ -103,51 +127,152 @@ public class NewTest extends ShareTest {
         UserValues values = client.getValues();
         calendar = insertPrivateFolder(EnumAPI.OX_NEW, Module.CALENDAR.getFolderConstant(), values.getPrivateAppointmentFolder());
         contacts = insertPrivateFolder(EnumAPI.OX_NEW, Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder());
+        tasks = insertPrivateFolder(EnumAPI.OX_NEW, Module.TASK.getFolderConstant(), values.getPrivateTaskFolder());
         infostore = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
+        infostore2 = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
 
-        file = new DefaultFile();
-        file.setFolderId(String.valueOf(infostore.getObjectID()));
-        file.setTitle("NewTest" + System.currentTimeMillis());
-        file.setDescription(file.getTitle());
-        itm.newAction(file);
+
+        files = new ArrayList<DefaultFile>(NUM_FILES);
+        long now = System.currentTimeMillis();
+        for (int i = 0; i < NUM_FILES; i++) {
+            FolderObject parent = i % 2 == 0 ? infostore : infostore2;
+            DefaultFile file = new DefaultFile();
+            file.setFolderId(String.valueOf(parent.getObjectID()));
+            file.setTitle("NewTest_" + now + "_" + i);
+            file.setDescription(file.getTitle());
+            itm.newAction(file);
+            files.add(file);
+        }
     }
 
     public void testShareMultipleFoldersInternally() throws Exception {
-        List<ShareTarget> targets = new ArrayList<ShareTarget>(3);
+        List<ShareTarget> targets = new ArrayList<ShareTarget>(4);
         targets.add(new ShareTarget(Module.CALENDAR.getFolderConstant(), Integer.toString(calendar.getObjectID())));
         targets.add(new ShareTarget(Module.CONTACTS.getFolderConstant(), Integer.toString(contacts.getObjectID())));
+        targets.add(new ShareTarget(Module.TASK.getFolderConstant(), Integer.toString(tasks.getObjectID())));
         targets.add(new ShareTarget(Module.INFOSTORE.getFolderConstant(), Integer.toString(infostore.getObjectID())));
 
         InternalRecipient recipient = new InternalRecipient();
         int userId2 = client2.getValues().getUserId();
         recipient.setEntity(userId2);
-        int permissions = FolderTest.createPermissionBits(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            false);
-        recipient.setBits(permissions);
+        recipient.setBits(FOLDER_READ_PERMISSION);
 
         client.execute(new NewRequest(targets, Collections.<ShareRecipient>singletonList(recipient)));
 
         /*
          * Reload folders with second client and check permissions
          */
-        checkFolderPermission(userId2, permissions, getFolder(EnumAPI.OX_NEW, calendar.getObjectID(), client2));
-        checkFolderPermission(userId2, permissions, getFolder(EnumAPI.OX_NEW, contacts.getObjectID(), client2));
-        checkFolderPermission(userId2, permissions, getFolder(EnumAPI.OX_NEW, infostore.getObjectID(), client2));
+        checkFolderPermission(userId2, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, calendar.getObjectID(), client2));
+        checkFolderPermission(userId2, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, contacts.getObjectID(), client2));
+        checkFolderPermission(userId2, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, tasks.getObjectID(), client2));
+        checkFolderPermission(userId2, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, infostore.getObjectID(), client2));
     }
 
     public void testShareSingleObjectInternally() throws Exception {
-        ShareTarget target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), Integer.toString(infostore.getObjectID()), file.getId());
+        DefaultFile file = files.get(0);
+        ShareTarget target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
         InternalRecipient recipient = new InternalRecipient();
         int userId2 = client2.getValues().getUserId();
         recipient.setEntity(userId2);
-        recipient.setBits(ObjectPermission.READ);
+        recipient.setBits(FOLDER_READ_PERMISSION);
 
         client.execute(new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(recipient)));
         checkFilePermission(userId2, ObjectPermission.READ, itm.getAction(file.getId()));
+    }
+
+    public void testShareMultipleFoldersAndFilesInAndExternally() throws Exception {
+        List<ShareTarget> targets = new ArrayList<ShareTarget>(3 + NUM_FILES);
+        targets.add(new ShareTarget(Module.CALENDAR.getFolderConstant(), Integer.toString(calendar.getObjectID())));
+        targets.add(new ShareTarget(Module.CONTACTS.getFolderConstant(), Integer.toString(contacts.getObjectID())));
+        targets.add(new ShareTarget(Module.TASK.getFolderConstant(), Integer.toString(tasks.getObjectID())));
+        for (DefaultFile file : files) {
+            targets.add(new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId()));
+        }
+
+        InternalRecipient internalRecipient = new InternalRecipient();
+        int userId2 = client2.getValues().getUserId();
+        internalRecipient.setEntity(userId2);
+        internalRecipient.setBits(FOLDER_READ_PERMISSION);
+        AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
+        anonymousRecipient.setBits(FOLDER_READ_PERMISSION);
+        anonymousRecipient.setPassword("1234");
+        List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(2);
+        recipients.add(internalRecipient);
+        recipients.add(anonymousRecipient);
+
+        client.execute(new NewRequest(targets, recipients));
+
+        /*
+         * Assert that all shares have been created and create client for anonymous guest
+         */
+        List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
+        List<ParsedShare> shares = getSharesForTargets(allShares, targets);
+        assertEquals(targets.size(), shares.size());
+        GuestClient guestClient = new GuestClient(shares.get(0), anonymousRecipient.getPassword());
+
+        /*
+         * Check folder permissions for internal recipient
+         */
+        checkFolderPermission(userId2, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, calendar.getObjectID(), client2));
+        checkFolderPermission(userId2, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, contacts.getObjectID(), client2));
+        checkFolderPermission(userId2, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, tasks.getObjectID(), client2));
+
+        /*
+         * Check folder permissions for guest recipient
+         */
+        int guestUserId = guestClient.getValues().getUserId();
+        checkFolderPermission(guestUserId, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, calendar.getObjectID(), guestClient));
+        checkFolderPermission(guestUserId, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, contacts.getObjectID(), guestClient));
+        checkFolderPermission(guestUserId, FOLDER_READ_PERMISSION, getFolder(EnumAPI.OX_NEW, tasks.getObjectID(), guestClient));
+
+        /*
+         * Check object permissions for internal recipient
+         */
+        List<ListItem> listItems = new ArrayList<ListItem>(NUM_FILES);
+        for (DefaultFile file : files) {
+            listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), new FileID(file.getId()).getFileId()));
+        }
+        ListInfostoreResponse listResp = client2.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
+        assertListResponse(listResp, userId2, ObjectPermission.READ);
+
+        /*
+         * Check object permissions for guest recipient
+         */
+        listResp = guestClient.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
+        assertListResponse(listResp, guestUserId, ObjectPermission.READ);
+    }
+
+    private void assertListResponse(ListInfostoreResponse listResp, int entity, int permissionBits) {
+        Object[][] objects = listResp.getArray();
+        for (int i = 0; i < NUM_FILES; i++) {
+            Object[] doc = objects[i];
+            DefaultFile file = files.get(i);
+            FileID fileID = new FileID(file.getId());
+            fileID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+            assertEquals(fileID.toUniqueID(), (String) doc[listResp.getColumnPos(Metadata.ID)]);
+            List<FileStorageObjectPermission> permissions = (List<FileStorageObjectPermission>) doc[listResp.getColumnPos(Metadata.OBJECT_PERMISSIONS)];
+            boolean foundValidGuestPermission = false;
+            for (FileStorageObjectPermission permission : permissions) {
+                if (permission.getEntity() == entity && permission.getPermissions() == permissionBits) {
+                    foundValidGuestPermission = true;
+                }
+            }
+            assertTrue(foundValidGuestPermission);
+        }
+    }
+
+    private List<ParsedShare> getSharesForTargets(List<ParsedShare> allShares, List<ShareTarget> targets) {
+        List<ParsedShare> shares = new LinkedList<ParsedShare>();
+        for (ParsedShare ps : allShares) {
+            for (ShareTarget target : targets) {
+                if (target.equals(ps.getTarget())) {
+                    shares.add(ps);
+                    break;
+                }
+            }
+        }
+
+        return shares;
     }
 
     private void checkFilePermission(int entity, int expectedBits, File file) {
@@ -167,7 +292,7 @@ public class NewTest extends ShareTest {
     private void checkFolderPermission(int entity, int expectedBits, FolderObject folder) {
         for (OCLPermission permission : folder.getPermissions()) {
             if (permission.getEntity() == entity) {
-                assertEquals(expectedBits, FolderTest.createPermissionBits(
+                assertEquals(expectedBits, Permissions.createPermissionBits(
                     permission.getFolderPermission(),
                     permission.getReadPermission(),
                     permission.getWritePermission(),
