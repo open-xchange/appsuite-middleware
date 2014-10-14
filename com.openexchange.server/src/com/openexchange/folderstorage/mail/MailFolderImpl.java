@@ -78,6 +78,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -358,15 +359,20 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
             this.mailFolderType = mailFolderType;
         }
+
         {
-            if (MailFolderType.NONE.equals(this.mailFolderType)) {
-                if (mailFolder.containsShared() && mailFolder.isShared()) {
-                    type = SharedType.getInstance();
-                } else if (mailFolder.containsPublic() && mailFolder.isPublic()) {
-                    type = PublicType.getInstance();
+            String client = Strings.asciiLowerCase(mailAccess.getSession().getClient());
+            if (null == client || !client.startsWith("usm-")) {
+                if (MailFolderType.NONE.equals(this.mailFolderType)) {
+                    if (mailFolder.containsShared() && mailFolder.isShared()) {
+                        type = SharedType.getInstance();
+                    } else if (mailFolder.containsPublic() && mailFolder.isPublic()) {
+                        type = PublicType.getInstance();
+                    }
                 }
             }
         }
+
         {
             int caps = mailConfig.getCapabilities().getCapabilities();
             if ((caps & MailCapabilities.BIT_SUBSCRIPTION) > 0 && STANDARD_FOLDER_TYPES.contains(this.mailFolderType)) {
