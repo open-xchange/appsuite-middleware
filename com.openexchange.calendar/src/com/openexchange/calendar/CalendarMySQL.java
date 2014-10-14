@@ -148,6 +148,7 @@ import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -3036,26 +3037,23 @@ public class CalendarMySQL implements CalendarSqlImp {
         cdao.setParentFolderID(cdao.getActionFolder());
 
         if (cdao.getFolderMove()) {
-
             /*
              * Update reminders' folder ID on move operation
              */
-            final ReminderService reminderInterface = new ReminderHandler(ctx);
+            ReminderService reminderInterface = new ReminderHandler(ctx);
 
-            final SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID());
-            final List<ReminderObject> toUpdate = new ArrayList<ReminderObject>();
-            try {
-                while (it.hasNext()) {
-                    toUpdate.add((ReminderObject) it.next());
-                }
-            } finally {
+            List<ReminderObject> toUpdate = new LinkedList<ReminderObject>();
+            {
+                SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID());
                 try {
-                    it.close();
-                } catch (final OXException e) {
-                    LOG.error("", e);
+                    while (it.hasNext()) {
+                        toUpdate.add((ReminderObject) it.next());
+                    }
+                } finally {
+                    SearchIterators.close(it);
                 }
             }
-            for (final ReminderObject reminder : toUpdate) {
+            for (ReminderObject reminder : toUpdate) {
                 // Check for public->private move
                 if (edao.getFolderType() == FolderObject.PUBLIC && cdao.getFolderType() == FolderObject.PRIVATE) {
                     if (reminder.getUser() == so.getUserId()) {
@@ -3269,7 +3267,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (check_up < 1) {
             throw OXCalendarExceptionCodes.UPDATE_WITHOUT_PARTICIPANTS.create();
         }
-        
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("New participants:");
             for (Participant d : new_participants) {
@@ -3985,14 +3983,14 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         return retval;
     }
-    
+
     private Participant[] toArrayP(Set<Participant> set) {
         if (set == null) {
             return null;
         }
         return set.toArray(new Participant[set.size()]);
     }
-    
+
     private <T> Set<T> toSet(T[] array) {
         if (array == null) {
             return null;

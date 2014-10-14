@@ -599,6 +599,7 @@ public class ReminderHandler implements ReminderService {
         final Connection con = DBPool.pickup(context);
         PreparedStatement ps = null;
         ResultSet rs = null;
+        boolean close = true;
         try {
             ps = con.prepareStatement(SQL.sqlListByTargetId);
             int pos = 1;
@@ -606,12 +607,16 @@ public class ReminderHandler implements ReminderService {
             ps.setInt(pos++, module);
             ps.setString(pos++, String.valueOf(targetId));
             rs = ps.executeQuery();
-            return new ReminderSearchIterator(context, ps, rs, con);
+            ReminderSearchIterator iter = new ReminderSearchIterator(context, ps, rs, con);
+            close = false;
+            return iter;
         } catch (final SQLException e) {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, ps);
-            DBPool.closeReaderSilent(context, con);
+            if (close) {
+                DBUtils.closeSQLStuff(rs, ps);
+                DBPool.closeReaderSilent(context, con);
+            }
         }
     }
 
