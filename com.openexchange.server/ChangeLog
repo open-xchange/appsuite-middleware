@@ -1,7 +1,11 @@
+* 2014-10-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34920: Do not close SQL resources on SearchIterator creation
+
 * 2014-10-12 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 34896: Initialize member before first accessing it 
- - Fix for bug 34897: Consider number of files in context for "amount"-type quota 
+ - Fix for bug 34896: Initialize member before first accessing it
+ - Fix for bug 34897: Consider number of files in context for "amount"-type quota
 
 * 2014-10-10 - thorben.betten@open-xchange.com
 

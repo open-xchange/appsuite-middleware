@@ -66,6 +66,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * This class contains everything for handling reminder for tasks.
@@ -251,25 +252,29 @@ final class Reminder {
         FolderObject folder = Tools.getFolder(ctx, destFolderId);
         ReminderService service = new ReminderHandler(ctx);
         SearchIterator<ReminderObject> iter = service.listReminder(Types.TASK, taskId);
-        while (iter.hasNext()) {
-            ReminderObject reminder = iter.next();
-            if (reminder.getFolder() == sourceFolderId) {
-                int userId = reminder.getUser();
-                User user = Tools.getUser(ctx, userId);
-                UserPermissionBits userPerms = Tools.getUserPermissionBits(ctx, userId);
-                try {
-                    boolean testFlag = com.openexchange.groupware.tasks.Permission.canReadInFolder(ctx, user, userPerms, folder);
-                    if (testFlag && privateFlag) {
-                        // Go to catch clause.
-                        throw new OXException();
+        try {
+            while (iter.hasNext()) {
+                ReminderObject reminder = iter.next();
+                if (reminder.getFolder() == sourceFolderId) {
+                    int userId = reminder.getUser();
+                    User user = Tools.getUser(ctx, userId);
+                    UserPermissionBits userPerms = Tools.getUserPermissionBits(ctx, userId);
+                    try {
+                        boolean testFlag = com.openexchange.groupware.tasks.Permission.canReadInFolder(ctx, user, userPerms, folder);
+                        if (testFlag && privateFlag) {
+                            // Go to catch clause.
+                            throw new OXException();
+                        }
+                        reminder.setFolder(destFolderId);
+                        service.updateReminder(reminder);
+                    } catch (OXException e) {
+                        // Reading is not allowed. Delete the reminder
+                        service.deleteReminder(reminder);
                     }
-                    reminder.setFolder(destFolderId);
-                    service.updateReminder(reminder);
-                } catch (OXException e) {
-                    // Reading is not allowed. Delete the reminder
-                    service.deleteReminder(reminder);
                 }
             }
+        } finally {
+            SearchIterators.close(iter);
         }
     }
 }
