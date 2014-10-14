@@ -68,6 +68,8 @@ import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.ShareServiceLookup;
 import com.openexchange.share.impl.notification.DefaultNotificationService;
+import com.openexchange.share.impl.notification.mail.MailNotificationHandler;
+import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
@@ -148,10 +150,38 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
+        // Initialize share notification service
+        final DefaultNotificationService defaultNotificationService = new DefaultNotificationService();
+
+        // Add in-place handlers
+        defaultNotificationService.add(new MailNotificationHandler());
+
+        // track additional share notification handlers
+        track(ShareNotificationHandler.class, new ServiceTrackerCustomizer<ShareNotificationHandler, ShareNotificationHandler>() {
+
+            @Override
+            public ShareNotificationHandler addingService(ServiceReference<ShareNotificationHandler> reference) {
+                ShareNotificationHandler handler = context.getService(reference);
+                defaultNotificationService.add(handler);
+                return handler;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<ShareNotificationHandler> reference, ShareNotificationHandler service) {
+                // Ignore
+            }
+
+            @Override
+            public void removedService(ServiceReference<ShareNotificationHandler> reference, ShareNotificationHandler service) {
+                defaultNotificationService.remove(service);
+                context.ungetService(reference);
+            }
+        });
+
         track(ManagementService.class, new ManagementServiceTracker(context, shareService));
         openTrackers();
 
-        registerService(ShareNotificationService.class, new DefaultNotificationService());
+        registerService(ShareNotificationService.class, defaultNotificationService);
     }
 
     @Override

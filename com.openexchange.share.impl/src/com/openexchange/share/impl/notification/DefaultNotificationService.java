@@ -50,35 +50,110 @@
 package com.openexchange.share.impl.notification;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.session.Session;
-import com.openexchange.share.impl.notification.mail.MailSender;
 import com.openexchange.share.notification.ShareNotification;
+import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.mail.MailNotification;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link DefaultNotificationService}
+ * {@link DefaultNotificationService} - The default share notification service.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
 public class DefaultNotificationService implements ShareNotificationService {
 
+    private static final class Wrapper implements Comparable<Wrapper> {
+
+        final ShareNotificationHandler handler;
+
+        Wrapper(ShareNotificationHandler handler) {
+            super();
+            this.handler = handler;
+        }
+
+        @Override
+        public int compareTo(Wrapper o) {
+            int thisVal = handler.getRanking();
+            int anotherVal = o.handler.getRanking();
+            return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1));
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((handler == null) ? 0 : handler.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Wrapper)) {
+                return false;
+            }
+            Wrapper other = (Wrapper) obj;
+            if (handler == null) {
+                if (other.handler != null) {
+                    return false;
+                }
+            } else if (!handler.equals(other.handler)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------- //
+
+    /** The queue for additional handlers */
+    private final SortableConcurrentList<Wrapper> handlers;
+
+    /**
+     * Initializes a new {@link DefaultNotificationService}.
+     */
     public DefaultNotificationService() {
         super();
+        handlers = new SortableConcurrentList<Wrapper>();
+    }
+
+    /**
+     * Adds specified handler.
+     *
+     * @param handler The handler to add
+     */
+    public void add(ShareNotificationHandler handler) {
+        if (handlers.add(new Wrapper(handler))) {
+            handlers.sort();
+        }
+    }
+
+    /**
+     * Removes given handler
+     *
+     * @param handler The handler to remove
+     */
+    public void remove(ShareNotificationHandler handler) {
+        handlers.remove(new Wrapper(handler));
     }
 
     @Override
     public <T extends ShareNotification<?>> void notify(T notification, Session session) throws OXException {
-        if (MailNotification.class.isAssignableFrom(notification.getClass())) {
-            new MailSender((MailNotification) notification, ServerSessionAdapter.valueOf(session)).send();
-        } else {
-            // TODO: implement extension mechanism based on concrete notification type (think of SMS, WhatsApp etc.)
-            throw new OXException(
-                new IllegalArgumentException("No provider exists to handle notifications of type " + notification.getClass().getName()));
+        for (Wrapper wrapper : handlers) {
+            ShareNotificationHandler currentHandler = wrapper.handler;
+            if (currentHandler.handles(notification)) {
+                currentHandler.notify(notification, session);
+            }
         }
+
+        // TODO: implement extension mechanism based on concrete notification type (think of SMS, WhatsApp etc.)
+        throw new OXException(new IllegalArgumentException("No provider exists to handle notifications of type " + notification.getClass().getName()));
     }
 
 }
