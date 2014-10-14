@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.Picture;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
@@ -146,7 +147,11 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
         }
 
         if (req.isSet("id") && !hadCriterium) {
-            contact.setObjectID(req.getIntParameter("id"));
+            int id = Strings.parsePositiveInt(req.getParameter("id"));
+            if (id > 0) {
+                contact.setObjectID(req.getIntParameter("id"));
+            }
+
             if (req.isSet("folder")) {
                 hadCriterium = true;
                 contact.setParentFolderID(req.getIntParameter("folder"));

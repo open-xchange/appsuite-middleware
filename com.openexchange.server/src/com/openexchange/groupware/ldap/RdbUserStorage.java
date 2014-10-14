@@ -730,7 +730,7 @@ public class RdbUserStorage extends UserStorage {
 	    		for (int updateCount : updateCounts) {
 	    			// Concurrent modification of at least one attribute. We lost the race...
 	    			if (updateCount != 1) {
-	    				LOG.debug("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, context.getContextId(), value);
+	    				LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, context.getContextId(), value);
 	    				throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(context.getContextId(), userId);
 	    			}
 	    		}
