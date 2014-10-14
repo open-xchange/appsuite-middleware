@@ -1,6 +1,7 @@
 * 2014-10-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 34920: Do not close SQL resources on SearchIterator creation
+ - Fix for bug 33862: Signal former folder type "7" for shared/public mail folders for USM-* clients
 
 * 2014-10-13 - marcus.klein@open-xchange.com
 
