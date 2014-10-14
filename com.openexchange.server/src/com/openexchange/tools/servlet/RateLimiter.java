@@ -398,7 +398,7 @@ public final class RateLimiter {
 
     private static volatile Integer maxRateTimeWindow;
 
-    private static int maxRateTimeWindow() {
+    public static int maxRateTimeWindow() {
         Integer tmp = maxRateTimeWindow;
         if (null == tmp) {
             synchronized (RateLimiter.class) {

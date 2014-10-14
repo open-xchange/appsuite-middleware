@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Set;
@@ -156,6 +157,9 @@ public abstract class SessionServlet extends AJAXServlet {
             super.service(req, resp);
         } catch (final RateLimitedException e) {
             resp.setContentType("text/plain; charset=UTF-8");
+            if(e.getRetryAfter() > 0) {
+                resp.setHeader(RETRY_AFTER, String.valueOf(e.getRetryAfter()));
+            }
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final OXException e) {
             handleOXException(e, req, resp);
