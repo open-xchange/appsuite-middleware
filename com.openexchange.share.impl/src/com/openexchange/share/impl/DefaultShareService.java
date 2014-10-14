@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -141,7 +142,7 @@ public class DefaultShareService implements ShareService {
             /*
              * delete / adjust guest users as needed
              */
-            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), affectedGuestIDs, session);
+            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), affectedGuestIDs);
             connectionHelper.commit();
             LOG.info("Shares to guest user(s) {} for folder {} in context {} deleted successfully.",
                 Arrays.toString(guests), folder, session.getContextId());
@@ -171,13 +172,12 @@ public class DefaultShareService implements ShareService {
                     throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
                 }
                 if (session.getUserId() != share.getCreatedBy()) {
-                    throw ShareExceptionCodes.NO_DELETE_PERMISSIONS.create(
-                        Integer.valueOf(session.getUserId()), token, Integer.valueOf(session.getContextId()));
+                    throw ShareExceptionCodes.NO_DELETE_PERMISSIONS.create(I(session.getUserId()), token, I(session.getContextId()));
                 }
                 if (share.getLastModified().after(clientTimestamp)) {
                     throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(token);
                 }
-                affectedGuestIDs.add(Integer.valueOf(share.getGuest()));
+                affectedGuestIDs.add(I(share.getGuest()));
             }
             /*
              * proceed with deletion
@@ -186,7 +186,7 @@ public class DefaultShareService implements ShareService {
             /*
              * delete / adjust guest users as needed
              */
-            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), I2i(affectedGuestIDs), session);
+            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), I2i(affectedGuestIDs));
             connectionHelper.commit();
             return deletedGuestIDs;
         } finally {
@@ -212,8 +212,7 @@ public class DefaultShareService implements ShareService {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
             if (session.getUserId() != share.getCreatedBy()) {
-                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(
-                    Integer.valueOf(session.getUserId()), token, Integer.valueOf(session.getContextId()));
+                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), token, I(session.getContextId()));
             }
             if (share.getLastModified().after(clientTimestamp)) {
                 throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(token);
@@ -345,7 +344,7 @@ public class DefaultShareService implements ShareService {
          */
         Map<Integer, List<String>> tokensByContextID = new HashMap<Integer, List<String>>();
         for (String token : tokens) {
-            Integer contextId = Integer.valueOf(ShareTool.extractContextId(token));
+            Integer contextId = I(ShareTool.extractContextId(token));
             List<String> tokensInContext = tokensByContextID.get(contextId);
             if (null == tokensInContext) {
                 tokensInContext = new ArrayList<String>();
@@ -513,7 +512,7 @@ public class DefaultShareService implements ShareService {
             List<String> tokens = new ArrayList<String>(shares.size());
             for (int i = 0; i < shares.size(); i++) {
                 Share share = shares.get(i);
-                affectedGuestIDs.add(Integer.valueOf(share.getGuest()));
+                affectedGuestIDs.add(I(share.getGuest()));
                 tokens.add(share.getToken());
             }
             /*
@@ -524,8 +523,7 @@ public class DefaultShareService implements ShareService {
             /*
              * delete / adjust guest users as needed
              */
-            // TODO find a way to delete guests without session
-//            cleanupGuestUsers(connectionHelper, connectionHelper.getContextID(), I2i(affectedGuestIDs), session);
+            cleanupGuestUsers(connectionHelper, connectionHelper.getContextID(), I2i(affectedGuestIDs));
             connectionHelper.commit();
             LOG.info("Deleted {} share(s) in context {}: {}", tokens.size(), connectionHelper.getContextID(), tokens);
         }
@@ -603,7 +601,7 @@ public class DefaultShareService implements ShareService {
      * @return The identifiers of the deleted guest users
      * @throws OXException
      */
-    private int[] cleanupGuestUsers(ConnectionHelper connectionHelper, int contextID, int[] guestIDs, Session session) throws OXException {
+    private int[] cleanupGuestUsers(ConnectionHelper connectionHelper, int contextID, int[] guestIDs) throws OXException {
         if (null == guestIDs || 0 == guestIDs.length) {
             return new int[0];
         }
@@ -630,7 +628,7 @@ public class DefaultShareService implements ShareService {
                     connectionHelper.getConnection(), context, guestID);
                 userService.deleteUser(connectionHelper.getConnection(), context, guestID);
                 LOG.info("Deleted {} guest user(s) in context {}: {}", guestIDs.length, contextID, Arrays.toString(guestIDs));
-                deletedGuestIDs.add(Integer.valueOf(guestID));
+                deletedGuestIDs.add(I(guestID));
             }
         }
         return I2i(deletedGuestIDs);
@@ -661,7 +659,7 @@ public class DefaultShareService implements ShareService {
         for (Share share : shares) {
             for (int i = 0; i < guests.length; i++) {
                 if (guests[i] == share.getGuest()) {
-                    guestIDs.add(Integer.valueOf(share.getGuest()));
+                    guestIDs.add(I(share.getGuest()));
                     tokens.add(share.getToken());
                     break;
                 }
