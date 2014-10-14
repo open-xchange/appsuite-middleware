@@ -59,7 +59,7 @@
  * @author jdumas@zgs.com (John Dumas)
  */
 
-package com.openexchange.passwordchange.mechs;
+package com.openexchange.passwordmechs.mechs;
 
 import java.io.UnsupportedEncodingException;
 

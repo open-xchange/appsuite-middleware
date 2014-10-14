@@ -47,11 +47,12 @@
  *
  */
 
-package com.openexchange.passwordchange.mechs;
+package com.openexchange.passwordmechs.mechs;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import com.openexchange.java.Charsets;
 
 public final class SHACrypt {
 
@@ -71,7 +72,7 @@ public final class SHACrypt {
         md.update(salt);
 
         final byte[] pwhash = md.digest();
-        final String ret = com.openexchange.tools.encoding.Base64.encode(pwhash);
+        final String ret = Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(pwhash));
 
         return ret;
     }

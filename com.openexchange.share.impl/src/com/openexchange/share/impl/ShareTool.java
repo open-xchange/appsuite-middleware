@@ -69,7 +69,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
-import com.openexchange.passwordchange.PasswordMechanism;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
@@ -301,9 +301,9 @@ public class ShareTool {
         guestUser.setDisplayName(recipient.getDisplayName());
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
-        guestUser.setPasswordMech(PasswordMechanism.MECH_BCRYPT);
+        guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
         try {
-            guestUser.setUserPassword(PasswordMechanism.getEncodedPassword(PasswordMechanism.MECH_BCRYPT, recipient.getPassword()));
+            guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
         } catch (UnsupportedEncodingException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (NoSuchAlgorithmException e) {

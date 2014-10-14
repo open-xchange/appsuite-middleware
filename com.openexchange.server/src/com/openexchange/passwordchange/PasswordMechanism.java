@@ -50,19 +50,17 @@ package com.openexchange.passwordchange;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import com.damienmiller.BCrypt;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.mechs.SHACrypt;
-import com.openexchange.passwordchange.mechs.UnixCrypt;
+import com.openexchange.passwordmechs.PasswordMech;
 
 
 public class PasswordMechanism {
 
-    public static final String MECH_CRYPT = "{CRYPT}".intern();
+    public static final String MECH_CRYPT = PasswordMech.CRYPT.getIdentifier();
 
-    public static final String MECH_SHA = "{SHA}".intern();
+    public static final String MECH_SHA = PasswordMech.SHA.getIdentifier();
 
-    public static final String MECH_BCRYPT = "{BCRYPT}".intern();
+    public static final String MECH_BCRYPT = PasswordMech.BCRYPT.getIdentifier();
 
     /**
      * Utility method to encode given <code>newPassword</code> according to specified encoding mechanism
@@ -76,11 +74,11 @@ public class PasswordMechanism {
      */
     public static final String getEncodedPassword(final String mech, final String newPassword) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         if (MECH_CRYPT.equals(mech)) {
-            return UnixCrypt.crypt(newPassword);
+            return PasswordMech.CRYPT.encode(newPassword);
         } else if (MECH_SHA.equals(mech)) {
-            return SHACrypt.makeSHAPasswd(newPassword);
+            return PasswordMech.SHA.encode(newPassword);
         } else if (MECH_BCRYPT.equals(mech)) {
-            return BCrypt.hashpw(newPassword, BCrypt.gensalt());
+            return PasswordMech.BCRYPT.encode(newPassword);
         } else {
             return null;
         }

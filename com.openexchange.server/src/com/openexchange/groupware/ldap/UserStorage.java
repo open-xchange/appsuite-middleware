@@ -49,16 +49,18 @@
 
 package com.openexchange.groupware.ldap;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import com.damienmiller.BCrypt;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -425,25 +427,43 @@ public abstract class UserStorage {
 
     static {
         final Map<String, PasswordCheck> m = new HashMap<String, UserStorage.PasswordCheck>(3);
-        m.put("{CRYPT}", new PasswordCheck() {
+        m.put(PasswordMech.CRYPT.getIdentifier(), new PasswordCheck() {
 
             @Override
             public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                return UnixCrypt.matches(userHash, candidate);
+                try {
+                    return PasswordMech.CRYPT.check(candidate, userHash);
+                } catch (UnsupportedEncodingException e) {
+                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
+                } catch (NoSuchAlgorithmException e) {
+                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
+                }
             }
         });
-        m.put("{SHA}", new PasswordCheck() {
+        m.put(PasswordMech.SHA.getIdentifier(), new PasswordCheck() {
 
             @Override
             public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                return UserTools.hashPassword(candidate).equals(userHash);
+                try {
+                    return PasswordMech.SHA.check(candidate, userHash);
+                } catch (UnsupportedEncodingException e) {
+                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
+                } catch (NoSuchAlgorithmException e) {
+                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
+                }
             }
         });
-        m.put("{BCRYPT}", new PasswordCheck() {
+        m.put(PasswordMech.BCRYPT.getIdentifier(), new PasswordCheck() {
 
             @Override
             public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                return BCrypt.checkpw(candidate, userHash);
+                try {
+                    return PasswordMech.BCRYPT.check(candidate, userHash);
+                } catch (UnsupportedEncodingException e) {
+                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
+                } catch (NoSuchAlgorithmException e) {
+                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
+                }
             }
         });
         CHECKERS = Collections.unmodifiableMap(m);

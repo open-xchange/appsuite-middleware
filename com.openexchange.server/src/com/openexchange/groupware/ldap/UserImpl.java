@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.passwordmechs.PasswordMech;
 
 /**
  * This class implements the data container for the attributes of a user. This
@@ -165,7 +166,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * Password encryption mechanism.
      */
-    private String passwordMech = "{CRYPT}";
+    private String passwordMech = PasswordMech.CRYPT.getIdentifier();
 
     /**
      * Determines if the user is enabled or disabled.
