@@ -267,10 +267,10 @@ public final class FolderParser {
         case GUEST:
             GuestRecipient guestRecipient = new GuestRecipient();
             guestRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
-            if (false == jsonObject.hasAndNotNull(FolderField.MAIL_ADDRESS.getName())) {
-                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.MAIL_ADDRESS.getName());
+            if (false == jsonObject.hasAndNotNull(FolderField.EMAIL_ADDRESS.getName())) {
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.EMAIL_ADDRESS.getName());
             }
-            guestRecipient.setEmailAddress(jsonObject.getString(FolderField.MAIL_ADDRESS.getName()));
+            guestRecipient.setEmailAddress(jsonObject.getString(FolderField.EMAIL_ADDRESS.getName()));
             guestRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
             guestRecipient.setDisplayName(jsonObject.optString(FolderField.DISPLAY_NAME.getName(), null));
             guestRecipient.setContactID(jsonObject.optString(FolderField.CONTACT_ID.getName(), null));

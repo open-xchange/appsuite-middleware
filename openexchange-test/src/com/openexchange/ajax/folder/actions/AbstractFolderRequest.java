@@ -99,13 +99,16 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
             if (OCLGuestPermission.class.isInstance(perm)) {
                 OCLGuestPermission guestPerm = (OCLGuestPermission) perm;
                 jsonPermission.put("type", guestPerm.getType());
-                jsonPermission.putOpt(FolderField.MAIL_ADDRESS.getName(), guestPerm.getEmailAddress());
+                jsonPermission.putOpt(FolderField.EMAIL_ADDRESS.getName(), guestPerm.getEmailAddress());
                 jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestPerm.getPassword());
                 jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestPerm.getDisplayName());
                 jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestPerm.getContactFolderID());
                 jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestPerm.getContactID());
                 if (null != guestPerm.getExpires()) {
                     jsonPermission.put(FolderField.EXPIRY_DATE.getName(), guestPerm.getExpires().getTime());
+                }
+                if (null != guestPerm.getActivationDate()) {
+                    jsonPermission.put(FolderField.ACTIVATION_DATE.getName(), guestPerm.getActivationDate().getTime());
                 }
             } else {
                 jsonPermission.put(FolderFields.ENTITY, perm.getEntity());

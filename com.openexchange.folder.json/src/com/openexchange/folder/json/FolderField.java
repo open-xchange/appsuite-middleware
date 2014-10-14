@@ -167,7 +167,7 @@ public enum FolderField {
     /**
      * Mail address for an external permission
      */
-    MAIL_ADDRESS(-1, "mail_address"),
+    EMAIL_ADDRESS(-1, "email_address"),
     /**
      * Contact id for an external permission
      */
@@ -176,10 +176,6 @@ public enum FolderField {
      * Contact folder id for an external permission
      */
     CONTACT_FOLDER_ID(-1, "contact_folder"),
-    /**
-     * Authentication mode for guest access
-     */
-    GUEST_AUTH(-1, "guest_auth"),
     /**
      * The date when an external permission should expire
      */

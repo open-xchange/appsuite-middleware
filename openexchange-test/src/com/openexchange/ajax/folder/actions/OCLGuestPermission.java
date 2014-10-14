@@ -59,13 +59,14 @@ public class OCLGuestPermission extends OCLPermission {
 
     private static final long serialVersionUID = -3277662647906767821L;
 
-    private String mailAddress;
+    private String emailAddress;
     private String contactID;
     private String contactFolderID;
     private String displayName;
     private String type;
     private String password;
     private Date expires;
+    private Date activationDate;
 
     /**
      * Initializes an empty {@link OCLGuestPermission}.
@@ -75,12 +76,12 @@ public class OCLGuestPermission extends OCLPermission {
     }
 
     public String getEmailAddress() {
-        return mailAddress;
+        return emailAddress;
     }
 
 
     public void setEmailAddress(String mailAddress) {
-        this.mailAddress = mailAddress;
+        this.emailAddress = mailAddress;
     }
 
     public String getContactID() {
@@ -139,6 +140,24 @@ public class OCLGuestPermission extends OCLPermission {
      */
     public void setExpires(Date expires) {
         this.expires = expires;
+    }
+
+    /**
+     * Gets the activationDate
+     *
+     * @return The activationDate
+     */
+    public Date getActivationDate() {
+        return activationDate;
+    }
+
+    /**
+     * Sets the activationDate
+     *
+     * @param activationDate The activationDate to set
+     */
+    public void setActivationDate(Date activationDate) {
+        this.activationDate = activationDate;
     }
 
 }
