@@ -144,10 +144,9 @@ public class ParsedShare {
             if (jsonObject.hasAndNotNull(FolderField.ACTIVATION_DATE.getName())) {
                 recipient.setActivationDate(new Date(jsonObject.getLong(FolderField.ACTIVATION_DATE.getName())));
             }
-            if (false == jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
-                throw new JSONException("missing permission bits");
+            if (jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
+                recipient.setBits(jsonObject.getInt(FolderField.BITS.getName()));
             }
-            recipient.setBits(jsonObject.getInt(FolderField.BITS.getName()));
             guest = jsonObject.getInt(FolderField.ENTITY.getName());
         }
     }
