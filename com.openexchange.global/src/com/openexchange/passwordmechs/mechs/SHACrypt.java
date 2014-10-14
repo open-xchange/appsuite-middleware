@@ -60,21 +60,15 @@ public final class SHACrypt {
         super();
     }
 
-    public static String makeSHAPasswd(final String raw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md;
-
-        md = MessageDigest.getInstance("SHA-1");
-
-        final byte[] salt = {};
+    public static String makeSHAPasswd(String raw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
 
         md.reset();
         md.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
+        byte[] salt = {};
         md.update(salt);
 
-        final byte[] pwhash = md.digest();
-        final String ret = Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(pwhash));
-
-        return ret;
+        return Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(md.digest()));
     }
 
 }
