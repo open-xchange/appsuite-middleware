@@ -49,7 +49,6 @@
 
 package com.openexchange.passwordmechs.mechs;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import com.openexchange.java.Charsets;
@@ -60,15 +59,11 @@ public final class SHACrypt {
         super();
     }
 
-    public static String makeSHAPasswd(String raw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-
-        md.reset();
-        md.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
-        byte[] salt = {};
-        md.update(salt);
-
-        return Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(md.digest()));
+    public static String makeSHAPasswd(String raw) throws NoSuchAlgorithmException {
+        final MessageDigest sha = MessageDigest.getInstance("SHA-1");
+        sha.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
+        final byte[] hash = sha.digest();
+        return Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(hash));
     }
 
 }
