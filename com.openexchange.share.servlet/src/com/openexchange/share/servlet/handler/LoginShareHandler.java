@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
@@ -124,19 +125,19 @@ public class LoginShareHandler extends AbstractShareHandler {
     /**
      * Checks if this redirecting share handler fees responsible for passed share
      *
-     * @param request The associated HTTP request
+     * @param share The associated share
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      */
-    protected boolean handles(HttpServletRequest request){
-        String ua = request.getHeader("User-Agent");
-        // Full list of browsers: http://www.useragentstring.com/pages/Browserlist/
-        return null != ua && (ua.startsWith("Mozilla/") || ua.startsWith("Opera/"));
+    protected boolean handles(Share share){
+        AuthenticationMode authentication = share.getAuthentication();
+        return null != authentication &&
+            (AuthenticationMode.ANONYMOUS_PASSWORD == authentication || AuthenticationMode.GUEST_PASSWORD == authentication);
     }
 
     @Override
     public boolean handle(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (false == handles(request)) {
-            // Not a Browser
+        if (false == handles(share)) {
+            // no password prompt required
             return false;
         }
 
@@ -145,24 +146,23 @@ public class LoginShareHandler extends AbstractShareHandler {
             int guestId = share.getGuest();
             String loginPageLink = getLoginPageLink(guestId, contextId, request);
 
-            String mail;
-            {
-                // Special anonymous guests do not have a E-Mail address applied
-                UserService service = ShareServiceLookup.getService(UserService.class);
-                User user = service.getUser(guestId, contextId);
-                mail = user.getMail();
-            }
-
             // Build URL
             StringBuilder url = new StringBuilder(loginPageLink);
 
             // Start fragment portion
             url.append('#').append("share=").append(urlEncode(share.getToken()));
-            if (Strings.isEmpty(mail)) {
+            if (AuthenticationMode.ANONYMOUS_PASSWORD == share.getAuthentication()) {
                 url.append('&').append("login_type=anonymous");
             } else {
                 url.append('&').append("login_type=guest");
-                url.append('&').append("login_name=").append(urlEncode(share.getToken()));
+                String mail;
+                {
+                    // Special anonymous guests do not have a E-Mail address applied
+                    UserService service = ShareServiceLookup.getService(UserService.class);
+                    User user = service.getUser(guestId, contextId);
+                    mail = user.getMail();
+                }
+                url.append('&').append("login_name=").append(urlEncode(mail));
             }
 
             // Do the redirect
