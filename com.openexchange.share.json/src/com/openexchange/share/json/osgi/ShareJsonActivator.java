@@ -111,7 +111,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
         PermissionUpdaters.put(newFolderUpdater(Module.TASK));
 
         registerModule(new ShareActionFactory(this), "share/management");
-        registerService(ResultConverter.class, new GuestShareResultConverter());
+        registerService(ResultConverter.class, new GuestShareResultConverter(this));
     }
 
     private PermissionUpdater newFolderUpdater(final Module module) {
