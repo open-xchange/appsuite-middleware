@@ -79,10 +79,10 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
      */
     public static LoginRequest createGuestLoginRequest(String share, String login, String password, boolean failOnError) {
         return new LoginRequest(new Parameter[] {
-            new Parameter("action", "guest_login"),
-            new Parameter("share", share),
-            new Parameter("login", share),
-            new Parameter("password", share)
+            new URLParameter("action", "guest_login"),
+            new URLParameter("share", share),
+            new FieldParameter("login", share),
+            new FieldParameter("password", share)
         }, failOnError);
     }
 
@@ -96,9 +96,9 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
      */
     public static LoginRequest createAnonymousLoginRequest(String share, String password, boolean failOnError) {
         return new LoginRequest(new Parameter[] {
-            new Parameter("action", "anonymous_login"),
-            new Parameter("share", share),
-            new Parameter("password", share)
+            new URLParameter("action", "anonymous_login"),
+            new FieldParameter("share", share),
+            new FieldParameter("password", share)
         }, failOnError);
     }
 
