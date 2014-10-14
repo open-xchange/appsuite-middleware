@@ -49,6 +49,7 @@
 
 package com.openexchange.share.recipient;
 
+
 /**
  * {@link RecipientType}
  *
@@ -75,5 +76,19 @@ public enum RecipientType {
      * An anonymous external guest
      */
     ANONYMOUS
+    ;
+
+    public static RecipientType of(ShareRecipient recipient) {
+        if (InternalRecipient.class.isInstance(recipient)) {
+            return ((InternalRecipient) recipient).isGroup() ? GROUP : USER;
+        }
+        if (AnonymousRecipient.class.isInstance(recipient)) {
+            return ANONYMOUS;
+        }
+        if (GuestRecipient.class.isInstance(recipient)) {
+            return GUEST;
+        }
+        return null;
+    }
 
 }

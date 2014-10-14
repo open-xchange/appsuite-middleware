@@ -60,9 +60,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.Share;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -110,72 +111,120 @@ public class GuestShareResultConverter implements ResultConverter {
          */
         Object resultObject = result.getResultObject();
         if (GuestShare.class.isInstance(resultObject)) {
-            resultObject = convert((GuestShare)resultObject, timeZone, session);
+            resultObject = convert((GuestShare)resultObject, timeZone);
         } else {
-            resultObject = convert((List<GuestShare>) resultObject, timeZone, session);
+            resultObject = convert((List<GuestShare>) resultObject, timeZone);
         }
         result.setResultObject(resultObject, "json");
     }
 
-    private JSONArray convert(List<GuestShare> shares, TimeZone timeZone, Session session) throws OXException {
+    /**
+     * Serializes multiple guest shares to JSON.
+     *
+     * @param shares The guest shares to serialize
+     * @param timeZone The client timezone
+     * @return The serialized guest shares
+     */
+    private static JSONArray convert(List<GuestShare> shares, TimeZone timeZone) throws OXException {
         JSONArray jsonArray = new JSONArray(shares.size());
         for (GuestShare share : shares) {
-            jsonArray.put(convert(share, timeZone, session));
+            jsonArray.put(convert(share, timeZone));
         }
         return jsonArray;
     }
 
-    private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
-        return null == timeZone ? date : date + timeZone.getOffset(date);
-    }
-
-    private JSONObject convert(GuestShare guestShare, TimeZone timeZone, Session session) throws OXException {
+    /**
+     * Serializes a guest share to JSON.
+     *
+     * @param guestShare The guest share to serialize
+     * @param timeZone The client timezone
+     * @return The serialized guest share
+     */
+    private static JSONObject convert(GuestShare guestShare, TimeZone timeZone) throws OXException {
         try {
             JSONObject json = new JSONObject();
+            /*
+             * common share properties
+             */
             Share share = guestShare.getShare();
             json.putOpt("token", share.getToken());
-            if (0 != share.getModule()) {
-                json.put("module", share.getModule());
-            }
-            json.putOpt("folder", share.getFolder());
-            json.putOpt("item", share.getItem());
-            Date created = share.getCreated();
-            if (null != created) {
-                json.put("created", addTimeZoneOffset(created.getTime(), timeZone));
-            }
-            if (0 != share.getCreatedBy()) {
-                json.put("created_by", share.getCreatedBy());
-            }
-            Date lastModified = share.getLastModified();
-            if (null != lastModified) {
-                json.put("last_modified", addTimeZoneOffset(lastModified.getTime(), timeZone));
-            }
-            if (0 != share.getModifiedBy()) {
-                json.put("modified_by", share.getModifiedBy());
-            }
-            Date activationDate = share.getActivationDate();
-            if (null != activationDate) {
-                json.put("activation_date", share.getActivationDate().getTime());
-            }
-            Date expiryDate = share.getExpiryDate();
-            if (null != expiryDate) {
-                json.put("expiry_date", share.getExpiryDate().getTime());
-            }
-            if (0 != share.getGuest()) {
-                json.put("guest", share.getGuest());
-            }
-            json.put("authentication", share.getAuthentication().toString().toLowerCase());
-            User guest = guestShare.getGuest();
-            if (null != guest) {
-                json.putOpt("guest_mail_address", guest.getMail());
-                json.putOpt("guest_display_name", guest.getDisplayName());
-                json.putOpt("guest_password", guestShare.getGuestPassword());
-            }
             json.putOpt("share_url", guestShare.getShareURL());
+            json.putOpt("authentication", null != share.getAuthentication() ? share.getAuthentication().toString().toLowerCase() : null);
+            json.putOpt("created", null != share.getCreated() ? addTimeZoneOffset(share.getCreated().getTime(), timeZone) : null);
+            json.put("created_by", share.getCreatedBy());
+            json.putOpt("last_modified", null != share.getLastModified() ? addTimeZoneOffset(share.getLastModified().getTime(), timeZone) : null);
+            json.put("modified_by", share.getModifiedBy());
+            /*
+             * share target & recipient
+             */
+            json.put("target", serializeShareTarget(guestShare));
+            json.put("recipient", serializeShareRecipient(guestShare, timeZone));
             return json;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
+    }
+
+    /**
+     * Extracts the share target from a guest share and serializes it to JSON.
+     *
+     * @param guestShare The guest share to serialize the share recipient for
+     * @param timeZone The client timezone
+     * @return The serialized share target
+     * @throws JSONException
+     */
+    private static JSONObject serializeShareTarget(GuestShare guestShare) throws JSONException {
+        JSONObject jsonTarget = new JSONObject(3);
+        Module module = Module.getForFolderConstant(guestShare.getShare().getModule());
+        jsonTarget.putOpt("module", null != module ? module.getName() : null);
+        jsonTarget.putOpt("folder", guestShare.getShare().getFolder());
+        jsonTarget.putOpt("item", guestShare.getShare().getItem());
+        return jsonTarget;
+    }
+
+    /**
+     * Extracts the share recipient from a guest share and serializes it to JSON.
+     *
+     * @param guestShare The guest share to serialize the share recipient for
+     * @param timeZone The client timezone
+     * @return The serialized share recipient
+     */
+    private static JSONObject serializeShareRecipient(GuestShare guestShare, TimeZone timeZone) throws JSONException {
+        JSONObject jsonRecipient = new JSONObject(8);
+        switch (guestShare.getShare().getAuthentication()) {
+        case ANONYMOUS:
+            jsonRecipient.put("type", RecipientType.ANONYMOUS.toString().toLowerCase());
+            break;
+        case ANONYMOUS_PASSWORD:
+            jsonRecipient.put("type", RecipientType.ANONYMOUS.toString().toLowerCase());
+            jsonRecipient.put("password", guestShare.getGuest().getUserPassword());
+            break;
+        case GUEST_PASSWORD:
+            jsonRecipient.put("type", RecipientType.GUEST.toString().toLowerCase());
+            jsonRecipient.put("email_address", guestShare.getGuest().getMail());
+            jsonRecipient.put("display_name", guestShare.getGuest().getDisplayName());
+            if (0 < guestShare.getGuest().getContactId()) {
+                jsonRecipient.put("contact_id", String.valueOf(guestShare.getGuest().getContactId()));
+                jsonRecipient.put("contact_folder", String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID));
+            }
+            break;
+        default:
+            throw new UnsupportedOperationException("Unsupported authentication: " + guestShare.getShare().getAuthentication());
+        }
+        jsonRecipient.put("entity", String.valueOf(guestShare.getGuest().getId()));
+        Date activationDate = guestShare.getShare().getActivationDate();
+        if (null != activationDate) {
+            jsonRecipient.put("activation_date", addTimeZoneOffset(activationDate.getTime(), timeZone));
+        }
+        Date expiryDate = guestShare.getShare().getExpiryDate();
+        if (null != expiryDate) {
+            jsonRecipient.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
+        }
+        return jsonRecipient;
+    }
+
+    private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
+        return null == timeZone ? date : date + timeZone.getOffset(date);
     }
 
 }
