@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage.rdb.osgi;
 
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbContactQuotaProvider;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
@@ -92,7 +93,9 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
         try {
             LOG.info("starting bundle: com.openexchange.contact.storage.rdb");
             RdbServiceLookup.set(this);
-            registerService(ContactStorage.class, new RdbContactStorage());
+            RdbContactStorage service = new RdbContactStorage();
+            registerService(ContactStorage.class, service);
+            registerService(ContactUserStorage.class, service);
             DatabaseService dbService = getService(DatabaseService.class);
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
                 new AddFilenameColumnTask(dbService),

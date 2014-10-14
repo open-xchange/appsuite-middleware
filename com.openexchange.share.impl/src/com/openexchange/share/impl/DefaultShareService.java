@@ -62,8 +62,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
@@ -257,7 +260,7 @@ public class DefaultShareService implements ShareService {
             List<User> guestUsers = new ArrayList<User>(recipients.size());
             List<Share> sharesToCreate = new ArrayList<Share>();
             for (ShareRecipient recipient : recipients) {
-                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, session);
+                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient);
                 guestUsers.add(guestUser);
                 for (ShareTarget target : targets) {
                     List<Share> sharesPerTarget = shares.get(target);
@@ -540,8 +543,9 @@ public class DefaultShareService implements ShareService {
      * @return The guest user
      * @throws OXException
      */
-    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, Session session) throws OXException {
+    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
         UserService userService = services.getService(UserService.class);
+        ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
         if (GuestRecipient.class.isInstance(recipient) && services.getService(
             ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", true)) {
             /*
@@ -579,7 +583,14 @@ public class DefaultShareService implements ShareService {
             throw new UnsupportedOperationException("unsupported share recipient: " + recipient);
         }
         int guestID = userService.createUser(connection, context, guestUser);
+        Contact contact = new Contact();
+        contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        contact.setCreatedBy(sharingUser.getId());
+        contact.setInternalUserId(guestID);
+        int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
         guestUser.setId(guestID);
+        guestUser.setContactId(contactId);
+        userService.updateUser(guestUser, context);
         services.getService(UserPermissionService.class).saveUserPermissionBits(
             connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
         if (AnonymousRecipient.class.isInstance(recipient)) {
@@ -607,6 +618,7 @@ public class DefaultShareService implements ShareService {
         }
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         UserService userService = services.getService(UserService.class);
+        ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
         Context context = userService.getContext(contextID);
         /*
          * check which guest users can be deleted
@@ -626,6 +638,12 @@ public class DefaultShareService implements ShareService {
                  */
                 services.getService(UserPermissionService.class).deleteUserPermissionBits(
                     connectionHelper.getConnection(), context, guestID);
+
+                /*
+                 * delete guest contacts
+                 */
+                User guest = userService.getUser(guestID, contextID);
+                contactUserStorage.deleteGuestContact(contextID, guest.getContactId(), new Date(), connectionHelper.getConnection());
                 userService.deleteUser(connectionHelper.getConnection(), context, guestID);
                 LOG.info("Deleted {} guest user(s) in context {}: {}", guestIDs.length, contextID, Arrays.toString(guestIDs));
                 deletedGuestIDs.add(I(guestID));

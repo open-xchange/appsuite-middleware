@@ -57,9 +57,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -91,10 +91,12 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorage extends DefaultContactStorage {
+public class RdbContactStorage extends DefaultContactStorage implements ContactUserStorage {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactStorage.class);
+
     private static boolean PREFETCH_ATTACHMENT_INFO = true;
+
     private static int DELETE_CHUNK_SIZE = 50;
 
     private final Executor executor;
@@ -129,8 +131,8 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = FolderObject.SYSTEM_LDAP_FOLDER_ID == folderID ?
-                new QueryFields(fields, ContactField.INTERNAL_USERID) : new QueryFields(fields);
+            QueryFields queryFields = FolderObject.SYSTEM_LDAP_FOLDER_ID == folderID ? new QueryFields(fields, ContactField.INTERNAL_USERID) : new QueryFields(
+                fields);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -156,13 +158,12 @@ public class RdbContactStorage extends DefaultContactStorage {
              * merge distribution list data if needed
              */
             if (queryFields.hasDistListData() && 0 < contact.getNumberOfDistributionLists()) {
-                contact.setDistributionList(executor.select(connection, Table.DISTLIST, contextID, objectID,
-                        Fields.DISTLIST_DATABASE_ARRAY));
+                contact.setDistributionList(executor.select(connection, Table.DISTLIST, contextID, objectID, Fields.DISTLIST_DATABASE_ARRAY));
             }
             /*
              * add attachment information in advance if needed
              */
-            //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+            // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
             if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData() && 0 < contact.getNumberOfAttachments()) {
                 contact.setLastModifiedOfNewestAttachment(executor.selectNewestAttachmentDate(connection, contextID, objectID));
             }
@@ -186,9 +187,14 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(parse(folderId), false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
+                serverSession.getUserId(),
+                serverSession.getUserPermissionBits(),
+                connection);
             if (false == permission.canCreateObjects()) {
-                throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(Integer.valueOf(parse(folderId)), Integer.valueOf(contextID), Integer.valueOf(serverSession.getUserId()));
+                throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(
+                    Integer.valueOf(parse(folderId)),
+                    Integer.valueOf(contextID),
+                    Integer.valueOf(serverSession.getUserId()));
             }
             /*
              * check quota restrictions
@@ -255,7 +261,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
+                serverSession.getUserId(),
+                serverSession.getUserPermissionBits(),
+                connection);
             if (false == permission.canDeleteOwnObjects()) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderId), session.getContextId(), serverSession.getUserId());
             }
@@ -292,8 +300,16 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get a list of object IDs to delete
              */
-            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE,
-                new ContactField[] { ContactField.OBJECT_ID }, null, null);
+            List<Contact> contacts = executor.select(
+                connection,
+                Table.CONTACTS,
+                contextID,
+                folderID,
+                null,
+                Integer.MIN_VALUE,
+                new ContactField[] { ContactField.OBJECT_ID },
+                null,
+                null);
             if (null == contacts || 0 == contacts.size()) {
                 return; // nothing to do
             }
@@ -302,7 +318,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
+                serverSession.getUserId(),
+                serverSession.getUserPermissionBits(),
+                connection);
             if (false == permission.canDeleteOwnObjects()) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, contextID, serverSession.getUserId());
             }
@@ -342,7 +360,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
+                serverSession.getUserId(),
+                serverSession.getUserPermissionBits(),
+                connection);
             if (false == permission.canDeleteOwnObjects()) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, session.getContextId(), serverSession.getUserId());
             }
@@ -380,29 +400,36 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
                 // move
-                FolderObject sourceFolder = new OXFolderAccess(
-                    connection, serverSession.getContext()).getFolderObject(parse(folderId), false);
+                FolderObject sourceFolder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(
+                    parse(folderId),
+                    false);
                 EffectivePermission sourcePermission = sourceFolder.getEffectiveUserPermission(
-                    serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
+                    serverSession.getUserId(),
+                    serverSession.getUserConfiguration(),
+                    connection);
                 if (false == sourcePermission.canReadOwnObjects()) {
                     throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderId), contextID, session.getUserId());
                 }
-                FolderObject targetFolder = new OXFolderAccess(
-                    connection, serverSession.getContext()).getFolderObject(contact.getParentFolderID(), false);
+                FolderObject targetFolder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(
+                    contact.getParentFolderID(),
+                    false);
                 EffectivePermission targetPermission = targetFolder.getEffectiveUserPermission(
-                    serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
+                    serverSession.getUserId(),
+                    serverSession.getUserConfiguration(),
+                    connection);
                 if (false == targetPermission.canWriteOwnObjects()) {
                     throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contact.getObjectID(), contextID);
                 }
             } else if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderId)) {
-                if (false == OXFolderProperties.isEnableInternalUsersEdit() &&
-                    session.getUserId() != serverSession.getContext().getMailadmin()) {
+                if (false == OXFolderProperties.isEnableInternalUsersEdit() && session.getUserId() != serverSession.getContext().getMailadmin()) {
                     throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(id), contextID);
                 }
             } else {
                 FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(parse(folderId), false);
                 EffectivePermission permission = folder.getEffectiveUserPermission(
-                    serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
+                    serverSession.getUserId(),
+                    serverSession.getUserConfiguration(),
+                    connection);
                 if (false == permission.canWriteOwnObjects()) {
                     throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(id), contextID);
                 }
@@ -420,9 +447,14 @@ public class RdbContactStorage extends DefaultContactStorage {
                 Contact update = new Contact();
                 update.setLastModified(new Date());
                 update.setModifiedBy(userID);
-                if (0 == executor.replaceToDeletedContactsAndUpdate(connection, contextID, Integer.MIN_VALUE,
-                    new int[] { objectID }, maxLastModified, update, new ContactField[] {
-                    ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED })) {
+                if (0 == executor.replaceToDeletedContactsAndUpdate(
+                    connection,
+                    contextID,
+                    Integer.MIN_VALUE,
+                    new int[] { objectID },
+                    maxLastModified,
+                    update,
+                    new ContactField[] { ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED })) {
                     throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
                 }
             }
@@ -436,11 +468,21 @@ public class RdbContactStorage extends DefaultContactStorage {
                     // delete previous image if exists
                     executor.deleteSingle(connection, Table.IMAGES, contextID, objectID, maxLastModified);
                 } else {
-                    if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] {
-                            ContactField.OBJECT_ID })) {
+                    if (null != executor.selectSingle(
+                        connection,
+                        Table.IMAGES,
+                        contextID,
+                        objectID,
+                        new ContactField[] { ContactField.OBJECT_ID })) {
                         // update previous image
-                        if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, maxLastModified, contact,
-                                queryFields.getImageDataFields(true))) {
+                        if (0 == executor.update(
+                            connection,
+                            Table.IMAGES,
+                            contextID,
+                            objectID,
+                            maxLastModified,
+                            contact,
+                            queryFields.getImageDataFields(true))) {
                             throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
                         }
                     } else {
@@ -458,16 +500,22 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * update contact data
              */
-            if (0 == executor.update(connection, Table.CONTACTS, contextID, objectID, maxLastModified, contact,
-                    Fields.sort(queryFields.getContactDataFields()))) {
-                //TODO: check imagelastmodified also?
+            if (0 == executor.update(
+                connection,
+                Table.CONTACTS,
+                contextID,
+                objectID,
+                maxLastModified,
+                contact,
+                Fields.sort(queryFields.getContactDataFields()))) {
+                // TODO: check imagelastmodified also?
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
             }
             /*
              * update distlist data if needed
              */
             if (queryFields.hasDistListData()) {
-                //TODO: this is lazy compared to the old implementation
+                // TODO: this is lazy compared to the old implementation
                 // delete any previous entries
                 executor.deleteSingle(connection, Table.DISTLIST, contextID, objectID);
                 if (0 < contact.getNumberOfDistributionLists() && null != contact.getDistributionList()) {
@@ -520,8 +568,12 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             List<Integer> affectedDistributionLists = new ArrayList<Integer>();
             List<DistListMember> referencedMembers = executor.select(
-                connectionHelper.getReadOnly(), Table.DISTLIST, contextID, originalContact.getObjectID(),
-                originalContact.getParentFolderID(), DistListMemberField.values());
+                connectionHelper.getReadOnly(),
+                Table.DISTLIST,
+                contextID,
+                originalContact.getObjectID(),
+                originalContact.getParentFolderID(),
+                DistListMemberField.values());
             if (null != referencedMembers && 0 < referencedMembers.size()) {
                 for (DistListMember member : referencedMembers) {
                     DistListMemberField[] updatedFields = Tools.updateMember(member, updatedContact);
@@ -540,8 +592,14 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             if (0 < affectedDistributionLists.size()) {
                 for (Integer distListID : affectedDistributionLists) {
-                    executor.update(connectionHelper.getWritable(), Table.CONTACTS, contextID, distListID.intValue(), Long.MIN_VALUE,
-                        updatedContact, new ContactField[] { ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY });
+                    executor.update(
+                        connectionHelper.getWritable(),
+                        Table.CONTACTS,
+                        contextID,
+                        distListID.intValue(),
+                        Long.MIN_VALUE,
+                        updatedContact,
+                        new ContactField[] { ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY });
                 }
             }
             /*
@@ -637,7 +695,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              * check fields
              */
             ContactField[] mandatoryFields = com.openexchange.tools.arrays.Arrays.add(
-                Tools.getRequiredFields(sortOptions), ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+                Tools.getRequiredFields(sortOptions),
+                ContactField.OBJECT_ID,
+                ContactField.INTERNAL_USERID);
             QueryFields queryFields = new QueryFields(fields, mandatoryFields);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
@@ -645,8 +705,14 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */
-            List<Contact> contacts = executor.selectByAutoComplete(connection, contextID, parentFolderIDs, query, parameters,
-                queryFields.getContactDataFields(), sortOptions);
+            List<Contact> contacts = executor.selectByAutoComplete(
+                connection,
+                contextID,
+                parentFolderIDs,
+                query,
+                parameters,
+                queryFields.getContactDataFields(),
+                sortOptions);
             if (null != contacts && 0 < contacts.size()) {
                 /*
                  * merge image data if needed
@@ -663,7 +729,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                 /*
                  * merge attachment information in advance if needed
                  */
-                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
                 if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                     contacts = mergeAttachmentData(connection, contextID, contacts);
                 }
@@ -695,8 +761,15 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */
-            List<Contact> contacts = executor.selectByAnnualDate(connection, contextID, parentFolderIDs, from, until,
-                queryFields.getContactDataFields(), sortOptions, dateField);
+            List<Contact> contacts = executor.selectByAnnualDate(
+                connection,
+                contextID,
+                parentFolderIDs,
+                from,
+                until,
+                queryFields.getContactDataFields(),
+                sortOptions,
+                dateField);
             if (null != contacts && 0 < contacts.size()) {
                 /*
                  * merge image data if needed
@@ -713,7 +786,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                 /*
                  * merge attachment information in advance if needed
                  */
-                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
                 if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                     contacts = mergeAttachmentData(connection, contextID, contacts);
                 }
@@ -740,8 +813,7 @@ public class RdbContactStorage extends DefaultContactStorage {
      * @return the contacts
      * @throws OXException
      */
-    private <O> SearchIterator<Contact> getContacts(boolean deleted, Session session, String folderID, String[] ids, Date since,
-            ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
+    private <O> SearchIterator<Contact> getContacts(boolean deleted, Session session, String folderID, String[] ids, Date since, ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
         /*
          * prepare select
          */
@@ -755,8 +827,10 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = FolderObject.SYSTEM_LDAP_FOLDER_ID == parentFolderID ? new QueryFields(fields,
-                ContactField.OBJECT_ID, ContactField.INTERNAL_USERID) : new QueryFields(fields, ContactField.OBJECT_ID);
+            QueryFields queryFields = FolderObject.SYSTEM_LDAP_FOLDER_ID == parentFolderID ? new QueryFields(
+                fields,
+                ContactField.OBJECT_ID,
+                ContactField.INTERNAL_USERID) : new QueryFields(fields, ContactField.OBJECT_ID);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -775,18 +849,38 @@ public class RdbContactStorage extends DefaultContactStorage {
                         availableFields.add(requestedField);
                     }
                 }
-                contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, objectIDs, minLastModified,
-                    availableFields.toArray(new ContactField[availableFields.size()]), term, sortOptions);
+                contacts = executor.select(
+                    connection,
+                    Table.DELETED_CONTACTS,
+                    contextID,
+                    parentFolderID,
+                    objectIDs,
+                    minLastModified,
+                    availableFields.toArray(new ContactField[availableFields.size()]),
+                    term,
+                    sortOptions);
             } else {
-                contacts = executor.select(connection, deleted ? Table.DELETED_CONTACTS : Table.CONTACTS, contextID,
-                    parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions);
+                contacts = executor.select(
+                    connection,
+                    deleted ? Table.DELETED_CONTACTS : Table.CONTACTS,
+                    contextID,
+                    parentFolderID,
+                    objectIDs,
+                    minLastModified,
+                    queryFields.getContactDataFields(),
+                    term,
+                    sortOptions);
                 if (null != contacts && 0 < contacts.size()) {
                     /*
                      * merge image data if needed
                      */
                     if (queryFields.hasImageData()) {
-                        contacts = mergeImageData(connection, deleted ? Table.DELETED_IMAGES : Table.IMAGES, contextID, contacts,
-                                queryFields.getImageDataFields());
+                        contacts = mergeImageData(
+                            connection,
+                            deleted ? Table.DELETED_IMAGES : Table.IMAGES,
+                            contextID,
+                            contacts,
+                            queryFields.getImageDataFields());
                     }
                     /*
                      * merge distribution list data if needed
@@ -797,7 +891,8 @@ public class RdbContactStorage extends DefaultContactStorage {
                     /*
                      * merge attachment information in advance if needed
                      */
-                    //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                    // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same
+                    // database
                     if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                         contacts = mergeAttachmentData(connection, contextID, contacts);
                     }
@@ -814,8 +909,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         }
     }
 
-    private <O> SearchIterator<Contact> getContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields,
-            SortOptions sortOptions) throws OXException {
+    private <O> SearchIterator<Contact> getContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
         /*
          * prepare select
          */
@@ -827,7 +921,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              * check fields
              */
             ContactField[] mandatoryFields = com.openexchange.tools.arrays.Arrays.add(
-                Tools.getRequiredFields(sortOptions), ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+                Tools.getRequiredFields(sortOptions),
+                ContactField.OBJECT_ID,
+                ContactField.INTERNAL_USERID);
             QueryFields queryFields = new QueryFields(fields, mandatoryFields);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
@@ -835,15 +931,19 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */
-            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, contactSearch,
-                    queryFields.getContactDataFields(), sortOptions);
+            List<Contact> contacts = executor.select(
+                connection,
+                Table.CONTACTS,
+                contextID,
+                contactSearch,
+                queryFields.getContactDataFields(),
+                sortOptions);
             if (null != contacts && 0 < contacts.size()) {
                 /*
                  * merge image data if needed
                  */
                 if (queryFields.hasImageData()) {
-                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts,
-                            queryFields.getImageDataFields());
+                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
                 }
                 /*
                  * merge distribution list data if needed
@@ -854,7 +954,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                 /*
                  * merge attachment information in advance if needed
                  */
-                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
                 if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                     contacts = mergeAttachmentData(connection, contextID, contacts);
                 }
@@ -890,8 +990,14 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * insert copied records to 'deleted' contact-table with updated metadata
              */
-            executor.replaceToDeletedContactsAndUpdate(connection, contextID, folderID, currentObjectIDs, maxLastModified,
-                updatedMetadata, updatedFields);
+            executor.replaceToDeletedContactsAndUpdate(
+                connection,
+                contextID,
+                folderID,
+                currentObjectIDs,
+                maxLastModified,
+                updatedMetadata,
+                updatedFields);
             /*
              * delete records in original tables
              */
@@ -905,7 +1011,12 @@ public class RdbContactStorage extends DefaultContactStorage {
     private List<Contact> mergeDistListData(Connection connection, Table table, int contextID, List<Contact> contacts) throws SQLException, OXException {
         int[] objectIDs = getObjectIDsWithDistLists(contacts);
         if (null != objectIDs && 0 < objectIDs.length) {
-            Map<Integer, List<DistListMember>> distListData = executor.select(connection, table, contextID, objectIDs, Fields.DISTLIST_DATABASE_ARRAY);
+            Map<Integer, List<DistListMember>> distListData = executor.select(
+                connection,
+                table,
+                contextID,
+                objectIDs,
+                Fields.DISTLIST_DATABASE_ARRAY);
             for (Contact contact : contacts) {
                 List<DistListMember> distList = distListData.get(Integer.valueOf(contact.getObjectID()));
                 if (null != distList) {
@@ -930,11 +1041,19 @@ public class RdbContactStorage extends DefaultContactStorage {
         return contacts;
     }
 
-    private List<Contact> mergeImageData(Connection connection, Table table, int contextID, List<Contact> contacts,
-            ContactField[] fields) throws SQLException, OXException {
+    private List<Contact> mergeImageData(Connection connection, Table table, int contextID, List<Contact> contacts, ContactField[] fields) throws SQLException, OXException {
         int[] objectIDs = getObjectIDsWithImages(contacts);
         if (null != objectIDs && 0 < objectIDs.length) {
-            List<Contact> imagaDataList = executor.select(connection, table, contextID, Integer.MIN_VALUE, objectIDs, Long.MIN_VALUE, fields, null, null);
+            List<Contact> imagaDataList = executor.select(
+                connection,
+                table,
+                contextID,
+                Integer.MIN_VALUE,
+                objectIDs,
+                Long.MIN_VALUE,
+                fields,
+                null,
+                null);
             if (null != imagaDataList && 0 < imagaDataList.size()) {
                 return mergeByID(contacts, imagaDataList);
             }
@@ -1001,6 +1120,72 @@ public class RdbContactStorage extends DefaultContactStorage {
             objectIDs[i++] = contact.getObjectID();
         }
         return Arrays.copyOf(objectIDs, i);
+    }
+
+    @Override
+    public int createGuestContact(int contextId, Contact contact, Connection con) throws OXException {
+        boolean newCon = false;
+        if (null == con) {
+            newCon = true;
+            //
+        }
+        int objectId = -1;
+        try {
+            objectId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.CONTACT, con);
+            contact.setObjectID(objectId);
+            Date now = new Date();
+            contact.setLastModified(now);
+            contact.setCreationDate(now);
+            contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+            contact.setContextId(contextId);
+            /*
+             * insert image data if needed
+             */
+            if (contact.containsImage1() && null != contact.getImage1()) {
+                contact.setImageLastModified(now);
+                this.executor.insert(con, Table.IMAGES, contact, Fields.IMAGE_DATABASE_ARRAY);
+            }
+            /*
+             * insert contact
+             */
+            this.executor.insert(con, Table.CONTACTS, contact, Fields.CONTACT_DATABASE_ARRAY);
+        } catch (SQLException e) {
+            DBUtils.rollback(con);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } catch (OXException e) {
+            DBUtils.rollback(con);
+            throw e;
+        } finally {
+            if (newCon) {
+                //
+            }
+        }
+        return objectId;
+    }
+
+    @Override
+    public void deleteGuestContact(int contextId, int contactId, Date lastRead, Connection con) throws OXException {
+        boolean newCon = false;
+        if (null == con) {
+            newCon = true;
+            //
+        }
+        int[] contactIds = new int[] { contactId };
+        try {
+            executor.delete(con, Table.CONTACTS, contextId, FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID, contactIds, lastRead.getTime());
+            executor.delete(con, Table.IMAGES, contextId, Integer.MIN_VALUE, contactIds, lastRead.getTime());
+            executor.delete(con, Table.DISTLIST, contextId, Integer.MIN_VALUE, contactIds);
+        } catch (SQLException e) {
+            DBUtils.rollback(con);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } catch (OXException e) {
+            DBUtils.rollback(con);
+            throw e;
+        } finally {
+            if (newCon) {
+                //
+            }
+        }
     }
 
 }
