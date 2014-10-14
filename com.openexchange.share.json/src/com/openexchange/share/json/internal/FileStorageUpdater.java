@@ -133,7 +133,7 @@ public class FileStorageUpdater extends AbstractUpdater {
         List<FileStorageObjectPermission> newPermissions = new ArrayList<FileStorageObjectPermission>(origPermissions.size() + finalRecipients.size());
         if (origPermissions.isEmpty()) {
             for (InternalRecipient recipient : finalRecipients) {
-                newPermissions.add(new DefaultFileStorageObjectPermission(recipient.getEntity(), recipient.isGroup(), recipient.getBits()));
+                newPermissions.add(new DefaultFileStorageObjectPermission(recipient.getEntity(), recipient.isGroup(), getObjectPermissionBits(recipient.getBits())));
             }
         } else {
             Map<Integer, FileStorageObjectPermission> permissionsByEntity = new HashMap<Integer, FileStorageObjectPermission>();

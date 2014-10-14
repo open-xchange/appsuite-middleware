@@ -55,11 +55,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareTarget;
@@ -109,7 +112,7 @@ public abstract class AbstractUpdater implements PermissionUpdater {
 
         if (origPermissions == null || origPermissions.length == 0) {
             for (InternalRecipient recipient : finalRecipients) {
-                newPermissions.add(new FolderPermission(recipient.getEntity(), recipient.isGroup(), recipient.getBits()));
+                newPermissions.add(new DefaultPermission(recipient.getEntity(), recipient.isGroup(), recipient.getBits()));
             }
         } else {
             Map<Integer, Permission> permissionsByEntity = new HashMap<Integer, Permission>();
@@ -119,7 +122,7 @@ public abstract class AbstractUpdater implements PermissionUpdater {
 
             for (InternalRecipient recipient : finalRecipients) {
                 permissionsByEntity.remove(recipient.getEntity());
-                newPermissions.add(new FolderPermission(recipient.getEntity(), recipient.isGroup(), recipient.getBits()));
+                newPermissions.add(new DefaultPermission(recipient.getEntity(), recipient.isGroup(), recipient.getBits()));
             }
 
             for (Permission permission : permissionsByEntity.values()) {
@@ -130,6 +133,28 @@ public abstract class AbstractUpdater implements PermissionUpdater {
         folder.setPermissions(newPermissions.toArray(new Permission[newPermissions.size()]));
     }
 
+    /**
+     * Takes a folder permission bit mask and deduces the according object permissions.
+     *
+     * @param folderPermissionBits The folder permission bit mask
+     * @return The object permission bits
+     */
+    protected int getObjectPermissionBits(int folderPermissionBits) {
+        int objectBits = ObjectPermission.NONE;
+        int[] permissionBits = Permissions.parsePermissionBits(folderPermissionBits);
+        int rp = permissionBits[1];
+        int wp = permissionBits[2];
+        int dp = permissionBits[3];
+        if (dp >= Permission.DELETE_ALL_OBJECTS) {
+            objectBits = ObjectPermission.DELETE;
+        } else if (wp >= Permission.WRITE_ALL_OBJECTS) {
+            objectBits = ObjectPermission.WRITE;
+        } else if (rp >= Permission.READ_ALL_OBJECTS) {
+            objectBits = ObjectPermission.READ;
+        }
+
+        return objectBits;
+    }
 
     protected FolderService getFolderService() throws OXException {
         return getService(FolderService.class);
@@ -142,245 +167,6 @@ public abstract class AbstractUpdater implements PermissionUpdater {
         }
 
         return service;
-    }
-
-    private static final class FolderPermission implements Permission {
-
-        private static final long serialVersionUID = -9031199262579165853L;
-
-        private int system;
-
-        private int deletePermission;
-
-        private int folderPermission;
-
-        private int readPermission;
-
-        private int writePermission;
-
-        private boolean admin;
-
-        private int entity = -1;
-
-        private boolean group;
-
-        /**
-         * Initializes an empty {@link FolderPermission}.
-         */
-        public FolderPermission(int entity, boolean isGroup, int bits) {
-            super();
-            this.entity = entity;
-            this.group = isGroup;
-            int[] permissions = parsePermissionBits(bits);
-            folderPermission = permissions[0];
-            readPermission = permissions[1];
-            writePermission = permissions[2];
-            deletePermission = permissions[3];
-            admin = permissions[4] > 0;
-        }
-
-        @Override
-        public boolean isVisible() {
-            return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
-        }
-
-        @Override
-        public int getDeletePermission() {
-            return deletePermission;
-        }
-
-        @Override
-        public int getEntity() {
-            return entity;
-        }
-
-        @Override
-        public int getFolderPermission() {
-            return folderPermission;
-        }
-
-        @Override
-        public int getReadPermission() {
-            return readPermission;
-        }
-
-        @Override
-        public int getSystem() {
-            return system;
-        }
-
-        @Override
-        public int getWritePermission() {
-            return writePermission;
-        }
-
-        @Override
-        public boolean isAdmin() {
-            return admin;
-        }
-
-        @Override
-        public boolean isGroup() {
-            return group;
-        }
-
-        @Override
-        public void setAdmin(final boolean admin) {
-            this.admin = admin;
-        }
-
-        @Override
-        public void setAllPermissions(final int folderPermission, final int readPermission, final int writePermission, final int deletePermission) {
-            this.folderPermission = folderPermission;
-            this.readPermission = readPermission;
-            this.deletePermission = deletePermission;
-            this.writePermission = writePermission;
-        }
-
-        @Override
-        public void setDeletePermission(final int permission) {
-            deletePermission = permission;
-        }
-
-        @Override
-        public void setEntity(final int entity) {
-            this.entity = entity;
-        }
-
-        @Override
-        public void setFolderPermission(final int permission) {
-            folderPermission = permission;
-        }
-
-        @Override
-        public void setGroup(final boolean group) {
-            this.group = group;
-        }
-
-        @Override
-        public void setMaxPermissions() {
-            folderPermission = Permission.MAX_PERMISSION;
-            readPermission = Permission.MAX_PERMISSION;
-            deletePermission = Permission.MAX_PERMISSION;
-            writePermission = Permission.MAX_PERMISSION;
-            admin = true;
-        }
-
-        @Override
-        public void setNoPermissions() {
-            folderPermission = Permission.NO_PERMISSIONS;
-            readPermission = Permission.NO_PERMISSIONS;
-            deletePermission = Permission.NO_PERMISSIONS;
-            writePermission = Permission.NO_PERMISSIONS;
-            admin = false;
-        }
-
-        @Override
-        public void setReadPermission(final int permission) {
-            readPermission = permission;
-        }
-
-        @Override
-        public void setSystem(final int system) {
-            this.system = system;
-        }
-
-        @Override
-        public void setWritePermission(final int permission) {
-            writePermission = permission;
-        }
-
-        @Override
-        public Object clone() {
-            try {
-                return super.clone();
-            } catch (final CloneNotSupportedException e) {
-                throw new InternalError(e.getMessage());
-            }
-        }
-
-      @Override
-      public int hashCode() {
-          final int prime = 31;
-          int result = 1;
-          result = prime * result + (admin ? 1231 : 1237);
-          result = prime * result + deletePermission;
-          result = prime * result + entity;
-          result = prime * result + folderPermission;
-          result = prime * result + (group ? 1231 : 1237);
-          result = prime * result + readPermission;
-          result = prime * result + system;
-          result = prime * result + writePermission;
-          return result;
-      }
-
-      @Override
-      public boolean equals(final Object obj) {
-          if (this == obj) {
-              return true;
-          }
-          if (obj == null) {
-              return false;
-          }
-
-          if (!(obj instanceof Permission)) {
-              return false;
-          }
-
-          final Permission other = (Permission) obj;
-          if (admin != other.isAdmin()) {
-              return false;
-          }
-          if (deletePermission != other.getDeletePermission()) {
-              return false;
-          }
-          if (entity != other.getEntity()) {
-              return false;
-          }
-          if (folderPermission != other.getFolderPermission()) {
-              return false;
-          }
-          if (group != other.isGroup()) {
-              return false;
-          }
-          if (readPermission != other.getReadPermission()) {
-              return false;
-          }
-          if (system != other.getSystem()) {
-              return false;
-          }
-          if (writePermission != other.getWritePermission()) {
-              return false;
-          }
-
-          return true;
-      }
-
-      private static final int[] mapping = { 0, 2, 4, -1, 8 };
-
-      /**
-       * The actual max permission that can be transfered in field 'bits' or JSON's permission object
-       */
-      private static final int MAX_PERMISSION = 64;
-
-      private static final int[] parsePermissionBits(final int bitsArg) {
-          int bits = bitsArg;
-          final int[] retval = new int[5];
-          for (int i = retval.length - 1; i >= 0; i--) {
-              final int shiftVal = (i * 7); // Number of bits to be shifted
-              retval[i] = bits >> shiftVal;
-              bits -= (retval[i] << shiftVal);
-              if (retval[i] == MAX_PERMISSION) {
-                  retval[i] = Permission.MAX_PERMISSION;
-              } else if (i < (retval.length - 1)) {
-                  retval[i] = mapping[retval[i]];
-              } else {
-                  retval[i] = retval[i];
-              }
-          }
-          return retval;
-      }
-
     }
 
 }
