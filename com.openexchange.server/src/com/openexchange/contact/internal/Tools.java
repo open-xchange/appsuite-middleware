@@ -165,6 +165,10 @@ public final class Tools {
         return storage;
 	}
 
+	public static List<ContactStorage> getStorages() throws OXException {
+	    return ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorages(null);
+	}
+
 	/**
 	 * Gets all contact storages.
 	 *

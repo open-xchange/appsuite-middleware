@@ -50,7 +50,6 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -60,7 +59,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;

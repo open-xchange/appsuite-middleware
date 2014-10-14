@@ -452,7 +452,7 @@ public interface ContactService {
      * @param sortOptions The options to sort the results
      * @return The contacts found with the search
      * @throws OXException
-     * 
+     *
      * @see {@link AutocompleteParameters#newInstance()}
      */
     SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
