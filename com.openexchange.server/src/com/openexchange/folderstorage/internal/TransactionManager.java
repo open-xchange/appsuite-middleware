@@ -159,6 +159,7 @@ public class TransactionManager {
             Object connectionProperty = decorator.getProperty(Connection.class.getName());
             try {
                 if (connectionProperty != null && connectionProperty instanceof Connection && !((Connection) connectionProperty).isReadOnly()) {
+                    connection = (Connection) connectionProperty;
                     ConnectionMode connectionMode = new ConnectionMode(new ResilientConnection((Connection) connectionProperty), Mode.WRITE);
                     storageParameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, connectionMode);
                     ownsConnection = false;
