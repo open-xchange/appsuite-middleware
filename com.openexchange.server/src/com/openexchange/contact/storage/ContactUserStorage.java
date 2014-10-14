@@ -59,12 +59,28 @@ import com.openexchange.groupware.container.Contact;
  * {@link ContactUserStorage}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.1
+ * @since v7.8
  */
 public interface ContactUserStorage extends ContactStorage {
 
+    /**
+     * Creates a contact for a guest user
+     * @param contextId The context id
+     * @param contact The contact
+     * @param con Database connection
+     * @return Id of created contact
+     * @throws OXException On error
+     */
     int createGuestContact(int contextId, Contact contact, Connection con) throws OXException;
 
+    /**
+     * Deletes a contact for a guest user
+     * @param contextId The context id
+     * @param contactId The contact id
+     * @param lastRead Time when the contact was last read from storage
+     * @param con Database connection
+     * @throws OXException On error
+     */
     void deleteGuestContact(int contextId, int contactId, Date lastRead, Connection con) throws OXException;
 
 }
