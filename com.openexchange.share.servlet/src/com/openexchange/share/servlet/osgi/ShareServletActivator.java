@@ -49,9 +49,6 @@
 
 package com.openexchange.share.servlet.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.osgi.AbstractServletActivator;
 import com.openexchange.config.ConfigurationService;
@@ -108,15 +105,11 @@ public class ShareServletActivator extends AbstractServletActivator {
          */
         {
             ShareHandler handler = new RedirectingShareHandler();
-            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-            props.put(Constants.SERVICE_RANKING, Integer.valueOf(handler.getRanking()));
-            registerService(ShareHandler.class, handler);
+            registerService(ShareHandler.class, handler, handler.getRanking());
         }
         {
             ShareHandler handler = new LoginShareHandler();
-            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-            props.put(Constants.SERVICE_RANKING, Integer.valueOf(handler.getRanking()));
-            registerService(ShareHandler.class, handler);
+            registerService(ShareHandler.class, handler, handler.getRanking());
         }
         /*
          * Register Servlet
