@@ -88,9 +88,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
         createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
-        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
-        createAnonymousAuthorPermission("secret"),
-        createAnonymousGuestPermission()
+//        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
+//        createAnonymousAuthorPermission("secret"),
+//        createAnonymousGuestPermission()
     };
 
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };

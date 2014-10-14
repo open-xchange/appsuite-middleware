@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.share.actions;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
+import junitx.framework.Assert;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.java.Strings;
 
@@ -87,7 +90,15 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     }
 
     public String getLoginName() {
-        return parameters.get("login_name");
+        String name = parameters.get("login_name");
+        if (null != name) {
+            try {
+                return URLDecoder.decode(name, "ISO-8859-1");
+            } catch (UnsupportedEncodingException e) {
+                Assert.fail(e);
+            }
+        }
+        return name;
     }
 
     public String getPath() {
