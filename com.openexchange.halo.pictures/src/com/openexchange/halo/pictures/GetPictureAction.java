@@ -147,8 +147,7 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
         }
 
         if (req.isSet("id") && !hadCriterium) {
-            String sId = req.getParameter("id");
-            int id = Strings.parsePositiveInt(sId);
+            int id = Strings.parsePositiveInt(req.getParameter("id"));
             if (id > 0) {
                 contact.setObjectID(req.getIntParameter("id"));
             }
