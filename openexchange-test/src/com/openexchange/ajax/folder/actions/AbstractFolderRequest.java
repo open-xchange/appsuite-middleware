@@ -55,12 +55,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Folder;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.folder.json.FolderField;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.OCLPermission;
@@ -114,7 +114,7 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
                 jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
                 jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
             }
-            jsonPermission.put(FolderFields.BITS, FolderTest.createPermissionBits(
+            jsonPermission.put(FolderFields.BITS, Permissions.createPermissionBits(
                 perm.getFolderPermission(),
                 perm.getReadPermission(),
                 perm.getWritePermission(),

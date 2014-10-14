@@ -53,7 +53,6 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Closeable;
 import java.text.MessageFormat;
@@ -85,6 +84,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
@@ -417,7 +417,7 @@ public final class FolderWriter {
                     final Permission obj = folder.getOwnPermission();
                     jsonPutter.put(
                         FolderField.OWN_RIGHTS.getName(),
-                        null == obj ? JSONObject.NULL : Integer.valueOf(createPermissionBits(
+                        null == obj ? JSONObject.NULL : Integer.valueOf(Permissions.createPermissionBits(
                             obj.getFolderPermission(),
                             obj.getReadPermission(),
                             obj.getWritePermission(),
@@ -441,7 +441,7 @@ public final class FolderWriter {
                         ja = new JSONArray();
                         for (final Permission permission : obj) {
                             final JSONObject jo = new JSONObject();
-                            jo.put(FolderField.BITS.getName(), createPermissionBits(permission));
+                            jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
                             jo.put(FolderField.ENTITY.getName(), permission.getEntity());
                             jo.put(FolderField.GROUP.getName(), permission.isGroup());
                             ja.put(jo);
@@ -772,42 +772,6 @@ public final class FolderWriter {
         return pw;
     }
 
-    /**
-     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
-     */
-    private static final int MAX_PERMISSION = 64;
-
-    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6) {
-
-        { // Unnamed Block.
-            put(Permission.MAX_PERMISSION, MAX_PERMISSION);
-            put(MAX_PERMISSION, MAX_PERMISSION);
-            put(0, 0);
-            put(2, 1);
-            put(4, 2);
-            put(8, 4);
-        }
-    };
-
-    static int createPermissionBits(final Permission perm) {
-        return createPermissionBits(
-            perm.getFolderPermission(),
-            perm.getReadPermission(),
-            perm.getWritePermission(),
-            perm.getDeletePermission(),
-            perm.isAdmin());
-    }
-
-    static int createPermissionBits(final int fp, final int rp, final int wp, final int dp, final boolean adminFlag) {
-        int retval = 0;
-        int i = 4;
-        retval += (adminFlag ? 1 : 0) << (i-- * 7)/* Number of bits to be shifted */;
-        retval += MAPPING.get(dp) << (i-- * 7);
-        retval += MAPPING.get(wp) << (i-- * 7);
-        retval += MAPPING.get(rp) << (i-- * 7);
-        retval += MAPPING.get(fp) << (i * 7);
-        return retval;
-    }
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.

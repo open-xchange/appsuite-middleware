@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.java.Enums;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -240,7 +241,7 @@ public final class FolderParser {
         if (false == jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.BITS.getName());
         }
-        int[] permissionBits = parsePermissionBits(jsonObject.getInt(FolderField.BITS.getName()));
+        int[] permissionBits = Permissions.parsePermissionBits(jsonObject.getInt(FolderField.BITS.getName()));
         permission.setFolderPermission(permissionBits[0]);
         permission.setReadPermission(permissionBits[1]);
         permission.setWritePermission(permissionBits[2]);
@@ -291,31 +292,6 @@ public final class FolderParser {
         }
         recipient.setBits(jsonObject.getInt(FolderField.BITS.getName()));
         return recipient;
-    }
-
-    private static final int[] mapping = { 0, 2, 4, -1, 8 };
-
-    /**
-     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
-     */
-    private static final int MAX_PERMISSION = 64;
-
-    private static final int[] parsePermissionBits(final int bitsArg) {
-        int bits = bitsArg;
-        final int[] retval = new int[5];
-        for (int i = retval.length - 1; i >= 0; i--) {
-            final int shiftVal = (i * 7); // Number of bits to be shifted
-            retval[i] = bits >> shiftVal;
-            bits -= (retval[i] << shiftVal);
-            if (retval[i] == MAX_PERMISSION) {
-                retval[i] = Permission.MAX_PERMISSION;
-            } else if (i < (retval.length - 1)) {
-                retval[i] = mapping[retval[i]];
-            } else {
-                retval[i] = retval[i];
-            }
-        }
-        return retval;
     }
 
 }

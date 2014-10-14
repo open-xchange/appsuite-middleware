@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.folderstorage.Permissions.createPermissionBits;
+import static com.openexchange.folderstorage.Permissions.parsePermissionBits;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -109,25 +111,6 @@ public class FolderTest extends AbstractAJAXTest {
         sb.append(intArray[intArray.length - 1]);
         return sb.toString();
     }
-
-    private static int[] parsePermissionBits(int bits) {
-        final int[] retval = new int[5];
-        for (int i = retval.length - 1; i >= 0; i--) {
-            final int exponent = (i * 7); // Number of bits to be shifted
-            retval[i] = bits >> exponent;
-            bits -= (retval[i] << exponent);
-            if (retval[i] == Folder.MAX_PERMISSION) {
-                retval[i] = OCLPermission.ADMIN_PERMISSION;
-            } else if (i < (retval.length - 1)) {
-                retval[i] = mapping_01[retval[i]];
-            } else {
-                retval[i] = retval[i];
-            }
-        }
-        return retval;
-    }
-
-    private static final int[] mapping_01 = { 0, 2, 4, -1, 8 };
 
     /**
      * @deprecated use {@link ConfigTools#getUserId(WebConversation, String, String)}.
@@ -540,37 +523,6 @@ public class FolderTest extends AbstractAJAXTest {
         final int[] retval = new int[arr.length()];
         for (int i = 0; i < arr.length(); i++) {
             retval[i] = arr.getInt(i);
-        }
-        return retval;
-    }
-
-    private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
-
-    public static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) {
-        final int[] perms = new int[5];
-        perms[0] = fp;
-        perms[1] = orp;
-        perms[2] = owp;
-        perms[3] = odp;
-        perms[4] = adminFlag ? 1 : 0;
-        return createPermissionBits(perms);
-    }
-
-    private static int createPermissionBits(final int[] permission) {
-        int retval = 0;
-        boolean first = true;
-        for (int i = permission.length - 1; i >= 0; i--) {
-            final int exponent = (i * 7); // Number of bits to be shifted
-            if (first) {
-                retval += permission[i] << exponent;
-                first = false;
-            } else {
-                if (permission[i] == OCLPermission.ADMIN_PERMISSION) {
-                    retval += Folder.MAX_PERMISSION << exponent;
-                } else {
-                    retval += mapping[permission[i]] << exponent;
-                }
-            }
         }
         return retval;
     }
