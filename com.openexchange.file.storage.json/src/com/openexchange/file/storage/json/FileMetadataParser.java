@@ -50,24 +50,16 @@
 package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
-import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
-import com.openexchange.java.Enums;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -155,84 +147,7 @@ public class FileMetadataParser implements FileMetadataParserService{
         }
 
         private Object process(final Field field, final Object value) throws JSONException, OXException {
-            Object val = value;
-            if (val == JSONObject.NULL) {
-                val = null;
-            }
-            switch(field) {
-            case CATEGORIES: {
-                if(String.class.isInstance(val)) {
-                    return val;
-                }
-                return categories((JSONArray) val);
-            }
-            case META:
-                if (value == null || value == JSONObject.NULL) {
-                    return null;
-                }
-                return JSONCoercion.coerceToNative(value);
-            case OBJECT_PERMISSIONS:
-                if (null == val || JSONObject.NULL.equals(val)) {
-                    return null;
-                }
-                JSONArray jsonArray = (JSONArray) val;
-                List<FileStorageObjectPermission> objectPermissions = new ArrayList<FileStorageObjectPermission>(jsonArray.length());
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonPermission = jsonArray.getJSONObject(i);
-                    int permissions = jsonPermission.getInt("bits");
-                    FileStorageObjectPermission permission;
-                    if (jsonPermission.hasAndNotNull("entity")) {
-                        int entity = jsonPermission.getInt("entity");
-                        boolean group = jsonPermission.getBoolean("group");
-                        permission = new DefaultFileStorageObjectPermission(entity, group, permissions);
-                    } else if (jsonPermission.hasAndNotNull("guest_auth")) {
-                        DefaultFileStorageGuestObjectPermission perm = new DefaultFileStorageGuestObjectPermission(permissions);
-                        String authValue = jsonPermission.getString("guest_auth");
-                        try {
-                            perm.setAuthenticationMode(Enums.parse(AuthenticationMode.class, authValue));
-                        } catch (IllegalArgumentException e) {
-                            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "guest_auth", authValue);
-                        }
-                        if (jsonPermission.hasAndNotNull("expires")) {
-                            perm.setExpires(new Date(jsonPermission.getLong("expires")));
-                        }
-                        if (AuthenticationMode.ANONYMOUS != perm.getAuthenticationMode()) {
-                            if (false == jsonPermission.hasAndNotNull("mail_address")) {
-                                throw AjaxExceptionCodes.MISSING_PARAMETER.create("mail_address");
-                            }
-                            perm.setEmailAddress(jsonPermission.getString("mail_address"));
-                            if (false == jsonPermission.hasAndNotNull("password")) {
-                                throw AjaxExceptionCodes.MISSING_PARAMETER.create("password");
-                            }
-                            perm.setPassword(jsonPermission.optString("password", null));
-                            perm.setDisplayName(jsonPermission.optString("display_name", null));
-                            perm.setContactID(jsonPermission.optString("contact_id", null));
-                            perm.setContactFolderID(jsonPermission.optString("contact_folder", null));
-                        }
-
-                        permission = perm;
-                    } else {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create("entity");
-                    }
-
-                    objectPermissions.add(permission);
-                }
-                return objectPermissions;
-            default:
-                return val;
-            }
-        }
-
-        private Object categories(final JSONArray value) throws JSONException {
-            if(value.length() == 0) {
-                return "";
-            }
-            final StringBuilder b = new StringBuilder();
-            for(int i = 0, size = value.length(); i < size; i++) {
-                b.append(value.getString(i)).append(", ");
-            }
-            b.setLength(b.length()-2);
-            return b.toString();
+            return FileMetadataFieldParser.convert(field, value);
         }
     }
 
