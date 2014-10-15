@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.passwordchange.database.impl;
+package com.openexchange.passwordchange;
 
-import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -61,37 +60,43 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
-import com.openexchange.passwordchange.PasswordChangeEvent;
-import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
 
+
 /**
- * {@link DatabasePasswordChange}
+ * {@link DefaultBasicPasswordChangeService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public final class DatabasePasswordChange extends PasswordChangeService {
+public class DefaultBasicPasswordChangeService extends BasicPasswordChangeService {
 
-    public DatabasePasswordChange() {
+    /**
+     * Initializes a new {@link DefaultBasicPasswordChangeService}.
+     */
+    public DefaultBasicPasswordChangeService() {
         super();
     }
 
     @Override
-    protected void update(final PasswordChangeEvent event) throws OXException {
-        final String encodedPassword;
-        final Context ctx = event.getContext();
+    protected void update(PasswordChangeEvent event) throws OXException {
+        String encodedPassword;
+        Context ctx = event.getContext();
         {
-            final UserService userService = getServiceRegistry().getService(UserService.class);
+            UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
             if (userService == null) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
             }
-            final User user = userService.getUser(event.getSession().getUserId(), ctx);
+            User user = userService.getUser(event.getSession().getUserId(), ctx);
+
             // Get encoded version of new password
             encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
         }
+
         // Update database
-        final Connection writeCon = Database.get(ctx, true);
+        Connection writeCon = Database.get(ctx, true);
         boolean rollback = false;
         try {
             writeCon.setAutoCommit(false);
@@ -113,16 +118,14 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         }
     }
 
-    private static final String SQL_UPDATE = "UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
-
-    private void update(final Connection writeCon, final String encodedPassword, final int userId, final int cid) throws SQLException {
+    private void update(Connection writeCon, String encodedPassword, int userId, int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = writeCon.prepareStatement(SQL_UPDATE);
+            stmt = writeCon.prepareStatement("UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?");
             int pos = 1;
             stmt.setString(pos++, encodedPassword);
             stmt.setInt(pos++,(int)(System.currentTimeMillis()/1000));
-            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
         } finally {
@@ -130,14 +133,12 @@ public final class DatabasePasswordChange extends PasswordChangeService {
         }
     }
 
-    private static final String SQL_DELETE = "DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?";
-
-    private void deleteAttr(final Connection writeCon, final int userId, final int cid) throws SQLException {
+    private void deleteAttr(Connection writeCon, int userId, int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = writeCon.prepareStatement(SQL_DELETE);
+            stmt = writeCon.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
             int pos = 1;
-            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setString(pos++, "passcrypt");
             stmt.executeUpdate();
@@ -145,4 +146,5 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             closeSQLStuff(stmt);
         }
     }
+
 }

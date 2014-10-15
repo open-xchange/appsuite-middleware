@@ -101,7 +101,8 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.requesthandler.converters.preview.cache.osgi.ResourceCacheActivator(),
         new com.openexchange.report.osgi.ReportActivator(),
         new com.openexchange.groupware.update.tasks.quota.QuotaGWActivator(),
-        new PingActivator()
+        new com.openexchange.server.osgi.PingActivator(),
+        new com.openexchange.passwordchange.osgi.PasswordChangeActivator()
     };
 
     public ServerCompositeActivator() {

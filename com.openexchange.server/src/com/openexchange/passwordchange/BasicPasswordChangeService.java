@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,27 @@
  *
  */
 
-package com.openexchange.passwordchange.database.services;
+package com.openexchange.passwordchange;
 
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.annotation.SingletonService;
+
+
 
 /**
- * {@link DPWServiceRegistry} - A registry for services
+ * {@link BasicPasswordChangeService} - The basic password change service.
+ * <p>
+ * Especially used to handle guest users.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public final class DPWServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry(1);
-
-    /**
-     * Gets the service registry
-     *
-     * @return The service registry
-     */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
-    }
+@SingletonService
+public abstract class BasicPasswordChangeService extends PasswordChangeService {
 
     /**
-     * Initializes a new {@link DPWServiceRegistry}
+     * Initializes a new {@link BasicPasswordChangeService}.
      */
-    private DPWServiceRegistry() {
+    protected BasicPasswordChangeService() {
         super();
     }
 
