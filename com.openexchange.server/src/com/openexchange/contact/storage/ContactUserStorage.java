@@ -99,7 +99,7 @@ public interface ContactUserStorage extends ContactStorage {
     void updateGuestContact(int contextId, int contactId, Contact contact, Date lastRead, Connection con) throws OXException;
 
     /**
-     * Gets the guest' contact
+     * Gets the guest's contact
      * @param contextId The context id
      * @param guestId The guest id
      * @param contactFields Fields to fill in the contact
