@@ -170,7 +170,7 @@ public class AnonymousLogin extends AbstractLoginRequestHandler {
                         final String pass;
 
                         String body = AJAXServlet.getBody(httpRequest);
-                        if (null == body) {
+                        if (Strings.isEmpty(body)) {
                             // By parameters
                             pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
                             if (Strings.isEmpty(pass)) {

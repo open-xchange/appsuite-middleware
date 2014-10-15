@@ -97,7 +97,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     public static LoginRequest createAnonymousLoginRequest(String share, String password, boolean failOnError) {
         return new LoginRequest(new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, "anonymous"),
-            new FieldParameter("share", share),
+            new URLParameter("share", share),
             new FieldParameter(PARAM_PASSWORD, password)
         }, failOnError);
     }
