@@ -1,3 +1,7 @@
+* 2014-10-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34517: Put Kerberos tickets of session parameters into distributed session storage.
+
 * 2014-10-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 34920: Do not close SQL resources on SearchIterator creation

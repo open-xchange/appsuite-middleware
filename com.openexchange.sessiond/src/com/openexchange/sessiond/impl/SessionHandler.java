@@ -80,6 +80,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
+import com.openexchange.sessiond.SessionModifyCallback;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -422,10 +423,11 @@ public final class SessionHandler {
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
+     * @param callback after creating the session, this callback will be called when not <code>null</code> for extending the session.
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken, final boolean tranzient) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken, final boolean tranzient, SessionModifyCallback callback) throws OXException {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -438,6 +440,9 @@ public final class SessionHandler {
         final SessionImpl session = new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
             loginName, Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash,
             client, tranzient);
+        if (null != callback) {
+            callback.modify(session);
+        }
         // Add session
         final SessionImpl addedSession;
         if (null == clientToken) {

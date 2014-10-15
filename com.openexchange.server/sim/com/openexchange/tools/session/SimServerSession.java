@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.session;
 
+import java.util.Collections;
+import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.MockUser;
@@ -245,4 +247,8 @@ public class SimServerSession implements ServerSession {
         return false;
     }
 
+    @Override
+    public Set<String> getParameterNames() {
+        return Collections.emptySet();
+    }
 }

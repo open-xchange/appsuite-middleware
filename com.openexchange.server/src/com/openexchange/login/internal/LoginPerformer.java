@@ -87,6 +87,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionModifyCallback;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -206,16 +207,22 @@ public final class LoginPerformer {
                     throw ServiceExceptionCode.absentService(SessiondService.class);
                 }
             }
-            final Session session = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
+            AddSessionParameterImpl addSession = new AddSessionParameterImpl(username, request, user, ctx);
+            if (SessionEnhancement.class.isInstance(authed)) {
+                addSession.setCallback(new SessionModifyCallback() {
+                    @Override
+                    public void modify(Session session2) {
+                        ((SessionEnhancement) authed).enhanceSession(session2);
+                    }
+                });
+            }
+            final Session session = sessiondService.addSession(addSession);
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
-            if (SessionEnhancement.class.isInstance(authed)) {
-                ((SessionEnhancement) authed).enhanceSession(session);
-            }
             retval.setSession(session);
 
             // Trigger registered login handlers

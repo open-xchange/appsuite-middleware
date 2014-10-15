@@ -49,6 +49,8 @@
 
 package com.openexchange.freebusy.publisher.ews.internal;
 
+import java.util.Collections;
+import java.util.Set;
 import com.openexchange.session.Session;
 
 /**
@@ -189,4 +191,8 @@ public class PublishSession implements Session {
         return false;
     }
 
+    @Override
+    public Set<String> getParameterNames() {
+        return Collections.emptySet();
+    }
 }
