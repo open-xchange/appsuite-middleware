@@ -49,12 +49,14 @@
 
 package com.openexchange.share.servlet.osgi;
 
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
-import com.openexchange.ajax.osgi.AbstractServletActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
@@ -65,7 +67,6 @@ import com.openexchange.share.servlet.handler.RedirectingShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.share.servlet.internal.ShareServlet;
 import com.openexchange.user.UserService;
 
 /**
@@ -74,35 +75,40 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareServletActivator extends AbstractServletActivator {
-
-    private static final String ALIAS = "/ajax/share";
+public class ShareServletActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            HttpService.class, SessiondService.class, ShareCryptoService.class, ConfigurationService.class };
+        return new Class<?>[] {
+            ShareService.class, UserService.class, ContextService.class, SessiondService.class, ShareCryptoService.class,
+            ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("starting bundle: \"com.openexchange.share.servlet\"");
         ShareServiceLookup.set(this);
-        /*
-         * Track share handlers
-         */
+
+        // Track share handlers
         RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry = new RankingAwareNearRegistryServiceTracker<ShareHandler>(context, ShareHandler.class);
         rememberTracker(shareHandlerRegistry);
         trackService(HostnameService.class);
+
+        // Dependently registers Servlet
+        {
+            Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
+            ServletRegisterer registerer = new ServletRegisterer(shareHandlerRegistry, context);
+            track(filter, registerer);
+        }
+
+        // Open trackers
         openTrackers();
-        /*
-         * Initialize login configuration for shares
-         */
+
+        // Initialize login configuration for shares
         ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(getService(ConfigurationService.class));
         AbstractShareHandler.setShareLoginConfiguration(loginConfig);
-        /*
-         * Register default handlers
-         */
+
+        // Register default handlers
         {
             ShareHandler handler = new RedirectingShareHandler();
             registerService(ShareHandler.class, handler, handler.getRanking());
@@ -111,10 +117,6 @@ public class ShareServletActivator extends AbstractServletActivator {
             ShareHandler handler = new LoginShareHandler();
             registerService(ShareHandler.class, handler, handler.getRanking());
         }
-        /*
-         * Register Servlet
-         */
-        super.registerServlet(ALIAS, new ShareServlet(shareHandlerRegistry), getService(HttpService.class));
     }
 
     @Override
