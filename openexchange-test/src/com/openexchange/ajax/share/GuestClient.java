@@ -141,7 +141,7 @@ public class GuestClient extends AJAXClient {
         this.shareResponse = resolve(share, password, failOnNonRedirect);
         if (null != shareResponse.getLoginType()) {
             LoginResponse loginResponse = login(shareResponse, password);
-            extractShareTarget(loginResponse);
+            target = extractShareTarget(loginResponse);
         } else {
             target = extractShareTarget(shareResponse);
         }
@@ -153,7 +153,11 @@ public class GuestClient extends AJAXClient {
 
     private static ShareTarget extractShareTarget(LoginResponse loginResponse) throws JSONException {
         JSONObject data = (JSONObject) loginResponse.getData();
-        return new ShareTarget(Module.getModuleInteger(data.getString("module")), data.getString("folder"), data.getString("item"));
+        if (data.has("item")) {
+            return new ShareTarget(Module.getModuleInteger(data.getString("module")), data.getString("folder"), data.getString("item"));
+        } else {
+            return new ShareTarget(Module.getModuleInteger(data.getString("module")), data.getString("folder"));
+        }
     }
 
     public ResolveShareResponse getShareResolveResponse() {
@@ -502,9 +506,9 @@ public class GuestClient extends AJAXClient {
         if (null != loginType) {
             LoginRequest loginRequest = null;
             if ("guest".equals(loginType)) {
-                loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getLoginName(), password, true);
+                loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getLoginName(), password, false);
             } else if ("anonymous".equals(loginType)) {
-                loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), password, true);
+                loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), password, false);
             } else {
                 Assert.fail("unknown login type: " + loginType);
             }
