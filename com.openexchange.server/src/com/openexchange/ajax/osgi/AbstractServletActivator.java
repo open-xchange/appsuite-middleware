@@ -50,8 +50,8 @@
 package com.openexchange.ajax.osgi;
 
 import java.util.Dictionary;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.osgi.service.http.HttpService;
@@ -65,9 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public abstract class AbstractServletActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
-
-    private final List<String> servlets = new LinkedList<String>();
+    private final Queue<String> servlets = new ConcurrentLinkedQueue<String>();
 
     /**
      * Initializes a new {@link AbstractServletActivator}.
@@ -76,19 +74,40 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
         super();
     }
 
-    protected void registerServlet(final String alias, final HttpServlet servlet, final HttpService httpService) {
-        registerServlet(alias, servlet, null, httpService);
+    /**
+     * Registers specified Servlet under given alias.
+     *
+     * @param alias The alias
+     * @param servlet The Servlet instance
+     * @param httpService The HTTP service
+     * @return <code>true</code> on successful Servlet registration; otherwise <code>false</code>
+     */
+    protected boolean registerServlet(String alias, HttpServlet servlet, HttpService httpService) {
+        return registerServlet(alias, servlet, null, httpService);
     }
 
-    protected void registerServlet(final String alias, final HttpServlet servlet, final Dictionary<String, String> params, final HttpService httpService) {
+    /**
+     * Registers specified Servlet for given alias.
+     *
+     * @param alias The alias
+     * @param servlet The Servlet instance
+     * @param params Optional parameters
+     * @param httpService The HTTP service
+     * @return <code>true</code> on successful Servlet registration; otherwise <code>false</code>
+     */
+    protected boolean registerServlet(String alias, HttpServlet servlet, Dictionary<String, String> params, HttpService httpService) {
         try {
             httpService.registerServlet(alias, servlet, params, null);
-            servlets.add(alias);
+            servlets.offer(alias);
+            return true;
         } catch (final ServletException e) {
-            LOG.error("", e);
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
+            logger.error("", e);
         } catch (final NamespaceException e) {
-            LOG.error("", e);
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
+            logger.error("", e);
         }
+        return false;
     }
 
     @Override
@@ -97,22 +116,31 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
         super.cleanUp();
     }
 
+    /**
+     * Unregisters all previously registered Servlet instances.
+     */
     private void unregisterServlets() {
-        final HttpService httpService = getService(HttpService.class);
+        HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            for (final String servlet : servlets) {
+            for (String alias : servlets) {
                 try {
-                    httpService.unregister(servlet);
+                    httpService.unregister(alias);
                 } catch (final Exception e) {
-                    LOG.warn("Failed to unregister servlet alias: {}", servlet, e);
+                    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
+                    logger.warn("Failed to unregister servlet alias: {}", alias, e);
                 }
             }
             servlets.clear();
         }
     }
 
-    protected void unregisterServlet(final String alias) {
-        final HttpService httpService = getService(HttpService.class);
+    /**
+     * Unregisters the Servlet instance registered for given alias
+     *
+     * @param alias The alias
+     */
+    protected void unregisterServlet(String alias) {
+        HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             httpService.unregister(alias);
         }
