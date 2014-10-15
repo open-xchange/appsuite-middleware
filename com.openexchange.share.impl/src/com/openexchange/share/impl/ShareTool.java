@@ -79,6 +79,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
@@ -148,24 +149,6 @@ public class ShareTool {
     }
 
     /**
-     * Gets permission bits suitable for a guest user being allowed to access a module. Besides the module permission, this includes the
-     * permission bits to access shared and public folders, as well as the bit to turn off portal access.
-     *
-     * @param module The identifier of the module that should be added to the permissions
-     * @return The permission bits
-     * @throws OXException
-     */
-    public static int getUserPermissionBits(int module) throws OXException {
-        Set<Permission> perms = new HashSet<Permission>(4);
-        perms.add(Permission.DENIED_PORTAL);
-        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
-        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        perms.add(Permission.EDIT_PASSWORD);
-        addModulePermissions(perms, module);
-        return Permission.toBits(perms);
-    }
-
-    /**
      * Gets permission bits suitable for a guest user being allowed to access all supplied shares. Besides the concrete module
      * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
      * access.
@@ -179,9 +162,11 @@ public class ShareTool {
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        perms.add(Permission.EDIT_PASSWORD);
         for (Share share : shares) {
             addModulePermissions(perms, share.getModule());
+            if (AuthenticationMode.GUEST_PASSWORD == share.getAuthentication()) {
+                perms.add(Permission.EDIT_PASSWORD);
+            }
         }
         return Permission.toBits(perms);
     }
@@ -191,18 +176,21 @@ public class ShareTool {
      * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
      * access.
      *
+     * @param recipient The share recipient
      * @param targets The share targets
      * @return The permission bits
      * @throws OXException
      */
-    public static int getUserPermissionBitsForTargets(List<ShareTarget> targets) throws OXException {
+    public static int getUserPermissionBitsForTargets(ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
         Set<Permission> perms = new HashSet<Permission>(8);
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        perms.add(Permission.EDIT_PASSWORD);
         for (ShareTarget target : targets) {
             addModulePermissions(perms, target.getModule());
+        }
+        if (RecipientType.GUEST == recipient.getType()) {
+            perms.add(Permission.EDIT_PASSWORD);
         }
         return Permission.toBits(perms);
     }

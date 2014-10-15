@@ -248,7 +248,6 @@ public class DefaultShareService implements ShareService {
         LOG.info("Adding shares to recipient(s) {} for {} in context {}...", recipients, targets, session.getContextId());
         Map<ShareTarget, List<Share>> shares = new HashMap<ShareTarget, List<Share>>(targets.size());
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
-        int permissionBits = ShareTool.getUserPermissionBitsForTargets(targets);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
@@ -260,6 +259,7 @@ public class DefaultShareService implements ShareService {
             List<User> guestUsers = new ArrayList<User>(recipients.size());
             List<Share> sharesToCreate = new ArrayList<Share>();
             for (ShareRecipient recipient : recipients) {
+                int permissionBits = ShareTool.getUserPermissionBitsForTargets(recipient, targets);
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient);
                 guestUsers.add(guestUser);
                 for (ShareTarget target : targets) {
