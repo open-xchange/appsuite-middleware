@@ -56,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
@@ -78,9 +79,10 @@ public class NotifyAction extends AbstractShareAction {
      * Initializes a new {@link NotifyAction}.
      *
      * @param services The service lookup
+     * @param translatorFactory
      */
-    public NotifyAction(ServiceLookup services) {
-        super(services);
+    public NotifyAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
+        super(services, translatorFactory);
     }
 
     @Override
@@ -107,7 +109,7 @@ public class NotifyAction extends AbstractShareAction {
         }
 
         List<String> urls = generateShareURLs(Collections.singletonList(share), requestData);
-        ShareNotificationService notificationService = services.getService(ShareNotificationService.class);
+        ShareNotificationService notificationService = getNotificationService();
         notificationService.notify(new MailNotification(share, urls.get(0), title, message, recipient), session);
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }

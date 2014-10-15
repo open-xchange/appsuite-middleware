@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
@@ -67,10 +68,10 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.json.GuestShareResultConverter;
 import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.share.json.internal.AbstractUpdater;
-import com.openexchange.share.json.internal.FileStorageUpdater;
-import com.openexchange.share.json.internal.PermissionUpdater;
-import com.openexchange.share.json.internal.PermissionUpdaters;
+import com.openexchange.share.json.internal.AbstractModuleHandler;
+import com.openexchange.share.json.internal.FileStorageHandler;
+import com.openexchange.share.json.internal.ModuleHandler;
+import com.openexchange.share.json.internal.ModuleHandlers;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.tools.session.ServerSession;
@@ -103,22 +104,30 @@ public class ShareJsonActivator extends AJAXModuleActivator {
         LOG.info("starting bundle: \"com.openexchange.share.json\"");
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
+        I18nTranslatorFactory translatorFactory = new I18nTranslatorFactory(context);
+        rememberTracker(translatorFactory);
         openTrackers();
 
-        PermissionUpdaters.put(new FileStorageUpdater(this));
-        PermissionUpdaters.put(newFolderUpdater(Module.CALENDAR));
-        PermissionUpdaters.put(newFolderUpdater(Module.CONTACTS));
-        PermissionUpdaters.put(newFolderUpdater(Module.TASK));
+        ModuleHandlers.put(new FileStorageHandler(this));
+        ModuleHandlers.put(newFolderUpdater(Module.CALENDAR));
+        ModuleHandlers.put(newFolderUpdater(Module.CONTACTS));
+        ModuleHandlers.put(newFolderUpdater(Module.TASK));
 
-        registerModule(new ShareActionFactory(this), "share/management");
+        registerModule(new ShareActionFactory(this, translatorFactory), "share/management");
         registerService(ResultConverter.class, new GuestShareResultConverter(this));
+
     }
 
-    private PermissionUpdater newFolderUpdater(final Module module) {
-        return new AbstractUpdater(this) {
+    private ModuleHandler newFolderUpdater(final Module module) {
+        return new AbstractModuleHandler(this) {
             @Override
             public int getModule() {
                 return module.getFolderConstant();
+            }
+
+            @Override
+            protected String getItemTitle(String folder, String item, ServerSession session) throws OXException {
+                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
             }
 
             @Override

@@ -71,23 +71,51 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AbstractUpdater}
+ * {@link AbstractModuleHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public abstract class AbstractUpdater implements PermissionUpdater {
+public abstract class AbstractModuleHandler implements ModuleHandler {
 
     protected final ServiceLookup services;
 
     /**
-     * Initializes a new {@link AbstractUpdater}.
+     * Initializes a new {@link AbstractModuleHandler}.
      */
-    protected AbstractUpdater(ServiceLookup services) {
+    protected AbstractModuleHandler(ServiceLookup services) {
         super();
         this.services = services;
     }
 
+    @Override
+    public String getTargetTitle(ShareTarget target, ServerSession session) throws OXException {
+        if (target.isFolder()) {
+            UserizedFolder folder = getFolderService().getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
+            String name = folder.getLocalizedName(session.getUser().getLocale(), true);
+            if (name == null) {
+                name = folder.getName();
+                if (name == null) {
+                    name = folder.getID();
+                }
+            }
+
+            return name;
+        }
+
+        return getItemTitle(target.getFolder(), target.getItem(), session);
+    }
+
+    /**
+     * Gets the human-readable title for the given item.
+     *
+     * @param folder The items parent folder
+     * @param item The items id
+     * @param session The session
+     * @return The title; never <code>null</code>
+     * @throws OXException
+     */
+    protected abstract String getItemTitle(String folder, String item, ServerSession session) throws OXException;
 
     @Override
     public void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {

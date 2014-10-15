@@ -54,9 +54,15 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.I18nTranslatorFactory;
+import com.openexchange.i18n.Translator;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractShareAction}
@@ -68,31 +74,76 @@ public abstract class AbstractShareAction implements AJAXActionService {
 
     protected final ServiceLookup services;
 
+    protected final I18nTranslatorFactory translatorFactory;
+
     /**
      * Initializes a new {@link AbstractShareAction}.
      *
      * @param services The service lookup reference
+     * @param translatorFactory
      */
-    public AbstractShareAction(ServiceLookup services) {
+    public AbstractShareAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
         super();
         this.services = services;
+        this.translatorFactory = translatorFactory;
     }
 
     /**
      * Gets the share service.
      *
      * @return The share service
+     * @throws OXException if the service is unavailable
      */
-    protected ShareService getShareService() {
-        return services.getService(ShareService.class);
+    protected ShareService getShareService() throws OXException {
+        ShareService service = services.getService(ShareService.class);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareService.class.getName());
+        }
+        return service;
     }
 
     /**
-     * Generates share URLs appropriate for the supplied request data.
+     * Gets the {@link ShareNotificationService}.
      *
-     * @param shares The shares
+     * @return The {@link ShareNotificationService}.
+     * @throws OXException if the service is unavailable
+     */
+    protected ShareNotificationService getNotificationService() throws OXException {
+        ShareNotificationService service = services.getService(ShareNotificationService.class);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareNotificationService.class.getName());
+        }
+        return service;
+    }
+
+    /**
+     * Gets the {@link UserService}.
+     * @return The {@link UserService}.
+     * @throws OXException if the service is unavailable
+     */
+    protected UserService getUserService() throws OXException {
+        UserService service = services.getService(UserService.class);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+        }
+        return service;
+    }
+
+    /**
+     * Gets a {@link Translator} for the session users locale.
+     * @param session The session
+     * @return The translator
+     */
+    protected Translator getTranslator(ServerSession session) {
+        return translatorFactory.translatorFor(session.getUser().getLocale());
+    }
+
+    /**
+     * Generates a URL for every share that is passed.
+     *
+     * @param shares A list of shares
      * @param requestData The request data
-     * @return The share URLs
+     * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
      * @throws OXException
      */
     protected List<String> generateShareURLs(List<Share> shares, AJAXRequestData requestData) throws OXException {

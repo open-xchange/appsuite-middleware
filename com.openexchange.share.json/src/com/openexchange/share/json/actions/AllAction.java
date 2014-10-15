@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
@@ -69,7 +70,6 @@ import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.json.GuestShare;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link AllAction}
@@ -83,9 +83,10 @@ public class AllAction extends AbstractShareAction {
      * Initializes a new {@link AllAction}.
      *
      * @param services The service lookup
+     * @param translatorFactory
      */
-    public AllAction(ServiceLookup services) {
-        super(services);
+    public AllAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
+        super(services, translatorFactory);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class AllAction extends AbstractShareAction {
             }
             guestIDs.add(Integer.valueOf(share.getGuest()));
         }
-        User[] guestUsers = services.getService(UserService.class).getUser(session.getContext(), Autoboxing.I2i(guestIDs));
+        User[] guestUsers = getUserService().getUser(session.getContext(), Autoboxing.I2i(guestIDs));
         Map<Integer, User> guestUsersByID = new HashMap<Integer, User>();
         for (User user : guestUsers) {
             guestUsersByID.put(Integer.valueOf(user.getId()), user);

@@ -51,23 +51,31 @@ package com.openexchange.share.json.internal;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.share.ShareExceptionCodes;
 
 
 /**
- * {@link PermissionUpdaters}
+ * {@link ModuleHandlers}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class PermissionUpdaters {
+public class ModuleHandlers {
 
-    private static final Map<Integer, PermissionUpdater> UPDATERS = new HashMap<Integer, PermissionUpdater>();
+    private static final Map<Integer, ModuleHandler> UPDATERS = new HashMap<Integer, ModuleHandler>();
 
-    public static PermissionUpdater forModule(int module) {
-        return UPDATERS.get(module);
+    public static ModuleHandler forModule(int module) throws OXException {
+        ModuleHandler handler = UPDATERS.get(module);
+        if (handler == null) {
+            Module m = Module.getForFolderConstant(module);
+            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
+        }
+        return handler;
     }
 
-    public static void put(PermissionUpdater updater) {
+    public static void put(ModuleHandler updater) {
         UPDATERS.put(updater.getModule(), updater);
     }
 

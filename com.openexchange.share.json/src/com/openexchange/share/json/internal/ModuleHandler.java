@@ -58,14 +58,16 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link PermissionUpdater}
+ * {@link ModuleHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface PermissionUpdater {
+public interface ModuleHandler {
 
     int getModule();
+
+    String getTargetTitle(ShareTarget target, ServerSession session) throws OXException;
 
     void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException;
 

@@ -47,63 +47,20 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.share.json.internal;
 
-import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.i18n.I18nTranslatorFactory;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.DefaultShare;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link UpdateAction}
+ * {@link ShareStrings}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class UpdateAction extends AbstractShareAction {
+public class ShareStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link UpdateAction}.
-     *
-     * @param services The service lookup
-     * @param translatorFactory
-     */
-    public UpdateAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
-        super(services, translatorFactory);
-    }
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * extract parameters
-         */
-        String token = requestData.checkParameter("token");
-        Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
-        DefaultShare share = new DefaultShare();
-        share.setToken(token);
-        try {
-            JSONObject jsonObject = (JSONObject) requestData.requireData();
-            if (jsonObject.has("expiry_date")) {
-                share.setExpiryDate(new Date(jsonObject.getLong("expiry_date")));
-            }
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-        /*
-         * update share
-         */
-        getShareService().updateShare(session, share, clientTimestamp);
-        /*
-         * return empty result in case of success
-         */
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
-    }
+    // John Doe shared 7 items with you
+    public static final String GENERIC_TITLE = "%d items";
 
 }

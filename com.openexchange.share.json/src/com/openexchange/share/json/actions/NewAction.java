@@ -53,14 +53,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -68,22 +65,22 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Enums;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.json.internal.PermissionUpdater;
-import com.openexchange.share.json.internal.PermissionUpdaters;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.json.internal.ModuleHandlers;
+import com.openexchange.share.json.internal.ShareStrings;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link NewAction}
@@ -93,41 +90,75 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class NewAction extends AbstractShareAction {
 
+    // TODO: remove
+    private static final boolean SEND_NOTIFICATIONS = false;
+
     /**
      * Initializes a new {@link NewAction}.
      *
      * @param services The service lookup
+     * @param translatorFactory
      */
-    public NewAction(ServiceLookup services) {
-        super(services);
+    public NewAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
+        super(services, translatorFactory);
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * get request body
-         */
-        JSONObject data = (JSONObject) requestData.getData();
-        if (null == data) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        NewRequest request = NewRequest.parse(requestData);
+        List<Share> shares = shareTargets(request, session);
+        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+        if (SEND_NOTIFICATIONS) {
+            sendNotifications(shares, request, result, session);
         }
-        /*
-         * parse targets & recipients
-         */
-        List<ShareTarget> targets;
-        List<ShareRecipient> recipients;
-        try {
-            targets = parseTargets(data.getJSONArray("targets"));
-            recipients = parseRecipients(data.getJSONArray("recipients"));
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-
-        shareTargets(targets, recipients, session);
-        return new AJAXRequestResult(new JSONObject(), "json");
+        return result;
     }
 
-    private void shareTargets(List<ShareTarget> targets, List<ShareRecipient> recipients, ServerSession session) throws OXException {
+    private void sendNotifications(List<Share> shares, NewRequest request, AJAXRequestResult result, ServerSession session) {
+        List<OXException> warnings = new LinkedList<OXException>();
+        try {
+            if (!shares.isEmpty()) {
+                List<String> urls = generateShareURLs(shares, request.getRequestData());
+                ShareNotificationService notificationService = getNotificationService();
+                UserService userService = getUserService();
+                List<ShareTarget> targets = request.getTargets();
+                for (int i = 0; i < urls.size(); i++) {
+                    Share share = shares.get(i);
+                    String url = urls.get(i);
+                    User guest = userService.getUser(share.getGuest(), share.getContextID());
+                    String mailAddress = guest.getMail();
+                    if (mailAddress != null) {
+                        String title;
+                        if (targets.size() == 1) {
+                            title = ModuleHandlers.forModule(share.getModule()).getTargetTitle(targets.get(0), session);
+                        } else {
+                            title = getTranslator(session).translate(String.format(ShareStrings.GENERIC_TITLE, targets.size()));
+                        }
+
+                        try {
+                            notificationService.notify(new MailNotification(share, url, title, request.getMessage(), mailAddress), session);
+                        } catch (Exception e) {
+                            if (e instanceof OXException) {
+                                warnings.add((OXException) e);
+                            } else {
+                                warnings.add(ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            if (e instanceof OXException) {
+                warnings.add((OXException) e);
+            } else {
+                warnings.add(ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
+            }
+        } finally {
+            result.addWarnings(warnings);
+        }
+    }
+
+    private List<Share> shareTargets(NewRequest request, ServerSession session) throws OXException {
         DatabaseService dbService = services.getService(DatabaseService.class);
         Context context = session.getContext();
         Connection writeCon = dbService.getWritable(context);
@@ -137,16 +168,22 @@ public class NewAction extends AbstractShareAction {
             /*
              * distinguish between internal and external recipients
              */
+            List<ShareTarget> targets = request.getTargets();
+            List<ShareRecipient> recipients = request.getRecipients();
             List<ShareRecipient> internalRecipients = filterRecipients(recipients, RecipientType.USER, RecipientType.GROUP);
             List<ShareRecipient> externalRecipients = filterRecipients(recipients, RecipientType.ANONYMOUS, RecipientType.GUEST);
             List<Integer> guestIDs = Collections.emptyList();
-            if (!externalRecipients.isEmpty()) {
+            List<Share> shares;
+            if (externalRecipients.isEmpty()) {
+                shares = Collections.emptyList();
+            } else {
                 /*
                  * create shares & corresponding guest user entities for external recipients first
                  */
                 Map<ShareTarget, List<Share>> createdShares = getShareService().createShares(session, targets, externalRecipients);
                 guestIDs = new ArrayList<Integer>(externalRecipients.size());
-                for (Share share : createdShares.values().iterator().next()) {
+                shares = createdShares.values().iterator().next();
+                for (Share share : shares) {
                     guestIDs.add(share.getGuest());
                 }
             }
@@ -162,6 +199,7 @@ public class NewAction extends AbstractShareAction {
             updateFolders(folders, finalRecipients, session, writeCon);
             updateObjects(objects, finalRecipients, session, writeCon);
             writeCon.commit();
+            return shares;
         } catch (OXException e) {
             Databases.rollback(writeCon);
             throw e;
@@ -175,23 +213,11 @@ public class NewAction extends AbstractShareAction {
         }
     }
 
-    /**
-     * @param objectsByModule
-     * @param finalRecipients
-     * @param writeCon
-     * @throws OXException
-     */
     private void updateObjects(Map<Integer, List<ShareTarget>> objectsByModule, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
         for (Entry<Integer, List<ShareTarget>> entry : objectsByModule.entrySet()) {
             int module = entry.getKey();
             List<ShareTarget> objects = entry.getValue();
-            PermissionUpdater updater = PermissionUpdaters.forModule(module);
-            if (updater == null) {
-                Module m = Module.getForFolderConstant(module);
-                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
-            }
-
-            updater.updateObjects(objects, finalRecipients, session, writeCon);
+            ModuleHandlers.forModule(module).updateObjects(objects, finalRecipients, session, writeCon);
         }
     }
 
@@ -200,13 +226,7 @@ public class NewAction extends AbstractShareAction {
         for (Entry<Integer, List<ShareTarget>> entry : foldersByModule.entrySet()) {
             int module = entry.getKey();
             List<ShareTarget> folders = entry.getValue();
-            PermissionUpdater updater = PermissionUpdaters.forModule(module);
-            if (updater == null) {
-                Module m = Module.getForFolderConstant(module);
-                throw ShareExceptionCodes.SHARING_FOLDERS_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
-            }
-
-            updater.updateFolders(folders, finalRecipients, session, writeCon);
+            ModuleHandlers.forModule(module).updateFolders(folders, finalRecipients, session, writeCon);
         }
     }
 
@@ -290,147 +310,6 @@ public class NewAction extends AbstractShareAction {
             }
         }
         return filteredRecipients;
-    }
-
-    /**
-     * Parses a list of share recipients from the supplied JSON array.
-     *
-     * @param jsonRecipients The JSON array holding the share recipients
-     * @return The share recipients
-     * @throws JSONException
-     */
-    private static List<ShareRecipient> parseRecipients(JSONArray jsonRecipients) throws OXException, JSONException {
-        if (null == jsonRecipients || 0 == jsonRecipients.length()) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("recipients");
-        }
-        List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
-        for (int i = 0; i < jsonRecipients.length(); i++) {
-            recipients.add(parseRecipient(jsonRecipients.getJSONObject(i)));
-        }
-        return recipients;
-    }
-
-    /**
-     * Parses a list of share targets from the supplied JSON array.
-     *
-     * @param jsonTargets The JSON array holding the share targets
-     * @return The share targets
-     */
-    private static List<ShareTarget> parseTargets(JSONArray jsonTargets) throws OXException, JSONException {
-        if (null == jsonTargets || 0 == jsonTargets.length()) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("targets");
-        }
-        List<ShareTarget> targets = new ArrayList<ShareTarget>();
-        for (int i = 0; i < jsonTargets.length(); i++) {
-            targets.add(parseTarget(jsonTargets.getJSONObject(i)));
-        }
-        return targets;
-    }
-
-    /**
-     * Parses a share target from the supplied JSON object.
-     *
-     * @param jsonTargets The JSON object holding the share target
-     * @return The share target
-     * @throws OXException
-     */
-    private static ShareTarget parseTarget(JSONObject jsonTarget) throws JSONException, OXException {
-        if (false == jsonTarget.hasAndNotNull("module")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("module");
-        }
-        int module = Module.getModuleInteger(jsonTarget.getString("module"));
-        if (false == jsonTarget.hasAndNotNull("folder")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
-        }
-        String folder = jsonTarget.getString("folder");
-        if (jsonTarget.hasAndNotNull("item")) {
-            return new ShareTarget(module, folder, jsonTarget.getString("item"));
-        } else {
-            return new ShareTarget(module, folder);
-        }
-    }
-
-    /**
-     * Parses a share recipient from the supplied JSON object.
-     *
-     * @param jsonTargets The JSON object holding the share recipient
-     * @return The share recipient
-     * @throws OXException
-     */
-    private static ShareRecipient parseRecipient(JSONObject jsonRecipient) throws JSONException, OXException {
-        /*
-         * determine type
-         */
-        if (false == jsonRecipient.hasAndNotNull("type")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("type");
-        }
-        RecipientType type;
-        try {
-            type = Enums.parse(RecipientType.class, jsonRecipient.getString("type"));
-        } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "type", jsonRecipient.getString("type"));
-        }
-        /*
-         * parse recipient type specific properties
-         */
-        ShareRecipient recipient;
-        switch (type) {
-        case USER:
-        case GROUP:
-            InternalRecipient internalRecipient = new InternalRecipient();
-            internalRecipient.setGroup(RecipientType.GROUP == type);
-            if (false == jsonRecipient.hasAndNotNull("id")) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
-            }
-            internalRecipient.setEntity(jsonRecipient.getInt("id"));
-            recipient = internalRecipient;
-            break;
-        case ANONYMOUS:
-            AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
-            if (jsonRecipient.hasAndNotNull("password")) {
-                anonymousRecipient.setPassword(jsonRecipient.getString("password"));
-            }
-            recipient = anonymousRecipient;
-            break;
-        case GUEST:
-            GuestRecipient guestRecipient = new GuestRecipient();
-            if (false == jsonRecipient.hasAndNotNull("email_address")) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("email_address");
-            }
-            guestRecipient.setEmailAddress(jsonRecipient.getString("email_address"));
-            if (jsonRecipient.hasAndNotNull("password")) {
-                guestRecipient.setPassword(jsonRecipient.getString("password"));
-            }
-            if (jsonRecipient.hasAndNotNull("display_name")) {
-                guestRecipient.setDisplayName(jsonRecipient.getString("display_name"));
-            }
-            if (jsonRecipient.hasAndNotNull("contact_id")) {
-                guestRecipient.setContactID(jsonRecipient.getString("contact_id"));
-                if (false == jsonRecipient.hasAndNotNull("contact_folder")) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("contact_folder");
-                }
-                guestRecipient.setContactFolder(jsonRecipient.getString("contact_folder"));
-            }
-            recipient = guestRecipient;
-            break;
-        default:
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", jsonRecipient.getString("type"));
-        }
-        /*
-         * parse common properties
-         */
-        if (false == jsonRecipient.hasAndNotNull("bits")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("bits");
-        }
-        int bits = jsonRecipient.getInt("bits");
-        recipient.setBits(bits);
-        if (jsonRecipient.hasAndNotNull("activation_date")) {
-            recipient.setActivationDate(new Date(jsonRecipient.getLong("activation_date")));
-        }
-        if (jsonRecipient.hasAndNotNull("expiry_date")) {
-            recipient.setExpiryDate(new Date(jsonRecipient.getLong("expiry_date")));
-        }
-        return recipient;
     }
 
 }

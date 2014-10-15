@@ -74,23 +74,38 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link FileStorageUpdater}
+ * {@link FileStorageHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class FileStorageUpdater extends AbstractUpdater {
+public class FileStorageHandler extends AbstractModuleHandler {
 
     /**
-     * Initializes a new {@link FileStorageUpdater}.
+     * Initializes a new {@link FileStorageHandler}.
      */
-    public FileStorageUpdater(ServiceLookup services) {
+    public FileStorageHandler(ServiceLookup services) {
         super(services);
     }
 
     @Override
     public int getModule() {
         return Module.INFOSTORE.getFolderConstant();
+    }
+
+    @Override
+    protected String getItemTitle(String folder, String item, ServerSession session) throws OXException {
+        FileID fileID = new FileID(item);
+        if (fileID.getFolderId() == null) {
+            fileID.setFolderId(folder);
+        }
+        File file = getFileAccess(session).getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+        String title = file.getTitle();
+        if (title == null) {
+            title = file.getFileName();
+        }
+
+        return title;
     }
 
     @Override

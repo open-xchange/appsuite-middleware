@@ -103,14 +103,19 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     SQL_ERROR("An SQL error occurred: %1$s", null, Category.CATEGORY_ERROR, 10),
 
     /**
+     * Module %1$s does not support sharing.
+     */
+    SHARING_NOT_SUPPORTED(ShareExceptionMessages.SHARING_NOT_SUPPORTED, ShareExceptionMessages.SHARING_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 11),
+
+    /**
      * Module %1$s does not support sharing of items.
      */
-    SHARING_ITEMS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 11),
+    SHARING_ITEMS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 12),
 
     /**
      * Module %1$s does not support sharing of folders.
      */
-    SHARING_FOLDERS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 12),
+    SHARING_FOLDERS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 13),
     ;
 
     private static final String PREFIX = "SHR";

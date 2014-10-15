@@ -55,6 +55,7 @@ import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.json.actions.AllAction;
 import com.openexchange.share.json.actions.DeleteAction;
@@ -75,15 +76,16 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link ShareActionFactory}.
-     * @param shareJsonActivator
+     * @param services
+     * @param translatorFactory
      */
-    public ShareActionFactory(ServiceLookup services) {
+    public ShareActionFactory(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
         super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("new", new NewAction(services));
+        actions.put("all", new AllAction(services, translatorFactory));
+        actions.put("notify", new NotifyAction(services, translatorFactory));
+        actions.put("delete", new DeleteAction(services, translatorFactory));
+        actions.put("update", new UpdateAction(services, translatorFactory));
+        actions.put("new", new NewAction(services, translatorFactory));
     }
 
     @Override

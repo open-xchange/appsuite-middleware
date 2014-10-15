@@ -110,12 +110,7 @@ public class ParsedShare {
         modifiedBy = json.optInt("modified_by");
         if (json.has("target")) {
             JSONObject jsonTarget = json.getJSONObject("target");
-            String item = jsonTarget.optString("item");
-            if ("".equals(item)) {
-                item = null;
-            }
-            target = new ShareTarget(
-                Module.getModuleInteger(jsonTarget.optString("module")), jsonTarget.optString("folder"), item);
+            target = new ShareTarget(Module.getModuleInteger(jsonTarget.optString("module")), jsonTarget.optString("folder"), jsonTarget.optString("item", null));
         }
         if (json.has("recipient")) {
             JSONObject jsonObject = json.getJSONObject("recipient");
