@@ -72,6 +72,7 @@ import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
@@ -162,7 +163,7 @@ public final class UpdateAction extends AbstractUserAction {
                         parsedUserContact.removeDisplayName();
                     } else {
                         // Remove display name if equal to storage version to avoid update conflict
-                        final Contact storageContact = contactService.getUser(session, id);
+                        Contact storageContact = contactService.getUser(session, id, new ContactField[] { ContactField.DISPLAY_NAME });
                         if (displayName.equals(storageContact.getDisplayName())) {
                             parsedUserContact.removeDisplayName();
                         }
