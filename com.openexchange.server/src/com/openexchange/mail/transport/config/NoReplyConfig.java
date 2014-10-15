@@ -52,9 +52,13 @@ package com.openexchange.mail.transport.config;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * {@link NoReplyConfig} - The configuration for the no-reply account used for system-initiated messages.
@@ -119,31 +123,29 @@ public final class NoReplyConfig {
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
-    private static volatile NoReplyConfig instance;
+    /**
+     * Gets the no-reply configuration.
+     *
+     * @return The no-reply configuration
+     * @throws OXException If no-reply configuration cannot be return
+     */
+    public static NoReplyConfig getInstance(Session session) throws OXException {
+        NoReplyConfig retval = (NoReplyConfig) session.getParameter("__transport.noreply");
+        if (null == retval) {
+            retval = getInstance(session.getUserId(), session.getContextId());
+            session.setParameter("__transport.noreply", retval);
+        }
+        return retval;
+    }
 
     /**
      * Gets the no-reply configuration.
      *
      * @return The no-reply configuration
+     * @throws OXException If no-reply configuration cannot be return
      */
-    public static NoReplyConfig getInstance() {
-        return instance;
-    }
-
-    /**
-     * Initializes the no-reply configuration.
-     */
-    public static synchronized void init(ConfigurationService service) {
-        if (null == instance) {
-            instance = new NoReplyConfig(service);
-        }
-    }
-
-    /**
-     * Releases the no-reply configuration.
-     */
-    public static synchronized void release() {
-        instance = null;
+    public static NoReplyConfig getInstance(int userId, int contextId) throws OXException {
+        return new NoReplyConfig(userId, contextId);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
@@ -157,14 +159,19 @@ public final class NoReplyConfig {
 
     /**
      * Initializes a new {@link NoReplyConfig}.
+     *
+     * @throws OXException If initialization fails
      */
-    private NoReplyConfig(ConfigurationService service) {
+    private NoReplyConfig(int userId, int contextId) throws OXException {
         super();
+
+        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(userId, contextId);
 
         Logger logger = org.slf4j.LoggerFactory.getLogger(NoReplyConfig.class);
 
         {
-            String sAddress = service.getProperty("com.openexchange.noreply.address");
+            String sAddress = view.get("com.openexchange.noreply.address", String.class);
             InternetAddress address;
             if (Strings.isEmpty(sAddress)) {
                 String msg = "Missing no-reply address";
@@ -183,7 +190,7 @@ public final class NoReplyConfig {
         }
 
         {
-            String str = service.getProperty("com.openexchange.noreply.login");
+            String str = view.get("com.openexchange.noreply.login", String.class);
             if (Strings.isEmpty(str)) {
                 String msg = "Missing no-reply login";
                 logger.error(msg, new Throwable(msg));
@@ -194,7 +201,7 @@ public final class NoReplyConfig {
         }
 
         {
-            String str = service.getProperty("com.openexchange.noreply.password");
+            String str = view.get("com.openexchange.noreply.password", String.class);
             if (Strings.isEmpty(str)) {
                 String msg = "Missing no-reply password";
                 logger.error(msg, new Throwable(msg));
@@ -205,7 +212,7 @@ public final class NoReplyConfig {
         }
 
         {
-            String str = service.getProperty("com.openexchange.noreply.server");
+            String str = view.get("com.openexchange.noreply.server", String.class);
             if (Strings.isEmpty(str)) {
                 String msg = "Missing no-reply server";
                 logger.error(msg, new Throwable(msg));
@@ -216,7 +223,7 @@ public final class NoReplyConfig {
         }
 
         {
-            String str = service.getProperty("com.openexchange.noreply.port");
+            String str = view.get("com.openexchange.noreply.port", String.class);
             if (Strings.isEmpty(str)) {
                 logger.info("Missing no-reply port. Using 25 as fall-back value.");
                 port = 25;
@@ -232,7 +239,7 @@ public final class NoReplyConfig {
         }
 
         {
-            String str = service.getProperty("com.openexchange.noreply.secureMode");
+            String str = view.get("com.openexchange.noreply.secureMode", String.class);
             if (Strings.isEmpty(str)) {
                 logger.info("Missing no-reply secure mode. Using \"plain\" as fall-back value.");
                 secureMode = SecureMode.PLAIN;

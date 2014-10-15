@@ -96,7 +96,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
-import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -138,7 +137,6 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         final ServiceLookup serviceLookup = new ExceptionOnAbsenceServiceLookup(this);
         SERVICES.set(serviceLookup);
-        NoReplyConfig.init(getService(ConfigurationService.class));
 
         final BundleContext context = this.context;
 
@@ -251,7 +249,6 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         DefaultMailAttachmentStorageRegistry.dropInstance();
-        NoReplyConfig.release();
         SERVICES.set(null);
     }
 
