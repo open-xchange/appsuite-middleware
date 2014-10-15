@@ -53,6 +53,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -296,6 +298,10 @@ public class LdapGlobalFolderCreator {
                 return false;
             }
 
+            @Override
+            public Set<String> getParameterNames() {
+                return Collections.emptySet();
+            }
         };
     }
 

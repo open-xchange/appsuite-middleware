@@ -47,139 +47,24 @@
  *
  */
 
-package com.openexchange.calendar.api.itip;
+package com.openexchange.sessiond;
 
-import java.util.Collections;
-import java.util.Set;
 import com.openexchange.session.Session;
 
-public class ITipSession implements Session {
+/**
+ * Implement this callback to modify some attribute of a session.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.6.2
+ */
+public interface SessionModifyCallback {
 
-	private final int ctxId;
-	private final int userId;
+    /**
+     * This method is called to modify a session at some appropriate time. Just call some set methods of the session object. Everything
+     * added or modified in the given session MUST be instantiated before calling this method. Do not interact with any other backend
+     * internal service within this method.
+     * @param session session that can be modified.
+     */
+    void modify(Session session);
 
-	public ITipSession(final int uid, final int ctxId) {
-		this.userId = uid;
-		this.ctxId = ctxId;
-	}
-
-	@Override
-    public int getContextId() {
-		return ctxId;
-	}
-
-	@Override
-    public String getLocalIp() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setLocalIp(final String ip) {
-		// Nothing to do
-
-	}
-
-	@Override
-    public String getLoginName() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public boolean containsParameter(final String name) {
-		// Nothing to do
-		return false;
-	}
-
-	@Override
-    public Object getParameter(final String name) {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getPassword() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getRandomToken() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSecret() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSessionID() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public int getUserId() {
-		return userId;
-	}
-
-	@Override
-    public String getUserlogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getLogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setParameter(final String name, final Object value) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getAuthId() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getHash() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setHash(final String hash) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getClient() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setClient(final String client) {
-		// Nothing to do
-
-	}
-
-    @Override
-    public boolean isTransient() {
-        return false;
-    }
-
-    @Override
-    public Set<String> getParameterNames() {
-        return Collections.emptySet();
-    }
 }

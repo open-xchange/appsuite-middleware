@@ -49,10 +49,19 @@
 
 package com.openexchange.sessionstorage.hazelcast.portable;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.apache.commons.lang.SerializationException;
+import org.apache.commons.lang.SerializationUtils;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.java.StringAppender;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.StoredSession;
 
@@ -80,6 +89,11 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_CLIENT = "client";
     public static final String PARAMETER_USER_LOGIN = "userLogin";
     public static final String PARAMETER_ALT_ID = "altId";
+
+    public static final String PARAMETER_SERIALIZABLE_PARAMETER_NAMES = "remoteSerializableParameterNames";
+
+    // must not contain a colon in every name!
+    private static final String[] PORTABLE_PARAMETERS = new String[] { "kerberosSubject", "kerberosPrincipal" };
 
     private static final long serialVersionUID = -2346327568417617677L;
 
@@ -132,6 +146,24 @@ public class PortableSession extends StoredSession implements CustomPortable {
          */
         Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
         writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
+        {
+            List<String> remoteParameterNames = new ArrayList<String>();
+            remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
+            StringAppender serializableNames = new StringAppender(':');
+            for (String parameterName : remoteParameterNames) {
+                Object value = parameters.get(parameterName);
+                if (value instanceof Serializable) {
+                    serializableNames.append(parameterName);
+                    byte[] bytes = SerializationUtils.serialize((Serializable) value);
+                    writer.writeByteArray(parameterName, bytes);
+                }
+            }
+            if (0 == serializableNames.length()) {
+                writer.writeUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES, null);
+            } else {
+                writer.writeUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES, serializableNames.toString());
+            }
+        }
     }
 
     @Override
@@ -159,6 +191,39 @@ public class PortableSession extends StoredSession implements CustomPortable {
         if (null != altId) {
             parameters.put(PARAM_ALTERNATIVE_ID, altId);
         }
+        {
+            String serializableNames = reader.readUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES);
+            if (null != serializableNames) {
+                List<String> names = parseColonString(serializableNames);
+                for (String name : names) {
+                    ByteArrayInputStream bais = null;
+                    ObjectInputStream ois = null;
+                    try {
+                        byte[] bytes = reader.readByteArray(name);
+                        bais = new ByteArrayInputStream(bytes);
+                        ois = new ObjectInputStream(bais);
+                        Object value = ois.readObject();
+                        parameters.put(name, value);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (SerializationException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (null != ois) {
+                            ois.close();
+                        }
+                        if (null != bais) {
+                            bais.close();
+                        }
+                    }
+                }
+            }
+        }
     }
 
+    private static List<String> parseColonString(String str) {
+        return Arrays.asList(str.split(":"));
+    }
 }
