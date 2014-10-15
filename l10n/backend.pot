@@ -7764,6 +7764,19 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
+#. Your password has been reseted
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/internal/ResetPasswordStrings.java:71
+msgid "Your password has been reseted"
+msgstr ""
+
+#. Your password for the following URL has been reseted to %1$s:\n\n%2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/internal/ResetPasswordStrings.java:74
+msgid ""
+"Your password for the following URL has been reseted to %1$s:\n"
+"\n"
+"%2$s"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64
 msgid "The requested share does not exist."
 msgstr ""
