@@ -71,7 +71,6 @@ public class MailNotification extends AbstractNotification<InternetAddress> {
     public static final String TYPE = MailNotification.class.getName();
 
     private final InternetAddress mailAddress;
-    private final boolean withResetPassword;
 
     /**
      * Initializes a new {@link MailNotification}.
@@ -84,23 +83,7 @@ public class MailNotification extends AbstractNotification<InternetAddress> {
      * @throws OXException If the recipient address is not a valid mail address
      */
     public MailNotification(Share share, String url, String title, String message, String recipientAddress) throws OXException {
-        this(share, url, title, message, recipientAddress, true);
-    }
-
-    /**
-     * Initializes a new {@link MailNotification}.
-     *
-     * @param share The share
-     * @param url The URL that points to the share. See {@link ShareService#generateShareURLs(java.util.List, String, String)}.
-     * @param title The shares title
-     * @param message The message (optional)
-     * @param recipientAddress The mail address of the recipient
-     * @param withResetPassword <code>true</code> to include reset-password URL; otherwise <code>false</code>
-     * @throws OXException If the recipient address is not a valid mail address
-     */
-    public MailNotification(Share share, String url, String title, String message, String recipientAddress, boolean withResetPassword) throws OXException {
         super(share, url, title, message);
-        this.withResetPassword = withResetPassword;
         if (Strings.isEmpty(recipientAddress)) {
             throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create("");
         }
@@ -115,15 +98,6 @@ public class MailNotification extends AbstractNotification<InternetAddress> {
     @Override
     public InternetAddress getTransportInfo() {
         return mailAddress;
-    }
-
-    /**
-     * Checks whether to include reset-password URL
-     *
-     * @return <code>true</code> to include reset-password URL; otherwise <code>false</code>
-     */
-    public boolean withResetPassword() {
-        return withResetPassword;
     }
 
 }
