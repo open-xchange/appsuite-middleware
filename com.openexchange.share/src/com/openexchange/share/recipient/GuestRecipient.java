@@ -69,7 +69,7 @@ public class GuestRecipient extends ShareRecipient {
 
     @Override
     public RecipientType getType() {
-        return RecipientType.GROUP;
+        return RecipientType.GUEST;
     }
 
     /**
