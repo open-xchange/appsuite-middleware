@@ -8,6 +8,10 @@
                       escape sequence
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger
 
+* 2014-10-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34962: Mail notification on state changes for organizer.
+
 * 2014-10-14 - marcus.klein@open-xchange.com
 
  - Fix for bug 34517: Put Kerberos tickets of session parameters into distributed session storage.
