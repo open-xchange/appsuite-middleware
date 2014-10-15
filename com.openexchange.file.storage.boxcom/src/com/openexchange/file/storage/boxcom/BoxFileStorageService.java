@@ -445,6 +445,10 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
             return false;
         }
 
+        @Override
+        public Set<String> getParameterNames() {
+            return parameters.keySet();
+        }
     }
 
 }
