@@ -4,6 +4,24 @@ open-xchange-oauth (7.6.2-0) unstable; urgency=medium
 
  -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 17 Sep 2014 12:36:13 +0200
 
+open-xchange-oauth (7.6.1-5) stable; urgency=low
+
+  * Fifth candidate for 7.6.1 release
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 14 Oct 2014 14:23:37 +0200
+
+open-xchange-oauth (7.6.1-4) stable; urgency=low
+
+  * Fourth candidate for 7.6.1 release
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 10 Oct 2014 14:59:19 +0200
+
+open-xchange-oauth (7.6.1-3) stable; urgency=medium
+
+  * Third release candidate for 7.6.1
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Thu, 02 Oct 2014 14:04:18 +0200
+
 open-xchange-oauth (7.6.1-2) stable; urgency=low
 
   * Second release candidate for 7.6.1

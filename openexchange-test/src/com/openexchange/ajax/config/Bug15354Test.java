@@ -87,11 +87,12 @@ public class Bug15354Test extends AbstractAJAXSession {
         assertNotNull("Aliases are null.", origAliases);
         Arrays.sort(origAliases);
         for (int i = 0; i < writer.length; i++) {
-            writer[i] = new BetaWriter(User.User1);
+            writer[i] = new BetaWriter(User.User1, true);
             thread[i] = new Thread(writer[i]);
         }
         for (int i = 0; i < thread.length; i++) {
             thread[i].start();
+            Thread.sleep(10L); // Avoid concurrent modification of last login recorder
         }
     }
 

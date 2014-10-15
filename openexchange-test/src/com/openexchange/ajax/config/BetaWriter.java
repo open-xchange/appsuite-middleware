@@ -50,14 +50,14 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
-
 import java.util.Random;
-
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 
 /**
- * {@link Runnable} that constantly writes 
+ * {@link Runnable} that constantly writes
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -67,13 +67,30 @@ public final class BetaWriter extends AttributeWriter {
 
     private final Random rand;
 
+    private final boolean ignoreConcurrentModification;
+
     public BetaWriter(User user) {
-        super(Tree.Beta, user);
-        rand = new Random(System.currentTimeMillis());
+        this(user, false);
     }
 
-	@Override
-	protected Object getValue() {
-		return B(rand.nextBoolean());
-	}
+    public BetaWriter(User user, boolean ignoreConcurrentModification) {
+        super(Tree.Beta, user);
+        rand = new Random(System.currentTimeMillis());
+        this.ignoreConcurrentModification = ignoreConcurrentModification;
+    }
+
+    @Override
+    protected Object getValue() {
+        return B(rand.nextBoolean());
+    }
+
+    @Override
+    protected Throwable handleError(Throwable t) {
+        if (ignoreConcurrentModification && t instanceof OXException && UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.equals((OXException) t)) {
+            LOG.warn(t.getMessage());
+            return null;
+        }
+
+        return t;
+    }
 }
