@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,37 @@
  *
  */
 
-package com.openexchange.passwordchange.database.osgi;
+package com.openexchange.passwordchange.osgi;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
-import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
+import com.openexchange.user.UserService;
+
 
 /**
- * {@link DatabasePasswordChangeActivator}
+ * {@link PasswordChangeActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public final class DatabasePasswordChangeActivator extends HousekeepingActivator {
+public class PasswordChangeActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link DatabasePasswordChangeActivator}
+     * Initializes a new {@link PasswordChangeActivator}.
      */
-    public DatabasePasswordChangeActivator() {
+    public PasswordChangeActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { UserService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        // Track BasicPasswordChangeService and re-distribute it as regular password change service
-        final BundleContext context = this.context;
-        track(BasicPasswordChangeService.class, new ServiceTrackerCustomizer<BasicPasswordChangeService, BasicPasswordChangeService>() {
-
-            @Override
-            public BasicPasswordChangeService addingService(ServiceReference<BasicPasswordChangeService> reference) {
-                BasicPasswordChangeService basicService = context.getService(reference);
-
-                // Re-Distribute as regular password change service
-                registerService(PasswordChangeService.class, basicService);
-
-                return basicService;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<BasicPasswordChangeService> reference, BasicPasswordChangeService service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(ServiceReference<BasicPasswordChangeService> reference, BasicPasswordChangeService service) {
-                unregisterServices();
-                context.ungetService(reference);
-            }
-        });
-        openTrackers();
-    }
-
-    @Override
-    public <S> void registerService(Class<S> clazz, S service) {
-        super.registerService(clazz, service);
-    }
-
-    @Override
-    public void unregisterServices() {
-        super.unregisterServices();
+        registerService(BasicPasswordChangeService.class, new DefaultBasicPasswordChangeService());
     }
 
 }
