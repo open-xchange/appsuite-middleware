@@ -64,6 +64,7 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/noreply.properties
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog

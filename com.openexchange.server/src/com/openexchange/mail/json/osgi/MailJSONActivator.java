@@ -72,6 +72,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -95,6 +96,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
+import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -129,13 +131,14 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, ContactStorage.class };
+        return new Class<?>[] { ContactService.class, ContactStorage.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final ServiceLookup serviceLookup = new ExceptionOnAbsenceServiceLookup(this);
         SERVICES.set(serviceLookup);
+        NoReplyConfig.init(getService(ConfigurationService.class));
 
         final BundleContext context = this.context;
 
@@ -248,6 +251,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         DefaultMailAttachmentStorageRegistry.dropInstance();
+        NoReplyConfig.release();
         SERVICES.set(null);
     }
 
