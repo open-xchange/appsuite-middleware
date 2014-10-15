@@ -50,7 +50,6 @@
 package com.openexchange.contact.storage.rdb.sql;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
@@ -82,6 +80,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
@@ -200,6 +199,27 @@ public class Executor {
             closeSQLStuff(resultSet, stmt);
         }
     }
+
+    public Contact selectSingleGuestContact(Connection connection, Table table, int contextID, int userID, ContactField[] fields)
+        throws SQLException, OXException {
+    StringBuilder stringBuilder = new StringBuilder(256);
+    stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+        .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
+        .append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=? AND ")
+        .append(Mappers.CONTACT.get(ContactField.INTERNAL_USERID).getColumnLabel()).append("=?;");
+    PreparedStatement stmt = null;
+    ResultSet resultSet = null;
+    try {
+        stmt = connection.prepareStatement(stringBuilder.toString());
+        stmt.setInt(1, contextID);
+        stmt.setInt(2, FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        stmt.setInt(3, userID);
+        resultSet = logExecuteQuery(stmt);
+        return new ContactReader(contextID, connection, resultSet).readContact(fields);
+    } finally {
+        closeSQLStuff(resultSet, stmt);
+    }
+}
 
     /**
      *

@@ -53,6 +53,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -122,7 +123,8 @@ public final class GetAction extends AbstractUserAction {
             ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
             contact = contactService.getUser(session, userId, contactFields);
         } else {
-            contact = getVirtualContact(session, user);
+            ContactUserStorage contactUserStorage = ServiceRegistry.getInstance().getService(ContactUserStorage.class, true);
+            contact = contactUserStorage.getGuestContact(session.getContextId(), userId, contactFields);
         }
         /*
          * Return appropriate result

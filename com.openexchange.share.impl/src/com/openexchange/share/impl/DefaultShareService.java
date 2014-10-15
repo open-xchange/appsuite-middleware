@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -547,7 +546,6 @@ public class DefaultShareService implements ShareService {
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, Session session) throws OXException {
         UserService userService = services.getService(UserService.class);
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
-        ContactService contactService = services.getService(ContactService.class);
         if (GuestRecipient.class.isInstance(recipient) && services.getService(
             ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", true)) {
             /*
@@ -587,14 +585,13 @@ public class DefaultShareService implements ShareService {
         Contact contact = new Contact();
         contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
         contact.setCreatedBy(sharingUser.getId());
+        contact.setDisplayName(guestUser.getDisplayName());
+        contact.setEmail1(guestUser.getMail());
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
         int guestID = userService.createUser(connection, context, guestUser);
+        guestUser.setId(guestID);
         contact.setInternalUserId(guestID);
-        contactService.updateContact(session,
-            String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID),
-            String.valueOf(contactId),
-            contact,
-            new Date());
+        contactUserStorage.updateGuestContact(context.getContextId(), contactId, contact, new Date(), connection);
         services.getService(UserPermissionService.class).saveUserPermissionBits(
             connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
         if (AnonymousRecipient.class.isInstance(recipient)) {

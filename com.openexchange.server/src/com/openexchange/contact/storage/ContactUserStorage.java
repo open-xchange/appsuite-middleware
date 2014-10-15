@@ -52,6 +52,7 @@ package com.openexchange.contact.storage;
 import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 
 
@@ -65,6 +66,7 @@ public interface ContactUserStorage extends ContactStorage {
 
     /**
      * Creates a contact for a guest user
+     *
      * @param contextId The context id
      * @param contact The contact
      * @param con Database connection
@@ -75,6 +77,7 @@ public interface ContactUserStorage extends ContactStorage {
 
     /**
      * Deletes a contact for a guest user
+     *
      * @param contextId The context id
      * @param contactId The contact id
      * @param lastRead Time when the contact was last read from storage
@@ -82,5 +85,27 @@ public interface ContactUserStorage extends ContactStorage {
      * @throws OXException On error
      */
     void deleteGuestContact(int contextId, int contactId, Date lastRead, Connection con) throws OXException;
+
+    /**
+     * Updates a contact for a guest user
+     *
+     * @param contextId The context id
+     * @param contactId The contact id
+     * @param contact The updated contact
+     * @param lastRead Time when the contact was last read from storage
+     * @param con Database connection
+     * @throws OXException On error
+     */
+    void updateGuestContact(int contextId, int contactId, Contact contact, Date lastRead, Connection con) throws OXException;
+
+    /**
+     * Gets the guest' contact
+     * @param contextId The context id
+     * @param guestId The guest id
+     * @param contactFields Fields to fill in the contact
+     * @return The contact
+     * @throws OXException On error
+     */
+    Contact getGuestContact(int contextId, int guestId, ContactField[] contactFields) throws OXException;
 
 }
