@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -260,7 +261,7 @@ public class DefaultShareService implements ShareService {
             List<Share> sharesToCreate = new ArrayList<Share>();
             for (ShareRecipient recipient : recipients) {
                 int permissionBits = ShareTool.getUserPermissionBitsForTargets(recipient, targets);
-                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient);
+                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, session);
                 guestUsers.add(guestUser);
                 for (ShareTarget target : targets) {
                     List<Share> sharesPerTarget = shares.get(target);
@@ -543,9 +544,10 @@ public class DefaultShareService implements ShareService {
      * @return The guest user
      * @throws OXException
      */
-    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
+    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, Session session) throws OXException {
         UserService userService = services.getService(UserService.class);
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+        ContactService contactService = services.getService(ContactService.class);
         if (GuestRecipient.class.isInstance(recipient) && services.getService(
             ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", true)) {
             /*
@@ -582,15 +584,17 @@ public class DefaultShareService implements ShareService {
         } else {
             throw new UnsupportedOperationException("unsupported share recipient: " + recipient);
         }
-        int guestID = userService.createUser(connection, context, guestUser);
         Contact contact = new Contact();
         contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
         contact.setCreatedBy(sharingUser.getId());
-        contact.setInternalUserId(guestID);
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
-        guestUser.setId(guestID);
-        guestUser.setContactId(contactId);
-        userService.updateUser(guestUser, context);
+        int guestID = userService.createUser(connection, context, guestUser);
+        contact.setInternalUserId(guestID);
+        contactService.updateContact(session,
+            String.valueOf(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID),
+            String.valueOf(contactId),
+            contact,
+            new Date());
         services.getService(UserPermissionService.class).saveUserPermissionBits(
             connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
         if (AnonymousRecipient.class.isInstance(recipient)) {
