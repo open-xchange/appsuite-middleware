@@ -49,8 +49,8 @@
 
 package com.openexchange.share.servlet.internal;
 
-import javax.mail.Address;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 import com.openexchange.exception.OXException;
@@ -58,6 +58,10 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.config.NoReplyConfig;
+import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.notification.ShareNotification;
@@ -83,24 +87,40 @@ public class ResetPasswordShareNotificationHandler implements ShareNotificationH
     public <T extends ShareNotification<?>> void notify(T notification, Session session) throws OXException {
         ResetPasswordShareNotification resetPasswordNotification = (ResetPasswordShareNotification) notification;
 
-        MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
-        try {
-            mimeMessage.addFrom(new Address[] { resetPasswordNotification.getSender() });
-            mimeMessage.addRecipient(RecipientType.TO, resetPasswordNotification.getTransportInfo());
-            mimeMessage.addHeader("X-Open-Xchange-Share", resetPasswordNotification.getUrl());
-            mimeMessage.setSubject(resetPasswordNotification.getTitle(), "UTF-8");
+        NoReplyConfig noReplyConfig = NoReplyConfig.getInstance(session.getUserId(), session.getContextId());
+        if (noReplyConfig.isValid()) {
+            // Compose message
+            InternetAddress address = noReplyConfig.getAddress();
+            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+            try {
+                mimeMessage.setFrom(address);
+                mimeMessage.addRecipient(RecipientType.TO, resetPasswordNotification.getTransportInfo());
+                mimeMessage.addHeader("X-Open-Xchange-Share", resetPasswordNotification.getUrl());
+                mimeMessage.setSubject(resetPasswordNotification.getTitle(), "UTF-8");
 
-            mimeMessage.setText(resetPasswordNotification.getMessage(), "UTF-8", "plain");
-            mimeMessage.saveChanges();
-        } catch (MessagingException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+                mimeMessage.setText(resetPasswordNotification.getMessage(), "UTF-8", "plain");
+                mimeMessage.saveChanges();
+            } catch (MessagingException e) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
 
-        MailTransport transport = MailTransport.getInstance(session);
-        try {
-            transport.sendMailMessage(new ContentAwareComposedMailMessage(mimeMessage, session, session.getContextId()), ComposeType.NEW);
-        } finally {
-            transport.close();
+            // Transport message
+            TransportProvider transportProvider = com.openexchange.mail.transport.TransportProviderRegistry.getTransportProvider("smtp");
+            MailTransport mailTransport = transportProvider.createNewMailTransport(session);
+            try {
+                TransportConfig transportConfig = mailTransport.getTransportConfig();
+                transportConfig.setLogin(noReplyConfig.getLogin());
+                transportConfig.setPassword(noReplyConfig.getPassword());
+                transportConfig.setServer(noReplyConfig.getServer());
+                transportConfig.setPort(noReplyConfig.getPort());
+                SecureMode secureMode = noReplyConfig.getSecureMode();
+                transportConfig.setRequireTls(NoReplyConfig.SecureMode.TLS.equals(secureMode));
+                transportConfig.setSecure(NoReplyConfig.SecureMode.SSL.equals(secureMode));
+
+                mailTransport.sendMailMessage(new ContentAwareComposedMailMessage(mimeMessage, session, session.getContextId()), ComposeType.NEW);
+            } finally {
+                try { mailTransport.close(); } catch (Exception e) { /* ignore */ }
+            }
         }
     }
 

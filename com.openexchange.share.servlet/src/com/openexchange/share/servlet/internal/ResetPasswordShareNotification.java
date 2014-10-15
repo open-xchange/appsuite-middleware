@@ -67,7 +67,6 @@ public class ResetPasswordShareNotification implements ShareNotification<Interne
     private final String title;
     private final String message;
     private final InternetAddress recipient;
-    private final InternetAddress sender;
 
     /**
      * Initializes a new {@link ResetPasswordShareNotification}.
@@ -78,14 +77,13 @@ public class ResetPasswordShareNotification implements ShareNotification<Interne
      * @param message The message text
      * @param recipient The address to send to
      */
-    public ResetPasswordShareNotification(Share share, String url, String title, String message, InternetAddress recipient, InternetAddress sender) {
+    public ResetPasswordShareNotification(Share share, String url, String title, String message, InternetAddress recipient) {
         super();
         this.share = share;
         this.url = url;
         this.title = title;
         this.message = message;
         this.recipient = recipient;
-        this.sender = sender;
     }
 
     @Override
@@ -111,15 +109,6 @@ public class ResetPasswordShareNotification implements ShareNotification<Interne
     @Override
     public InternetAddress getTransportInfo() {
         return recipient;
-    }
-
-    /**
-     * Gets the sender
-     *
-     * @return The sender
-     */
-    public InternetAddress getSender() {
-        return sender;
     }
 
 }

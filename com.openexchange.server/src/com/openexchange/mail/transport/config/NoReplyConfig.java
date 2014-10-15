@@ -256,6 +256,15 @@ public final class NoReplyConfig {
     }
 
     /**
+     * Checks if this no-reply configuration is valid
+     *
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    public boolean isValid() {
+        return (null != address) && (null != login) && (null != password) && (null != server) && (port > 0) && (port < 65536) && (null != secureMode);
+    }
+
+    /**
      * Gets the address
      *
      * @return The address

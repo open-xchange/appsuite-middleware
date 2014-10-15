@@ -55,7 +55,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.List;
 import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -160,14 +159,14 @@ public class ResetPasswordServlet extends HttpServlet {
 
             // Notify
             ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-            List<String> urls = shareService.generateShareURLs(Collections.singletonList(share), Tools.getProtocol(request), request.getServerName());
+            String url = shareService.generateShareURLs(Collections.singletonList(share), Tools.getProtocol(request), request.getServerName()).get(0);
 
             StringHelper stringHelper = StringHelper.valueOf(guest.getLocale());
             String title = stringHelper.getString(ResetPasswordStrings.TITLE_RESET_PASSWORD);
-            String message = String.format(stringHelper.getString(ResetPasswordStrings.MESSAGE_RESET_PASSWORD), newPassword, urls.get(0));
+            String message = String.format(stringHelper.getString(ResetPasswordStrings.MESSAGE_RESET_PASSWORD), newPassword, url);
 
-            ResetPasswordShareNotification notification = new ResetPasswordShareNotification(share, urls.get(0), title, message, new QuotedInternetAddress(mail), null);
-            notificationService.notify(notification, new ResetPasswordSession(share.getGuest(), share.getContextID(), request));
+            ResetPasswordShareNotification notification = new ResetPasswordShareNotification(share, url, title, message, new QuotedInternetAddress(mail));
+            notificationService.notify(notification, new ResetPasswordSession(share.getGuest(), share.getContextID(), newPassword, request));
         } catch (RateLimitedException e) {
             response.setContentType("text/plain; charset=UTF-8");
             if(e.getRetryAfter() > 0) {

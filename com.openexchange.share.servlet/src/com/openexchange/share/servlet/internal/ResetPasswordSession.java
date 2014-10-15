@@ -49,6 +49,8 @@
 
 package com.openexchange.share.servlet.internal;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.session.Session;
 
@@ -64,6 +66,7 @@ public class ResetPasswordSession implements Session {
     private final int contextId;
     private final int userId;
     private final HttpServletRequest request;
+    private final ConcurrentMap<String, Object> parameters;
 
     /**
      * Initializes a new {@link ResetPasswordSession}.
@@ -72,11 +75,12 @@ public class ResetPasswordSession implements Session {
      * @param contextId The context identifier
      * @param request The associated HTTP request
      */
-    public ResetPasswordSession(int userId, int contextId, HttpServletRequest request) {
+    public ResetPasswordSession(int userId, int contextId, String password, HttpServletRequest request) {
         super();
         this.contextId = contextId;
         this.userId = userId;
         this.request = request;
+        parameters = new ConcurrentHashMap<String, Object>(4);
     }
 
     @Override
@@ -108,14 +112,12 @@ public class ResetPasswordSession implements Session {
 
     @Override
     public boolean containsParameter(String name) {
-        // Nothing to do
-        return false;
+        return null == name ? false : parameters.containsKey(name);
     }
 
     @Override
     public Object getParameter(String name) {
-        // Nothing to do
-        return null;
+        return null == name ? null : parameters.get(name);
     }
 
     @Override
@@ -156,7 +158,13 @@ public class ResetPasswordSession implements Session {
 
     @Override
     public void setParameter(String name, Object value) {
-        // Nothing to do
+        if (null != name) {
+            if (null == value) {
+                parameters.remove(value);
+            } else {
+                parameters.put(name, value);
+            }
+        }
     }
 
     @Override
