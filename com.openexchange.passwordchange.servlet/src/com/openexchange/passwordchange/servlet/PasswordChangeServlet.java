@@ -203,12 +203,13 @@ public final class PasswordChangeServlet extends SessionServlet {
             if (contextService == null) {
                 throw ServiceExceptionCode.absentService(ContextService.class);
             }
-            Context context = contextService.getContext(session.getContextId());
 
             UserService userService = services.getService(UserService.class);
             if (null == userService) {
                 throw ServiceExceptionCode.absentService(UserService.class);
             }
+
+            Context context = contextService.getContext(session.getContextId());
             User user = userService.getUser(session.getUserId(), context);
 
             if (user.isGuest()) {
