@@ -49,149 +49,48 @@
 
 package com.openexchange.passwordchange.servlet.osgi;
 
-import static com.openexchange.passwordchange.servlet.services.PasswordChangeServletServiceRegistry.getServiceRegistry;
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.servlet.ServletException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.passwordchange.servlet.PasswordChangeServlet;
+import com.openexchange.user.UserService;
 
 /**
  * {@link PasswordChangeServletActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PasswordChangeServletActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeServletActivator.class);
-
-    private static final String PWC_SRVLT_ALIAS_APPENDIX = "passwordchange";
-
-    private final AtomicBoolean registered;
+public class PasswordChangeServletActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link PasswordChangeServletActivator}
      */
     public PasswordChangeServletActivator() {
         super();
-        registered = new AtomicBoolean();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, PasswordChangeService.class, ContextService.class, DispatcherPrefixService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        /*
-         * Add available service to registry
-         */
-        getServiceRegistry().addService(clazz, getService(clazz));
-        if (getServiceRegistry().size() == new Class<?>[] { HttpService.class, PasswordChangeService.class, ContextService.class, DispatcherPrefixService.class }.length) {
-            /*
-             * All needed services available: Register servlet
-             */
-            try {
-                registerServlet();
-            } catch (final ServletException e) {
-                LOG.error("", e);
-            } catch (final NamespaceException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        unregisterServlet();
-        /*
-         * Remove unavailable service from registry
-         */
-        getServiceRegistry().removeService(clazz);
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
-            /*
-             * Register servlet
-             */
-            registerServlet();
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
+        Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
+        ServletRegisterer registerer = new ServletRegisterer(this, context);
+        track(filter, registerer);
 
+        trackService(ContextService.class);
+        trackService(UserService.class);
+
+        trackService(PasswordChangeService.class);
+        trackService(BasicPasswordChangeService.class);
+
+        openTrackers();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            /*
-             * Unregister servlet
-             */
-            unregisterServlet();
-            /*
-             * Clear service registry
-             */
-            getServiceRegistry().clearRegistry();
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
-
-    }
-
-    private void registerServlet() throws ServletException, NamespaceException {
-        if (registered.compareAndSet(false, true)) {
-            final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-            if (httpService == null) {
-                LOG.error("HTTP service is null. Password change servlet cannot be registered");
-            } else {
-                /*
-                 * Register servlet
-                 */
-                httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + PWC_SRVLT_ALIAS_APPENDIX, new PasswordChangeServlet(), null, null);
-                LOG.info("Password change servlet successfully registered");
-            }
-        }
-    }
-
-    private void unregisterServlet() {
-        if (registered.compareAndSet(true, false)) {
-            /*
-             * Unregister servlet
-             */
-            final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-            if (httpService == null) {
-                LOG.error("HTTP service is null. Password change servlet cannot be unregistered");
-            } else {
-                /*
-                 * Unregister servlet
-                 */
-                httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + PWC_SRVLT_ALIAS_APPENDIX);
-                LOG.info("Password change servlet successfully unregistered");
-            }
-        }
-    }
 }
