@@ -160,6 +160,7 @@ public class ShareTool {
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        perms.add(Permission.EDIT_PASSWORD);
         addModulePermissions(perms, module);
         return Permission.toBits(perms);
     }
@@ -178,6 +179,7 @@ public class ShareTool {
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        perms.add(Permission.EDIT_PASSWORD);
         for (Share share : shares) {
             addModulePermissions(perms, share.getModule());
         }
@@ -198,6 +200,7 @@ public class ShareTool {
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        perms.add(Permission.EDIT_PASSWORD);
         for (ShareTarget target : targets) {
             addModulePermissions(perms, target.getModule());
         }
