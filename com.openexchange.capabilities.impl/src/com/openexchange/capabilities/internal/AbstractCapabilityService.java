@@ -90,6 +90,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -312,7 +313,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (null != cachedCapabilitySet) {
                 capabilities = cachedCapabilitySet;
                 if (computeCapabilityFilters) {
-                    applyUIFilter(capabilities);
+                    applyUIFilter(capabilities, isGuest(serverSession));
                 }
                 return capabilities;
             }
@@ -509,7 +510,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
 
         if (computeCapabilityFilters) {
-            applyUIFilter(capabilities);
+            applyUIFilter(capabilities, isGuest(serverSession));
         }
 
 //        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -520,12 +521,33 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return capabilities;
     }
 
+    protected boolean isGuest(ServerSession session) throws OXException {
+        if (null == session || session.isAnonymous()) {
+            return false;
+        }
+        UserService userService = services.getOptionalService(UserService.class);
+        return null == userService ? false : userService.getUser(session.getUserId(), session.getContextId()).isGuest();
+    }
+
     /**
      * Applies the filter on capabilities for JSON requests and if services (e. g. PasswordChangeService) are not available.
      *
      * @param capabilitiesToFilter - the capabilities the filter should be applied on
      */
     protected void applyUIFilter(CapabilitySet capabilitiesToFilter) {
+        applyUIFilter(capabilitiesToFilter, false);
+    }
+
+    /**
+     * Applies the filter on capabilities for JSON requests and if services (e. g. PasswordChangeService) are not available.
+     *
+     * @param capabilitiesToFilter - the capabilities the filter should be applied on
+     * @param isGuest <code>true</code> if the associated user is a guest; otherwise <code>false</code>
+     */
+    protected void applyUIFilter(CapabilitySet capabilitiesToFilter, boolean isGuest) {
+        if (isGuest) {
+            return;
+        }
         final PermissionAvailabilityServiceRegistry registry = this.registry;
         if (registry != null) {
             final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
