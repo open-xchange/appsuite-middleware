@@ -76,7 +76,7 @@ public class ShareServlet extends HttpServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServlet.class);
 
-    // ----------------------------------------------------------------------------------------------------------- //
+    // --------------------------------------------------------------------------------------------------------------------------------- //
 
     private final RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry;
 
@@ -94,13 +94,10 @@ public class ShareServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            /*
-             * Create a new HttpSession if it is missing
-             */
+            // Create a new HttpSession if it is missing
             request.getSession(true);
-            /*
-             * Extract share from path info
-             */
+
+            // Extract share from path info
             Share share;
             {
                 String pathInfo = request.getPathInfo();
@@ -113,20 +110,22 @@ public class ShareServlet extends HttpServlet {
                 }
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
             }
-            /*
-             * Determine appropriate ShareHandler and handle the share
-             */
+
+            // Determine appropriate ShareHandler and handle the share
             for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
                 if (handler.handle(share, request, response)) {
                     return;
                 }
             }
-            /*
-             * No appropriate ShareHandler available
-             */
+
+            // No appropriate ShareHandler available
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
         } catch (RateLimitedException e) {
-            response.sendError(429, e.getMessage());
+            response.setContentType("text/plain; charset=UTF-8");
+            if(e.getRetryAfter() > 0) {
+                response.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
+            }
+            response.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (OXException e) {
             LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

@@ -145,13 +145,11 @@ public final class ShareServletUtils {
      * @return The token, or <code>null</code> if no token could be extracted
      */
     public static String extractToken(String pathInfo) {
-        if (false == Strings.isEmpty(pathInfo)) {
-            Matcher matcher = PATH_PATTERN.matcher(pathInfo);
-            if (matcher.matches()) {
-                return matcher.group(1);
-            }
+        if (Strings.isEmpty(pathInfo)) {
+            return null;
         }
-        return null;
+        Matcher matcher = PATH_PATTERN.matcher(pathInfo);
+        return matcher.matches() ? matcher.group(1) : null;
     }
 
 }

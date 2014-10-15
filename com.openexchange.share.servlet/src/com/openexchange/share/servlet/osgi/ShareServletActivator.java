@@ -54,6 +54,7 @@ import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -61,10 +62,12 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.servlet.handler.AbstractShareHandler;
 import com.openexchange.share.servlet.handler.LoginShareHandler;
 import com.openexchange.share.servlet.handler.RedirectingShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandler;
+import com.openexchange.share.servlet.internal.ResetPasswordShareNotificationHandler;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
@@ -93,11 +96,17 @@ public class ShareServletActivator extends HousekeepingActivator {
         RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry = new RankingAwareNearRegistryServiceTracker<ShareHandler>(context, ShareHandler.class);
         rememberTracker(shareHandlerRegistry);
         trackService(HostnameService.class);
+        trackService(DatabaseService.class);
 
-        // Dependently registers Servlet
+        // Dependently registers Servlets
         {
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
             ServletRegisterer registerer = new ServletRegisterer(shareHandlerRegistry, context);
+            track(filter, registerer);
+        }
+        {
+            Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
+            ResetPasswordServletRegisterer registerer = new ResetPasswordServletRegisterer(context);
             track(filter, registerer);
         }
 
@@ -117,6 +126,9 @@ public class ShareServletActivator extends HousekeepingActivator {
             ShareHandler handler = new LoginShareHandler();
             registerService(ShareHandler.class, handler, handler.getRanking());
         }
+
+        // Register notification handler
+        registerService(ShareNotificationHandler.class, new ResetPasswordShareNotificationHandler());
     }
 
     @Override

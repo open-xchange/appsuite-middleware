@@ -57,6 +57,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
 
@@ -70,6 +71,18 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
     private static final long serialVersionUID = 7469781321067672927L;
 
     private final MimeMessage content;
+
+    /**
+     * Initializes a new {@link ContentAwareComposedMailMessage}.
+     *
+     * @param content The content object
+     * @param session The session
+     * @param contextId The context identifier
+     * @throws OXException If initialization fails
+     */
+    public ContentAwareComposedMailMessage(final MimeMessage content, final Session session, final int contextId) throws OXException {
+        this(content, session, ContextStorage.getStorageContext(contextId));
+    }
 
     /**
      * Initializes a new {@link ContentAwareComposedMailMessage}.
