@@ -103,14 +103,15 @@ public class ShareServlet extends HttpServlet {
              */
             Share share;
             {
-                String token = ShareServletUtils.extractToken(request.getPathInfo());
+                String pathInfo = request.getPathInfo();
+                String token = ShareServletUtils.extractToken(pathInfo);
                 share = null == token ? null : ShareServiceLookup.getService(ShareService.class, true).resolveToken(token);
                 if (null == share) {
-                    LOG.debug("No share found at '{}'", request.getPathInfo());
+                    LOG.debug("No share found at '{}'", pathInfo);
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
-                LOG.debug("Successfully resolved token at '{}' to {}", request.getPathInfo(), share);
+                LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
             }
             /*
              * Determine appropriate ShareHandler and handle the share
