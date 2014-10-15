@@ -15,6 +15,7 @@ Import-Package: com.openexchange.ajax.fields,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.login,
  com.openexchange.osgi,
@@ -34,4 +35,6 @@ Import-Package: com.openexchange.ajax.fields,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
+Require-Bundle: com.openexchange.sessionstorage.hazelcast;resolution:=optional
 Export-Package: com.openexchange.kerberos
+Eclipse-RegisterBuddy: com.openexchange.sessionstorage.hazelcast

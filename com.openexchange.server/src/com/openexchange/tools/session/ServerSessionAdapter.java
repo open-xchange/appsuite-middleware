@@ -50,6 +50,7 @@
 package com.openexchange.tools.session;
 
 import static com.openexchange.osgi.util.ServiceCallWrapper.doServiceCall;
+import java.util.Set;
 import org.apache.commons.lang.Validate;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
@@ -485,6 +486,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     @Override
     public int hashCode() {
         return session().hashCode();
+    }
+
+    @Override
+    public Set<String> getParameterNames() {
+        return session().getParameterNames();
     }
 
     private static Context loadContext(final int contextId) throws OXException {

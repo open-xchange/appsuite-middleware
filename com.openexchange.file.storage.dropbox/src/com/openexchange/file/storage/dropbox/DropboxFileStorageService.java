@@ -445,6 +445,10 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
             return false;
         }
 
+        @Override
+        public Set<String> getParameterNames() {
+            return parameters.keySet();
+        }
     }
 
 }

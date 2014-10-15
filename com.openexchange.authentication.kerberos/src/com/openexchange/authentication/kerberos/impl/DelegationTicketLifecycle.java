@@ -50,6 +50,7 @@
 package com.openexchange.authentication.kerberos.impl;
 
 import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
+import static com.openexchange.kerberos.KerberosUtils.disposeSubject;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.service.event.Event;
@@ -131,7 +132,8 @@ public final class DelegationTicketLifecycle implements LoginHandlerService, Eve
         }
         final ClientPrincipal principal = (ClientPrincipal) session.getParameter(SESSION_PRINCIPAL);
         if (null != principal) {
-            principal.dispose();
+            disposeSubject(principal.getClientSubject());
+            disposeSubject(principal.getDelegateSubject());
         }
     }
 }
