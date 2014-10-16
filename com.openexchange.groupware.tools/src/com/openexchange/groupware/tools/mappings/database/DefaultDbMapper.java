@@ -93,6 +93,17 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
     }
 
     @Override
+    public O fromResultSet(final ResultSet resultSet, final E[] fields, String columnLabelPrefix) throws OXException, SQLException {
+        final O object = this.newInstance();
+        for (final E field : fields) {
+            DbMapping<? extends Object, O> mapping = get(field);
+            String columnLabel = null == columnLabelPrefix ? mapping.getColumnLabel() : columnLabelPrefix + mapping.getColumnLabel();
+            mapping.set(resultSet, object, columnLabel);
+        }
+        return object;
+    }
+
+    @Override
     public List<O> listFromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException {
         List<O> list = new ArrayList<O>();
         while (resultSet.next()) {

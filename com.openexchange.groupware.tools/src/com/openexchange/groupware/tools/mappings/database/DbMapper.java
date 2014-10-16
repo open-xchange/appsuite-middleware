@@ -90,6 +90,20 @@ public interface DbMapper<O, E extends Enum<E>> extends Mapper<O, E> {
     O fromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException;
 
     /**
+     * Creates a new object and sets all properties of the supplied fields
+     * from the result set.
+     *
+     * @param resultSet the result set to create the object from
+     * @param fields the fields present in the result set
+     * @param columnLabelPrefix A prefix to use for the column names when getting the results from the columns in the result set,
+     *                          typically something like <code>ab.</code> when getting joined results
+     * @return the object
+     * @throws OXException
+     * @throws SQLException
+     */
+    O fromResultSet(ResultSet resultSet, E[] fields, String columnLabelPrefix) throws OXException, SQLException;
+
+    /**
      * Creates a list of new objects and sets all properties of the supplied
      * fields from the result set.
      *

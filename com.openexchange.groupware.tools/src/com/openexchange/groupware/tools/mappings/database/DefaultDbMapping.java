@@ -106,13 +106,18 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
 		}
 	}
 
-	@Override
-	public void set(final ResultSet resultSet, final O object) throws SQLException, OXException {
-		final T value = this.get(resultSet);
-		if (false == resultSet.wasNull()) {
-			this.set(object, value);
-		}
-	}
+    @Override
+    public void set(final ResultSet resultSet, final O object) throws SQLException, OXException {
+        set(resultSet, object, getColumnLabel());
+    }
+
+    @Override
+    public void set(final ResultSet resultSet, final O object, String columnLabel) throws SQLException, OXException {
+        final T value = this.get(resultSet, columnLabel);
+        if (false == resultSet.wasNull()) {
+            this.set(object, value);
+        }
+    }
 
 	@Override
 	public String getColumnLabel() {

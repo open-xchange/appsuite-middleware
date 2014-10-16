@@ -2213,7 +2213,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 			}
 
 			@Override
-			public DistributionListEntryObject[] get(ResultSet resultSet) throws SQLException {
+			public DistributionListEntryObject[] get(ResultSet resultSet, String columnLabel) throws SQLException {
 				return null;
 			}
 
@@ -2458,8 +2458,8 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 			}
 
 			@Override
-			public byte[] get(ResultSet resultSet) throws SQLException {
-				return resultSet.getBytes(this.getColumnLabel());
+			public byte[] get(ResultSet resultSet, String columnLabel) throws SQLException {
+				return resultSet.getBytes(columnLabel);
 			}
 
 			@Override

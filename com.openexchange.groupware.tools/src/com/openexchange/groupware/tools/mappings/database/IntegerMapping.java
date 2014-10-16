@@ -66,7 +66,7 @@ public abstract class IntegerMapping<O> extends DefaultDbMapping<Integer, O> {
 	}
 
 	@Override
-	public Integer get(final ResultSet resultSet) throws SQLException {
+	public Integer get(final ResultSet resultSet, String columnLabel) throws SQLException {
 		return resultSet.getInt(this.getColumnLabel());
 	}
 

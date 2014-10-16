@@ -52,7 +52,6 @@ package com.openexchange.groupware.tools.mappings.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import com.openexchange.exception.OXException;
 
 /**
@@ -68,8 +67,8 @@ public abstract class VarCharMapping<O> extends DefaultDbMapping<String, O> {
 	}
 
 	@Override
-	public String get(final ResultSet resultSet) throws SQLException {
-		return resultSet.getString(this.getColumnLabel());
+	public String get(final ResultSet resultSet, String columnLabel) throws SQLException {
+		return resultSet.getString(columnLabel);
 	}
 
 	@Override

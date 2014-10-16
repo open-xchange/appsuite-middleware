@@ -69,9 +69,9 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 	}
 
 	@Override
-	public Date get(final ResultSet resultSet) throws SQLException {
+	public Date get(final ResultSet resultSet, String columnLabel) throws SQLException {
 	    try {
-	        return resultSet.getTimestamp(this.getColumnLabel());
+	        return resultSet.getTimestamp(columnLabel);
 	    } catch (SQLException e) {
 	        if ("S1009".equals(e.getSQLState())) {
 	            /*
