@@ -229,7 +229,7 @@ public final class LoginPerformer {
                     throw ServiceExceptionCode.absentService(SessiondService.class);
                 }
             }
-            AddSessionParameterImpl addSession = new AddSessionParameterImpl(username, request, user, ctx);
+            AddSessionParameterImpl addSession = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
             if (SessionEnhancement.class.isInstance(authed)) {
                 addSession.setCallback(new SessionModifyCallback() {
                     @Override
