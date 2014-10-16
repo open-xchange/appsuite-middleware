@@ -8,6 +8,7 @@
                       escape sequence
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger
  - Fix for bug 34944: Ensure every threads holds its own IDBasedFileAccess instance
+ - Fix for bug 34975: Log an exceeded rate limit only once per minute
 
 * 2014-10-15 - martin.herfurth@open-xchange.com
 

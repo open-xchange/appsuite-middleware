@@ -62,6 +62,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -398,7 +399,7 @@ public final class RateLimiter {
 
     private static volatile Integer maxRateTimeWindow;
 
-    public static int maxRateTimeWindow() {
+    private static int maxRateTimeWindow() {
         Integer tmp = maxRateTimeWindow;
         if (null == tmp) {
             synchronized (RateLimiter.class) {
@@ -455,32 +456,35 @@ public final class RateLimiter {
 
     private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1", "::1")));
 
+    private static final String LINE_SEP = System.getProperty("line.separator");
+    private static final long LAST_RATE_LIMIT_LOG_THRESHOLD = 60000L;
+
     /**
      * Checks given request if possibly rate limited.
      *
      * @param servletRequest The request to check
-     * @return <code>true</code> if not rate limited; otherwise <code>false</code> if rate limited
+     * @throws RateLimitedException If associated request is rate limited
      */
-    public static boolean checkRequest(final HttpServletRequest servletRequest) {
+    public static void checkRequest(HttpServletRequest servletRequest) {
         int maxRatePerMinute = maxRate();
         if (maxRatePerMinute <= 0) {
-            return true;
+            return;
         }
         final int maxRateTimeWindow = maxRateTimeWindow();
         if (maxRateTimeWindow <= 0) {
-            return true;
+            return;
         }
         if (omitLocals() && LOCALS.contains(servletRequest.getServerName())) {
-            return true;
+            return;
         }
         if (lenientCheckForRequest(servletRequest)) {
-            return true;
+            return;
             //maxRatePerMinute <<= 2;
         }
         final ConcurrentMap<Key, Rate> bucketMap = bucketMap();
         if (null == bucketMap) {
             // Not yet fully initialized
-            return true;
+            return;
         }
         final Key key = new Key(servletRequest, servletRequest.getHeader("User-Agent"));
         while (true) {
@@ -498,9 +502,26 @@ public final class RateLimiter {
                 // Deprecated
                 bucketMap.remove(key, rate);
             } else {
-                return (Result.SUCCESS == res);
+                if (Result.SUCCESS == res) {
+                    return;
+                }
+
+                // Rate limit exceeded
+                logRateLimitExceeded(rate, servletRequest);
+                throw new RateLimitedException("429 Too Many Requests", maxRateTimeWindow / 1000);
             }
             // Otherwise retry
+        }
+    }
+
+    private static void logRateLimitExceeded(Rate rate, HttpServletRequest servletRequest) {
+        AtomicLong lastAtomicLogStamp = rate.getLastLogStamp();
+        long lastLogStamp = lastAtomicLogStamp.get();
+        long now = System.currentTimeMillis();
+        if (now - lastLogStamp > LAST_RATE_LIMIT_LOG_THRESHOLD && lastAtomicLogStamp.compareAndSet(lastLogStamp, now)) {
+            LOG.info("Request with IP '{}' to path '{}' has been rate limited.{}", servletRequest.getRemoteAddr(), servletRequest.getServletPath(), LINE_SEP);
+        } else {
+            LOG.debug("Request with IP '{}' to path '{}' has been rate limited.{}", servletRequest.getRemoteAddr(), servletRequest.getServletPath(), LINE_SEP);
         }
     }
 
