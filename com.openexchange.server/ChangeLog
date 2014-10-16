@@ -4,6 +4,7 @@
  - Fix for bug 34985: Restrictive reading of configuration and improved logging in case a .properties file contains a malformed Unicode
                       escape sequence
  - Fix for bug 34944: Ensure every threads holds its own IDBasedFileAccess instance
+ - Fix for bug 34975: Log an exceeded rate limit only once per minute
 
 * 2014-10-15 - martin.herfurth@open-xchange.com
 
