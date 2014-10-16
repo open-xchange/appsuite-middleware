@@ -1,3 +1,7 @@
+* 2014-10-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34921: Do not generally apply HTML sanitizing to XML content
+
 * 2014-10-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 34706: Use timeout-aware operations to distribute either change of local IP address, client identifier or hash string through
