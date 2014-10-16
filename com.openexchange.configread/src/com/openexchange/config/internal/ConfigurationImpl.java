@@ -105,15 +105,17 @@ public final class ConfigurationImpl implements ConfigurationService {
     private static final class PropertyFileFilter implements FileFilter {
 
         private final String ext;
+        private final String mpasswd;
 
         PropertyFileFilter() {
             super();
             ext = ".properties";
+            mpasswd = "mpasswd";
         }
 
         @Override
         public boolean accept(final File pathname) {
-            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext) || !pathname.getName().contains(".");
+            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext) || mpasswd.equals(pathname.getName());
         }
 
     }
@@ -324,8 +326,12 @@ public final class ConfigurationImpl implements ConfigurationService {
                 properties.put(propName, e.getValue().toString().trim());
                 propertiesFiles.put(propName, propFilePath);
             }
-        } catch (final IOException e) {
-            LOG.warn("An error occurred while processing property file \"{}\".", propFile, e);
+        } catch (IOException e) {
+            LOG.warn("An I/O error occurred while processing .properties file \"{}\".", propFile, e);
+        } catch (IllegalArgumentException encodingError) {
+            LOG.warn("A malformed Unicode escape sequence in .properties file \"{}\".", propFile, encodingError);
+        } catch (RuntimeException e) {
+            LOG.warn("An error occurred while processing .properties file \"{}\".", propFile, e);
         }
     }
 
