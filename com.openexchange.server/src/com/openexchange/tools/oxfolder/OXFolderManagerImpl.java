@@ -62,7 +62,6 @@ import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,7 +106,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
@@ -1520,9 +1518,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                         throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                     }
                     /*
-                     * remove any subscriptions and publications recursively
+                     * remove any folder-dependent entities
                      */
-                    deleteSubscriptionsAndPublications(folder.getModule(), folderId, true);
+                    deleteDependentEntities(writeCon, folder, true);
                     /*
                      * perform move to trash
                      */
@@ -1674,93 +1672,17 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     /**
-     * Deletes any existing subscriptions and publications for the supplied folder ID.
-     *
-     * @param module The module of the folder
-     * @param folderID The folder ID
-     * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
-     *                 otherwise
-     * @return The number of removed subscriptions and publications
-     * @throws OXException
-     */
-    private int deleteSubscriptionsAndPublications(int module, int folderID, boolean handDown) throws OXException {
-        Connection wc = writeCon;
-        final boolean create = (wc == null);
-        try {
-            if (create) {
-                wc = DBPool.pickupWriteable(ctx);
-            }
-            return deleteSubscriptionsAndPublications(wc, module, folderID, handDown);
-        } finally {
-            if (create && wc != null) {
-                DBPool.closeWriterSilent(ctx, wc);
-            }
-        }
-    }
-
-    /**
-     * Deletes any existing subscriptions and publications for the supplied folder ID.
+     * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
      *
      * @param con A "write" connection to the database
-     * @param module The module of the folder
-     * @param folderID The folder ID
+     * @param folder The deleted folder. Must be fully initialized.
      * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
      *                 otherwise
      * @return The number of removed subscriptions and publications
      * @throws OXException
      */
-    private int deleteSubscriptionsAndPublications(Connection con, int module, int folderID, boolean handDown) throws OXException {
-        int updated = 0;
-        PreparedStatement stmt1 = null;
-        PreparedStatement stmt2 = null;
-        try {
-            /*
-             * prepare clause for folder IDs
-             */
-            TIntList subfolderIDs = handDown ? OXFolderSQL.getSubfolderIDs(folderID, con, ctx) : null;
-            String whereFolderID;
-            if (null == subfolderIDs || 0 == subfolderIDs.size()) {
-                whereFolderID = "=?;";
-            } else {
-                StringBuilder StringBuilder = new StringBuilder(" IN (?");
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    StringBuilder.append(",?");
-                }
-                StringBuilder.append(");");
-                whereFolderID = StringBuilder.toString();
-            }
-            /*
-             * delete publications
-             */
-            stmt1 = con.prepareStatement("DELETE FROM publications WHERE cid=? AND module=? AND entity" + whereFolderID);
-            stmt1.setInt(1, ctx.getContextId());
-            stmt1.setString(2, Module.getModuleString(module, folderID));
-            stmt1.setInt(3, folderID);
-            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stmt1.setInt(i + 4, subfolderIDs.get(i));
-                }
-            }
-            /*
-             * delete subscriptions
-             */
-            updated += stmt1.executeUpdate();
-            stmt2 = con.prepareStatement("DELETE FROM subscriptions WHERE cid=? AND folder_id" + whereFolderID);
-            stmt2.setInt(1, ctx.getContextId());
-            stmt2.setInt(2, folderID);
-            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-                for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stmt2.setInt(i + 3, subfolderIDs.get(i));
-                }
-            }
-            updated += stmt2.executeUpdate();
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt1);
-            DBUtils.closeSQLStuff(stmt2);
-        }
-        return updated;
+    private void  deleteDependentEntities(Connection con, FolderObject folder, boolean handDown) throws OXException {
+        OXFolderDependentDeleter.folderDeleted(con, session, folder, handDown);
     }
 
     /**
@@ -1928,7 +1850,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Subscriptions & Publications
              */
-            deleteSubscriptionsAndPublications(wc, storageFolder.getModule(), folderID, false);
+            deleteDependentEntities(wc, storageFolder, false);
             /*
              * Propagate
              */
