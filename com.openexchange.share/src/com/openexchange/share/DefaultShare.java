@@ -51,6 +51,7 @@ package com.openexchange.share;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * {@link DefaultShare}
@@ -64,17 +65,13 @@ public class DefaultShare implements Share, Serializable {
 
     private String token;
     private int contextID;
-    private int module;
-    private String folder;
-    private String item;
     private Date created;
     private int createdBy;
     private Date lastModified;
     private int modifiedBy;
-    private Date expiryDate;
-    private Date activationDate;
     private int guest;
     private AuthenticationMode authentication;
+    private List<ShareTarget> targets;
 
     /**
      * Initializes a new {@link DefaultShare}.
@@ -92,15 +89,11 @@ public class DefaultShare implements Share, Serializable {
         super();
         token = share.getToken();
         contextID = share.getContextID();
-        module = share.getModule();
-        folder = share.getFolder();
-        item = share.getItem();
+        targets = share.getTargets();
         created = share.getCreated();
         createdBy = share.getCreatedBy();
         lastModified = share.getLastModified();
         modifiedBy = share.getModifiedBy();
-        expiryDate = share.getExpiryDate();
-        activationDate = share.getActivationDate();
         guest = share.getGuest();
         authentication = share.getAuthentication();
     }
@@ -116,23 +109,8 @@ public class DefaultShare implements Share, Serializable {
     }
 
     @Override
-    public int getModule() {
-        return module;
-    }
-
-    @Override
-    public String getFolder() {
-        return folder;
-    }
-
-    @Override
-    public boolean isFolder() {
-        return item == null;
-    }
-
-    @Override
-    public String getItem() {
-        return item;
+    public List<ShareTarget> getTargets() {
+        return targets;
     }
 
     @Override
@@ -153,31 +131,6 @@ public class DefaultShare implements Share, Serializable {
     @Override
     public int getModifiedBy() {
         return modifiedBy;
-    }
-
-    /**
-     * Gets the activationDate
-     *
-     * @return The activationDate
-     */
-    @Override
-    public Date getActivationDate() {
-        return activationDate;
-    }
-
-    @Override
-    public boolean isActive() {
-        return null == activationDate || activationDate.before(new Date());
-    }
-
-    @Override
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
-    @Override
-    public boolean isExpired() {
-        return expiryDate != null && new Date().after(expiryDate);
     }
 
     @Override
@@ -209,30 +162,12 @@ public class DefaultShare implements Share, Serializable {
     }
 
     /**
-     * Sets the module
+     * Sets the targets
      *
-     * @param module The module to set
+     * @param targets The targets to set
      */
-    public void setModule(int module) {
-        this.module = module;
-    }
-
-    /**
-     * Sets the folder
-     *
-     * @param folder The folder to set
-     */
-    public void setFolder(String folder) {
-        this.folder = folder;
-    }
-
-    /**
-     * Sets the item
-     *
-     * @param item The item to set
-     */
-    public void setItem(String item) {
-        this.item = item;
+    public void setTargets(List<ShareTarget> targets) {
+        this.targets = targets;
     }
 
     /**
@@ -272,15 +207,6 @@ public class DefaultShare implements Share, Serializable {
     }
 
     /**
-     * Sets the expiryDate
-     *
-     * @param expires The expiryDate to set
-     */
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
-    }
-
-    /**
      * Sets the guest
      *
      * @param guest The guest to set
@@ -296,21 +222,6 @@ public class DefaultShare implements Share, Serializable {
      */
     public void setAuthentication(AuthenticationMode authentication) {
         this.authentication = authentication;
-    }
-
-    /**
-     * Sets the activationDate
-     *
-     * @param activationDate The activationDate to set
-     */
-    public void setActivationDate(Date activationDate) {
-        this.activationDate = activationDate;
-    }
-
-    @Override
-    public String toString() {
-        return "DefaultShare [token=" + token + ", contextID=" + contextID + ", guest=" + guest + ", folder=" + folder
-            + (null != item ? (", item=" + item) : "") + "]";
     }
 
 }

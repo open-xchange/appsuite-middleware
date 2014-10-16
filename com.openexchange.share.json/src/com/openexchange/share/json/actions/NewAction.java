@@ -129,11 +129,12 @@ public class NewAction extends AbstractShareAction {
                     String mailAddress = guest.getMail();
                     if (mailAddress != null) {
                         String title;
-                        if (targets.size() == 1) {
-                            title = ModuleHandlers.forModule(share.getModule()).getTargetTitle(targets.get(0), session);
-                        } else {
+                        //TODO
+//                        if (targets.size() == 1) {
+//                            title = ModuleHandlers.forModule(share.getModule()).getTargetTitle(targets.get(0), session);
+//                        } else {
                             title = getTranslator(session).translate(String.format(ShareStrings.GENERIC_TITLE, targets.size()));
-                        }
+//                        }
 
                         try {
                             notificationService.notify(new MailNotification(share, url, title, request.getMessage(), mailAddress), session);
@@ -180,9 +181,8 @@ public class NewAction extends AbstractShareAction {
                 /*
                  * create shares & corresponding guest user entities for external recipients first
                  */
-                Map<ShareTarget, List<Share>> createdShares = getShareService().createShares(session, targets, externalRecipients);
+                shares = getShareService().createShares(session, targets, externalRecipients);
                 guestIDs = new ArrayList<Integer>(externalRecipients.size());
-                shares = createdShares.values().iterator().next();
                 for (Share share : shares) {
                     guestIDs.add(share.getGuest());
                 }

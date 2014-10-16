@@ -223,8 +223,8 @@ public class DefaultShareService implements ShareService {
             /*
              * prepare update
              */
+            //TODO
             DefaultShare updatedShare = new DefaultShare(storedShare);
-            updatedShare.setExpiryDate(updatedShare.getExpiryDate());
             updatedShare.setLastModified(new Date());
             updatedShare.setModifiedBy(session.getUserId());
             /*
@@ -240,13 +240,13 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public List<Share> createShares(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
-        return createShares(session, Collections.singletonList(target), recipients).get(target);
+        return createShares(session, Collections.singletonList(target), recipients);
     }
 
     @Override
-    public Map<ShareTarget, List<Share>> createShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
+    public List<Share> createShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
         LOG.info("Adding shares to recipient(s) {} for {} in context {}...", recipients, targets, session.getContextId());
-        Map<ShareTarget, List<Share>> shares = new HashMap<ShareTarget, List<Share>>(targets.size());
+        List<Share> shares = new ArrayList<Share>(recipients.size());
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
@@ -257,26 +257,16 @@ public class DefaultShareService implements ShareService {
             User sharingUser = services.getService(UserService.class).getUser(
                 connectionHelper.getConnection(), session.getUserId(), context);
             List<User> guestUsers = new ArrayList<User>(recipients.size());
-            List<Share> sharesToCreate = new ArrayList<Share>();
             for (ShareRecipient recipient : recipients) {
                 int permissionBits = ShareTool.getUserPermissionBitsForTargets(recipient, targets);
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, session);
                 guestUsers.add(guestUser);
-                for (ShareTarget target : targets) {
-                    List<Share> sharesPerTarget = shares.get(target);
-                    if (null == sharesPerTarget) {
-                        sharesPerTarget = new ArrayList<Share>();
-                        shares.put(target, sharesPerTarget);
-                    }
-                    Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, recipient);
-                    sharesToCreate.add(share);
-                    sharesPerTarget.add(share);
-                }
+                shares.add(ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), targets, recipient));
             }
             /*
              * store shares
              */
-            services.getService(ShareStorage.class).storeShares(session.getContextId(), sharesToCreate, connectionHelper.getParameters());
+            services.getService(ShareStorage.class).storeShares(session.getContextId(), shares, connectionHelper.getParameters());
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -446,22 +436,23 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private List<Share> removeExpired(Session session, List<Share> shares) throws OXException {
-        List<Share> expiredShares = ShareTool.filterExpiredShares(shares);
-        if (null != expiredShares && 0 < expiredShares.size()) {
-            if (LOG.isInfoEnabled()) {
-                for (Share share : expiredShares) {
-                    LOG.info("Detected expired share ({}): {}", share.getExpiryDate(), share);
-                }
-            }
-            ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-            try {
-                connectionHelper.start();
-                removeShares(connectionHelper, expiredShares);
-                connectionHelper.commit();
-            } finally {
-                connectionHelper.finish();
-            }
-        }
+        //TODO : remove expired targets, remove parent share if all targets expired
+//        List<Share> expiredShares = ShareTool.filterExpiredShares(shares);
+//        if (null != expiredShares && 0 < expiredShares.size()) {
+//            if (LOG.isInfoEnabled()) {
+//                for (Share share : expiredShares) {
+//                    LOG.info("Detected expired share ({}): {}", share.getExpiryDate(), share);
+//                }
+//            }
+//            ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+//            try {
+//                connectionHelper.start();
+//                removeShares(connectionHelper, expiredShares);
+//                connectionHelper.commit();
+//            } finally {
+//                connectionHelper.finish();
+//            }
+//        }
         return shares;
     }
 
@@ -473,18 +464,19 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private Share removeExpired(Share share) throws OXException {
-        if (null != share && share.isExpired()) {
-            LOG.info("Detected expired share ({}): {}", share.getExpiryDate(), share);
-            ConnectionHelper connectionHelper = new ConnectionHelper(share.getContextID(), services, true);
-            try {
-                connectionHelper.start();
-                removeShares(connectionHelper, Collections.singletonList(share));
-                connectionHelper.commit();
-            } finally {
-                connectionHelper.finish();
-            }
-            return null;
-        }
+        //TODO : remove expired targets, remove parent share if all targets expired
+//        if (null != share && share.isExpired()) {
+//            LOG.info("Detected expired share ({}): {}", share.getExpiryDate(), share);
+//            ConnectionHelper connectionHelper = new ConnectionHelper(share.getContextID(), services, true);
+//            try {
+//                connectionHelper.start();
+//                removeShares(connectionHelper, Collections.singletonList(share));
+//                connectionHelper.commit();
+//            } finally {
+//                connectionHelper.finish();
+//            }
+//            return null;
+//        }
         return share;
     }
 
@@ -496,7 +488,9 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private Share filterInactive(Share share) throws OXException {
-        return null == share || false == share.isActive() ? null : share;
+        //TODO : remove inactive targets, return null if all targets not active
+//        return null == share || false == share.isActive() ? null : share;
+        return share;
     }
 
     /**
@@ -639,7 +633,6 @@ public class DefaultShareService implements ShareService {
                  */
                 services.getService(UserPermissionService.class).deleteUserPermissionBits(
                     connectionHelper.getConnection(), context, guestID);
-
                 /*
                  * delete guest contacts
                  */

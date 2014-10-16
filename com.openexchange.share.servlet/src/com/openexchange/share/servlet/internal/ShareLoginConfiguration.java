@@ -121,7 +121,8 @@ public class ShareLoginConfiguration {
      * @throws OXException
      */
     private static LoginConfiguration adjustCookieTTL(LoginConfiguration loginConfig, Share share) {
-        Date expires = share.getExpiryDate();
+        // TODO
+        Date expires = null;//share.getExpiryDate();
         if (null != expires) {
             int shareExpiry = (int) ((expires.getTime() - System.currentTimeMillis()) / 1000);
             if (0 <= shareExpiry && loginConfig.getCookieExpiry() > shareExpiry) {

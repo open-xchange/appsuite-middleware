@@ -56,7 +56,6 @@ import com.openexchange.groupware.tools.mappings.database.BinaryMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
-import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
@@ -133,72 +132,6 @@ public class ShareMapper extends DefaultDbMapper<DefaultShare, ShareField> {
             @Override
             public void remove(DefaultShare share) {
                 share.setContextID(0);
-            }
-        });
-        mappings.put(ShareField.MODULE, new IntegerMapping<DefaultShare>("module", "Module ID") {
-
-            @Override
-            public void set(DefaultShare share, Integer value) {
-                share.setModule(value.intValue());
-            }
-
-            @Override
-            public boolean isSet(DefaultShare share) {
-                return 0 < share.getModule();
-            }
-
-            @Override
-            public Integer get(DefaultShare share) {
-                return Integer.valueOf(share.getModule());
-            }
-
-            @Override
-            public void remove(DefaultShare share) {
-                share.setModule(0);
-            }
-        });
-        mappings.put(ShareField.FOLDER, new VarCharMapping<DefaultShare>("folder", "Folder ID") {
-
-            @Override
-            public void set(DefaultShare share, String value) {
-                share.setFolder(value);
-            }
-
-            @Override
-            public boolean isSet(DefaultShare share) {
-                return null != share.getFolder();
-            }
-
-            @Override
-            public String get(DefaultShare share) {
-                return share.getFolder();
-            }
-
-            @Override
-            public void remove(DefaultShare share) {
-                share.setFolder(null);
-            }
-        });
-        mappings.put(ShareField.ITEM, new VarCharMapping<DefaultShare>("item", "Item") {
-
-            @Override
-            public void set(DefaultShare share, String value) {
-                share.setItem(value);
-            }
-
-            @Override
-            public boolean isSet(DefaultShare share) {
-                return null != share.getItem();
-            }
-
-            @Override
-            public String get(DefaultShare share) {
-                return share.getItem();
-            }
-
-            @Override
-            public void remove(DefaultShare share) {
-                share.setItem(null);
             }
         });
         mappings.put(ShareField.CREATION_DATE, new BigIntMapping<DefaultShare>("created", "Creation date") {
@@ -287,50 +220,6 @@ public class ShareMapper extends DefaultDbMapper<DefaultShare, ShareField> {
             @Override
             public void remove(DefaultShare share) {
                 share.setModifiedBy(0);
-            }
-        });
-        mappings.put(ShareField.ACTIVATION_DATE, new BigIntMapping<DefaultShare>("activationDate", "Activation date") {
-
-            @Override
-            public void set(DefaultShare share, Long value) {
-                share.setActivationDate(new Date(value));
-            }
-
-            @Override
-            public boolean isSet(DefaultShare share) {
-                return null != share.getActivationDate();
-            }
-
-            @Override
-            public Long get(DefaultShare share) {
-                return share.getActivationDate().getTime();
-            }
-
-            @Override
-            public void remove(DefaultShare share) {
-                share.setActivationDate(null);
-            }
-        });
-        mappings.put(ShareField.EXPIRY_DATE, new BigIntMapping<DefaultShare>("expiryDate", "Expiry date") {
-
-            @Override
-            public void set(DefaultShare share, Long value) {
-                share.setExpiryDate(new Date(value));
-            }
-
-            @Override
-            public boolean isSet(DefaultShare share) {
-                return null != share.getExpiryDate();
-            }
-
-            @Override
-            public Long get(DefaultShare share) {
-                return share.getExpiryDate().getTime();
-            }
-
-            @Override
-            public void remove(DefaultShare share) {
-                share.setExpiryDate(null);
             }
         });
         mappings.put(ShareField.GUEST_ID, new IntegerMapping<DefaultShare>("guest", "Guest ID") {

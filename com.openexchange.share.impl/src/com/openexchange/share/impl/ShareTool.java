@@ -51,10 +51,8 @@ package com.openexchange.share.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -163,9 +161,11 @@ public class ShareTool {
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
         for (Share share : shares) {
-            addModulePermissions(perms, share.getModule());
             if (AuthenticationMode.GUEST_PASSWORD == share.getAuthentication()) {
                 perms.add(Permission.EDIT_PASSWORD);
+            }
+            for (ShareTarget target : share.getTargets()) {
+                addModulePermissions(perms, target.getModule());
             }
         }
         return Permission.toBits(perms);
@@ -226,22 +226,18 @@ public class ShareTool {
      * @param recipient The recipient
      * @return The share
      */
-    public static Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target, ShareRecipient recipient) {
+    public static Share prepareShare(int contextID, User sharingUser, int guestUserID, List<ShareTarget> targets, ShareRecipient recipient) {
         Date now = new Date();
         DefaultShare share = new DefaultShare();
         share.setToken(ShareTool.generateToken(contextID));
         share.setAuthentication(getAuthenticationMode(recipient));
-        share.setExpiryDate(recipient.getExpiryDate());
-        share.setActivationDate(recipient.getActivationDate());
+        share.setTargets(targets);
         share.setContextID(contextID);
         share.setCreated(now);
         share.setLastModified(now);
         share.setCreatedBy(sharingUser.getId());
         share.setModifiedBy(sharingUser.getId());
         share.setGuest(guestUserID);
-        share.setModule(target.getModule());
-        share.setFolder(target.getFolder());
-        share.setItem(target.getItem());
         return share;
     }
 
@@ -318,23 +314,23 @@ public class ShareTool {
      * @param shares The shares to filter
      * @return The expired shares that were removed from the supplied list, or <code>null</code> if no shares were expired
      */
-    public static List<Share> filterExpiredShares(List<Share> shares) {
-        List<Share> expiredShares = null;
-        if (null != shares && 0 < shares.size()) {
-            Iterator<Share> iterator = shares.iterator();
-            while (iterator.hasNext()) {
-                Share share = iterator.next();
-                if (share.isExpired()) {
-                    if (null == expiredShares) {
-                        expiredShares = new ArrayList<Share>();
-                    }
-                    iterator.remove();
-                    expiredShares.add(share);
-                }
-            }
-        }
-        return expiredShares;
-    }
+//    public static List<Share> filterExpiredShares(List<Share> shares) {
+//        List<Share> expiredShares = null;
+//        if (null != shares && 0 < shares.size()) {
+//            Iterator<Share> iterator = shares.iterator();
+//            while (iterator.hasNext()) {
+//                Share share = iterator.next();
+//                if (share.isExpired()) {
+//                    if (null == expiredShares) {
+//                        expiredShares = new ArrayList<Share>();
+//                    }
+//                    iterator.remove();
+//                    expiredShares.add(share);
+//                }
+//            }
+//        }
+//        return expiredShares;
+//    }
 
     /**
      * Finds a share by its token in the supplied list of shares.

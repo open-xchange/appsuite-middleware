@@ -50,6 +50,7 @@
 package com.openexchange.share;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -75,32 +76,11 @@ public interface Share {
     int getContextID();
 
     /**
-     * Gets the groupware module of the share's target folder.
+     * Gets the share targets accessible through this share.
      *
-     * @return The module
+     * @return The share targets
      */
-    int getModule();
-
-    /**
-     * Gets the identifier of the share's folder.
-     *
-     * @return The folder ID
-     */
-    String getFolder();
-
-    /**
-     * Gets a value indicating whether the share points to a folder or a single item.
-     *
-     * @return <code>true</code> if the share points to a folder, <code>false</code>, otherwise
-     */
-    boolean isFolder();
-
-    /**
-     * Gets the identifier of the share's item in case the share is not a folder share.
-     *
-     * @return The item ID, or <code>null</code> if the share references a folder
-     */
-    String getItem();
+    List<ShareTarget> getTargets();
 
     /**
      * Gets the creation date of the share.
@@ -129,34 +109,6 @@ public interface Share {
      * @return The ID of the user who made the last modification on the share
      */
     int getModifiedBy();
-
-    /**
-     * If defined, gets the date when this share becomes active, i.e. it should be accessible.
-     *
-     * @return The activation date of the share, or <code>null</code> if not defined
-     */
-    Date getActivationDate();
-
-    /**
-     * Gets a value indicating whether this share is active or not.
-     *
-     * @return <code>true</code> if the share is active, <code>false</code>, otherwise
-     */
-    boolean isActive();
-
-    /**
-     * If defined, gets the date when this share expires, i.e. it should be no longer accessible.
-     *
-     * @return The expiry date of the share, or <code>null</code> if not defined
-     */
-    Date getExpiryDate();
-
-    /**
-     * Gets a value indicating whether this share is expired or not.
-     *
-     * @return <code>true</code> if the share is expired, <code>false</code>, otherwise
-     */
-    boolean isExpired();
 
     /**
      * Gets the identifier of the guest user that is allowed to access this share.

@@ -49,6 +49,8 @@
 
 package com.openexchange.share;
 
+import java.util.Date;
+
 
 /**
  * {@link ShareTarget}
@@ -58,9 +60,11 @@ package com.openexchange.share;
  */
 public class ShareTarget {
 
-    private final int module;
-    private final String folder;
-    private final String item;
+    protected int module;
+    protected String folder;
+    protected String item;
+    protected Date expiryDate;
+    protected Date activationDate;
 
     /**
      * Initializes a new {@link ShareTarget}.
@@ -84,6 +88,13 @@ public class ShareTarget {
      */
     public ShareTarget(int module, String folder) {
         this(module, folder, null);
+    }
+
+    /**
+     * Initializes a new {@link ShareTarget}.
+     */
+    public ShareTarget() {
+        super();
     }
 
     /**
@@ -121,6 +132,33 @@ public class ShareTarget {
     public boolean isFolder() {
         return null == item;
     }
+
+    /**
+     * If defined, gets the date when this share target becomes active, i.e. it should be accessible.
+     *
+     * @return The activation date of the target, or <code>null</code> if not defined
+     */
+    public Date getActivationDate() {
+        return activationDate;
+    }
+
+    public boolean isActive() {
+        return null == activationDate || activationDate.before(new Date());
+    }
+
+    /**
+     * If defined, gets the date when this share expires, i.e. it should be no longer accessible.
+     *
+     * @return The expiry date of the share, or <code>null</code> if not defined
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    public boolean isExpired() {
+        return expiryDate != null && new Date().after(expiryDate);
+    }
+
 
     @Override
     public int hashCode() {
