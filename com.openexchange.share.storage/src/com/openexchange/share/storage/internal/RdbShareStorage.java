@@ -49,7 +49,8 @@
 
 package com.openexchange.share.storage.internal;
 
-import static com.openexchange.share.storage.internal.SQL.MAPPER;
+import static com.openexchange.share.storage.internal.SQL.SHARE_MAPPER;
+import static com.openexchange.share.storage.internal.SQL.TARGET_MAPPER;
 import static com.openexchange.share.storage.internal.SQL.logExecuteQuery;
 import static com.openexchange.share.storage.internal.SQL.logExecuteUpdate;
 import java.sql.Connection;
@@ -61,15 +62,19 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.share.storage.internal.ConnectionProvider.ConnectionMode;
+import com.openexchange.share.storage.mapping.ShareField;
+import com.openexchange.share.storage.mapping.ShareTargetField;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -248,42 +253,77 @@ public class RdbShareStorage implements ShareStorage {
 
     private static int insertShare(Connection connection, DefaultShare share) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder()
-            .append("INSERT INTO share (").append(MAPPER.getColumns(ShareField.values())).append(") VALUES (")
-            .append(MAPPER.getParameters(ShareField.values().length)).append(");")
+            .append("INSERT INTO share (").append(SHARE_MAPPER.getColumns(ShareField.values())).append(") VALUES (")
+            .append(SHARE_MAPPER.getParameters(ShareField.values().length)).append(");")
         ;
+        int affectedRows = 0;
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
-            MAPPER.setParameters(stmt, share, ShareField.values());
-            return SQL.logExecuteUpdate(stmt);
+            SHARE_MAPPER.setParameters(stmt, share, ShareField.values());
+            affectedRows += SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
+        stringBuilder = new StringBuilder()
+            .append("INSERT INTO share_target (").append(TARGET_MAPPER.getColumns(ShareTargetField.values())).append(") VALUES (")
+            .append(TARGET_MAPPER.getParameters(ShareTargetField.values().length)).append(");")
+        ;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            for (ShareTarget target : share.getTargets()) {
+                RdbShareTarget rdbShareTarget = new RdbShareTarget(target);
+                rdbShareTarget.setToken(share.getToken());
+                rdbShareTarget.setContextID(share.getContextID());
+                rdbShareTarget.setUuid(UUIDs.toByteArray(UUID.randomUUID()));
+                TARGET_MAPPER.setParameters(stmt, rdbShareTarget, ShareTargetField.values());
+                stmt.addBatch();
+            }
+            int[] result = stmt.executeBatch();
+            for (int i = 0; i < result.length; i++) {
+                affectedRows += result[i];
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return affectedRows;
     }
 
     private static int updateShare(Connection connection, DefaultShare share, ShareField[] fields) throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("UPDATE share SET ").append(MAPPER.getAssignments(fields)).append(' ')
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel()).append("=?;")
-        ;
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(stringBuilder.toString());
-            MAPPER.setParameters(stmt, share, fields);
-            stmt.setInt(1 + fields.length, share.getContextID());
-            stmt.setBytes(2 + fields.length, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
-            return logExecuteUpdate(stmt);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
+        //TODO
+        return 0;
+//        StringBuilder stringBuilder = new StringBuilder()
+//            .append("UPDATE share SET ").append(MAPPER.getAssignments(fields)).append(' ')
+//            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+//            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel()).append("=?;")
+//        ;
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt = connection.prepareStatement(stringBuilder.toString());
+//            MAPPER.setParameters(stmt, share, fields);
+//            stmt.setInt(1 + fields.length, share.getContextID());
+//            stmt.setBytes(2 + fields.length, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
+//            return logExecuteUpdate(stmt);
+//        } finally {
+//            DBUtils.closeSQLStuff(stmt);
+//        }
     }
 
     private static DefaultShare selectShare(Connection connection, int cid, String token) throws SQLException, OXException {
+        ShareField[] shareFields = { ShareField.CREATION_DATE, ShareField.CREATED_BY, ShareField.LAST_MODIFIED, ShareField.MODIFIED_BY,
+            ShareField.GUEST_ID, ShareField.AUTHENTICATION };
+        ShareTargetField[] targetFields = { ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM,
+            ShareTargetField.ACTIVATION_DATE, ShareTargetField.EXPIRY_DATE, ShareTargetField.META };
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel()).append("=?;")
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(shareFields, "s")).append(',')
+            .append(TARGET_MAPPER.getColumns(targetFields, "t"))
+            .append(" FROM share AS s LEFT JOIN share_target AS t")
+            .append(" ON s.").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel())
+            .append("=t.").append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel())
+            .append(" AND s.").append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel())
+            .append("=t.").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel())
+            .append(" WHERE s.").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND s.")
+            .append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel()).append("=? AND s.")
         ;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -292,21 +332,37 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setBytes(2, UUIDs.toByteArray(UUIDs.fromUnformattedString(token)));
             resultSet = logExecuteQuery(stmt);
-            return resultSet.next() ? MAPPER.fromResultSet(resultSet, ShareField.values()) : null;
+            if (resultSet.next()) {
+                DefaultShare share = SHARE_MAPPER.fromResultSet(resultSet, shareFields, "s.");
+                share.setContextID(cid);
+                share.setToken(token);
+                List<ShareTarget> targets = new ArrayList<ShareTarget>();
+                RdbShareTarget target = TARGET_MAPPER.fromResultSet(resultSet, targetFields, "t.");
+                if (0 < target.getModule()) {
+                    targets.add(target);
+                    while (resultSet.next()) {
+                        targets.add(TARGET_MAPPER.fromResultSet(resultSet, targetFields, "t."));
+                    }
+                }
+                share.setTargets(targets);
+                return share;
+            }
+            return null;
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
 
     private static int deleteShares(Connection connection, int cid, List<String> tokens) throws SQLException, OXException {
+        int affectedRows = 0;
         StringBuilder stringBuilder = new StringBuilder()
-            .append("DELETE FROM share WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel())
+            .append("DELETE FROM share WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel())
         ;
         if (1 == tokens.size()) {
             stringBuilder.append("=?;");
         } else {
-            stringBuilder.append(" IN (").append(MAPPER.getParameters(tokens.size())).append(");");
+            stringBuilder.append(" IN (").append(SHARE_MAPPER.getParameters(tokens.size())).append(");");
         }
         PreparedStatement stmt = null;
         try {
@@ -315,17 +371,39 @@ public class RdbShareStorage implements ShareStorage {
             for (int i = 0; i < tokens.size(); i++) {
                 stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens.get(i))));
             }
-            return logExecuteUpdate(stmt);
+            affectedRows += logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
+        stringBuilder = new StringBuilder()
+            .append("DELETE FROM share_target WHERE ").append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel())
+        ;
+        if (1 == tokens.size()) {
+            stringBuilder.append("=?;");
+        } else {
+            stringBuilder.append(" IN (").append(TARGET_MAPPER.getParameters(tokens.size())).append(");");
+        }
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, cid);
+            for (int i = 0; i < tokens.size(); i++) {
+                stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens.get(i))));
+            }
+            affectedRows += logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return affectedRows;
     }
 
     private static List<DefaultShare> selectSharesCreatedBy(Connection connection, int cid, int createdBy) throws SQLException, OXException {
+        //TODO
+
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
         ;
         ResultSet resultSet = null;
         PreparedStatement stmt = null;
@@ -334,16 +412,17 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setInt(2, createdBy);
             resultSet = logExecuteQuery(stmt);
-            return MAPPER.listFromResultSet(resultSet, ShareField.values());
+            return SHARE_MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
 
     private List<DefaultShare> selectSharesForContext(Connection connection, int cid) throws SQLException, OXException {
+        //TODO
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?;")
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?;")
         ;
         ResultSet resultSet = null;
         PreparedStatement stmt = null;
@@ -351,17 +430,18 @@ public class RdbShareStorage implements ShareStorage {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             resultSet = logExecuteQuery(stmt);
-            return MAPPER.listFromResultSet(resultSet, ShareField.values());
+            return SHARE_MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
 
     private static List<DefaultShare> selectSharesByFolder(Connection connection, int cid, String folder) throws SQLException, OXException {
+        //TODO
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?;")
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+//            .append("AND ").append(MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?;")
         ;
         ResultSet resultSet = null;
         PreparedStatement stmt = null;
@@ -370,18 +450,20 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setString(2, folder);
             resultSet = logExecuteQuery(stmt);
-            return MAPPER.listFromResultSet(resultSet, ShareField.values());
+            return SHARE_MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
 
     private static List<DefaultShare> selectSharesByItem(Connection connection, int cid, String folder, String item) throws SQLException, OXException {
+        //TODO
+
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;")
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+//            .append("AND ").append(MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=? ")
+//            .append("AND ").append(MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;")
         ;
         ResultSet resultSet = null;
         PreparedStatement stmt = null;
@@ -391,7 +473,7 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setString(2, folder);
             stmt.setString(3, item);
             resultSet = logExecuteQuery(stmt);
-            return MAPPER.listFromResultSet(resultSet, ShareField.values());
+            return SHARE_MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
@@ -399,14 +481,14 @@ public class RdbShareStorage implements ShareStorage {
 
     private static List<DefaultShare> selectSharesByTokens(Connection connection, int cid, String[] tokens) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel())
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel())
         ;
         if (1 == tokens.length) {
             stringBuilder.append("=?;");
         } else {
-            stringBuilder.append(" IN (").append(MAPPER.getParameters(tokens.length)).append(");");
+            stringBuilder.append(" IN (").append(SHARE_MAPPER.getParameters(tokens.length)).append(");");
         }
         ResultSet resultSet = null;
         PreparedStatement stmt = null;
@@ -417,18 +499,19 @@ public class RdbShareStorage implements ShareStorage {
                 stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens[i])));
             }
             resultSet = logExecuteQuery(stmt);
-            return MAPPER.listFromResultSet(resultSet, ShareField.values());
+            return SHARE_MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
 
     private static List<DefaultShare> selectSharesExpiredAfter(Connection connection, int cid, long expired) throws SQLException, OXException {
+        //TODO
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.EXPIRY_DATE).getColumnLabel()).append("<? ")
-            .append("AND ").append(MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;")
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+//            .append("AND ").append(MAPPER.get(ShareField.EXPIRY_DATE).getColumnLabel()).append("<? ")
+//            .append("AND ").append(MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;")
         ;
         ResultSet resultSet = null;
         PreparedStatement stmt = null;
@@ -437,7 +520,7 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setLong(2, expired);
             resultSet = logExecuteQuery(stmt);
-            return MAPPER.listFromResultSet(resultSet, ShareField.values());
+            return SHARE_MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
@@ -445,9 +528,9 @@ public class RdbShareStorage implements ShareStorage {
 
     private static List<DefaultShare> selectSharesForGuest(Connection connection, int cid, int guestID) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(MAPPER.getColumns(ShareField.values())).append(" FROM share ")
-            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(MAPPER.get(ShareField.GUEST_ID).getColumnLabel()).append("=?;")
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(ShareField.values())).append(" FROM share ")
+            .append("WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel()).append("=?;")
         ;
         ResultSet resultSet = null;
         PreparedStatement stmt = null;
@@ -456,7 +539,7 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setInt(2, guestID);
             resultSet = logExecuteQuery(stmt);
-            return MAPPER.listFromResultSet(resultSet, ShareField.values());
+            return SHARE_MAPPER.listFromResultSet(resultSet, ShareField.values());
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }

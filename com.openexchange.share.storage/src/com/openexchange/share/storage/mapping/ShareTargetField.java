@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,24 @@
  *
  */
 
-package com.openexchange.share.storage.internal;
-
-import com.openexchange.database.AbstractCreateTableImpl;
+package com.openexchange.share.storage.mapping;
 
 /**
- * {@link ShareCreateTableService}
+ * {@link ShareTargetField}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareCreateTableService extends AbstractCreateTableImpl {
+public enum ShareTargetField {
 
-    /**
-     * Initializes a new {@link ShareCreateTableService}.
-     */
-    public ShareCreateTableService() {
-        super();
-    }
-
-    /**
-     * Gets the table names.
-     *
-     * @return The table names.
-     */
-    public static String[] getTablesToCreate() {
-        return new String[] { "share", "share_target" };
-    }
-
-    /**
-     * Gets the CREATE TABLE statements.
-     *
-     * @return The CREATE statements
-     */
-    public static String[] getCreateStmts() {
-        return new String[] { SQL.getCreateShareTableStmt(), SQL.getCreateShareTargetTableStmt() };
-    }
-
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
-    }
-
-    @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
-    }
-
+    CONTEXT_ID,
+    UUID,
+    TOKEN,
+    MODULE,
+    FOLDER,
+    ITEM,
+    ACTIVATION_DATE,
+    EXPIRY_DATE,
+    META,
+    ;
 }
+

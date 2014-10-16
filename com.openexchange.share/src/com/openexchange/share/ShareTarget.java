@@ -142,17 +142,35 @@ public class ShareTarget {
         return activationDate;
     }
 
+    /**
+     * Sets the date when this share target becomes active, i.e. it should be accessible.
+     *
+     * @param activationDate The activation date of the target
+     */
+    public void setActivationDate(Date activationDate) {
+        this.activationDate = activationDate;
+    }
+
     public boolean isActive() {
         return null == activationDate || activationDate.before(new Date());
     }
 
     /**
-     * If defined, gets the date when this share expires, i.e. it should be no longer accessible.
+     * If defined, gets the date when this target expires, i.e. it should be no longer accessible.
      *
      * @return The expiry date of the share, or <code>null</code> if not defined
      */
     public Date getExpiryDate() {
         return expiryDate;
+    }
+
+    /**
+     * Sets the date when this share target, i.e. it should be no longer accessible.
+     *
+     * @param expiryDate The expiry date of the target
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     public boolean isExpired() {

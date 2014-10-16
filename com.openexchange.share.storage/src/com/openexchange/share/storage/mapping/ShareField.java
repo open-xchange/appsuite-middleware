@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.storage.internal;
+package com.openexchange.share.storage.mapping;
 
 /**
  * {@link ShareField}
@@ -56,17 +56,12 @@ package com.openexchange.share.storage.internal;
  */
 public enum ShareField {
 
-    TOKEN,
     CONTEXT_ID,
-    MODULE,
-    FOLDER,
-    ITEM,
+    TOKEN,
     CREATION_DATE,
     CREATED_BY,
     LAST_MODIFIED,
     MODIFIED_BY,
-    ACTIVATION_DATE,
-    EXPIRY_DATE,
     GUEST_ID,
     AUTHENTICATION,
     ;

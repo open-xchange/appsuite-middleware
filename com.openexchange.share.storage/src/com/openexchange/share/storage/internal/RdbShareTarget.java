@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,53 +49,138 @@
 
 package com.openexchange.share.storage.internal;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.util.Date;
+import com.openexchange.share.ShareTarget;
 
 /**
- * {@link ShareCreateTableService}
+ * {@link RdbShareTarget}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareCreateTableService extends AbstractCreateTableImpl {
+public class RdbShareTarget extends ShareTarget {
+
+    private int contextID;
+    private byte[] uuid;
+    private String token;
 
     /**
-     * Initializes a new {@link ShareCreateTableService}.
+     * Initializes a new {@link RdbShareTarget}.
+     *
+     * @param target The target to copy the values from
      */
-    public ShareCreateTableService() {
+    public RdbShareTarget(ShareTarget target) {
+        super(target.getModule(), target.getFolder(), target.getItem());
+        this.activationDate = target.getActivationDate();
+        this.expiryDate = target.getExpiryDate();
+    }
+
+    /**
+     * Initializes a new {@link RdbShareTarget}.
+     */
+    public RdbShareTarget() {
         super();
     }
 
     /**
-     * Gets the table names.
+     * Sets the module
      *
-     * @return The table names.
+     * @param module The module to set
      */
-    public static String[] getTablesToCreate() {
-        return new String[] { "share", "share_target" };
+    public void setModule(int module) {
+        this.module = module;
     }
 
     /**
-     * Gets the CREATE TABLE statements.
+     * Sets the folder
      *
-     * @return The CREATE statements
+     * @param folder The folder to set
      */
-    public static String[] getCreateStmts() {
-        return new String[] { SQL.getCreateShareTableStmt(), SQL.getCreateShareTargetTableStmt() };
+    public void setFolder(String folder) {
+        this.folder = folder;
     }
 
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
+    /**
+     * Sets the item
+     *
+     * @param item The item to set
+     */
+    public void setItem(String item) {
+        this.item = item;
     }
 
+    /**
+     * Sets the expiryDate
+     *
+     * @param expiryDate The expiryDate to set
+     */
     @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
+    /**
+     * Sets the activationDate
+     *
+     * @param activationDate The activationDate to set
+     */
     @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
+    public void setActivationDate(Date activationDate) {
+        this.activationDate = activationDate;
+    }
+
+    /**
+     * Gets the contextID
+     *
+     * @return The contextID
+     */
+    public int getContextID() {
+        return contextID;
+    }
+
+    /**
+     * Sets the contextID
+     *
+     * @param contextID The contextID to set
+     */
+    public void setContextID(int contextID) {
+        this.contextID = contextID;
+    }
+
+    /**
+     * Gets the uuid
+     *
+     * @return The uuid
+     */
+    public byte[] getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Sets the uuid
+     *
+     * @param uuid The uuid to set
+     */
+    public void setUuid(byte[] uuid) {
+        this.uuid = uuid;
+    }
+
+    /**
+     * Gets the token
+     *
+     * @return The token
+     */
+    public String getToken() {
+        return token;
+    }
+
+    /**
+     * Sets the token
+     *
+     * @param token The token to set
+     */
+    public void setToken(String token) {
+        this.token = token;
     }
 
 }
+

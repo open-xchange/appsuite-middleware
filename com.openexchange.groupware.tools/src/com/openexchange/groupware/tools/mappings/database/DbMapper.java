@@ -138,14 +138,26 @@ public interface DbMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
 	String getAssignments(E[] fields) throws OXException;
 
-	/**
-	 * Gets a comma-separated string of the mapped column names for the
-	 * supplied fields.
-	 *
-	 * @param fields the fields
-	 * @return the columns string
-	 * @throws OXException
-	 */
-	String getColumns(E[] fields) throws OXException;
+    /**
+     * Gets a comma-separated string of the mapped column names for the
+     * supplied fields.
+     *
+     * @param fields the fields
+     * @return the columns string
+     * @throws OXException
+     */
+    String getColumns(E[] fields) throws OXException;
+
+    /**
+     * Gets a comma-separated string of the mapped column names for the
+     * supplied fields.
+     *
+     * @param fields the fields
+     * @param columnLabelPrefix A prefix to use for the column names when getting the results from the columns in the result set,
+     *                          typically something like <code>ab.</code> when getting joined results
+     * @return the columns string
+     * @throws OXException
+     */
+    String getColumns(E[] fields, String columnLabelPrefix) throws OXException;
 
 }

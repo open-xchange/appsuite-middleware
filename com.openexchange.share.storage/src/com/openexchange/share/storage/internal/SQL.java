@@ -53,6 +53,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.storage.mapping.ShareMapper;
+import com.openexchange.share.storage.mapping.ShareTargetMapper;
 
 /**
  * {@link SQL}
@@ -62,30 +65,46 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 public class SQL {
 
     /**
-     * The DB mapper for shares
+     * The DB mapper for the "share" table
      */
-    public static final ShareMapper MAPPER = new ShareMapper();
+    public static final ShareMapper SHARE_MAPPER = new ShareMapper();
+
+    /**
+     * The DB mapper for the "share_target" table
+     */
+    public static final ShareTargetMapper TARGET_MAPPER = new ShareTargetMapper();
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SQL.class);
 
     public static String getCreateShareTableStmt() {
         return "CREATE TABLE share (" +
-            "token binary(16) NOT NULL," +
             "cid int(10) unsigned NOT NULL," +
-            "module tinyint(3) unsigned NOT NULL," +
-            "folder varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL," +
-            "item varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL," +
+            "token binary(16) NOT NULL," +
             "created bigint(64) NOT NULL," +
             "createdBy int(10) unsigned NOT NULL," +
             "lastModified bigint(64) NOT NULL," +
             "modifiedBy int(10) unsigned NOT NULL," +
-            "expiryDate bigint(64) DEFAULT NULL," +
-            "activationDate bigint(64) DEFAULT NULL," +
             "guest int(10) unsigned NOT NULL," +
             "auth tinyint(3) unsigned NOT NULL," +
             "PRIMARY KEY (cid,token)," +
             "KEY createdByIndex (cid,createdBy)," +
-            "KEY guestIndex (cid,guest)," +
+            "KEY guestIndex (cid,guest)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    }
+
+    public static String getCreateShareTargetTableStmt() {
+        return "CREATE TABLE share_target (" +
+            "cid int(10) unsigned NOT NULL," +
+            "uuid binary(16) NOT NULL," +
+            "token binary(16) NOT NULL," +
+            "module tinyint(3) unsigned NOT NULL," +
+            "folder varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL," +
+            "item varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL," +
+            "activationDate bigint(64) DEFAULT NULL," +
+            "expiryDate bigint(64) DEFAULT NULL," +
+            "meta BLOB DEFAULT NULL," +
+            "PRIMARY KEY (cid,uuid)," +
+            "KEY tokenIndex (cid,token)," +
             "KEY folderIndex (cid,folder)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
@@ -98,6 +117,32 @@ public class SQL {
     public static UpdateTaskV2[] getUpdateTasks() {
         return new UpdateTaskV2[] { new ShareCreateTableTask() };
     };
+
+    public static int encodeAuthenticationMode(AuthenticationMode authenticationMode) {
+        switch (authenticationMode) {
+        case ANONYMOUS:
+            return 0;
+        case ANONYMOUS_PASSWORD:
+            return 1;
+        case GUEST_PASSWORD:
+            return 2;
+        default:
+            throw new IllegalArgumentException("authenticationMode");
+        }
+    }
+
+    public static AuthenticationMode decodeAuthenticationMode(int encoded) {
+        switch (encoded) {
+        case 0:
+            return AuthenticationMode.ANONYMOUS;
+        case 1:
+            return AuthenticationMode.ANONYMOUS_PASSWORD;
+        case 2:
+            return AuthenticationMode.GUEST_PASSWORD;
+        default:
+            throw new IllegalArgumentException("encoded");
+        }
+    }
 
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {

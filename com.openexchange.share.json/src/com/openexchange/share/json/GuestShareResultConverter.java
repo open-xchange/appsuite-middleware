@@ -49,7 +49,6 @@
 
 package com.openexchange.share.json;
 
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -61,7 +60,6 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
@@ -183,10 +181,11 @@ public class GuestShareResultConverter implements ResultConverter {
      */
     private JSONObject serializeShareTarget(GuestShare guestShare) throws JSONException {
         JSONObject jsonTarget = new JSONObject(3);
-        Module module = Module.getForFolderConstant(guestShare.getShare().getModule());
-        jsonTarget.putOpt("module", null != module ? module.getName() : null);
-        jsonTarget.putOpt("folder", guestShare.getShare().getFolder());
-        jsonTarget.putOpt("item", guestShare.getShare().getItem());
+        //TODO
+//        Module module = Module.getForFolderConstant(guestShare.getShare().getModule());
+//        jsonTarget.putOpt("module", null != module ? module.getName() : null);
+//        jsonTarget.putOpt("folder", guestShare.getShare().getFolder());
+//        jsonTarget.putOpt("item", guestShare.getShare().getItem());
         return jsonTarget;
     }
 
@@ -224,14 +223,15 @@ public class GuestShareResultConverter implements ResultConverter {
             throw new UnsupportedOperationException("Unsupported authentication: " + guestShare.getShare().getAuthentication());
         }
         jsonRecipient.put("entity", String.valueOf(guestShare.getGuest().getId()));
-        Date activationDate = guestShare.getShare().getActivationDate();
-        if (null != activationDate) {
-            jsonRecipient.put("activation_date", addTimeZoneOffset(activationDate.getTime(), timeZone));
-        }
-        Date expiryDate = guestShare.getShare().getExpiryDate();
-        if (null != expiryDate) {
-            jsonRecipient.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
-        }
+        //TODO
+//        Date activationDate = guestShare.getShare().getActivationDate();
+//        if (null != activationDate) {
+//            jsonRecipient.put("activation_date", addTimeZoneOffset(activationDate.getTime(), timeZone));
+//        }
+//        Date expiryDate = guestShare.getShare().getExpiryDate();
+//        if (null != expiryDate) {
+//            jsonRecipient.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
+//        }
         return jsonRecipient;
     }
 

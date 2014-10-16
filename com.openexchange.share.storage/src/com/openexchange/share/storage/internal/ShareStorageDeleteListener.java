@@ -57,6 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.share.storage.mapping.ShareField;
+import com.openexchange.share.storage.mapping.ShareTargetField;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -96,39 +98,68 @@ public class ShareStorageDeleteListener implements DeleteListener {
     }
 
     private static int deleteSharesInContext(Connection connection, int cid) throws SQLException, OXException {
+        int affectedRows = 0;
         StringBuilder stringBuilder = new StringBuilder()
-            .append("DELETE FROM share WHERE ").append(SQL.MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?;");
+            .append("DELETE FROM share WHERE ").append(SQL.SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?;");
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
-            return logExecuteUpdate(stmt);
+            affectedRows += logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
+        stringBuilder = new StringBuilder()
+            .append("DELETE FROM share_target WHERE ").append(SQL.TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel()).append("=?;");
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, cid);
+            affectedRows += logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return affectedRows;
     }
 
     private static int deleteSharesForGuest(Connection connection, int cid, int guest) throws SQLException, OXException {
+        int affectedRows = 0;
         StringBuilder stringBuilder = new StringBuilder()
-            .append("DELETE FROM share WHERE ").append(SQL.MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(SQL.MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
+            .append("DELETE FROM share_target WHERE ").append(SQL.TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SQL.TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel()).append(" IN (")
+            .append("SELECT ").append(SQL.SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel()).append(" FROM share WHERE ")
+            .append(SQL.SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SQL.SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?);")
         ;
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
-            stmt.setInt(2, guest);
-            return logExecuteUpdate(stmt);
+            stmt.setInt(2, cid);
+            stmt.setInt(3, guest);
+            affectedRows += logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
+        stringBuilder = new StringBuilder()
+            .append("DELETE FROM share WHERE ").append(SQL.SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SQL.SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
+        ;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, cid);
+            stmt.setInt(2, guest);
+            affectedRows += logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return affectedRows;
     }
 
     private static int reassignShares(Connection connection, int cid, int createdBy, int newCreatedBy) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder()
-            .append("UPDATE share SET ").append(SQL.MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=? ")
-            .append("WHERE ").append(SQL.MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(SQL.MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
+            .append("UPDATE share SET ").append(SQL.SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=? ")
+            .append("WHERE ").append(SQL.SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+            .append("AND ").append(SQL.SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
         ;
         PreparedStatement stmt = null;
         try {

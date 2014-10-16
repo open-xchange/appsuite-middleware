@@ -163,20 +163,28 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 		return columnsParamsBuilder.toString();
 	}
 
-	@Override
-	public String getColumns(final E[] fields) throws OXException {
-		if (null == fields) {
-			throw new IllegalArgumentException("fields");
-		}
-		final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);
-		if (null != fields && 0 < fields.length) {
-			columnsBuilder.append(get(fields[0]).getColumnLabel());
-			for (int i = 1; i < fields.length; i++) {
-				columnsBuilder.append(',').append(get(fields[i]).getColumnLabel());
-			}
-		}
-		return columnsBuilder.toString();
-	}
+    @Override
+    public String getColumns(final E[] fields) throws OXException {
+        return getColumns(fields, null);
+    }
+
+    @Override
+    public String getColumns(final E[] fields, String columnLabelPrefix) throws OXException {
+        if (null == fields) {
+            throw new IllegalArgumentException("fields");
+        }
+        final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);
+        if (null != fields && 0 < fields.length) {
+            if (null != columnLabelPrefix) {
+                columnsBuilder.append(columnLabelPrefix);
+            }
+            columnsBuilder.append(get(fields[0]).getColumnLabel());
+            for (int i = 1; i < fields.length; i++) {
+                columnsBuilder.append(',').append(get(fields[i]).getColumnLabel());
+            }
+        }
+        return columnsBuilder.toString();
+    }
 
     /**
      * Gets a string to be used as parameter values in <code>INSERT</code>- or

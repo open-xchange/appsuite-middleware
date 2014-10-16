@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.storage.internal;
+package com.openexchange.share.storage.mapping;
 
 import java.util.Date;
 import java.util.EnumMap;
