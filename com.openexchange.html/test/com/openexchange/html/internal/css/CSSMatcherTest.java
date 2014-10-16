@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.css;
 
+import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
@@ -335,6 +336,18 @@ public class CSSMatcherTest {
         CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
 
         String content = "font-family: \"MS Mincho\";";
+        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
+    }
+
+    @Test
+    public void testDoCheckCss_bug35001() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("border-collapse: collapse; table-layout: auto; background-image: url(http://images.host.invalid/images/clients/{100974df-02f4-aaef-be13-9eb464b5ab91}_image-3BG.png)"));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        checkCSS(cssBld, FilterJerichoHandler.getImageStyleMap(), true, false);
+
+        String content = "border-collapse: collapse; table-layout: auto;";
         Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
     }
 
