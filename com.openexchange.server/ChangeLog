@@ -3,6 +3,7 @@
  - Fix for bug 34995: Removed Dropbox and Box.com remnants from packaging
  - Fix for bug 34985: Restrictive reading of configuration and improved logging in case a .properties file contains a malformed Unicode
                       escape sequence
+ - Fix for bug 34944: Ensure every threads holds its own IDBasedFileAccess instance
 
 * 2014-10-15 - martin.herfurth@open-xchange.com
 

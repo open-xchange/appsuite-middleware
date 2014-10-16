@@ -76,12 +76,12 @@ import com.openexchange.tools.session.ServerSession;
 public class SearchAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.COLUMNS);
 
-        final Field sortingField = request.getSortingField();
-        final SortDirection sortingOrder = request.getSortingOrder();
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        Field sortingField = request.getSortingField();
+        SortDirection sortingOrder = request.getSortingOrder();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
         SearchIterator<File> results = fileAccess.search(
             request.getSearchQuery(),
             request.getColumns(),
@@ -92,8 +92,8 @@ public class SearchAction extends AbstractFileAction {
             request.getEnd());
 
         if (Field.CREATED_BY.equals(sortingField)) {
-            final ServerSession serverSession = request.getSession();
-            final CreatedByComparator comparator = new CreatedByComparator(
+            ServerSession serverSession = request.getSession();
+            CreatedByComparator comparator = new CreatedByComparator(
                 serverSession.getUser().getLocale(),
                 serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
             results = CreatedByComparator.resort(results, comparator);

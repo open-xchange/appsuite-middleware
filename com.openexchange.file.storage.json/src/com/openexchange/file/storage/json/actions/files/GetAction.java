@@ -71,13 +71,10 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 public class GetAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.ID);
-
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
-
-        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-
+        IDBasedFileAccess fileAccess = request.getFileAccess();
+        File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
         return result(fileMetadata, request);
     }
 

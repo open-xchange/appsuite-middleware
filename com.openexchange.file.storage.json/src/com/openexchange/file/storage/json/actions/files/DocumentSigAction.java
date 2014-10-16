@@ -72,10 +72,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class DocumentSigAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(AbstractFileAction.Param.ID);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
         InputStream documentStream = null;
         OutputStream sigOut = null;

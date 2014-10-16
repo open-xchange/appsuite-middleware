@@ -329,7 +329,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileId, folderId);
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-        final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
+        IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
         try {
             final com.openexchange.file.storage.File mp3File = fileAccess.getFileMetadata(fileId, FileStorageFileAccess.CURRENT_VERSION);
             // Check MIME type
@@ -347,6 +347,8 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             return mp3File;
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            fileAccess.finish();
         }
     }
 
@@ -355,23 +357,27 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileId, folderId);
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-        final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
-        final com.openexchange.file.storage.File audioFile = fileAccess.getFileMetadata(fileId, FileStorageFileAccess.CURRENT_VERSION);
-        final String fileName = audioFile.getFileName();
-        final ManagedFile managedFile;
-        if (null == fileName) {
-            managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
-        } else {
-            final int pos = fileName.indexOf('.');
-            if (pos > 0) {
-                managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), fileName.substring(pos)); // Stream is closed during creation of ManagedFile
-            } else {
+        IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
+        try {
+            final com.openexchange.file.storage.File audioFile = fileAccess.getFileMetadata(fileId, FileStorageFileAccess.CURRENT_VERSION);
+            final String fileName = audioFile.getFileName();
+            final ManagedFile managedFile;
+            if (null == fileName) {
                 managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
+            } else {
+                final int pos = fileName.indexOf('.');
+                if (pos > 0) {
+                    managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), fileName.substring(pos)); // Stream is closed during creation of ManagedFile
+                } else {
+                    managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
+                }
             }
+            managedFile.setContentType(audioFile.getFileMIMEType());
+            managedFile.setFileName(fileName);
+            return managedFile;
+        } finally {
+            fileAccess.finish();
         }
-        managedFile.setContentType(audioFile.getFileMIMEType());
-        managedFile.setFileName(fileName);
-        return managedFile;
     }
 
 }
