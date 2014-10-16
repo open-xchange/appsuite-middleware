@@ -98,36 +98,64 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
-        ConnectionProvider provider = getReadProvider(contextID, parameters);
-        try {
-            return selectShare(provider.get(), contextID, token);
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            provider.close();
-        }
-    }
-
-    @Override
     public void storeShare(Share share, StorageParameters parameters) throws OXException {
-        ConnectionProvider provider = getWriteProvider(share.getContextID(), parameters);
-        try {
-            insertShare(provider.get(), new DefaultShare(share));
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            provider.close();
-        }
+        storeShares(share.getContextID(), Collections.singletonList(share), parameters);
     }
 
     @Override
     public void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
+        /*
+         * prepare shares and share-targets
+         */
+        List<RdbShareTarget> targetsToInsert = new ArrayList<RdbShareTarget>();
+        List<DefaultShare> sharesToInsert = new ArrayList<DefaultShare>();
+        for (Share share : shares) {
+            sharesToInsert.add(new DefaultShare(share));
+            for (ShareTarget target : share.getTargets()) {
+                RdbShareTarget rdbShareTarget = new RdbShareTarget(target);
+                rdbShareTarget.setContextID(contextID);
+                rdbShareTarget.setToken(share.getToken());
+                rdbShareTarget.setUuid(UUIDs.toByteArray(UUID.randomUUID()));
+                targetsToInsert.add(rdbShareTarget);
+            }
+        }
+        /*
+         * insert them
+         */
         ConnectionProvider provider = getWriteProvider(contextID, parameters);
         try {
-            for (Share share : shares) {
-                insertShare(provider.get(), new DefaultShare(share));
-            }
+            insertShares(provider.get(), sharesToInsert);
+            insertShareTargets(provider.get(), targetsToInsert);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public void deleteShare(int contextID, String token, StorageParameters parameters) throws OXException {
+        deleteShares(contextID, Collections.singletonList(token), parameters);
+    }
+
+    @Override
+    public void deleteShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(contextID, parameters);
+        try {
+            deleteShares(provider.get(), contextID, tokens);
+            deleteShareTargets(provider.get(), contextID, tokens);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return selectShareAndTargets(provider.get(), contextID, token);
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -151,20 +179,18 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public void deleteShare(int contextID, String token, StorageParameters parameters) throws OXException {
-        deleteShares(contextID, Collections.singletonList(token), parameters);
-    }
-
-    @Override
-    public void deleteShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
-        ConnectionProvider provider = getWriteProvider(contextID, parameters);
-        try {
-            deleteShares(provider.get(), contextID, tokens);
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            provider.close();
-        }
+    public void updateShares(List<Share> shares, StorageParameters parameters) throws OXException {
+//        EnumSet<ShareField> updatableFields = EnumSet.allOf(ShareField.class);
+//        updatableFields.remove(ShareField.CONTEXT_ID);
+//        updatableFields.remove(ShareField.TOKEN);
+//        ConnectionProvider provider = getWriteProvider(share.getContextID(), parameters);
+//        try {
+//            updateShare(provider.get(), new DefaultShare(share), updatableFields.toArray(new ShareField[updatableFields.size()]));
+//        } catch (SQLException e) {
+//            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+//        } finally {
+//            provider.close();
+//        }
     }
 
     @Override
@@ -251,65 +277,43 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
-    private static int insertShare(Connection connection, DefaultShare share) throws SQLException, OXException {
+    private static int[] insertShares(Connection connection, List<DefaultShare> shares) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("INSERT INTO share (").append(SHARE_MAPPER.getColumns(ShareField.values())).append(") VALUES (")
             .append(SHARE_MAPPER.getParameters(ShareField.values().length)).append(");")
         ;
-        int affectedRows = 0;
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
-            SHARE_MAPPER.setParameters(stmt, share, ShareField.values());
-            affectedRows += SQL.logExecuteUpdate(stmt);
+            for (DefaultShare share : shares) {
+                SHARE_MAPPER.setParameters(stmt, share, ShareField.values());
+                stmt.addBatch();
+            }
+            return SQL.logExecuteBatch(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-        stringBuilder = new StringBuilder()
+    }
+
+    private static int[] insertShareTargets(Connection connection, List<RdbShareTarget> targets) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
             .append("INSERT INTO share_target (").append(TARGET_MAPPER.getColumns(ShareTargetField.values())).append(") VALUES (")
             .append(TARGET_MAPPER.getParameters(ShareTargetField.values().length)).append(");")
         ;
+        PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
-            for (ShareTarget target : share.getTargets()) {
-                RdbShareTarget rdbShareTarget = new RdbShareTarget(target);
-                rdbShareTarget.setToken(share.getToken());
-                rdbShareTarget.setContextID(share.getContextID());
-                rdbShareTarget.setUuid(UUIDs.toByteArray(UUID.randomUUID()));
-                TARGET_MAPPER.setParameters(stmt, rdbShareTarget, ShareTargetField.values());
+            for (RdbShareTarget target : targets) {
+                TARGET_MAPPER.setParameters(stmt, target, ShareTargetField.values());
                 stmt.addBatch();
             }
-            int[] result = stmt.executeBatch();
-            for (int i = 0; i < result.length; i++) {
-                affectedRows += result[i];
-            }
+            return SQL.logExecuteBatch(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-        return affectedRows;
     }
 
-    private static int updateShare(Connection connection, DefaultShare share, ShareField[] fields) throws SQLException, OXException {
-        //TODO
-        return 0;
-//        StringBuilder stringBuilder = new StringBuilder()
-//            .append("UPDATE share SET ").append(MAPPER.getAssignments(fields)).append(' ')
-//            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-//            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel()).append("=?;")
-//        ;
-//        PreparedStatement stmt = null;
-//        try {
-//            stmt = connection.prepareStatement(stringBuilder.toString());
-//            MAPPER.setParameters(stmt, share, fields);
-//            stmt.setInt(1 + fields.length, share.getContextID());
-//            stmt.setBytes(2 + fields.length, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
-//            return logExecuteUpdate(stmt);
-//        } finally {
-//            DBUtils.closeSQLStuff(stmt);
-//        }
-    }
-
-    private static DefaultShare selectShare(Connection connection, int cid, String token) throws SQLException, OXException {
+    private static DefaultShare selectShareAndTargets(Connection connection, int cid, String token) throws SQLException, OXException {
         ShareField[] shareFields = { ShareField.CREATION_DATE, ShareField.CREATED_BY, ShareField.LAST_MODIFIED, ShareField.MODIFIED_BY,
             ShareField.GUEST_ID, ShareField.AUTHENTICATION };
         ShareTargetField[] targetFields = { ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM,
@@ -354,7 +358,6 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     private static int deleteShares(Connection connection, int cid, List<String> tokens) throws SQLException, OXException {
-        int affectedRows = 0;
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM share WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
             .append("AND ").append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel())
@@ -371,30 +374,53 @@ public class RdbShareStorage implements ShareStorage {
             for (int i = 0; i < tokens.size(); i++) {
                 stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens.get(i))));
             }
-            affectedRows += logExecuteUpdate(stmt);
+            return logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-        stringBuilder = new StringBuilder()
-            .append("DELETE FROM share_target WHERE ").append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel()).append("=? ")
-            .append("AND ").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel())
+    }
+
+    private static int deleteShareTargets(Connection connection, int cid, List<String> tokens) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM share_target WHERE ").append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel())
+            .append("=? ").append("AND ").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel())
         ;
         if (1 == tokens.size()) {
             stringBuilder.append("=?;");
         } else {
             stringBuilder.append(" IN (").append(TARGET_MAPPER.getParameters(tokens.size())).append(");");
         }
+        PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(1, cid);
             for (int i = 0; i < tokens.size(); i++) {
                 stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens.get(i))));
             }
-            affectedRows += logExecuteUpdate(stmt);
+            return logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-        return affectedRows;
+    }
+
+    private static int updateShare(Connection connection, DefaultShare share, ShareField[] fields) throws SQLException, OXException {
+        //TODO
+        return 0;
+//        StringBuilder stringBuilder = new StringBuilder()
+//            .append("UPDATE share SET ").append(MAPPER.getAssignments(fields)).append(' ')
+//            .append("WHERE ").append(MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+//            .append("AND ").append(MAPPER.get(ShareField.TOKEN).getColumnLabel()).append("=?;")
+//        ;
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt = connection.prepareStatement(stringBuilder.toString());
+//            MAPPER.setParameters(stmt, share, fields);
+//            stmt.setInt(1 + fields.length, share.getContextID());
+//            stmt.setBytes(2 + fields.length, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
+//            return logExecuteUpdate(stmt);
+//        } finally {
+//            DBUtils.closeSQLStuff(stmt);
+//        }
     }
 
     private static List<DefaultShare> selectSharesCreatedBy(Connection connection, int cid, int createdBy) throws SQLException, OXException {

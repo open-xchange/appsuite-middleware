@@ -100,6 +100,14 @@ public interface ShareStorage {
     void updateShare(Share share, StorageParameters parameters) throws OXException;
 
     /**
+     * Updates already existing shares in the storage.
+     *
+     * @param shares The shares to update
+     * @param parameters The storage parameters
+     */
+    void updateShares(List<Share> shares, StorageParameters parameters) throws OXException;
+
+    /**
      * Deletes a share identified by its unique token.
      *
      * @param contextID The context ID

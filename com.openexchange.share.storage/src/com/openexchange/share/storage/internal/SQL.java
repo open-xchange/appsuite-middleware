@@ -52,6 +52,7 @@ package com.openexchange.share.storage.internal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.storage.mapping.ShareMapper;
@@ -163,6 +164,17 @@ public class SQL {
             int rowCount = stmt.executeUpdate();
             LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
+        }
+    }
+
+    public static int[] logExecuteBatch(PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeBatch();
+        } else {
+            long start = System.currentTimeMillis();
+            int[] result = stmt.executeBatch();
+            LOG.debug("executeBatch: {} - {} rows affected, {} ms elapsed.", stmt.toString(), Arrays.toString(result), (System.currentTimeMillis() - start));
+            return result;
         }
     }
 
