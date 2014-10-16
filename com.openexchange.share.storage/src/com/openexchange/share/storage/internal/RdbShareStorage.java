@@ -159,7 +159,7 @@ public class RdbShareStorage implements ShareStorage {
     public Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            Collection<DefaultShare> shares = selectShareAndTargets(provider.get(), contextID, new String[] { token }, 0, 0);
+            Collection<DefaultShare> shares = selectShareAndTargets(provider.get(), contextID, new String[] { token }, 0, null);
             return null != shares && 0 < shares.size() ? shares.iterator().next() : null;
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -214,7 +214,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, createdBy, 0));
+            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, createdBy, null));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -226,7 +226,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, tokens.toArray(new String[tokens.size()]), 0, 0));
+            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, tokens.toArray(new String[tokens.size()]), 0, null));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -250,7 +250,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, 0, 0));
+            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, 0, null));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -266,9 +266,14 @@ public class RdbShareStorage implements ShareStorage {
 
     @Override
     public List<Share> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException {
+        return loadSharesForGuests(contextID, new int[] { guestID }, parameters);
+    }
+
+    @Override
+    public List<Share> loadSharesForGuests(int contextID, int[] guestIDs, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, 0, guestID));
+            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, 0, guestIDs));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -386,12 +391,12 @@ public class RdbShareStorage implements ShareStorage {
      * @param cid the context ID
      * @param tokens The tokens of the shares to retrieve, or <code>null</code> to not filter by token
      * @param createdBy The ID of the user who created the shares, or <code>0</code> to not filter by the creating user
-     * @param guest The ID of the guest assigned to the shares, or <code>0</code> to not filter by the guest user
+     * @param guests The IDs of the guests assigned to the shares, or <code>null</code> to not filter by the guest users
      * @return The shares
      * @throws SQLException
      * @throws OXException
      */
-    private static Collection<DefaultShare> selectShareAndTargets(Connection connection, int cid, String[] tokens, int createdBy, int guest) throws SQLException, OXException {
+    private static Collection<DefaultShare> selectShareAndTargets(Connection connection, int cid, String[] tokens, int createdBy, int[] guests) throws SQLException, OXException {
         /*
          * build statement
          */
@@ -424,8 +429,17 @@ public class RdbShareStorage implements ShareStorage {
         if (0 < createdBy) {
             stringBuilder.append(" AND s.").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?");
         }
-        if (0 < guest) {
-            stringBuilder.append(" AND s.").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel()).append("=?");
+        if (null != guests && 0 < guests.length) {
+            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel());
+            if (1 == tokens.length) {
+                stringBuilder.append("=?");
+            } else {
+                stringBuilder.append(" IN (?");
+                for (int i = 1; i < tokens.length; i++) {
+                    stringBuilder.append(",?");
+                }
+                stringBuilder.append(')');
+            }
         }
         Map<String, DefaultShare> sharesByToken = new HashMap<String, DefaultShare>();
         PreparedStatement stmt = null;
@@ -442,8 +456,10 @@ public class RdbShareStorage implements ShareStorage {
             if (0 < createdBy) {
                 stmt.setInt(parameterIndex++, createdBy);
             }
-            if (0 < guest) {
-                stmt.setInt(parameterIndex++, guest);
+            if (null != guests) {
+                for (int guest : guests) {
+                    stmt.setInt(parameterIndex++, guest);
+                }
             }
             resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {

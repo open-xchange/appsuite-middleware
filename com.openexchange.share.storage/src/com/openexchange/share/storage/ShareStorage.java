@@ -190,6 +190,16 @@ public interface ShareStorage {
     List<Share> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException;
 
     /**
+     * Loads all shares that were created for a specific guest user ID.
+     *
+     * @param contextID The context ID
+     * @param guestIDs The IDs of the guest users to whom the shares are for
+     * @param parameters The storage parameters
+     * @return The shares
+     */
+    List<Share> loadSharesForGuests(int contextID, int[] guestIDs, StorageParameters parameters) throws OXException;
+
+    /**
      * Loads all shares that were created in supplied context.
      *
      * @param contextID The contextId
