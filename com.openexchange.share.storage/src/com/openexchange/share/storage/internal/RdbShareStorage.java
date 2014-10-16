@@ -400,8 +400,8 @@ public class RdbShareStorage implements ShareStorage {
         ShareTargetField[] targetFields = { ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM,
             ShareTargetField.ACTIVATION_DATE, ShareTargetField.EXPIRY_DATE, ShareTargetField.META };
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(SHARE_MAPPER.getColumns(shareFields, "s")).append(',')
-            .append(TARGET_MAPPER.getColumns(targetFields, "t"))
+            .append("SELECT ").append(SHARE_MAPPER.getColumns(shareFields, "s.")).append(',')
+            .append(TARGET_MAPPER.getColumns(targetFields, "t."))
             .append(" FROM share AS s LEFT JOIN share_target AS t")
             .append(" ON s.").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel())
             .append("=t.").append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel())
@@ -422,10 +422,10 @@ public class RdbShareStorage implements ShareStorage {
             }
         }
         if (0 < createdBy) {
-            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?");
+            stringBuilder.append(" AND s.").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?");
         }
         if (0 < guest) {
-            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel()).append("=?");
+            stringBuilder.append(" AND s.").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel()).append("=?");
         }
         Map<String, DefaultShare> sharesByToken = new HashMap<String, DefaultShare>();
         PreparedStatement stmt = null;
@@ -453,6 +453,7 @@ public class RdbShareStorage implements ShareStorage {
                     share = currentShare;
                     share.setTargets(new ArrayList<ShareTarget>());
                     share.setContextID(cid);
+                    sharesByToken.put(share.getToken(), share);
                 }
                 RdbShareTarget target = TARGET_MAPPER.fromResultSet(resultSet, targetFields, "t.");
                 if (0 < target.getModule()) {

@@ -50,6 +50,7 @@
 package com.openexchange.share;
 
 import java.util.Date;
+import java.util.Map;
 
 
 /**
@@ -65,6 +66,7 @@ public class ShareTarget {
     protected String item;
     protected Date expiryDate;
     protected Date activationDate;
+    protected Map<String, Object> meta;
 
     /**
      * Initializes a new {@link ShareTarget}.
@@ -218,6 +220,24 @@ public class ShareTarget {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Gets the meta
+     *
+     * @return The meta
+     */
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    /**
+     * Sets the meta
+     *
+     * @param meta The meta to set
+     */
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     @Override

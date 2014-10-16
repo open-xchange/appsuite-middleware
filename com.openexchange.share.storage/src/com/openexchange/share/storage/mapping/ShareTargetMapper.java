@@ -49,10 +49,18 @@
 
 package com.openexchange.share.storage.mapping;
 
+import java.io.InputStream;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONInputStream;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.BinaryMapping;
@@ -61,6 +69,8 @@ import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.storage.internal.RdbShareTarget;
 
@@ -270,31 +280,62 @@ public class ShareTargetMapper extends DefaultDbMapper<RdbShareTarget, ShareTarg
                 target.setExpiryDate(null);
             }
         });
-        mappings.put(ShareTargetField.META, new DefaultDbMapping<byte[], RdbShareTarget>("meta", "Meta", java.sql.Types.BLOB) {
-
-            // TODO
+        mappings.put(ShareTargetField.META, new DefaultDbMapping<Map<String, Object>, RdbShareTarget>("meta", "Meta", java.sql.Types.BLOB) {
 
             @Override
-            public byte[] get(ResultSet resultSet, String columnLabel) throws SQLException {
+            public Map<String, Object> get(ResultSet resultSet, String columnLabel) throws SQLException {
+                InputStream inputStream = null;
+                try {
+                    inputStream = resultSet.getBinaryStream(columnLabel);
+                    if (false == resultSet.wasNull() && null != inputStream) {
+                        return new JSONObject(new AsciiReader(inputStream)).asMap();
+                    }
+                } catch (JSONException e) {
+                    throw new SQLException(e);
+                } finally {
+                    Streams.close(inputStream);
+                }
                 return null;
+            }
+
+            @Override
+            public void set(PreparedStatement statement, int parameterIndex, RdbShareTarget target) throws SQLException {
+                if (isSet(target)) {
+                    Object coerced;
+                    try {
+                        coerced = JSONCoercion.coerceToJSON(target.getMeta());
+                    } catch (JSONException e) {
+                        throw new SQLException(e);
+                    }
+                    if (null == coerced || JSONObject.NULL.equals(coerced)) {
+                        statement.setNull(parameterIndex, getSqlType());
+                    } else {
+                        statement.setBinaryStream(parameterIndex, new JSONInputStream((JSONValue) coerced, "US-ASCII"));
+                    }
+                } else {
+                    statement.setNull(parameterIndex, getSqlType());
+                }
             }
 
             @Override
             public boolean isSet(RdbShareTarget target) {
-                return false;
+                Map<String, Object> meta = target.getMeta();
+                return null != target.getMeta() && 0 < meta.size();
             }
 
             @Override
-            public void set(RdbShareTarget object, byte[] value) throws OXException {
+            public void set(RdbShareTarget target, Map<String, Object> value) throws OXException {
+                target.setMeta(value);
             }
 
             @Override
-            public byte[] get(RdbShareTarget object) {
-                return null;
+            public Map<String, Object> get(RdbShareTarget target) {
+                return target.getMeta();
             }
 
             @Override
-            public void remove(RdbShareTarget object) {
+            public void remove(RdbShareTarget target) {
+                target.setMeta(null);
             }
         });
 

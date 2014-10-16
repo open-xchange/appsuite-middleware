@@ -180,7 +180,11 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
             }
             columnsBuilder.append(get(fields[0]).getColumnLabel());
             for (int i = 1; i < fields.length; i++) {
-                columnsBuilder.append(',').append(get(fields[i]).getColumnLabel());
+                columnsBuilder.append(',');
+                if (null != columnLabelPrefix) {
+                    columnsBuilder.append(columnLabelPrefix);
+                }
+                columnsBuilder.append(get(fields[i]).getColumnLabel());
             }
         }
         return columnsBuilder.toString();
