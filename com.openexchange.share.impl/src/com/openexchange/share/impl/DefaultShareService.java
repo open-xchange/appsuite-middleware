@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,37 +123,91 @@ public class DefaultShareService implements ShareService {
     @Override
     public List<Share> getAllShares(Session session) throws OXException {
         List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(
-            session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
+            session.getContextId(),
+            session.getUserId(),
+            StorageParameters.NO_PARAMETERS);
         return removeExpired(session, shares);
     }
 
     @Override
-    public int[] deleteSharesForFolder(Session session, String folder, int module, int[] guests) throws OXException {
-        LOG.info("Deleting shares to guest user(s) {} for folder {} in context {}...",
-            Arrays.toString(guests), folder, session.getContextId());
+    public void deleteShareTarget(Session session, ShareTarget shareTarget, List<Integer> guestIDs) throws OXException {
+        deleteShareTargets(session, Collections.singletonList(shareTarget), guestIDs);
+    }
+
+    @Override
+    public void deleteShareTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+        int contextID = session.getContextId();
+        LOG.info("Deleting share target(s) {} for guest user {} in context {}...", targets, session.getUserId(), contextID);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            /*
-             * remove shares for folder / guest user(s)
-             */
-            int[] affectedGuestIDs = deleteSharesForFolder(
-                connectionHelper.getParameters(), session.getContextId(), folder, module, guests);
-            if (null == affectedGuestIDs || 0 == affectedGuestIDs.length) {
-                LOG.info("No guest users affected for shares in folder {}.", folder);
-                return new int[0];
+            StorageParameters parameters = connectionHelper.getParameters();
+            ShareStorage shareStorage = services.getService(ShareStorage.class);
+
+            List<Share> shares = Collections.emptyList();
+            // TODO: shares = shareStorage.loadSharesForGuests(contextID, guestIDs, parameters);
+            List<Share> modifiedShares = new ArrayList<Share>(shares.size());
+            List<Share> sharesToDelete = new LinkedList<Share>();
+            for (Share share : shares) {
+                List<ShareTarget> origTargets = share.getTargets();
+                List<ShareTarget> modifiedTargets = new ArrayList<ShareTarget>(origTargets);
+                for (ShareTarget origTarget : origTargets) {
+                    for (ShareTarget toDelete : targets) {
+                        if (targetsEqual(origTarget, toDelete)) {
+                            modifiedTargets.remove(origTarget);
+                            break;
+                        }
+                    }
+                }
+
+                DefaultShare modifiedShare = new DefaultShare(share);
+                modifiedShare.setTargets(modifiedTargets);
+                modifiedShares.add(modifiedShare);
+                if (modifiedTargets.isEmpty()) {
+                    sharesToDelete.add(modifiedShare);
+                }
             }
-            /*
-             * delete / adjust guest users as needed
-             */
-            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), affectedGuestIDs);
+
+            shareStorage.updateShares(contextID, modifiedShares, parameters);
+
+            // TODO: maybe we keep empty shares for re-using them later and delete stale ones with a cron job
+            if (!sharesToDelete.isEmpty()) {
+                List<String> tokens = new ArrayList<String>(sharesToDelete.size());
+                List<Integer> guestsToDelete = new ArrayList<Integer>(sharesToDelete.size());
+                for (Share share : sharesToDelete) {
+                    tokens.add(share.getToken());
+                    guestsToDelete.add(share.getGuest());
+                }
+
+                shareStorage.deleteShares(contextID, tokens, parameters);
+                cleanupGuestUsers(connectionHelper, contextID, I2i(guestsToDelete));
+            }
+
             connectionHelper.commit();
-            LOG.info("Shares to guest user(s) {} for folder {} in context {} deleted successfully.",
-                Arrays.toString(guests), folder, session.getContextId());
-            return deletedGuestIDs;
+            LOG.info("Share target(s) {} for guest user {} in context {} deleted successfully.", targets, session.getUserId(), contextID);
         } finally {
             connectionHelper.finish();
         }
+    }
+
+    private static boolean targetsEqual(ShareTarget t1, ShareTarget t2) {
+        if (t1.getModule() != t2.getModule()) {
+            return false;
+        }
+
+        if (!t1.getFolder().equals(t2.getFolder())) {
+            return false;
+        }
+
+        if (t1.isFolder() != t2.isFolder()) {
+            return false;
+        }
+
+        if (!t1.isFolder() && !t1.getItem().equals(t2.getItem())) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -166,8 +221,7 @@ public class DefaultShareService implements ShareService {
             /*
              * load & check shares, gather associated guest user IDs
              */
-            List<Share> shares = services.getService(ShareStorage.class).loadShares(
-                session.getContextId(), tokens, connectionHelper.getParameters());
+            List<Share> shares = services.getService(ShareStorage.class).loadShares(session.getContextId(), tokens, connectionHelper.getParameters());
             Set<Integer> affectedGuestIDs = new HashSet<Integer>(shares.size());
             for (String token : tokens) {
                 Share share = ShareTool.findShare(shares, token);
@@ -209,8 +263,7 @@ public class DefaultShareService implements ShareService {
             /*
              * load & check share
              */
-            Share storedShare = services.getService(ShareStorage.class).loadShare(
-                session.getContextId(), token, connectionHelper.getParameters());
+            Share storedShare = services.getService(ShareStorage.class).loadShare(session.getContextId(), token, connectionHelper.getParameters());
             if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
@@ -254,8 +307,7 @@ public class DefaultShareService implements ShareService {
             /*
              * prepare guest users and resulting shares
              */
-            User sharingUser = services.getService(UserService.class).getUser(
-                connectionHelper.getConnection(), session.getUserId(), context);
+            User sharingUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), session.getUserId(), context);
             List<User> guestUsers = new ArrayList<User>(recipients.size());
             for (ShareRecipient recipient : recipients) {
                 int permissionBits = ShareTool.getUserPermissionBitsForTargets(recipient, targets);
@@ -515,8 +567,7 @@ public class DefaultShareService implements ShareService {
             /*
              * proceed with deletion
              */
-            services.getService(ShareStorage.class).deleteShares(
-                connectionHelper.getContextID(), tokens, connectionHelper.getParameters());
+            services.getService(ShareStorage.class).deleteShares(connectionHelper.getContextID(), tokens, connectionHelper.getParameters());
             /*
              * delete / adjust guest users as needed
              */
@@ -540,8 +591,9 @@ public class DefaultShareService implements ShareService {
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, Session session) throws OXException {
         UserService userService = services.getService(UserService.class);
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
-        if (GuestRecipient.class.isInstance(recipient) && services.getService(
-            ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", true)) {
+        if (GuestRecipient.class.isInstance(recipient) && services.getService(ConfigurationService.class).getBoolProperty(
+            "com.openexchange.share.aggregateShares",
+            true)) {
             /*
              * re-use existing, non-anonymous guest user if possible
              */
@@ -558,10 +610,13 @@ public class DefaultShareService implements ShareService {
                 /*
                  * combine permission bits with existing ones
                  */
-                UserPermissionBits userPermissionBits = setPermissionBits(
-                    connection, context, existingGuestUser.getId(), permissionBits, true);
-                LOG.info("Using existing guest user {} with permissions {} in context {}: {}", existingGuestUser.getMail(),
-                    userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
+                UserPermissionBits userPermissionBits = setPermissionBits(connection, context, existingGuestUser.getId(), permissionBits, true);
+                LOG.info(
+                    "Using existing guest user {} with permissions {} in context {}: {}",
+                    existingGuestUser.getMail(),
+                    userPermissionBits.getPermissionBits(),
+                    context.getContextId(),
+                    existingGuestUser.getId());
                 return existingGuestUser;
             }
         }
@@ -587,19 +642,19 @@ public class DefaultShareService implements ShareService {
         contact.setInternalUserId(guestID);
         contactUserStorage.updateGuestContact(context.getContextId(), contactId, contact, new Date(), connection);
         services.getService(UserPermissionService.class).saveUserPermissionBits(
-            connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
+            connection,
+            new UserPermissionBits(permissionBits, guestID, context.getContextId()));
         if (AnonymousRecipient.class.isInstance(recipient)) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {
-            LOG.info("Created guest user {} with permissions {} in context {}: {}",
-                guestUser.getMail(), permissionBits, context.getContextId(), guestID);
+            LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), permissionBits, context.getContextId(), guestID);
         }
         return guestUser;
     }
 
     /**
-     * Deletes guest users that are no longer needed after all shares to them has been revoked. Guest users that are referenced by
-     * existing shares are skipped, while there module permissions are adjusted to reflect access to the remaining shares.
+     * Deletes guest users that are no longer needed after all shares to them has been revoked. Guest users that are referenced by existing
+     * shares are skipped, while there module permissions are adjusted to reflect access to the remaining shares.
      *
      * @param connectionHelper A (started) connection helper
      * @param contextID The context ID
@@ -620,6 +675,7 @@ public class DefaultShareService implements ShareService {
          */
         List<Integer> deletedGuestIDs = new ArrayList<Integer>(guestIDs.length);
         for (int guestID : guestIDs) {
+            // FIXME: No multiple shares will exist for a single user
             List<Share> sharesForGuest = shareStorage.loadSharesForGuest(contextID, guestID, connectionHelper.getParameters());
             if (null != sharesForGuest && 0 < sharesForGuest.size()) {
                 /*

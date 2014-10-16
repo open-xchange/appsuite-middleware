@@ -82,18 +82,6 @@ public interface ShareService {
     List<Share> getAllShares(Session session) throws OXException;
 
     /**
-     * Deletes shares for a specific folder that were bound to one of the supplied guest user IDs.
-     *
-     * @param session The session
-     * @param folder The identifier of the folder to remove the shares for
-     * @param module The module of the folder
-     * @param guests The user identifiers of the guests
-     * @return The identifiers of the guest users that have been removed through the removal of the share
-     * @throws OXException
-     */
-    int[] deleteSharesForFolder(Session session, String folder, int module, int[] guests) throws OXException;
-
-    /**
      * Deletes multiple shares of a user identified by their tokens.
      *
      * @param session The session
@@ -148,5 +136,19 @@ public interface ShareService {
      * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
      */
     List<String> generateShareURLs(List<Share> shares, String protocol, String fallbackHostname) throws OXException;
+
+    /**
+     * @param session
+     * @param shareTarget
+     * @throws OXException
+     */
+    void deleteShareTarget(Session session, ShareTarget shareTarget, List<Integer> guestIDs) throws OXException;
+
+    /**
+     * @param session
+     * @param targets
+     * @throws OXException
+     */
+    void deleteShareTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
 
 }
