@@ -217,10 +217,6 @@ public final class UpdateExecutor {
 
     private final void removeContexts() throws OXException {
         final int[] contextIds = Database.getContextsInSameSchema(contextId);
-        for (int i : contextIds) {
-            ContextStorage.getInstance().invalidateContext(i);
-
-        }
-//        ContextStorage.getInstance().invalidateContexts(contextIds);
+        ContextStorage.getInstance().invalidateContexts(contextIds);
     }
 }
