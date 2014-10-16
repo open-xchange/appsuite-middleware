@@ -71,11 +71,11 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 public class DeleteAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.requireBody().require(Param.TIMESTAMP);
         boolean hardDelete = "true".equals(request.getParameter("hardDelete"));
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
-        final List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp(), hardDelete);
+        IDBasedFileAccess fileAccess = request.getFileAccess();
+        List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp(), hardDelete);
         return result(conflicting, request);
     }
 

@@ -62,6 +62,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.results.Delta;
@@ -204,8 +206,23 @@ public abstract class AbstractFileAction implements AJAXActionService {
         }
     }
 
-    protected void after(final AJAXInfostoreRequest req) throws OXException{
-        req.getFileAccess().finish();
+    protected void after(final AJAXInfostoreRequest req) {
+        IDBasedFileAccess fileAccess = req.optFileAccess();
+        if (null != fileAccess) {
+            try {
+                fileAccess.finish();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+        IDBasedFolderAccess folderAccess = req.optFolderAccess();
+        if (null != folderAccess) {
+            try {
+                folderAccess.finish();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
     }
 
 

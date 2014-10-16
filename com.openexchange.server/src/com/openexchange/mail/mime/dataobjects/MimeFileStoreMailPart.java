@@ -139,7 +139,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
              * Put attachment's document to dedicated infostore folder
              */
             fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
-            final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+            IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
             boolean retry = true;
             int count = 1;
             final StringBuilder hlp = new StringBuilder(16);

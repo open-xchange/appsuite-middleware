@@ -71,13 +71,13 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 public class UnlockAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.ID);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
         fileAccess.unlock(request.getId());
-        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
+        File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
 
         return success(fileMetadata.getSequenceNumber());
     }

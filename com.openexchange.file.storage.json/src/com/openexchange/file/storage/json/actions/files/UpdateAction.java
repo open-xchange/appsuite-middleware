@@ -85,19 +85,19 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class UpdateAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.requireFileMetadata().require(Param.TIMESTAMP);
         final File file = request.getFile();
         if (file.getId() == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
         if (request.hasUploads()) {
-            final boolean ignoreVersion = request.getBoolParameter("ignoreVersion");
+            boolean ignoreVersion = request.getBoolParameter("ignoreVersion");
             if (ignoreVersion && (fileAccess instanceof IDBasedIgnorableVersionFileAccess)) {
-                final IDBasedIgnorableVersionFileAccess ignorableVersionFileAccess = (IDBasedIgnorableVersionFileAccess) fileAccess;
-                final FileID id = new FileID(file.getId());
+                IDBasedIgnorableVersionFileAccess ignorableVersionFileAccess = (IDBasedIgnorableVersionFileAccess) fileAccess;
+                FileID id = new FileID(file.getId());
                 if (ignorableVersionFileAccess.supportsIgnorableVersion(id.getService(), id.getAccountId())) {
                     ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
                 } else {

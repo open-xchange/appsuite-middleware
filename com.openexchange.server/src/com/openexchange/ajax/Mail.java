@@ -4548,14 +4548,14 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         jsonWriter.array();
         try {
-            final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
-            final String sequenceId = paramContainer.checkStringParam(PARAMETER_MAILATTCHMENT);
-            final String destFolderIdentifier = paramContainer.checkStringParam(PARAMETER_DESTINATION_FOLDER);
+            String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
+            String uid = paramContainer.checkStringParam(PARAMETER_ID);
+            String sequenceId = paramContainer.checkStringParam(PARAMETER_MAILATTCHMENT);
+            String destFolderIdentifier = paramContainer.checkStringParam(PARAMETER_DESTINATION_FOLDER);
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
-            final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-            final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
+            ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
+            IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
             try {
                 if (!session.getUserPermissionBits().hasInfostore()) {
