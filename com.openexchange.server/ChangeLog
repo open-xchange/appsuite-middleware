@@ -9,6 +9,7 @@
  - Fix for bug 34985: Restrictive reading of configuration and improved logging in case a .properties file contains a malformed Unicode
                       escape sequence
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger
+ - Fix for bug 34921: Do not generally apply HTML sanitizing to XML content
 
 * 2014-10-14 - thorben.betten@open-xchange.com
 
