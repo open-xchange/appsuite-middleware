@@ -95,17 +95,19 @@ public class DefaultShareServiceTest implements ServiceLookup {
 
     private DefaultShareService shareService;
 
+    private SimShareStorage shareStorage;
+
     private Session session;
 
-    private DefaultShare share;
+    private DefaultShare s1;
+
+    private DefaultShare s2;
 
     private ShareTarget t1;
 
     private ShareTarget t2;
 
     private ShareTarget t3;
-
-    private SimShareStorage shareStorage;
 
     @Before
     public void setUp() throws Exception {
@@ -122,15 +124,6 @@ public class DefaultShareServiceTest implements ServiceLookup {
         services.put(UserPermissionService.class, Mockito.mock(UserPermissionService.class, Mockito.RETURNS_DEEP_STUBS));
         services.put(ContactUserStorage.class, Mockito.mock(ContactUserStorage.class, Mockito.RETURNS_DEEP_STUBS));
 
-        share = new DefaultShare();
-        share.setAuthentication(AuthenticationMode.GUEST_PASSWORD);
-        share.setContextID(CONTEXT_ID);
-        share.setCreated(new Date());
-        share.setCreatedBy(USER_ID);
-        share.setGuest(2);
-        share.setLastModified(share.getLastModified());
-        share.setModifiedBy(share.getCreatedBy());
-        share.setToken(UUIDs.getUnformattedString(UUID.randomUUID()));
         List<ShareTarget> targets = new ArrayList<ShareTarget>(3);
         t1 = new ShareTarget(FolderObject.INFOSTORE, "1");
         t2 = new ShareTarget(FolderObject.INFOSTORE, "2");
@@ -138,9 +131,13 @@ public class DefaultShareServiceTest implements ServiceLookup {
         targets.add(t1);
         targets.add(t2);
         targets.add(t3);
-        share.setTargets(targets);
+        s1 = createShare(2, targets);
 
-        shareStorage.storeShare(share, null);
+        targets = new ArrayList<ShareTarget>(targets);
+        s2 = createShare(3, targets);
+
+        shareStorage.storeShare(s1, null);
+        shareStorage.storeShare(s2, null);
     }
 
     @Test
@@ -149,7 +146,7 @@ public class DefaultShareServiceTest implements ServiceLookup {
         toDelete.add(new ShareTarget(t1.getModule(), t1.getFolder()));
         toDelete.add(new ShareTarget(t2.getModule(), t2.getFolder()));
         shareService.deleteShareTargets(session, toDelete, Collections.singletonList(2));
-        Share reloaded = shareStorage.loadShare(CONTEXT_ID, share.getToken(), null);
+        Share reloaded = shareStorage.loadShare(CONTEXT_ID, s1.getToken(), null);
         assertEquals(1, reloaded.getTargets().size());
         ShareTarget t = reloaded.getTargets().get(0);
         assertTrue(t3.getModule() == t.getModule() && t3.getFolder().equals(t.getFolder()));
@@ -162,10 +159,28 @@ public class DefaultShareServiceTest implements ServiceLookup {
         toDelete.add(new ShareTarget(t2.getModule(), t2.getFolder()));
         toDelete.add(new ShareTarget(t3.getModule(), t3.getFolder()));
         shareService.deleteShareTargets(session, toDelete, Collections.singletonList(2));
-        assertNull(shareStorage.loadShare(CONTEXT_ID, share.getToken(), null));
-        Mockito.verify(getService(UserService.class)).deleteUser(Mockito.any(Connection.class), Mockito.any(Context.class), Mockito.eq(share.getGuest()));
-        Mockito.verify(getService(UserPermissionService.class)).deleteUserPermissionBits(Mockito.any(Connection.class), Mockito.any(Context.class), Mockito.eq(share.getGuest()));
+        assertNull(shareStorage.loadShare(CONTEXT_ID, s1.getToken(), null));
+        Mockito.verify(getService(UserService.class)).deleteUser(Mockito.any(Connection.class), Mockito.any(Context.class), Mockito.eq(s1.getGuest()));
+        Mockito.verify(getService(UserPermissionService.class)).deleteUserPermissionBits(Mockito.any(Connection.class), Mockito.any(Context.class), Mockito.eq(s1.getGuest()));
         Mockito.verify(getService(ContactUserStorage.class)).deleteGuestContact(Mockito.eq(CONTEXT_ID), Mockito.anyInt(), Mockito.any(Date.class), Mockito.any(Connection.class));
+    }
+
+    @Test
+    public void testTargetDeletionForAllSharesIfNoGuestsAreSpecified() throws Exception {
+        List<ShareTarget> toDelete = new ArrayList<ShareTarget>(2);
+        toDelete.add(new ShareTarget(t1.getModule(), t1.getFolder()));
+        toDelete.add(new ShareTarget(t2.getModule(), t2.getFolder()));
+        shareService.deleteShareTargets(session, toDelete, Collections.<Integer>emptyList());
+        List<Share> shares = shareStorage.loadSharesForContext(CONTEXT_ID, null);
+        assertEquals(2, shares.size());
+        Share rs1 = shares.get(0);
+        assertEquals(1, rs1.getTargets().size());
+        Share rs2 = shares.get(1);
+        assertEquals(1, rs2.getTargets().size());
+        ShareTarget rt1 = rs1.getTargets().get(0);
+        assertTrue(t3.getModule() == rt1.getModule() && t3.getFolder().equals(rt1.getFolder()));
+        ShareTarget rt2 = rs2.getTargets().get(0);
+        assertTrue(t3.getModule() == rt2.getModule() && t3.getFolder().equals(rt2.getFolder()));
     }
 
     @Override
@@ -176,6 +191,20 @@ public class DefaultShareServiceTest implements ServiceLookup {
     @Override
     public <S> S getOptionalService(Class<? extends S> clazz) {
         return (S) services.get(clazz);
+    }
+
+    private static DefaultShare createShare(int guestID, List<ShareTarget> targets) {
+        DefaultShare share = new DefaultShare();
+        share.setAuthentication(AuthenticationMode.GUEST_PASSWORD);
+        share.setContextID(CONTEXT_ID);
+        share.setCreated(new Date());
+        share.setCreatedBy(USER_ID);
+        share.setGuest(guestID);
+        share.setLastModified(share.getLastModified());
+        share.setModifiedBy(share.getCreatedBy());
+        share.setToken(UUIDs.getUnformattedString(UUID.randomUUID()));
+        share.setTargets(targets);
+        return share;
     }
 
 }

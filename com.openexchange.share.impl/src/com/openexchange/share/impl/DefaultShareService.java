@@ -144,44 +144,49 @@ public class DefaultShareService implements ShareService {
             connectionHelper.start();
             StorageParameters parameters = connectionHelper.getParameters();
             ShareStorage shareStorage = services.getService(ShareStorage.class);
+            List<Share> shares = loadSharesForTargetDeletion(shareStorage, parameters, contextID, targets, guestIDs);
+            if (!shares.isEmpty()) {
+                List<Share> modifiedShares = new ArrayList<Share>(shares.size());
+                List<Share> sharesToDelete = new LinkedList<Share>();
+                for (Share share : shares) {
+                    List<ShareTarget> origTargets = share.getTargets();
+                    List<ShareTarget> modifiedTargets = new ArrayList<ShareTarget>(origTargets);
+                    for (ShareTarget origTarget : origTargets) {
+                        for (ShareTarget toDelete : targets) {
+                            if (targetsEqual(origTarget, toDelete)) {
+                                modifiedTargets.remove(origTarget);
+                                break;
+                            }
+                        }
+                    }
 
-            List<Share> shares = Collections.emptyList();
-            // TODO: shares = shareStorage.loadSharesForGuests(contextID, guestIDs, parameters);
-            List<Share> modifiedShares = new ArrayList<Share>(shares.size());
-            List<Share> sharesToDelete = new LinkedList<Share>();
-            for (Share share : shares) {
-                List<ShareTarget> origTargets = share.getTargets();
-                List<ShareTarget> modifiedTargets = new ArrayList<ShareTarget>(origTargets);
-                for (ShareTarget origTarget : origTargets) {
-                    for (ShareTarget toDelete : targets) {
-                        if (targetsEqual(origTarget, toDelete)) {
-                            modifiedTargets.remove(origTarget);
-                            break;
+                    if (modifiedTargets.size() != origTargets.size()) {
+                        DefaultShare modifiedShare = new DefaultShare(share);
+                        modifiedShare.setTargets(modifiedTargets);
+                        modifiedShares.add(modifiedShare);
+                        if (modifiedTargets.isEmpty()) {
+                            sharesToDelete.add(modifiedShare);
                         }
                     }
                 }
 
-                DefaultShare modifiedShare = new DefaultShare(share);
-                modifiedShare.setTargets(modifiedTargets);
-                modifiedShares.add(modifiedShare);
-                if (modifiedTargets.isEmpty()) {
-                    sharesToDelete.add(modifiedShare);
+                if (!modifiedShares.isEmpty()) {
+                    shareStorage.updateShares(contextID, modifiedShares, parameters);
+                    if (!sharesToDelete.isEmpty()) {
+                        // TODO: maybe we keep empty shares for re-using them later and delete stale ones with a cron job
+                        if (!sharesToDelete.isEmpty()) {
+                            List<String> tokens = new ArrayList<String>(sharesToDelete.size());
+                            List<Integer> guestsToDelete = new ArrayList<Integer>(sharesToDelete.size());
+                            for (Share share : sharesToDelete) {
+                                tokens.add(share.getToken());
+                                guestsToDelete.add(share.getGuest());
+                            }
+
+                            shareStorage.deleteShares(contextID, tokens, parameters);
+                            cleanupGuestUsers(connectionHelper, contextID, I2i(guestsToDelete));
+                        }
+                    }
                 }
-            }
-
-            shareStorage.updateShares(contextID, modifiedShares, parameters);
-
-            // TODO: maybe we keep empty shares for re-using them later and delete stale ones with a cron job
-            if (!sharesToDelete.isEmpty()) {
-                List<String> tokens = new ArrayList<String>(sharesToDelete.size());
-                List<Integer> guestsToDelete = new ArrayList<Integer>(sharesToDelete.size());
-                for (Share share : sharesToDelete) {
-                    tokens.add(share.getToken());
-                    guestsToDelete.add(share.getGuest());
-                }
-
-                shareStorage.deleteShares(contextID, tokens, parameters);
-                cleanupGuestUsers(connectionHelper, contextID, I2i(guestsToDelete));
             }
 
             connectionHelper.commit();
@@ -191,24 +196,33 @@ public class DefaultShareService implements ShareService {
         }
     }
 
-    private static boolean targetsEqual(ShareTarget t1, ShareTarget t2) {
-        if (t1.getModule() != t2.getModule()) {
-            return false;
+    private static List<Share> loadSharesForTargetDeletion(ShareStorage shareStorage, StorageParameters parameters, int contextID, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+        List<Share> shares;
+        if (guestIDs == null || guestIDs.isEmpty()) {
+            shares = new LinkedList<Share>();
+            Set<String> tokens = new HashSet<String>();
+            for (ShareTarget target : targets) {
+                List<Share> foundShares;
+                // TODO: maybe build loadSharesForTarget()
+                if (target.isFolder()) {
+                    foundShares = shareStorage.loadSharesForFolder(contextID, target.getFolder(), parameters); // TODO: module missing
+                } else {
+                    foundShares = shareStorage.loadSharesForItem(contextID, target.getFolder(), target.getItem(), parameters); // TODO: module missing
+                }
+
+                for (Share share : foundShares) {
+                    String token = share.getToken();
+                    if (!tokens.contains(token)) {
+                        shares.add(share);
+                        tokens.add(token);
+                    }
+                }
+            }
+        } else {
+            shares = shareStorage.loadSharesForGuests(contextID, I2i(guestIDs), parameters);
         }
 
-        if (!t1.getFolder().equals(t2.getFolder())) {
-            return false;
-        }
-
-        if (t1.isFolder() != t2.isFolder()) {
-            return false;
-        }
-
-        if (!t1.isFolder() && !t1.getItem().equals(t2.getItem())) {
-            return false;
-        }
-
-        return true;
+        return shares;
     }
 
     @Override
@@ -783,6 +797,32 @@ public class DefaultShareService implements ShareService {
             services.getService(UserConfigurationService.class).removeUserConfiguration(userID, context);
         }
         return userPermissionBits;
+    }
+
+    /**
+     * Checks whether two targets are equal in terms of module, folder and item
+     * @param t1
+     * @param t2
+     * @return
+     */
+    private static boolean targetsEqual(ShareTarget t1, ShareTarget t2) {
+        if (t1.getModule() != t2.getModule()) {
+            return false;
+        }
+
+        if (!t1.getFolder().equals(t2.getFolder())) {
+            return false;
+        }
+
+        if (t1.isFolder() != t2.isFolder()) {
+            return false;
+        }
+
+        if (!t1.isFolder() && !t1.getItem().equals(t2.getItem())) {
+            return false;
+        }
+
+        return true;
     }
 
 }

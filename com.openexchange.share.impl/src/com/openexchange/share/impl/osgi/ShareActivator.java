@@ -49,9 +49,13 @@
 
 package com.openexchange.share.impl.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
@@ -59,12 +63,14 @@ import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.html.HtmlService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.impl.FileStorageShareCleanUp;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.ShareServiceLookup;
 import com.openexchange.share.impl.notification.DefaultNotificationService;
@@ -115,6 +121,7 @@ public class ShareActivator extends HousekeepingActivator {
 
             private volatile ServiceRegistration<ShareCryptoService> cryptoRegistration;
             private volatile ServiceRegistration<ShareService> shareRegistration;
+            private volatile ServiceRegistration<EventHandler> cleanUpRegistration;
 
             @Override
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
@@ -125,6 +132,13 @@ public class ShareActivator extends HousekeepingActivator {
                 addService(ShareCryptoService.class, shareCryptoService);
                 cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
+
+                /*
+                 * Event handler for deleted files
+                 */
+                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { FileStorageEventConstants.DELETE_TOPIC });
+                cleanUpRegistration = context.registerService(EventHandler.class, new FileStorageShareCleanUp(shareService), serviceProperties);
                 return service;
             }
 
@@ -144,6 +158,11 @@ public class ShareActivator extends HousekeepingActivator {
                 if (null != cryptoRegistration) {
                     cryptoRegistration.unregister();
                     this.cryptoRegistration = null;
+                }
+                ServiceRegistration<EventHandler> cleanUpRegistration = this.cleanUpRegistration;
+                if (null != cleanUpRegistration) {
+                    cleanUpRegistration.unregister();
+                    this.cleanUpRegistration = null;
                 }
 
                 context.ungetService(serviceReference);

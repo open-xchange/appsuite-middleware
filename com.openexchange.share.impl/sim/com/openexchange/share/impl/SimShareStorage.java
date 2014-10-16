@@ -153,9 +153,23 @@ public class SimShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Share> loadSharesForGuests(final int contextID, final int[] guestIDs, StorageParameters parameters) throws OXException {
+        return filter(new Filter<Share>() {
+            @Override
+            public boolean accept(Share share) {
+                return share.getContextID() == contextID && com.openexchange.tools.arrays.Arrays.contains(guestIDs, share.getGuest());
+            }
+        });
+    }
+
+    @Override
+    public List<Share> loadSharesForContext(final int contextID, StorageParameters parameters) throws OXException {
+        return filter(new Filter<Share>() {
+            @Override
+            public boolean accept(Share share) {
+                return share.getContextID() == contextID;
+            }
+        });
     }
 
     private List<Share> filter(Filter<Share> filter) {

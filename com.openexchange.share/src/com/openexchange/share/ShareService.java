@@ -93,6 +93,26 @@ public interface ShareService {
     int[] deleteShares(Session session, List<String> tokens, Date clientTimestamp) throws OXException;
 
     /**
+     * Deletes a share target for all shares that belong to a certain list of guests.
+     *
+     * @param session The session
+     * @param shareTarget The share target to delete
+     * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the target is deleted for all shares that reference it
+     * @throws OXException
+     */
+    void deleteShareTarget(Session session, ShareTarget shareTarget, List<Integer> guestIDs) throws OXException;
+
+    /**
+     * Deletes a list of share targets for all shares that belong to a certain list of guests.
+     *
+     * @param session The session
+     * @param shareTarget The share target to delete
+     * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the targets are deleted for all shares that reference it
+     * @throws OXException
+     */
+    void deleteShareTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
+
+    /**
      * Updates an existing share.
      *
      * @param session The session
@@ -136,19 +156,5 @@ public interface ShareService {
      * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
      */
     List<String> generateShareURLs(List<Share> shares, String protocol, String fallbackHostname) throws OXException;
-
-    /**
-     * @param session
-     * @param shareTarget
-     * @throws OXException
-     */
-    void deleteShareTarget(Session session, ShareTarget shareTarget, List<Integer> guestIDs) throws OXException;
-
-    /**
-     * @param session
-     * @param targets
-     * @throws OXException
-     */
-    void deleteShareTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
 
 }
