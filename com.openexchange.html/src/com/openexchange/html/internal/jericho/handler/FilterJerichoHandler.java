@@ -187,6 +187,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
         return staticStyleMap;
     }
 
+    /**
+     * Gets the image CSS map.
+     *
+     * @return The image CSS map
+     */
+    public static Map<String, Set<String>> getImageStyleMap() {
+        return IMAGE_STYLE_MAP;
+    }
+
     /*-
      * Member stuff
      */
@@ -668,19 +677,22 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSS(cssBuffer.append(attribute.getValue()), styleMap, true);
-                String checkedCSS = cssBuffer.toString();
-                cssBuffer.setLength(0);
-                if (dropExternalImages) {
-                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
-                    checkedCSS = cssBuffer.toString();
+                String css = attribute.getValue();
+                if (!Strings.isEmpty(css)) {
+                    checkCSS(cssBuffer.append(css), styleMap, true);
+                    css = cssBuffer.toString();
                     cssBuffer.setLength(0);
+                    if (dropExternalImages) {
+                        imageURLFound |= checkCSS(cssBuffer.append(css), IMAGE_STYLE_MAP, true, false);
+                        css = cssBuffer.toString();
+                        cssBuffer.setLength(0);
+                    }
                 }
-                if (containsCSSElement(checkedCSS)) {
-                    if (checkedCSS.indexOf('"') == -1) {
-                        attrBuilder.append(' ').append("style").append("=\"").append(checkedCSS).append('"');
+                if (containsCSSElement(css)) {
+                    if (css.indexOf('"') == -1) {
+                        attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
                     } else {
-                        attrBuilder.append(' ').append("style").append("='").append(checkedCSS).append('\'');
+                        attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
                     }
                 }
             } else if ("class".equals(attr) || "id".equals(attr)) {
