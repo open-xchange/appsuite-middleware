@@ -89,7 +89,7 @@ public class ZipDocumentsAction extends AbstractFileAction {
     }
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         // Get IDs
         final List<IdVersionPair> idVersionPairs;
         {
@@ -119,7 +119,7 @@ public class ZipDocumentsAction extends AbstractFileAction {
             }
         }
         // Get file access
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
         // Initialize ZIP'ing -- Either streamed or in-memory/tmp file
         {
             final AJAXRequestData ajaxRequestData = request.getRequestData();
@@ -150,7 +150,7 @@ public class ZipDocumentsAction extends AbstractFileAction {
         return new AJAXRequestResult(thresholdFileHolder, "file");
     }
 
-    private void createZipArchive(final List<IdVersionPair> idVersionPairs, final IDBasedFileAccess fileAccess, OutputStream out) throws OXException {
+    private void createZipArchive(List<IdVersionPair> idVersionPairs, IDBasedFileAccess fileAccess, OutputStream out) throws OXException {
         final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
         zipOutput.setEncoding("UTF-8");
         zipOutput.setUseLanguageEncodingFlag(true);

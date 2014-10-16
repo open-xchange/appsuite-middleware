@@ -83,14 +83,14 @@ responseDescription = "The response is sent as a HTML document (see introduction
 public class CopyAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.ID).requireFileMetadata();
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        final String id = request.getId();
-        final File file = request.getFile();
-        final String folder = file.getFolderId();
+        String id = request.getId();
+        File file = request.getFile();
+        String folder = file.getFolderId();
         String version = request.getVersion();
 
         String newId = null;

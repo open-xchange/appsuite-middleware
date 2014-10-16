@@ -84,14 +84,14 @@ public class AllAction extends AbstractFileAction {
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(FOLDER_ID);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        final String folderId = request.getFolderId();
+        String folderId = request.getFolderId();
         if (Strings.isEmpty(folderId)) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(Param.FOLDER_ID.getName());
         }
-        final Field sortingField = request.getSortingField();
-        final SortDirection sortingOrder = request.getSortingOrder();
+        Field sortingField = request.getSortingField();
+        SortDirection sortingOrder = request.getSortingOrder();
         TimedResult<File> documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder);
 
         if (Field.CREATED_BY.equals(sortingField)) {

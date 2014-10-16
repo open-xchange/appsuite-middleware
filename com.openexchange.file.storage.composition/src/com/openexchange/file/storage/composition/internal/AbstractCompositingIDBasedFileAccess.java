@@ -1447,7 +1447,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         }
 
         // Others...
-        final Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
+        Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
+        if (null == connectedAccounts) {
+            connectedAccounts = new HashMap<String, FileStorageAccountAccess>();
+            this.connectedAccounts.set(connectedAccounts);
+        }
         final FileStorageAccountAccess cached = connectedAccounts.get(new StringBuilder(serviceId).append('/').append(accountId).toString());
         if (cached != null) {
             return cached.getFileAccess();
@@ -1488,10 +1492,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     private void connect(final FileStorageAccountAccess accountAccess) throws OXException {
         final String id = accountAccess.getService().getId() + "/" + accountAccess.getAccountId();
 
-        if (!connectedAccounts.get().containsKey(id)) {
-            connectedAccounts.get().put(id, accountAccess);
+        Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
+        if (!connectedAccounts.containsKey(id)) {
+            connectedAccounts.put(id, accountAccess);
             accountAccess.connect();
-            accessesToClose.get().add(accountAccess);
+            List<FileStorageAccountAccess> accessesToClose = this.accessesToClose.get();
+            if (null == accessesToClose) {
+                accessesToClose = new LinkedList<FileStorageAccountAccess>();
+                this.accessesToClose.set(accessesToClose);
+            }
+            accessesToClose.add(accountAccess);
         }
     }
 
@@ -1574,17 +1584,29 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public void startTransaction() throws TransactionException {
         super.startTransaction();
-        connectedAccounts.get().clear();
-        accessesToClose.get().clear();
+        Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
+        if (null != connectedAccounts) {
+            connectedAccounts.clear();
+        }
+        List<FileStorageAccountAccess> accessesToClose = this.accessesToClose.get();
+        if (null != accessesToClose) {
+            accessesToClose.clear();
+        }
     }
 
     @Override
     public void finish() throws TransactionException {
-        connectedAccounts.get().clear();
-        for (final FileStorageAccountAccess acc : accessesToClose.get()) {
-            acc.close();
+        Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
+        if (null != connectedAccounts) {
+            connectedAccounts.clear();
         }
-        accessesToClose.get().clear();
+        List<FileStorageAccountAccess> accessesToClose = this.accessesToClose.get();
+        if (null != accessesToClose) {
+            for (final FileStorageAccountAccess acc : accessesToClose) {
+                acc.close();
+            }
+            accessesToClose.clear();
+        }
         super.finish();
     }
 
