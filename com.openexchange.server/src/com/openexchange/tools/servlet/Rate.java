@@ -53,6 +53,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link Rate} - Implements time stamp based rate limit.
@@ -70,6 +71,7 @@ public class Rate {
         SUCCESS, FAILED, DEPRECATED;
     }
 
+    private final AtomicLong lastLogStamp;
     private final int numberCalls;
     private final long timeInMillis;
     private final Deque<Long> callHistory;
@@ -84,6 +86,7 @@ public class Rate {
      */
     public Rate(final int numberCalls, final int timeLength, final TimeUnit timeUnit) {
         super();
+        lastLogStamp = new AtomicLong(0L);
         deprecated = false;
         callHistory = new LinkedList<Long>();
         this.numberCalls = numberCalls;
@@ -116,6 +119,15 @@ public class Rate {
             firstPeriodCall = call;
         }
         return count < numberCalls ? (firstPeriodCall + 1) : (firstPeriodCall + timeInMillis + 1);
+    }
+
+    /**
+     * Gets the lastLogStamp
+     *
+     * @return The lastLogStamp
+     */
+    AtomicLong getLastLogStamp() {
+        return lastLogStamp;
     }
 
     /**

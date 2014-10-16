@@ -78,10 +78,6 @@ import com.openexchange.tools.stream.CountingInputStream;
  */
 public final class CountingHttpServletRequest implements HttpServletRequest, Parameterizable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CountingHttpServletRequest.class);
-
-    private static final String LINE_SEP = System.getProperty("line.separator");
-
     private static volatile Long lMax;
     private static long max() {
         Long tmp = lMax;
@@ -131,7 +127,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
      *
      * @throws RateLimitedException If associated request is rate limited
      */
-    public CountingHttpServletRequest(final HttpServletRequest servletRequest) {
+    public CountingHttpServletRequest(HttpServletRequest servletRequest) {
         this(servletRequest, max());
     }
 
@@ -140,12 +136,9 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
      *
      * @throws RateLimitedException If associated request is rate limited
      */
-    public CountingHttpServletRequest(final HttpServletRequest servletRequest, final long max) {
+    public CountingHttpServletRequest(HttpServletRequest servletRequest, long max) {
         super();
-        if (!checkRequest(servletRequest)) {
-            LOG.info("Request with IP '{}' to path '{}' has been rate limited.{}", servletRequest.getRemoteAddr(), servletRequest.getServletPath(), LINE_SEP);
-            throw new RateLimitedException("429 Too Many Requests", RateLimiter.maxRateTimeWindow()/1000);
-        }
+        checkRequest(servletRequest);
         this.max = max;
         this.servletRequest = servletRequest;
         parameterizable = servletRequest instanceof Parameterizable ? (Parameterizable) servletRequest : null;
