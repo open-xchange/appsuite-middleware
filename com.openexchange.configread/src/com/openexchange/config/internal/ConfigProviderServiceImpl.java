@@ -80,14 +80,19 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
 
     private static final String TRUE = "true";
 
-    private ConfigurationService configService;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigProviderService.class);
-
+    private final ConfigurationService configService;
     private final ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
 
+    /**
+     * Initializes a new {@link ConfigProviderServiceImpl}.
+     *
+     * @param configService The associated configuration service
+     * @throws OXException If initialization fails
+     */
     public ConfigProviderServiceImpl(final ConfigurationService configService) throws OXException {
-        setConfigService(configService);
+        super();
+        this.configService = configService;
+        init();
     }
 
     @Override
@@ -122,8 +127,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         return retval;
     }
 
-    public void setConfigService(final ConfigurationService configService) throws OXException {
-        this.configService = configService;
+    private void init() throws OXException {
         initSettings(configService);
         initStructuredObjects(configService);
         initMetadata(configService);
@@ -175,9 +179,10 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     }
 
     private void initMetadata(final ConfigurationService config) throws OXException {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigProviderService.class);
         final Map<String, Object> yamlInFolder = config.getYamlInFolder(META);
         for(final Object o : yamlInFolder.values()) {
-            if (! checkMap(o)) {
+            if (false == checkMap(o, logger)) {
                 continue;
             }
             @SuppressWarnings("unchecked")
@@ -185,7 +190,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             for(final Map.Entry<String, Object> entry : metadataDef.entrySet()) {
                 final String propertyName = entry.getKey();
                 final Object value2 = entry.getValue();
-                if (! checkMap(value2)) {
+                if (false == checkMap(value2, logger)) {
                     continue;
                 }
                 @SuppressWarnings("unchecked")
@@ -207,7 +212,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         }
     }
 
-    private boolean checkMap(final Object o) {
+    private boolean checkMap(Object o, org.slf4j.Logger logger) {
         if (! Map.class.isInstance(o)) {
             final StringBuilder b = new StringBuilder("One of the .yml files in the meta configuration directory is improperly formatted\n");
             b.append("Please make sure they are formatted in this fashion:\n");
@@ -215,17 +220,20 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             b.append("\tprotected: false\n\n");
             b.append("ui/someOtherpath:\n");
             b.append("\tprotected: false\n\n");
-            LOG.error(b.toString(), new IllegalArgumentException("Invalid .yml file"));
+            logger.error(b.toString(), new IllegalArgumentException("Invalid .yml file"));
             return false;
         }
         return true;
     }
 
     /**
-     * Invalidates cached properties.
+     * Re-initializes this configuration provider.
+     *
+     * @throws OXException If operation fails
      */
-    public void invalidate() {
+    public void reinit() throws OXException {
         properties.clear();
+        init();
     }
 
 }
