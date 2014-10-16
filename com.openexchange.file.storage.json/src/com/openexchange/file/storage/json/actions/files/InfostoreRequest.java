@@ -103,8 +103,10 @@ public interface InfostoreRequest {
     InfostoreRequest requireFileMetadata() throws OXException;
 
     IDBasedFileAccess getFileAccess() throws OXException;
+    IDBasedFileAccess optFileAccess();
 
     IDBasedFolderAccess getFolderAccess() throws OXException;
+    IDBasedFolderAccess optFolderAccess();
 
     String getId() throws OXException;
 

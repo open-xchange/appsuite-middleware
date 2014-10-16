@@ -228,11 +228,21 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
+    public IDBasedFileAccess optFileAccess() {
+        return fileAccess;
+    }
+
+    @Override
     public IDBasedFolderAccess getFolderAccess() throws OXException {
         if (folderAccess != null) {
             return folderAccess;
         }
         return folderAccess = Services.getFolderAccessFactory().createAccess(session);
+    }
+
+    @Override
+    public IDBasedFolderAccess optFolderAccess() {
+        return folderAccess;
     }
 
     @Override

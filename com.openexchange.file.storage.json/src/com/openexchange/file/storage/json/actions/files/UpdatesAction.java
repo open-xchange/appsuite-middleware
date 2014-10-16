@@ -80,14 +80,14 @@ import com.openexchange.tools.session.ServerSession;
 public class UpdatesAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.FOLDER_ID, Param.COLUMNS);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        final long timestamp = request.getTimestamp();
-        final Field sortingField = request.getSortingField();
-        final SortDirection sortingOrder = request.getSortingOrder();
+        long timestamp = request.getTimestamp();
+        Field sortingField = request.getSortingField();
+        SortDirection sortingOrder = request.getSortingOrder();
         Delta<File> delta = fileAccess.getDelta(
             request.getFolderId(),
             timestamp == FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER ? FileStorageFileAccess.DISTANT_PAST : timestamp,

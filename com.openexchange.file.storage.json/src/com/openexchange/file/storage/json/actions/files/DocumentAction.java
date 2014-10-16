@@ -72,6 +72,7 @@ import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,7 +104,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
         final String id = request.getId();
         final String version = request.getVersion();
 
@@ -135,39 +136,44 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final File fileMetadata = fileAccess.getFileMetadata(id, version);
 
         IFileHolder.InputStreamClosure isClosure;
-        if (seemsLikeThumbnailRequest(request.getRequestData())) {
-            isClosure = new IFileHolder.InputStreamClosure() {
+        {
+            final ServerSession session = request.getSession();
+            if (seemsLikeThumbnailRequest(request.getRequestData())) {
+                isClosure = new IFileHolder.InputStreamClosure() {
 
-                @Override
-                public InputStream newStream() throws OXException, IOException {
-                    InputStream inputStream;
-                    try {
-                        inputStream = fileAccess.optThumbnailStream(id, version);
-                    } catch (OXException e) {
-                        LOGGER.debug("Unable to retrieve thumbnail for file: {}", id, e);
-                        inputStream = null;
+                    @Override
+                    public InputStream newStream() throws OXException, IOException {
+                        IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                        InputStream inputStream;
+                        try {
+                            inputStream = fileAccess.optThumbnailStream(id, version);
+                        } catch (OXException e) {
+                            LOGGER.debug("Unable to retrieve thumbnail for file: {}", id, e);
+                            inputStream = null;
+                        }
+                        if (null == inputStream) {
+                            inputStream = fileAccess.getDocument(id, version);
+                        }
+                        if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                            return inputStream;
+                        }
+                        return new BufferedInputStream(inputStream, 65536);
                     }
-                    if (null == inputStream) {
-                        inputStream = fileAccess.getDocument(id, version);
-                    }
-                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                        return inputStream;
-                    }
-                    return new BufferedInputStream(inputStream, 65536);
-                }
-            };
-        } else {
-            isClosure = new IFileHolder.InputStreamClosure() {
+                };
+            } else {
+                isClosure = new IFileHolder.InputStreamClosure() {
 
-                @Override
-                public InputStream newStream() throws OXException, IOException {
-                    InputStream inputStream = fileAccess.getDocument(id, version);
-                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                        return inputStream;
+                    @Override
+                    public InputStream newStream() throws OXException, IOException {
+                        IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                        InputStream inputStream = fileAccess.getDocument(id, version);
+                        if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                            return inputStream;
+                        }
+                        return new BufferedInputStream(inputStream, 65536);
                     }
-                    return new BufferedInputStream(inputStream, 65536);
-                }
-            };
+                };
+            }
         }
 
         final FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());

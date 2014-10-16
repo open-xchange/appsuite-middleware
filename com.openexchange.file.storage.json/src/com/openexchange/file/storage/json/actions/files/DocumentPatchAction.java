@@ -76,12 +76,12 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class DocumentPatchAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(AbstractFileAction.Param.ID);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        final List<Closeable> closeables = new ArrayList<Closeable>(4);
+        List<Closeable> closeables = new ArrayList<Closeable>(4);
         java.io.File baseFile = null;
         java.io.File patchedFile = null;
         try {
