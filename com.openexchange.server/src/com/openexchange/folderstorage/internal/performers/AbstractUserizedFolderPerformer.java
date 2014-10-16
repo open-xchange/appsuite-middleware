@@ -168,6 +168,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Initializes a new {@link AbstractUserizedFolderPerformer}.
+     *
      * @param storageParameters
      * @param folderStorageDiscoverer
      * @throws OXException
@@ -427,17 +428,17 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param contentType The content type / module of the parent folder
      * @param removedPermissions The removed permissions
      * @param connection The database connection to use or <code>null</code>
-     * @return The identifiers of the guest users that have been removed through the removal of a share
      */
-    protected int[] processRemovedGuestPermissions(String folderID, ContentType contentType, List<Permission> removedPermissions, Connection connection) throws OXException {
-        int[] guests = new int[removedPermissions.size()];
-        for (int i = 0; i < removedPermissions.size(); i++) {
-            guests[i] = removedPermissions.get(i).getEntity();
+    protected void processRemovedGuestPermissions(String folderID, ContentType contentType, List<Permission> removedPermissions, Connection connection) throws OXException {
+        List<Integer> guestIDs = new ArrayList<Integer>(removedPermissions.size());
+        for (Permission permission : removedPermissions) {
+            guestIDs.add(permission.getEntity());
         }
+
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
-            return shareService.deleteSharesForFolder(session, folderID, contentType.getModule(), guests);
+            shareService.deleteShareTarget(session, new ShareTarget(contentType.getModule(), folderID), guestIDs);
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
@@ -449,10 +450,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
      * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
-     *                         upon share creation
+     *            upon share creation
      * @param connection The database connection to use or <code>null</code>
-     * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
-     *         in the same order as the supplied guest permissions list
+     * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares, in
+     *         the same order as the supplied guest permissions list
      */
     protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
         List<ShareRecipient> guests = new ArrayList<ShareRecipient>(addedPermissions.size());
@@ -537,7 +538,11 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                          * Get subfolder from appropriate storage
                          */
                         final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
-                        if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) && CalculatePermission.isVisible(subfolder, getUser(), getContext(), getAllowedContentTypes())) {
+                        if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) && CalculatePermission.isVisible(
+                            subfolder,
+                            getUser(),
+                            getContext(),
+                            getAllowedContentTypes())) {
                             dummyId = id;
                         }
                     }
