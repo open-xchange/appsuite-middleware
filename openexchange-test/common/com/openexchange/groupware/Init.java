@@ -84,6 +84,9 @@ import com.openexchange.charset.CustomCharsetProviderInit;
 import com.openexchange.charset.ModifyCharsetExtendedProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.impl.ConfigCascade;
+import com.openexchange.config.cascade.impl.InMemoryConfigProvider;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
@@ -117,7 +120,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
-import com.openexchange.folderstorage.mail.MailServiceRegistry;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
@@ -152,18 +154,12 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
-import com.openexchange.quota.Quota;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.Resource;
-import com.openexchange.quota.ResourceDescription;
-import com.openexchange.quota.UnlimitedQuota;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.server.services.I18nServices;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -190,6 +186,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
+import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -363,12 +360,12 @@ public final class Init {
         startVersionBundle();
         startAndInjectIDGeneratorService();
         startAndInjectConfigBundle();
+        startAndInjectConfigViewFactory();
         startAndInjectThreadPoolBundle();
         startAndInjectBasicServices();
         startAndInjectHTMLService();
         startAndInjectServerConfiguration();
         startAndInjectNotification();
-        startAndInjectQuotaService();
         startAndInjectCache();
         startAndInjectCalendarServices();
         startAndInjectDatabaseBundle();
@@ -422,6 +419,17 @@ public final class Init {
 
         services.put(CapabilityService.class, c);
         TestServiceRegistry.getInstance().addService(CapabilityService.class, c);
+    }
+
+    private static void startAndInjectConfigViewFactory() {
+        ConfigCascade cascade = new ConfigCascade();
+        cascade.setProvider("server", new InMemoryConfigProvider());
+        cascade.setProvider("context", new InMemoryConfigProvider());
+        cascade.setProvider("user", new InMemoryConfigProvider());
+        cascade.setSearchPath("user", "context", "server");
+        cascade.setStringParser(new BasicTypesStringParser());
+        services.put(ConfigViewFactory.class, cascade);
+        TestServiceRegistry.getInstance().addService(ConfigViewFactory.class, cascade);
     }
 
     private static void startVersionBundle() throws Exception {
@@ -754,7 +762,12 @@ public final class Init {
             final MailAccountStorageService storageService = MailAccountStorageInit.newMailAccountStorageService();
             services.put(MailAccountStorageService.class, storageService);
             TestServiceRegistry.getInstance().addService(MailAccountStorageService.class, storageService);
-            MailServiceRegistry.getServiceRegistry().addService(MailAccountStorageService.class, storageService);
+
+            {
+                SimpleServiceLookup services = new SimpleServiceLookup();
+                services.add(MailAccountStorageService.class, storageService);
+                com.openexchange.folderstorage.mail.osgi.Services.setServiceLookup(services);
+            }
 
             final UnifiedInboxManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
             services.put(UnifiedInboxManagement.class, unifiedINBOXManagement);
@@ -844,26 +857,6 @@ public final class Init {
             });
             TestServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
             PushServiceRegistry.getServiceRegistry().addService(EventAdmin.class, TestEventAdmin.getInstance());
-        }
-    }
-
-    public static void startAndInjectQuotaService() {
-        if (null == TestServiceRegistry.getInstance().getService(QuotaService.class)) {
-            QuotaService quotaService = new QuotaService() {
-
-                @Override
-                public Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException {
-                    return UnlimitedQuota.getInstance();
-                }
-
-                @Override
-                public Quota getQuotaFor(Resource resource, Session session) throws OXException {
-                    return UnlimitedQuota.getInstance();
-                }
-            };
-            services.put(QuotaService.class, quotaService);
-            TestServiceRegistry.getInstance().addService(QuotaService.class, quotaService);
-            ServerServiceRegistry.getInstance().addService(QuotaService.class, quotaService);
         }
     }
 

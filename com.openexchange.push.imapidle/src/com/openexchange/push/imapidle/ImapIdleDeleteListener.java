@@ -67,7 +67,11 @@ public final class ImapIdleDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
-            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(event.getContext().getContextId(), event.getId());
+            ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
+            if (null != instance) {
+                instance.stopListener(false, event.getId(), event.getContext().getContextId());
+            }
         }
     }
+
 }

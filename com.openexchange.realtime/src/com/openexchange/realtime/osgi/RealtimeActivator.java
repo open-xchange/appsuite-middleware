@@ -50,6 +50,7 @@
 package com.openexchange.realtime.osgi;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +93,11 @@ import com.openexchange.user.UserService;
 public class RealtimeActivator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RealtimeActivator.class);
+
+    private final AtomicBoolean isStopped = new AtomicBoolean(true);
+
     private SyntheticChannel synth;
+
     private RealtimeConfig realtimeConfig;
 
     @Override
@@ -134,7 +139,7 @@ public class RealtimeActivator extends HousekeepingActivator {
         });
         
         synth = new SyntheticChannel(this, localRealtimeCleanup);
-
+        RealtimeJanitors.getInstance().addJanitor(synth);
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleAtFixedRate(synth, 0, 1, TimeUnit.MINUTES);
 
@@ -165,7 +170,7 @@ public class RealtimeActivator extends HousekeepingActivator {
 
         //Register all RealtimeJanitors
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
+            registerService(RealtimeJanitor.class, realtimeJanitor, realtimeJanitor.getServiceProperties());
         }
 
         //Expose all ManagementObjects for this bundle
@@ -175,17 +180,45 @@ public class RealtimeActivator extends HousekeepingActivator {
             LOG.error("Failed to expose ManagementObjects", oxe);
         }
         openTrackers();
+        isStopped.set(false);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        synth.shutdown();
-        //Conceal all ManagementObjects for this bundle and remove them from the housekeeper
-        ManagementHouseKeeper.getInstance().cleanup();
-        ID.ID_MANAGER_REF.set(null);
-        RealtimeJanitors.getInstance().cleanup();
-        realtimeConfig.stop();
-        super.cleanUp();
+        if (isStopped.compareAndSet(false, true)) {
+            synth.shutdown();
+            // Conceal all ManagementObjects for this bundle and remove them from the housekeeper
+            ManagementHouseKeeper.getInstance().cleanup();
+            ID.ID_MANAGER_REF.set(null);
+            RealtimeJanitors.getInstance().cleanup();
+            realtimeConfig.stop();
+            super.cleanUp();
+        }
+    }
+
+    @Override
+    protected void handleAvailability(Class<?> clazz) {
+        if (allAvailable()) {
+            LOG.info("{} regained all needed services {}. Going to restart bundle.", this.getClass().getSimpleName(), clazz.getSimpleName());
+            try {
+                startBundle();
+            } catch (Exception e) {
+                LOG.error("Error while starting bundle.", e);
+            }
+        }
+    }
+
+    @Override
+    protected void handleUnavailability(Class<?> clazz) {
+        LOG.warn(
+            "{} is handling unavailibility of needed service {}. Going to stop bundle.",
+            this.getClass().getSimpleName(),
+            clazz.getSimpleName());
+        try {
+            this.stopBundle();
+        } catch (Exception e) {
+            LOG.error("Error while stopping bundle.", e);
+        }
     }
 
 }

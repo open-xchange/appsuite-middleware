@@ -111,6 +111,11 @@ public final class MimeTypes {
     public static final String MIME_MULTIPART_ALTERNATIVE = "multipart/alternative";
 
     /**
+     * multipart/octet-stream
+     */
+    public static final String MIME_MULTIPART_OCTET = "multipart/octet-stream";
+
+    /**
      * multipart/related
      */
     public static final String MIME_MULTIPART_RELATED = "multipart/related";
@@ -353,8 +358,8 @@ public final class MimeTypes {
         if (isEmpty(givenMimeType)) {
             return MimeType2ExtMap.getContentType(fileName);
         }
-        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-        if ((MIME_UNKNOWN.equals(contentTypeByFileName) || equalPrimaryTypes(givenMimeType, contentTypeByFileName)) && !consideredAsInvalid(givenMimeType, invalids)) {
+        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName, null);
+        if ((null == contentTypeByFileName || equalPrimaryTypes(givenMimeType, contentTypeByFileName)) && !consideredAsInvalid(givenMimeType, invalids)) {
             // Unknown or MIME types do match
             return givenMimeType;
         }
@@ -379,8 +384,8 @@ public final class MimeTypes {
         if (isEmpty(baseType)) {
             return givenFileName;
         }
-        final String contentTypeByFileName = MimeType2ExtMap.getContentType(givenFileName);
-        if (MIME_UNKNOWN.equals(contentTypeByFileName) || equalPrimaryTypes(baseType, contentTypeByFileName)) {
+        final String contentTypeByFileName = MimeType2ExtMap.getContentType(givenFileName, null);
+        if (null == contentTypeByFileName || equalPrimaryTypes(baseType, contentTypeByFileName)) {
             // Unknown or MIME types do match
             return givenFileName;
         }

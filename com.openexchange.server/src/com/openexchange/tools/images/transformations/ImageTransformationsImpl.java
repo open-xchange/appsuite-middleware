@@ -56,6 +56,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -65,11 +67,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
+import org.apache.commons.io.FileUtils;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -81,6 +85,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.Constants;
 import com.openexchange.tools.images.ImageTransformationUtility;
@@ -234,6 +239,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      */
     protected BufferedImage getImage(String formatName) throws IOException {
         BufferedImage image = getSourceImage(formatName);
+
         if (null != image && image.getHeight() > 3 && image.getWidth() > 3) {
             ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
             for (ImageTransformation transformation : transformations) {
@@ -255,7 +261,9 @@ public class ImageTransformationsImpl implements ImageTransformations {
      */
     private BufferedImage getSourceImage(String formatName) throws IOException {
         if (null == this.sourceImage && null != this.sourceImageStream) {
-            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream, formatName) : read(sourceImageStream, formatName);
+            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream, formatName) : read(
+                sourceImageStream,
+                formatName);
         }
         return sourceImage;
     }
@@ -438,6 +446,9 @@ public class ImageTransformationsImpl implements ImageTransformations {
             } catch (ImageProcessingException e) {
                 LOG.warn("error getting metadata for {}", formatName, e);
             }
+            if (LOG.isTraceEnabled()) {
+                return traceImageIORead(managedFile, formatName);
+            }
             return ImageIO.read(managedFile.getInputStream());
         } catch (OXException e) {
             throw new IOException("error accessing managed file", e);
@@ -452,6 +463,23 @@ public class ImageTransformationsImpl implements ImageTransformations {
                     // Ignore
                 }
             }
+        }
+    }
+
+    private BufferedImage traceImageIORead(ManagedFile manageFile, String formatName) throws IOException, OXException {
+        FileOutputStream fos = null;
+        final StringBuilder sb = new StringBuilder(128);
+        final UUID randomUUID = UUID.randomUUID();
+        final File f = new File(sb.append(FileUtils.getTempDirectoryPath()).append(File.separator).append(
+            UUIDs.getUnformattedString(randomUUID)).append("_TRACE.").append(formatName).toString());
+        try {
+            fos = new FileOutputStream(f);
+            org.apache.commons.io.IOUtils.copy(manageFile.getInputStream(), fos);
+            BufferedImage bi = ImageIO.read(manageFile.getInputStream());
+            return bi;
+        } finally {
+            f.delete();
+            Streams.close(fos);
         }
     }
 

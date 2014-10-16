@@ -160,7 +160,9 @@ import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
+import com.openexchange.mail.MailQuotaProvider;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
@@ -193,7 +195,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -277,7 +279,7 @@ public final class ServerActivator extends HousekeepingActivator {
         AppointmentSqlFactoryService.class, CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class,
         IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
-        StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class,
+        StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
         SearchService.class };
 
     private static volatile BundleContext CONTEXT;
@@ -462,20 +464,20 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
             @Override
-            public void added(final ServiceReference<ManagementService> ref, final ManagementService management) {
+            public void added(ServiceReference<ManagementService> ref, ManagementService management) {
                 try {
-                    final ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
+                    ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
                     management.registerMBean(objectName, new AuthenticatorMBeanImpl());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Could not register MBean {}", AuthenticatorMBean.class.getName());
                 }
             }
 
             @Override
-            public void removed(final ServiceReference<ManagementService> ref, final ManagementService management) {
+            public void removed(ServiceReference<ManagementService> ref, ManagementService management) {
                 try {
                     management.unregisterMBean(Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN));
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Could not un-register MBean {}", AuthenticatorMBean.class.getName());
                 }
             }
@@ -568,6 +570,11 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ManagedFileManagement.class, new RegistryCustomizer<ManagedFileManagement>(context, ManagedFileManagement.class));
 
         /*
+         * Track UnifiedViewService
+         */
+        track(UnifiedViewService.class, new RegistryCustomizer<UnifiedViewService>(context, UnifiedViewService.class));
+
+        /*
          * User Service
          */
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
@@ -602,8 +609,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
+        MailServiceImpl mailService = new MailServiceImpl();
         {
-            registerService(MailService.class, new MailServiceImpl());
+            registerService(MailService.class, mailService);
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, MailSessionEventHandler.getTopics());
             registerService(EventHandler.class, new MailSessionEventHandler(), serviceProperties);
@@ -640,9 +648,12 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateMailAccountTables());
         registerService(CreateTableService.class, new CreateIDSequenceTable());
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
-        registerService(MailAccountStorageService.class, ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class));
+        MailAccountStorageService mailAccountStorageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+        registerService(MailAccountStorageService.class, mailAccountStorageService);
         // TODO: Register server's Unified Mail management here until its encapsulated in an own bundle
         registerService(UnifiedInboxManagement.class, ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class));
+        // TODO: Register server's Unified Mail management here until its encapsulated in an own bundle
+        registerService(QuotaProvider.class, new MailQuotaProvider(mailAccountStorageService, mailService));
         // Register ID generator
         registerService(IDGeneratorService.class, ServerServiceRegistry.getInstance().getService(IDGeneratorService.class));
         /*
@@ -752,7 +763,20 @@ public final class ServerActivator extends HousekeepingActivator {
         // Cache for generic volatile locks
         {
             final String regionName = "GenLocks";
-            final byte[] ccf = ("jcs.region." + regionName + "=\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=30\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=150\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
+            final byte[] ccf = ("jcs.region." + regionName + "=\n" +
+                "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" +
+                "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=30\n" +
+                "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" +
+                "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region." + regionName + ".elementattributes.IdleTime=150\n" +
+                "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" +
+                "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" +
+                "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
             final LockService lockService = new LockServiceImpl();
             ServerServiceRegistry.getInstance().addService(LockService.class, lockService);

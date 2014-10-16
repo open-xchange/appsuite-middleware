@@ -70,6 +70,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.annotation.NonNull;
@@ -78,6 +79,7 @@ import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -162,7 +164,7 @@ public class AJAXRequestData {
     /** The state reference */
     private @Nullable AJAXState state;
 
-    /** The eTag */
+    /** The eTag as parsed from <code>"If-None-Match"</code> request header */
     private @Nullable String eTag;
 
     /** The <code>User-Agent</code> value */
@@ -188,6 +190,9 @@ public class AJAXRequestData {
 
     /** The optional <code>HttpServletResponse</code> instance */
     private @Nullable HttpServletResponse httpServletResponse;
+
+    /** The request's last-modified time stamp as parsed from <code>"If-Modified-Since"</code> request header */
+    private @Nullable Long lastModified;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -350,6 +355,15 @@ public class AJAXRequestData {
      */
     public boolean isHttpServletResponseAvailable() {
         return null != httpServletResponse;
+    }
+
+    /**
+     * Gets the optional {@link HttpServletResponse} instance associated with this request data
+     *
+     * @return The {@link HttpServletResponse} instance or <code>null</code>
+     */
+    public HttpServletResponse optHttpServletResponse() {
+        return httpServletResponse;
     }
 
     /**
@@ -524,6 +538,50 @@ public class AJAXRequestData {
      */
     public void setExpires(final long expires) {
         this.expires = expires;
+    }
+
+    /**
+     * Gets the Last-Modified time taken from <code>"If-Modified-Since"</code> header.
+     * <p>
+     * <code>"If-Modified-Since"</code> header should be greater than server's last-modified time stamp. If so, then return 304.<br>
+     * This header is ignored if any <code>"If-None-Match"</code> header is specified.
+     *
+     * <pre>
+     * long ifModifiedSince = request.getDateHeader(&quot;If-Modified-Since&quot;);
+     * if (ifNoneMatch == null &amp;&amp; ifModifiedSince != -1 &amp;&amp; ifModifiedSince + 1000 &gt; lastModified) {
+     *     response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+     *     response.setHeader(&quot;ETag&quot;, eTag); // Required in 304.
+     *     response.setDateHeader(&quot;Expires&quot;, expires); // Postpone cache with 1 week.
+     *     return;
+     * }
+     * </pre>
+     *
+     * @return The Last-Modified time or <code>-1</code>
+     */
+    public long getLastModified() {
+        Long lastModified = this.lastModified;
+        if (null == lastModified) {
+            String ifModifiedSince = getHeader("If-Modified-Since");
+            if (null != ifModifiedSince) {
+                try {
+                    long time = Tools.parseHeaderDate(ifModifiedSince).getTime();
+                    lastModified = Long.valueOf(time);
+                    this.lastModified = lastModified;
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        }
+        return null == lastModified ? -1L : lastModified.longValue();
+    }
+
+    /**
+     * Sets the Last-Modified time
+     *
+     * @param lastModified The Last-Modified time to set
+     */
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified < 0 ? null : Long.valueOf(lastModified);
     }
 
     /**
@@ -803,8 +861,25 @@ public class AJAXRequestData {
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public @NonNull <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
+    public @Nullable <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
+        return getParameter(name, coerceTo, false);
+    }
+
+    /**
+     * Get the value of an optional parameter
+     *
+     * @param name name of the optional parameter
+     * @param coerceTo parse the value to the specified type
+     * @param optional <code>true</code> if parameter is optional; otherwise <code>false</code> to throw an exception on absence
+     * @return the coerced value
+     * @throws OXException if coercion fails
+     */
+    public @Nullable<T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo, final boolean optional) throws OXException {
         final String value = getParameter(name);
+        if (null == value && !optional) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, "null");
+        }
+
         try {
             final StringParser parser = ServerServiceRegistry.getInstance().getService(StringParser.class);
             if (null == parser) {
@@ -1186,6 +1261,69 @@ public class AJAXRequestData {
                 url.append('?');
             }
             url.append(query);
+        }
+        // Return URL
+        return url;
+    }
+
+    /**
+     * Constructs a URL to this server, injecting the host name and optionally the JVM route.
+     *
+     * <pre>
+     *  &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * </pre>
+     *
+     * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
+     * @param path The path on the server. If <code>null</code> no path is inserted
+     * @param withRoute Whether to include the JVM route in the server URL or not
+     * @param params The query string parameters. If <code>null</code> no query is included
+     * @return A string builder with the URL so far, ready for meddling.
+     */
+    public StringBuilder constructURLWithParameters(final String protocol, final String path, final boolean withRoute, final Map<String, String> params) {
+        final StringBuilder url = new StringBuilder(128);
+        // Protocol/schema
+        {
+            String prot = protocol;
+            if (prot == null) {
+                prot = isSecure() ? "https://" : "http://";
+            }
+            url.append(prot);
+            if (!prot.endsWith("://")) {
+                url.append("://");
+            }
+        }
+        // Host name
+        url.append(hostname);
+        // Path
+        if (path != null) {
+            if (!path.startsWith("/")) {
+                url.append('/');
+            }
+            url.append(path);
+        }
+        // JVM route
+        if (withRoute) {
+            url.append(";jsessionid=").append(route);
+        }
+        // Query string
+        if (params != null) {
+            boolean first = true;
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String key = entry.getKey();
+                if (!Strings.isEmpty(key)) {
+                    if (first) {
+                        url.append('?');
+                        first = false;
+                    } else {
+                        url.append('&');
+                    }
+                    url.append(AJAXUtility.encodeUrl(key, true));
+                    String value = entry.getValue();
+                    if (!Strings.isEmpty(value)) {
+                        url.append('=').append(AJAXUtility.encodeUrl(value, true));
+                    }
+                }
+            }
         }
         // Return URL
         return url;

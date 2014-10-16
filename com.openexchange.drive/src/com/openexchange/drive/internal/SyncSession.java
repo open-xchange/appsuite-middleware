@@ -56,10 +56,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
+import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.DriveUtils;
+import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.drive.checksum.DirectoryChecksum;
@@ -117,6 +120,11 @@ public class SyncSession {
         return session.getServerSession();
     }
 
+    /**
+     * Gets the file metadata fields relevant for the client.
+     *
+     * @return The file metadata fields, or <code>null</code> if not specified
+     */
     public List<DriveFileField> getFields() {
         return session.getFields();
     }
@@ -133,14 +141,19 @@ public class SyncSession {
         return storage;
     }
 
+    /**
+     * Get the identifier of the referenced root folder on the server.
+     *
+     * @return The root folder ID.
+     */
     public String getRootFolderID() {
         return session.getRootFolderID();
     }
 
     /**
-     * Gets the checksumStore
+     * Gets the checksum store.
      *
-     * @return The checksumStore
+     * @return The checksum store
      */
     public ChecksumStore getChecksumStore() throws OXException {
         if (null == checksumStore) {
@@ -190,6 +203,11 @@ public class SyncSession {
         return session.getHostData();
     }
 
+    /**
+     * Gets the direct link generator.
+     *
+     * @return The direct link generator
+     */
     public DirectLinkGenerator getLinkGenerator() {
         if (null == this.linkGenerator) {
             linkGenerator = new DirectLinkGenerator(this);
@@ -206,6 +224,11 @@ public class SyncSession {
         tracer.trace(message);
     }
 
+    /**
+     * Gets the recorded trace log.
+     *
+     * @return The trace log
+     */
     public String getDiagnosticsLog() {
         return tracer.getTraceLog();
     }
@@ -272,6 +295,12 @@ public class SyncSession {
         return hasTempFolder.booleanValue();
     }
 
+    /**
+     * Gets a list of all file versions in a directory available at the server. Only synchronized files are taken into account, i.e.
+     * invalid and ignored files are excluded from the result. Missing file checksums will be calculated on demand.
+     *
+     * @return The server directory versions
+     */
     public List<ServerFileVersion> getServerFiles(String path) throws OXException {
         FileStorageFolder folder = getStorage().getFolder(path);
         if (null == folder || null == folder.getOwnPermission() ||
@@ -287,40 +316,77 @@ public class SyncSession {
         return serverFiles;
     }
 
+    /**
+     * Gets a list of all directory versions available at the server. Only synchronized folders are taken into account, i.e. invalid and
+     * ignored directories are excluded from the result. Missing directory checksums will be calculated on demand.
+     *
+     * @return The server directory versions
+     */
     public List<ServerDirectoryVersion> getServerDirectories() throws OXException {
-        final SyncSession syncSession = this;
         return getStorage().wrapInTransaction(new StorageOperation<List<ServerDirectoryVersion>>() {
 
             @Override
             public List<ServerDirectoryVersion> call() throws OXException {
-                StringBuilder StringBuilder = isTraceEnabled() ? new StringBuilder("Server directories:\n") : null;
-                Map<String, FileStorageFolder> folders = getStorage().getFolders();
-                List<String> folderIDs = new ArrayList<String>(folders.size());
-                for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
-                    if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(entry.getKey()).matches()) {
-                        trace("Skipping invalid server directory: " + entry.getKey());
-                    } else {
-                        folderIDs.add(entry.getValue().getId());
-                    }
-                }
-                List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(syncSession, folderIDs);
-                List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
-                for (int i = 0; i < folderIDs.size(); i++) {
-                    ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(
-                        getStorage().getPath(folderIDs.get(i)), checksums.get(i));
-                    serverDirectories.add(directoryVersion);
-                    if (isTraceEnabled()) {
-                        StringBuilder.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
-                            .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
-                            .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
-                    }
-                }
-                if (isTraceEnabled()) {
-                    trace(StringBuilder);
-                }
-                return serverDirectories;
+                return getServerDirectoryVersions();
             }
         });
+    }
+
+    /**
+     * Gets a list of all directory versions available at the server. Only synchronized folders are taken into account, i.e. invalid and
+     * ignored directories are excluded from the result. Missing directory checksums will be calculated on demand.
+     *
+     * @return The server directory versions
+     */
+    private List<ServerDirectoryVersion> getServerDirectoryVersions() throws OXException {
+        StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server directories:\n") : null;
+        Map<String, FileStorageFolder> folders = getStorage().getFolders();
+        List<String> folderIDs = new ArrayList<String>(folders.size());
+        for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
+            String path = entry.getKey();
+            if (DriveUtils.isInvalidPath(path)) {
+                trace("Skipping invalid server directory: " + entry.getKey());
+            } else if (DriveUtils.isIgnoredPath(this, path)) {
+                trace("Skipping ignored server directory: " + entry.getKey());
+            } else {
+                folderIDs.add(entry.getValue().getId());
+            }
+        }
+        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(this, folderIDs);
+        List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
+        for (int i = 0; i < folderIDs.size(); i++) {
+            ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(
+                getStorage().getPath(folderIDs.get(i)), checksums.get(i));
+            serverDirectories.add(directoryVersion);
+            if (isTraceEnabled()) {
+                stringBuilder.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
+                    .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
+                    .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
+            }
+        }
+        if (isTraceEnabled()) {
+            trace(stringBuilder);
+        }
+        return serverDirectories;
+    }
+
+    /**
+     * Calculates a hash code for the (client-side) file- and directory exclusion filters.
+     *
+     * @return The hash code for the exclusion filters, or <code>1</code> if no filters are defined
+     */
+    public int getExclusionFilterHash() {
+        final int prime = 31;
+        int result = 1;
+        List<DirectoryPattern> directoryExclusions = session.getDirectoryExclusions();
+        if (null != directoryExclusions && 0 < directoryExclusions.size()) {
+            result = prime * result + directoryExclusions.hashCode();
+        }
+        List<FilePattern> fileExclusions = session.getFileExclusions();
+        if (null != fileExclusions && 0 < fileExclusions.size()) {
+            result = prime * result + fileExclusions.hashCode();
+        }
+        return 1 == result ? 0 : result;
     }
 
     @Override

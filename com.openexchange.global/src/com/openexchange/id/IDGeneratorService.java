@@ -50,6 +50,7 @@
 package com.openexchange.id;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
@@ -57,6 +58,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface IDGeneratorService {
 
     /**

@@ -138,7 +138,7 @@ public final class Tools {
         /*
          * Pattern for the HTTP header date format.
          */
-        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
+        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
         HEADER_DATEFORMAT.setTimeZone(getTimeZone("GMT"));
         EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
     }
@@ -345,6 +345,25 @@ public final class Tools {
     public static Date parseHeaderDate(final String str) throws ParseException {
         synchronized (HEADER_DATEFORMAT) {
             return HEADER_DATEFORMAT.parse(str);
+        }
+    }
+
+    /**
+     * Optionally parses a date from a HTTP date header.
+     *
+     * @param str The HTTP date header value
+     * @return The parsed time or <code>-1</code>
+     */
+    public static long optHeaderDate(final String str) {
+        if (null == str) {
+            return -1L;
+        }
+        synchronized (HEADER_DATEFORMAT) {
+            try {
+                return HEADER_DATEFORMAT.parse(str).getTime();
+            } catch (ParseException e) {
+                return -1L;
+            }
         }
     }
 

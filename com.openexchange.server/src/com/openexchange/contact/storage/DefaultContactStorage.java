@@ -58,6 +58,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.internal.SearchAdapter;
@@ -66,6 +68,7 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -192,6 +195,31 @@ public abstract class DefaultContactStorage implements ContactStorage {
         SearchIterator<Contact> searchIterator = this.search(
             session, getAnnualDateTerm(folderIDs, ContactField.ANNIVERSARY), addUniquely(fields, ContactField.ANNIVERSARY), sortOptions);
         return filterByAnnualDate(searchIterator, from, until, ContactField.ANNIVERSARY);
+    }
+
+    /**
+     * Default implementation falls back to the contact search object. Override
+     * if applicable for storage.
+     */
+    @Override
+    public SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        String pattern = query;
+        if (false == Strings.isEmpty(pattern) && false == "*".equals(pattern) && '*' != pattern.charAt(pattern.length() - 1)) {
+            pattern = pattern + "*";
+        }
+        ContactSearchObject preparedSearchObject = new ContactSearchObject();
+        preparedSearchObject.setOrSearch(true);
+        preparedSearchObject.setEmailAutoComplete(parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true));
+        if (null != folderIDs && 0 < folderIDs.size()) {
+            preparedSearchObject.setFolders(parse(folderIDs.toArray(new String[folderIDs.size()])));
+        }
+        preparedSearchObject.setDisplayName(pattern);
+        preparedSearchObject.setEmail1(pattern);
+        preparedSearchObject.setEmail2(pattern);
+        preparedSearchObject.setEmail3(pattern);
+        preparedSearchObject.setGivenName(pattern);
+        preparedSearchObject.setSurname(pattern);
+        return search(session, preparedSearchObject, fields, sortOptions);
     }
 
     /**

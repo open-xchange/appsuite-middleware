@@ -90,4 +90,9 @@ public class NoOpGlobalRealtimeCleanup implements GlobalRealtimeCleanup {
         return null;
     }
 
+    @Override
+    public void cleanForId(ID id, long timestamp) {
+        
+    }
+
 }

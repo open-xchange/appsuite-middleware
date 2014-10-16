@@ -194,13 +194,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessContacts(2, OPT_ACCESS_CONTACTS, false),
         accessDelegatetasks(3, OPT_ACCESS_DELEGATE_TASKS, false),
         accessEditPublicFolder(4, OPT_ACCESS_EDIT_PUBLIC_FOLDERS, false),
-        accessForum(5, OPT_ACCESS_FORUM, false),
         accessIcal(6, OPT_ACCESS_ICAL, false),
         accessInfostore(7, OPT_ACCESS_INFOSTORE, false),
-        accessPinboardWrite(8, OPT_ACCESS_PINBOARD_WRITE, false),
         accessReadCreateSharedFolders(10, OPT_ACCESS_READCREATE_SHARED_FOLDERS, false),
-        accessRssBookmarks(11, OPT_ACCESS_RSS_BOOKMARKS, false),
-        accessRssPortal(12, OPT_ACCESS_RSS_PORTAL, false),
         accessSyncML(13, OPT_ACCESS_SYNCML, false),
         accessTasks(14, OPT_ACCESS_TASKS, false),
         accessVcard(15, OPT_ACCESS_VCARD, false),
@@ -451,13 +447,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_CONTACTS = "access-contacts";
     protected static final String OPT_ACCESS_DELEGATE_TASKS = "access-delegate-tasks";
     protected static final String OPT_ACCESS_EDIT_PUBLIC_FOLDERS = "access-edit-public-folder";
-    protected static final String OPT_ACCESS_FORUM = "access-forum";
+
     protected static final String OPT_ACCESS_ICAL = "access-ical";
     protected static final String OPT_ACCESS_INFOSTORE = "access-infostore";
-    protected static final String OPT_ACCESS_PINBOARD_WRITE = "access-pinboard-write";
     protected static final String OPT_ACCESS_READCREATE_SHARED_FOLDERS = "access-read-create-shared-Folders";
-    protected static final String OPT_ACCESS_RSS_BOOKMARKS = "access-rss-bookmarks";
-    protected static final String OPT_ACCESS_RSS_PORTAL = "access-rss-portal";
     protected static final String OPT_ACCESS_SYNCML = "access-syncml";
     protected static final String OPT_ACCESS_TASKS = "access-tasks";
     protected static final String OPT_ACCESS_VCARD = "access-vcard";
@@ -640,13 +633,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessContactOption = null;
     protected CLIOption accessDelegateTasksOption = null;
     protected CLIOption accessEditPublicFolderOption = null;
-    protected CLIOption accessForumOption = null;
     protected CLIOption accessIcalOption = null;
     protected CLIOption accessInfostoreOption = null;
-    protected CLIOption accessPinboardWriteOption = null;
     protected CLIOption accessReadCreateSharedFolderOption = null;
-    protected CLIOption accessRssBookmarkOption = null;
-    protected CLIOption accessRssPortalOption = null;
     protected CLIOption accessSyncmlOption = null;
     protected CLIOption accessTasksOption = null;
     protected CLIOption accessVcardOption = null;
@@ -844,12 +833,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 moduleaccess.setEditResource(stringToBool(nextLine[m2]));
             }
         }
-        final int n = idarray[AccessCombinations.accessForum.getIndex()];
-        if (-1 != n) {
-            if (nextLine[n].length() > 0) {
-                moduleaccess.setForum(stringToBool(nextLine[n]));
-            }
-        }
         final int n2 = idarray[AccessCombinations.accessIcal.getIndex()];
         if (-1 != n2) {
             if (nextLine[n2].length() > 0) {
@@ -868,12 +851,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 moduleaccess.setMultipleMailAccounts(stringToBool(nextLine[o2]));
             }
         }
-        final int p = idarray[AccessCombinations.accessPinboardWrite.getIndex()];
-        if (-1 != p) {
-            if (nextLine[p].length() > 0) {
-                moduleaccess.setPinboardWrite(stringToBool(nextLine[p]));
-            }
-        }
         final int q = idarray[AccessCombinations.accessPublication.getIndex()];
         if (-1 != q) {
             if (nextLine[q].length() > 0) {
@@ -884,18 +861,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (-1 != q2) {
             if (nextLine[q2].length() > 0) {
                 moduleaccess.setReadCreateSharedFolders(stringToBool(nextLine[q2]));
-            }
-        }
-        final int r = idarray[AccessCombinations.accessRssBookmarks.getIndex()];
-        if (-1 != r) {
-            if (nextLine[r].length() > 0) {
-                moduleaccess.setRssBookmarks(stringToBool(nextLine[r]));
-            }
-        }
-        final int r2 = idarray[AccessCombinations.accessRssPortal.getIndex()];
-        if (-1 != r2) {
-            if (nextLine[r2].length() > 0) {
-                moduleaccess.setRssPortal(stringToBool(nextLine[r2]));
             }
         }
         final int s = idarray[AccessCombinations.accessSubscription.getIndex()];
@@ -1839,7 +1804,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setQuotaModule(final AdminParser parser) {
-        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore]", true, false,false);
+        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore, attachment]", true, false,false);
     }
 
     protected void setQuotaValue(final AdminParser parser) {
@@ -2101,13 +2066,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setContacts(accessOption2BooleanCreate(parser,this.accessContactOption));
         access.setDelegateTask(accessOption2BooleanCreate(parser,this.accessDelegateTasksOption));
         access.setEditPublicFolders(accessOption2BooleanCreate(parser,this.accessEditPublicFolderOption));
-        access.setForum(accessOption2BooleanCreate(parser,this.accessForumOption));
         access.setIcal(accessOption2BooleanCreate(parser,this.accessIcalOption));
         access.setInfostore(accessOption2BooleanCreate(parser,this.accessInfostoreOption));
-        access.setPinboardWrite(accessOption2BooleanCreate(parser,this.accessPinboardWriteOption));
         access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser,this.accessReadCreateSharedFolderOption));
-        access.setRssBookmarks(accessOption2BooleanCreate(parser,this.accessRssBookmarkOption));
-        access.setRssPortal(accessOption2BooleanCreate(parser,this.accessRssPortalOption));
         access.setSyncml(accessOption2BooleanCreate(parser,this.accessSyncmlOption));
         access.setTasks(accessOption2BooleanCreate(parser,this.accessTasksOption));
         access.setVcard(accessOption2BooleanCreate(parser,this.accessVcardOption));
@@ -2163,10 +2124,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             access.setEditPublicFolders(accessOption2BooleanCreate(parser, this.accessEditPublicFolderOption));
             changed = true;
         }
-        if ((String) parser.getOptionValue(this.accessForumOption) != null) {
-            access.setForum(accessOption2BooleanCreate(parser, this.accessForumOption));
-            changed = true;
-        }
         if ((String) parser.getOptionValue(this.accessIcalOption) != null) {
             access.setIcal(accessOption2BooleanCreate(parser, this.accessIcalOption));
             changed = true;
@@ -2175,20 +2132,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             access.setInfostore(accessOption2BooleanCreate(parser, this.accessInfostoreOption));
             changed = true;
         }
-        if ((String) parser.getOptionValue(this.accessPinboardWriteOption) != null) {
-            access.setPinboardWrite(accessOption2BooleanCreate(parser, this.accessPinboardWriteOption));
-            changed = true;
-        }
         if ((String) parser.getOptionValue(this.accessReadCreateSharedFolderOption) != null) {
             access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser, this.accessReadCreateSharedFolderOption));
-            changed = true;
-        }
-        if ((String) parser.getOptionValue(this.accessRssBookmarkOption) != null) {
-            access.setRssBookmarks(accessOption2BooleanCreate(parser, this.accessRssBookmarkOption));
-            changed = true;
-        }
-        if ((String) parser.getOptionValue(this.accessRssPortalOption) != null) {
-            access.setRssPortal(accessOption2BooleanCreate(parser, this.accessRssPortalOption));
             changed = true;
         }
         if ((String) parser.getOptionValue(this.accessSyncmlOption) != null) {
@@ -2328,13 +2273,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessContactOption = setLongOpt(admp, OPT_ACCESS_CONTACTS,"on/off","Contact module access (Default is on)", true, false,true);
         this.accessDelegateTasksOption = setLongOpt(admp, OPT_ACCESS_DELEGATE_TASKS,"on/off","Delegate tasks access (Default is off)", true, false,true);
         this.accessEditPublicFolderOption = setLongOpt(admp, OPT_ACCESS_EDIT_PUBLIC_FOLDERS,"on/off","Edit public folder access (Default is off)", true, false,true);
-        this.accessForumOption = setLongOpt(admp, OPT_ACCESS_FORUM,"on/off","Forum module access (Default is off)", true, false,true);
         this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is off)", true, false,true);
         this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is off)", true, false,true);
-        this.accessPinboardWriteOption = setLongOpt(admp, OPT_ACCESS_PINBOARD_WRITE,"on/off","Pinboard write access (Default is off)", true, false,true);
         this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is off)", true, false,true);
-        this.accessRssBookmarkOption= setLongOpt(admp, OPT_ACCESS_RSS_BOOKMARKS,"on/off","RSS bookmarks access (Default is off)", true, false,true);
-        this.accessRssPortalOption = setLongOpt(admp, OPT_ACCESS_RSS_PORTAL,"on/off","RSS portal access (Default is off)", true, false,true);
         this.accessSyncmlOption = setLongOpt(admp, OPT_ACCESS_SYNCML,"on/off","Syncml access (Default is off)", true, false,true);
         this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS,"on/off","Tasks access (Default is off)", true, false,true);
         this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD,"on/off","Vcard access (Default is off)", true, false,true);

@@ -211,6 +211,10 @@ public final class SnippetJsonParser {
         if (jsonAttachment.hasAndNotNull(key)) {
             attachment.setContentType(jsonAttachment.getString(key));
         }
+        key = "contentid";
+        if (jsonAttachment.hasAndNotNull(key)) {
+            attachment.setContentId(jsonAttachment.getString(key));
+        }
         key = "size";
         if (jsonAttachment.hasAndNotNull(key)) {
             attachment.setSize(jsonAttachment.getLong(key));

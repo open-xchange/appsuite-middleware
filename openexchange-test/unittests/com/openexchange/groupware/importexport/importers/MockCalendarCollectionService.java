@@ -193,7 +193,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndModifyAlarm(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], int, com.openexchange.groupware.container.UserParticipant[])
      */
     @Override
-    public UserParticipant[] checkAndModifyAlarm(CalendarDataObject cdao, UserParticipant[] check, int uid, UserParticipant[] orig) {
+    public Set<UserParticipant> checkAndModifyAlarm(CalendarDataObject cdao, Set<UserParticipant> check, int uid, Set<UserParticipant> orig) {
         // Nothing to do
         return null;
     }
@@ -931,7 +931,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeParticipant(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
-    public void removeParticipant(CalendarDataObject cdao, int uid) throws OXException {
+    public void removeUserParticipant(CalendarDataObject cdao, int uid) throws OXException {
         // Nothing to do
 
     }
@@ -949,7 +949,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeUserParticipant(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
-    public void removeUserParticipant(CalendarDataObject cdao, int uid) throws OXException {
+    public void removeParticipant(CalendarDataObject cdao, int uid) throws OXException {
         // Nothing to do
 
     }
@@ -1029,7 +1029,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillEventInformation(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
      */
     @Override
-    public void fillEventInformation(CalendarDataObject cdao, CalendarDataObject edao, UserParticipant[] up_event, UserParticipant[] new_userparticipants, UserParticipant[] deleted_userparticipants, UserParticipant[] modified_userparticipants, Participant[] p_event, Participant[] new_participants, Participant[] deleted_participants, Participant[] modified_participants) {
+    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final Set<UserParticipant> new_userparticipants, final Set<UserParticipant> deleted_userparticipants,final Set<UserParticipant> modified_userparticipants, Participant p_event[], final Set<Participant> new_participants, final Set<Participant> deleted_participants, final Participant[] modified_participants) {
         // Nothing to do
 
     }

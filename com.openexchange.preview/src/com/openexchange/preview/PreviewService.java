@@ -52,6 +52,7 @@ package com.openexchange.preview;
 import java.io.InputStream;
 import com.openexchange.conversion.Data;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -59,6 +60,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface PreviewService {
 
     /**

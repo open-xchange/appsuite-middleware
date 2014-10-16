@@ -136,4 +136,18 @@ public interface DriveSession {
      */
     DriveClientType getClientType();
 
+    /**
+     * Gets a list of directory patterns matching those directory versions that should be excluded from synchronization.
+     *
+     * @return The directory patterns, or <code>null</code> if there are none
+     */
+    List<DirectoryPattern> getDirectoryExclusions();
+
+    /**
+     * Gets a list of file patterns matching those file versions that should be excluded from synchronization.
+     *
+     * @return The file patterns, or <code>null</code> if there are none
+     */
+    List<FilePattern> getFileExclusions();
+
 }

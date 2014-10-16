@@ -87,7 +87,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         return Services.getService(DriveSubscriptionStore.class, true);
     }
 
-    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException;
+    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException;
 
     protected boolean requiresRootFolderID() {
         return true;
@@ -258,7 +258,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      */
     protected void enableUnlimitedBodySize(AJAXRequestData requestData) {
         HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest && CountingHttpServletRequest.class.isInstance(servletRequest)) {
+        if (servletRequest instanceof CountingHttpServletRequest) {
             ((CountingHttpServletRequest)servletRequest).setMax(-1);
         }
     }

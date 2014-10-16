@@ -50,16 +50,16 @@
 package com.openexchange.groupware.contact;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -179,190 +179,423 @@ public final class ContactDeleteListener implements DeleteListener {
         }
     }
 
-    /*
-     * taken as-is from previous Contacts.java and ContactMySql.java implementations
-     */
-    private static void trashAllUserContacts(Context ct, int uid, Session so, Connection readcon, Connection writecon) throws OXException {
-        Statement stmt = null;
-        Statement del = null;
-        ResultSet rs = null;
-
-        try {
-            final int contextId = so.getContextId();
-            stmt = readcon.createStatement();
-            del = writecon.createStatement();
-            FolderObject contactFolder = null;
-
+    private static void trashAllUserContacts(Context context, int userID, Session session, Connection readConnection, Connection writeConnection) throws OXException {
+        /*
+         * get all contacts created by the user being deleted
+         */
+        List<Contact> contacts = getContactsCreatedBy(readConnection, context.getContextId(), userID);
+        if (null == contacts || 0 == contacts.size()) {
+            return; // nothing to do
+        }
+        /*
+         * process contacts by their parent folder
+         */
+        Map<Integer, FolderObject> parentFolders = getParentFolders(contacts, context, readConnection);
+        List<Contact> toAdmin = new ArrayList<Contact>();
+        List<Contact> toAdminsFolder = new ArrayList<Contact>();
+        List<Contact> toDelete = new ArrayList<Contact>();
+        for (Map.Entry<FolderObject, List<Contact>> entry : mapToParentFolders(contacts, parentFolders).entrySet()) {
+            orderContacts(entry.getKey(), entry.getValue(), userID, toAdmin, toAdminsFolder, toDelete);
+        }
+        if (0 < toAdminsFolder.size()) {
+            if (userID == context.getMailadmin()) {
+                toDelete.addAll(toAdminsFolder);
+            }
             /*
-             * Get all contacts which were created by specified user. This includes the user's contact as well since the user is always the
-             * creator.
+             * try to move stale contacts to admin's default folder
              */
-            rs = stmt.executeQuery(iFgetRightsSelectString(uid, contextId));
+            try {
+                int moved = moveToAdminsFolder(writeConnection, context, toAdminsFolder);
+                LOG.debug("Moved {} entries originally owned by user {} in context {} to context administrator's default folder.",
+                    I(moved), I(userID), I(context.getContextId()));
+            } catch (OXException e) {
+                LOG.error("Error moving stale contacts to context administrator's default folder, deleting affected contacts.", e);
+                toDelete.addAll(toAdminsFolder);
+            }
+        }
+        if (0 < toAdmin.size()) {
+            /*
+             * transfer ownership to admin
+             */
+            int updated = reassignContacts(writeConnection, "prg_contacts", context.getContextId(), userID, context.getMailadmin());
+            LOG.debug("Reassigned {} entries in 'prg_contacts' table to user {} originally owned by user {} in context {}.",
+                I(updated), I(context.getMailadmin()), I(userID), I(context.getContextId()));
+        }
+        if (0 < toDelete.size()) {
+            /*
+             * delete contacts
+             */
+            int deleted = deleteContacts(writeConnection, context.getContextId(), toDelete);
+            LOG.debug("Deleted {} entries from 'prg_contacts' table originally owned by user {} in context {}.",
+                I(deleted), I(userID), I(context.getContextId()));
+            /*
+             * trigger delete events
+             */
+            EventClient eventClient = new EventClient(session);
+            for (Contact contact : toDelete) {
+                try {
+                    FolderObject parentFolder = parentFolders.get(contact.getParentFolderID());
+                    if (null != parentFolder) {
+                        eventClient.delete(contact, parentFolder);
+                    } else {
+                        eventClient.delete(contact);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error triggering delete event for contact delete: id={} cid={}",
+                        I(contact.getObjectID()), I(contact.getContextId()), e);
+                }
+            }
+        }
+        /*
+         * cleanup any leftovers in the del_contacts table
+         */
+        if (userID == context.getMailadmin()) {
+            int deleted = deleteFromDelContacts(writeConnection, context.getContextId(), userID);
+            LOG.debug("Deleted {} entries from 'del_contacts' table originally owned by user {} in context {}.",
+                I(deleted), I(userID), I(context.getContextId()));
+        } else {
+            int updated = reassignContacts(writeConnection, "del_contacts", context.getContextId(), userID, context.getMailadmin());
+            LOG.debug("Reassigned {} entries in 'del_contacts' table to user {} originally owned by user {} in context {}.",
+                I(updated), I(context.getMailadmin()), I(userID), I(context.getContextId()));
+        }
+    }
 
-            int fid = 0;
-            int oid = 0;
-            int created_from = 0;
-            boolean delete = false;
-            int pflag = 0;
+    /**
+     * Decides for contacts in a folder that were created by the deleted user what to do and orders the contact into one of the supplied
+     * lists.
+     *
+     * @param folder The parent folder of the contacts
+     * @param contacts The contacts to order
+     * @param userID The ID of the deleted user
+     * @param toAdmin The list to contain contacts where ownership should be transferred to the context administrator
+     * @param toAdminsFolder The list to contain contacts that should be moved to the context administrator's default folder
+     * @param toDelete The list to contain contacts that should be deleted
+     * @throws OXException
+     */
+    private static void orderContacts(FolderObject folder, List<Contact> contacts, int userID, List<Contact> toAdmin, List<Contact> toAdminsFolder, List<Contact> toDelete) throws OXException {
+        for (Contact contact : contacts) {
+            if (contact.getPrivateFlag()) {
+                LOG.debug("Contact marked as 'private' will be deleted [Context={} Folder={} User={} Contact={}].",
+                    I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
+                toDelete.add(contact);
+            } else if (null == folder) {
+                LOG.warn("Contact with no valid parent folder will be moved to context administrator's address book. " +
+                    "[Context={} Folder={} User={} Contact={}]",
+                    I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
+                toAdminsFolder.add(contact);
+            } else if (FolderObject.CONTACT != folder.getModule()) {
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(
+                    I(folder.getObjectID()), I(contact.getContextId()), I(userID));
+            } else if (FolderObject.PRIVATE == folder.getType(userID)) {
+                LOG.debug("Contact in 'private' folder will be deleted [Context={} Folder={} User={} Contact={}].",
+                    I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
+                toDelete.add(contact);
+            } else {
+                LOG.debug("Contact in non-'private' folder will be transferred to context administrator " +
+                    "[Context={} Folder={} User={} Contact={}].",
+                    I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
+                toAdmin.add(contact);
+            }
+        }
+    }
 
-            final EventClient ec = new EventClient(so);
-            OXFolderAccess oxfs = null;
+    /**
+     * Maps the supplied list of contacts to their parent folders, or to the <code>null</code>-key if no parent folder could be retrieved.
+     *
+     * @param contacts The contacts to map
+     * @param knownFolders The parent folders
+     * @return The contacts mapped to their parent folders
+     */
+    private static java.util.Map<FolderObject, List<Contact>> mapToParentFolders(List<Contact> contacts, Map<Integer, FolderObject> knownFolders) {
+        Map<FolderObject, List<Contact>> contactsByFolder = new HashMap<FolderObject, List<Contact>>();
+        for (Contact contact : contacts) {
+            Integer folderID = Integer.valueOf(contact.getParentFolderID());
+            FolderObject folder = knownFolders.get(folderID);
+            List<Contact> contactsInFolder = contactsByFolder.get(folder);
+            if (null == contactsInFolder) {
+                contactsInFolder = new ArrayList<Contact>();
+                contactsByFolder.put(folder, contactsInFolder);
+            }
+            contactsInFolder.add(contact);
+        }
+        return contactsByFolder;
+    }
 
-            while (rs.next()) {
-                delete = false;
-                oid = rs.getInt(1);
-                fid = rs.getInt(5);
-                created_from = rs.getInt(6);
-                pflag = rs.getInt(7);
-                if (rs.wasNull()) {
+    /**
+     * Gets all parent folders of the supplied contacts, mapped to the folder identifiers. If no folder could be retrieved, the identifier
+     * will be mapped to <code>null</code>.
+     *
+     * @param contacts The contacts to map
+     * @param context The context
+     * @param readConnection A database connection
+     * @return The contacts mapped to their parent folders
+     */
+    private static java.util.Map<Integer, FolderObject> getParentFolders(List<Contact> contacts, Context context, Connection readConnection) {
+        Map<Integer, FolderObject> knownFolders = new HashMap<Integer, FolderObject>();
+        for (Contact contact : contacts) {
+            Integer folderID = Integer.valueOf(contact.getParentFolderID());
+            if (false == knownFolders.containsKey(folderID)) {
+                knownFolders.put(folderID, getFolder(context, readConnection, folderID));
+            }
+        }
+        return knownFolders;
+    }
+
+    /**
+     * Gets all contacts that were created from a specific user.
+     *
+     * @param connection The database connection to use
+     * @param contextID The context ID
+     * @param createdBy The user ID
+     * @return The contacts
+     */
+    private static List<Contact> getContactsCreatedBy(Connection connection, int contextID, int createdBy) throws OXException {
+        String sql =
+            "SELECT intfield01,fid,pflag " +
+            "FROM prg_contacts " +
+            "WHERE cid=? AND created_from=?;"
+        ;
+        List<Contact> contacts = new ArrayList<Contact>();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, createdBy);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                Contact contact = new Contact();
+                contact.setContextId(contextID);
+                contact.setCreatedBy(createdBy);
+                contact.setObjectID(result.getInt(1));
+                contact.setParentFolderID(result.getInt(2));
+                int pflag = result.getInt(3);
+                if (result.wasNull()) {
                     pflag = 0;
                 }
-
-                boolean folder_error = false;
-
-                try {
-                    if (FolderCacheManager.isEnabled()) {
-                        contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, ct, readcon);
-                    } else {
-                        contactFolder = FolderObject.loadFolderObjectFromDB(fid, ct, readcon);
-                    }
-                    if (contactFolder.getModule() != FolderObject.CONTACT) {
-                        throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(contextId), I(uid));
-                    }
-                    if (contactFolder.getType() == FolderObject.PRIVATE) {
-                        delete = true;
-                    }
-
-                } catch (final Exception oe) {
-                    LOG.warn("WARNING: During the delete process ''delete all contacts from one user'', a contact was found who has no folder.This contact will be modified and can be found in the administrator address book. Context={} Folder={} User={} Contact={}", contextId, fid, uid, oid);
-                    folder_error = true;
-                    delete = true;
-                }
-
-                if (folder_error && (pflag == 0)) {
-                    try {
-                        final int mailadmin = ct.getMailadmin();
-                        if (null == oxfs) {
-                            oxfs = new OXFolderAccess(readcon, ct);
-                        }
-                        final FolderObject xx = oxfs.getDefaultFolder(mailadmin, FolderObject.CONTACT);
-
-                        final int admin_folder = xx.getObjectID();
-                        iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
-                    } catch (final Exception oxee) {
-                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!.This contact will be deleted.Context {} Folder {} User{} Contact{}", contextId, fid, uid, oid, oxee);
-
-                        folder_error = false;
-                    }
-                } else if (folder_error && (pflag != 0)) {
-                    folder_error = false;
-                }
-
-                if (!folder_error) {
-                    iFtrashAllUserContacts(delete, del, contextId, oid, uid, rs, so, ct);
-                    final Contact co = new Contact();
-                    try {
-                        co.setCreatedBy(created_from);
-                        co.setParentFolderID(fid);
-                        co.setObjectID(oid);
-                        ec.delete(co);
-                    } catch (final Exception e) {
-                        LOG.error(
-                            "Unable to trigger delete event for contact delete: id=" + co.getObjectID() + " cid=" + co.getContextId(),
-                            e);
-                    }
-                }
+                contact.setPrivateFlag(0 != pflag);
+                contacts.add(contact);
             }
-            if (uid == ct.getMailadmin()) {
-                iFtrashAllUserContactsDeletedEntriesFromAdmin(del, contextId, uid);
-            } else {
-                iFtrashAllUserContactsDeletedEntries(del, contextId, uid, ct);
-            }
-        } catch (final SQLException e) {
+            return contacts;
+        } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            closeSQLStuff(rs, stmt);
-            closeSQLStuff(del);
+            DBUtils.closeSQLStuff(result, stmt);
         }
     }
 
-    private static String rightsSelectString =
-        "SELECT co.intfield01,co.intfield02,co.intfield03,co.intfield04,co.fid,co.created_from,co.pflag,co.cid FROM prg_contacts AS co ";
-
-    private static String iFgetRightsSelectString(final int uid, final int cid) {
-        return new StringBuilder(rightsSelectString).append(" where created_from = ").append(uid).append(" AND cid = ").append(cid).toString();
+    /**
+     * Deletes all entries from the 'del_contacts' table that were created by a specific user.
+     *
+     * @param writeConnection The connection to use
+     * @param contextID The context ID
+     * @param createdBy The matching created by ID
+     * @return The number of deleted rows
+     * @throws OXException
+     */
+    private static int deleteFromDelContacts(Connection writeConnection, int contextID, int createdBy) throws OXException {
+        String sql =
+            "DELETE FROM del_contacts " +
+            "WHERE cid=? AND created_from=?;"
+        ;
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeConnection.prepareStatement(sql);
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, createdBy);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
-    private static void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct) throws SQLException {
-        final StringBuilder tmp =
-            new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
-                ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(", fid = ").append(admin_fid).append(
-                " WHERE intfield01 = ").append(oid).append(" and cid = ").append(ct.getContextId());
-        smt.execute(tmp.toString());
+    /**
+     * Updates the "created by" and "modified by" information of all entries from a contacts table that were created by a specific user.
+     * The last modification timestamp is updated as well.
+     *
+     * @param writeConnection The connection to use
+     * @param table The table name
+     * @param contextID The context ID
+     * @param oldCreatedBy The matching created by ID
+     * @param newCreatedBy The new created by ID
+     * @return The number of updated rows
+     * @throws OXException
+     */
+    private static int reassignContacts(Connection writeConnection, String table, int contextID, int oldCreatedBy, int newCreatedBy) throws OXException {
+        String sql =
+            "UPDATE " + table + ' ' +
+            "SET created_from=?,changed_from=?,changing_date=? " +
+            "WHERE cid=? AND created_from=?;"
+        ;
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeConnection.prepareStatement(sql);
+            stmt.setInt(1, newCreatedBy);
+            stmt.setInt(2, newCreatedBy);
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.setInt(4, contextID);
+            stmt.setInt(5, oldCreatedBy);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
-    private static void iFtrashAllUserContacts(final boolean delete, final Statement del, final int cid, final int oid, final int uid, final ResultSet rs, final Session so, Context ctx) throws SQLException {
-
-        final StringBuilder tmp = new StringBuilder(256);
-
-        if (delete) {
-            tmp.append("DELETE from prg_dlist where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
-            del.execute(tmp.toString());
-
-            tmp.setLength(0);
-            tmp.append("DELETE from prg_contacts_linkage where (intfield01 = ").append(oid).append(" OR intfield02 = ").append(oid).append(
-                ") AND cid = ").append(cid);
-            del.execute(tmp.toString());
-
-            tmp.setLength(0);
-            tmp.append("DELETE from prg_contacts_image where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
-            del.execute(tmp.toString());
-
-            tmp.setLength(0);
-            tmp.append("DELETE from prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-            // FIXME quick fix. deleteRow doesn't work because del.execute
-            // creates new resultset
-            del.execute(tmp.toString());
-            // rs.deleteRow();
-
+    /**
+     * Moves the supplied contacts to the context administrator's default contacts folder. The "created by" and "modified by" information,
+     * as well as the last modification timestamp is updated accordingly.
+     *
+     * @param writeConnection The connection to use
+     * @param context The context
+     * @param contacts The contacts to move
+     * @param newCreatedBy The new created by ID
+     * @return The number of updated rows
+     * @throws OXException
+     */
+    private static int moveToAdminsFolder(Connection writeConnection, Context context, List<Contact> contacts) throws OXException {
+        FolderObject targetFolder = new OXFolderAccess(writeConnection, context).getDefaultFolder(
+            context.getMailadmin(), FolderObject.CONTACT);
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("UPDATE prg_contacts ")
+            .append("SET fid=?,created_from=?,changed_from=?,changing_date=? ")
+            .append("WHERE cid=? AND intfield01")
+        ;
+        if (1 == contacts.size()) {
+            stringBuilder.append("=?;");
         } else {
-            /*
-             * tmp = newStringBuilder( "INSERT INTO del_contacts_image SELECT * FROM prg_contacts_image WHERE intfield01 = " + oid +
-             * " AND  cid = "+cid); LOG.debug(tmp.toString()); del.execute(tmp.toString()); tmp = new
-             * StringBuilder("DELETE from prg_contacts_image where intfield01 = " +oid+" AND cid = "+cid); LOG.debug(tmp.toString());
-             * del.execute(tmp.toString()); tmp = newStringBuilder( "INSERT INTO del_dlist SELECT * FROM prg_dlist WHERE intfield01 = " +
-             * oid + " AND  cid = "+cid); LOG.debug(tmp.toString()); del.execute(tmp.toString()); tmp = new
-             * StringBuilder("DELETE FROM prg_dlist WHERE cid = " + cid + " AND intfield01 = " + oid); LOG.debug(tmp.toString());
-             * del.execute(tmp.toString()); tmp = new StringBuilder("DELETE from prg_contacts_linkage where (intfield01 = "
-             * +oid+" OR intfield02 = "+oid+") AND cid = "+cid); LOG.debug(tmp.toString()); del.execute(tmp.toString()); tmp =
-             * newStringBuilder( "INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = " + oid + " AND  cid = "+cid);
-             * LOG.debug(tmp.toString()); del.execute(tmp.toString()); tmp = new StringBuilder("DELETE from prg_contacts WHERE cid = "+cid
-             * +" AND intfield01 = "+oid); LOG.debug(tmp.toString()); del.execute(tmp.toString()); // rs.deleteRow(); tmp = new
-             * StringBuilder("UPDATE del_contacts SET changed_from = "+ so.getContext ().getMailadmin()+", created_from = "+so.getContext()
-             * .getMailadmin()+", changing_date = "+System.currentTimeMillis()+ " WHERE intfield01 = "+oid); LOG.debug(tmp.toString());
-             * del.execute(tmp.toString());
-             */
-
-            tmp.append("UPDATE prg_contacts SET changed_from = ").append(ctx.getMailadmin()).append(", created_from = ").append(
-                ctx.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE intfield01 = ").append(
-                oid).append(" AND cid = ").append(cid);
-            del.execute(tmp.toString());
-
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < contacts.size(); i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(");");
+        }
+        String sql = stringBuilder.toString();
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeConnection.prepareStatement(sql);
+            stmt.setInt(1, targetFolder.getObjectID());
+            stmt.setInt(2, context.getMailadmin());
+            stmt.setInt(3, context.getMailadmin());
+            stmt.setLong(4, System.currentTimeMillis());
+            stmt.setInt(5, context.getContextId());
+            for (int i = 0; i < contacts.size(); i++) {
+                stmt.setInt(i + 6, contacts.get(i).getObjectID());
+            }
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
-        final StringBuilder tmp =
-            new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(cid);
-        del.execute(tmp.toString());
+    /**
+     * Deletes the supplied contacts. This includes all affected entries in tables 'prg_dlist', 'prg_contacts_linkage',
+     * 'prg_contacts_image' and 'prg_contacts'.
+     *
+     * @param writeConnection The connection to use
+     * @param contextID The context ID
+     * @param contacts The contacts to delete
+     * @param newCreatedBy The new created by ID
+     * @return The number of updated rows
+     * @throws OXException
+     */
+    private static int deleteContacts(Connection writeConnection, int contextID, List<Contact> contacts) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (1 == contacts.size()) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < contacts.size(); i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        String inClause = stringBuilder.toString();
+        try {
+            PreparedStatement stmt = null;
+            /*
+             * prg_dlist
+             */
+            try {
+                stmt = writeConnection.prepareStatement("DELETE FROM prg_dlist WHERE cid=? AND intfield01" + inClause + ';');
+                stmt.setInt(1, contextID);
+                for (int i = 0; i < contacts.size(); i++) {
+                    stmt.setInt(i + 2, contacts.get(i).getObjectID());
+                }
+                stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            /*
+             * prg_contacts_linkage (obsoloete?)
+             */
+            try {
+                stmt = writeConnection.prepareStatement(
+                    "DELETE FROM prg_contacts_linkage WHERE cid=? AND (intfield01" + inClause + " OR intfield02" + inClause + ");");
+                stmt.setInt(1, contextID);
+                for (int i = 0; i < contacts.size(); i++) {
+                    stmt.setInt(i + 2, contacts.get(i).getObjectID());
+                    stmt.setInt(i + 2 + contacts.size(), contacts.get(i).getObjectID());
+                }
+                stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            /*
+             * prg_contacts_image
+             */
+            try {
+                stmt = writeConnection.prepareStatement("DELETE FROM prg_contacts_image WHERE cid=? AND intfield01" + inClause + ';');
+                stmt.setInt(1, contextID);
+                for (int i = 0; i < contacts.size(); i++) {
+                    stmt.setInt(i + 2, contacts.get(i).getObjectID());
+                }
+                stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            /*
+             * prg_contacts
+             */
+            try {
+                stmt = writeConnection.prepareStatement("DELETE FROM prg_contacts WHERE cid=? AND intfield01" + inClause + ';');
+                stmt.setInt(1, contextID);
+                for (int i = 0; i < contacts.size(); i++) {
+                    stmt.setInt(i + 2, contacts.get(i).getObjectID());
+                }
+                return stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        }
     }
 
-    private static void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final Context ct) throws SQLException {
-        final StringBuilder tmp =
-            new StringBuilder("UPDATE del_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
-                ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE created_from = ").append(
-                uid).append(" and cid = ").append(cid);
-        del.execute(tmp.toString());
+    /**
+     * Gets a folder by it's identifier.
+     *
+     * @param context The context
+     * @param readConnection A database connection
+     * @param folderID The ID of the folder
+     * @return The folder, or <code>null</code> if the folder could not be loaded
+     */
+    private static FolderObject getFolder(Context context, Connection readConnection, int folderID) {
+        try {
+            if (FolderCacheManager.isEnabled()) {
+                return FolderCacheManager.getInstance().getFolderObject(folderID, true, context, readConnection);
+            } else {
+                return FolderObject.loadFolderObjectFromDB(folderID, context, readConnection);
+            }
+        } catch (OXException e) {
+            LOG.warn("No folder found for id {} in context {}.", Integer.valueOf(folderID), Integer.valueOf(context.getContextId()));
+            return null;
+        }
     }
 
 }

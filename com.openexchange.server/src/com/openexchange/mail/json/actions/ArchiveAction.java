@@ -49,7 +49,13 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -60,16 +66,19 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -83,6 +92,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -95,7 +105,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "Object ID of the requested mail."),
     @Parameter(name = "folder", description = "Object ID of the source folder.")
 }, requestBody = "A JSON object containing the id of the destination folder inside the \"folder_id\" field: e.g.: {\"folder_id\": 1376}.",
-responseDescription = "A JSON array containing the ID of the copied mail.")
+responseDescription = "A JSON true response.")
 public final class ArchiveAction extends AbstractMailAction {
 
     /**
@@ -129,6 +139,7 @@ public final class ArchiveAction extends AbstractMailAction {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
             // Check archive full name
+            char separator;
             String archiveFullname = mailAccount.getArchiveFullname();
             final String parentFullName;
             String archiveName;
@@ -137,7 +148,7 @@ public final class ArchiveAction extends AbstractMailAction {
                 boolean updateAccount = false;
                 if (isEmpty(archiveName)) {
                     final User user = session.getUser();
-                    if (!AJAXRequestDataTools.parseBoolParameter(req.getParameter("useDefaultName"))) {
+                    if (!AJAXRequestDataTools.parseBoolParameter("useDefaultName", req.getRequest(), true)) {
                         final String i18nArchive = StringHelper.valueOf(user.getLocale()).getString(MailStrings.ARCHIVE);
                         throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(Category.CATEGORY_USER_INPUT, i18nArchive);
                     }
@@ -147,9 +158,11 @@ public final class ArchiveAction extends AbstractMailAction {
                 }
                 final String prefix = mailAccess.getFolderStorage().getDefaultFolderPrefix();
                 if (isEmpty(prefix)) {
+                    separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
                     archiveFullname = archiveName;
                     parentFullName = MailFolder.DEFAULT_FOLDER_ID;
                 } else {
+                    separator = prefix.charAt(prefix.length() - 1);
                     archiveFullname = new StringBuilder(prefix).append(archiveName).toString();
                     parentFullName = prefix.substring(0, prefix.length() - 1);
                 }
@@ -172,7 +185,7 @@ public final class ArchiveAction extends AbstractMailAction {
                     }
                 }
             } else {
-                final char separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+                separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
                 final int pos = archiveFullname.lastIndexOf(separator);
                 if (pos > 0) {
                     parentFullName = archiveFullname.substring(0, pos);
@@ -183,7 +196,7 @@ public final class ArchiveAction extends AbstractMailAction {
                 }
             }
             if (!mailAccess.getFolderStorage().exists(archiveFullname)) {
-                if (!AJAXRequestDataTools.parseBoolParameter(req.getParameter("createIfAbsent"))) {
+                if (!AJAXRequestDataTools.parseBoolParameter("createIfAbsent", req.getRequest(), true)) {
                     throw MailExceptionCode.FOLDER_NOT_FOUND.create(archiveFullname);
                 }
                 final MailFolderDescription toCreate = new MailFolderDescription();
@@ -193,6 +206,7 @@ public final class ArchiveAction extends AbstractMailAction {
                 toCreate.setExists(false);
                 toCreate.setFullname(archiveFullname);
                 toCreate.setName(archiveName);
+                toCreate.setSeparator(separator);
                 {
                     final DefaultMailPermission mp = new DefaultMailPermission();
                     mp.setEntity(session.getUserId());
@@ -203,14 +217,64 @@ public final class ArchiveAction extends AbstractMailAction {
                     toCreate.addPermission(mp);
                 }
                 mailAccess.getFolderStorage().createFolder(toCreate);
+                CacheFolderStorage.getInstance().removeFromCache(parentFullName, "0", true, session);
             }
             // Move to archive folder
-            final int length = uids.length();
-            final String[] mailIds = new String[length];
+            Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+
+            int length = uids.length();
+            String[] mailIds = new String[length];
             for (int i = 0; i < length; i++) {
                 mailIds[i] = uids.getString(i);
             }
-            mailAccess.getMessageStorage().moveMessages(fa.getFullname(), archiveFullname, mailIds, true);
+
+            MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, new MailField[] { MailField.ID, MailField.RECEIVED_DATE});
+            if (null == msgs || msgs.length <= 0) {
+                return new AJAXRequestResult(Boolean.TRUE, "native");
+            }
+
+            Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
+            for (MailMessage mailMessage : msgs) {
+                Date receivedDate = mailMessage.getReceivedDate();
+                cal.setTime(receivedDate);
+                Integer year = Integer.valueOf(cal.get(Calendar.YEAR));
+                List<String> ids = map.get(year);
+                if (null == ids) {
+                    ids = new LinkedList<String>();
+                    map.put(year, ids);
+                }
+                ids.add(mailMessage.getMailId());
+            }
+
+            for (Map.Entry<Integer, List<String>> entry : map.entrySet() ) {
+                String sYear = entry.getKey().toString();
+                String fn = archiveFullname + separator + sYear;
+                if (!mailAccess.getFolderStorage().exists(fn)) {
+                    final MailFolderDescription toCreate = new MailFolderDescription();
+                    toCreate.setAccountId(accountId);
+                    toCreate.setParentAccountId(accountId);
+                    toCreate.setParentFullname(archiveFullname);
+                    toCreate.setExists(false);
+                    toCreate.setFullname(fn);
+                    toCreate.setName(sYear);
+                    toCreate.setSeparator(separator);
+                    {
+                        final DefaultMailPermission mp = new DefaultMailPermission();
+                        mp.setEntity(session.getUserId());
+                        final int p = MailPermission.ADMIN_PERMISSION;
+                        mp.setAllPermission(p, p, p, p);
+                        mp.setFolderAdmin(true);
+                        mp.setGroupPermission(false);
+                        toCreate.addPermission(mp);
+                    }
+                    mailAccess.getFolderStorage().createFolder(toCreate);
+                    CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
+                }
+
+                List<String> ids = entry.getValue();
+                mailAccess.getMessageStorage().moveMessages(fa.getFullname(), fn, ids.toArray(new String[ids.size()]), true);
+            }
+
             return new AJAXRequestResult(Boolean.TRUE, "native");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

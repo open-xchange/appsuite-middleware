@@ -22,8 +22,12 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_args --base 1000 -l 0\n";
 	print "graph_category Open Xchange\n";
 	print "graph_vlabel Number\n";
-	print "a.label Sessions\n";
+	print "a.label Overall count\n";
 	print "a.draw LINE1\n";
+	print "b.label Locally owned\n";
+	print "b.draw LINE1\n";
+	print "c.label Locally backed up\n";
+	print "c.draw LINE1\n";
 	exit 0;
 }
 
@@ -35,6 +39,16 @@ while (<SHOWRUNTIME>)
     if ($_ =~ m/com.hazelcast:instance=.+,type=IMap,name=sessions-\d+,size\s*?=\s*?(\d+)/) {
 	    $val = $1;
 	    print "a.value $val\n";
+	    next;
+	}
+    if ($_ =~ m/com.hazelcast:instance=.+,type=IMap,name=sessions-\d+,localBackupEntryCount\s*?=\s*?(\d+)/) {
+	    $val = $1;
+	    print "b.value $val\n";
+	    next;
+	}
+    if ($_ =~ m/com.hazelcast:instance=.+,type=IMap,name=sessions-\d+,localOwnedEntryCount\s*?=\s*?(\d+)/) {
+	    $val = $1;
+	    print "c.value $val\n";
 	    next;
 	}
 }

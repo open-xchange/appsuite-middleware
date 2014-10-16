@@ -60,6 +60,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.tools.session.ServerSession;
 
@@ -101,7 +102,9 @@ public interface InfostoreRequest {
 
     InfostoreRequest requireFileMetadata() throws OXException;
 
-    public IDBasedFileAccess getFileAccess() throws OXException;
+    IDBasedFileAccess getFileAccess() throws OXException;
+
+    IDBasedFolderAccess getFolderAccess() throws OXException;
 
     String getId() throws OXException;
 
@@ -171,6 +174,12 @@ public interface InfostoreRequest {
 
     AttachmentBase getAttachmentBase();
 
+    /**
+     * Gets the folder identifier at given position
+     *
+     * @param i The index position
+     * @return The folder identifier or <code>null</code>
+     */
     String getFolderAt(int i);
 
     List<String> getFolders();

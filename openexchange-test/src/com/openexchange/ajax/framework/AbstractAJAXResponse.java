@@ -51,7 +51,7 @@ package com.openexchange.ajax.framework;
 
 import java.util.Date;
 import java.util.List;
-import junit.framework.Assert;
+import org.junit.Assert;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;

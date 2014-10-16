@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -109,7 +110,19 @@ public class FacebookServiceImpl implements FacebookService {
             final Token accessToken = new Token(checkToken(account.getToken()), account.getSecret());
             final OAuthRequest ownProfileRequest = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
             service.signRequest(accessToken, ownProfileRequest);
-            final Response ownProfileResponse = ownProfileRequest.send(FacebookRequestTuner.getInstance());
+            Response ownProfileResponse;
+            try {
+                ownProfileResponse = ownProfileRequest.send(FacebookRequestTuner.getInstance());
+            } catch (org.scribe.exceptions.OAuthException e) {
+                // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+                Throwable cause = e.getCause();
+                if (cause instanceof java.net.SocketTimeoutException) {
+                    // A socket timeout
+                    throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+                }
+
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
+            }
 
             String myuid = "";
             try {
@@ -120,22 +133,21 @@ public class FacebookServiceImpl implements FacebookService {
             }
 
             // get the users connections
-            final OAuthRequest connectionsRequest = new OAuthRequest(
-                Verb.GET,
-                "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,current_location,profile_url%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1=" + myuid + "%29&format=JSON");
-            service.signRequest(accessToken, connectionsRequest);
-            final Response connectionsResponse = connectionsRequest.send(FacebookRequestTuner.getInstance());
+            JSONObject jResponse;
+            {
+                OAuthRequest connectionsRequest = new OAuthRequest(Verb.GET, "https://graph.facebook.com/v2.0/fql?q=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,current_location,profile_url%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1=" + myuid + "%29&format=JSON");
+                service.signRequest(accessToken, connectionsRequest);
+                final Response connectionsResponse = connectionsRequest.send(FacebookRequestTuner.getInstance());
 
-            // parse the returned JSON into neat little contacts
-            String jsonString = connectionsResponse.getBody();
+                // parse the returned JSON into neat little contacts
+                jResponse = toJsonObject(connectionsResponse);
+            }
             try {
-                final JSONArray allConnections = new JSONArray(jsonString);
-                jsonString = null;
-                return parse(allConnections);
+                return parse(jResponse.getJSONArray("data"));
             } catch (JSONException e) {
                 // Maybe this is a JSONObject with an error
                 try {
-                    final JSONObject obj = new JSONObject(jsonString);
+                    final JSONObject obj = jResponse;
                     if (obj.has("error")) {
                         LOG.error(obj.get("error").toString());
                         throw OXException.general(obj.getJSONObject("error").getString("message"));
@@ -147,6 +159,15 @@ public class FacebookServiceImpl implements FacebookService {
             }
         }
         return SearchIteratorAdapter.emptyIterator();
+    }
+
+    private JSONObject toJsonObject(Response connectionsResponse) throws OXException {
+        try {
+            return new JSONObject(connectionsResponse.getBody());
+        } catch (JSONException fatal) {
+            LOG.error("Facebook response is no valid JSON.", fatal);
+            throw OXException.general("Facebook response is no valid JSON.", fatal);
+        }
     }
 
     private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");

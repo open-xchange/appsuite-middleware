@@ -223,6 +223,9 @@ public abstract class WebDavServlet extends HttpServlet {
             }
         } catch (final RateLimitedException e) {
             resp.setContentType("text/plain; charset=UTF-8");
+            if(e.getRetryAfter() > 0) {
+                resp.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
+            }
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } finally {
             decrementRequests();

@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -65,6 +66,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SingletonService
 public interface ContactService {
 
     /**
@@ -436,6 +438,38 @@ public interface ContactService {
      * @throws OXException
      */
     SearchIterator<Contact> searchContactsWithAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Performs an "auto-complete" lookup for contacts.
+     *
+     * @param session The session
+     * @param folderIDs A list of folder IDs to restrict the search to
+     * @param query The search query as supplied by the client
+     * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
+     *                   but use an empty instance to use the default parameter values.
+     * @param fields The contact fields that should be retrieved
+     * @param sortOptions The options to sort the results
+     * @return The contacts found with the search
+     * @throws OXException
+     * 
+     * @see {@link AutocompleteParameters#newInstance()}
+     */
+    SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Performs an "auto-complete" lookup for contacts. Depending <code>com.openexchange.contacts.allFoldersForAutoComplete</code>, either
+     * all folders visible to the user, or a reduced set of specific folders is used for the search.
+     *
+     * @param session The session
+     * @param query The search query as supplied by the client
+     * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
+     *                   but use an empty instance to use the default parameter values.
+     * @param fields The contact fields that should be retrieved
+     * @param sortOptions The options to sort the results
+     * @return The contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> autocompleteContacts(Session session, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Creates a new contact in a folder.

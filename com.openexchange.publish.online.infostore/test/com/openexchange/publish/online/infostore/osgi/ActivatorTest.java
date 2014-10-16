@@ -49,10 +49,8 @@
 
 package com.openexchange.publish.online.infostore.osgi;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
@@ -69,6 +67,8 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.osgi.ServiceProvider;
@@ -157,7 +157,7 @@ public class ActivatorTest {
 
     @Test
     public void testStopBundle_Fine_AllServicesUnregistered() throws Exception {
-        final Map<Object, ServiceRegistration<?>> serviceRegistrations = new LinkedHashMap<Object, ServiceRegistration<?>>(6);
+        final Multimap<Object, ServiceRegistration<?>> serviceRegistrations = HashMultimap.create(6,2);
         ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
         serviceRegistrations.put(PublicationService.class, serviceRegistration);
         MockUtils.injectValueIntoPrivateField(this.activator, InjectionFieldConstants.SERVICE_REGISTRATIONS, serviceRegistrations);

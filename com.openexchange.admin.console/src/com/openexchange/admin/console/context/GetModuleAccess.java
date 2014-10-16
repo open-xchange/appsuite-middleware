@@ -102,13 +102,9 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.getContacts()));
         datarow.add(String.valueOf(access.getDelegateTask()));
         datarow.add(String.valueOf(access.getEditPublicFolders()));
-        datarow.add(String.valueOf(access.getForum()));
         datarow.add(String.valueOf(access.getIcal()));
         datarow.add(String.valueOf(access.getInfostore()));
-        datarow.add(String.valueOf(access.getPinboardWrite()));
         datarow.add(String.valueOf(access.getReadCreateSharedFolders()));
-        datarow.add(String.valueOf(access.getRssBookmarks()));
-        datarow.add(String.valueOf(access.getRssPortal()));
         datarow.add(String.valueOf(access.getSyncml()));
         datarow.add(String.valueOf(access.getTasks()));
         datarow.add(String.valueOf(access.getVcard()));
@@ -138,13 +134,9 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_CONTACTS);
         columnnames.add(UserAbstraction.OPT_ACCESS_DELEGATE_TASKS);
         columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PUBLIC_FOLDERS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_FORUM);
         columnnames.add(UserAbstraction.OPT_ACCESS_ICAL);
         columnnames.add(UserAbstraction.OPT_ACCESS_INFOSTORE);
-        columnnames.add(UserAbstraction.OPT_ACCESS_PINBOARD_WRITE);
         columnnames.add(UserAbstraction.OPT_ACCESS_READCREATE_SHARED_FOLDERS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_RSS_BOOKMARKS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_RSS_PORTAL);
         columnnames.add(UserAbstraction.OPT_ACCESS_SYNCML);
         columnnames.add(UserAbstraction.OPT_ACCESS_TASKS);
         columnnames.add(UserAbstraction.OPT_ACCESS_VCARD);

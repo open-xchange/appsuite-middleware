@@ -206,8 +206,12 @@ public class UserContact {
                  * Non wildcard
                  */
             	for (final String attribute : attributes) {
-            		final String attributeName = String.format("%s/%s", attributePrefix, attribute);
-            		jsonArray.put(toJSONValue(user.getAttributes().get(attributeName)));
+                    if (null == userAttributes || userAttributes.isEmpty()) {
+                        jsonArray.put(JSONObject.NULL);
+                    } else {
+                		final String attributeName = String.format("%s/%s", attributePrefix, attribute);
+                		jsonArray.put(toJSONValue(userAttributes.get(attributeName)));
+                    }
 				}
             }
         }

@@ -53,6 +53,8 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.find.common.Bug32060Test;
+import com.openexchange.ajax.find.contacts.Bug33447Test;
+import com.openexchange.ajax.find.contacts.Bug33576Test;
 import com.openexchange.ajax.find.contacts.ExcludeContextAdminTest;
 import com.openexchange.ajax.find.drive.BasicDriveTest;
 import com.openexchange.ajax.find.mail.BasicMailTest;
@@ -83,8 +85,7 @@ public final class FindTestSuite {
         //disable AutoCompleteTest for now
         //tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
-        //disable AutoCompleteTest for now
-        //tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
         tests.addTestSuite(BasicMailTest.class);
         tests.addTestSuite(BasicDriveTest.class);
         tests.addTestSuite(FindTasksTestsFilterCombinations.class);
@@ -92,7 +93,8 @@ public final class FindTestSuite {
         tests.addTestSuite(FindTasksAutocompleteTests.class);
         tests.addTestSuite(Bug32060Test.class);
         tests.addTestSuite(ExcludeContextAdminTest.class);
-
+        tests.addTestSuite(Bug33447Test.class);
+        tests.addTestSuite(Bug33576Test.class);
 
         TestSetup setup = new TestSetup(tests) {
             @Override

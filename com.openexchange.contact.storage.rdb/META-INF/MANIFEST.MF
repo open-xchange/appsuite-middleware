@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RDB contact storage implementaion
 Bundle-SymbolicName: com.openexchange.contact.storage.rdb
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.contact,
+Import-Package: com.openexchange.config.cascade,
+ com.openexchange.contact,
  com.openexchange.contact.storage,
  com.openexchange.context,
  com.openexchange.database,
@@ -29,18 +30,22 @@ Import-Package: com.openexchange.contact,
  com.openexchange.l10n,
  com.openexchange.log,
  com.openexchange.mail.usersetting,
+ com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.quota,
+ com.openexchange.quota.groupware,
  com.openexchange.search,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.session,
  com.openexchange.tools,
+ com.openexchange.tools.arrays,
  com.openexchange.tools.iterator,
  com.openexchange.tools.oxfolder,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.tools.update,
+ javax.management,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,

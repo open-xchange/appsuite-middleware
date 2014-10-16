@@ -52,6 +52,7 @@ package com.openexchange.context;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ContextService} - Offers access method to context module.
@@ -59,6 +60,7 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
+@SingletonService
 public interface ContextService {
 
     /**

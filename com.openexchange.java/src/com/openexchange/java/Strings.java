@@ -92,13 +92,67 @@ public class Strings {
      * @param objects The objects
      * @return The string build up from concatenating objects' string representation
      */
-    public static String concat(final Object... objects) {
+    public static String concat(Object... objects) {
         if (null == objects || 0 == objects.length) {
             return "";
         }
-        final StringBuilder sb = new StringBuilder(2048);
-        for (final Object object : objects) {
-            sb.append(String.valueOf(object));
+        StringBuilder sb = new StringBuilder(2048);
+        for (Object object : objects) {
+            sb.append(object == null ? "null" : object.toString());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Builds up a string from passed objects.
+     *
+     * @param delimiter The delimiter string
+     * @param objects The objects
+     * @return The string build up from concatenating objects' string representation
+     */
+    public static String concat(String delimiter, Object... objects) {
+        if (null == objects) {
+            return "";
+        }
+        if (null == delimiter) {
+            return concat(objects);
+        }
+        int length = objects.length;
+        if (length <= 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(2048);
+        sb.append(objects[0] == null ? "null" : objects[0].toString());
+        for (int i = 1; i < length; i++) {
+            sb.append(delimiter);
+            sb.append(objects[i] == null ? "null" : objects[i].toString());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Builds up a string from passed objects.
+     *
+     * @param delimiter The delimiter string
+     * @param strings The strings
+     * @return The string build up from concatenating objects' string representation
+     */
+    public static String concat(String delimiter, String... strings) {
+        if (null == strings) {
+            return "";
+        }
+        if (null == delimiter) {
+            return concat(strings);
+        }
+        int length = strings.length;
+        if (length <= 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(2048);
+        sb.append(strings[0] == null ? "null" : strings[0]);
+        for (int i = 1; i < length; i++) {
+            sb.append(delimiter);
+            sb.append(strings[i] == null ? "null" : strings[i]);
         }
         return sb.toString();
     }
@@ -192,6 +246,46 @@ public class Strings {
         Charsets.writeAsciiBytes(str, out);
     }
 
+    /**
+     * Splits given string by comma separator.
+     *
+     * @param s The string to split
+     * @return The splitted string
+     */
+    public static String[] splitByCommaNotInQuotes(String str) {
+        if (null == str) {
+            return null;
+        }
+        List<String> splitted = new LinkedList<String>();
+        int skipCommas = 0;
+        boolean inQuotes = false;
+        String s = "";
+
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(i);
+            if (c == ',' && skipCommas == 0 && !inQuotes) {
+                splitted.add(s);
+                s = "";
+            } else {
+                /*
+                if (c == '(') {
+                    skipCommas++;
+                }
+                if (c == ')') {
+                    skipCommas--;
+                }
+                */
+                if ('"' == c) {
+                    inQuotes = !inQuotes;
+                }
+                s += c;
+            }
+        }
+        splitted.add(s);
+        return splitted.toArray(new String[splitted.size()]);
+    }
+
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
@@ -205,6 +299,21 @@ public class Strings {
             return null;
         }
         return P_SPLIT_COMMA.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
+
+    /**
+     * Splits given string by dots.
+     *
+     * @param s The string to split
+     * @return The splitted string
+     */
+    public static String[] splitByDots(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_DOT.split(s, 0);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
@@ -413,10 +522,10 @@ public class Strings {
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
-        final byte[][] byteOrderMarks =
-            new byte[][] {
-                new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 },
-                new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
+        final byte[][] byteOrderMarks = new byte[][] {
+            new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF },
+            new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF },
+            new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
 
         final byte[] bytes = str.getBytes();
         for (final byte[] bom : byteOrderMarks) {
@@ -563,7 +672,7 @@ public class Strings {
      * @return The un-parenthized value or <code>null</code>
      */
     public static String unparenthize(final String s) {
-        if (!isEmpty(s) && ((s.startsWith("(") && s.endsWith(")")) || (s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]")) )) {
+        if (!isEmpty(s) && ((s.startsWith("(") && s.endsWith(")")) || (s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]")))) {
             return s.substring(1, s.length() - 1);
         }
         return s;
@@ -656,22 +765,14 @@ public class Strings {
     }
 
     private static char[] lowercases = {
-        '\000','\001','\002','\003','\004','\005','\006','\007',
-        '\010','\011','\012','\013','\014','\015','\016','\017',
-        '\020','\021','\022','\023','\024','\025','\026','\027',
-        '\030','\031','\032','\033','\034','\035','\036','\037',
-        '\040','\041','\042','\043','\044','\045','\046','\047',
-        '\050','\051','\052','\053','\054','\055','\056','\057',
-        '\060','\061','\062','\063','\064','\065','\066','\067',
-        '\070','\071','\072','\073','\074','\075','\076','\077',
-        '\100','\141','\142','\143','\144','\145','\146','\147',
-        '\150','\151','\152','\153','\154','\155','\156','\157',
-        '\160','\161','\162','\163','\164','\165','\166','\167',
-        '\170','\171','\172','\133','\134','\135','\136','\137',
-        '\140','\141','\142','\143','\144','\145','\146','\147',
-        '\150','\151','\152','\153','\154','\155','\156','\157',
-        '\160','\161','\162','\163','\164','\165','\166','\167',
-        '\170','\171','\172','\173','\174','\175','\176','\177' };
+        '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
+        '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
+        '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
+        '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
+        '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
+        '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
 
     /**
      * Fast lower-case conversion.
@@ -739,7 +840,6 @@ public class Strings {
         return trimmedSplits;
     }
 
-
     /**
      * Gets a value indicating whether the supplied strings are equal, using their {@link Form#NFC} normalization from, i.e. canonical
      * decomposition, followed by canonical composition.
@@ -759,8 +859,8 @@ public class Strings {
     }
 
     /**
-     * Gets a value indicating whether the supplied strings are equal ignoring case, using their {@link Form#NFC} normalization from,
-     * i.e. canonical decomposition, followed by canonical composition.
+     * Gets a value indicating whether the supplied strings are equal ignoring case, using their {@link Form#NFC} normalization from, i.e.
+     * canonical decomposition, followed by canonical composition.
      *
      * @param s1 The first string
      * @param s2 The second string
@@ -806,6 +906,169 @@ public class Strings {
             }
         }
         return true;
+    }
+
+    /**
+     * Fast parsing to an integer
+     *
+     * @param s The string to parse
+     * @return The <code>int</code> value
+     * @throws NumberFormatException If string appears not be an integer
+     */
+    public static int parseInt(final String s) {
+        if (s == null) {
+            throw new NumberFormatException("Null string");
+        }
+
+        // Check for a sign.
+        final int len = s.length();
+        if (len <= 0) {
+            throw new NumberFormatException("Empty string");
+        }
+
+        int num = 0;
+        int sign = -1;
+        final char ch = s.charAt(0);
+        if (ch == '-') {
+            if (len == 1) {
+                throw new NumberFormatException("Missing digits:  " + s);
+            }
+            sign = 1;
+        } else {
+            final int d = ch - '0';
+            if (d < 0 || d > 9) {
+                throw new NumberFormatException("Malformed:  " + s);
+            }
+            num = -d;
+        }
+
+        // Build the number.
+        final int max = (sign == -1) ? -Integer.MAX_VALUE : Integer.MIN_VALUE;
+        final int multmax = max / 10;
+        int i = 1;
+        while (i < len) {
+            int d = s.charAt(i++) - '0';
+            if (d < 0 || d > 9) {
+                throw new NumberFormatException("Malformed:  " + s);
+            }
+            if (num < multmax) {
+                throw new NumberFormatException("Over/underflow:  " + s);
+            }
+            num *= 10;
+            if (num < (max + d)) {
+                throw new NumberFormatException("Over/underflow:  " + s);
+            }
+            num -= d;
+        }
+
+        return sign * num;
+    }
+
+    /**
+     * Fast parsing to a positive integer
+     *
+     * @param s The string to parse
+     * @return The <code>int</code> value or <code>-1</code> if string appears not be a positive integer
+     */
+    public static int parsePositiveInt(final String s) {
+        if (s == null) {
+            return -1;
+        }
+
+        // Check for a sign.
+        final int len = s.length();
+        if (len <= 0) {
+            return -1;
+        }
+
+        final char ch = s.charAt(0);
+        if (ch == '-') {
+            return -1;
+        }
+
+        int num;
+        {
+            final int d = ch - '0';
+            if (d < 0 || d > 9) {
+                return -1;
+            }
+            num = -d;
+        }
+
+        // Build the number.
+        final int sign = -1;
+        final int max = -Integer.MAX_VALUE;
+        final int multmax = max / 10;
+        int i = 1;
+        while (i < len) {
+            final int d = s.charAt(i++) - '0';
+            if (d < 0 || d > 9) {
+                return -1;
+            }
+            if (num < multmax) {
+                return -1;
+            }
+            num *= 10;
+            if (num < (max + d)) {
+                return -1;
+            }
+            num -= d;
+        }
+
+        return sign * num;
+    }
+
+    /**
+     * Returns the reverse of the supplied character sequence.
+     *
+     * @param string The string to reverse
+     * @return The reversed string
+     * @see StringBuilder#reverse
+     */
+    public static String reverse(String string) {
+        return new StringBuilder(string).reverse().toString();
+    }
+
+    /**
+     * Removes all leading occurrences of the supplied characters from the given string.
+     *
+     * @param string The string to trim
+     * @param trimChars The characters to remove
+     * @return The trimmed string
+     */
+    public static String trimStart(String string, char...trimChars) {
+        if (null != string && null != trimChars && 0 < trimChars.length) {
+            while (0 < string.length() && contains(string.charAt(0), trimChars)) {
+                string = string.substring(1, string.length() - 1);
+            }
+        }
+        return string;
+    }
+
+    /**
+     * Removes all trailing occurrences of the supplied characters from the given string.
+     *
+     * @param string The string to trim
+     * @param trimChars The characters to remove
+     * @return The trimmed string
+     */
+    public static String trimEnd(String string, char...trimChars) {
+        if (null != string && null != trimChars && 0 < trimChars.length) {
+            while (0 < string.length() && contains(string.charAt(string.length() - 1), trimChars)) {
+                string = string.substring(0, string.length() - 1);
+            }
+        }
+        return string;
+    }
+
+    private static boolean contains(char c, char[] charArray) {
+        for (char character : charArray) {
+            if (c == character) {
+                return true;
+            }
+        }
+        return false;
+
     }
 
 }

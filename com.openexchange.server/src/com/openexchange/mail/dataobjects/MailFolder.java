@@ -190,6 +190,8 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the {@link MailFolderInfo} view for this folder.
+     * <p>
+     * {@link MailFolderInfo#setNumSubfolders(int)} is <b>not</b> set!
      *
      * @return The appropriate {@link MailFolderInfo} instance
      */

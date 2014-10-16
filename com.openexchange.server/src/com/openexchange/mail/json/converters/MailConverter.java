@@ -186,7 +186,6 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 } else if (AJAXServlet.ACTION_LIST.equalsIgnoreCase(action)) {
                     convertMultiple4List(mails, requestData, result, session);
                 } else {
-                    // throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
                     convertMultiple4List(mails, requestData, result, session);
                 }
             }
@@ -310,13 +309,6 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                         headerWriter.writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
                     }
                 }
-                /*-
-                 *
-                for (final MailFieldWriter w : WRITER_IDS) {
-                    w.writeField(jChild, child, 0, true, accountID, userId, contextId);
-                }
-                 *
-                 */
                 jChildMessages.put(jChild);
                 /*
                  * Count unread messages in this thread structure
@@ -548,6 +540,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
+        final int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
         final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(requestData.getParameter("exact_length"));
         final JSONObject jMail;
         try {
@@ -563,7 +556,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 ttlMillis,
                 mimeFilter,
                 timeZone,
-                exactLength);
+                exactLength,
+                maxContentSize);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();
@@ -629,10 +623,22 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Overwrite settings with request's parameters
          */
-        final DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
-        final List<OXException> warnings = new ArrayList<OXException>(2);
-        final JSONObject jsonObject =
-            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1);
+        DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
+        int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
+        List<OXException> warnings = new ArrayList<OXException>(2);
+        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize);
+
+        {
+            String csid = (String) result.getParameter("csid");
+            if (null != csid) {
+                try {
+                    jsonObject.put("csid", csid);
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+
         result.addWarnings(warnings);
         result.setResultObject(jsonObject, "json");
     }

@@ -90,6 +90,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(ListAliasTest.class);
         tests.addTestSuite(TaskDurationAndCostsTest.class);
         tests.addTestSuite(DeleteMultipleTaskTest.class);
+        tests.addTest(new JUnit4TestAdapter(DateTimeTest.class));
 
         // Nodes
         tests.addTestSuite(LastModifiedUTCTest.class);
@@ -131,6 +132,7 @@ public final class TaskTestSuite {
         tests.addTest(new JUnit4TestAdapter(Bug28089Test.class));
         tests.addTest(new JUnit4TestAdapter(Bug30015Test.class));
         tests.addTest(new JUnit4TestAdapter(Bug32044Test.class));
+        tests.addTest(new JUnit4TestAdapter(Bug33258Test.class));
         return tests;
     }
 }

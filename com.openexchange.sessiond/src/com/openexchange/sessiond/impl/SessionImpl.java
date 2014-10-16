@@ -537,15 +537,18 @@ public final class SessionImpl implements PutIfAbsent {
         if (login != null) {
             builder.append("login=").append(login).append(", ");
         }
+        String localIp = this.localIp;
         if (localIp != null) {
             builder.append("localIp=").append(localIp).append(", ");
         }
         if (authId != null) {
             builder.append("authId=").append(authId).append(", ");
         }
+        String hash = this.hash;
         if (hash != null) {
             builder.append("hash=").append(hash).append(", ");
         }
+        String client = this.client;
         if (client != null) {
             builder.append("client=").append(client).append(", ");
         }

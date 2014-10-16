@@ -63,10 +63,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -374,7 +376,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.setInt(pos++, taskId);
             for (final ExternalParticipant participant : participants) {
                 pos = 3;
-                stmt.setString(pos++, StorageType.DELETED.equals(type) ? "" : participant.getMail());
+                stmt.setString(pos++, StorageType.DELETED.equals(type) ? UUIDs.getUnformattedString(UUID.randomUUID()) : participant.getMail());
                 final String displayName = participant.getDisplayName();
                 if (null == displayName) {
                     stmt.setNull(pos++, java.sql.Types.VARCHAR);

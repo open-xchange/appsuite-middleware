@@ -76,11 +76,11 @@ SKIP_COMPRESSION_VALUES="true false"
 EXCLUDE_OLDER_LOGS_THAN=disabled
 EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
 EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
-EXCLUDE_SECRETS=false
+EXCLUDE_SECRETS=true
 EXCLUDE_SECRETS_LONG=exclude-ox-secrets
 EXCLUDE_SECRETS_VALUES="true false"
 KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
-PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version'
+PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version;listconfigdiff'
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
@@ -247,7 +247,21 @@ create_heap_dump() {
 # to have the right permissions and is somehow much faster as '-F', calling as root
 # will fail on some systems.
     echo "Creating Java heap dump of Open-Xchange groupware..."
-    if [ 'ibm' != "${JAVA_VM_TYPE}" ]; then
+    if [ -f "/opt/open-xchange/sbin/heapdump" -a 'ibm' != "${JAVA_VM_TYPE}" ]; then
+        local _heap_dump="${TMP}/${LOGDIR}/commands/heapdump.bin"
+        local _heap_dump_cmd="heapdump -f ${_heap_dump}"
+        local _heap_dump_log="${TMP}/${LOGDIR}/commands/heapdump -f heapdump.bin"
+
+        # Grant write permissions for ox user
+        chmod a+w ${TMP}/${LOGDIR}/commands
+
+        ${_heap_dump_cmd} 2>&1 | tee "${_heap_dump_log}"
+
+        if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+            echo "Compressing Java heap dump: ${_heap_dump}${LOGS_SUFFIX}"
+            bzip2 "${_heap_dump}"
+        fi
+    elif [ 'ibm' != "${JAVA_VM_TYPE}" ]; then
         local _heap_dump_cmd="jmap -dump:file"
         local _heap_dump_log="${TMP}/${LOGDIR}/commands/${_heap_dump_cmd}"
         local _heap_dump="${_heap_dump_log} (heap-dump)"
@@ -363,7 +377,7 @@ exclude_secret_ox_properties_entries() {
     local _ox_config_copy=${1}
     local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-secret-exclude)
     local _whitelist='enabledMailCapableKey|UserAttributePassword|^[[:blank:]]*#'
-    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*='
+    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*=|[sS]alt[[:blank:]]*='
     find ${_ox_config_copy} -type f -name "*.properties*" | \
         xargs egrep -rIv "${_whitelist}" | \
         egrep "${_blacklist}" > ${_tmp_exclude_status}
@@ -547,8 +561,9 @@ Groupware Max Heap Size: $(cat /opt/open-xchange/etc/ox-scriptconf.sh | \
     grep -A 1 'groupware Java virtual machine' | \
     sed 's|.*-Xmx|-Xmx|g' | \
     sed 's|"||g' | \
+    sed 's| .*||g' | \
     tail -n 1)
-OX Log Storage: $(du -h ${OX_LOG_DIR})
+OX Log Storage: $(du -h ${OX_LOG_DIR} | sort | tail -n 1)
 
 $(df -h ${TMP})    Processing data within: $(normalize_path ${TMP}/${LOGDIR})
 $(df -h $(dirname ${LOGARC}) | tail -n 1)    Final tarball storage: ${LOGARC}
@@ -635,7 +650,9 @@ for argument in ${@}; do
         ;;
         --${CREATE_HEAP_DUMP_LONG})
             CREATE_HEAP_DUMP=$(check_argument ${1} ${2})
-            if [ 'ibm' == "${JAVA_VM_TYPE}" ]; then
+            if [ -f "/opt/open-xchange/sbin/heapdump" -a 'ibm' != "${JAVA_VM_TYPE}" ]; then
+                NEEDED_TOOLS="heapdump tee ${NEEDED_TOOLS}"
+            elif [ 'ibm' == "${JAVA_VM_TYPE}" ]; then
                 NEEDED_TOOLS="kill service jextract tee ${NEEDED_TOOLS}"
             else
                 NEEDED_TOOLS="jmap sudo tee ${NEEDED_TOOLS}"

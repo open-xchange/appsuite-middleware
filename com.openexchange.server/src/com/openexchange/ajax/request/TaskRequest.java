@@ -464,7 +464,6 @@ public class TaskRequest extends CalendarRequest {
         }
 
         searchObj.setTitle(DataParser.parseString(jData, CalendarFields.TITLE));
-        searchObj.setPriority(DataParser.parseInt(jData, TaskFields.PRIORITY));
         searchObj.setSearchInNote(DataParser.parseBoolean(jData, "searchinnote"));
         searchObj.setStatus(DataParser.parseInt(jData, TaskFields.STATUS));
         searchObj.setCatgories(DataParser.parseString(jData, CommonFields.CATEGORIES));

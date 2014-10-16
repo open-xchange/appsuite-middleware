@@ -127,18 +127,18 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     public S3FileStorage getFileStorage(URI uri) throws OXException {
         S3FileStorage storage = storages.get(uri);
         if (null == storage) {
-            LOG.debug("Initializing S3 client for " + uri);
+            LOG.debug("Initializing S3 client for {}", uri);
             /*
              * extract filestore ID from authority part of URI
              */
             String filestoreID = extractFilestoreID(uri);
-            LOG.debug("Using \"" + filestoreID + "\" as filestore ID.");
+            LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
             /*
              * create client
              */
             AmazonS3Client client = initClient(filestoreID);
             String bucketName = initBucket(client, filestoreID);
-            LOG.debug("Using \"" + bucketName + "\" as bucket name.");
+            LOG.debug("Using \"{}\" as bucket name.", bucketName);
             S3FileStorage newStorage = new S3FileStorage(client, bucketName, extractFilestorePrefix(uri));
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {
@@ -214,14 +214,14 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     }
 
     private EncryptionMaterials getEncryptionMaterials(String filestoreID, String encryptionMode) throws OXException {
-        if ("rsa".equalsIgnoreCase(encryptionMode)) {
-            String keyStore = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption.rsa.keyStore");
-            String password = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption.rsa.password");
-            KeyPair keyPair = extractKeys(keyStore, password);
-            return new EncryptionMaterials(keyPair);
-        } else {
+        if (!"rsa".equalsIgnoreCase(encryptionMode)) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unknown encryption mode: " + encryptionMode);
         }
+
+        String keyStore = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption.rsa.keyStore");
+        String password = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption.rsa.password");
+        KeyPair keyPair = extractKeys(keyStore, password);
+        return new EncryptionMaterials(keyPair);
     }
 
     /**
@@ -321,6 +321,9 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
         String path = uri.getPath();
         while (0 < path.length() && '/' == path.charAt(0)) {
             path = path.substring(1);
+        }
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
         }
         Matcher matcher = CTX_STORE_PATTERN.matcher(path);
         if (false == matcher.matches()) {

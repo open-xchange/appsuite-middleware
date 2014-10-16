@@ -56,10 +56,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.rdb.Services;
+import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
@@ -85,35 +88,55 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
         if (DeleteEvent.TYPE_USER != event.getType()) {
             return;
         }
-        // final DatabaseService databaseService = getService(DatabaseService.class);
-        /*
-         * Writable connection
-         */
-        final int contextId = event.getContext().getContextId();
+
+        int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            final int userId = event.getId();
-            final TIntList confIds;
+            int userId = event.getId();
+
+            class AccountAndService {
+                final int accountId;
+                final String serviceId;
+
+                AccountAndService(int accountId, String serviceId) {
+                    super();
+                    this.accountId = accountId;
+                    this.serviceId = serviceId;
+                }
+            }
+
+            List<AccountAndService> accounts;
+            TIntList confIds;
             {
                 ResultSet rs = null;
                 try {
-                    stmt = writeCon.prepareStatement("SELECT confId FROM filestorageAccount WHERE cid = ? AND user = ?");
+                    stmt = writeCon.prepareStatement("SELECT confId, account, serviceId FROM filestorageAccount WHERE cid = ? AND user = ?");
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
                     rs = stmt.executeQuery();
+                    accounts = new LinkedList<AccountAndService>();
                     confIds = new TIntArrayList(4);
                     while (rs.next()) {
                         confIds.add(rs.getInt(1));
+                        accounts.add(new AccountAndService(rs.getInt(2), rs.getString(3)));
                     }
                 } finally {
                     DBUtils.closeSQLStuff(rs);
                 }
             }
             DBUtils.closeSQLStuff(stmt);
-            /*
-             * Delete account configurations using generic conf
-             */
+            stmt = null;
+
+            // Invalidate cache
+            if (!accounts.isEmpty()) {
+                CachingFileStorageAccountStorage cache = CachingFileStorageAccountStorage.getInstance();
+                for (AccountAndService accountAndService : accounts) {
+                    cache.invalidate(accountAndService.serviceId, accountAndService.accountId, userId, contextId);
+                }
+            }
+
+            // Delete account configurations using generic conf
             if (!confIds.isEmpty()) {
                 final GenericConfigurationStorageService genericConfStorageService = getService(GenericConfigurationStorageService.class);
                 final Context context = event.getContext();
@@ -132,14 +155,13 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
                         }
                     }
                 }
-                final GenConfDelete gcd = new GenConfDelete();
+                GenConfDelete gcd = new GenConfDelete();
                 if (!confIds.forEach(gcd) && null != gcd.genConfError) {
                     throw gcd.genConfError;
                 }
             }
-            /*
-             * Delete account data
-             */
+
+            // Delete account data
             stmt = writeCon.prepareStatement("DELETE FROM filestorageAccount WHERE cid = ? AND user = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);

@@ -50,11 +50,18 @@
 package com.openexchange.quota;
 
 /**
- * {@link Quota} - Represents a quota restriction.
+ * A {@link Quota} provides a limit and current usage according to its type.
+ * There are convenience constants for unlimited quotas:
+ * <ul>
+ *   <li>{@link Quota#UNLIMITED_AMOUNT}</li>
+ *   <li>{@link Quota#UNLIMITED_SIZE}</li>
+ * </ul>
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.6.1
  */
-public interface Quota {
+public class Quota {
 
     /**
      * The quota value for unlimited.
@@ -62,11 +69,72 @@ public interface Quota {
     public static final long UNLIMITED = -1L;
 
     /**
-     * Gets the quota for specified type.
-     *
-     * @param type The quota type
-     * @return The quota restriction or {@link #UNLIMITED}
+     * Represents an unlimited quota of type {@link QuotaType#AMOUNT}.
      */
-    long getQuota(QuotaType type);
+    public static final Quota UNLIMITED_AMOUNT = new Quota(QuotaType.AMOUNT, UNLIMITED, 0);
+
+    /**
+     * Represents an unlimited quota of type {@link QuotaType#SIZE}.
+     */
+    public static final Quota UNLIMITED_SIZE = new Quota(QuotaType.SIZE, UNLIMITED, 0);
+
+    private final QuotaType type;
+
+    private final long usage;
+
+    private final long limit;
+
+    /**
+     * Initializes a new {@link Quota}.
+     *
+     * @param type The {@link Quota}, not <code>null</code>.
+     * @param limit The limit in number of objects or number of bytes, according to the type.
+     * @param usage The usage in number of objects or number of bytes, according to the type.
+     */
+    public Quota(QuotaType type, long limit, long usage) {
+        super();
+        this.type = type;
+        this.limit = limit;
+        this.usage = usage;
+    }
+
+    /**
+     * Gets the type of this {@link Quota} instance.
+     *
+     * @return The type.
+     */
+    public QuotaType getType() {
+        return type;
+    }
+
+    /**
+     * Depending on this quotas {@link QuotaType} this method returns
+     * <ul>
+     *   <li>the max. number of objects that can be created or</li>
+     *   <li>the max. number of bytes that can be allocated by the users data</li>
+     * </ul>
+     *
+     * The limit applies to this account in this module.
+     *
+     * @return A number > 0 or {@value #UNLIMITED} if unlimited.
+     */
+    public long getLimit() {
+        return limit;
+    }
+
+    /**
+     * Depending on this quotas {@link QuotaType} this method returns
+     * <ul>
+     *   <li>the number of existing objects or</li>
+     *   <li>the number of bytes occupied by the users data</li>
+     * </ul>
+     *
+     * The limit applies to this account in this module.
+     *
+     * @return A number >= 0.
+     */
+    public long getUsage() {
+        return usage;
+    }
 
 }

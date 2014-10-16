@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: RT Evens JSON Interface
+Bundle-Name: Realtime event pubsub implementations via JSON channel
 Bundle-SymbolicName: com.openexchange.realtime.events.json
-Bundle-Version: 7.4.0
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,

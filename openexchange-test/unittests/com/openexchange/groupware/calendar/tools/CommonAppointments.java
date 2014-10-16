@@ -295,6 +295,10 @@ public class CommonAppointments {
     public List<Appointment> getAppointmentsInFolder(final int folderId) throws OXException {
         return getAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID});
     }
+    
+    public CalendarDataObject getObjectById(int objectId, int folderId) throws OXException, SQLException {
+        return calendar.getObjectById(objectId, folderId);
+    }
 
     public List<Appointment> getAppointmentsInFolder(final int folderId, int[] columns) throws OXException {
         final List<Appointment> cdao = new ArrayList<Appointment>();

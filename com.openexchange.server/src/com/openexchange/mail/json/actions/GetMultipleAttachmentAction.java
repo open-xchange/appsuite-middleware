@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import javax.mail.MessageRemovedException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.ajax.AJAXServlet;
@@ -107,7 +108,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
              */
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String[] sequenceIds = req.checkStringArray(Mail.PARAMETER_MAILATTCHMENT);
+            final String[] sequenceIds = req.optStringArray(Mail.PARAMETER_MAILATTCHMENT);
             /*
              * Get mail interface
              */
@@ -174,7 +175,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         } catch (final OXException e) {
             if (e.getCause() instanceof IOException) {
                 final IOException ioe = (IOException) e.getCause();
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(ioe.getClass().getName())) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(ioe.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(ioe);
                 }
             }
@@ -191,64 +192,75 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         try {
             final int buflen = 8192;
             final byte[] buf = new byte[buflen];
-            for (final String sequenceId : sequenceIds) {
-                final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
-                final InputStream in = mailPart.getInputStream();
-                try {
-                    /*
-                     * Add ZIP entry to output stream
-                     */
-                    String name = mailPart.getFileName();
-                    if (null == name) {
-                        final List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());
-                        name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
-                    }
-                    int num = 1;
-                    ZipArchiveEntry entry;
-                    while (true) {
-                        try {
-                            final String entryName;
-                            {
-                                final int pos = name.indexOf('.');
-                                if (pos < 0) {
-                                    entryName = name + (num > 1 ? "_(" + num + ")" : "");
-                                } else {
-                                    entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
-                                }
-                            }
-                            entry = new ZipArchiveEntry(entryName);
-                            zipOutput.putArchiveEntry(entry);
-                            break;
-                        } catch (final java.util.zip.ZipException e) {
-                            final String message = e.getMessage();
-                            if (message == null || !message.startsWith("duplicate entry")) {
-                                throw e;
-                            }
-                            num++;
-                        }
-                    }
-                    /*
-                     * Transfer bytes from the file to the ZIP file
-                     */
-                    long size = 0;
-                    for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
-                        zipOutput.write(buf, 0, read);
-                        size += read;
-                    }
-                    entry.setSize(size);
-                    /*
-                     * Complete the entry
-                     */
-                    zipOutput.closeArchiveEntry();
-                } catch (final IOException e) {
-                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                } finally {
-                    Streams.close(in);
+
+            if (null == sequenceIds) {
+                for (final MailPart mailPart : mailInterface.getAllMessageAttachments(folderPath, uid)) {
+                    addPart2Archive(mailPart, zipOutput, buflen, buf);
+                }
+            } else {
+                for (final String sequenceId : sequenceIds) {
+                    final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
+                    addPart2Archive(mailPart, zipOutput, buflen, buf);
                 }
             }
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutput);
+        }
+    }
+
+    private void addPart2Archive(final MailPart mailPart, final ZipArchiveOutputStream zipOutput, final int buflen, final byte[] buf) throws OXException {
+        final InputStream in = mailPart.getInputStream();
+        try {
+            /*
+             * Add ZIP entry to output stream
+             */
+            String name = mailPart.getFileName();
+            if (null == name) {
+                final List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());
+                name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
+            }
+            int num = 1;
+            ZipArchiveEntry entry;
+            while (true) {
+                try {
+                    final String entryName;
+                    {
+                        final int pos = name.indexOf('.');
+                        if (pos < 0) {
+                            entryName = name + (num > 1 ? "_(" + num + ")" : "");
+                        } else {
+                            entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
+                        }
+                    }
+                    entry = new ZipArchiveEntry(entryName);
+                    zipOutput.putArchiveEntry(entry);
+                    break;
+                } catch (final java.util.zip.ZipException e) {
+                    final String message = e.getMessage();
+                    if (message == null || !message.startsWith("duplicate entry")) {
+                        throw e;
+                    }
+                    num++;
+                }
+            }
+            /*
+             * Transfer bytes from the file to the ZIP file
+             */
+            long size = 0;
+            for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
+                zipOutput.write(buf, 0, read);
+                size += read;
+            }
+            entry.setSize(size);
+            /*
+             * Complete the entry
+             */
+            zipOutput.closeArchiveEntry();
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
         }
     }
 

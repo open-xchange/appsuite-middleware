@@ -59,6 +59,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.internal.PathNormalizer;
+import com.openexchange.drive.internal.Tracer;
 import com.openexchange.java.Strings;
 
 
@@ -215,37 +216,34 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
         return comparison;
     }
 
-    private void check(String s) {
-
-
-//        Normalizer.isNormalized(src, form)
-
-    }
-
     @Override
     public String toString() {
-        StringBuilder StringBuilder = new StringBuilder();
-        StringBuilder.append("                                         | Original Version                 | Client Version                     | Server Version                    \n");
-        StringBuilder.append("-----------------------------------------+----------------------------------+------------------------------------+-----------------------------------\n");
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("                                         | Original Version                 | Client Version                     | Server Version                    \n");
+        stringBuilder.append("-----------------------------------------+----------------------------------+------------------------------------+-----------------------------------\n");
         for (Entry<String, ThreeWayComparison<T>> entry : this) {
             String name = Strings.abbreviate(entry.getKey(), entry.getKey().length() + 1, 40);
             ThreeWayComparison<T> comparison = entry.getValue();
-            StringBuilder.append(name);
+            stringBuilder.append(name);
             for (int i = 0; i < 40 - name.length(); i++) {
-                StringBuilder.append(' ');
+                stringBuilder.append(' ');
             }
-            StringBuilder.append(" | ");
-            StringBuilder.append(null != comparison.getOriginalVersion() ? comparison.getOriginalVersion().getChecksum() : "                                ");
-            StringBuilder.append(" | ");
-            StringBuilder.append(null != comparison.getClientVersion() ? comparison.getClientVersion().getChecksum() : "                                ");
-            StringBuilder.append(Change.NONE == comparison.getClientChange() ? "  " : ' ' + comparison.getClientChange().toString().substring(0, 1));
-            StringBuilder.append(" | ");
-            StringBuilder.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
-            StringBuilder.append(Change.NONE == comparison.getServerChange() ? "  " : ' ' + comparison.getServerChange().toString().substring(0, 1));
-            StringBuilder.append('\n');
+            stringBuilder.append(" | ");
+            stringBuilder.append(null != comparison.getOriginalVersion() ? comparison.getOriginalVersion().getChecksum() : "                                ");
+            stringBuilder.append(" | ");
+            stringBuilder.append(null != comparison.getClientVersion() ? comparison.getClientVersion().getChecksum() : "                                ");
+            stringBuilder.append(Change.NONE == comparison.getClientChange() ? "  " : ' ' + comparison.getClientChange().toString().substring(0, 1));
+            stringBuilder.append(" | ");
+            stringBuilder.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
+            stringBuilder.append(Change.NONE == comparison.getServerChange() ? "  " : ' ' + comparison.getServerChange().toString().substring(0, 1));
+            stringBuilder.append('\n');
+            if (Tracer.MAX_SIZE < stringBuilder.length()) {
+                stringBuilder.append('\n').append("[...]");
+                break;
+            }
         }
-        StringBuilder.append(mappingProblems);
-        return StringBuilder.toString();
+        stringBuilder.append(mappingProblems);
+        return stringBuilder.toString();
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
@@ -70,14 +71,18 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
@@ -107,7 +112,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherServlet.class);
 
-    private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
+    private static final @NonNull Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
@@ -122,7 +127,7 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param dispatcher The dispatcher instance or <code>null</code> to remove
      */
-    public static void setDispatcher(final Dispatcher dispatcher) {
+    public static void setDispatcher(Dispatcher dispatcher) {
         DISPATCHER.set(dispatcher);
     }
 
@@ -140,7 +145,7 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param prefix The prefix or <code>null</code> to remove
      */
-    public static void setPrefix(final String prefix) {
+    public static void setPrefix(String prefix) {
         PREFIX.set(prefix);
     }
 
@@ -188,7 +193,7 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param renderer The renderer
      */
-    public static void registerRenderer(final ResponseRenderer renderer) {
+    public static void registerRenderer(ResponseRenderer renderer) {
         List<ResponseRenderer> expect;
         List<ResponseRenderer> update;
         do {
@@ -213,7 +218,7 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param renderer The renderer
      */
-    public static synchronized void unregisterRenderer(final ResponseRenderer renderer) {
+    public static synchronized void unregisterRenderer(ResponseRenderer renderer) {
         List<ResponseRenderer> expect;
         List<ResponseRenderer> update;
         do {
@@ -241,38 +246,38 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
-    protected void initializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
-        if (null != getSessionObject(req, true)) {
+    protected void initializeSession(HttpServletRequest req, HttpServletResponse resp) throws OXException {
+        if (null != SessionUtility.getSessionObject(req, true)) {
             return;
         }
         // Remember session
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
         ServerSession session;
-        final boolean sessionParamFound;
+        boolean sessionParamFound;
         {
-            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId != null && sessionId.length() > 0) {
                 try {
-                    session = getSession(req, sessionId, sessiondService);
-                } catch (final OXException e) {
+                    session = SessionUtility.getSession(req, sessionId, sessiondService);
+                } catch (OXException e) {
                     if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
                         throw e;
                     }
                     // Got a wrong or missing secret
-                    final String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                    String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
                     if (!"null".equals(wrongSecret)) {
                         // No information available or a differing secret
                         throw e;
                     }
                     // Missing secret cookie
-                    session = getSession(hashSource, req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+                    session = SessionUtility.getSession(SessionUtility.getHashSource(), req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
                 }
-                verifySession(req, sessiondService, sessionId, session);
-                rememberSession(req, session);
-                checkPublicSessionCookie(req, resp, session, sessiondService);
+                SessionUtility.verifySession(req, sessiondService, sessionId, session);
+                SessionUtility.rememberSession(req, session);
+                SessionUtility.checkPublicSessionCookie(req, resp, session, sessiondService);
                 sessionParamFound = true;
             } else {
                 session = null;
@@ -284,46 +289,34 @@ public class DispatcherServlet extends SessionServlet {
         boolean mayUseFallbackSession = false;
         boolean mayPerformPublicSessionAuth = false;
         if (!sessionParamFound) {
-            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            final String module = requestDataTools.getModule(PREFIX.get(), req);
-            final String action = requestDataTools.getAction(req);
-            final Dispatcher dispatcher = DISPATCHER.get();
+            AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+            String module = requestDataTools.getModule(PREFIX.get(), req);
+            String action = requestDataTools.getAction(req);
+            Dispatcher dispatcher = DISPATCHER.get();
             mayOmitSession = dispatcher.mayOmitSession(module, action);
             mayUseFallbackSession = dispatcher.mayUseFallbackSession(module, action);
             mayPerformPublicSessionAuth = dispatcher.mayPerformPublicSessionAuth(module, action);
         }
         // Try public session
         if (!mayOmitSession) {
-            findPublicSessionId(req, session, sessiondService, mayUseFallbackSession, mayPerformPublicSessionAuth);
+            SessionUtility.findPublicSessionId(req, session, sessiondService, mayUseFallbackSession, mayPerformPublicSessionAuth);
         }
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp, false);
     }
 
     @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp, false);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp, true);
     }
-
-    /**
-     * The <code>ETag</code> result type.
-     */
-    private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
-
-    private static final AJAXRequestResult.ResultType NOT_FOUND = AJAXRequestResult.ResultType.NOT_FOUND;
-
-    /**
-     * The <code>direct</code> result type.
-     */
-    private static final AJAXRequestResult.ResultType DIRECT = AJAXRequestResult.ResultType.DIRECT;
 
     /**
      * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
@@ -336,8 +329,8 @@ public class DispatcherServlet extends SessionServlet {
      * @param e The {@code OXException} instance to check
      * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
-    private static boolean ignore(final OXException e) {
-        for (final OXExceptionCode code : IGNOREES) {
+    private static boolean ignore(OXException e) {
+        for (OXExceptionCode code : IGNOREES) {
             if (code.equals(e)) {
                 return true;
             }
@@ -354,23 +347,27 @@ public class DispatcherServlet extends SessionServlet {
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    public void handle(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, final boolean preferStream) throws IOException {
+    public void handle(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws IOException {
+        /*-
+         * No needed because SessionServlet.service() does already perform it
+         *
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        */
         Tools.disableCaching(httpResponse);
 
         AJAXState state = null;
-        final Dispatcher dispatcher = DISPATCHER.get();
+        Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final AJAXRequestData requestData;
-            final ServerSession session;
+            AJAXRequestData requestData;
+            ServerSession session;
             /*
              * Parse & acquire session
              */
             {
-                final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-                final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
-                final String action = requestDataTools.getAction(httpRequest);
+                AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+                String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+                String action = requestDataTools.getAction(httpRequest);
                 session = getSession(httpRequest, dispatcher, module, action);
                 /*
                  * Parse AJAXRequestData
@@ -385,25 +382,30 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Perform request
              */
-            final AJAXRequestResult result = dispatcher.perform(requestData, state, session);
+            AJAXRequestResult result = dispatcher.perform(requestData, state, session);
             /*
              * Check result's type
              */
-            if (ETAG.equals(result.getType())) {
-                httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                final long expires = result.getExpires();
-                Tools.setETag(requestData.getETag(), expires > 0 ?  expires : -1L, httpResponse);
-                return;
-            }
-
-            if (NOT_FOUND.equals(result.getType())) {
-                httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (DIRECT.equals(result.getType())) {
-                // No further processing
-                return;
+            {
+                ResultType resultType = result.getType();
+                switch (resultType) {
+                case ETAG: {
+                    httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                    long expires = result.getExpires();
+                    Tools.setETag(requestData.getETag(), expires > 0 ? expires : -1L, httpResponse);
+                    return;
+                }
+                case HTTP_ERROR: {
+                    handleError(result, httpResponse);
+                    return;
+                }
+                case DIRECT: {
+                    // No further processing
+                    return;
+                }
+                default:
+                    break;
+                }
             }
             /*-
              * A common result
@@ -415,23 +417,36 @@ public class DispatcherServlet extends SessionServlet {
              * ... and send response
              */
             sendResponse(requestData, result, httpRequest, httpResponse);
-        } catch (final OXException e) {
-            if (AjaxExceptionCodes.BAD_REQUEST.equals(e) || AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
-                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (OXException e) {
+            if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
+                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
                 logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-                final Object[] logArgs = e.getLogArgs();
-                final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-                final int sc = ((Integer) logArgs[0]).intValue();
-                httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
-                logException(e, LogLevel.DEBUG, sc);
+                Object[] logArgs = e.getLogArgs();
+                Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+                int sc = ((Integer) logArgs[0]).intValue();
+                sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
+                Throwable cause = e.getNonOXExceptionCause();
+                if (null == cause) {
+                    logException(e, LogLevel.DEBUG, sc);
+                } else {
+                    logException(e);
+                }
                 return;
             }
+
             // Handle other OXExceptions
+
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
-                LOG.error("Unexpected error", e);
+                Throwable cause = e.getCause();
+                LOG.error("Unexpected error", null == cause ? e : cause);
             } else {
                 // Ignore special "folder not found" error
                 if (ignore(e)) {
@@ -440,13 +455,15 @@ public class DispatcherServlet extends SessionServlet {
                     logException(e);
                 }
             }
-            final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
-        } catch (final RuntimeException e) {
+
+            if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
+                writeErrorAsJsCallback(e, httpRequest, httpResponse);
+            } else {
+                handleOXException(e, httpRequest, httpResponse);
+            }
+        } catch (RuntimeException e) {
             logException(e);
-            final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
+            handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -454,20 +471,56 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void logException(final @Nullable Exception e) {
+    /**
+     * Do "error" handling in case the response status is != 200. Like writing Retry-After header for a successful 202 response or removing
+     * the default Content-Type: text/javascript we assume in {@link AJAXServlet#service()}.
+     *
+     * @param result The current {@link AJAXRequestResult}
+     * @param httpServletResponse The current {@link HttpServletResponse}
+     * @throws IOException If sending the error fails
+     */
+    private void handleError(AJAXRequestResult result, HttpServletResponse httpServletResponse) throws IOException {
+        int httpStatusCode = result.getHttpStatusCode();
+        switch (httpStatusCode) {
+        case 202: {
+            httpServletResponse.setContentType(null);
+            String retry_after = result.getHeader(RETRY_AFTER);
+            if (!Strings.isEmpty(retry_after)) {
+                httpServletResponse.addHeader(RETRY_AFTER, retry_after);
+            }
+        }
+        default:
+            break;
+        }
+        httpServletResponse.sendError(result.getHttpStatusCode());
+    }
+
+    private void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
+        // Try to write error page
+        try {
+            httpResponse.setStatus(statusCode);
+            writeErrorPage(statusCode, statusMsg, httpResponse);
+        } catch (Exception x) {
+            // Ignore
+            httpResponse.sendError(statusCode, null == statusMsg ? null : statusMsg.toString());
+            flushSafe(httpResponse);
+        }
+    }
+
+    private void logException(@Nullable Exception e) {
         logException(e, null, -1);
     }
 
-    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel) {
+    private void logException(@Nullable Exception e, @Nullable LogLevel logLevel) {
         logException(e, logLevel, -1);
     }
 
-    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel, final int statusCode) {
+    private void logException(@Nullable Exception e, @Nullable LogLevel logLevel, int statusCode) {
         if (null == e) {
             return;
         }
 
-        final String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
+        String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
 
         if (null == logLevel) {
             LOG.error(msg, e);
@@ -494,13 +547,13 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private ServerSession getSession(final HttpServletRequest httpRequest, final Dispatcher dispatcher, final String module, final String action) throws OXException {
-        ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
+    private ServerSession getSession(HttpServletRequest httpRequest, Dispatcher dispatcher, String module, String action) throws OXException {
+        ServerSession session = SessionUtility.getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
         if (session == null) {
             if (!dispatcher.mayOmitSession(module, action)) {
                 if (dispatcher.mayUseFallbackSession(module, action)) {
                     // "open-xchange-public-session" allowed, but missing for associated action
-                    final String name = LoginServlet.getPublicSessionCookieName(httpRequest);
+                    String name = LoginServlet.getPublicSessionCookieName(httpRequest);
                     throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(name) : AjaxExceptionCodes.MISSING_COOKIE.create(name);
                 }
                 // "open-xchange-public-session" NOT allowed for associated action, therefore complain about missing "session" parameter
@@ -512,7 +565,7 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private ServerSession fakeSession() {
-        final UserImpl user = new UserImpl();
+        UserImpl user = new UserImpl();
         user.setAttributes(new HashMap<String, Set<String>>(1));
         return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
     }
@@ -525,11 +578,11 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpRequest The associated HTTP Servlet request
      * @param httpResponse The associated HTTP Servlet response
      */
-    protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-        final List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
-        final Iterator<ResponseRenderer> iter = responseRenderers.iterator();
+    protected void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
+        Iterator<ResponseRenderer> iter = responseRenderers.iterator();
         for (int i = responseRenderers.size(); i-- > 0;) {
-            final ResponseRenderer renderer = iter.next();
+            ResponseRenderer renderer = iter.next();
             if (renderer.handles(requestData, result)) {
                 renderer.write(requestData, result, httpRequest, httpResponse);
                 return;
@@ -539,19 +592,20 @@ public class DispatcherServlet extends SessionServlet {
         throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
     }
 
-    /** ASCII-wise to upper-case */
-    private String toUpperCase(CharSequence chars) {
-        if (null == chars) {
-            return null;
+    private void flushSafe(HttpServletResponse httpResponse) {
+        try {
+            try {
+                Streams.flush(httpResponse.getWriter());
+            } catch (IllegalStateException e) {
+                // getOutputStream has already been called
+                Streams.flush(httpResponse.getOutputStream());
+            }
+        } catch (Exception e) {
+            // Ignore
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Helper class.
@@ -567,7 +621,7 @@ public class DispatcherServlet extends SessionServlet {
         /**
          * Initializes a new {@link SessionSecretCheckerImplementation}.
          */
-        protected NoSecretCallbackChecker(final Dispatcher dispatcher, final OXException e, final AJAXRequestDataTools requestDataTools) {
+        protected NoSecretCallbackChecker(Dispatcher dispatcher, OXException e, AJAXRequestDataTools requestDataTools) {
             super();
             this.requestDataTools = requestDataTools;
             this.dispatcher = dispatcher;
@@ -575,15 +629,15 @@ public class DispatcherServlet extends SessionServlet {
         }
 
         @Override
-        public void checkSecret(final Session session, final HttpServletRequest req, final String cookieHashSource) throws OXException {
-            final String module = requestDataTools.getModule(PREFIX.get(), req);
-            final String action = requestDataTools.getAction(req);
-            final boolean noSecretCallback = dispatcher.noSecretCallback(module, action);
+        public void checkSecret(Session session, HttpServletRequest req, String cookieHashSource) throws OXException {
+            String module = requestDataTools.getModule(PREFIX.get(), req);
+            String action = requestDataTools.getAction(req);
+            boolean noSecretCallback = dispatcher.noSecretCallback(module, action);
             if (!noSecretCallback) {
                 throw e;
             }
-            final String paramToken = PARAM_TOKEN;
-            final String token = (String) session.getParameter(paramToken);
+            String paramToken = PARAM_TOKEN;
+            String token = (String) session.getParameter(paramToken);
             session.setParameter(paramToken, null);
             if (null == token || !token.equals(req.getParameter(paramToken))) {
                 throw e;

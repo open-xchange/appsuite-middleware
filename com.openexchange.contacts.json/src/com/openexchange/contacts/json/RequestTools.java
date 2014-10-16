@@ -84,7 +84,7 @@ public class RequestTools {
     public static int getNullableIntParameter(final AJAXRequestData request, final String parameter) throws OXException {
         Integer intParam = null;
         try {
-            intParam = request.getParameter(parameter, int.class);
+            intParam = request.getParameter(parameter, int.class, true);
             if (intParam == null) {
                 return 0;
             }

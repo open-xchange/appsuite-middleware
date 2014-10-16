@@ -84,6 +84,8 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.mail.mime.MimeUtilityTest.class,
     com.openexchange.mail.mime.MimeStructureFixerTest.class,
     com.openexchange.mail.mime.MimeSmilFixerTest.class,
+    com.openexchange.mail.mime.QuotedInternetAddressTest.class,
+    com.openexchange.mail.mime.utils.MimeMessageUtilityTest.class,
     com.openexchange.mail.parser.handlers.JsonMessageHandlerTest.class,
     com.openexchange.groupware.notify.ParticipantNotifyTest.class,
     com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
@@ -94,7 +96,9 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.login.internal.format.CompositeLoginFormatterTest.class,
     com.openexchange.user.UserServiceInterceptorRegistryTest.class,
     com.openexchange.groupware.infostore.search.impl.ToMySqlQueryVisitorTest.class,
-    com.openexchange.mailaccount.json.parser.MailAccountParserTest.class
+    com.openexchange.mail.text.HtmlProcessingTest.class,
+    com.openexchange.mailaccount.json.actions.ValidateActionTest.class,
+    com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverterTest.class
 })
 public class UnitTests {
 

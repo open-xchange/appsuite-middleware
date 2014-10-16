@@ -131,7 +131,7 @@ public class JolokiaConfig implements Initialization {
         this.user = configService.getProperty("com.openexchange.jolokia.user","");
         this.password = configService.getProperty("com.openexchange.jolokia.password","");
         this.restrictToLocalhost = configService.getBoolProperty("com.openexchange.jolokia.restrict.to.localhost", true);
-        
+
         // only allow Jolokia to be started if user and password are set by admin
         if (jolokiaStart){
             if (!(null != user && user.length() != 0)) {
@@ -150,26 +150,26 @@ public class JolokiaConfig implements Initialization {
             try {
                 restrictor =  RestrictorFactory.lookupPolicyRestrictor(xmlConfigFile.toURI().toURL().toString());
             } catch (RuntimeException e) {
-                LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+                LOG.warn("Error loading configuration from file {}", xmlConfigFile.getAbsolutePath(), e);
             } catch (IOException e) {
-                LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+                LOG.warn("Error loading configuration from file {}", xmlConfigFile.getAbsolutePath(), e);
             }
         } else if (restrictToLocalhost) {
             restrictor = RestrictorFactoryForLocalhost.createPolicyRestrictor();
         }
 
 
-        
+
         final String maxObjects = configService.getProperty("com.openexchange.jolokia.maxObjects", "0");
         if (null != maxObjects) {
             pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), maxObjects);
         }
-        
+
         final String maxDepth = configService.getProperty("com.openexchange.jolokia.maxDepth", "0");
         if (null != maxDepth) {
             pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), maxDepth);
         }
-        
+
 
     }
 

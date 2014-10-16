@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,7 +43,6 @@ package com.sun.mail.imap;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.logging.Level;
-
 import javax.mail.*;
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.MailLogger;
@@ -441,4 +440,12 @@ public class MessageCache {
 	}
 	return -1;
     }
+
+    /**
+     * Frees the message references.
+     */
+    public void freeCache() {
+        Arrays.fill(messages, null);
+    }
+
 }

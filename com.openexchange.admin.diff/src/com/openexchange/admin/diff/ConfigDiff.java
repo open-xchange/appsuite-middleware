@@ -49,59 +49,105 @@
 
 package com.openexchange.admin.diff;
 
-import java.io.IOException;
-import java.util.Enumeration;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import com.openexchange.admin.diff.file.handler.FileHandler;
+import com.openexchange.admin.diff.file.handler.IConfFileHandler;
+import com.openexchange.admin.diff.file.handler.TooManyFilesException;
+import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
+import com.openexchange.admin.diff.file.provider.JarFileProvider;
+import com.openexchange.admin.diff.file.provider.RecursiveFileProvider;
+import com.openexchange.admin.diff.result.DiffResult;
 
 /**
- * {@link ConfigDiff}
- * 
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * Main class that is invoked to execute the configuration diffs.
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
 public class ConfigDiff {
 
-    private final Set<String> propFilesExtensions;
+    /**
+     * Default folder for original configuration files
+     */
+    protected String originalFolder = "/opt/open-xchange/bundles";
 
     /**
-     * Initializes a new {@link ConfigDiff}.
-     * 
-     * @throws IOException
+     * Default folder for installed configuration files
      */
-    public ConfigDiff() throws IOException {
-        super();
-        propFilesExtensions = new HashSet<String>();
-        propFilesExtensions.add("properties");
-        propFilesExtensions.add("yaml");
-        propFilesExtensions.add("yml");
-        propFilesExtensions.add("conf");
-        propFilesExtensions.add("cnf");
-        propFilesExtensions.add("xml");
-        // testing
-        // readJar(System.getProperty("user.dir") + "/lib/diffutils-1.2.1.jar");
+    protected String installationFolder = "/opt/open-xchange/etc";
+
+    /**
+     * Handles processing with files
+     */
+    private FileHandler fileHandler = new FileHandler();
+
+    /**
+     * Handlers that are registered for diff processing
+     */
+    private static Set<IConfFileHandler> handlers = new HashSet<IConfFileHandler>();
+
+    public static void register(IConfFileHandler handler) {
+        handlers.add(handler);
+    }
+
+    public DiffResult run() {
+        final DiffResult diffResult = new DiffResult();
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        Future<Void> orgFuture = executor.submit(new Callable<Void>() {
+
+            @Override
+            public Void call() throws TooManyFilesException {
+                fileHandler.readConfFiles(diffResult, new File(originalFolder), true, new JarFileProvider(), new ConfFolderFileProvider());
+                return null;
+            }
+        });
+
+        Future<Void> instFuture = executor.submit(new Callable<Void>() {
+
+            @Override
+            public Void call() throws TooManyFilesException {
+                fileHandler.readConfFiles(diffResult, new File(installationFolder), false, new RecursiveFileProvider());
+                return null;
+            }
+        });
+
+        try {
+            orgFuture.get();
+            instFuture.get();
+        } catch (ExecutionException e) {
+            Throwable rootException = e.getCause();
+            if (rootException instanceof TooManyFilesException) {
+                diffResult.reset();
+                return diffResult;
+            }
+        } catch (InterruptedException e) {
+            diffResult.getProcessingErrors().add(e.getLocalizedMessage());
+        } finally {
+            executor.shutdown();
+        }
+
+        return getDiffs(diffResult);
     }
 
     /**
-     * Read JAR file
-     * 
-     * @param jarFile full path
-     * @throws IOException
+     * Calls all registered handles to get the diffs
+     *
+     * @param diffResult - object to add the DiffResults to
+     * @return - DiffResult object with all diffs
      */
-    private void readJar(String path) throws IOException {
-        JarFile jarFile = new JarFile(path);
-        final Enumeration<JarEntry> entries = jarFile.entries();
-        while (entries.hasMoreElements()) {
-            final JarEntry entry = entries.nextElement();
-            final String entryName = entry.getName();
-            final int dotIdx = entryName.lastIndexOf('.');
-            if (dotIdx > 0) {
-                final String entryExt = entryName.substring(dotIdx + 1);
-                if (propFilesExtensions.contains(entryExt)) {
-                    System.out.println(entry.getName());
-                }
-            }
+    protected DiffResult getDiffs(DiffResult diffResult) {
+
+        for (IConfFileHandler handler : handlers) {
+            handler.getDiff(diffResult);
         }
+        return diffResult;
     }
 }

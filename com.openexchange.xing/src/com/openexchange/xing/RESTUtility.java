@@ -454,8 +454,11 @@ public class RESTUtility {
         return result;
     }
 
-    private static void checkForError(final JSONObject responseObject) throws XingApiException {
+    private static void checkForError(final JSONObject responseObject) throws XingApiException, XingUnlinkedException {
         if (responseObject.has("error_name")) {
+            if ("Invalid OAuth token".equals(responseObject.optString("message"))) {
+                throw new XingUnlinkedException("Invalid OAuth token");
+            }
             throw new XingApiException(responseObject);
         }
     }

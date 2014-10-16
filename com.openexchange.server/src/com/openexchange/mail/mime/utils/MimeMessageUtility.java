@@ -87,6 +87,7 @@ import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -151,6 +152,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.util.MessageRemovedIOException;
 
 /**
  * {@link MimeMessageUtility} - Utilities for MIME messages.
@@ -765,11 +767,6 @@ public final class MimeMessageUtility {
     }
 
     /**
-     * The max. length of a RFC 2047 style encoded word.
-     */
-    private static final int ENCODED_WORD_LEN = 75;
-
-    /**
      * Internal method to decode a string header obtained from ENVELOPE fetch item.
      *
      * @param value The header value
@@ -780,7 +777,7 @@ public final class MimeMessageUtility {
         /*
          * Passes possibly encoded-word is greater than 75 characters and contains no CR?LF
          */
-        if ((length > ENCODED_WORD_LEN) && (value.indexOf('\r') < 0) && (value.indexOf('\n') < 0)) {
+        if ((value.indexOf('\r') < 0) && (value.indexOf('\n') < 0)) {
             final StringBuilder sb = new StringBuilder(length).append(value);
             final String pattern = "?= =?";
             int i;
@@ -876,6 +873,29 @@ public final class MimeMessageUtility {
             sb.append(hdrVal.substring(lastMatch));
             return sb.toString();
         }
+
+        // Try to recover from malformed Content-Type value like ''=?windows-1252?q?application/pdf; name="blatt8.pdf"''
+        if (!hdrVal.startsWith("=?")) {
+            // Encoded word does not start with "=?"
+            return hdrVal;
+        }
+        int start = 2;
+        int pos;
+        if ((pos = hdrVal.indexOf('?', start)) == -1) {
+            // Encoded word does not include charset
+            return hdrVal;
+        }
+        start = pos+1;
+        if ((pos = hdrVal.indexOf('?', start)) == -1) {
+            // Encoded word does not include encoding
+            return hdrVal;
+        }
+        start = pos+1;
+        if ((pos = hdrVal.indexOf("?=", start)) == -1) {
+            // Encoded word does not end with "?="
+            return hdrVal.substring(start);
+        }
+
         return hdrVal;
     }
 
@@ -1148,7 +1168,13 @@ public final class MimeMessageUtility {
 
     private static final Pattern SPLITS = Pattern.compile(" *, *");
 
-    private static List<String> splitAddrs(final String addrs) {
+    /**
+     * Split address list
+     *
+     * @param addrs The address list
+     * @return The splitted addresses
+     */
+    public static List<String> splitAddrs(final String addrs) {
         if (isEmpty(addrs)) {
             return Collections.<String> emptyList();
         }
@@ -1283,7 +1309,16 @@ public final class MimeMessageUtility {
 
     private static final Pattern PATTERN_REPLACE = Pattern.compile("(\\.\\w+>?)(\\s*);(\\s*)");
 
-    private static String replaceWithComma(final String addressList) {
+    /**
+     * Sanitizes address list
+     *
+     * @param addressList The address list
+     * @return The sanitized address list
+     */
+    public static String replaceWithComma(final String addressList) {
+        if (null == addressList) {
+            return null;
+        }
         if (!checkReplaceWithComma()) {
             return addressList;
         }
@@ -1772,7 +1807,7 @@ public final class MimeMessageUtility {
             los.writeln();
             os.flush();
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -1818,7 +1853,7 @@ public final class MimeMessageUtility {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -1854,7 +1889,7 @@ public final class MimeMessageUtility {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -2089,7 +2124,7 @@ public final class MimeMessageUtility {
             LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 LOG.warn("Mail part removed in the meantime.", e);
                 return null;
             }
@@ -2185,7 +2220,7 @@ public final class MimeMessageUtility {
 
             return pin;
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -2227,21 +2262,42 @@ public final class MimeMessageUtility {
         if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
             return null;
         }
-        final Object content = part.getContent();
-        if (content instanceof Multipart) {
-            return (Multipart) content;
+        return multipartFrom(part, contentType);
+    }
+
+    /**
+     * Gets the multipart content from specified part known to hold a multipart content (w/o checking Content-Type header).
+     *
+     * @param part The part
+     * @return The multipart or <code>null</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static Multipart multipartFrom(final Part part) throws MessagingException, IOException {
+        return multipartFrom(part, null);
+    }
+
+    private static Multipart multipartFrom(final Part part, final String contentType) throws MessagingException, IOException {
+        try {
+            final Object content = part.getContent();
+            if (content instanceof Multipart) {
+                return (Multipart) content;
+            }
+            if (content instanceof InputStream) {
+                return new MimeMultipart(new MessageDataSource((InputStream) content, null == contentType ? getHeader("Content-Type", null, part) : contentType));
+            }
+            if (content instanceof Message) {
+                return getMultipartContentFrom((Message) content);
+            }
+            if (content instanceof String) {
+                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
+            }
+            LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Content signals to be {}.", null == contentType ? getHeader("Content-Type", null, part) : contentType, null == content ? "null" : content.getClass().getName());
+            return null;
+        } catch (MessageRemovedIOException e) {
+            String message = e.getMessage();
+            throw new MessageRemovedException(null == message ? "Message has been removed in the meantime" : message, e);
         }
-        if (content instanceof InputStream) {
-            return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
-        }
-        if (content instanceof Message) {
-            return getMultipartContentFrom((Message) content);
-        }
-        if (content instanceof String) {
-            return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
-        }
-        LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Content signals to be {}.", contentType, null == content ? "null" : content.getClass().getName());
-        return null;
     }
 
     /**

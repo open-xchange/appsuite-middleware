@@ -51,6 +51,7 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import java.util.Set;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.search.AndTerm;
 import com.openexchange.exception.OXException;
@@ -99,6 +100,12 @@ public final class ANDTerm extends CatenatingTerm {
     @Override
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return new AndTerm(terms[0].getNonWildcardJavaMailSearchTerm(), terms[1].getNonWildcardJavaMailSearchTerm());
+    }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        terms[0].contributeTo(fetchProfile);
+        terms[1].contributeTo(fetchProfile);
     }
 
     @Override

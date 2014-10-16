@@ -96,6 +96,7 @@ public class DriveConfig implements Initialization {
     private String directLinkQuota;
     private String directLinkHelp;
     private Pattern excludedFilenamesPattern;
+    private Pattern excludedDirectoriesPattern;
     private String shortProductName;
     private int minApiVersion;
     private int maxDirectoryActions;
@@ -222,6 +223,15 @@ public class DriveConfig implements Initialization {
      */
     public Pattern getExcludedFilenamesPattern() {
         return excludedFilenamesPattern;
+    }
+
+    /**
+     * Gets the excludedDirectoriesPattern
+     *
+     * @return The excludedDirectoriesPattern
+     */
+    public Pattern getExcludedDirectoriesPattern() {
+        return excludedDirectoriesPattern;
     }
 
     /**
@@ -373,9 +383,16 @@ public class DriveConfig implements Initialization {
         shortProductName = configService.getProperty("com.openexchange.drive.shortProductName", "OX Drive");
         try {
             excludedFilenamesPattern = Pattern.compile(configService.getProperty("com.openexchange.drive.excludedFilesPattern",
-                "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+                "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r|\\.msngr_hstr_data_.*\\.log"),
+                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         } catch (PatternSyntaxException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.drive.excludedFilesPattern");
+        }
+        try {
+            excludedDirectoriesPattern = Pattern.compile(configService.getProperty("com.openexchange.drive.excludedDirectoriesPattern",
+                "^.*/\\.msngr_hstr_data$"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        } catch (PatternSyntaxException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.drive.excludedDirectoriesPattern");
         }
         /*
          * temp cleaner

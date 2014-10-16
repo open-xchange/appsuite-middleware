@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find.basic
 Bundle-SymbolicName: com.openexchange.find.basic
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.find.basic.osgi.FindBasicActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -27,12 +27,14 @@ Import-Package: com.davekoelle,
  com.openexchange.find.mail,
  com.openexchange.find.spi,
  com.openexchange.find.tasks,
+ com.openexchange.find.util,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.database.contentType,
  com.openexchange.folderstorage.mail,
  com.openexchange.folderstorage.mail.contentType,
  com.openexchange.folderstorage.type,
  com.openexchange.groupware.calendar,
+ com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,

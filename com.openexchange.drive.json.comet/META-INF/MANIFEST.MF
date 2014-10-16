@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive JSON Bundle holding Comet extensions
 Bundle-SymbolicName: com.openexchange.drive.json.comet
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.drive.json.comet.osgi.DriveJsonCometActivator

@@ -89,12 +89,7 @@ public class AppointmentParser extends CalendarParser {
     }
 
     protected void parseElementAppointment(final Appointment appointmentobject, final JSONObject jsonobject) throws JSONException, OXException {
-        boolean isFullTime = false;
-
-        if (jsonobject.has(AppointmentFields.FULL_TIME)) {
-            isFullTime = parseBoolean(jsonobject, AppointmentFields.FULL_TIME);
-            appointmentobject.setFullTime(isFullTime);
-        }
+        boolean isFullTime = jsonobject.has(CalendarFields.FULL_TIME) && parseBoolean(jsonobject, CalendarFields.FULL_TIME);
 
         if (jsonobject.has(CalendarFields.START_DATE)) {
             if (isFullTime) {
@@ -143,7 +138,7 @@ public class AppointmentParser extends CalendarParser {
         if (jsonobject.has(CalendarFields.RECURRENCE_START)) {
             appointmentobject.setRecurringStart(parseDate(jsonobject, CalendarFields.RECURRENCE_START).getTime());
         }
-        
+
         if (parseAll) {
             if (jsonobject.has(CalendarFields.CHANGE_EXCEPTIONS)) {
                 appointmentobject.setChangeExceptions(parseJSONDateArray(jsonobject, CalendarFields.CHANGE_EXCEPTIONS));

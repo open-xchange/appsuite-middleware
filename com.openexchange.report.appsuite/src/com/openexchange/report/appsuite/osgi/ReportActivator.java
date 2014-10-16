@@ -23,12 +23,10 @@ import com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount;
 import com.openexchange.report.appsuite.defaultHandlers.Total;
 import com.openexchange.report.appsuite.jobs.Orchestration;
 import com.openexchange.report.appsuite.management.ReportMXBeanImpl;
-import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
 
 /**
- * 
- * The {@link ReportActivator} is the interface to the OSGi world between the report framework and the runtime system. 
+ * The {@link ReportActivator} is the interface to the OSGi world between the report framework and the runtime system.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -37,7 +35,7 @@ public class ReportActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
-            ContextService.class, UserService.class, HazelcastInstance.class, StringParser.class,
+            ContextService.class, UserService.class, HazelcastInstance.class,
             CapabilityService.class, ManagementService.class, LoginCounterService.class };
     }
 
@@ -120,7 +118,7 @@ public class ReportActivator extends HousekeepingActivator {
             }
 
         });
-        
+
         // ReportFinishingTouches
 
         track(ReportFinishingTouches.class, new SimpleRegistryListener<ReportFinishingTouches>() {
@@ -136,7 +134,7 @@ public class ReportActivator extends HousekeepingActivator {
             }
 
         });
-        
+
         // Register the implementations for the default report
         CapabilityHandler capabilityHandler = new CapabilityHandler();
 
@@ -148,14 +146,14 @@ public class ReportActivator extends HousekeepingActivator {
 
         Total total = new Total();
         Services.add(total);
-        
+
         ClientLoginCount clc = new ClientLoginCount();
         Services.add(clc);
-        
+
         openTrackers();
 
         registerService(ReportService.class, Orchestration.getInstance());
-        
+
         // Register the MBean
         ManagementService managementService = getService(ManagementService.class);
         managementService.registerMBean(

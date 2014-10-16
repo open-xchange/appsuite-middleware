@@ -52,7 +52,7 @@ package com.openexchange.index.solr;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Set;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

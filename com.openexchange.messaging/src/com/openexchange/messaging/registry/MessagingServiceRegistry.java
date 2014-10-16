@@ -52,6 +52,7 @@ package com.openexchange.messaging.registry;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link MessagingServiceRegistry}
@@ -60,6 +61,7 @@ import com.openexchange.messaging.MessagingService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
+@SingletonService
 public interface MessagingServiceRegistry {
 
     /**

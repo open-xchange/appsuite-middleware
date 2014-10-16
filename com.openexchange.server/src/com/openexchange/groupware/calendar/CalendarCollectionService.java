@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -74,6 +75,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
  */
+@SingletonService
 public interface CalendarCollectionService {
 
     // Stuff from CalendarCommonCollection
@@ -142,7 +144,7 @@ public interface CalendarCollectionService {
 
     public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(final CalendarDataObject cdao, final UserParticipant up);
 
-    public UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid, final UserParticipant orig[]);
+    public Set<UserParticipant> checkAndModifyAlarm(final CalendarDataObject cdao, Set<UserParticipant> check, final int uid,  final Set<UserParticipant> orig);
 
     public void simpleParticipantCheck(final CalendarDataObject cdao) throws OXException;
 
@@ -152,9 +154,9 @@ public interface CalendarCollectionService {
      */
     public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) throws OXException;
 
-    public void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException;
-
     public void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException;
+
+    public void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException;
 
     public Date getNextReminderDate(final int oid, final int fid, final Session so) throws OXException, SQLException;
 
@@ -411,7 +413,7 @@ public interface CalendarCollectionService {
      */
     public int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException;
 
-    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, UserParticipant[] modified_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[], final Participant modified_participants[]);
+    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final Set<UserParticipant> new_userparticipants, final Set<UserParticipant> deleted_userparticipants,final Set<UserParticipant> modified_userparticipants, Participant p_event[], final Set<Participant> new_participants, final Set<Participant> deleted_participants, final Participant[] modified_participants);
 
     /**
      * Gets the calendar data object from specified list whose ID matches given

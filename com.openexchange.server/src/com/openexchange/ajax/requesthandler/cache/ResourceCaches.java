@@ -53,6 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -95,6 +96,53 @@ public class ResourceCaches {
         return CACHE_REF.get();
     }
 
+    private static final List<String> DEFAULT_THUMBNAIL_PARAMS = Arrays.asList("content_type", "context", "folder", "format", "height", "id", "scaleType", "version", "width");
+
+    /**
+     * Generates the key for preview cache.
+     *
+     * @param eTag The ETag identifier
+     * @param requestData The request data
+     * @return The appropriate cache key
+     */
+    public static String generateDefaultThumbnailCacheKey(String eTag, AJAXRequestData requestData) {
+        return generateThumbnailCacheKey0(eTag, requestData, DEFAULT_THUMBNAIL_PARAMS);
+    }
+
+    /**
+     * Generates the key for preview cache.
+     *
+     * @param eTag The ETag identifier
+     * @param requestData The request data
+     * @param paramNames The names of the parameters to consider
+     * @return The appropriate cache key
+     */
+    public static String generateThumbnailCacheKey(String eTag, AJAXRequestData requestData, String... paramNames) {
+        List<String> parameters = new ArrayList<String>(Arrays.asList(paramNames));
+        Collections.sort(parameters);
+        return generateThumbnailCacheKey0(eTag, requestData, parameters);
+    }
+
+    private static String generateThumbnailCacheKey0(String eTag, AJAXRequestData requestData, List<String> parameters) {
+        StringBuilder sb = new StringBuilder(512);
+        sb.append(requestData.getModule());
+        sb.append('-').append(requestData.getAction());
+        sb.append('-').append(requestData.getSession().getContextId());
+
+        // Append sorted parameters
+        for (String name : parameters) {
+            if (isAcceptableParameter(name)) {
+                sb.append('-').append(name);
+                String parameter = requestData.getParameter(name);
+                if (!Strings.isEmpty(parameter)) {
+                    sb.append('=').append(parameter);
+                }
+            }
+        }
+
+        return toMD5(eTag, sb);
+    }
+
     /**
      * Generates the key for preview cache.
      *
@@ -103,7 +151,7 @@ public class ResourceCaches {
      * @param optParameters Optional parameters to consider
      * @return The appropriate cache key
      */
-    public static String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData, final String... additionalParams) {
+    public static String generatePreviewCacheKey(String eTag, AJAXRequestData requestData, String... additionalParams) {
         final StringBuilder sb = new StringBuilder(512);
         sb.append(requestData.getModule());
         sb.append('-').append(requestData.getAction());
@@ -111,12 +159,12 @@ public class ResourceCaches {
 
         // Append sorted parameters
         {
-            final List<String> parameters = new ArrayList<String>(requestData.getParameters().keySet());
+            List<String> parameters = new ArrayList<String>(requestData.getParameters().keySet());
             Collections.sort(parameters);
-            for (final String name : parameters) {
+            for (String name : parameters) {
                 if (isAcceptableParameter(name)) {
                     sb.append('-').append(name);
-                    final String parameter = requestData.getParameter(name);
+                    String parameter = requestData.getParameter(name);
                     if (!Strings.isEmpty(parameter)) {
                         sb.append('=').append(parameter);
                     }
@@ -126,7 +174,7 @@ public class ResourceCaches {
 
         // Append additional parameters, if given
         if (null != additionalParams) {
-            for (final String additionalParam : additionalParams) {
+            for (String additionalParam : additionalParams) {
                 if (!Strings.isEmpty(additionalParam)) {
                     sb.append('-').append(additionalParam);
                 }
@@ -134,32 +182,36 @@ public class ResourceCaches {
         }
 
         // Generate MD5 sum
+        return toMD5(eTag, sb);
+    }
+
+    private static String toMD5(String eTag, StringBuilder sb) {
         try {
-            final byte[] md5Bytes = sb.toString().getBytes("UTF-8");
-            final String hashedParams = asHex(MessageDigest.getInstance("MD5").digest(md5Bytes));
+            byte[] md5Bytes = sb.toString().getBytes("UTF-8");
+            String hashedParams = asHex(MessageDigest.getInstance("MD5").digest(md5Bytes));
             String prefix = eTag;
 
-            // ensure key size does not exceed 128 characters (current db limit)
+            // Ensure key size does not exceed 128 characters (current database limit)
             if (prefix.length() + 33 > 128) {
                 prefix = asHex(MessageDigest.getInstance("MD5").digest(prefix.getBytes()));
             }
             sb.setLength(0);
             return sb.append(prefix).append('-').append(hashedParams).toString();
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.error("", e);
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             // Shouldn't happen
             LOG.error("", e);
         }
         return sb.toString();
     }
 
-    private static boolean isAcceptableParameter(final String name) {
+    private static boolean isAcceptableParameter(String name) {
         if (Strings.isEmpty(name)) {
             return false;
         }
-        final String n = Strings.toLowerCase(name);
+        String n = Strings.toLowerCase(name);
         return !"session".equals(n) && !"action".equals(n);
     }
 
@@ -171,9 +223,9 @@ public class ResourceCaches {
      * @param hash Array of bytes to convert to hex-string
      * @return Generated hex string
      */
-    public static String asHex(final byte[] hash) {
-        final int length = hash.length;
-        final char[] buf = new char[length * 2];
+    public static String asHex(byte[] hash) {
+        int length = hash.length;
+        char[] buf = new char[length * 2];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];

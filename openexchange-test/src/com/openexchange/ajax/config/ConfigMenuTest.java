@@ -50,7 +50,6 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -85,7 +84,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         final GetRequest request = new GetRequest(Tree.ALL);
         final GetResponse response = getClient().execute(request);
         final JSONObject settings = response.getJSON();
-        LOG.trace("Settings: " + settings.toString());
+        LOG.trace("Settings: {}", settings.toString());
         assertTrue("Got no value from server.", settings.length() > 0);
     }
 
@@ -96,7 +95,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         final GetRequest request = new GetRequest(Tree.SpamButton);
         final GetResponse response = getClient().execute(request);
         final boolean spamButtonEnabled = response.getBoolean();
-        LOG.trace("Spam Button enabled: " + spamButtonEnabled);
+        LOG.trace("Spam Button enabled: {}", spamButtonEnabled);
         assertTrue("Got no spam-button-enabled flag from server.", response.hasValue());
     }
 
@@ -145,7 +144,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         final GetRequest request = new GetRequest(Tree.Identifier);
         final GetResponse response = getClient().execute(request);
         final int userId = response.getInteger();
-        LOG.trace("UserId: " + userId);
+        LOG.trace("UserId: {}", userId);
         assertTrue("No valid user identifier", userId > 0);
     }
 }

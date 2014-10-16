@@ -72,6 +72,10 @@ public enum MailJSONField {
      */
     HEADERS("headers"),
     /**
+     * Mail truncated: true, false
+     */
+    TRUNCATED("truncated"),
+    /**
      * Nested messages
      */
     NESTED_MESSAGES("nested_msgs"),

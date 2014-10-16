@@ -50,8 +50,10 @@
 package com.openexchange.file.storage.osgi;
 
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.internal.FileStorageQuotaProvider;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.quota.QuotaProvider;
 
 /**
  * {@link FileStorageActivator}
@@ -98,6 +100,7 @@ public final class FileStorageActivator extends HousekeepingActivator {
              */
             registerService(FileStorageServiceRegistry.class, registry);
             registerService(FileStorageAccountManagerLookupService.class, lookupService);
+            registerService(QuotaProvider.class, new FileStorageQuotaProvider(registry));
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.file.storage\" failed.", e);
             throw e;

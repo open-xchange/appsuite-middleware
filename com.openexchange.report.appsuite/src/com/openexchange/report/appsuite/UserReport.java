@@ -52,10 +52,11 @@ package com.openexchange.report.appsuite;
 import java.io.Serializable;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.report.appsuite.serialization.Report;
 
 /**
  * A {@link UserReport} holds information about a user
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UserReport extends Report {
@@ -69,8 +70,8 @@ public class UserReport extends Report {
     private final ContextReport contextReport;
 
     /**
-     * 
      * Initializes a new {@link UserReport}.
+     *
      * @param uuid The uuid of this report run
      * @param type The type of report to run
      * @param ctx The context the analyzed user belongs to
@@ -92,15 +93,15 @@ public class UserReport extends Report {
         super.set(ns, key, value);
         return this;
     }
-    
+
     public ContextReport getContextReport() {
         return contextReport;
     }
-    
+
     public User getUser() {
         return user;
     }
-    
+
     public Context getContext() {
         return ctx;
     }

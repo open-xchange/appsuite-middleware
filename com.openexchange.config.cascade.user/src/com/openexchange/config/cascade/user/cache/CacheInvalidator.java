@@ -80,31 +80,35 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if ("UserConfiguration".equals(cacheEvent.getRegion())) {
-            Serializable key = cacheEvent.getKey();
-            if (CacheKey.class.isInstance(key)) {
-                CacheOperation operation = cacheEvent.getOperation();
-                CacheKey cacheKey = (CacheKey) key;
-                int contextId = cacheKey.getContextId();
-                if (operation == CacheOperation.INVALIDATE) {
-                    if (cacheKey.getKeys().length == 1) {
-                        Serializable zero = cacheKey.getKeys()[0];
-                        if (Integer.class.isInstance(zero)) {
-                            // Beg for this being the userId...
-                            int userId = ((Integer) zero).intValue();
-                            invalidateUser(userId, contextId);
+            CacheOperation operation = cacheEvent.getOperation();
+            if (operation == CacheOperation.CLEAR) {
+                clear();
+            } else if (null != cacheEvent.getKeys()) {
+                for (Serializable key : cacheEvent.getKeys()) {
+                    if (CacheKey.class.isInstance(key)) {
+                        CacheKey cacheKey = (CacheKey) key;
+                        if (CacheOperation.INVALIDATE == operation) {
+                            String[] keys = cacheKey.getKeys();
+                            if (null != keys && 0 < keys.length && null != keys[0]) {
+                                try {
+                                    invalidateUser(Integer.valueOf(keys[0]), cacheKey.getContextId());
+                                } catch (NumberFormatException e) {
+                                    org.slf4j.LoggerFactory.getLogger(CacheInvalidator.class).error(
+                                        "Unexpected cache key for region {}: \"{}\", skipping invalidation.",
+                                        cacheEvent.getRegion(), keys[0], e);
+                                }
+                            }
+                        } else if (CacheOperation.INVALIDATE_GROUP == operation) {
+                            invalidateContext(cacheKey.getContextId());
                         }
                     }
-                } else if (operation == CacheOperation.INVALIDATE_GROUP) {
-                    invalidateContext(contextId);
                 }
             }
-
         }
     }
 
-    /*
-     * ServiceTrackerCustomizer
-     */
+    // -------------------------------------------------------------------------------------------------------------------------- //
+
     @Override
     public CacheEventService addingService(ServiceReference<CacheEventService> reference) {
         CacheEventService service = context.getService(reference);
@@ -113,12 +117,16 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
     }
 
     @Override
-    public void modifiedService(ServiceReference<CacheEventService> reference, CacheEventService service) {}
+    public void modifiedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
+        // Nothing to do
+    }
 
     @Override
     public void removedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
         service.removeListener("UserConfiguration", this);
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------- //
 
     /*
      * Cache invalidation
@@ -129,6 +137,10 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
 
     public void invalidateContext(int contextId) {
         PropertyMapManagement.getInstance().dropFor(contextId);
+    }
+
+    public void clear() {
+        PropertyMapManagement.getInstance().clear();
     }
 
 }

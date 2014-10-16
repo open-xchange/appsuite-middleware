@@ -652,8 +652,13 @@ public class IMAPDefaultFolderChecker {
                 IMAPCommandsCollection.createFolder(f, sep, type, false);
                 LOG.info("Created new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             } catch (final MessagingException e) {
-                LOG.warn("Failed to create new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-                throw e;
+                String msg = e.getMessage();
+                if (null == msg || Strings.toUpperCase(msg).indexOf("[ALREADYEXISTS]") < 0) {
+                    LOG.warn("Failed to create new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                    throw e;
+                }
+                // Obviously such a folder does already exist; treat as being successfully created
+                LOG.info("Standard {} folder does already exist (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             }
         }
     }

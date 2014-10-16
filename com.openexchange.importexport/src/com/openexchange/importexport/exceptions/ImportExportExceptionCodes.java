@@ -151,7 +151,7 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
     /** The file you selected does not exist. */
     FILE_NOT_EXISTS("The file you selected does not exist.", CATEGORY_USER_INPUT, 1304, ImportExportExceptionMessages.FILE_NOT_EXISTS_MSG),
     /** Ignoring invalid value for field "%1$s": %2$s  */
-    IGNORE_FIELD("Ignoring invalid value for field \"%1$s\": %2$s", CATEGORY_USER_INPUT, 1306,
+    IGNORE_FIELD("Ignoring invalid value for field \"%1$s\": %2$s", CATEGORY_WARNING, 1306,
         ImportExportExceptionMessages.IGNORE_FIELD_MSG),
     CONTACT_INTERFACE_MISSING("Could not load ContactInterface to write storage contacts.", Category.CATEGORY_ERROR, 1307, null),
     COULD_NOT_WRITE("Could not write entry into database.", Category.CATEGORY_ERROR, 1308, OXExceptionStrings.SQL_ERROR_MSG),
@@ -169,7 +169,7 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
         ImportExportExceptionMessages.NO_CONTENT_MSG),
     /** Something went wrong reading from specified file. Please try again. */
     IOEXCEPTION_RETRY("Something went wrong reading from specified file. Please try again.", CATEGORY_TRY_AGAIN, 1316,
-        ImportExportExceptionMessages.IOEXCEPTION_RETRY_MSG), 
+        ImportExportExceptionMessages.IOEXCEPTION_RETRY_MSG),
     LIMIT_EXCEEDED("Import limit exceeded. Only imported the first %1$s contacts", CATEGORY_WARNING, 1317,
         ImportExportExceptionMessages.LIMIT_EXCEEDED_MSG)
     ;
@@ -200,7 +200,7 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

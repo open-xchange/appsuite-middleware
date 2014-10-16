@@ -71,7 +71,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     static final Logger LOG = LoggerFactory.getLogger(ReentrantLockPool.class);
 
-    private final int minIdle;
     private final int maxIdle;
     private final long maxIdleTime;
     private final int maxActive;
@@ -120,7 +119,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      */
     public ReentrantLockPool(final PoolableLifecycle<T> lifecycle, final Config config) {
         super();
-        minIdle = Math.max(0, config.minIdle);
         maxIdle = config.maxIdle;
         maxIdleTime = config.maxIdleTime;
         maxActive = config.maxActive;
@@ -132,11 +130,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         testOnIdle = config.testOnIdle;
         testThreads = config.testThreads;
         this.lifecycle = lifecycle;
-        try {
-            ensureMinIdle();
-        } catch (final PoolingException e) {
-            LOG.error("Problem while creating initial objects.", e);
-        }
     }
 
     protected final PoolableLifecycle<T> getLifecycle() {
@@ -509,51 +502,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return cleaner;
     }
 
-    private boolean isBelowMinIdle() {
-        final int numIdle;
-        final int numActive;
-        lock.lock();
-        try {
-            numIdle = data.numIdle();
-            numActive = data.numActive();
-        } finally {
-            lock.unlock();
-        }
-        final int maxCreate;
-        if (-1 == maxActive) {
-            maxCreate = Integer.MAX_VALUE;
-        } else {
-            maxCreate = Math.max(0, maxActive - numActive - numIdle);
-        }
-        return Math.min(minIdle - numIdle, maxCreate) > 0;
-    }
-
-    /**
-     * Fills the pool that it provides the minimum count of idle object without exceeding the maximum number objects.
-     * @throws PoolingException if creating an object or putting it to the pool fails.
-     */
-    private void ensureMinIdle() throws PoolingException {
-        boolean successfullyAdded = true;
-        while (isBelowMinIdle() && successfullyAdded) {
-            successfullyAdded &= createObject();
-        }
-    }
-
-    /**
-     * Creates an object and puts it to the pool.
-     * @return <code>true</code> if the object has been put into pool.
-     * @throws PoolingException if creating the object throws an exception.
-     */
-    private boolean createObject() throws PoolingException {
-        final T pooled;
-        try {
-            pooled = lifecycle.create();
-        } catch (final Exception e) {
-            throw new PoolingException("Cannot create pooled object.", e);
-        }
-        return back(pooled, false);
-    }
-
     @Override
     public void run() {
         final long startTime = System.currentTimeMillis();
@@ -627,16 +575,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             }
             LOG.error(e.getMessage(), e);
         }
-        try {
-            ensureMinIdle();
-        } catch (final PoolingException e) {
-            LOG.error("Problem creating the minimum number of connections.", e);
-        }
         LOG.trace("Clean run ending. Time: {}", L(getWaitTime(startTime)));
     }
 
     public static class Config implements Cloneable {
-        public int minIdle;
         public int maxIdle;
         public long maxIdleTime;
         public int maxActive;
@@ -650,7 +592,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
         public Config() {
             super();
-            minIdle = 0;
             maxIdle = -1;
             maxIdleTime = 60000;
             maxActive = -1;
@@ -676,9 +617,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder();
-            sb.append("Database pooling options:\n\tMinimum idle connections: ");
-            sb.append(minIdle);
-            sb.append("\n\tMaximum idle connections: ");
+            sb.append("Database pooling options:\n\tMaximum idle connections: ");
             sb.append(maxIdle);
             sb.append("\n\tMaximum idle time: ");
             sb.append(maxIdleTime);

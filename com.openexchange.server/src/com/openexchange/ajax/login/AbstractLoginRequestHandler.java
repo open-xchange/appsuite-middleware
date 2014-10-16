@@ -50,19 +50,24 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
+
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
-import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -131,9 +136,6 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             // Add session log properties
             LogProperties.putSessionProperties(session);
 
-            // Request modules
-            final Future<Object> optModules = getModulesAsync(session, req);
-
             // Add headers and cookies from login result
             LoginServlet.addHeadersAndCookies(result, resp);
 
@@ -152,26 +154,53 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 }
             }
 
+            // Request modules
+            Future<Object> optModules = getModulesAsync(session, req);
+
             // Remember User-Agent
             session.setParameter("user-agent", req.getHeader("user-agent"));
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+
+            // Trigger client-specific ramp-up
+            Future<JSONObject> optRampUp = rampUpAsync(serverSession, req);
 
             // Write response
-            final JSONObject json = new JSONObject(8);
+            JSONObject json = new JSONObject(12);
             LoginWriter.write(result, json);
 
             // Handle initial multiple
-            final String multipleRequest = req.getParameter("multiple");
-            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-            if (multipleRequest != null) {
-                final JSONArray dataArray = new JSONArray(multipleRequest);
-                if (dataArray.length() > 0) {
-                    JSONArray responses = Multiple.perform(dataArray, req, serverSession);
-                    json.put("multiple", responses);
-                } else {
-                    json.put("multiple", new JSONArray(0));
+            {
+                String multipleRequest = req.getParameter("multiple");
+                if (multipleRequest != null) {
+                    final JSONArray dataArray = new JSONArray(multipleRequest);
+                    if (dataArray.length() > 0) {
+                        JSONArray responses = Multiple.perform(dataArray, req, serverSession);
+                        json.put("multiple", responses);
+                    } else {
+                        json.put("multiple", new JSONArray(0));
+                    }
                 }
             }
 
+            // Await client-specific ramp-up and add to JSON object
+            if (null != optRampUp) {
+                try {
+                    JSONObject jsonObject = optRampUp.get();
+                    for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                        json.put(entry.getKey(), entry.getValue());
+                    }
+                } catch (InterruptedException e) {
+                    // Keep interrupted state
+                    Thread.currentThread().interrupt();
+                    throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                } catch (ExecutionException e) {
+                    // Cannot occur
+                    final Throwable cause = e.getCause();
+                    LOG.warn("Ramp-up information could not be added to login JSON response", cause);
+                }
+            }
+
+            // Add modules information to JSON object
             if (null != optModules) {
                 // Append "config/modules"
                 try {
@@ -179,23 +208,20 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     if (null != oModules) {
                         json.put("modules", oModules);
                     }
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     // Keep interrupted state
                     Thread.currentThread().interrupt();
                     throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
-                } catch (final ExecutionException e) {
+                } catch (ExecutionException e) {
                     // Cannot occur
                     final Throwable cause = e.getCause();
                     LOG.warn("Modules could not be added to login JSON response", cause);
                 }
             }
 
-            // Perform Client Specific Ramp-Up
-            performRampUp(req, json, serverSession);
-
             // Set response
             response.setData(json);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 throw e;
             }
@@ -232,7 +258,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
             final Session session = result.getSession();
             // Store associated session
-            SessionServlet.rememberSession(req, new ServerSessionAdapter(session));
+            SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
             LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
             // Login response is unfortunately not conform to default responses.
             if (req.getParameter("callback") != null && LoginServlet.ACTION_LOGIN.equals(req.getParameter("action"))) {
@@ -277,16 +303,20 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      * @throws IOException If an I/O error occurred
      */
     protected void performRampUp(HttpServletRequest req, JSONObject json, ServerSession session, boolean force) throws OXException, IOException {
-        if (force || Boolean.parseBoolean(req.getParameter("rampup"))) {
+        if (null != session && (force || Boolean.parseBoolean(req.getParameter("rampup")))) {
             final Set<LoginRampUpService> rampUpServices = this.rampUpServices;
             if (rampUpServices != null) {
                 try {
                     String client = session.getClient();
+                    String clientOverride = req.getParameter("rampUpFor");
+                    if (clientOverride != null) {
+                    	client = clientOverride;
+                    }
                     for (LoginRampUpService rampUpService : rampUpServices) {
                         if (rampUpService.contributesTo(client)) {
                             JSONObject contribution = rampUpService.getContribution(session, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, session, ""));
                             json.put("rampup", contribution);
-                            break;
+                            return;
                         }
                     }
                 } catch (JSONException e) {
@@ -324,6 +354,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             return null;
         }
         // Submit task
+        final org.slf4j.Logger logger = LOG;
         return ThreadPools.getThreadPool().submit(new AbstractTask<Object>() {
 
             @Override
@@ -333,15 +364,35 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     SettingStorage.getInstance(session).readValues(setting);
                     return convert2JS(setting);
                 } catch (final OXException e) {
-                    LOG.warn("Modules could not be added to login JSON response", e);
+                    logger.warn("Modules could not be added to login JSON response", e);
                 } catch (final JSONException e) {
-                    LOG.warn("Modules could not be added to login JSON response", e);
+                    logger.warn("Modules could not be added to login JSON response", e);
                 } catch (final Exception e) {
-                    LOG.warn("Modules could not be added to login JSON response", e);
+                    logger.warn("Modules could not be added to login JSON response", e);
                 }
                 return null;
             }
         });
+    }
+
+    /**
+     * Asynchronously triggers ramp-up.
+     *
+     * @param serverSession The associated session
+     * @param req The request
+     * @return The resulting object or <code>null</code>
+     */
+    public Future<JSONObject> rampUpAsync(final ServerSession serverSession, final HttpServletRequest req) {
+        AbstractTask<JSONObject> task = new AbstractTask<JSONObject>() {
+
+            @Override
+            public JSONObject call() throws OXException, IOException {
+                JSONObject json = new JSONObject(8);
+                performRampUp(req, json, serverSession);
+                return json;
+            }
+        };
+        return ThreadPools.getThreadPool().submit(task);
     }
 
 }

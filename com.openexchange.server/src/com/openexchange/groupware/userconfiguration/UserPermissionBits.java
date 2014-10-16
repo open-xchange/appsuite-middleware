@@ -98,17 +98,17 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public static final int INFOSTORE = 1 << 4;
 
     /**
-     * The permission bit for projects access.
+     * @Obsolete This permission is not used. Permission bit should stay here to prevent confusion.
      */
     public static final int PROJECTS = 1 << 5;
 
     /**
-     * The permission bit for forum access.
+     * @Obsolete This permission is not used. Permission bit should stay here to prevent confusion.
      */
     public static final int FORUM = 1 << 6;
 
     /**
-     * The permission bit for pinboard access.
+     * @Obsolete This permission is not used. Permission bit should stay here to prevent confusion.
      */
     public static final int PINBOARD_WRITE_ACCESS = 1 << 7;
 
@@ -133,12 +133,12 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public static final int VCARD = 1 << 11;
 
     /**
-     * The permission bit for RSS bookmarks access.
+     * @Obsolete This permission is not used. Permission bit should stay here to prevent confusion.
      */
     public static final int RSS_BOOKMARKS = 1 << 12;
 
     /**
-     * The permission bit for RSS portal access.
+     * @Obsolete This permission is not used. Permission bit should stay here to prevent confusion.
      */
     public static final int RSS_PORTAL = 1 << 13;
 
@@ -397,42 +397,6 @@ public class UserPermissionBits implements Serializable, Cloneable {
     }
 
     /**
-     * Detects if user configuration allows forum access.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasForum() {
-        return hasPermission(FORUM);
-    }
-
-    /**
-     * Enables/Disables forum access in user configuration.
-     *
-     * @param enableForum
-     */
-    public void setForum(final boolean enableForum) {
-        setPermission(enableForum, FORUM);
-    }
-
-    /**
-     * Detects if user configuration allows pinboard write access.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasPinboardWriteAccess() {
-        return hasPermission(PINBOARD_WRITE_ACCESS);
-    }
-
-    /**
-     * Enables/Disables pinboard write access in user configuration.
-     *
-     * @param enablePinboardWriteAccess
-     */
-    public void setPinboardWriteAccess(final boolean enablePinboardWriteAccess) {
-        setPermission(enablePinboardWriteAccess, PINBOARD_WRITE_ACCESS);
-    }
-
-    /**
      * Detects if user configuration allows WebDAV XML.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
@@ -502,42 +466,6 @@ public class UserPermissionBits implements Serializable, Cloneable {
      */
     public void setVCard(final boolean enableVCard) {
         setPermission(enableVCard, VCARD);
-    }
-
-    /**
-     * Detects if user configuration allows RSS bookmarks.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasRSSBookmarks() {
-        return hasPermission(RSS_BOOKMARKS);
-    }
-
-    /**
-     * Enables/Disables RSS bookmarks access in user configuration.
-     *
-     * @param enableRSSBookmarks
-     */
-    public void setRSSBookmarks(final boolean enableRSSBookmarks) {
-        setPermission(enableRSSBookmarks, RSS_BOOKMARKS);
-    }
-
-    /**
-     * Detects if user configuration allows RSS portal.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasRSSPortal() {
-        return hasPermission(RSS_PORTAL);
-    }
-
-    /**
-     * Enables/Disables RSS portal access in user configuration.
-     *
-     * @param enableRSSPortal
-     */
-    public void setRSSPortal(final boolean enableRSSPortal) {
-        setPermission(enableRSSPortal, RSS_PORTAL);
     }
 
     /**

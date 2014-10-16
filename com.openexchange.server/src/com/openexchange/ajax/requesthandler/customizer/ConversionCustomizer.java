@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCustomizerFactory {
 
-    private Converter converter = null;
+    private final Converter converter;
 
     public ConversionCustomizer(final Converter converter) {
         this.converter = converter;
@@ -85,7 +85,7 @@ public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCus
         if (currentFormat.equals(requestedFormat)) {
             return result;
         }
-        if (result.getType() == ResultType.NOT_FOUND) {
+        if (result.getType() == ResultType.HTTP_ERROR) {
             return result;
         }
         converter.convert(currentFormat, requestedFormat, requestData, result, session);

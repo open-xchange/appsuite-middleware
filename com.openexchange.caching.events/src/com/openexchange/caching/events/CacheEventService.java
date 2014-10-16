@@ -49,11 +49,14 @@
 
 package com.openexchange.caching.events;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * {@link CacheEventService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SingletonService
 public interface CacheEventService {
 
     /**

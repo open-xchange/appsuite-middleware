@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Oauth Bundle
 Bundle-SymbolicName: com.openexchange.oauth
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -11,6 +11,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.crypto,
  com.openexchange.database,
  com.openexchange.database.provider,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
@@ -27,6 +28,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.secret,
  com.openexchange.secret.recovery,
  com.openexchange.server,
@@ -42,6 +44,8 @@ Import-Package: com.openexchange.config,
  com.openexchange.tools.update,
  javax.crypto,
  javax.crypto.spec,
+ javax.net,
+ javax.net.ssl,
  javax.security.auth,
  javax.servlet,
  javax.servlet.http,

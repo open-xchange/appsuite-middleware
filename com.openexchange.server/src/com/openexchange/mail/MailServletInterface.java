@@ -68,6 +68,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
@@ -307,11 +308,16 @@ public abstract class MailServletInterface implements Closeable {
     public abstract MailPart getMessageAttachment(String folder, String msgUID, String attachmentPosition, boolean displayVersion) throws OXException;
 
     /**
+     * Returns all (file) attachments from denoted message
+     */
+    public abstract List<MailPart> getAllMessageAttachments(final String folder, final String msgUID) throws OXException;
+
+    /**
      * Returns message's attachments as a ZIP file backed by returned managed file instance.
      *
      * @param folder The folder
      * @param msgUID The message ID
-     * @param attachmentPositions The attachment positions
+     * @param attachmentPositions The attachment positions or <code>null</code> to consider all file/non-inline attachments
      * @return A ZIP file backed by returned managed file instance
      * @throws OXException If an error occurs
      */
@@ -344,7 +350,7 @@ public abstract class MailServletInterface implements Closeable {
      * @return The stored draft's mail path
      * @throws OXException
      */
-    public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException;
+    public abstract MailPath saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException;
 
     /**
      * Sends a read acknowledgment to given message
@@ -372,6 +378,12 @@ public abstract class MailServletInterface implements Closeable {
      * of <code>uploadEvent</code>.
      */
     public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting) throws OXException;
+
+    /**
+     * Sends a message described through given instance of <code>msgObj</code> and its possible file attachments contained in given instance
+     * of <code>uploadEvent</code>.
+     */
+    public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo) throws OXException;
 
     /**
      * Appends given messages to given folder.
@@ -555,6 +567,14 @@ public abstract class MailServletInterface implements Closeable {
      * Returns user-specific mail access
      */
     public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException;
+
+    /**
+     * Prepares this {@link MailServletInterface} instance to perform operations on denoted folder
+     *
+     * @param folder The folder identifier
+     * @throws OXException If opening the folder fails
+     */
+    public abstract void openFor(String folder) throws OXException;
 
     /**
      * Gets the account ID to which the (primary) mail access is connected

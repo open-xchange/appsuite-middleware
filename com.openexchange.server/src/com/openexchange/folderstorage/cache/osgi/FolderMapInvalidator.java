@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.cache.osgi;
 
 import java.io.Serializable;
+import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -93,19 +94,24 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
             final String region = cacheEvent.getRegion();
             if ("GlobalFolderCache".equals(region)) {
                 final int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
-                if (null == cacheEvent.getKey()) {
+                List<Serializable> cacheKeys = cacheEvent.getKeys();
+                if (null == cacheKeys || 0 == cacheKeys.size()) {
                     FolderMapManagement.getInstance().dropFor(contextId);
                 } else {
-                    final Serializable[] keys = ((CacheKey) cacheEvent.getKey()).getKeys();
-                    final String id = keys[1].toString();
-                    final String treeId = keys[0].toString();
-                    removeFromUserCache(id, treeId, contextId);
+                    for (Serializable cacheKey : cacheKeys) {
+                        final Serializable[] keys = ((CacheKey) cacheKey).getKeys();
+                        final String id = keys[1].toString();
+                        final String treeId = keys[0].toString();
+                        removeFromUserCache(id, treeId, contextId);
+                    }
                 }
             } else if ("OXFolderCache".equals(region)) {
-                final CacheKey cacheKey = (CacheKey) cacheEvent.getKey();
-                final String id = cacheKey.getKeys()[0].toString();
-                final String treeId = FolderStorage.REAL_TREE_ID;
-                removeFromUserCache(id, treeId, cacheKey.getContextId());
+                for (Serializable key : cacheEvent.getKeys()) {
+                    final CacheKey cacheKey = (CacheKey) key;
+                    final String id = cacheKey.getKeys()[0].toString();
+                    final String treeId = FolderStorage.REAL_TREE_ID;
+                    removeFromUserCache(id, treeId, cacheKey.getContextId());
+                }
             }
         }
     }

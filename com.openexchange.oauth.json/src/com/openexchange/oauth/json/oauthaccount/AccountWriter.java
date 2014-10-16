@@ -77,11 +77,11 @@ public class AccountWriter {
      * @throws JSONException If writing to JSON fails
      */
     public static JSONObject write(final OAuthAccount account) throws JSONException {
-        final JSONObject accountJSON = new JSONObject(5);
-        accountJSON.put(AccountField.ID.getName(), account.getId());
-        accountJSON.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
-        accountJSON.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
-        return accountJSON;
+        final JSONObject jAccount = new JSONObject(5);
+        jAccount.put(AccountField.ID.getName(), account.getId());
+        jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
+        jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
+        return jAccount;
     }
 
     /**
@@ -93,12 +93,12 @@ public class AccountWriter {
      * @throws JSONException If writing to JSON fails
      */
     public static JSONObject write(final OAuthInteraction interaction, final String uuid) throws JSONException {
-        final JSONObject json = new JSONObject(6);
-        json.put(AccountField.AUTH_URL.getName(), interaction.getAuthorizationURL());
-        json.put(AccountField.INTERACTION_TYPE.getName(), interaction.getInteractionType().getName());
-        json.put(AccountField.TOKEN.getName(), interaction.getRequestToken().getToken());
-        json.put(OAuthConstants.SESSION_PARAM_UUID, uuid);
-        return json;
+        final JSONObject jInteraction = new JSONObject(6);
+        jInteraction.put(AccountField.AUTH_URL.getName(), interaction.getAuthorizationURL());
+        jInteraction.put(AccountField.INTERACTION_TYPE.getName(), interaction.getInteractionType().getName());
+        jInteraction.put(AccountField.TOKEN.getName(), interaction.getRequestToken().getToken());
+        jInteraction.put(OAuthConstants.SESSION_PARAM_UUID, uuid);
+        return jInteraction;
     }
 
 }

@@ -66,7 +66,7 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
     private static final long serialVersionUID = -7226304751781497934L;
 
     /** The capability map */
-    private Map<String, Capability> capabilities;
+    private final transient Map<String, Capability> capabilities;
 
     /**
      * Initializes a new {@link CapabilitySet}.
@@ -78,16 +78,15 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
         capabilities = new LinkedHashMap<String, Capability>(capacity);
     }
 
+    private CapabilitySet(CapabilitySet source) {
+        super();
+        Map<String, Capability> m = source.capabilities;
+        capabilities = null == m ? null : new LinkedHashMap<String, Capability>(m);
+    }
+
     @Override
     public CapabilitySet clone() {
-        try {
-            final CapabilitySet clone = (CapabilitySet) super.clone();
-            final Map<String, Capability> m = this.capabilities;
-            clone.capabilities = null == m ? null : new LinkedHashMap<String, Capability>(m);
-            return clone;
-        } catch (final CloneNotSupportedException e) {
-            throw new InternalError("Clone not supported although Cloneable is implemented");
-        }
+        return new CapabilitySet(this);
     }
 
     /**

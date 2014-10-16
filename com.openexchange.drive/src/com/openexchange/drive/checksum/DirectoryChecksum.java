@@ -62,6 +62,7 @@ public class DirectoryChecksum extends StoredChecksum {
     private FolderID folderID;
     private int userID;
     private String eTag;
+    private int view;
 
     /**
      * Initializes a new {@link DirectoryChecksum}.
@@ -77,9 +78,10 @@ public class DirectoryChecksum extends StoredChecksum {
      * @param folderID The folder ID
      * @param sequenceNumber The sequence number
      * @param checksum The checksum
+     * @param view The view of the directory, or <code>0</code> for the default view
      */
-    public DirectoryChecksum(int userID, FolderID folderID, long sequenceNumber, String checksum) {
-        this(userID, folderID, sequenceNumber, null, checksum);
+    public DirectoryChecksum(int userID, FolderID folderID, long sequenceNumber, String checksum, int view) {
+        this(userID, folderID, sequenceNumber, null, checksum, view);
     }
 
     /**
@@ -89,9 +91,10 @@ public class DirectoryChecksum extends StoredChecksum {
      * @param folderID The folder ID
      * @param eTag The E-Tag
      * @param checksum The checksum
+     * @param view The view of the directory, or <code>0</code> for the default view
      */
-    public DirectoryChecksum(int userID, FolderID folderID, String eTag, String checksum) {
-        this(userID, folderID, 0, eTag, checksum);
+    public DirectoryChecksum(int userID, FolderID folderID, String eTag, String checksum, int view) {
+        this(userID, folderID, 0, eTag, checksum, view);
     }
 
     /**
@@ -102,14 +105,16 @@ public class DirectoryChecksum extends StoredChecksum {
      * @param sequenceNumber The sequence number
      * @param eTag The E-Tag
      * @param checksum The checksum
+     * @param view The view of the directory, or <code>0</code> for the default view
      */
-    private DirectoryChecksum(int userID, FolderID folderID, long sequenceNumber, String eTag, String checksum) {
+    private DirectoryChecksum(int userID, FolderID folderID, long sequenceNumber, String eTag, String checksum, int view) {
         super();
         this.userID = userID;
         this.folderID = folderID;
         this.eTag = eTag;
         this.sequenceNumber = sequenceNumber;
         this.checksum = checksum;
+        this.view = view;
     }
 
     /**
@@ -164,6 +169,24 @@ public class DirectoryChecksum extends StoredChecksum {
      */
     public void setETag(String eTag) {
         this.eTag = eTag;
+    }
+
+    /**
+     * Gets the view
+     *
+     * @return The view
+     */
+    public int getView() {
+        return view;
+    }
+
+    /**
+     * Sets the view
+     *
+     * @param view The view to set
+     */
+    public void setView(int view) {
+        this.view = view;
     }
 
     @Override

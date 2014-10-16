@@ -49,9 +49,9 @@
 
 package com.openexchange.find.basic.drive;
 
-import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.drive.Utils.prepareSearchTerm;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -102,10 +102,6 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.6.0
  */
 public class BasicDriveDriver extends AbstractModuleSearchDriver {
-
-    static enum Comparison {
-        GREATER_THAN, GREATER_EQUALS, EQUALS, LOWER_THAN, LOWER_EQUALS;
-    }
 
     private static final List<Field> DEFAULT_FIELDS = new ArrayList<Field>(10);
     static {

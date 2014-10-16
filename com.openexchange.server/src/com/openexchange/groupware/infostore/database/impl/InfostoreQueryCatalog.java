@@ -530,6 +530,16 @@ public class InfostoreQueryCatalog {
         }
         builder.setLength(builder.length() - 1);
         builder.append(')');
+        if (1 < id.length) {
+            /*
+             * ensure exact list order
+             */
+            builder.append(" ORDER BY FIELD(infostore.id,").append(id[0]);
+            for (int i = 1; i < id.length; i++) {
+                builder.append(',').append(id[i]);
+            }
+            builder.append(')');
+        }
         return builder.toString();
     }
 

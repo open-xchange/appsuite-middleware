@@ -150,7 +150,7 @@ public abstract class AbstractFacebookAccess {
         }
     }
 
-    private static final String FQL_JSON_START = "https://api.facebook.com/method/fql.query?format=JSON&query=";
+    private static final String FQL_JSON_START = "https://graph.facebook.com/v2.0/fql?q=";
 
     /**
      * Performs specified FQL query and returns its result as a JSON object.
@@ -161,10 +161,9 @@ public abstract class AbstractFacebookAccess {
      */
     protected JSONObject performFQLQuery(final String fqlQuery) throws OXException {
         try {
-            final String encodedQuery = encode(fqlQuery);
-            final JSONObject result =
-                (JSONObject) facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(
-                    FQL_JSON_START).append(encodedQuery));
+            String encodedQuery = encode(fqlQuery);
+            JSONObject result = (JSONObject) facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(FQL_JSON_START.length() + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery));
+
             if (result.has("error")) {
                 final JSONObject error = result.getJSONObject("error");
                 final String type = error.optString("type");
@@ -174,6 +173,12 @@ public abstract class AbstractFacebookAccess {
                 }
                 throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == message ? "" : message);
             }
+
+            JSONArray jsonArray = result.optJSONArray("data");
+            if (null != jsonArray) {
+                return jsonArray.isEmpty() ? new JSONObject(0) : jsonArray.getJSONObject(0);
+            }
+
             return result;
         } catch (final JSONException e) {
             throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());

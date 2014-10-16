@@ -52,13 +52,56 @@ package com.openexchange.groupware.infostore.database.impl;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.DataTruncation;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class UpdateVersionAction extends AbstractDocumentUpdateAction {
+
+    /**
+     * Initializes a new {@link UpdateVersionAction}.
+     */
+    public UpdateVersionAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link UpdateVersionAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param version The version to update
+     * @param oldVersion The version being updated
+     * @param modifiedColums The columns to update
+     * @param The sequence number to catch concurrent modifications
+     */
+    public UpdateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata version,
+        DocumentMetadata oldVersion, Metadata[] modifiedColums, long sequenceNumber) {
+        this(provider, queryCatalog, context, Collections.singletonList(version), Collections.singletonList(oldVersion), modifiedColums, sequenceNumber);
+    }
+
+    /**
+     * Initializes a new {@link UpdateVersionAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param versions The versions to update
+     * @param oldVersions The versions being updated
+     * @param modifiedColums The columns to update
+     * @param The sequence number to catch concurrent modifications
+     */
+    public UpdateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        List<DocumentMetadata> versions, List<DocumentMetadata> oldVersions, Metadata[] modifiedColums, long sequenceNumber) {
+        super(provider, queryCatalog, context, versions, oldVersions, modifiedColums, sequenceNumber);
+    }
 
     @Override
     protected void undoAction() throws OXException {

@@ -70,7 +70,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandler.class);
 
-    private static final String TOPIC_NAME = "cacheEvents-0";
+    private static final String TOPIC_NAME = "cacheEvents-1";
     private static final AtomicReference<PortableMsService> MS_REFERENCE = new AtomicReference<PortableMsService>();
 
     private final CacheEventService cacheEvents;

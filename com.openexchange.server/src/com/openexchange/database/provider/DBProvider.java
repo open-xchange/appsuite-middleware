@@ -52,12 +52,14 @@ package com.openexchange.database.provider;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link DBProvider} - Provides connections for database access.
  *
  * @author <a href="mailto:info@open-xchange.com">Open-Xchange Engineering</a>
  */
+@SingletonService
 public interface DBProvider {
 
     /**

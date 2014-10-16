@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -46,12 +46,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Oct 14 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Fifth candidate for 7.6.1 release
+* Fri Oct 10 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Fourth candidate for 7.6.1 release
 * Thu Oct 09 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-10-09
 * Tue Oct 07 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-10-10
+* Thu Oct 02 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Third release candidate for 7.6.1
 * Tue Sep 30 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-10-06
 * Fri Sep 26 2014 Steffen Templin <steffen.templin@open-xchange.com>
@@ -60,8 +66,12 @@ Build for patch 2014-09-29
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-09-23
+* Tue Sep 16 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Second release candidate for 7.6.1
 * Mon Sep 08 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-09-15
+* Fri Sep 05 2014 Steffen Templin <steffen.templin@open-xchange.com>
+First release candidate for 7.6.1
 * Thu Aug 21 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Steffen Templin <steffen.templin@open-xchange.com>
@@ -80,6 +90,8 @@ Build for patch 2014-07-24
 Build for patch 2014-07-15
 * Tue Jul 01 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-07-07
+* Thu Jun 26 2014 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.6.1
 * Mon Jun 23 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Steffen Templin <steffen.templin@open-xchange.com>

@@ -66,11 +66,22 @@ final class InputStreamDataSource implements DataSource {
 
     private String type;
 
+    /**
+     * Initializes a new {@link InputStreamDataSource}.
+     *
+     * @param inputStream The input stream
+     */
     public InputStreamDataSource(final InputStream inputStream) {
         super();
         this.inStream = inputStream;
     }
 
+    /**
+     * Sets the MIME type
+     *
+     * @param type The MIME type
+     * @return Theis reference
+     */
     public InputStreamDataSource setType(final String type) {
         this.type = type;
         return this;

@@ -71,8 +71,8 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.InterruptibleInputStream;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -105,9 +105,10 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
     static PreviewDocument getPreviewDocument(IFileHolder fileHolder, InputStream stream, AJAXRequestData requestData, String previewLanguage, PreviewOutput previewOutput, ServerSession session, PreviewService previewService) throws OXException {
         try {
-            // Obtain preview
-            final DataProperties dataProperties = new DataProperties(12);
-            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
+            // Prepare properties for preview generation
+            DataProperties dataProperties = new DataProperties(12);
+            String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
             dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
             dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
             dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
@@ -117,7 +118,12 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
             dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
             dataProperties.put("PreviewLanguage", previewLanguage);
-            return previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
+
+            // Generate preview
+            PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
+            LOG.debug("Obtained preview for file {} with MIME type {} from {} for user {} in context {}", fileHolder.getName(), mimeType, previewService.getClass().getSimpleName(), session.getUserId(), session.getContextId());
+
+            return previewDocument;
         } catch (RuntimeException rte) {
             throw PreviewExceptionCodes.ERROR.create(rte, rte.getMessage());
         }
@@ -194,21 +200,30 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 final CachedResource cachedPreview = resourceCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
-                    // Create appropriate IFileHolder
+
+                    // Determine MIME type
                     String contentType = cachedPreview.getFileType();
                     if (null == contentType) {
                         contentType = "image/jpeg";
                     }
-                    final InputStream inputStream = cachedPreview.getInputStream();
-                    if (null == inputStream) {
-                        final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedPreview.getBytes());
-                        responseFileHolder.setContentType(contentType);
-                        responseFileHolder.setName(cachedPreview.getFileName());
-                        result.setResultObject(responseFileHolder, "file");
-                    } else {
-                        final FileHolder responseFileHolder = new FileHolder(inputStream, cachedPreview.getSize(), contentType, cachedPreview.getFileName());
-                        result.setResultObject(responseFileHolder, "file");
+
+                    // Create appropriate IFileHolder
+                    IFileHolder responseFileHolder;
+                    {
+                        InputStream inputStream = cachedPreview.getInputStream();
+                        if (null == inputStream) {
+                            final ByteArrayFileHolder bafh = new ByteArrayFileHolder(cachedPreview.getBytes());
+                            bafh.setContentType(contentType);
+                            bafh.setName(cachedPreview.getFileName());
+                            responseFileHolder = bafh;
+                        } else {
+                            responseFileHolder = new FileHolder(inputStream, cachedPreview.getSize(), contentType, cachedPreview.getFileName());
+                        }
                     }
+
+                    // Apply result
+                    result.setResultObject(responseFileHolder, "file");
+                    LOG.debug("Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}", cachedPreview.getFileName(), contentType, eTag, session.getUserId(), session.getContextId());
                     return;
                 }
             }
@@ -235,7 +250,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                             setDefaulThumbnail(requestData, result);
                             return;
                         }
-                        final Ref<InputStream> ref = new Ref<InputStream>();
+                        final Reference<InputStream> ref = new Reference<InputStream>();
                         if (streamIsEof(stream, ref)) {
                             Streams.close(stream, fileHolder);
                             stream = null;
@@ -254,6 +269,10 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                         // Unknown. Then detect MIME type by content.
                         fileHolder = new ThresholdFileHolder().write(stream).setContentInfo(fileHolder);
                         mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
+                        stream = fileHolder.getStream();
+                        LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
+                    } else {
+                        LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
                     }
                     fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
 
@@ -282,7 +301,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                                     // Preview image has not been generated in time
                                     iis.interrupt();
                                     submittedTask.cancel(true);
-                                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+                                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("Thumbnail has not been generated in time.");
                                 } catch (InterruptedException e) {
                                     // Keep interrupted state
                                     Thread.currentThread().interrupt();
@@ -309,7 +328,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // Check result
             if (null == previewDocument) {
                 // No thumbnail available
-                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create(new NullPointerException("previewDocument is null"), new Object[0]);
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("PreviewDocument is null");
             }
 
             // Check thumbnail stream
@@ -317,13 +336,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             InputStream thumbnail = previewDocument.getThumbnail();
             if (null == thumbnail) {
                 // No thumbnail available
-                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("PreviewDocument's thumbnail input stream is null");
             }
 
             // Prepare response
-            if("com.openexchange.documentpreview.OfficePreviewDocument".equals(previewDocument.getClass().getName())) {
-                requestData.putParameter("transformationNeeded", "false");
-            }
+            preventTransformations(requestData, previewDocument);
 
             // (Asynchronously) Put to cache if ETag is available
             final String fileName = previewDocument.getMetaData().get("resourcename");
@@ -378,20 +395,6 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private String getUserLanguage(final ServerSession session) {
-        final User sessionUser = session.getUser();
-        return null == sessionUser ? null : sessionUser.getPreferredLanguage();
-    }
-
-    private void setDefaulThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
-        requestData.setFormat("file");
-        final byte[] bytes = PreviewConst.DEFAULT_THUMBNAIL;
-        InputStream thumbnail = Streams.newByteArrayInputStream(bytes);
-        requestData.putParameter("transformationNeeded", "false");
-        final FileHolder responseFileHolder = new FileHolder(thumbnail, bytes.length, "image/jpeg", "thumbs.jpg");
-        result.setResultObject(responseFileHolder, "file");
     }
 
 }

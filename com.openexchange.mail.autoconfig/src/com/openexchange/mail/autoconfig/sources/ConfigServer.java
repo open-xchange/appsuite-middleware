@@ -130,6 +130,8 @@ public class ConfigServer extends AbstractConfigSource {
         } catch (final java.net.UnknownHostException e) {
             // Obviously that host does not exist
             LOG.debug("Could not retrieve config XML, because of an unknown host for URL: {}", uri, e);
+        } catch (final java.net.ConnectException e) {
+            LOG.debug("Could not connect to {}.", uri, e);
         } catch (final IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
         }

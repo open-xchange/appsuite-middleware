@@ -613,23 +613,33 @@ public class RdbTaskStorage extends TaskStorage {
     @Override
     int countTasks(Context ctx) throws OXException {
         final Connection con = Database.get(ctx, false);
+        final int retval;
+        try {
+            retval = countTasks(ctx.getContextId(), con);
+        } catch (SQLException e) {
+            throw TaskExceptionCode.SQL_ERROR.create(e);
+        } finally {
+            Database.back(ctx, false, con);
+        }
+        return retval;
+    }
+
+    @Override
+    int countTasks(int contextId, final Connection con) throws SQLException, OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final int retval;
         try {
             stmt = con.prepareStatement(SQL.COUNT_TASKS_IN_CONTEXT);
-            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(1, contextId);
             result = stmt.executeQuery();
             if (result.next()) {
                 retval = result.getInt(1);
             } else {
                 throw TaskExceptionCode.NO_COUNT_RESULT.create();
             }
-        } catch (SQLException e) {
-            throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
-            Database.back(ctx, false, con);
         }
         return retval;
     }

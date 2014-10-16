@@ -52,6 +52,7 @@ package com.openexchange.file.storage.dropbox;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.RESTUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -69,6 +70,19 @@ import com.openexchange.file.storage.TypeAware;
 public final class DropboxFolder extends DefaultFileStorageFolder implements TypeAware {
 
     private FileStorageFolderType type;
+
+    /**
+     * Initializes a new {@link DropboxFolder}.
+     *
+     * @param entry The dropbox entry representing the folder
+     * @param userID The identifier of the user to use as created-/modified-by information
+     * @param accountDisplayName The display name of the dropbox account
+     * @throws OXException
+     */
+    public DropboxFolder(Entry entry, int userID, String accountDisplayName) throws OXException {
+        this(userID);
+        parseDirEntry(entry, accountDisplayName);
+    }
 
     /**
      * Initializes a new {@link DropboxFolder}.
@@ -114,9 +128,10 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
      * Parses specified Dropbox entry.
      *
      * @param entry The Dropbox entry denoting the directory
+     * @param accountDisplayName The account'S display name
      * @throws OXException If parsing Dropbox entry fails
      */
-    public DropboxFolder parseDirEntry(final com.dropbox.client2.DropboxAPI.Entry entry) throws OXException {
+    public DropboxFolder parseDirEntry(final com.dropbox.client2.DropboxAPI.Entry entry, String accountDisplayName) throws OXException {
         if (null != entry) {
             try {
                 final String path = entry.path;
@@ -126,7 +141,7 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
                         rootFolder = true;
                         id = FileStorageFolder.ROOT_FULLNAME;
                         setParentId(null);
-                        setName(entry.root);
+                        setName(null == accountDisplayName ? entry.root : accountDisplayName);
                     } else {
                         rootFolder = false;
                         final int pos = path.lastIndexOf('/');
@@ -138,14 +153,16 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
                 {
                     final String modified = entry.modified;
                     if (null != modified) {
-                        final Date date = RESTUtility.parseDate(modified);
+                        final Date date;
+                        synchronized (RESTUtility.class) {
+                            date = RESTUtility.parseDate(modified);
+                        }
                         creationDate = new Date(date.getTime());
                         lastModifiedDate = new Date(date.getTime());
                     }
                 }
                 {
-                    final List<com.dropbox.client2.DropboxAPI.Entry> contents = entry.contents;
-                    final boolean hasSubfolders = contents != null && !contents.isEmpty();
+                    final boolean hasSubfolders = hasSubfolder(entry);
                     setSubfolders(hasSubfolders);
                     setSubscribedSubfolders(hasSubfolders);
                 }
@@ -154,6 +171,20 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
             }
         }
         return this;
+    }
+
+    private boolean hasSubfolder(com.dropbox.client2.DropboxAPI.Entry entry) {
+        List<com.dropbox.client2.DropboxAPI.Entry> contents = entry.contents;
+        if (contents == null || contents.isEmpty()) {
+            return false;
+        }
+
+        for (com.dropbox.client2.DropboxAPI.Entry subEntry : contents) {
+            if (subEntry.isDir) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

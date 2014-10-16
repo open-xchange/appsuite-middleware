@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -92,19 +92,22 @@ public class ContentType {
 	// First "type" ..
 	tk = h.next();
 	if (tk.getType() != HeaderTokenizer.Token.ATOM)
-	    throw new ParseException("Expected MIME type, got " +
+	    throw new ParseException("In Content-Type string <" + s + ">" +
+					", expected MIME type, got " +
 					tk.getValue());
 	primaryType = tk.getValue();
 
 	// The '/' separator ..
 	tk = h.next();
 	if ((char)tk.getType() != '/')
-	    throw new ParseException("Expected '/', got " + tk.getValue());
+	    throw new ParseException("In Content-Type string <" + s + ">" +
+				", expected '/', got " + tk.getValue());
 
 	// Then "subType" ..
 	tk = h.next();
 	if (tk.getType() != HeaderTokenizer.Token.ATOM)
-	    throw new ParseException("Expected MIME subtype, got " +
+	    throw new ParseException("In Content-Type string <" + s + ">" +
+					", expected MIME subtype, got " +
 					tk.getValue());
 	subType = tk.getValue();
 
@@ -138,12 +141,16 @@ public class ContentType {
      * @return the type
      */
     public String getBaseType() {
+	if (primaryType == null || subType == null)
+	    return "";
 	return primaryType + '/' + subType;
     }
 
     /**
      * Return the specified parameter value. Returns <code>null</code>
      * if this parameter is absent.
+     *
+     * @param	name	the parameter name
      * @return	parameter value
      */
     public String getParameter(String name) {
@@ -240,23 +247,25 @@ public class ContentType {
      * and <strong>"text/*" </strong>
      *
      * @param   cType	ContentType to compare this against
+     * @return	true if it matches
      */
     public boolean match(ContentType cType) {
 	// Match primaryType
-	if (!primaryType.equalsIgnoreCase(cType.getPrimaryType()))
+	if (!((primaryType == null && cType.getPrimaryType() == null) ||
+		(primaryType != null &&
+		    primaryType.equalsIgnoreCase(cType.getPrimaryType()))))
 	    return false;
 	
 	String sType = cType.getSubType();
 
 	// If either one of the subTypes is wildcarded, return true
-	if ((subType.charAt(0) == '*') || (sType.charAt(0) == '*'))
+	if ((subType != null && subType.startsWith("*")) ||
+	    (sType != null && sType.startsWith("*")))
 	    return true;
 	
 	// Match subType
-	if (!subType.equalsIgnoreCase(sType))
-	    return false;
-
-	return true;
+	return (subType == null && sType == null) ||
+	    (subType != null && subType.equalsIgnoreCase(sType));
     }
 
     /**
@@ -274,6 +283,9 @@ public class ContentType {
      * For example, this method will return <code>true</code> when 
      * comparing the ContentType for <strong>"text/plain"</strong> 
      * with <strong>"text/*" </strong>
+     *
+     * @param	s	the content-type string to match
+     * @return	true if it matches
      */
     public boolean match(String s) {
 	try {

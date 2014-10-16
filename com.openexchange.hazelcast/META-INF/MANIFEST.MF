@@ -2,15 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hazelcast Integration
 Bundle-SymbolicName: com.openexchange.hazelcast
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.hazelcast.osgi.HazelcastActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
+ com.hazelcast.instance,
  com.hazelcast.logging,
  com.hazelcast.transaction,
+ com.hazelcast.util,
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.hazelcast.configuration,

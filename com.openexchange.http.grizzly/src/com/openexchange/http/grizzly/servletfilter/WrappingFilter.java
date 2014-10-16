@@ -65,9 +65,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
+import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -84,24 +86,16 @@ public class WrappingFilter implements Filter {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WrappingFilter.class);
 
     IPTools remoteIPFinder;
-
     private String forHeader;
-
     private List<String> knownProxies;
-
     private String protocolHeader;
-
     private String httpsProtoValue;
-
     private int httpPort;
-
     private int httpsPort;
-
     private boolean isConsiderXForwards = false;
-
     private String echoHeader;
-
     private String contentSecurityPolicy = null;
+    private String dispatcherPrefix = DispatcherPrefixService.DEFAULT_PREFIX;
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -124,81 +118,107 @@ public class WrappingFilter implements Filter {
                 knownProxies = config.getKnownProxies();
             }
         });
+
+        String prefix = DispatcherPrefixService.DEFAULT_PREFIX;
+        DispatcherPrefixService service = Services.optService(DispatcherPrefixService.class);
+        if (null != service) {
+            prefix = service.getPrefix();
+        }
+        this.dispatcherPrefix = prefix;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-        HttpServletRequestWrapper httpServletRequestWrapper = null;
-        HttpServletResponseWrapper httpServletResponseWrapper = null;
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        HttpServletRequestWrapper httpRequestWrapper = null;
+        HttpServletResponseWrapper httpResponseWrapper = null;
 
         // Inspect echoHeader and when present copy it to Response
-        String echoHeaderValue = httpServletRequest.getHeader(echoHeader);
+        String echoHeaderValue = httpRequest.getHeader(echoHeader);
         if (echoHeaderValue != null) {
-            httpServletResponse.setHeader(echoHeader, echoHeaderValue);
+            httpResponse.setHeader(echoHeader, echoHeaderValue);
         }
 
         // Set Content-Security-Policy header
         {
             final String contentSecurityPolicy = this.contentSecurityPolicy;
             if (!Strings.isEmpty(contentSecurityPolicy)) {
-                httpServletResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
-                httpServletResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
-                httpServletResponse.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
+                httpResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
+                httpResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
+                httpResponse.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
             }
         }
 
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly
         if (isConsiderXForwards) {
-            String forHeaderValue = httpServletRequest.getHeader(forHeader);
+            String forHeaderValue = httpRequest.getHeader(forHeader);
             String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
-            String protocol = httpServletRequest.getHeader(protocolHeader);
+            String protocol = httpRequest.getHeader(protocolHeader);
 
-            if(!isValidProtocol(protocol)) {
+            if (!isValidProtocol(protocol)) {
                 LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
-                 protocol = httpServletRequest.getScheme();
+                 protocol = httpRequest.getScheme();
             }
 
             if (remoteIP.isEmpty()) {
-                LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
-                remoteIP = httpServletRequest.getRemoteAddr();
+                LOG.debug("Could not detect a valid remote IP address in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
+                remoteIP = httpRequest.getRemoteAddr();
             }
 
-            httpServletRequestWrapper = new HttpServletRequestWrapper(protocol, remoteIP, httpServletRequest.getServerPort(), httpServletRequest);
+            httpRequestWrapper = new HttpServletRequestWrapper(protocol, remoteIP, httpRequest.getServerPort(), httpRequest);
 
         } else {
-            httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
+            httpRequestWrapper = new HttpServletRequestWrapper(httpRequest);
         }
-        httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
+        httpResponseWrapper = new HttpServletResponseWrapper(httpResponse);
 
         // Set LogProperties
         {
 
             // Servlet related properties
-            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpServletRequest.getRequestURI());
-            LogProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpServletRequest.getServletPath());
-            LogProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpRequest.getRequestURI());
+            LogProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpRequest.getServletPath());
+            LogProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpRequest.getPathInfo());
 
             // Remote infos
-            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpServletRequestWrapper.getRemotePort()));
-            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpServletRequestWrapper.getRemoteAddr());
-            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpRequestWrapper.getRemotePort()));
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpRequestWrapper.getRemoteAddr());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpRequestWrapper.getRemoteAddr());
 
             // Names, addresses
             final Thread currentThread = Thread.currentThread();
             LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, currentThread.getName());
             LogProperties.put(LogProperties.Name.THREAD_ID, Long.toString(currentThread.getId()));
-            LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
-            final String userAgent = httpServletRequest.getHeader("User-Agent");
+            LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpRequest.getServerName());
+            final String userAgent = httpRequest.getHeader("User-Agent");
             LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
 
-            // AJAX action
-            final String action = request.getParameter("action");
-            if (null != action) {
+            // AJAX module/action
+            {
+                String action = request.getParameter("action");
+                if (null == action) {
+                    action = Strings.toUpperCase(httpRequest.getMethod());
+                }
                 LogProperties.put(LogProperties.Name.AJAX_ACTION, action);
+
+                String requestURI = httpRequest.getRequestURI();
+                if (requestURI.startsWith(dispatcherPrefix) && requestURI.length() > dispatcherPrefix.length()) {
+                    String pathInfo = requestURI;
+                    int lastIndex = pathInfo.lastIndexOf(';');
+                    if (lastIndex > 0) {
+                        pathInfo = pathInfo.substring(0, lastIndex);
+                    }
+                    String module = pathInfo.substring(dispatcherPrefix.length());
+                    int mlen = module.length() - 1;
+                    if (mlen > 0 && '/' == module.charAt(mlen)) {
+                        module = module.substring(0, mlen);
+                    }
+                    LogProperties.put(LogProperties.Name.AJAX_MODULE, module);
+                }
             }
 
+            // Tracking identifier
             String trackingId = request.getParameter("trackingId");
             if (trackingId == null) {
                 trackingId = UUIDs.getUnformattedString(UUID.randomUUID());
@@ -206,7 +226,7 @@ public class WrappingFilter implements Filter {
             LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, trackingId);
         }
 
-        chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
+        chain.doFilter(httpRequestWrapper, httpResponseWrapper);
     }
 
     private boolean isValidProtocol(String protocolHeaderValue) {

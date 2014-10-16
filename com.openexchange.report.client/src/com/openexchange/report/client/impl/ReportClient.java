@@ -79,6 +79,8 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
 public class ReportClient extends AbstractJMXTools {
 
+    protected static final String NO_REPORT_FOUND_MSG = "No report found. Please generate a report first by using parameter -e or -x or having a look into the CLT help (-h)!";
+
     private static final char OPT_SEND_ONLY_SHORT = 's';
 
     private static final String OPT_SEND_ONLY_LONG = "sendonly";
@@ -152,8 +154,6 @@ public class ReportClient extends AbstractJMXTools {
     private CLIOption runAndDeliverAsReport = null;
 
     private CLIOption asReportType = null;
-
-    private CLIOption asSilent = null;
 
     public enum ReportMode {
         SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE
@@ -351,8 +351,6 @@ public class ReportClient extends AbstractJMXTools {
             "Create a new report and send it immediately. Note: This command will run until the report is finished, and that could take a while. Can (and should) be combined with the options for sending, displaying or saving the report ",
             false,
             NeededQuadState.notneeded);
-
-        this.asSilent = setLongOpt(parser, OPT_APPSUITE_SILENT_LONG, "Do not print out the status line. To be used with " + OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG + ".", false, false);
     }
 
     private void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
@@ -387,7 +385,7 @@ public class ReportClient extends AbstractJMXTools {
                 System.out,
                 new ColumnFormat[] {
                     new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) },
-                ObjectHandler.createMacList(macDetails)).write();
+                    ObjectHandler.createMacList(macDetails)).write();
         }
 
         System.out.println("");
@@ -434,13 +432,9 @@ public class ReportClient extends AbstractJMXTools {
             put("CONTACTS", "access-contacts");
             put("DELEGATE_TASKS", "access-delegate-tasks");
             put("EDIT_PUBLIC_FOLDERS", "access-edit-public-folder");
-            put("FORUM", "access-forum");
             put("ICAL", "access-ical");
             put("INFOSTORE", "access-infostore");
-            put("PINBOARD_WRITE_ACCESS", "access-pinboard-write");
             put("READ_CREATE_SHARED_FOLDERS", "access-read-create-shared-Folders");
-            put("RSS_BOOKMARKS", "access-rss-bookmarks");
-            put("RSS_PORTAL", "access-rss-portal");
             put("SYNCML", "access-syncml");
             put("MOBILITY", "access-syncml");
             put("TASKS", "access-tasks");
@@ -506,7 +500,7 @@ public class ReportClient extends AbstractJMXTools {
         return null;
     }
 
-    private void getASReport(Object reportType, ReportMode mode, boolean savereport, MBeanServerConnection server) {
+    protected void getASReport(Object reportType, ReportMode mode, boolean savereport, MBeanServerConnection server) {
         if (reportType == null) {
             reportType = "default";
         }
@@ -516,6 +510,11 @@ public class ReportClient extends AbstractJMXTools {
                 "retrieveLastReport",
                 new Object[] { reportType },
                 new String[] { String.class.getCanonicalName() });
+
+            if (report == null) {
+                System.out.println(NO_REPORT_FOUND_MSG);
+                return;
+            }
             System.out.println("");
             switch (mode) {
             case SENDONLY:
@@ -529,10 +528,12 @@ public class ReportClient extends AbstractJMXTools {
 
             case NONE:
                 System.out.println("No option selected. Using the default (display and send)");
+                //$FALL-THROUGH$
             case MULTIPLE:
                 if (ReportMode.NONE != mode) {
                     System.out.println("Too many arguments. Using the default (display and send)");
                 }
+                //$FALL-THROUGH$
             case DISPLAYANDSEND:
             default:
                 savereport = false;
@@ -551,41 +552,41 @@ public class ReportClient extends AbstractJMXTools {
             reportType = "default";
         }
         try {
-           String uuid = (String) server.invoke(
+            String uuid = (String) server.invoke(
                 getAppSuiteReportingName(),
                 "run",
                 new Object[] { reportType },
                 new String[] { String.class.getCanonicalName() });
 
 
-           // Start polling
-           boolean done = false;
-           int charNum = 0;
+            // Start polling
+            boolean done = false;
+            int charNum = 0;
 
-           while (!done) {
-               CompositeData[] reports = (CompositeData[]) server.invoke(
-                   getAppSuiteReportingName(),
-                   "retrievePendingReports",
-                   new Object[] { reportType },
-                   new String[] { String.class.getCanonicalName() });
+            while (!done) {
+                CompositeData[] reports = (CompositeData[]) server.invoke(
+                    getAppSuiteReportingName(),
+                    "retrievePendingReports",
+                    new Object[] { reportType },
+                    new String[] { String.class.getCanonicalName() });
 
-               boolean found = false;
-               for (CompositeData report : reports) {
-                   if (report.get("uuid").equals(uuid)) {
-                       found = true;
-                       if (!silent) {
-                           eraseStatusLine(charNum);
-                           charNum = printStatusLine(report);
-                       }
-                   }
-               }
+                boolean found = false;
+                for (CompositeData report : reports) {
+                    if (report.get("uuid").equals(uuid)) {
+                        found = true;
+                        if (!silent) {
+                            eraseStatusLine(charNum);
+                            charNum = printStatusLine(report);
+                        }
+                    }
+                }
 
-               done = !found;
+                done = !found;
 
-               if (!done) {
-                   Thread.sleep(silent ? 60000 : 1000);
-               }
-           }
+                if (!done) {
+                    Thread.sleep(silent ? 60000 : 1000);
+                }
+            }
 
 
 
@@ -782,9 +783,9 @@ public class ReportClient extends AbstractJMXTools {
             "%d hour%s, %d minute%s, %d second%s",
             diff[0],
             diff[0] > 1 || diff[0] == 0 ? "s" : "",
-            diff[1],
-            diff[1] > 1 || diff[1] == 0 ? "s" : "",
-            diff[2],
-            diff[2] > 1 || diff[2] == 0 ? "s" : "");
+                diff[1],
+                diff[1] > 1 || diff[1] == 0 ? "s" : "",
+                    diff[2],
+                    diff[2] > 1 || diff[2] == 0 ? "s" : "");
     }
 }

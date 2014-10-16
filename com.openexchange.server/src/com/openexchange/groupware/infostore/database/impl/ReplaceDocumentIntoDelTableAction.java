@@ -51,17 +51,53 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 
 /**
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListAction{
+public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListAction {
 
     private static final int batchSize = 100;
+
+    /**
+     * Initializes a new {@link ReplaceDocumentIntoDelTableAction}.
+     */
+    public ReplaceDocumentIntoDelTableAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link ReplaceDocumentIntoDelTableAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param document The document to replace in the backup tables
+     */
+    public ReplaceDocumentIntoDelTableAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        DocumentMetadata document) {
+        this(provider, queryCatalog, context, Collections.singletonList(document));
+    }
+
+    /**
+     * Initializes a new {@link ReplaceDocumentIntoDelTableAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param documents The documents to replace in the backup tables
+     */
+    public ReplaceDocumentIntoDelTableAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        List<DocumentMetadata> documents) {
+        super(provider, queryCatalog, context, documents);
+    }
 
     @Override
     protected Object[] getAdditionals(DocumentMetadata doc) {

@@ -57,14 +57,15 @@ import com.openexchange.config.cascade.context.matching.UserConfigurationAnalyze
 
 /**
  * Unit tests for the bundle com.openexchange.config.cascade.context
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
 @RunWith(Suite.class)
 @SuiteClasses({
     ContextSetTermParserTest.class,
-    UserConfigurationAnalyzerTest.class
+    UserConfigurationAnalyzerTest.class,
+    ContextSetConfigProviderTest.class
 })
 public class UnitTests {
 

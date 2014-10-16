@@ -170,6 +170,21 @@ public abstract class MailTransport {
     public abstract MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType, Address[] allRecipients) throws OXException;
 
     /**
+     * Sends a mail message
+     *
+     * @param transportMail The mail message to send (containing necessary header data and body)
+     * @param sendType The send type
+     * @param allRecipients An array of {@link Address addresses} to send this message to; may be <code>null</code> to extract recipients
+     *            from message headers TO, CC, BCC, and NEWSGROUPS.
+     * @param mtaStatusInfo The optional MTA status information container which gets filled during transport attempt
+     * @return The sent mail message
+     * @throws OXException If transport fails
+     */
+    public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients, final MtaStatusInfo mtaStatusInfo) throws OXException {
+        return sendMailMessage(composedMail, sendType, allRecipients);
+    }
+
+    /**
      * Sends specified message's raw ascii bytes. The given bytes are interpreted dependent on implementation, but in most cases it's
      * treated as an rfc822 MIME message.
      * <p>

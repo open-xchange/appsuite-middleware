@@ -50,8 +50,6 @@
 package com.openexchange.capabilities;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * {@link Capability} - Represents a capability.
@@ -64,7 +62,7 @@ public class Capability implements Serializable {
     private static final long serialVersionUID = 8389975218424678442L;
 
     private final String id;
-    private final Map<String, String> attributes = new HashMap<String, String>();
+    private final int hash;
 
     /**
      * Initializes a new {@link Capability}.
@@ -74,6 +72,10 @@ public class Capability implements Serializable {
     public Capability(String id) {
         super();
         this.id = id;
+        int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        this.hash = result;
     }
 
     /**
@@ -85,54 +87,9 @@ public class Capability implements Serializable {
         return id;
     }
 
-    /**
-     * Gets this capability's attributes
-     *
-     * @return The attributes
-     */
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    /**
-     * Sets specified attribute for this capability.
-     *
-     * @param key The attribute's key
-     * @param value The attribute's value
-     * @return This capability with attribute applied
-     */
-    public Capability set(String key, String value) {
-        attributes.put(key, value);
-        return this;
-    }
-
-    /**
-     * Gets the value of the attribute associated with given key.
-     *
-     * @param key The attribute's key
-     * @return The value or <code>null</code> if there is no such attribute
-     */
-    public String getAttribute(String key) {
-        return attributes.get(key);
-    }
-
-    /**
-     * Sets all attributes from given capability for this capability.
-     *
-     * @param otherCapability The other capability providing the attributes
-     */
-    public void learnFrom(Capability otherCapability) {
-        if (null != otherCapability) {
-            attributes.putAll(otherCapability.attributes);
-        }
-    }
-
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
+        return hash;
     }
 
     @Override

@@ -74,6 +74,36 @@ public class DraftMailMessage extends MailMessage {
     private final MailMessage message;
 
     @Override
+    public void addReplyTo(final InternetAddress addr) {
+        message.addReplyTo(addr);
+    }
+
+    @Override
+    public void addReplyTo(final InternetAddress[] addrs) {
+        message.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean containsReplyTo() {
+        return message.containsReplyTo();
+    }
+
+    @Override
+    public void removeReplyTo() {
+        message.removeReplyTo();
+    }
+
+    @Override
+    public InternetAddress[] getReplyTo() {
+        return message.getReplyTo();
+    }
+
+    @Override
+    public boolean isUnseen() {
+        return message.isUnseen();
+    }
+
+    @Override
     public boolean containsMessageId() {
         return message.containsMessageId();
     }

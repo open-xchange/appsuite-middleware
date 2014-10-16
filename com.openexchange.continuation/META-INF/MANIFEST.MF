@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Continuation Service Bundle
 Bundle-SymbolicName: com.openexchange.continuation
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.annotations,
@@ -27,6 +27,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,

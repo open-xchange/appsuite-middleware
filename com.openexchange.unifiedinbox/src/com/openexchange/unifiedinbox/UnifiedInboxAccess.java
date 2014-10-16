@@ -49,8 +49,14 @@
 
 package com.openexchange.unifiedinbox;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -107,12 +113,10 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
      * Members
      */
 
+    private final TIntObjectMap<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> openedMailAccessed;
     private boolean connected;
-
     private transient UnifiedInboxFolderStorage folderStorage;
-
     private transient UnifiedInboxMessageStorage messageStorage;
-
     private transient UnifiedInboxLogicTools logicTools;
 
     /**
@@ -122,6 +126,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
      */
     protected UnifiedInboxAccess(final Session session) {
         super(session);
+        openedMailAccessed = new TIntObjectHashMap<MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(8);
         cacheable = false;
     }
 
@@ -133,15 +138,86 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
      */
     protected UnifiedInboxAccess(final Session session, final int accountId) {
         super(session, accountId);
+        openedMailAccessed = new TIntObjectHashMap<MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(8);
         cacheable = false;
     }
 
-    private void reset() {
+    /**
+     * Gets the map holding opened {@link MailAccess} instances.
+     *
+     * @return The map
+     */
+    public TIntObjectMap<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> getOpenedMailAccessed() {
+        return openedMailAccessed;
+    }
+
+    /**
+     * Stores given {@code MailAccess} instance if no such instance is currently held in map.
+     *
+     * @param accountId The account identifier
+     * @param mailAccess The opened {@code MailAccess} instance
+     * @return <code>true</code> if put into map; otherwise <code>false</code> if such an instance is currently held in map
+     */
+    public boolean storeOpenedMailAccessIfAbsent(int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        if (null != mailAccess) {
+            if (!openedMailAccessed.containsKey(accountId)) {
+                openedMailAccessed.put(accountId, mailAccess);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the {@code MailAccess} instance associated with given account identifier.
+     *
+     * @param accountId The account identifier
+     * @return The {@code MailAccess} instance or <code>null</code>
+     */
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getOpenedMailAccess(int accountId) {
+        return openedMailAccessed.get(accountId);
+    }
+
+    /**
+     * Removes the {@code MailAccess} instance associated with given account identifier.
+     *
+     * @param accountId The account identifier
+     * @return The removed {@code MailAccess} instance or <code>null</code>
+     */
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeOpenedMailAccess(int accountId) {
+        return openedMailAccessed.remove(accountId);
+    }
+
+    private void reset(boolean markClosed) {
         super.resetFields();
-        folderStorage = null;
-        messageStorage = null;
+
+        UnifiedInboxFolderStorage folderStorage = this.folderStorage;
+        if (null != folderStorage) {
+            try {
+                folderStorage.releaseResources();
+            } catch (Exception e) {
+                // Ignore
+            }
+            this.folderStorage = null;
+        }
+
+        UnifiedInboxMessageStorage messageStorage = this.messageStorage;
+        if (null != messageStorage) {
+            try {
+                messageStorage.releaseResources();
+            } catch (Exception e) {
+                // Ignore
+            }
+            this.messageStorage = null;
+        }
+
         logicTools = null;
-        connected = false;
+
+        if (markClosed) {
+            openedMailAccessed.forEachValue(CLOSER);
+            openedMailAccessed.clear();
+            connected = false;
+        }
     }
 
     @Override
@@ -154,7 +230,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
         /*
          * Reset
          */
-        reset();
+        reset(true);
     }
 
     @Override
@@ -213,28 +289,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     @Override
     protected void releaseResources() {
-        if (folderStorage != null) {
-            try {
-                folderStorage.releaseResources();
-            } catch (final OXException e) {
-                LOG.error("Error while closing Unified Mail folder storage", e);
-            } finally {
-                folderStorage = null;
-            }
-        }
-        if (messageStorage != null) {
-            try {
-                messageStorage.releaseResources();
-            } catch (final OXException e) {
-                LOG.error("Error while closing Unified Mail message storage", e);
-            } finally {
-                messageStorage = null;
-
-            }
-        }
-        if (logicTools != null) {
-            logicTools = null;
-        }
+        reset(false);
     }
 
     @Override
@@ -259,5 +314,16 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             throw e;
         }
     }
+
+    // ----------------------------------------------------------------------------------------------------------------------- //
+
+    private static final TObjectProcedure<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> CLOSER = new TObjectProcedure<MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>() {
+
+        @Override
+        public boolean execute(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> openedMailAccess) {
+            Streams.close(openedMailAccess);
+            return true;
+        }
+    };
 
 }

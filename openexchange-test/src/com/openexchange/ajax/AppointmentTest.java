@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -59,7 +60,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,7 +106,7 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * {@link AppointmentTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added parseUserParticipants
  */
 public class AppointmentTest extends AbstractAJAXTest {
@@ -505,13 +505,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         final JSONArray jsonArray = new JSONArray();
 
-        for (int a = 0; a < appointmentArray.length; a++) {
+        for (Appointment element : appointmentArray) {
             final JSONObject jsonObj = new JSONObject();
-            jsonObj.put(DataFields.ID, appointmentArray[a].getObjectID());
-            jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, appointmentArray[a].getParentFolderID());
+            jsonObj.put(DataFields.ID, element.getObjectID());
+            jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, element.getParentFolderID());
 
-            if (appointmentArray[a].containsRecurrencePosition()) {
-                jsonObj.put(CalendarFields.RECURRENCE_POSITION, appointmentArray[a].getRecurrencePosition());
+            if (element.containsRecurrencePosition()) {
+                jsonObj.put(CalendarFields.RECURRENCE_POSITION, element.getRecurrencePosition());
             }
 
             jsonArray.put(jsonObj);
@@ -592,9 +592,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         final Appointment[] appointmentArray = listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, host, session);
 
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == objectId) {
-                return appointmentArray[a];
+        for (Appointment element : appointmentArray) {
+            if (element.getObjectID() == objectId) {
+                return element;
             }
         }
 
@@ -614,9 +614,9 @@ public class AppointmentTest extends AbstractAJAXTest {
             host,
             session);
 
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == objectId) {
-                return appointmentArray[a];
+        for (Appointment element : appointmentArray) {
+            if (element.getObjectID() == objectId) {
+                return element;
             }
         }
 
@@ -637,9 +637,9 @@ public class AppointmentTest extends AbstractAJAXTest {
             host,
             session);
 
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == objectId && appointmentArray[a].getRecurrencePosition() == recurrencePosition) {
-                return appointmentArray[a];
+        for (Appointment element : appointmentArray) {
+            if (element.getObjectID() == objectId && element.getRecurrencePosition() == recurrencePosition) {
+                return element;
             }
         }
 
@@ -882,7 +882,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     private static void parseCols(final int[] cols, final JSONArray jsonArray, final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
         if (cols.length != jsonArray.length()) {
-            LOG.debug("expected cols: " + StringCollection.convertArray2String(cols) + " recieved cols: " + jsonArray.toString());
+            LOG.debug("expected cols: {} recieved cols: {}", StringCollection.convertArray2String(cols), jsonArray.toString());
         }
 
         assertEquals("compare array size with cols size", cols.length, jsonArray.length());
@@ -996,7 +996,6 @@ public class AppointmentTest extends AbstractAJAXTest {
             break;
         case Appointment.USERS:
             appointmentObj.setUsers(parseUserParticipants(jsonArray.getJSONArray(pos)));
-
             break;
         case Appointment.CHANGE_EXCEPTIONS:
             if (!jsonArray.isNull(pos)) {
@@ -1034,7 +1033,15 @@ public class AppointmentTest extends AbstractAJAXTest {
         final List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
         for (int i = 0, size = userParticipantArr.length(); i < size; i++) {
             final JSONObject participantObj = userParticipantArr.getJSONObject(i);
-            userParticipants.add(new UserParticipant(participantObj.getInt("id")));
+            UserParticipant userParticipant = new UserParticipant(participantObj.getInt("id"));
+            if (participantObj.has("confirmation")) {
+                userParticipant.setConfirm(participantObj.getInt("confirmation"));
+            }
+            if (participantObj.has("confirmmessage")) {
+                userParticipant.setConfirmMessage(participantObj.getString("confirmmessage"));
+            }
+
+            userParticipants.add(userParticipant);
         }
         return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
     }
@@ -1058,6 +1065,12 @@ public class AppointmentTest extends AbstractAJAXTest {
                     throw new JSONException("JSONObject[id] not found.");
                 }
                 final UserParticipant user = new UserParticipant(id);
+                if (jparticipant.has("confirmation")) {
+                    user.setConfirm(jparticipant.getInt("confirmation"));
+                }
+                if (jparticipant.has("confirmmessage")) {
+                    user.setConfirmMessage(jparticipant.getString("confirmmessage"));
+                }
                 p = user;
                 break;
             case Participant.GROUP:
@@ -1100,8 +1113,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         final HashSet hs = new HashSet();
 
-        for (int a = 0; a < participant.length; a++) {
-            hs.add(participant2String(participant[a]));
+        for (Participant element : participant) {
+            hs.add(participant2String(element));
         }
 
         return hs;

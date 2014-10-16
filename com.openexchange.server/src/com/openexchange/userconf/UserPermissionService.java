@@ -53,54 +53,69 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
- * {@link UserPermissionService}
+ * {@link UserPermissionService} - The service for {@link UserPermissionBits}.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc + {@link #getUserPermissionBits(Context, int[])}
  */
+@SingletonService
 public interface UserPermissionService {
+
     /**
      * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
      *
-     * @param userId - the user ID
-     * @param ctx - the context
-     * @return the instance of <code>UserPermissionBits</code>
+     * @param userId The user identifier
+     * @param ctx The context
+     * @return The instance of <code>UserPermissionBits</code>
      * @throws OXException If user's configuration could not be determined
      * @see #getUserPermissionBits(int, int[], Context)
      */
-    public UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException;
+    UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException;
 
     /**
      * This method reads several user module access permissions. This method is faster than reading separately the {@link UserPermissionBits}
      * for every given user.
-     * @param ctx the context
-     * @param users user objects that module access permission should be loaded.
-     * @return an array with the module access permissions of the given users.
-     * @throws OXException if users configuration could not be loaded.
+     *
+     * @param ctx The context
+     * @param users The users for whom module access permission should be loaded.
+     * @return An array with the module access permissions of the given users.
+     * @throws OXException If users configuration could not be loaded.
      */
-    public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException;
+    UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException;
 
     /**
-     * <p>
+     * This method reads several user module access permissions. This method is faster than reading separately the {@link UserPermissionBits}
+     * for every given user.
+     *
+     * @param ctx The context
+     * @param userIds The identifiers of the users for whom module access permission should be loaded.
+     * @return An array with the module access permissions of the given users.
+     * @throws OXException If users configuration could not be loaded.
+     */
+    UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException;
+
+    /**
      * Clears the whole storage. All kept instances of <code>UserPermissionBits</code> are going to be removed from storage.
      * <p>
      * <b>NOTE:</b> Only the instances are going to be removed from storage; underlying database is not affected
      *
      * @throws OXException If clearing fails
      */
-    public void clearStorage() throws OXException;
+    void clearStorage() throws OXException;
 
     /**
-     * <p>
      * Removes the instance of <code>UserPermissionBits</code> that corresponds to given user ID from storage.
      * <p>
      * <b>NOTE:</b> Only the instance is going to be removed from storage; underlying database is not affected
      *
-     * @param userId - the user ID
-     * @param ctx - the context
+     * @param userId The user identifier
+     * @param ctx The context
      * @throws OXException If removal fails
      */
-    public void removeUserPermissionBits(int userId, Context ctx) throws OXException;
+    void removeUserPermissionBits(int userId, Context ctx) throws OXException;
+
 }

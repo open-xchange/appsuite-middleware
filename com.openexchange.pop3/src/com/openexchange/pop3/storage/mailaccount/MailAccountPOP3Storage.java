@@ -71,6 +71,7 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Store;
 import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.databaseold.Database;
@@ -79,6 +80,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -113,7 +115,7 @@ import com.sun.mail.pop3.POP3Store;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountPOP3Storage implements POP3Storage {
+public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountPOP3Storage.class);
 
@@ -234,6 +236,25 @@ public class MailAccountPOP3Storage implements POP3Storage {
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public boolean isStoreSupported() throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> inst = getDefaultMailAccess();
+        return (inst instanceof IMailStoreAware) && ((IMailStoreAware) inst).isStoreSupported();
+    }
+
+    @Override
+    public Store getStore() throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> inst = getDefaultMailAccess();
+        if (inst instanceof IMailStoreAware) {
+            IMailStoreAware storeAware = (IMailStoreAware) inst;
+            if (storeAware.isStoreSupported()) {
+                return storeAware.getStore();
+            }
+        }
+
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
 
     @Override
@@ -564,7 +585,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
         // Start sync process
         POP3Store pop3Store = null;
         try {
-            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge, pop3AccountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
+            POP3Config pop3Config = pop3Access.getPOP3Config();
+            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection());
+            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Config, pop3Access.getMailProperties(), false, session, !expunge, forceSecure);
             pop3Store = result.getPop3Store();
             boolean uidlNotSupported = false;
             if (result.containsWarnings()) {
@@ -667,8 +690,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         inbox.close(doExpunge);
                     }
                 } catch (final Exception e) {
-                    final POP3Config pop3Config = pop3Access.getPOP3Config();
-                    LOG.warn("POP3 mailbox " + pop3Config.getServer() + " could not be expunged/closed for login " + pop3Config.getLogin(), e);
+                    LOG.warn("POP3 mailbox {} could not be expunged/closed for login {}", pop3Config.getServer(), pop3Config.getLogin(), e);
                 }
                 // Trashed UIDLs not needed anymore
                 if (doExpunge) {

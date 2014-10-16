@@ -80,12 +80,16 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.api.unified.UnifiedFullName;
+import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.search.SearchTerm;
@@ -95,6 +99,7 @@ import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -114,7 +119,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedInboxMessageStorage extends MailMessageStorage implements ISimplifiedThreadStructure {
+public final class UnifiedInboxMessageStorage extends MailMessageStorage implements ISimplifiedThreadStructure, UnifiedViewService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxMessageStorage.class);
 
@@ -149,7 +154,29 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         user = session.getUserId();
     }
 
-    protected static void closeSafe(final MailAccess<?, ?> mailAccess) {
+    /**
+     * Initializes a new stateless {@link UnifiedInboxMessageStorage}.
+     */
+    public UnifiedInboxMessageStorage() {
+        super();
+        access = null;
+        session = null;
+        user = 0;
+        cid = 0;
+        ctx = null;
+    }
+
+    private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getStoredMailAccessFor(int accountId, Session session, UnifiedInboxAccess access) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = access.getOpenedMailAccess(accountId);
+        if (null == mailAccess) {
+            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect();
+            access.storeOpenedMailAccessIfAbsent(accountId, mailAccess);
+        }
+        return mailAccess;
+    }
+
+    protected static void closeSafe(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         if (null == mailAccess) {
             return;
         }
@@ -178,12 +205,16 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private List<MailAccount> getAccounts() throws OXException {
+        return getAccounts(true, access.getAccountId(), user, cid);
+    }
+
+    private static List<MailAccount> getAccounts(boolean onlyEnabled, int unifiedMailAccountId, int userId, int contextId) throws OXException {
         final MailAccountStorageService srv = Services.getService(MailAccountStorageService.class);
-        final MailAccount[] tmp = srv.getUserMailAccounts(user, cid);
+        final MailAccount[] tmp = srv.getUserMailAccounts(userId, contextId);
         final List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
-        final int thisAccountId = access.getAccountId();
+        final int thisAccountId = unifiedMailAccountId;
         for (final MailAccount mailAccount : tmp) {
-            if (thisAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
+            if (thisAccountId != mailAccount.getId() && (!onlyEnabled || mailAccount.isUnifiedINBOXEnabled())) {
                 accounts.add(mailAccount);
             }
         }
@@ -196,12 +227,26 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     @Override
-    public void releaseResources() throws OXException {
+    public void releaseResources() {
         // Nothing to release
     }
 
     @Override
     public MailMessage[] getMessages(final String fullName, final String[] mailIds, final MailField[] fields) throws OXException {
+        return getMessages(fullName, mailIds, fields, session, access);
+    }
+
+    @Override
+    public MailMessage[] getMessages(UnifiedFullName fullName, String[] mailIds, MailField[] fields, Session session) throws OXException {
+        int unifiedAccountId = Services.getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
+
+        UnifiedInboxAccess access = new UnifiedInboxAccess(session, unifiedAccountId);
+        access.connectInternal();
+
+        return getMessages(fullName.getFullName(), mailIds, fields, session, access);
+    }
+
+    private static MailMessage[] getMessages(final String fullName, final String[] mailIds, final MailField[] fields, final Session session, final UnifiedInboxAccess access) throws OXException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
@@ -210,7 +255,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             if (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY)) {
                 final MailMessage[] mails = new MailMessage[mailIds.length];
                 for (int j = 0; j < mails.length; j++) {
-                    mails[j] = getMessage(fullName, mailIds[j], true);
+                    mails[j] = getMessage(fullName, mailIds[j], true, session, access);
                 }
                 return mails;
             }
@@ -238,7 +283,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     @Override
                     public GetMessagesResult call() throws OXException {
                         // Get account's mail access
-                        MailAccess<?, ?> mailAccess = null;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
@@ -289,7 +334,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                 final int accountId = accountMapEntry.getKey().intValue();
                 // Get account's mail access
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session, accountId);
                 boolean close = false;
                 try {
                     mailAccess.connect();
@@ -334,14 +379,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             return messages;
         }
         final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-        MailAccess<?, ?> mailAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
             // Get messages
             final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, fields);
-            final int unifiedAccountId = this.access.getAccountId();
+            final int unifiedAccountId = access.getAccountId();
             for (final MailMessage mail : mails) {
                 if (null != mail) {
                     mail.setFolder(fullName);
@@ -355,26 +400,120 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     @Override
-    public MailMessage getMessage(final String fullName, final String mailId, final boolean markSeen) throws OXException {
+    public MailPart getImageAttachment(String fullName, String mailId, String contentId) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
-            MailAccess<?, ?> mailAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
+                // Get stored or newly connect MailAccess instance
+                mailAccess = getStoredMailAccessFor(uid.getAccountId(), session, access);
+
+                // Get part
+                MailPart part = mailAccess.getMessageStorage().getImageAttachment(uid.getFullName(), uid.getId(), contentId);
+                if (null == part) {
+                    return null;
+                }
+                return part;
+            } finally {
+                // Nothing
+            }
+        }
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            // Get stored or newly connect MailAccess instance
+            mailAccess = getStoredMailAccessFor(fa.getAccountId(), session, access);
+
+            // Get part
+            final MailPart part = mailAccess.getMessageStorage().getImageAttachment(fa.getFullname(), mailId, contentId);
+            if (null == part) {
+                return null;
+            }
+            return part;
+        } finally {
+            // Nothing
+        }
+    }
+
+    @Override
+    public MailPart getAttachment(String fullName, String mailId, String sequenceId) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+        }
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                // Get stored or newly connect MailAccess instance
+                mailAccess = getStoredMailAccessFor(uid.getAccountId(), session, access);
+
+                // Get part
+                MailPart part = mailAccess.getMessageStorage().getAttachment(uid.getFullName(), uid.getId(), sequenceId);
+                if (null == part) {
+                    return null;
+                }
+                return part;
+            } finally {
+                // Nothing
+            }
+        }
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            // Get stored or newly connect MailAccess instance
+            mailAccess = getStoredMailAccessFor(fa.getAccountId(), session, access);
+
+            // Get part
+            final MailPart part = mailAccess.getMessageStorage().getAttachment(fa.getFullname(), mailId, sequenceId);
+            if (null == part) {
+                return null;
+            }
+            return part;
+        } finally {
+            // Nothing
+        }
+    }
+
+    @Override
+    public MailMessage getMessage(String fullName, String mailId, boolean markSeen) throws OXException {
+        return getMessage(fullName, mailId, markSeen, session, access);
+    }
+
+    @Override
+    public MailMessage getMessage(UnifiedFullName fullName, String mailId, boolean markSeen, Session session) throws OXException {
+        int unifiedAccountId = Services.getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
+
+        UnifiedInboxAccess access = new UnifiedInboxAccess(session, unifiedAccountId);
+        access.connectInternal();
+
+        return getMessage(fullName.getFullName(), mailId, markSeen, session, access);
+    }
+
+    private static MailMessage getMessage(final String fullName, String mailId, boolean markSeen, Session session, final UnifiedInboxAccess access) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+        }
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                // Get stored or newly connect MailAccess instance
+                int accountId = uid.getAccountId();
+                mailAccess = getStoredMailAccessFor(accountId, session, access);
+
                 // Get the message
-                mailAccess = MailAccess.getInstance(session, uid.getAccountId());
-                mailAccess.connect();
                 MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullName(), uid.getId(), markSeen);
                 if (null == mail) {
                     return null;
                 }
+
                 // Determine unread count
                 final boolean wasUnseen = markSeen && mail.containsPrevSeen() && !mail.isPrevSeen();
                 Future<Integer> future = null;
                 if (wasUnseen) {
-                    final UnifiedInboxAccess access = this.access;
                     future = ThreadPools.getThreadPool().submit(new AbstractTask<Integer>() {
 
                         @Override
@@ -383,12 +522,12 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                         }
                     });
                 }
+
                 // Convert to Unified Mail message
                 mail = new UnifiedMailMessage(mail, access.getAccountId());
-                mail.loadContent();
                 mail.setMailId(mailId);
                 mail.setFolder(fullName);
-                mail.setAccountId(uid.getAccountId());
+                mail.setAccountId(accountId);
                 if (null != future) {
                     try {
                         mail.setUnreadMessages(future.get().intValue());
@@ -401,26 +540,29 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 }
                 return mail;
             } finally {
-                closeSafe(mailAccess);
+                // Nothing
             }
         }
         final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-        MailAccess<?, ?> mailAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-            mailAccess.connect();
+            // Get stored or newly connect MailAccess instance
+            mailAccess = getStoredMailAccessFor(fa.getAccountId(), session, access);
+
             // Get message
             final MailMessage mail = mailAccess.getMessageStorage().getMessage(fa.getFullname(), mailId, markSeen);
             if (null == mail) {
                 return null;
             }
-            final int unifiedAccountId = this.access.getAccountId();
-            mail.loadContent();
+
+            // Prepare it
+            final int unifiedAccountId = access.getAccountId();
+            // mail.loadContent();
             mail.setFolder(fullName);
             mail.setAccountId(unifiedAccountId);
             return mail;
         } finally {
-                closeSafe(mailAccess);
+            // Nothing
         }
     }
 
@@ -445,12 +587,13 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final TrackingCompletionService<List<List<MailMessage>>> completionService =
                 new UnifiedInboxCompletionService<List<List<MailMessage>>>(executor);
             for (final MailAccount mailAccount : accounts) {
+                final Session session = this.session;
                 completionService.submit(new LoggingCallable<List<List<MailMessage>>>(session) {
 
                     @Override
                     public List<List<MailMessage>> call() {
                         final int accountId = mailAccount.getId();
-                        MailAccess<?, ?> mailAccess = null;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         String fn = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
@@ -637,7 +780,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
          * Certain account's folder
          */
         final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-        MailAccess<?, ?> mailAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
@@ -813,12 +956,13 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedInboxCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
+                final Session session  = this.session;
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
                     @Override
                     public List<MailMessage> call() {
                         final int accountId = mailAccount.getId();
-                        MailAccess<?, ?> mailAccess = null;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         String fn = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
@@ -903,7 +1047,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
         }
         final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-        MailAccess<?, ?> mailAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
@@ -925,24 +1069,49 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+        return searchMessages(fullName, indexRange, sortField, order, searchTerm, fields, session, true, access.getAccountId(), getLocale());
+    }
+
+    @Override
+    public MailMessage[] searchMessages(final UnifiedFullName fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields, final Session session) throws OXException {
+        int unifiedAccountId = Services.getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
+
+        ContextService contextService = Services.getService(ContextService.class);
+        UserService userService = Services.getService(UserService.class);
+        Locale locale = userService.getUser(session.getUserId(), contextService.getContext(session.getContextId())).getLocale();
+
+        return searchMessages(fullName.getFullName(), indexRange, sortField, order, searchTerm, fields, session, false, unifiedAccountId, locale);
+    }
+
+    @Override
+    public MailMessage[] allMessages(UnifiedFullName fullName, MailField[] fields, Session session) throws OXException {
+        int unifiedAccountId = Services.getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
+
+        ContextService contextService = Services.getService(ContextService.class);
+        UserService userService = Services.getService(UserService.class);
+        Locale locale = userService.getUser(session.getUserId(), contextService.getContext(session.getContextId())).getLocale();
+
+        return searchMessages(fullName.getFullName(), null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, fields, session, false, unifiedAccountId, locale);
+    }
+
+    private static MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields, final Session session, final boolean onlyEnabled, final int unifiedMailAccountId, final Locale locale) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         final MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts = getAccounts();
+            final List<MailAccount> accounts = getAccounts(onlyEnabled, unifiedMailAccountId, session.getUserId(), session.getContextId());
             final MailFields mfs = StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField);
             final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             final int length = accounts.size();
-            final int undelegatedAccountId = access.getAccountId();
+            final int undelegatedAccountId = unifiedMailAccountId;
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             // Check for continuation service
             final ContinuationRegistryService continuationRegistry = Services.optService(ContinuationRegistryService.class);
             if (null != continuationRegistry && mfs.contains(MailField.SUPPORTS_CONTINUATION) && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
                 final ExecutorContinuation<MailMessage> executorContinuation;
                 {
-                    final Locale locale = getLocale();
                     final ContinuationResponseGenerator<MailMessage> responseGenerator = new ContinuationResponseGenerator<MailMessage>() {
 
                         @Override
@@ -981,7 +1150,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                         @Override
                         public List<MailMessage> call() {
                             final int accountId = mailAccount.getId();
-                            MailAccess<?, ?> mailAccess = null;
+                            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                             String fn = null;
                             try {
                                 mailAccess = MailAccess.getInstance(getSession(), accountId);
@@ -1041,7 +1210,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     @Override
                     public List<MailMessage> call() {
                         final int accountId = mailAccount.getId();
-                        MailAccess<?, ?> mailAccess = null;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         String fn = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
@@ -1088,7 +1257,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 }
                 LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 // Sort them
-                final MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), getLocale());
+                final MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale);
                 Collections.sort(messages, c);
                 // Return as array
                 if (null == indexRange) {
@@ -1119,14 +1288,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
         }
         final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-        MailAccess<?, ?> mailAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
             // Get account's messages
             final MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, effectiveSortField, order, searchTerm, fields);
-            final int unifiedAccountId = this.access.getAccountId();
+            final int unifiedAccountId = unifiedMailAccountId;
             for (final MailMessage mail : mails) {
                 if (null != mail) {
                     mail.setFolder(fullName);
@@ -1139,7 +1308,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         }
     }
 
-    private MailSortField determineSortFieldForSearch(final String fullName, final MailSortField requestedSortField) {
+    private static MailSortField determineSortFieldForSearch(final String fullName, final MailSortField requestedSortField) {
         final MailSortField effectiveSortField;
         if (null == requestedSortField) {
             effectiveSortField = MailSortField.RECEIVED_DATE;
@@ -1172,11 +1341,12 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedInboxCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
+                final Session session  = this.session;
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
                     @Override
                     public List<MailMessage> call() throws Exception {
-                        MailAccess<?, ?> mailAccess = null;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         try {
                             final int accountId = mailAccount.getId();
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
@@ -1230,7 +1400,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
         }
         final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-        MailAccess<?, ?> mailAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
@@ -1271,7 +1441,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     @Override
                     public Object call() throws Exception {
                         // Get account's mail access
-                        MailAccess<?, ?> mailAccess = null;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
@@ -1305,7 +1475,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
         } else {
             final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-            MailAccess<?, ?> mailAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = MailAccess.getInstance(session, fa.getAccountId());
                 mailAccess.connect();
@@ -1334,7 +1504,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         }
         // Parse destination folder
         final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullName(destFullname);
-        MailAccess<?, ?> mailAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, destFullnameArgument.getAccountId());
             mailAccess.connect();
@@ -1365,7 +1535,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     @Override
                     public Object call() throws Exception {
                         // Get account's mail access
-                        MailAccess<?, ?> mailAccess = null;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
@@ -1399,11 +1569,77 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
         } else {
             final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-            MailAccess<?, ?> mailAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = MailAccess.getInstance(session, fa.getAccountId());
                 mailAccess.connect();
                 mailAccess.getMessageStorage().updateMessageFlags(fa.getFullname(), mailIds, flags, set);
+            } finally {
+                closeSafe(mailAccess);
+            }
+        }
+    }
+
+    @Override
+    public void updateMessageUserFlags(final String fullName, final String[] mailIds, final String[] flags, final boolean set) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+        }
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            // Parse mail IDs
+            final TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
+            final int size = parsed.size();
+            final TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
+            // Collection of Callables
+            final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
+            for (int i = size; i-- > 0;) {
+                iter.advance();
+                final int accountId = iter.key();
+                final Map<String, List<String>> folderUIDMap = iter.value();
+                collection.add(new LoggingCallable<Object>(session) {
+
+                    @Override
+                    public Object call() throws Exception {
+                        // Get account's mail access
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                        try {
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
+                            mailAccess.connect();
+                            final int innersize = folderUIDMap.size();
+                            final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
+                            for (int j = 0; j < innersize; j++) {
+                                final Map.Entry<String, List<String>> e = inneriter.next();
+                                final String folder = e.getKey();
+                                final List<String> uids = e.getValue();
+                                // Update flags
+                                mailAccess.getMessageStorage().updateMessageUserFlags(folder, uids.toArray(new String[uids.size()]), flags, set);
+                            }
+                        } catch (final OXException e) {
+                            getLogger().debug("", e);
+                            return null;
+                        } finally {
+                            closeSafe(mailAccess);
+                        }
+                        return null;
+                    }
+                });
+            }
+            final ThreadPoolService executor = ThreadPools.getThreadPool();
+            try {
+                // Invoke all and wait for being executed
+                executor.invokeAll(collection);
+
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+            }
+        } else {
+            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+                mailAccess.connect();
+                mailAccess.getMessageStorage().updateMessageUserFlags(fa.getFullname(), mailIds, flags, set);
             } finally {
                 closeSafe(mailAccess);
             }
@@ -1431,7 +1667,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     @Override
                     public Object call() throws Exception {
                         // Get account's mail access
-                        MailAccess<?, ?> mailAccess = null;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
@@ -1468,7 +1704,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
         } else {
             final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
-            MailAccess<?, ?> mailAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = MailAccess.getInstance(session, fa.getAccountId());
                 mailAccess.connect();
@@ -1490,11 +1726,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static void insertMessage(final String[] mailIds, final MailMessage[] toFill, final int accountId, final String folder, final MailMessage[] mails, final String uiFullname, final int undelegatedAccountId) {
-        final UnifiedInboxUID helper = new UnifiedInboxUID();
-        for (final MailMessage mail : mails) {
+    private static void insertMessage(String[] mailIds, MailMessage[] toFill, int accountId, String folder, MailMessage[] mails, String uiFullname, int undelegatedAccountId) {
+        UnifiedInboxUID helper = new UnifiedInboxUID();
+        for (MailMessage mail : mails) {
             if (null != mail) {
-                final String lookFor = helper.setUID(accountId, folder, mail.getMailId()).toString();
+                String lookFor = helper.setUID(accountId, folder, mail.getMailId()).toString();
                 int pos = -1;
                 for (int l = 0; l < mailIds.length && pos == -1; l++) {
                     if (lookFor.equals(mailIds[l])) {
@@ -1502,7 +1738,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     }
                 }
                 if (pos != -1) {
-                    final UnifiedMailMessage umm = new UnifiedMailMessage(mail, undelegatedAccountId);
+                    UnifiedMailMessage umm = new UnifiedMailMessage(mail, undelegatedAccountId);
                     toFill[pos] = umm;
                     umm.setMailId(mailIds[pos]);
                     umm.setFolder(uiFullname);

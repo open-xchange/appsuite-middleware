@@ -66,6 +66,7 @@ import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * {@link MailMessageStorage} - Abstract implementation of {@link IMailMessageStorage}.
@@ -166,6 +167,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
             try {
                text = textFinder.getText(getMessage(folder, mailIds[i], false));
             } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
                 LOG.warn("Error while getting primary content for mail ''{}'' in folder ''{}''. Returning null.", mailIds[i], folder, t);
             }
 
@@ -294,6 +296,11 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
+        // Empty body here
+    }
+
+    @Override
+    public void updateMessageUserFlags(String folder, String[] mailIds, String[] flags, boolean set) throws OXException {
         // Empty body here
     }
 

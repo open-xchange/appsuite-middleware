@@ -1717,11 +1717,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             moduleAccess.setEditResource(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isForum();
-        if (tmp != null) {
-            moduleAccess.setForum(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isGlobalAddressBookDisabled();
         if (tmp != null) {
             moduleAccess.setGlobalAddressBookDisabled(booleanValue(tmp));
@@ -1747,11 +1742,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             moduleAccess.setOLOX20(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isPinboardWrite();
-        if (tmp != null) {
-            moduleAccess.setPinboardWrite(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isPublication();
         if (tmp != null) {
             moduleAccess.setPublication(booleanValue(tmp));
@@ -1765,16 +1755,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         tmp = soapModuleAccess.isReadCreateSharedFolders();
         if (tmp != null) {
             moduleAccess.setReadCreateSharedFolders(booleanValue(tmp));
-        }
-
-        tmp = soapModuleAccess.isRssBookmarks();
-        if (tmp != null) {
-            moduleAccess.setRssBookmarks(booleanValue(tmp));
-        }
-
-        tmp = soapModuleAccess.isRssPortal();
-        if (tmp != null) {
-            moduleAccess.setRssPortal(booleanValue(tmp));
         }
 
         tmp = soapModuleAccess.isSubscription();
@@ -1838,18 +1818,14 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapModuleAccess.setEditPassword(Boolean.valueOf(moduleAccess.getEditPassword()));
         soapModuleAccess.setEditPublicFolders(Boolean.valueOf(moduleAccess.getEditPublicFolders()));
         soapModuleAccess.setEditResource(Boolean.valueOf(moduleAccess.getEditResource()));
-        soapModuleAccess.setForum(Boolean.valueOf(moduleAccess.getForum()));
         soapModuleAccess.setGlobalAddressBookDisabled(Boolean.valueOf(moduleAccess.isGlobalAddressBookDisabled()));
         soapModuleAccess.setIcal(Boolean.valueOf(moduleAccess.getIcal()));
         soapModuleAccess.setInfostore(Boolean.valueOf(moduleAccess.getInfostore()));
         soapModuleAccess.setMultipleMailAccounts(Boolean.valueOf(moduleAccess.isMultipleMailAccounts()));
         soapModuleAccess.setOLOX20(Boolean.valueOf(moduleAccess.isOLOX20()));
-        soapModuleAccess.setPinboardWrite(Boolean.valueOf(moduleAccess.getPinboardWrite()));
         soapModuleAccess.setPublication(Boolean.valueOf(moduleAccess.isPublication()));
         soapModuleAccess.setPublicFolderEditable(Boolean.valueOf(moduleAccess.isPublicFolderEditable()));
         soapModuleAccess.setReadCreateSharedFolders(Boolean.valueOf(moduleAccess.getReadCreateSharedFolders()));
-        soapModuleAccess.setRssBookmarks(Boolean.valueOf(moduleAccess.getRssBookmarks()));
-        soapModuleAccess.setRssPortal(Boolean.valueOf(moduleAccess.getRssPortal()));
         soapModuleAccess.setSubscription(Boolean.valueOf(moduleAccess.isSubscription()));
         soapModuleAccess.setSyncml(Boolean.valueOf(moduleAccess.getSyncml()));
         soapModuleAccess.setTasks(Boolean.valueOf(moduleAccess.getTasks()));

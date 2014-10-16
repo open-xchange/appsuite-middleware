@@ -52,14 +52,15 @@ package com.openexchange.publish;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
  * {@link PublicationTargetDiscoveryService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
+@SingletonService
 public interface PublicationTargetDiscoveryService {
 
     Collection<PublicationTarget> listTargets() throws OXException;

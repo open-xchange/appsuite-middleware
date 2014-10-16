@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hazelcast
 Bundle-SymbolicName: com.hazelcast
-Bundle-Version: 3.1.5
+Bundle-Version: 3.2.4
 Bundle-Vendor: Hazelcast Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
- lib/hazelcast-3.1.5.jar
+ lib/hazelcast-3.2.4.jar
 Import-Package: com.openexchange.config,
  javax.crypto,
  javax.crypto.interfaces,
@@ -43,4 +43,5 @@ Export-Package: com.hazelcast.config,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
  com.hazelcast.queue,
- com.hazelcast.transaction
+ com.hazelcast.transaction,
+ com.hazelcast.util

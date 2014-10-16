@@ -49,7 +49,7 @@
 
 package com.openexchange.test;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -307,6 +307,9 @@ public class TaskTestManager implements TestManager{
 //            break;
         case Task.BILLING_INFORMATION:
             retval = value;
+            break;
+        case Task.PRIORITY:
+            retval = Integer.valueOf(String.valueOf(value));
             break;
         default:
             retval = value;

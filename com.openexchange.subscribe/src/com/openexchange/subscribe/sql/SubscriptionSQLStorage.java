@@ -387,7 +387,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             new StatementBuilder().executeStatement(writeConnection, update, values);
         }
     }
-    
+
     @Override
     public void touch(Context ctx, int subscriptionId, long currentTimeMillis) throws OXException {
         Connection writeConnection = null;
@@ -396,14 +396,14 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
             rollback = true;
-            
+
             new StatementBuilder().executeStatement(writeConnection,
                 new UPDATE(subscriptions)
                     .SET("last_update", PLACEHOLDER)
                     .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id",  PLACEHOLDER))), Arrays.<Object>asList(currentTimeMillis, ctx.getContextId(), subscriptionId));
-            
-            
-            
+
+
+
             txPolicy.commit(writeConnection);
             rollback = false;
         } catch (final SQLException e) {
@@ -416,7 +416,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 Databases.autocommit(writeConnection);
                 dbProvider.releaseWriteConnection(ctx, writeConnection);
             }
-        }       
+        }
     }
 
     private int getConfigurationId(final Subscription subscription) throws OXException {
@@ -581,6 +581,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 
     @Override
     public void deleteAllSubscriptionsWhereConfigMatches(final Map<String, Object> query, final String sourceId, final Context ctx) throws OXException {
+        boolean modified = false;
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
@@ -597,6 +598,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 if(deleted == 1) {
                     // Delete the generic configuration only if the source_id matched
                     storageService.delete(writeConnection, ctx, configId);
+                    modified = true;
                 }
             }
             txPolicy.commit(writeConnection);
@@ -611,7 +613,11 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             } catch (final SQLException e) {
                 throw SQLException.create(e);
             }
-            dbProvider.releaseWriteConnection(ctx, writeConnection);
+            if (modified) {
+                dbProvider.releaseWriteConnectionAfterReading(ctx, writeConnection);
+            } else {
+                dbProvider.releaseWriteConnection(ctx, writeConnection);
+            }
         }
     }
 

@@ -509,6 +509,11 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
+    /**
+     * Raises a folder "create" event.
+     *
+     * @param folder The created folder
+     */
     public void create(final FolderObject folder) throws OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
@@ -519,7 +524,26 @@ public class EventClient {
         }
     }
 
+    /**
+     * Raises a folder "create" event.
+     *
+     * @param folder The created folder
+     * @param parentFolder The parent folder
+     * @throws OXException
+     */
     public void create(final FolderObject folder, final FolderObject parentFolder) throws OXException {
+        create(folder, parentFolder, null);
+    }
+
+    /**
+     * Raises a folder "create" event.
+     *
+     * @param folder The created folder
+     * @param parentFolder The parent folder
+     * @param folderPath The full path of the folder down to the root folder
+     * @throws OXException
+     */
+    public void create(final FolderObject folder, final FolderObject parentFolder, String[] folderPath) throws OXException {
         final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder, parentFolder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.FOLDER, folder, null, parentFolder, null, session);
 
@@ -529,14 +553,35 @@ public class EventClient {
         final Event event = new Event("com/openexchange/groupware/folder/insert", ht);
         triggerEvent(event);
         if (null != folder && FolderObject.INFOSTORE == folder.getModule()) {
-            triggerEvent(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(folder)));
+            triggerEvent(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(folder, parentFolder, folderPath)));
         }
 
         final EventObject eventObject = new EventObject(folder, CREATED, session);
         EventQueue.add(eventObject);
     }
 
+    /**
+     * Raises a folder "modify" event.
+     *
+     * @param oldFolder The old folder
+     * @param newFolder The new folder
+     * @param parentFolder The parent folder
+     * @throws OXException
+     */
     public void modify(final FolderObject oldFolder, final FolderObject newFolder, final FolderObject parentFolder) throws OXException {
+        modify(oldFolder, newFolder, parentFolder, null);
+    }
+
+    /**
+     * Raises a folder "modify" event.
+     *
+     * @param oldFolder The old folder
+     * @param newFolder The new folder
+     * @param parentFolder The parent folder
+     * @param folderPath The full path of the folder down to the root folder
+     * @throws OXException
+     */
+    public void modify(final FolderObject oldFolder, final FolderObject newFolder, final FolderObject parentFolder, String[] folderPath) throws OXException {
         final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { oldFolder, newFolder, parentFolder }, oldFolder.getParentFolderID(), newFolder.getParentFolderID());
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.FOLDER, newFolder, oldFolder, parentFolder, null, session);
 
@@ -546,7 +591,7 @@ public class EventClient {
         final Event event = new Event("com/openexchange/groupware/folder/update", ht);
         triggerEvent(event);
         if (null != newFolder && FolderObject.INFOSTORE == newFolder.getModule()) {
-            Dictionary<String, Object> properties = getEventProperties(newFolder);
+            Dictionary<String, Object> properties = getEventProperties(newFolder, parentFolder, folderPath);
             if (null != oldFolder && oldFolder.getParentFolderID() != newFolder.getParentFolderID()) {
                 properties.put(FileStorageEventConstants.OLD_PARENT_FOLDER_ID, String.valueOf(oldFolder.getParentFolderID()));
             }
@@ -557,9 +602,14 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
+    /**
+     * Raises a folder "delete" event.
+     *
+     * @param folder The folder
+     * @throws OXException
+     */
     public void delete(final FolderObject folder) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
-
         final int folderId = folder.getParentFolderID();
         if (folderId > 0) {
             FolderObject parentFolderObj = null;
@@ -576,7 +626,26 @@ public class EventClient {
         }
     }
 
+    /**
+     * Raises a folder "delete" event.
+     *
+     * @param folder The folder
+     * @param parentFolder The parent folder
+     * @throws OXException
+     */
     public void delete(final FolderObject folder, final FolderObject parentFolder) throws OXException {
+        delete(folder, parentFolder, null);
+    }
+
+    /**
+     * Raises a folder "delete" event.
+     *
+     * @param folder The folder
+     * @param parentFolder The parent folder
+     * @param folderPath The full path of the folder down to the root folder
+     * @throws OXException
+     */
+    public void delete(final FolderObject folder, final FolderObject parentFolder, String[] folderPath) throws OXException {
         final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder, parentFolder });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.FOLDER, folder, null, parentFolder, null, session);
 
@@ -586,7 +655,7 @@ public class EventClient {
         final Event event = new Event("com/openexchange/groupware/folder/delete", ht);
         triggerEvent(event);
         if (null != parentFolder && FolderObject.INFOSTORE == parentFolder.getModule()) {
-            triggerEvent(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folder, parentFolder)));
+            triggerEvent(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folder, parentFolder, folderPath)));
         }
 
         final EventObject eventObject = new EventObject(folder, DELETED, session);
@@ -693,22 +762,47 @@ public class EventClient {
         eventAdmin.postEvent(event);
     }
 
+    /**
+     * Constructs the properties for a file storage folder event.
+     *
+     * @param folder The folder
+     * @return The event properties
+     */
     private Dictionary<String, Object> getEventProperties(FolderObject folder) {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
-        properties.put(FileStorageEventConstants.SESSION, session);
-        properties.put(FileStorageEventConstants.FOLDER_ID, String.valueOf(folder.getObjectID()));
-        properties.put(FileStorageEventConstants.ACCOUNT_ID, "infostore");
-        properties.put(FileStorageEventConstants.SERVICE, "com.openexchange.infostore");
-        return properties;
+        return getEventProperties(folder, null);
     }
 
+    /**
+     * Constructs the properties for a file storage folder event.
+     *
+     * @param folder The folder
+     * @param parentFolder The parent folder
+     * @return The event properties
+     */
     private Dictionary<String, Object> getEventProperties(FolderObject folder, FolderObject parentFolder) {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
+        return getEventProperties(folder, parentFolder, null);
+    }
+
+    /**
+     * Constructs the properties for a file storage folder event.
+     *
+     * @param folder The folder
+     * @param parentFolder The parent folder
+     * @param folderPath The folder path
+     * @return The event properties
+     */
+    private Dictionary<String, Object> getEventProperties(FolderObject folder, FolderObject parentFolder, String[] folderPath) {
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
         properties.put(FileStorageEventConstants.SESSION, session);
         properties.put(FileStorageEventConstants.FOLDER_ID, String.valueOf(folder.getObjectID()));
-        properties.put(FileStorageEventConstants.PARENT_FOLDER_ID, String.valueOf(parentFolder.getObjectID()));
         properties.put(FileStorageEventConstants.ACCOUNT_ID, "infostore");
         properties.put(FileStorageEventConstants.SERVICE, "com.openexchange.infostore");
+        if (null != parentFolder) {
+            properties.put(FileStorageEventConstants.PARENT_FOLDER_ID, String.valueOf(parentFolder.getObjectID()));
+        }
+        if (null != folderPath) {
+            properties.put(FileStorageEventConstants.FOLDER_PATH, folderPath);
+        }
         return properties;
     }
 

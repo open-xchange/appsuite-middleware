@@ -148,7 +148,7 @@ public class AttachmentQueryCatalog {
     public void appendColumnList(final StringBuilder select, final AttachmentField[] columns) {
         appendColumnListWithPrefix(select, columns, null);
     }
-    
+
     public void appendColumnListWithPrefix(final StringBuilder select, final AttachmentField[] columns, String prefix) {
         prefix = Strings.isNullOrEmpty(prefix) ? "" : prefix + ".";
         for(final AttachmentField field : columns ) {
@@ -165,4 +165,5 @@ public class AttachmentQueryCatalog {
     public String getSelectNewestCreationDate() {
         return SELECT_NEWEST_CREATION_DATE;
     }
+
 }

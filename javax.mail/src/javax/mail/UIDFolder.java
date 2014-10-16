@@ -66,7 +66,7 @@ import java.util.NoSuchElementException;
  * for more information.
  *
  * All the Folder objects returned by the default IMAP provider implement
- * the UIDFolder interface.  Use it as follows: <p>
+ * the UIDFolder interface.  Use it as follows:
  * <blockquote><pre>
  *
  * 	Folder f = store.getFolder("whatever");
@@ -99,14 +99,14 @@ public interface UIDFolder {
 	 * This item indicates that the UIDs for messages in the specified 
 	 * range are desired to be prefetched. <p>
 	 * 
-	 * An example of how a client uses this is below: <p>
+	 * An example of how a client uses this is below:
 	 * <blockquote><pre>
 	 *
 	 * 	FetchProfile fp = new FetchProfile();
 	 *	fp.add(UIDFolder.FetchProfileItem.UID);
 	 *	folder.fetch(msgs, fp);
 	 *
-	 * </pre></blockquote><p>
+	 * </pre></blockquote>
 	 */ 
 	public static final FetchProfileItem UID = 
 		new FetchProfileItem("UID");
@@ -129,6 +129,7 @@ public interface UIDFolder {
      * UIDs are not stale.
      *
      * @return UIDValidity
+     * @exception	MessagingException for failures
      */
     public long getUIDValidity() throws MessagingException;
 
@@ -139,7 +140,7 @@ public interface UIDFolder {
      * @param uid	UID for the desired message
      * @return		the Message object. <code>null</code> is returned
      *			if no message corresponding to this UID is obtained.
-     * @exception	MessagingException
+     * @exception	MessagingException for failures
      */
     public Message getMessageByUID(long uid) throws MessagingException;
 
@@ -157,7 +158,7 @@ public interface UIDFolder {
      * @param start	start UID
      * @param end	end UID
      * @return		array of Message objects
-     * @exception	MessagingException
+     * @exception	MessagingException for failures
      * @see 		#LASTUID
      */
     public Message[] getMessagesByUID(long start, long end)
@@ -173,7 +174,7 @@ public interface UIDFolder {
      *
      * @param uids	array of UIDs
      * @return		array of Message objects
-     * @exception	MessagingException
+     * @exception	MessagingException for failures
      */
     public Message[] getMessagesByUID(long[] uids) 
 				throws MessagingException;
@@ -187,6 +188,7 @@ public interface UIDFolder {
      * @return		UID for this message
      * @exception	NoSuchElementException if the given Message
      *			is not in this Folder.
+     * @exception	MessagingException for other failures
      */
     public long getUID(Message message) throws MessagingException;
 }

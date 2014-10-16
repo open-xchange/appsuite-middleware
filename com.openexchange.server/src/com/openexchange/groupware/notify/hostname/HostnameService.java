@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.notify.hostname;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * {@link HostnameService} - A simple interface providing the host name part in generated links to internal objects, e.g. for notifications:
  *
@@ -58,6 +60,7 @@ package com.openexchange.groupware.notify.hostname;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface HostnameService {
 
     /**

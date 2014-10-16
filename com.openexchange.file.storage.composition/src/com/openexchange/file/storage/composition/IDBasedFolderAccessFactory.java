@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition;
 
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 
@@ -57,6 +58,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SingletonService
 public interface IDBasedFolderAccessFactory {
 
     /**

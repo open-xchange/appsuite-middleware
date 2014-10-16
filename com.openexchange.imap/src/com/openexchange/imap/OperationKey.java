@@ -85,6 +85,8 @@ public final class OperationKey implements Serializable {
         MSG_DELETE,
         /** Message label update operation */
         MSG_LABEL_UPDATE,
+        /** Message user flags update operation */
+        MSG_USER_FLAGS_UPDATE,
         /** Message flags update operation */
         MSG_FLAGS_UPDATE,
         /** Message append operation */

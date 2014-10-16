@@ -57,8 +57,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
-import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -75,10 +76,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.Resource;
-import com.openexchange.quota.ResourceDescription;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -196,18 +193,9 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check quota restrictions
              */
-            QuotaService quotaService = RdbServiceLookup.getService(QuotaService.class);
-            if (null != quotaService) {
-                Quota quota = quotaService.getQuotaFor(Resource.CONTACT, ResourceDescription.getEmptyResourceDescription(), session);
-                if (null != quota) {
-                    long quotaValue = quota.getQuota(QuotaType.AMOUNT);
-                    if (0 < quotaValue) {
-                        final long used = executor.count(connection, Table.CONTACTS, contextID);
-                        if (quotaValue <= used) {
-                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(used, quotaValue);
-                        }
-                    }
-                }
+            Quota quota = RdbContactQuotaProvider.getAmountQuota(serverSession, executor, connection);
+            if (null != quota && 0 < quota.getLimit() && 1 + quota.getUsage() > quota.getLimit()) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(quota.getUsage(), quota.getLimit());
             }
             /*
              * prepare insert
@@ -635,6 +623,59 @@ public class RdbContactStorage extends DefaultContactStorage {
         return searchByAnnualDate(session, folderIDs, from, until, fields, sortOptions, ContactField.ANNIVERSARY);
     }
 
+    @Override
+    public SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        /*
+         * prepare select
+         */
+        int contextID = session.getContextId();
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getReadOnly();
+        int[] parentFolderIDs = null != folderIDs ? parse(folderIDs.toArray(new String[folderIDs.size()])) : null;
+        try {
+            /*
+             * check fields
+             */
+            ContactField[] mandatoryFields = com.openexchange.tools.arrays.Arrays.add(
+                Tools.getRequiredFields(sortOptions), ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+            QueryFields queryFields = new QueryFields(fields, mandatoryFields);
+            if (false == queryFields.hasContactData()) {
+                return null; // nothing to do
+            }
+            /*
+             * get contact data
+             */
+            List<Contact> contacts = executor.selectByAutoComplete(connection, contextID, parentFolderIDs, query, parameters,
+                queryFields.getContactDataFields(), sortOptions);
+            if (null != contacts && 0 < contacts.size()) {
+                /*
+                 * merge image data if needed
+                 */
+                if (queryFields.hasImageData()) {
+                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
+                }
+                /*
+                 * merge distribution list data if needed
+                 */
+                if (queryFields.hasDistListData()) {
+                    contacts = mergeDistListData(connection, Table.DISTLIST, contextID, contacts);
+                }
+                /*
+                 * merge attachment information in advance if needed
+                 */
+                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
+                    contacts = mergeAttachmentData(connection, contextID, contacts);
+                }
+            }
+            return getSearchIterator(contacts);
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            connectionHelper.backReadOnly();
+        }
+    }
+
     private SearchIterator<Contact> searchByAnnualDate(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions, ContactField dateField) throws OXException {
         /*
          * prepare select
@@ -785,20 +826,9 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields;
-            if (null == contactSearch.getPattern() && null != sortOptions
-                && null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
-                // add sort field(s) to queried fields as this leads to UNION selects
-                List<ContactField> mandatoryFields = new ArrayList<ContactField>();
-                mandatoryFields.add(ContactField.OBJECT_ID);
-                mandatoryFields.add(ContactField.INTERNAL_USERID);
-                for (SortOrder order : sortOptions.getOrder()) {
-                    mandatoryFields.add(order.getBy());
-                }
-                queryFields = new QueryFields(fields, mandatoryFields.toArray(new ContactField[mandatoryFields.size()]));
-            } else {
-                queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
-            }
+            ContactField[] mandatoryFields = com.openexchange.tools.arrays.Arrays.add(
+                Tools.getRequiredFields(sortOptions), ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+            QueryFields queryFields = new QueryFields(fields, mandatoryFields);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }

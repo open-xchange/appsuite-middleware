@@ -60,7 +60,7 @@ public class Option {
 
     private final String id;
 
-    private final DisplayItem displayItem;
+    private final String name;
 
     private final Filter filter;
 
@@ -69,38 +69,22 @@ public class Option {
      * {@link SimpleDisplayItem}.
      * @param id
      *   The unique id of this option within a {@link FacetValue}.
-     * @param localizableDisplayName
+     * @param name
      *   The localizable display name of this option (shown within a client).
      * @param filter
      *   The filter.
      */
-    public static Option newInstance(String id, String localizableDisplayName, Filter filter) {
-        SimpleDisplayItem displayItem = new SimpleDisplayItem(localizableDisplayName, true);
+    public static Option newInstance(String id, String name, Filter filter) {
         checkNotNull(id);
-        checkNotNull(displayItem);
+        checkNotNull(name);
         checkNotNull(filter);
-        return new Option(id, displayItem, filter);
+        return new Option(id, name, filter);
     }
 
-    /**
-     * @param id
-     *   The unique id of this option within a {@link FacetValue}.
-     * @param displayItem
-     *   The display item of this option (shown within a client).
-     * @param filter
-     *   The filter.
-     */
-    public static Option newInstance(String id, DisplayItem displayItem, Filter filter) {
-        checkNotNull(id);
-        checkNotNull(displayItem);
-        checkNotNull(filter);
-        return new Option(id, displayItem, filter);
-    }
-
-    private Option(String id, DisplayItem displayItem, Filter filter) {
+    private Option(String id, String name, Filter filter) {
         super();
         this.id = id;
-        this.displayItem = displayItem;
+        this.name = name;
         this.filter = filter;
     }
 
@@ -108,8 +92,8 @@ public class Option {
         return id;
     }
 
-    public DisplayItem getDisplayItem() {
-        return displayItem;
+    public String getName() {
+        return name;
     }
 
     public Filter getFilter() {

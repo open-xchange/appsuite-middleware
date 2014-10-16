@@ -14,39 +14,7 @@ jcs.default.elementattributes.IsSpool=false
 jcs.default.elementattributes.IsRemote=false
 jcs.default.elementattributes.IsLateral=true
 
-# Pre-defined cache regions for usm session objects.
-jcs.region.USMSessionCache=LTCP
-jcs.region.USMSessionCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.USMSessionCache.cacheattributes.MaxObjects=1000000
-jcs.region.USMSessionCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
-jcs.region.USMSessionCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.USMSessionCache.cacheattributes.MaxMemoryIdleTimeSeconds=43200
-jcs.region.USMSessionCache.cacheattributes.ShrinkerIntervalSeconds=60
-jcs.region.USMSessionCache.elementattributes=org.apache.jcs.engine.ElementAttributes
-jcs.region.USMSessionCache.elementattributes.IsEternal=false
-jcs.region.USMSessionCache.elementattributes.MaxLifeSeconds=-1
-jcs.region.USMSessionCache.elementattributes.IdleTime=43200
-jcs.region.USMSessionCache.elementattributes.IsSpool=false
-jcs.region.USMSessionCache.elementattributes.IsRemote=false
-jcs.region.USMSessionCache.elementattributes.IsLateral=false
-
-# Pre-defined cache regions for usm user mapping objects.
-jcs.region.USMUserMappingCache=LTCP
-jcs.region.USMUserMappingCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.USMUserMappingCache.cacheattributes.MaxObjects=1000000
-jcs.region.USMUserMappingCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
-jcs.region.USMUserMappingCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.USMUserMappingCache.cacheattributes.MaxMemoryIdleTimeSeconds=43200
-jcs.region.USMUserMappingCache.cacheattributes.ShrinkerIntervalSeconds=60
-jcs.region.USMUserMappingCache.elementattributes=org.apache.jcs.engine.ElementAttributes
-jcs.region.USMUserMappingCache.elementattributes.IsEternal=false
-jcs.region.USMUserMappingCache.elementattributes.MaxLifeSeconds=-1
-jcs.region.USMUserMappingCache.elementattributes.IdleTime=-1
-jcs.region.USMUserMappingCache.elementattributes.IsSpool=false
-jcs.region.USMUserMappingCache.elementattributes.IsRemote=false
-jcs.region.USMUserMappingCache.elementattributes.IsLateral=false
-
-# Pre-defined cache regions for ox folder objects.   
+# Pre-defined cache regions for ox folder objects.
 jcs.region.OXFolderCache=LTCP
 jcs.region.OXFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.OXFolderCache.cacheattributes.MaxObjects=1000000
@@ -56,12 +24,12 @@ jcs.region.OXFolderCache.cacheattributes.UseMemoryShrinker=true
 # Shrinker removal works as follows:
 # 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
 # 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
-jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=360
 jcs.region.OXFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.OXFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.OXFolderCache.elementattributes.IsEternal=false
-jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds=300
-jcs.region.OXFolderCache.elementattributes.IdleTime=180
+jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds=-1
+jcs.region.OXFolderCache.elementattributes.IdleTime=360
 jcs.region.OXFolderCache.elementattributes.IsSpool=false
 jcs.region.OXFolderCache.elementattributes.IsRemote=false
 jcs.region.OXFolderCache.elementattributes.IsLateral=false
@@ -90,12 +58,12 @@ jcs.region.OXFolderQueryCache.cacheattributes=org.apache.jcs.engine.CompositeCac
 jcs.region.OXFolderQueryCache.cacheattributes.MaxObjects=1000000
 jcs.region.OXFolderQueryCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.OXFolderQueryCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.OXFolderQueryCache.cacheattributes.MaxMemoryIdleTimeSeconds=150
+jcs.region.OXFolderQueryCache.cacheattributes.MaxMemoryIdleTimeSeconds=360
 jcs.region.OXFolderQueryCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.OXFolderQueryCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.OXFolderQueryCache.elementattributes.IsEternal=false
-jcs.region.OXFolderQueryCache.elementattributes.MaxLifeSeconds=300
-jcs.region.OXFolderQueryCache.elementattributes.IdleTime=150
+jcs.region.OXFolderQueryCache.elementattributes.MaxLifeSeconds=-1
+jcs.region.OXFolderQueryCache.elementattributes.IdleTime=360
 # NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
 jcs.region.OXFolderQueryCache.elementattributes.IsSpool=false
 jcs.region.OXFolderQueryCache.elementattributes.IsRemote=false
@@ -135,19 +103,36 @@ jcs.region.UserConfiguration.elementattributes.IsSpool=false
 jcs.region.UserConfiguration.elementattributes.IsRemote=false
 jcs.region.UserConfiguration.elementattributes.IsLateral=false
 
+# Pre-defined cache for user configuration
+jcs.region.UserPermissionBits=LTCP
+jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000
+jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true
+jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360
+jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500
+jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.UserPermissionBits.elementattributes.IsEternal=false
+jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1
+jcs.region.UserPermissionBits.elementattributes.IdleTime=360
+jcs.region.UserPermissionBits.elementattributes.IsSpool=false
+jcs.region.UserPermissionBits.elementattributes.IsRemote=false
+jcs.region.UserPermissionBits.elementattributes.IsLateral=false
+
 # Pre-defined cache for user mail configuration
 jcs.region.UserSettingMail=LTCP
 jcs.region.UserSettingMail.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.UserSettingMail.cacheattributes.MaxObjects=20000
 jcs.region.UserSettingMail.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserSettingMail.cacheattributes.UseMemoryShrinker=true
-jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds=360
 jcs.region.UserSettingMail.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.UserSettingMail.cacheattributes.MaxSpoolPerRun=500
 jcs.region.UserSettingMail.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.UserSettingMail.elementattributes.IsEternal=false
-jcs.region.UserSettingMail.elementattributes.MaxLifeSeconds=300
-jcs.region.UserSettingMail.elementattributes.IdleTime=180
+jcs.region.UserSettingMail.elementattributes.MaxLifeSeconds=-1
+jcs.region.UserSettingMail.elementattributes.IdleTime=360
 jcs.region.UserSettingMail.elementattributes.IsSpool=false
 jcs.region.UserSettingMail.elementattributes.IsRemote=false
 jcs.region.UserSettingMail.elementattributes.IsLateral=false
@@ -186,7 +171,7 @@ jcs.region.Filestore.elementattributes.IsSpool=false
 jcs.region.Filestore.elementattributes.IsRemote=false
 jcs.region.Filestore.elementattributes.IsLateral=false
 
-# Pre-defined region for metadata of database connections to save config db accesses 
+# Pre-defined region for metadata of database connections to save config db accesses
 jcs.region.OXDBPoolCache=LTCP
 jcs.region.OXDBPoolCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.OXDBPoolCache.cacheattributes.MaxObjects=20000
@@ -226,18 +211,18 @@ jcs.region.MailAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttri
 jcs.region.MailAccount.cacheattributes.MaxObjects=100000
 jcs.region.MailAccount.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.MailAccount.cacheattributes.UseMemoryShrinker=true
-jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds=360
 jcs.region.MailAccount.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.MailAccount.cacheattributes.MaxSpoolPerRun=500
 jcs.region.MailAccount.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.MailAccount.elementattributes.IsEternal=false
-jcs.region.MailAccount.elementattributes.MaxLifeSeconds=300
-jcs.region.MailAccount.elementattributes.IdleTime=180
+jcs.region.MailAccount.elementattributes.MaxLifeSeconds=-1
+jcs.region.MailAccount.elementattributes.IdleTime=360
 jcs.region.MailAccount.elementattributes.IsSpool=false
 jcs.region.MailAccount.elementattributes.IsRemote=false
 jcs.region.MailAccount.elementattributes.IsLateral=false
 
-# Pre-defined cache regions for global folder objects.   
+# Pre-defined cache regions for global folder objects.
 jcs.region.GlobalFolderCache=LTCP
 jcs.region.GlobalFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.GlobalFolderCache.cacheattributes.MaxObjects=10000000
@@ -247,12 +232,12 @@ jcs.region.GlobalFolderCache.cacheattributes.UseMemoryShrinker=true
 # Shrinker removal works as follows:
 # 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
 # 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
-jcs.region.GlobalFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.GlobalFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=360
 jcs.region.GlobalFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.GlobalFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.GlobalFolderCache.elementattributes.IsEternal=false
-jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds=300
-jcs.region.GlobalFolderCache.elementattributes.IdleTime=180
+jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds=-1
+jcs.region.GlobalFolderCache.elementattributes.IdleTime=360
 jcs.region.GlobalFolderCache.elementattributes.IsSpool=false
 jcs.region.GlobalFolderCache.elementattributes.IsRemote=false
 jcs.region.GlobalFolderCache.elementattributes.IsLateral=false
@@ -264,8 +249,8 @@ jcs.auxiliary.LTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLat
 # jcs.auxiliary.LTCP.attributes.TcpServers=oxhost2:57461
 jcs.auxiliary.LTCP.attributes.TcpListenerPort=57462
 # Define UDP discovery here, but ensure you do not specify static TCP server via jcs.auxiliary.LTCP.attributes.TcpServers
-jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr=224.168.32.1
-jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort=6780
+# jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr=224.0.0.1
+# jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort=6780
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=false
 # Setting Receive equal to false means the cache operates in send-only mode
 jcs.auxiliary.LTCP.attributes.Receive=true

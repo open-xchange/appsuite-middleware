@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.messaging;
 
-import static com.openexchange.folderstorage.messaging.MessagingFolderStorageServiceRegistry.getServiceRegistry;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +85,7 @@ import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MessagingType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Collators;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.messaging.MailMessagingService;
@@ -106,6 +106,7 @@ import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.ServiceAware;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -185,11 +186,14 @@ public final class MessagingFolderStorage implements FolderStorage {
 
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link MessagingFolderStorage}.
      */
-    public MessagingFolderStorage() {
+    public MessagingFolderStorage(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -224,10 +228,9 @@ public final class MessagingFolderStorage implements FolderStorage {
         MessagingAccountAccess accountAccess = accesses.get(key);
         if (null == accountAccess) {
             try {
-                accountAccess =
-                    getServiceRegistry().getService(MessagingServiceRegistry.class, true).getMessagingService(serviceId, session.getUserId(), session.getContextId()).getAccountAccess(
-                        accountId,
-                        session);
+                MessagingServiceRegistry reg = services.getService(MessagingServiceRegistry.class);
+                MessagingService messagingService = reg.getMessagingService(serviceId, session.getUserId(), session.getContextId());
+                accountAccess = messagingService.getAccountAccess(accountId, session);
             } catch (final OXException e) {
                 throw e;
             }
@@ -592,8 +595,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             final Folder retval;
             final boolean hasSubfolders;
             if ("".equals(fullname)) {
-                final MessagingServiceRegistry msr =
-                    MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class, true);
+                final MessagingServiceRegistry msr = services.getService(MessagingServiceRegistry.class);
                 final MessagingService messagingService = msr.getMessagingService(serviceId, session.getUserId(), session.getContextId());
                 final MessagingAccount messagingAccount =
                     messagingService.getAccountManager().getAccount(accountId, session);
@@ -705,7 +707,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                  */
                 final List<MessagingAccount> accounts = new ArrayList<MessagingAccount>(8);
                 {
-                    final MessagingServiceRegistry registry = getServiceRegistry().getService(MessagingServiceRegistry.class, true);
+                    final MessagingServiceRegistry registry = services.getService(MessagingServiceRegistry.class);
                     final List<MessagingService> allServices = registry.getAllServices(session.getUserId(), session.getContextId());
                     final boolean available = mailFolderStorageAvailable;
                     final String mailMessagingServiceId = MailMessagingService.ID;
@@ -1182,8 +1184,7 @@ public final class MessagingFolderStorage implements FolderStorage {
 
         MessagingAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -1218,8 +1219,7 @@ public final class MessagingFolderStorage implements FolderStorage {
 
         SimpleMessagingFolderComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -1243,8 +1243,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                 indexMap.put(names[i], Integer.valueOf(i));
             }
             na = Integer.valueOf(names.length);
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         private Integer getNumberOf(final String name) {

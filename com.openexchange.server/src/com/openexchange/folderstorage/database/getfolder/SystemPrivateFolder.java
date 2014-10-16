@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Collators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -243,8 +244,7 @@ public final class SystemPrivateFolder {
 
         public NameComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override

@@ -96,8 +96,7 @@ public class OXRESTRoute {
      *
      * @return The HTTP method name
      */
-    public @NonNull
-    String getMethod() {
+    public @NonNull String getMethod() {
         return method;
     }
 
@@ -116,8 +115,7 @@ public class OXRESTRoute {
      *
      * @return The path declaration.
      */
-    public @NonNull
-    String getPath() {
+    public @NonNull String getPath() {
         return path;
     }
 

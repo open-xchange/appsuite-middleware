@@ -62,6 +62,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -78,6 +79,8 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.Provider;
 import javax.mail.Transport;
+import javax.mail.event.TransportEvent;
+import javax.mail.event.TransportListener;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
@@ -121,6 +124,8 @@ import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.MimeSupport;
+import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -139,13 +144,14 @@ import com.openexchange.smtp.services.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.JavaSMTPTransport;
 import com.sun.mail.smtp.SMTPMessage;
+import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
  * {@link SMTPTransport} - The SMTP mail transport.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPTransport extends MailTransport {
+public final class SMTPTransport extends MailTransport implements MimeSupport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPTransport.class);
 
@@ -333,10 +339,11 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private javax.mail.Session getSMTPSession() throws OXException {
-        return getSMTPSession(accountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
+        SMTPConfig smtpConfig = getTransportConfig0();
+        return getSMTPSession(smtpConfig, accountId > 0 && (smtpConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection()));
     }
 
-    private javax.mail.Session getSMTPSession(final boolean forceSecure) throws OXException {
+    private javax.mail.Session getSMTPSession(SMTPConfig smtpConfig, boolean forceSecure) throws OXException {
         if (null == smtpSession) {
             synchronized (this) {
                 if (null == smtpSession) {
@@ -345,7 +352,6 @@ public final class SMTPTransport extends MailTransport {
                     smtpProps.put("com.openexchange.mail.maxMailSize", Long.toString(getMaxMailSize()));
 
 
-                    final SMTPConfig smtpConfig = getTransportConfig0();
                     /*
                      * Set properties
                      */
@@ -592,12 +598,9 @@ public final class SMTPTransport extends MailTransport {
             {
                 final MimeBodyPart text = new MimeBodyPart();
                 final String txt = performLineFolding(
-                    strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
-                        "#DATE#",
-                        sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
-                            "#RECIPIENT#",
-                            quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
-                            usm.getAutoLinebreak());
+                    strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT)
+                    .replaceFirst("#DATE#", sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate)))
+                    .replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())), usm.getAutoLinebreak());
                 MessageUtility.setText(txt, defaultMimeCS, text);
                 // text.setText(txt,defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -699,7 +702,60 @@ public final class SMTPTransport extends MailTransport {
     }
 
     @Override
+    public void sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients) throws OXException {
+        final SMTPConfig smtpConfig = getTransportConfig0();
+        try {
+            /*
+             * Check recipients
+             */
+            final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
+            processAddressHeader(mimeMessage);
+            final boolean poisoned = checkRecipients(recipients);
+            if (poisoned) {
+                saveChangesSafe(mimeMessage);
+            } else {
+                try {
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        saveChangesSafe(mimeMessage);
+                        transport(mimeMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    } finally {
+                        transport.close();
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+        }
+    }
+
+    /**
+     * Gets the connected SMTP transport.
+     *
+     * @return The connected SMTP transport
+     * @throws OXException If an error occurs
+     * @throws MessagingException If a messaging error occurs
+     */
+    public com.sun.mail.smtp.SMTPTransport getSmtpTransport() throws OXException, MessagingException {
+        final com.sun.mail.smtp.SMTPTransport transport = (com.sun.mail.smtp.SMTPTransport) getSMTPSession().getTransport(SMTP);
+        connectTransport(transport, getTransportConfig0());
+        return transport;
+    }
+
+    @Override
     public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws OXException {
+        return sendMailMessage(composedMail, sendType, allRecipients, null);
+    }
+
+    @Override
+    public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients, final MtaStatusInfo mtaStatusInfo) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
         // There is an issue in the OSGi framework preventing the MailCap
         // from loading correctly. When getting the session here,
@@ -768,7 +824,7 @@ public final class SMTPTransport extends MailTransport {
                         try {
                             connectTransport(transport, smtpConfig);
                             saveChangesSafe(mimeMessage);
-                            transport(mimeMessage, recipients, transport, smtpConfig);
+                            transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
                             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         } catch (final javax.mail.AuthenticationFailedException e) {
                             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -827,7 +883,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * TODO: Do encryption here
                          */
-                        transport(smtpMessage, recipients, transport, smtpConfig);
+                        transport(smtpMessage, recipients, transport, smtpConfig, mtaStatusInfo);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {
                         throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -867,7 +923,7 @@ public final class SMTPTransport extends MailTransport {
                     transport.connect(server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword);
                 }
             } else {
-                transport.connect(server, port, "", "");
+                transport.connect(server, port, null, null);
             }
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {
@@ -885,10 +941,29 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+        transport(smtpMessage, recipients, transport, smtpConfig, null);
+    }
+
+    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig, final MtaStatusInfo mtaInfo) throws OXException {
+        // Prepare addresses
         prepareAddresses(recipients);
+
+        // Register transport listener to fill addresses to status info
+        if (null != mtaInfo) {
+            transport.addTransportListener(new AddressAddingTransportListener(mtaInfo));
+        }
+
+        // Try to send the message
         try {
             transport.sendMessage(smtpMessage, recipients);
             logMessageTransport(smtpMessage, smtpConfig);
+        } catch (SMTPSendFailedException sendFailed) {
+            OXException oxe = MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
+            if (null != mtaInfo) {
+                mtaInfo.setReturnCode(sendFailed.getReturnCode());
+                oxe.setArgument("mta_info", mtaInfo);
+            }
+            throw oxe;
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
@@ -1112,7 +1187,8 @@ public final class SMTPTransport extends MailTransport {
         // Connect to SMTP server
         final Transport transport;
         try {
-            transport = getSMTPSession(MailProperties.getInstance().isEnforceSecureConnection()).getTransport(SMTP);
+            SMTPConfig smtpConfig = getTransportConfig0();
+            transport = getSMTPSession(smtpConfig, smtpConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection()).getTransport(SMTP);
         } catch (final NoSuchProviderException e) {
             throw MimeMailException.handleMessagingException(e);
         }
@@ -1269,4 +1345,49 @@ public final class SMTPTransport extends MailTransport {
         }
         return builder.toString();
     }
+
+    private static final class AddressAddingTransportListener implements TransportListener {
+
+        private final MtaStatusInfo statusInfo;
+
+        AddressAddingTransportListener(MtaStatusInfo statusInfo) {
+            super();
+            this.statusInfo = statusInfo;
+        }
+
+        @Override
+        public void messagePartiallyDelivered(TransportEvent e) {
+            fillAddressesFromEvent(e);
+        }
+
+        @Override
+        public void messageNotDelivered(TransportEvent e) {
+            fillAddressesFromEvent(e);
+
+        }
+
+        @Override
+        public void messageDelivered(TransportEvent e) {
+            fillAddressesFromEvent(e);
+
+        }
+
+        private void fillAddressesFromEvent(TransportEvent e) {
+            javax.mail.Address[] arr = e.getInvalidAddresses();
+            if (null != arr) {
+                statusInfo.getInvalidAddresses().addAll(Arrays.asList(arr));
+            }
+
+            arr = e.getValidUnsentAddresses();
+            if (null != arr) {
+                statusInfo.getUnsentAddresses().addAll(Arrays.asList(arr));
+            }
+
+            arr = e.getValidSentAddresses();
+            if (null != arr) {
+                statusInfo.getSentAddresses().addAll(Arrays.asList(arr));
+            }
+        }
+    }
+
 }

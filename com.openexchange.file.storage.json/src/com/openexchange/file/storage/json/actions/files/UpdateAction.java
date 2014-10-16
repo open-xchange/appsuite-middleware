@@ -95,17 +95,13 @@ public class UpdateAction extends AbstractWriteAction {
         final IDBasedFileAccess fileAccess = request.getFileAccess();
         if (request.hasUploads()) {
             final boolean ignoreVersion = request.getBoolParameter("ignoreVersion");
-            if (ignoreVersion) {
-                if (fileAccess instanceof IDBasedIgnorableVersionFileAccess) {
-                    final IDBasedIgnorableVersionFileAccess ignorableVersionFileAccess = (IDBasedIgnorableVersionFileAccess) fileAccess;
-                    final FileID id = new FileID(file.getId());
-                    if (ignorableVersionFileAccess.supportsIgnorableVersion(id.getService(), id.getAccountId())) {
-                        ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
-                    } else {
-                        ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
-                    }
+            if (ignoreVersion && (fileAccess instanceof IDBasedIgnorableVersionFileAccess)) {
+                final IDBasedIgnorableVersionFileAccess ignorableVersionFileAccess = (IDBasedIgnorableVersionFileAccess) fileAccess;
+                final FileID id = new FileID(file.getId());
+                if (ignorableVersionFileAccess.supportsIgnorableVersion(id.getService(), id.getAccountId())) {
+                    ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
                 } else {
-                    fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+                    ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
                 }
             } else {
                 fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
@@ -113,11 +109,7 @@ public class UpdateAction extends AbstractWriteAction {
         } else {
             fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
         }
-        if (request.extendedResponse()) {
-            return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
-        } else {
-            return success(file.getSequenceNumber());
-        }
+        return request.extendedResponse() ? result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
     }
 
 }

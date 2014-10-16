@@ -79,7 +79,6 @@ import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.DistributionListFields;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
@@ -112,13 +111,13 @@ public class AbstractContactTest extends AbstractAJAXSession {
     public static final String CONTENT_TYPE = "image/png";
 
     public static final byte[] image = { -119, 80, 78, 71, 13, 10, 26, 10, 0,
-    0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 0, 0, 0,
-    37, -37, 86, -54, 0, 0, 0, 6, 80, 76, 84, 69, -1, -1, -1, -1, -1,
-    -1, 85, 124, -11, 108, 0, 0, 0, 1, 116, 82, 78, 83, 0, 64, -26,
-    -40, 102, 0, 0, 0, 1, 98, 75, 71, 68, 0, -120, 5, 29, 72, 0, 0, 0,
-    9, 112, 72, 89, 115, 0, 0, 11, 18, 0, 0, 11, 18, 1, -46, -35, 126,
-    -4, 0, 0, 0, 10, 73, 68, 65, 84, 120, -38, 99, 96, 0, 0, 0, 2, 0,
-    1, -27, 39, -34, -4, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126 };
+        0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 0, 0, 0,
+        37, -37, 86, -54, 0, 0, 0, 6, 80, 76, 84, 69, -1, -1, -1, -1, -1,
+        -1, 85, 124, -11, 108, 0, 0, 0, 1, 116, 82, 78, 83, 0, 64, -26,
+        -40, 102, 0, 0, 0, 1, 98, 75, 71, 68, 0, -120, 5, 29, 72, 0, 0, 0,
+        9, 112, 72, 89, 115, 0, 0, 11, 18, 0, 0, 11, 18, 1, -46, -35, 126,
+        -4, 0, 0, 0, 10, 73, 68, 65, 84, 120, -38, 99, 96, 0, 0, 0, 2, 0,
+        1, -27, 39, -34, -4, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126 };
 
     protected final static int[] CONTACT_FIELDS = {
         DataObject.OBJECT_ID,
@@ -232,8 +231,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     protected int userId = 0;
 
-    protected AJAXClient client;
-
     protected TimeZone tz;
 
     /**
@@ -248,7 +245,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
 
-        client = getClient();
         contactFolderId = client.getValues().getPrivateContactFolder();
         userId = client.getValues().getUserId();
         tz = client.getValues().getTimeZone();
@@ -281,6 +277,10 @@ public class AbstractContactTest extends AbstractAJAXSession {
     }
 
     protected void compareObject(final Contact contactObj1, final Contact contactObj2) throws Exception {
+        compareObject(contactObj1, contactObj2, true);
+    }
+
+    protected void compareObject(final Contact contactObj1, final Contact contactObj2, boolean compareUID) throws Exception {
         assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
         assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
         assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
@@ -378,9 +378,11 @@ public class AbstractContactTest extends AbstractAJAXSession {
         OXTestToolkit.assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
         OXTestToolkit.assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
         OXTestToolkit.assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
-        OXTestToolkit.assertEqualsAndNotNull("uid is not equals", contactObj1.getUid(), contactObj2.getUid());
+        if (compareUID) {
+            OXTestToolkit.assertEqualsAndNotNull("uid is not equals", contactObj1.getUid(), contactObj2.getUid());
+        }
 
-//        OXTestToolkit.assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
+        //        OXTestToolkit.assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
         OXTestToolkit.assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
     }
 
@@ -541,7 +543,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
     }
 
     public Contact[] allContact(final int inFolder, final int[] cols) throws Exception {
-         return allContact(inFolder, cols, -1, -1);
+        return allContact(inFolder, cols, -1, -1);
     }
 
     public Contact[] allContact(final int inFolder, final int[] cols, final int leftHandLimit, final int rightHandLimit) throws Exception {
@@ -581,9 +583,9 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     public Contact[] listContact(final int[][] objectIdAndFolderId, final int[] cols) throws Exception {
         final ListIDs identifier = new ListIDs();
-        for (int i = 0; i < objectIdAndFolderId.length; i++) {
+        for (int[] element : objectIdAndFolderId) {
 
-            identifier.add(new ListIDInt(objectIdAndFolderId[i][1], objectIdAndFolderId[i][0]));
+            identifier.add(new ListIDInt(element[1], element[0]));
         }
         final ListRequest request = new ListRequest(identifier, cols);
         final CommonListResponse response = client.execute(request);
@@ -609,6 +611,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         InputStream inputStream = null;
         try {
             final AJAXSession ajaxSession = getSession();
+
             final HttpGet httpRequest = new HttpGet((null == protocol ? "http" : protocol) + "://" + (hostname == null ? "localhost" : hostname) + imageUrl);
             final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
             inputStream = httpResponse.getEntity().getContent();
@@ -651,7 +654,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
     }
 
     private void parse(final int pos, final int field, final JSONArray jsonArray, final Contact contactObj)
-            throws Exception {
+        throws Exception {
         switch (field) {
         case Contact.OBJECT_ID:
             if (!jsonArray.isNull(pos)) {
@@ -843,10 +846,10 @@ public class AbstractContactTest extends AbstractAJAXSession {
                 contactObj.setImage1(jsonArray.getString(pos).getBytes());
             }
             break;
-        /*
-         * NO LONGER PRESENT case ContactObject.NUMBER_OF_IMAGES:
-         * contactObj.setNumberOfImages(jsonArray.getInt(pos)); break;
-         */
+            /*
+             * NO LONGER PRESENT case ContactObject.NUMBER_OF_IMAGES:
+             * contactObj.setNumberOfImages(jsonArray.getInt(pos)); break;
+             */
         case Contact.INFO:
             if (!jsonArray.isNull(pos)) {
                 contactObj.setInfo(jsonArray.getString(pos));
@@ -1230,8 +1233,8 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
         final HashSet hs = new HashSet();
 
-        for (int a = 0; a < distributionListEntry.length; a++) {
-            hs.add(entry2String(distributionListEntry[a]));
+        for (DistributionListEntryObject element : distributionListEntry) {
+            hs.add(entry2String(element));
         }
 
         return hs;

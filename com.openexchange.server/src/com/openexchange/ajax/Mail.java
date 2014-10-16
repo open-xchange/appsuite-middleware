@@ -315,6 +315,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     public static final String PARAMETER_MAILCID = "cid";
 
+    /**
+     * Parameter to define the maximum desired content length (in bytes) returned for the requested mail.
+     */
+    public static final String PARAMETER_MAX_SIZE = "max_size";
+
     public static final String PARAMETER_SAVE = "save";
 
     public static final String PARAMETER_SHOW_SRC = "src";
@@ -2784,7 +2789,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             accountId = MailAccount.DEFAULT_ID;
                             composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
                         }
-                        msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
+                        msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId).toString();
                     } else {
                         throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
                     }
@@ -4882,7 +4887,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 session,
                                 accountId,
                                 warnings);
-                            msgIdentifier = mailServletInterface.saveDraft(composedMail, false, accountId);
+                            msgIdentifier = mailServletInterface.saveDraft(composedMail, false, accountId).toString();
                         } else {
                             /*
                              * ... and send message
@@ -4987,7 +4992,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             /*
                              * ... and edit draft
                              */
-                            msgIdentifier = msi.saveDraft(composedMail, false, accountId);
+                            msgIdentifier = msi.saveDraft(composedMail, false, accountId).toString();
                         } else {
                             throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
                         }

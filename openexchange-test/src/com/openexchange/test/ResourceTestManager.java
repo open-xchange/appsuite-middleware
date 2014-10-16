@@ -49,7 +49,7 @@
 
 package com.openexchange.test;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;

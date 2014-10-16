@@ -67,8 +67,7 @@ public enum MailFacetType implements FacetType {
 
     SUBJECT,
     MAIL_TEXT,
-    CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
-    TIME(MailStrings.FACET_TIME);
+    CONTACTS(MailStrings.FACET_PEOPLE);
 
     private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
     static {

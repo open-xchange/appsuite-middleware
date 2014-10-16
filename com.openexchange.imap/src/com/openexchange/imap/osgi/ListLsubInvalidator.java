@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.osgi;
 
+import java.io.Serializable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -91,11 +92,13 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
 
             final String region = cacheEvent.getRegion();
             if (REGION.equals(region)) {
-                final String key = cacheEvent.getKey().toString(); // <user-id> + "@" + <context-id>
-                final int pos = key.indexOf('@');
-                final int userId = Integer.parseInt(key.substring(0, pos));
-                final int contextId = Integer.parseInt(key.substring(pos + 1));
-                ListLsubCache.dropFor(userId, contextId);
+                for (Serializable cacheKey : cacheEvent.getKeys()) {
+                    final String key = String.valueOf(cacheKey); // <user-id> + "@" + <context-id>
+                    final int pos = key.indexOf('@');
+                    final int userId = Integer.parseInt(key.substring(0, pos));
+                    final int contextId = Integer.parseInt(key.substring(pos + 1));
+                    ListLsubCache.dropFor(userId, contextId);
+                }
             }
         }
     }

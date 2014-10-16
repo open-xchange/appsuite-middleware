@@ -139,7 +139,11 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @exception AddressException If the parse failed
      */
     public static InternetAddress[] parse(final String addresslist, final boolean strict) throws AddressException {
-        return parse(addresslist, strict, false);
+        try {
+            return parse(addresslist, strict, false, true);
+        } catch (AddressException e) {
+            return parse(addresslist, strict, false, false);
+        }
     }
 
     /**
@@ -158,16 +162,21 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @exception AddressException If the parse failed
      */
     public static InternetAddress[] parseHeader(final String addresslist, final boolean strict) throws AddressException {
-        return parse(addresslist, strict, true);
+        try {
+            return parse(addresslist, strict, true, true);
+        } catch (AddressException e) {
+            return parse(addresslist, strict, true, false);
+        }
     }
 
     /*
      * RFC822 Address parser. XXX - This is complex enough that it ought to be a real parser, not this ad-hoc mess, and because of that,
      * this is not perfect. XXX - Deal with encoded Headers too.
      */
-    private static InternetAddress[] parse(final String s, final boolean strict, final boolean parseHdr) throws AddressException {
+    private static InternetAddress[] parse(String str, boolean strict, boolean parseHdr, boolean decodeFirst) throws AddressException {
         int start, end, index, nesting;
         int start_personal = -1, end_personal = -1;
+        String s = decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str;
         final int length = s.length();
         final boolean ignoreErrors = parseHdr && !strict;
         boolean in_group = false; // we're processing a group term
@@ -931,11 +940,26 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     private void parseAddress0(final String address) throws AddressException {
-        // use our address parsing utility routine to parse the string
-        final InternetAddress a[] = parse(address, true);
-        // if we got back anything other than a single address, it's an error
-        if (a.length != 1) {
-            throw new AddressException("Illegal address", address);
+        InternetAddress[] a;
+        try {
+            // use our address parsing utility routine to parse the string
+            a = parse(address, true);
+
+            // if we got back anything other than a single address, it's an error
+            if (a.length != 1) {
+                a = parse(address, true, false, false);
+                if (a.length != 1) {
+                    throw new AddressException("Illegal address", address);
+                }
+            }
+        } catch (AddressException e) {
+            // use our address parsing utility routine to parse the string
+            a = parse(address, true, false, false);
+
+            // if we got back anything other than a single address, it's an error
+            if (a.length != 1) {
+                throw new AddressException("Illegal address", address);
+            }
         }
 
         /*

@@ -392,7 +392,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     }
 
     protected void listRecursively(final SortedSet<String> allIds, String prefix, final File file) {
-        if(prefix.length() != 0 && !prefix.endsWith("/")) {
+        if (prefix.length() > 0 && !prefix.endsWith("/")) {
             prefix += "/";
         }
         if (SPECIAL_FILENAMES.contains(file.getName())) {
@@ -401,8 +401,8 @@ public class LocalFileStorage extends DefaultFileStorage {
         }
         if (file.isDirectory()) {
             for (final File subfile : file.listFiles()) {
-                if(file.equals(storage)) {
-                    listRecursively(allIds, "" , subfile);
+                if (file.equals(storage)) {
+                    listRecursively(allIds, "", subfile);
                 } else {
                     listRecursively(allIds, prefix + file.getName(), subfile);
                 }
@@ -620,6 +620,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     }
 
     protected void lock(final long timeout) throws OXException {
+        ensureStorageExists();
         final File lock = new File(storage, LOCK_FILENAME);
         final long maxLifeTime = 100 * timeout;
         final long lastModified = lock.lastModified();

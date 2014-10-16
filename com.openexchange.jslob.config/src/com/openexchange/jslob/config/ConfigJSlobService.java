@@ -305,7 +305,7 @@ public final class ConfigJSlobService implements JSlobService {
                     try {
                         attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
                     } catch (final Exception e) {
-                        logger.warn("Couldn''t initialize preference path: {}", preferencePath, e);
+                        logger.warn("Couldn't initialize preference path: {}", preferencePath, e);
                     }
                 }
             }
@@ -717,14 +717,16 @@ public final class ConfigJSlobService implements JSlobService {
                     @Override
                     public Void call() throws Exception {
                         try {
-                            final Setting setting = configTree.getSettingByPath(_path);
-                            setting.setSingleValue(value);
-                            saveSettingWithSubs(stor, setting);
+                            final Setting setting = configTree.optSettingByPath(_path);
+                            if (null != setting) {
+                                setting.setSingleValue(value);
+                                saveSettingWithSubs(stor, setting);
+                            }
                         } catch (OXException x) {
                             if (!SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
                                 throw x;
                             }
-                            LOG.error("Ignoring update to unmappable path", x);
+                            LOG.debug("Ignoring update to unmappable path", x);
                         }
                         return null;
                     }
@@ -788,13 +790,15 @@ public final class ConfigJSlobService implements JSlobService {
                 OXException exc = null;
                 while (iter.hasNext()) {
                     final String key = iter.next();
-                    final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
-                    sub.setSingleValue(json.getString(key));
-                    try {
-                        // Catch single exceptions if GUI writes not writable fields.
-                        saveSettingWithSubs(storage, sub);
-                    } catch (final OXException e) {
-                        exc = e;
+                    Setting sub = ConfigTree.optSettingByPath(setting, new String[] { key });
+                    if (null != sub) {
+                        sub.setSingleValue(json.getString(key));
+                        try {
+                            // Catch single exceptions if GUI writes not writable fields.
+                            saveSettingWithSubs(storage, sub);
+                        } catch (final OXException e) {
+                            exc = e;
+                        }
                     }
                 }
                 if (null != exc) {

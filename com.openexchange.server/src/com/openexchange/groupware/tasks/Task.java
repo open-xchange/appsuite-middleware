@@ -84,14 +84,18 @@ public class Task extends CalendarObject {
     public static final int TRIP_METER = 313;
     public static final int COMPANIES = 314;
     public static final int DATE_COMPLETED = 315;
+    public static final int START_TIME = 316;
+    public static final int END_TIME = 317;
 
     public static final int[] ALL_COLUMNS = {
         // From Task itself
         STATUS, PERCENT_COMPLETED, ACTUAL_COSTS, ACTUAL_DURATION, BILLING_INFORMATION, TARGET_COSTS, TARGET_DURATION, PRIORITY, CURRENCY,
         TRIP_METER, COMPANIES, DATE_COMPLETED,
+        // already covered by START_DATE: START_TIME,
+        // already covered by END_DATE: END_TIME,
 
         // From CalendarObject
-        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_TYPE, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, PARTICIPANTS, UID,
+        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_TYPE, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, PARTICIPANTS, UID, FULL_TIME,
         // not yet implemented: NOTIFICATION, USERS,
         // not implemented anymore: RECURRING_OCCURRENCE, PROJECT_ID,
 
@@ -138,7 +142,7 @@ public class Task extends CalendarObject {
      */
     private Long actualDuration;
 
-    private int priority = 0;
+    private Integer priority = null;
 
     private int percentComplete = 0;
 
@@ -220,7 +224,7 @@ public class Task extends CalendarObject {
         return actualDuration;
     }
 
-    public int getPriority() {
+    public Integer getPriority() {
         return priority;
     }
 
@@ -292,7 +296,7 @@ public class Task extends CalendarObject {
         actualDurationSet = true;
     }
 
-    public void setPriority(final int priority) {
+    public void setPriority(Integer priority) {
         this.priority = priority;
         prioritySet = true;
     }
@@ -369,7 +373,7 @@ public class Task extends CalendarObject {
     }
 
     public void removePriority() {
-        priority = 0;
+        priority = null;
         prioritySet = false;
     }
 
@@ -491,7 +495,7 @@ public class Task extends CalendarObject {
 
         actualDuration = null;
 
-        priority = 0;
+        priority = null;
         percentComplete = 0;
 
         currency = null;
@@ -574,7 +578,7 @@ public class Task extends CalendarObject {
             setTargetCosts((BigDecimal) value);
             break;
         case PRIORITY:
-            setPriority(((Integer) value).intValue());
+            setPriority((Integer) value);
             break;
         case BILLING_INFORMATION:
             setBillingInformation((String) value);
@@ -620,7 +624,7 @@ public class Task extends CalendarObject {
         case TARGET_COSTS:
             return getTargetCosts();
         case PRIORITY:
-            return I(getPriority());
+            return getPriority();
         case BILLING_INFORMATION:
             return getBillingInformation();
         case ALARM:

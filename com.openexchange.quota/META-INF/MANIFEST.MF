@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Quota Bundle
 Bundle-SymbolicName: com.openexchange.quota
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -18,5 +18,6 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.quota
+Export-Package: com.openexchange.quota,
+ com.openexchange.quota.groupware
 Bundle-Activator: com.openexchange.quota.osgi.QuotaActivator

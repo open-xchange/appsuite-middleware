@@ -13,8 +13,10 @@ opt/open-xchange/etc/findbasic.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/folderjson.properties
 opt/open-xchange/etc/folder-reserved-names
+opt/open-xchange/etc/guard.properties
 opt/open-xchange/etc/hazelcast.properties
 opt/open-xchange/etc/HTMLEntities.properties
+opt/open-xchange/etc/html-sanitizer.properties
 opt/open-xchange/etc/i18n.properties
 opt/open-xchange/etc/importerExporter.xml
 opt/open-xchange/etc/import.properties
@@ -58,7 +60,6 @@ opt/open-xchange/etc/transport.properties
 opt/open-xchange/etc/tokens.properties
 opt/open-xchange/etc/user.properties
 opt/open-xchange/etc/whitelist.properties
-opt/open-xchange/etc/contextSets/index.yml
 opt/open-xchange/etc/meta/ui.yml
 opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties

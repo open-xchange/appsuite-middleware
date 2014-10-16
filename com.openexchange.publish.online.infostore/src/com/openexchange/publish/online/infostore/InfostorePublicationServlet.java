@@ -119,6 +119,9 @@ public class InfostorePublicationServlet extends HttpServlet {
             super.service(new CountingHttpServletRequest(req), resp);
         } catch (final RateLimitedException e) {
             resp.setContentType("text/plain; charset=UTF-8");
+            if(e.getRetryAfter() > 0) {
+                resp.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
+            }
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         }
     }
@@ -146,7 +149,7 @@ public class InfostorePublicationServlet extends HttpServlet {
             final Context ctx = getContext(path);
             final String secret = getSecret(path);
             final Publication publication = getPublication(secret, ctx);
-            if(publication == null || !publication.isEnabled()) {
+            if (publication == null || !publication.isEnabled()) {
                 resp.getWriter().println("Not Found");
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -155,9 +158,9 @@ public class InfostorePublicationServlet extends HttpServlet {
             final InputStream is = loadContent(publication);
             configureHeaders(document, req, resp);
             write(is, resp);
-            if(mustSelfDestruct(publication)) {
+            if (mustSelfDestruct(publication)) {
                 destroy(publication);
-                if(mustDestroyDocument(publication) && ! hasMorePublications(publication.getContext(), document)) {
+                if (mustDestroyDocument(publication) && !hasMorePublications(publication.getContext(), document)) {
                     final ServerSession session = ServerSessionAdapter.valueOf(new PublicationSession(publication), publication.getContext());
                     destroy(session, document);
                 }

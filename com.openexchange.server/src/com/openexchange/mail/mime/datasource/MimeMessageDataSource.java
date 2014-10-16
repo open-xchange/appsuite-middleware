@@ -104,6 +104,7 @@ import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
@@ -337,10 +338,9 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
             final String name = contentType.getNameParameter();
             // Body
             if (contentType.startsWith("multipart/")) {
-                final Multipart m = (Multipart) mimePart.getContent();
+                final Multipart m = MimeMessageUtility.multipartFrom(mimePart);
                 final String subType = parseSubType(m.getContentType());
-                final org.apache.james.mime4j.dom.Multipart mime4jMultipart = new MultipartImpl(
-                    null == subType ? "mixed" : toLowerCase(subType));
+                final org.apache.james.mime4j.dom.Multipart mime4jMultipart = new MultipartImpl(null == subType ? "mixed" : toLowerCase(subType));
                 // A multipart may have a preamble
                 mime4jMultipart.setPreamble("This is a multi-part message in MIME format.");
                 final int count = m.getCount();

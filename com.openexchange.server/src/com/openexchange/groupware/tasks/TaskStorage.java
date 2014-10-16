@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -312,4 +313,13 @@ public abstract class TaskStorage {
      * @throws OXException if reading from the persistent storage fails.
      */
     abstract int countTasks(Context ctx) throws OXException;
+
+    /**
+     * Counts the number of tasks existing for the given context.
+     * @param contextId The context id.
+     * @param con The database connection to use.
+     * @return the number of tasks stored for the given context.
+     * @throws OXException if reading from the persistent storage fails.
+     */
+    abstract int countTasks(int contextId, Connection con) throws SQLException, OXException;
 }

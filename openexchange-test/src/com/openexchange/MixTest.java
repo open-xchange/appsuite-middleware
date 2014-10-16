@@ -163,8 +163,8 @@ public final class MixTest {
             final WebConversation conv = new WebConversation();
             final WebRequest req = new HeadMethodWebRequest(
                 AJAXConfig.getProperty(Property.PROTOCOL) + "://"
-                + AJAXConfig.getProperty(Property.HOSTNAME)
-                + "/servlet/webdav.infostore");
+                    + AJAXConfig.getProperty(Property.HOSTNAME)
+                    + "/servlet/webdav.infostore");
             conv.setAuthorization(
                 AJAXConfig.getProperty(Property.LOGIN),
                 AJAXConfig.getProperty(Property.PASSWORD));

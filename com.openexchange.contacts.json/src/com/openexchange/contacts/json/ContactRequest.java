@@ -112,6 +112,30 @@ public class ContactRequest {
     }
 
     /**
+     * Constant for not-found number.
+     */
+    public static final int NOT_FOUND = -9999;
+
+    /**
+     * Gets optional <code>int</code> parameter.
+     *
+     * @param name The parameter name
+     * @return The <code>int</code> or {@link #NOT_FOUND} (<code>-9999</code>)
+     * @throws OXException If parameter is an invalid number value
+     */
+    public int optInt(final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            return NOT_FOUND;
+        }
+        try {
+            return Integer.parseInt(parameter.trim());
+        } catch (final NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+        }
+    }
+
+    /**
      * Gets a value indicating whether the results should be sorted internally
      * or not, i.e. the 'sort' field of the request is set to a magic value.
      *
@@ -391,7 +415,15 @@ public class ContactRequest {
     }
 
     public boolean isExcludeAdmin() throws OXException {
-    	return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class);
+        return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class);
+    }
+
+    public boolean isRequireEmail() throws OXException {
+        return false == request.containsParameter("email") || request.getParameter("email", boolean.class);
+    }
+
+    public String getQuery() throws OXException {
+        return request.getParameter("query");
     }
 
     public int[][] getListRequestData() throws OXException {

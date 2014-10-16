@@ -70,7 +70,7 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link FindByMailsRequestAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FindByMailsRequestAction extends AbstractXingAction {
@@ -82,9 +82,8 @@ public class FindByMailsRequestAction extends AbstractXingAction {
 		super(services);
 	}
 
-	@Override
-	protected AJAXRequestResult perform(XingRequest req) throws OXException,
-			JSONException, XingException {
+    @Override
+    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         Object objData = req.getRequest().getData();
         if (objData == null) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
@@ -102,16 +101,16 @@ public class FindByMailsRequestAction extends AbstractXingAction {
 
         int length = jsonArray.length();
         List<String> emails = new ArrayList<String>(length);
-        for(int i=0; i<length; i++){
-        	String email = jsonArray.getString(i);
-        	email = validateMailAddress(email);
-        	emails.add(email);
+        for (int i = 0; i < length; i++) {
+            String email = jsonArray.getString(i);
+            email = validateMailAddress(email);
+            emails.add(email);
         }
 
         String token = req.getParameter("testToken");
-		String secret = req.getParameter("testSecret");
+        String secret = req.getParameter("testSecret");
 
-		final XingOAuthAccess xingOAuthAccess;
+        final XingOAuthAccess xingOAuthAccess;
         {
             if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
                 xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.internal;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -77,6 +76,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.preferences.ServerUserSetting;
@@ -123,30 +123,29 @@ public final class Tools {
 	                return 0;
 	            }
             };
-	    } else {
-	        /*
-	         * sort using the mapping's comparator with collation
-	         */
-	        final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
-	            Collator.getInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
-	        return new Comparator<Contact>() {
-	            @Override
-	            public int compare(Contact o1, Contact o2) {
-	                for (SortOrder order : sortOptions.getOrder()) {
-	                    int comparison = 0;
-	                    try {
-	                        comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
-	                    } catch (OXException e) {
-	                        LOG.error("error comparing objects", e);
-	                    }
-	                    if (0 != comparison) {
-	                        return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;
-	                    }
-	                }
-	                return 0;
-	            }
-	        };
 	    }
+        /*
+         * sort using the mapping's comparator with collation
+         */
+        final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
+            Collators.getDefaultInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
+        return new Comparator<Contact>() {
+            @Override
+            public int compare(Contact o1, Contact o2) {
+                for (SortOrder order : sortOptions.getOrder()) {
+                    int comparison = 0;
+                    try {
+                        comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
+                    } catch (OXException e) {
+                        LOG.error("error comparing objects", e);
+                    }
+                    if (0 != comparison) {
+                        return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;
+                    }
+                }
+                return 0;
+            }
+        };
 	}
 
 	/**
@@ -605,6 +604,37 @@ public final class Tools {
              */
             return prepareSearchContactsAlternative(contactSearch);
         }
+    }
+
+    /**
+     * Constructs a search object using the supplied parameters.
+     *
+     * @param session The session
+     * @param pattern The search pattern
+     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
+     *                     otherwise
+     * @param folderIDs A list of folder IDs to restrict the search for, or <code>null</code> to search in folders available for
+     *                  auto-complete
+     * @return The prepared search object
+     * @throws OXException
+     */
+    public static ContactSearchObject prepareAutocomplete(Session session, String pattern, boolean requireEmail, List<String> folderIDs) throws OXException {
+//        pattern = addWildcards(pattern, false, true);
+        ContactSearchObject searchObject = new ContactSearchObject();
+        searchObject.setOrSearch(true);
+        searchObject.setEmailAutoComplete(requireEmail);
+        searchObject.setDisplayName(pattern);
+        searchObject.setSurname(pattern);
+        searchObject.setGivenName(pattern);
+        searchObject.setEmail1(pattern);
+        searchObject.setEmail2(pattern);
+        searchObject.setEmail3(pattern);
+        if (null != folderIDs) {
+            searchObject.setFolders(parse(folderIDs));
+        } else {
+            Tools.getSearchFolders(session.getContextId(), session.getUserId(), true);
+        }
+        return searchObject;
     }
 
     private static ContactSearchObject prepareSearchContacts(ContactSearchObject contactSearch) {

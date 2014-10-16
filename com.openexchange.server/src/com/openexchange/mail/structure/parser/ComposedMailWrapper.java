@@ -391,6 +391,36 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
+    public void addReplyTo(final InternetAddress addr) {
+        mail.addReplyTo(addr);
+    }
+
+    @Override
+    public void addReplyTo(final InternetAddress[] addrs) {
+        mail.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean containsReplyTo() {
+        return mail.containsReplyTo();
+    }
+
+    @Override
+    public void removeReplyTo() {
+        mail.removeReplyTo();
+    }
+
+    @Override
+    public InternetAddress[] getReplyTo() {
+        return mail.getReplyTo();
+    }
+
+    @Override
+    public boolean isUnseen() {
+        return mail.isUnseen();
+    }
+
+    @Override
     public boolean containsCc() {
         return mail.containsCc();
     }

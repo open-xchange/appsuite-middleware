@@ -52,10 +52,15 @@ package com.openexchange.drive.sync;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
 import com.openexchange.drive.actions.ErrorDirectoryAction;
@@ -67,13 +72,11 @@ import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
-import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.java.Strings;
 
 
 /**
@@ -82,6 +85,8 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
+
+    private Map<String, Set<String>> normalizedFilesnamesPerFolder;
 
     public DirectorySynchronizer(SyncSession session, VersionMapper<DirectoryVersion> mapper) throws OXException {
         super(session, mapper);
@@ -101,7 +106,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
                 twc.setClientVersion(clientVersion);
                 OXException e = DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath());
-                LOG.warn("Client change refused due to case conflicting name: " + clientVersion, e);
+                LOG.warn("Client change refused due to case conflicting name: {}", clientVersion, e);
                 syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc, e, true, false));
             }
         }
@@ -113,7 +118,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
                 twc.setClientVersion(clientVersion);
                 OXException e = DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath());
-                LOG.warn("Client change refused due to unicode conflicting name: " + clientVersion, e);
+                LOG.warn("Client change refused due to unicode conflicting name: {}", clientVersion, e);
                 syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc, e, true, false));
             }
         }
@@ -129,6 +134,26 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
     protected int processServerChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         switch (comparison.getServerChange()) {
         case DELETED:
+            /*
+             * deleted on server, check for potential conflicts in subfolders
+             */
+            String normalizedPathToDelete = PathNormalizer.normalize(comparison.getClientVersion().getPath()).toLowerCase();
+            for (Entry<String, ThreeWayComparison<DirectoryVersion>> entry : mapper) {
+                Change clientChange = entry.getValue().getClientChange();
+                if (Change.NONE != clientChange && Change.DELETED != clientChange) {
+                    String normalizedPath = PathNormalizer.normalize(entry.getKey()).toLowerCase();
+                    if (normalizedPath.startsWith(normalizedPathToDelete) && false == normalizedPath.equals(normalizedPathToDelete)) {
+                        /*
+                         * conflicting change in one of the subfolders, don't delete directory at client for now
+                         */
+                        if (session.isTraceEnabled()) {
+                            session.trace("Skipping action \""+ new RemoveDirectoryAction(comparison.getClientVersion(), comparison) +
+                                "\" due to conflicting client-side changes in subfolders.");
+                        }
+                        return 0;
+                    }
+                }
+            }
             /*
              * deleted on server, delete directory on client, too
              */
@@ -184,35 +209,51 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  */
                 result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
                 OXException e = DriveExceptionCodes.NO_DELETE_DIRECTORY_PERMISSION.create(comparison.getServerVersion().getPath());
-                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, e, false, false));
                 return 2;
             }
         case NEW:
-            if (isInvalidPath(comparison.getClientVersion().getPath())) {
+            if (DriveUtils.isInvalidPath(comparison.getClientVersion().getPath())) {
                 /*
                  * invalid path, indicate as error with quarantine flag
                  */
                 OXException e = DriveExceptionCodes.INVALID_PATH.create(comparison.getClientVersion().getPath());
-                LOG.warn("Client change refused due to invalid path: " + comparison.getClientVersion(), e);
+                LOG.warn("Client change refused due to invalid path: {}", comparison.getClientVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(
                     null, comparison.getClientVersion(), comparison, e, true, false));
                 return 1;
-            } else if (isIgnoredPath(comparison.getClientVersion().getPath())) {
+            } else if (DriveUtils.isIgnoredPath(session, comparison.getClientVersion().getPath())) {
                 /*
                  * ignored path, indicate as error with quarantine flag
                  */
                 OXException e = DriveExceptionCodes.IGNORED_PATH.create(comparison.getClientVersion().getPath());
-                LOG.warn("Client change refused due to ignored path: " + comparison.getClientVersion(), e);
+                LOG.warn("Client change refused due to ignored path: {}", comparison.getClientVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(
                     null, comparison.getClientVersion(), comparison, e, true, false));
                 return 1;
             } else {
-                String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
-                if (mayCreate(parentPath)) {
+                DirectoryVersion lastExistingParentVersion = getLastExistingParentVersion(comparison.getClientVersion().getPath());
+                if (mayCreate(lastExistingParentVersion.getPath())) {
                     /*
-                     * new on client, let client synchronize the directory
+                     * new on client, check for potential directory name collisions
+                     */
+                    String directoryName = getFirstDirectoryNameToCreate(lastExistingParentVersion, comparison.getClientVersion().getPath());
+                    FileStorageFolder parentFolder = session.getStorage().getFolder(lastExistingParentVersion.getPath());
+                    if (getNormalizedFilenames(parentFolder.getId()).contains(PathNormalizer.normalize(directoryName.toLowerCase()))) {
+                        /*
+                         * collision with file on same level, indicate as error with quarantine flag
+                         */
+                        OXException e = DriveExceptionCodes.LEVEL_CONFLICTING_PATH.create(
+                            comparison.getClientVersion().getPath(), lastExistingParentVersion.getPath());
+                        LOG.warn("Client change refused due to conflicting path: {}", comparison.getClientVersion(), e);
+                        result.addActionForClient(new ErrorDirectoryAction(
+                            null, comparison.getClientVersion(), comparison, e, true, false));
+                        return 1;
+                    }
+                    /*
+                     * let client synchronize the directory
                      */
                     result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
                     return 1;
@@ -220,8 +261,8 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                     /*
                      * not allowed, indicate as error with quarantine flag
                      */
-                    OXException e = DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath);
-                    LOG.warn("Client change refused due to missing permissions: " + comparison.getClientVersion(), e);
+                    OXException e = DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(lastExistingParentVersion.getPath());
+                    LOG.warn("Client change refused due to missing permissions: {}", comparison.getClientVersion(), e);
                     result.addActionForClient(new ErrorDirectoryAction(
                         null, comparison.getClientVersion(), comparison, e, true, false));
                     return 1;
@@ -310,15 +351,31 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
             return 1;
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) && Change.DELETED == comparison.getServerChange()) {
             /*
-             * edit-delete conflict, create on server, let client synchronize the directory
+             * edit-delete conflict, leave on server, let client synchronize the directory
              */
-            String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
-            if (mayCreate(parentPath)) {
+            DirectoryVersion lastExistingParentVersion = getLastExistingParentVersion(comparison.getClientVersion().getPath());
+            if (mayCreate(lastExistingParentVersion.getPath())) {
+                String directoryName = getFirstDirectoryNameToCreate(lastExistingParentVersion, comparison.getClientVersion().getPath());
+                FileStorageFolder parentFolder = session.getStorage().getFolder(lastExistingParentVersion.getPath());
+                if (getNormalizedFilenames(parentFolder.getId()).contains(PathNormalizer.normalize(directoryName.toLowerCase()))) {
+                    /*
+                     * collision with file on same level, indicate as error with quarantine flag
+                     */
+                    OXException e = DriveExceptionCodes.LEVEL_CONFLICTING_PATH.create(
+                        comparison.getClientVersion().getPath(), lastExistingParentVersion.getPath());
+                    LOG.warn("Client change refused due to conflicting path: {}", comparison.getClientVersion(), e);
+                    result.addActionForClient(new ErrorDirectoryAction(
+                        null, comparison.getClientVersion(), comparison, e, true, false));
+                    return 1;
+                }
+                /*
+                 * let client synchronize the directory
+                 */
                 result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
                 return 1;
             } else {
-                OXException e = DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath);
-                LOG.warn("Client change refused due to missing permissions: " + comparison.getClientVersion(), e);
+                OXException e = DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(lastExistingParentVersion.getPath());
+                LOG.warn("Client change refused due to missing permissions: {}", comparison.getClientVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(
                     null, comparison.getClientVersion(), comparison, e, true, false));
                 return 1;
@@ -399,71 +456,63 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
     }
 
     /**
-     * Gets the last parent path that exists, i.e. that is already known by the server.
+     * Gets the server directory version of the last parent path that exists, i.e. that is already known by the server.
      *
-     * @param path The path to get the last existing parent path for
-     * @return The last existing parent path, down to the root folder if needed
+     * @param path The path to get the last existing parent version for
+     * @return The last existing parent directory version, down to the root folder if needed
      */
-    private String getLastExistingParentPath(String path) {
+    private DirectoryVersion getLastExistingParentVersion(String path) {
         Collection<? extends DirectoryVersion> serverVersions = mapper.getServerVersions();
         String currentPath = path;
         int idx;
         do {
             idx = currentPath.lastIndexOf(DriveConstants.PATH_SEPARATOR);
-            if (0 < idx) {
-                currentPath = currentPath.substring(0, idx);
-                for (DirectoryVersion serverVersion : serverVersions) {
-                    if (serverVersion.getPath().equals(currentPath)) {
-                        return currentPath;
-                    }
+            currentPath = 0 < idx ? currentPath.substring(0, idx) : DriveConstants.ROOT_PATH;
+            for (DirectoryVersion serverVersion : serverVersions) {
+                if (serverVersion.getPath().equals(currentPath)) {
+                    return serverVersion;
                 }
             }
         } while (0 < idx);
-        return DriveConstants.ROOT_PATH;
+        return null; // not possible
     }
 
     /**
-     * Gets a value indicating whether the supplied path is invalid, i.e. it contains illegal characters or is not supported for
-     * other reasons.
+     * Gets a set of the normalized names contained in a folder.
      *
-     * @param path The path to check
-     * @return <code>true</code> if the path is considered invalid, <code>false</code>, otherwise
+     * @param folderID The identifier of the folder to get the contained filenames for
+     * @return The normalized file names
      * @throws OXException
      */
-    private static boolean isInvalidPath(String path) throws OXException {
-        if (Strings.isEmpty(path)) {
-            return true; // no empty paths
+    private Set<String> getNormalizedFilenames(String folderID) throws OXException {
+        if (null == normalizedFilesnamesPerFolder) {
+            normalizedFilesnamesPerFolder = new HashMap<String, Set<String>>();
         }
-        if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(path).matches()) {
-            return true; // no invalid paths
+        Set<String> normalizedFilenames = normalizedFilesnamesPerFolder.get(folderID);
+        if (null == normalizedFilenames) {
+            normalizedFilenames = DriveUtils.getNormalizedFileNames(session.getStorage().getFilesInFolder(
+                folderID, true, null, Arrays.asList(File.Field.FILENAME)), true);
+            normalizedFilesnamesPerFolder.put(folderID, normalizedFilenames);
         }
-        for (String pathSegment : DriveStorage.split(path)) {
-            if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < pathSegment.length()) {
-                return true; // no too long paths
-            }
-        }
-        return false;
+        return normalizedFilenames;
     }
 
     /**
-     * Gets a value indicating whether the supplied path is ignored, i.e. it is excluded from synchronization by definition.
+     * Gets the name of the first directory that would be created when creating all folders in a path, based on the last existing
+     * directory version.
      *
-     * @param path The path to check
-     * @return <code>true</code> if the path is considered to be ignored, <code>false</code>, otherwise
-     * @throws OXException
+     * @param lastExistingParentVersion The last existing directory version
+     * @param pathToCreate The path that should be created
+     * @return The name of the directory that is created right below the parent directory
      */
-    private boolean isIgnoredPath(String path) throws OXException {
-        if (DriveConstants.TEMP_PATH.equalsIgnoreCase(path)) {
-            return true; // no temp path
+    private static String getFirstDirectoryNameToCreate(DirectoryVersion lastExistingParentVersion, String pathToCreate) {
+        String normalizedParentPath = PathNormalizer.normalize(lastExistingParentVersion.getPath());
+        if (false == DriveConstants.ROOT_PATH.equals(normalizedParentPath)) {
+            normalizedParentPath = normalizedParentPath + DriveConstants.PATH_SEPARATOR;
         }
-        if (session.getStorage().hasTrashFolder()) {
-            FileStorageFolder trashFolder = session.getStorage().getTrashFolder();
-            String trashPath = session.getStorage().getPath(trashFolder.getId());
-            if (null != trashPath && trashPath.equals(path)) {
-                return true; // no trash path
-            }
-        }
-        return false;
+        String normalizedPathToCreate = PathNormalizer.normalize(pathToCreate).substring(normalizedParentPath.length());
+        int idx = normalizedPathToCreate.indexOf(DriveConstants.PATH_SEPARATOR);
+        return 0 < idx ? normalizedPathToCreate.substring(0, idx) : normalizedPathToCreate;
     }
 
 }

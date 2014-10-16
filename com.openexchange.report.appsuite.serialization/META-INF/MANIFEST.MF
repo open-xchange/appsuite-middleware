@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Report Serialization for Report Generation Framework
+Bundle-SymbolicName: com.openexchange.report.appsuite.serialization
+Bundle-Version: 7.6.1
+Bundle-Activator: com.openexchange.report.appsuite.serialization.osgi.ReportSerializationActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.hazelcast.core,
+ com.hazelcast.nio,
+ com.hazelcast.nio.serialization,
+ com.openexchange.exception,
+ com.openexchange.hazelcast.serialization,
+ com.openexchange.osgi,
+ com.openexchange.tools.strings,
+ org.osgi.framework
+Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.report.appsuite.serialization

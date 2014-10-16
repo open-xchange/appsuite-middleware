@@ -86,7 +86,24 @@ public class ContentTypeTest extends TestCase {
             String hdr = "{\"application/octet-stream\"}; name=\"6N1911.pdf\"";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
 
-            System.out.println(contentType);
+            assertEquals("Unexpected primary type", "application", contentType.getPrimaryType());
+            assertEquals("Unexpected subtype", "octet-stream", contentType.getSubType());
+            assertEquals("Unexpected name parameter", "6N1911.pdf", contentType.getNameParameter());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testMalformedHeaderValue() {
+        try {
+            String hdr = "=?windows-1252?q?application/pdf; name=\"blatt8.pdf\"";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
+
+            assertEquals("Unexpected primary type", "application", contentType.getPrimaryType());
+            assertEquals("Unexpected subtype", "pdf", contentType.getSubType());
+            assertEquals("Unexpected name parameter", "blatt8.pdf", contentType.getNameParameter());
 
         } catch (Exception e) {
             e.printStackTrace();

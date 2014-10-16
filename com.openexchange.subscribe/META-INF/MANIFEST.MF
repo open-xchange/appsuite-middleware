@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Subscribe Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.subscribe.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -46,6 +46,7 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.publish,
  com.openexchange.secret,
  com.openexchange.secret.osgi.tools,

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail.filter.parser.action;
 
 import java.util.HashMap;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -73,9 +72,7 @@ public class ActionParserFactory {
 	}
 
 	public static ActionParser getWriter(String name) {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("getWriter for action: " + name);
-		}
+		LOG.debug("getWriter for action: {}", name);
 		return parserMap.get(name);
 	}
 }

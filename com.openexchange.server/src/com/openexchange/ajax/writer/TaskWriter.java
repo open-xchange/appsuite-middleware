@@ -51,6 +51,8 @@ package com.openexchange.ajax.writer;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +61,7 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.session.Session;
 
 /**
@@ -98,8 +101,21 @@ public class TaskWriter extends CalendarWriter {
     public void writeTask(final Task task, final JSONObject json) throws JSONException {
         super.writeFields(task, timeZone, json, session);
         writeParameter(CalendarFields.TITLE, task.getTitle(), json);
+        /*
+         * always write legacy start_date / end_date properties as-is
+         */
         writeParameter(CalendarFields.START_DATE, task.getStartDate(), json);
         writeParameter(CalendarFields.END_DATE, task.getEndDate(), json);
+        /*
+         * write start_time / end_time as "Date" or "Time" depending on the full_time flag
+         */
+        if (task.getFullTime()) {
+            writeParameter(TaskFields.START_TIME, truncateToUTCDate(task.getStartDate()), json);
+            writeParameter(TaskFields.END_TIME, truncateToUTCDate(task.getEndDate()), json);
+        } else {
+            writeParameter(TaskFields.START_TIME, task.getStartDate(), timeZone, json);
+            writeParameter(TaskFields.END_TIME, task.getEndDate(), timeZone, json);
+        }
         writeParameter(TaskFields.ACTUAL_COSTS, task.getActualCosts(), json, task.containsActualCosts());
         writeParameter(TaskFields.ACTUAL_DURATION, task.getActualDuration(), json, task.containsActualDuration());
         writeParameter(CalendarFields.NOTE, task.getNote(), json);
@@ -112,7 +128,7 @@ public class TaskWriter extends CalendarWriter {
             writeParameter(TaskFields.PERCENT_COMPLETED, task.getPercentComplete(), json);
         }
         if (task.containsPriority()) {
-            writeParameter(TaskFields.PRIORITY, task.getPriority(), json);
+            writeParameter(TaskFields.PRIORITY, task.getPriority(), json, task.containsPriority());
         }
         if (task.containsStatus()) {
             writeParameter(TaskFields.STATUS, task.getStatus(), json);
@@ -146,9 +162,42 @@ public class TaskWriter extends CalendarWriter {
         case CalendarObject.ALARM:
             writeValue(task.getAlarm(), tz, json);
             break;
+        case Task.START_TIME:
+            if (task.getFullTime()) {
+                writeValue(truncateToUTCDate(task.getStartDate()), json);
+            } else {
+                writeValue(task.getStartDate(), tz, json);
+            }
+            break;
+        case Task.END_TIME:
+            if (task.getFullTime()) {
+                writeValue(truncateToUTCDate(task.getEndDate()), json);
+            } else {
+                writeValue(task.getEndDate(), tz, json);
+            }
+            break;
         default:
             LOG.warn("Column {} is unknown for tasks.", column);
         }
+    }
+
+    /**
+     * Truncates the supplied date to a HTTP-API "Date"-style date, i.e. the number of milliseconds between 00:00 UTC on that date and
+     * 1970-01-01 00:00 UTC.
+     *
+     * @param dateTime The date to truncate the time-part from
+     * @return The truncated UTC date
+     */
+    private Date truncateToUTCDate(Date dateTime) {
+        if (null == dateTime) {
+            return null;
+        }
+        Calendar calendar = Calendar.getInstance(TimeZones.UTC);
+        calendar.setTime(dateTime);
+        for (int field : new int[] { Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND } ) {
+            calendar.set(field, 0);
+        }
+        return calendar.getTime();
     }
 
     private static interface TaskFieldWriter {

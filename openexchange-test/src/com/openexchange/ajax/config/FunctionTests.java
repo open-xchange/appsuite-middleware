@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Random;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -94,7 +93,7 @@ public class FunctionTests extends AbstractAJAXSession {
      */
     public void testMaxUploadIdleTimeout() throws Throwable {
         final int value = client.execute(new GetRequest(Tree.MaxUploadIdleTimeout)).getInteger();
-        LOG.info("Max upload idle timeout: " + value);
+        LOG.info("Max upload idle timeout: {}", value);
         assertTrue("Got no value for the maxUploadIdleTimeout configuration " + "parameter.", value > 0);
     }
 

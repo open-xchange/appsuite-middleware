@@ -68,6 +68,7 @@ import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.userconfiguration.AllowAllUserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link EffectivePermission} - A read-only permission considering user access restrictions and folder boundaries.
@@ -81,6 +82,11 @@ public final class EffectivePermission implements Permission {
     private static final long serialVersionUID = -6459987256871091818L;
 
     private static final int MODULE_INFOSTORE = InfostoreContentType.getInstance().getModule();
+
+    /**
+     * <code>"6"</code>
+     */
+    private static final String GAB = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 
     /**
      * <code>"9"</code>
@@ -332,6 +338,11 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public int getWritePermission() {
+        if (GAB.equals(folderId)) {
+            int writePermission = underlyingPerm.getWritePermission();
+            return OXFolderProperties.isEnableInternalUsersEdit() ? (writePermission <= NO_PERMISSIONS ? WRITE_OWN_OBJECTS : writePermission) : NO_PERMISSIONS;
+        }
+
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {

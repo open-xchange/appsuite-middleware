@@ -50,9 +50,11 @@
 package com.openexchange.drive.sync;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.internal.Tracer;
 
 
 /**
@@ -65,41 +67,74 @@ public class IntermediateSyncResult<T extends DriveVersion> {
     private final List<AbstractAction<T>> actionsForServer;
     private final List<AbstractAction<T>> actionsForClient;
 
+    /**
+     * Initializes a new {@link IntermediateSyncResult} based on the supplied actions.
+     *
+     * @param actionsForServer The actions for the server
+     * @param actionsForClient The actions for the client
+     */
     public IntermediateSyncResult(List<AbstractAction<T>> actionsForServer, List<AbstractAction<T>> actionsForClient) {
         super();
         this.actionsForClient = actionsForClient;
         this.actionsForServer = actionsForServer;
     }
 
+    /**
+     * Initializes a new {@link IntermediateSyncResult}.
+     */
     public IntermediateSyncResult() {
         this(new ArrayList<AbstractAction<T>>(), new ArrayList<AbstractAction<T>>());
     }
 
+    /**
+     * Adds an action for the client.
+     *
+     * @param action The action to add
+     */
     public void addActionForClient(AbstractAction<T> action) {
         actionsForClient.add(action);
     }
 
+    /**
+     * Adds multiple actions for the client.
+     *
+     * @param actions The actions to add
+     */
+    public void addActionsForClient(Collection<? extends AbstractAction<T>> actions) {
+        actionsForClient.addAll(actions);
+    }
+
+    /**
+     * Adds an action for the server.
+     *
+     * @param action The action to add
+     */
     public void addActionForServer(AbstractAction<T> action) {
         actionsForServer.add(action);
     }
 
+    /**
+     * Gets a value indicating whether this sync result is empty, i.e. it contains no actions for the server and client.
+     *
+     * @return <code>true</code> if the sync result is empty, <code>false</code>, otherwise
+     */
     public boolean isEmpty() {
         return (null == actionsForServer || 0 == actionsForServer.size()) && (null == actionsForClient || 0 == actionsForClient.size());
     }
 
     /**
-     * Gets the actionsForServer
+     * Gets the actions for the server.
      *
-     * @return The actionsForServer
+     * @return The actions for the server
      */
     public List<AbstractAction<T>> getActionsForServer() {
         return actionsForServer;
     }
 
     /**
-     * Gets the actionsForClient
+     * Gets the actions for the client.
      *
-     * @return The actionsForClient
+     * @return The actions for the client
      */
     public List<AbstractAction<T>> getActionsForClient() {
         return actionsForClient;
@@ -116,20 +151,28 @@ public class IntermediateSyncResult<T extends DriveVersion> {
 
     @Override
     public String toString() {
-        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         if (null != actionsForServer) {
-            StringBuilder.append("Actions for server:\n");
+            stringBuilder.append("Actions for server:\n");
             for (AbstractAction<T> action : actionsForServer) {
-                StringBuilder.append("  ").append(action).append('\n');
+                stringBuilder.append("  ").append(action).append('\n');
+                if (Tracer.MAX_SIZE < stringBuilder.length()) {
+                    stringBuilder.append('\n').append("[...]");
+                    break;
+                }
             }
         }
         if (null != actionsForClient) {
-            StringBuilder.append("Actions for client:\n");
+            stringBuilder.append("Actions for client:\n");
             for (AbstractAction<T> action : actionsForClient) {
-                StringBuilder.append("  ").append(action).append('\n');
+                stringBuilder.append("  ").append(action).append('\n');
+                if (Tracer.MAX_SIZE < stringBuilder.length()) {
+                    stringBuilder.append('\n').append("[...]");
+                    break;
+                }
             }
         }
-        return StringBuilder.toString();
+        return stringBuilder.toString();
     }
 
     @Override

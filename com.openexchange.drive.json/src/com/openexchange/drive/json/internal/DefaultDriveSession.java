@@ -51,10 +51,12 @@ package com.openexchange.drive.json.internal;
 
 import java.util.List;
 import java.util.Locale;
+import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.FilePattern;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.tools.session.ServerSession;
@@ -69,11 +71,13 @@ public class DefaultDriveSession implements DriveSession {
     private final String rootFolderID;
     private final ServerSession session;
     private final int apiVersion;
+    private final HostData hostData;
+    private final DriveClientVersion clientVersion;
     private String deviceName;
     private Boolean diagnostics;
     private List<DriveFileField> fields;
-    private final HostData hostData;
-    private final DriveClientVersion clientVersion;
+    private List<FilePattern> fileExclusions;
+    private List<DirectoryPattern> directoryExclusions;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
@@ -118,6 +122,24 @@ public class DefaultDriveSession implements DriveSession {
      */
     public void setFields(List<DriveFileField> fields) {
         this.fields = fields;
+    }
+
+    /**
+     * Sets the fileExclusions
+     *
+     * @param fileExclusions The fileExclusions to set
+     */
+    public void setFileExclusions(List<FilePattern> fileExclusions) {
+        this.fileExclusions = fileExclusions;
+    }
+
+    /**
+     * Sets the directoryExclusions
+     *
+     * @param directoryExclusions The directoryExclusions to set
+     */
+    public void setDirectoryExclusions(List<DirectoryPattern> directoryExclusions) {
+        this.directoryExclusions = directoryExclusions;
     }
 
     @Override
@@ -178,10 +200,19 @@ public class DefaultDriveSession implements DriveSession {
     }
 
     @Override
+    public List<DirectoryPattern> getDirectoryExclusions() {
+        return directoryExclusions;
+    }
+
+    @Override
+    public List<FilePattern> getFileExclusions() {
+        return fileExclusions;
+    }
+
+    @Override
     public String toString() {
         return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
             session.getContextId() + ", clientVersion=" + clientVersion + ", deviceName=" + deviceName + ", apiVersion=" +
             apiVersion + ", diagnostics=" + diagnostics + "]";
     }
-
 }

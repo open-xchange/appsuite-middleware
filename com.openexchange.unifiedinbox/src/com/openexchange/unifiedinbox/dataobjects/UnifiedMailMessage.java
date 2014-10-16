@@ -58,6 +58,7 @@ import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -84,7 +85,7 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     /**
      * Initializes a new {@link UnifiedMailMessage}.
      */
-    public UnifiedMailMessage(final MailMessage delegatee, final int undelegatedAccountId) {
+    public UnifiedMailMessage(MailMessage delegatee, int undelegatedAccountId) {
         super();
         this.undelegatedAccountId = undelegatedAccountId;
         this.delegatee = delegatee;
@@ -136,6 +137,36 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     @Override
     public MailPath getMailPath() {
         return delegatee.getMailPath();
+    }
+
+    @Override
+    public void addReplyTo(final InternetAddress addr) {
+        delegatee.addReplyTo(addr);
+    }
+
+    @Override
+    public void addReplyTo(final InternetAddress[] addrs) {
+        delegatee.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean containsReplyTo() {
+        return delegatee.containsReplyTo();
+    }
+
+    @Override
+    public void removeReplyTo() {
+        delegatee.removeReplyTo();
+    }
+
+    @Override
+    public InternetAddress[] getReplyTo() {
+        return delegatee.getReplyTo();
+    }
+
+    @Override
+    public boolean isUnseen() {
+        return delegatee.isUnseen();
     }
 
     @Override
@@ -988,6 +1019,12 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     public void setUnreadMessages(final int unreadMessages) {
         this.unreadCount = Integer.valueOf(unreadMessages);
         // delegatee.setUnreadMessages(unreadMessages);
+    }
+
+    private static void closeSafe(MailAccess<?, ?> mailAccess) {
+        if (null != mailAccess) {
+            mailAccess.close(true);
+        }
     }
 
 }

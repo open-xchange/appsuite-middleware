@@ -51,6 +51,8 @@ package com.openexchange.contact.storage;
 
 import java.util.Date;
 import java.util.List;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -399,4 +401,21 @@ public interface ContactStorage {
      * @throws OXException
      */
     SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+
+    /**
+     * Performs an optimized "auto-complete" lookup for contacts.
+     *
+     * @param session The session
+     * @param folderIDs A list of folder IDs to restrict the search to
+     * @param query The search query as supplied by the client
+     * @param parameters The additional parameters to refine the auto-complete search. If possible parameters are missing,
+     *                   their default values must be used (see JavaDoc of the common parameter keys in {@link AutocompleteParameters}).
+     * @param fields The contact fields that should be retrieved
+     * @param sortOptions The options to sort the results
+     * @return The contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
 }

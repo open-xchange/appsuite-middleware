@@ -50,6 +50,7 @@
 package com.openexchange.realtime.packet;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
@@ -114,6 +115,11 @@ public class Message extends Stanza {
     @Override
     public Stanza newInstance() {
         return new Message();
+    }
+
+    @Override
+    public void addPayload(PayloadTree tree) {
+        addPayloadToMap(tree, payloads);
     }
 
 }

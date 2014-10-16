@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange HTML Bundle
 Bundle-SymbolicName: com.openexchange.html
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
+ lib/commons-validator-1.4.0.jar,
  lib/jTidy.jar
 Import-Package: com.openexchange.config,
  com.openexchange.dispatcher,
@@ -13,6 +14,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.proxy,
  com.openexchange.session,
  com.openexchange.threadpool,

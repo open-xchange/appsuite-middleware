@@ -49,10 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.group;
 
-import static com.openexchange.realtime.hazelcast.serialization.PortableID.p;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,19 +58,26 @@ import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.InactivityNotice;
+import com.openexchange.realtime.group.NotMember;
+import com.openexchange.realtime.group.SelectorChoice;
+import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.group.commands.LeaveStanza;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerMBean;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerManagement;
-import com.openexchange.realtime.hazelcast.serialization.PortableID;
+import com.openexchange.realtime.hazelcast.osgi.Services;
+import com.openexchange.realtime.hazelcast.serialization.group.PortableSelectorChoice;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.IDMap;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -82,7 +86,7 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class DistributedGroupManagerImpl implements ManagementAware<DistributedGroupManagerMBean>, DistributedGroupManager, RealtimeJanitor {
+public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor implements ManagementAware<DistributedGroupManagerMBean>, DistributedGroupManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedGroupManagerImpl.class);
     private final MessageDispatcher messageDispatcher;
@@ -95,7 +99,8 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
     /**
      * Initializes a new {@link DistributedGroupManagerImpl}.
      * 
-     * @param messageDispatcher The messageDispatcher 
+     * @param messageDispatcher The MessageDispatcher 
+     * @param globalCleanup The GlobalRealtimeCleanup
      * @param client_map The name of the client map
      * @param group_map The name of group map
      */
@@ -104,7 +109,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
         this.client_map=client_map;
         this.group_map=group_map;
         this.inactivityMap = new IDMap<Duration>(true);
-        this.managementObject = new DistributedGroupManagerManagement(client_map);
+        this.managementObject = new DistributedGroupManagerManagement(client_map, group_map);
         this.cleaner = new DistributedGroupManagerCleaner(this);
     }
 
@@ -117,67 +122,105 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
         return cleaner;
     }
 
-    public boolean add(ID client, ID group) throws OXException {
-        Validate.notNull(client, "Client must not be null");
-        Validate.notNull(group, "Group must not be null");
-        return getClientToGroupsMapping().put(p(client), p(group));
+    @Override
+    public ManagementObject<DistributedGroupManagerMBean> getManagementObject() {
+        return managementObject;
     }
 
-    public Collection<ID> remove(ID client) throws OXException {
-        Validate.notNull(client, "ID must not be null");
-        Collection<ID> removedGroups = getClientToGroupsMapping().remove(p(client));
-        LOG.debug("Removed client to group association {} <-> {}", client, removedGroups, !removedGroups.isEmpty());
-        sendLeave(client, removedGroups);
-        return removedGroups;
+    @Override
+    public boolean addChoice(SelectorChoice selectorChoice) throws OXException {
+        Validate.notNull(selectorChoice, "Stamped group must not be null");
+
+        PortableID portableCID = new PortableID(selectorChoice.getClient());
+        PortableID portableGID = new PortableID(selectorChoice.getGroup());
+        PortableSelectorChoice portableSelectorChoice = new PortableSelectorChoice(selectorChoice);
+
+        boolean putClientToGroup = getClientToGroupsMapping().put(portableCID, portableSelectorChoice);
+        boolean putGroupToMember = getGroupToMembersMapping().put(portableGID, portableSelectorChoice);
+
+        return putGroupToMember && putClientToGroup;
     }
 
-    /**
-     * Send a @{@link Stanza} containing a {@link LeaveCommand} from a client to a {@link Collection} of groups.
-     * 
-     * @param client The client that leaves a group.
-     * @param groups The groups that the client should leave.
-     */
-    private void sendLeave(ID client, Collection<ID> groups) {
-        Validate.notNull(client, "Client must not be null");
-        Validate.notNull(groups, "Groups must not be null");
-        for (ID group : groups) {
-            try {
-                LOG.debug("Sending leave on behalf of {} to {}.", client, group);
-                messageDispatcher.send(new LeaveStanza(client, group));
-            } catch (OXException e) {
-                LOG.error("Unable to remove client {} from group {}.", client, group, e);
-            }
+    @Override
+    public boolean removeChoice(SelectorChoice selectorChoice) throws OXException {
+        Validate.notNull(selectorChoice, "SelectorChoice must not be null");
+
+        return removeClientToSelectorChoice(selectorChoice) && removeGroupToSelectorChoice(selectorChoice);
+    }
+
+    @Override
+    public boolean removeClientToSelectorChoice(SelectorChoice selectorChoice) throws OXException {
+        MultiMap<PortableID,PortableSelectorChoice> clientToGroupsMapping = getClientToGroupsMapping();
+
+        boolean clientAssociationRemoved = clientToGroupsMapping.remove(
+            new PortableID(selectorChoice.getClient()),
+            new PortableSelectorChoice(selectorChoice));
+
+        return clientAssociationRemoved;
+    }
+
+    @Override
+    public boolean removeGroupToSelectorChoice(SelectorChoice selectorChoice)  throws OXException {
+        MultiMap<PortableID, PortableSelectorChoice> groupToMembersMapping = getGroupToMembersMapping();
+
+        boolean groupAssociationRemoved = groupToMembersMapping.remove(new PortableID(selectorChoice.getGroup()), new PortableSelectorChoice(
+            selectorChoice));
+
+        return groupAssociationRemoved;
+    }
+
+    @Override
+    public Collection<? extends SelectorChoice> removeClient(ID client) throws OXException {
+        Collection<PortableSelectorChoice> removedChoices = removeClient(client, true);
+        return removedChoices;
+    }
+
+    @Override
+    public Collection<? extends SelectorChoice> removeGroup(ID group) throws OXException {
+        //first remove all mappings
+        Collection<PortableSelectorChoice> removedChoices = removeGroup(group, false);
+        for (PortableSelectorChoice portableSelectorChoice : removedChoices) {
+            removeClientToSelectorChoice(portableSelectorChoice);
         }
+        //then inform all members so they can rejoin
+        sendNotMember(removedChoices);
+        return removedChoices;
     }
 
-    public boolean remove(ID client, ID group) throws OXException {
-        Validate.notNull(client, "Client must not be null");
-        Validate.notNull(group, "Group must not be null");
-        boolean removed = getClientToGroupsMapping().remove(p(client), p(group));
-        LOG.info("Removed client to group association {} <-> {}: {}", client, group, removed);
-        return removed;
+    @Override
+    public Collection<? extends SelectorChoice> getGroups(ID client) throws OXException {
+        Validate.notNull(client, "Client ID must not be null");
+        Collection<PortableSelectorChoice> choices = getClientToGroupsMapping().get(new PortableID(client));
+        return choices;
     }
 
-    public Set<ID> getGroups(ID id) throws OXException {
-        Validate.notNull(id, "ID must not be null");
-        return new HashSet<ID>(getClientToGroupsMapping().get(p(id)));
+    @Override
+    public Collection<? extends SelectorChoice> getMembers(ID group) throws OXException {
+        Validate.notNull(group, "Group ID must not be null");
+        Collection<PortableSelectorChoice> selectorChoices = getGroupToMembersMapping().get(new PortableID(group));
+        return selectorChoices;
     }
 
-    public Set<ID> getMembers(ID id) throws OXException {
-        throw new UnsupportedOperationException("Not implemented, yet.");
-    }
-
-    public void setInactivity(ID id, Duration duration) throws OXException {
-        Validate.notNull(id, "ID must not be null");
+    @Override
+    public void setInactivity(ID client, Duration duration) throws OXException {
+        Validate.notNull(client, "Client ID must not be null");
         Validate.notNull(duration, "Duration must not be null");
-        Duration old = inactivityMap.put(id, duration);
-        if(!duration.equals(old)) {
-            for(ID group : getGroups(id)) {
+        Duration old = inactivityMap.put(client, duration);
+        if (!duration.equals(old)) {
+            ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+            for (SelectorChoice selectorChoice : getGroups(client)) {
                 try {
-                    LOG.debug("Informing GroupDispatcher {} about inactivity of client {} with Duration of {}.", group, id, duration);
-                    messageDispatcher.send(new InactivityNotice(group, id, duration));
-                } catch (OXException e) {
-                    LOG.error("Unable to inform GroupDispatcher {} about inactivity of client {} with Duration of {}.", group, id, duration, e);
+                    ID group = selectorChoice.getGroup();
+                    LOG.debug("Informing GroupDispatcher {} about inactivity of client {} with Duration of {}.", group, client, duration);
+                    InactivityNotice inactivityNotice = new InactivityNotice(group, client, duration);
+                    threadPoolService.submit(new SendStanzaTask(messageDispatcher, inactivityNotice));
+                } catch (Exception e) {
+                    LOG.error(
+                        "Unable to inform GroupDispatcher {} about inactivity of client {} with Duration of {}.",
+                        selectorChoice.getGroup(),
+                        client,
+                        duration,
+                        e);
                 }
             }
         }
@@ -193,18 +236,22 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
     }
 
     private void cleanupForSyntheticId(ID id) {
-        /*
-         * - Find clients that are member of this group
-         * - Remove every client <-> group mapping 
-         */
-        LOG.debug("Cleanup for synthetic id {}", id);
+        if (id != null) {
+            LOG.debug("Cleanup for synthetic id {}", id);
+            try {
+                // For now groups are the only synthetic resource
+                removeGroup(id);
+            } catch (OXException oxe) {
+                LOG.error("Error while cleaning for ID {}", id, oxe);
+            }
+        }
     }
 
     private void cleanupForClientId(ID id) {
         try {
-            Collection<ID> removed = remove(id);
+            Collection<? extends SelectorChoice> removedChoices = removeClient(id);
             inactivityMap.remove(id);
-            LOG.debug("Cleanup for ID: {}. Removed from groups: {}", id, removed);
+            LOG.debug("Cleanup for ID: {}. Removed mappings: {}", id, removedChoices);
         } catch (Exception e) {
             LOG.error("Error while cleaning for ID {}", id, e);
         }
@@ -215,7 +262,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
      * 
      * @return A {@link MultiMap} of one client to many groups
      */
-    private MultiMap<ID, ID> getClientToGroupsMapping() throws OXException {
+    private MultiMap<PortableID, PortableSelectorChoice> getClientToGroupsMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(client_map);
     }
@@ -225,14 +272,88 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
      * 
      * @return A @ MultiMap} of one group to many members
      */
-    private MultiMap<PortableID, PortableID> getGroupToMembersMapping() throws OXException {
+    private MultiMap<PortableID, PortableSelectorChoice> getGroupToMembersMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(group_map);
     }
 
-    @Override
-    public ManagementObject<DistributedGroupManagerMBean> getManagementObject() {
-        return managementObject;
+    /**
+     * Remove all client -> group mappings for a given client ID. Additionally allows to send a LeaveCommand to all GroupDispatchers that
+     * hold the client as member and thus remove the group -> client mapping.
+     * 
+     * @param client The client to remove
+     * @param sendLeave If a LeaveCommand should be sent to all GrpupDispatchers that the client was a member of
+     * @return A Collection of groups IDs that the client was member of
+     * @throws OXException
+     */
+    private Collection<PortableSelectorChoice> removeClient(ID client, boolean sendLeave) throws OXException {
+        Validate.notNull(client, "Client ID must not be null");
+        Collection<PortableSelectorChoice> removedChoices = getClientToGroupsMapping().remove(new PortableID(client));
+        //This will automatically remove the group -> member association for this client
+        if(sendLeave) {
+            sendLeave(removedChoices);
+        }
+        return removedChoices;
+    }
+
+    /**
+     * Remove all group -> client mappings for a given group ID. Additionally allows to send a {@link NotMember} to all members of the group
+     * being removed.
+     * 
+     * @param group The group to remove
+     * @param sendNotMember If a {@link NotMember} should be sent to all members of the group being removed
+     * @return A Collection selectorchoices representing the former members
+     * @throws OXException
+     */
+    private Collection<PortableSelectorChoice> removeGroup(ID group, boolean sendNotMember) throws OXException {
+        Validate.notNull(group, "Group ID must not be null");
+        Collection<PortableSelectorChoice> removedChoices = getGroupToMembersMapping().remove(new PortableID(group));
+        if(sendNotMember) {
+            sendNotMember(removedChoices);
+        }
+        return removedChoices;
+    }
+
+    /**
+     * Send a @{@link Stanza} containing a {@link LeaveCommand} from a client to a {@link Collection} of groups.
+     * 
+     * @param client The client that leaves a group.
+     * @param groups The groups that the client should leave.
+     */
+    private void sendLeave(Collection<PortableSelectorChoice> selectorChoices) {
+        ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+        for (SelectorChoice selectorChoice : selectorChoices) {
+            ID client = selectorChoice.getClient();
+            ID group = selectorChoice.getGroup();
+            try {
+                LOG.debug("Sending leave on behalf of {} to {}.", client, group);
+                LeaveStanza leaveStanza = new LeaveStanza(client, group);
+                threadPoolService.submit(new SendStanzaTask(messageDispatcher, leaveStanza));
+            } catch (Exception e) {
+                LOG.error("Unable to remove client {} from group {}.", client, group, e);
+            }
+        }
+    }
+
+    /**
+     * Send a @{@link Stanza} containing a {@link NotMember} from a group to a {@link Collection} of clients.
+     * 
+     * @param selectorChoices The {@link SelectorChoice}s containing the details needed to send the {@link NotMember}.
+     */
+    private void sendNotMember(Collection<PortableSelectorChoice> selectorChoices) {
+        ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+        for (PortableSelectorChoice selectorChoice : selectorChoices) {
+            ID client = selectorChoice.getClient();
+            ID group = selectorChoice.getGroup();
+            String selector = selectorChoice.getSelector();
+            try {
+                LOG.debug("Sending NotMember to {} for group {}.", client, group);
+                Stanza notMember = new NotMember(group, client, selector);
+                threadPoolService.submit(new SendStanzaTask(messageDispatcher, notMember));
+            } catch (Exception e) {
+                LOG.error("Unable to remove client {} from group {}.", client, group, e);
+            }
+        }
     }
 
 }

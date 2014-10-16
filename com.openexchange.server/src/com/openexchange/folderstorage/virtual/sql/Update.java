@@ -55,7 +55,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
+import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -83,7 +83,7 @@ public final class Update {
      * @throws OXException If update fails
      */
     public static void updateFolder(final int cid, final int tree, final int user, final Folder folder, final Session session) throws OXException {
-        final DatabaseService databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        final DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
         final Connection con = databaseService.getWritable(cid);
         try {

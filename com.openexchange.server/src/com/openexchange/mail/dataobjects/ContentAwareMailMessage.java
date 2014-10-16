@@ -137,6 +137,36 @@ public class ContentAwareMailMessage extends MailMessage {
         message.setReferences(references);
     }
 
+    @Override
+    public void addReplyTo(final InternetAddress addr) {
+        message.addReplyTo(addr);
+    }
+
+    @Override
+    public void addReplyTo(final InternetAddress[] addrs) {
+        message.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean containsReplyTo() {
+        return message.containsReplyTo();
+    }
+
+    @Override
+    public void removeReplyTo() {
+        message.removeReplyTo();
+    }
+
+    @Override
+    public InternetAddress[] getReplyTo() {
+        return message.getReplyTo();
+    }
+
+    @Override
+    public boolean isUnseen() {
+        return message.isUnseen();
+    }
+
     /**
      * Gets the primary content
      *

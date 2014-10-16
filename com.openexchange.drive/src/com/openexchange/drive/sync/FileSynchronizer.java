@@ -54,8 +54,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveAction;
-import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DownloadFileAction;
@@ -67,13 +67,13 @@ import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
 import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.java.Strings;
 
 
 /**
@@ -87,6 +87,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     private List<UploadFileAction> uploadActions;
     private final String path;
     private FileStoragePermission folderPermission;
+    private Set<String> normalizedDirectoryNames;
 
     public FileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
         super(session, mapper);
@@ -132,7 +133,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     syncResult.addActionForClient(uploadAction);
                 } else {
                     OXException e = DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path);
-                    LOG.warn("Client upload not allowed for " + clientVersion, e);
+                    LOG.warn("Client upload not allowed for {}", clientVersion, e);
                     syncResult.addActionForClient(new ErrorFileAction(clientVersion, renamedVersion, null, path, e , true));
                 }
             }
@@ -145,7 +146,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
                 twc.setClientVersion(clientVersion);
                 OXException e = DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName());
-                LOG.warn("Client upload not allowed due to unicode conflicts: " + clientVersion, e);
+                LOG.warn("Client upload not allowed due to unicode conflicts: {}", clientVersion, e);
                 syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path, e, true));
             }
         }
@@ -212,7 +213,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * not allowed, let client re-download the file, indicate as error without quarantine flag
                  */
                 OXException e = DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
-                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
                 result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
                     ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
@@ -255,7 +256,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * ... then mark that file as error (without quarantine)...
                  */
                 OXException e = DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
-                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
                 result.addActionForClient(new ErrorFileAction(
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, e, false));
                 /*
@@ -287,14 +288,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              * new on client
              */
             if (mayCreate()) {
-                if (isInvalidName(comparison.getClientVersion().getName())) {
+                if (DriveUtils.isInvalidFileName(comparison.getClientVersion().getName())) {
                     /*
                      * invalid name, indicate as error with quarantine flag
                      */
                     result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                         DriveExceptionCodes.INVALID_FILENAME.create(comparison.getClientVersion().getName()), true));
                     return 1;
-                } else if (isIgnoredName(comparison.getClientVersion().getName())) {
+                } else if (DriveUtils.isIgnoredFileName(session.getDriveSession(), path, comparison.getClientVersion().getName())) {
                     /*
                      * ignored file, indicate as error with quarantine flag
                      */
@@ -302,6 +303,17 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                         DriveExceptionCodes.IGNORED_FILENAME.create(comparison.getClientVersion().getName()), true));
                     return 1;
                 } else {
+                    /*
+                     * new on client, check for potential directory name collisions
+                     */
+                    if (getNormalizedDirectoryNames().contains(PathNormalizer.normalize(comparison.getClientVersion().getName()))) {
+                        /*
+                         * collision with directory on same level, indicate as error with quarantine flag
+                         */
+                        result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
+                            DriveExceptionCodes.LEVEL_CONFLICTING_FILENAME.create(comparison.getClientVersion().getName(), path), true));
+                        return 1;
+                    }
                     /*
                      * let client upload the file
                      */
@@ -369,7 +381,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     result.addActionForClient(uploadAction);
                 } else {
                     OXException e = DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path);
-                    LOG.warn("Client upload not allowed for " + comparison.getClientVersion(), e);
+                    LOG.warn("Client upload not allowed for {}", comparison.getClientVersion(), e);
                     result.addActionForClient(new ErrorFileAction(
                         comparison.getClientVersion(), renamedVersion, comparison, path, e, true));
                 }
@@ -459,41 +471,16 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     /**
-     * Gets a value indicating whether the supplied filename is invalid, i.e. it contains illegal characters or is not supported for
-     * other reasons.
+     * Gets a set of the normalized directory names contained in the synchronized folder.
      *
-     * @param fileName The filename to check
-     * @return <code>true</code> if the filename is considered invalid, <code>false</code>, otherwise
+     * @return The normalized folder names
      * @throws OXException
      */
-    private static boolean isInvalidName(String fileName) throws OXException {
-        if (Strings.isEmpty(fileName)) {
-            return true; // no empty filenames
+    private Set<String> getNormalizedDirectoryNames() throws OXException {
+        if (null == normalizedDirectoryNames) {
+            normalizedDirectoryNames = DriveUtils.getNormalizedFolderNames(session.getStorage().getSubfolders(path).values());
         }
-        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-            return true; // no invalid filenames
-        }
-        if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < fileName.length()) {
-            return true; // no too long filenames
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition.
-     *
-     * @param fileName The filename to check
-     * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    private static boolean isIgnoredName(String fileName) throws OXException {
-        if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
-            return true; // no temporary upload files
-        }
-        if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
-            return true; // no excluded files
-        }
-        return false;
+        return normalizedDirectoryNames;
     }
 
 }

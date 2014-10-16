@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 import com.openexchange.drive.DriveConstants;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
@@ -243,7 +244,7 @@ public class TempCleaner implements Runnable {
                         if (null != notDeleted && notDeleted.contains(file.getId())) {
                             continue;
                         }
-                        checksumStore.removeFileChecksums(IDUtil.getFileID(file));
+                        checksumStore.removeFileChecksums(DriveUtils.getFileID(file));
                     }
                 }
             }

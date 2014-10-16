@@ -54,12 +54,14 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link GenericConfigurationStorageService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface GenericConfigurationStorageService {
 
     public abstract int save(Context ctx, Map<String, Object> content) throws OXException;

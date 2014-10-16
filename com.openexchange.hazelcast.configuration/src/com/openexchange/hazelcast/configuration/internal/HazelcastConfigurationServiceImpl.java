@@ -71,6 +71,7 @@ import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TopicConfig;
 import com.hazelcast.instance.GroupProperties;
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -170,7 +171,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
         if (false == Strings.isEmpty(groupPassword)) {
             if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
-                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's "
+                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from its "
                     + "default. Please do so to restrict access to your cluster.");
             }
             config.getGroupConfig().setPassword(groupPassword);
@@ -314,8 +315,15 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * Register serialization factory
          */
+        DynamicPortableFactory dynamicPortableFactory = Services.getService(DynamicPortableFactory.class, true);
+
         config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID,
-            Services.getService(DynamicPortableFactory.class, true));
+            dynamicPortableFactory);
+
+        for(ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
+            config.getSerializationConfig().addClassDefinition(classDefinition);
+        }
+
         /*
          * Config ready
          */

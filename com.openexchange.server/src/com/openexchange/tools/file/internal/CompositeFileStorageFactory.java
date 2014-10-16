@@ -70,7 +70,8 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  */
 public class CompositeFileStorageFactory implements FileStorageFactory, ServiceTrackerCustomizer<FileStorageFactoryCandidate, FileStorageFactoryCandidate> {
 
-    protected static final List<FileStorageFactoryCandidate> facs = new CopyOnWriteArrayList<FileStorageFactoryCandidate>();
+    /** The list of known factory candidates */
+    protected static final List<FileStorageFactoryCandidate> FACTORY_CANDIDATES = new CopyOnWriteArrayList<FileStorageFactoryCandidate>();
 
     /**
      * Initializes a new {@link CompositeFileStorageFactory}.
@@ -86,7 +87,7 @@ public class CompositeFileStorageFactory implements FileStorageFactory, ServiceT
         }
 
         FileStorageFactoryCandidate candidate = null;
-        for (final FileStorageFactoryCandidate fac : facs) {
+        for (final FileStorageFactoryCandidate fac : FACTORY_CANDIDATES) {
             if (fac.supports(uri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {
                 candidate = fac;
             }
@@ -124,7 +125,7 @@ public class CompositeFileStorageFactory implements FileStorageFactory, ServiceT
     }
 
     @Override
-    public boolean supports(final URI uri) throws OXException {
+    public boolean supports(URI uri) throws OXException {
         return true;
     }
 
@@ -134,26 +135,33 @@ public class CompositeFileStorageFactory implements FileStorageFactory, ServiceT
     }
 
     @Override
-    public FileStorageFactoryCandidate addingService(final ServiceReference<FileStorageFactoryCandidate> reference) {
+    public FileStorageFactoryCandidate addingService(ServiceReference<FileStorageFactoryCandidate> reference) {
         final BundleContext context = ServerActivator.getContext();
         final FileStorageFactoryCandidate candidate = context.getService(reference);
-        if (!facs.contains(candidate)) {
-            facs.add(candidate);
+        synchronized (this) {
+            List<FileStorageFactoryCandidate> candidates = FACTORY_CANDIDATES;
+            if (!candidates.contains(candidate)) {
+                candidates.add(candidate);
+                return candidate;
+            }
         }
         return null;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<FileStorageFactoryCandidate> reference, final FileStorageFactoryCandidate service) {
+    public void modifiedService(ServiceReference<FileStorageFactoryCandidate> reference, FileStorageFactoryCandidate candidate) {
         // Ignore
     }
 
     @Override
-    public void removedService(final ServiceReference<FileStorageFactoryCandidate> reference, final FileStorageFactoryCandidate service) {
-        facs.remove(service);
-        final BundleContext context = ServerActivator.getContext();
-        if (null != context) {
-            context.ungetService(reference);
+    public void removedService(ServiceReference<FileStorageFactoryCandidate> reference, FileStorageFactoryCandidate candidate) {
+        boolean contained = FACTORY_CANDIDATES.remove(candidate);
+        if (contained) {
+            final BundleContext context = ServerActivator.getContext();
+            if (null != context) {
+                context.ungetService(reference);
+            }
         }
     }
+
 }

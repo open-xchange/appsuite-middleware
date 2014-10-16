@@ -67,6 +67,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -76,10 +78,14 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
@@ -88,11 +94,16 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.ContentTypeChecker;
+import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
+import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.RemoteInternalPreviewDocument;
+import com.openexchange.preview.RemoteInternalPreviewService;
 import com.openexchange.preview.cache.CachedPreviewDocument;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -107,7 +118,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractPreviewResultConverter implements ResultConverter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractPreviewResultConverter.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractPreviewResultConverter.class);
 
     private static final Charset UTF8 = Charsets.UTF_8;
     private static final byte[] DELIM = new byte[] { '\r', '\n' };
@@ -146,8 +158,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             }
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !Strings.isEmpty(eTag);
+            final String previewLanguage = getUserLanguage(session);
             if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
-                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
+                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, previewLanguage);
                 final CachedResource cachedPreview = resourceCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     /*
@@ -218,7 +231,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             final PreviewDocument previewDocument;
             {
                 InputStream stream = fileHolder.getStream();
-                final Ref<InputStream> ref = new Ref<InputStream>();
+                final Reference<InputStream> ref = new Reference<InputStream>();
                 if (streamIsEof(stream, null)) {
                     Streams.close(stream, fileHolder);
                     throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
@@ -268,7 +281,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                                         final CachedResource preview = new CachedResource(bytes, fileName, fileType, bytes.length);
                                         resourceCache.save(cacheKey, preview, 0, session.getContextId());
                                     } catch (OXException e) {
-                                        LOG.warn("Could not cache preview.", e);
+                                        LOGGER.warn("Could not cache preview.", e);
                                     }
 
                                     return null;
@@ -429,7 +442,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             usm.setAllowHTMLImages(false);
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         } else {
-            LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", PARAMETER_VIEW, view);
+            LOGGER.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", PARAMETER_VIEW, view);
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         }
         return displayMode;
@@ -452,7 +465,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Finds the first occurrence of the pattern in the text.
      */
-    private int indexOf(final byte[] data, final byte[] pattern, final int fromIndex, final int[] computedFailure) {
+    private int indexOf(byte[] data, final byte[] pattern, int fromIndex, int[] computedFailure) {
         final int[] failure = null == computedFailure ? computeFailure(pattern) : computedFailure;
         int j = 0;
         final int dLen = data.length;
@@ -477,7 +490,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Computes the failure function using a boot-strapping process, where the pattern is matched against itself.
      */
-    private int[] computeFailure(final byte[] pattern) {
+    private int[] computeFailure(byte[] pattern) {
         final int length = pattern.length;
         final int[] failure = new int[length];
         int j = 0;
@@ -502,7 +515,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @return <code>true</code> if passed stream signals EOF; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      */
-    protected static boolean streamIsEof(final InputStream in, final Ref<InputStream> ref) throws IOException {
+    public static boolean streamIsEof(InputStream in, Reference<InputStream> ref) throws IOException {
         if (null == in) {
             return true;
         }
@@ -516,34 +529,276 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         return false;
     }
 
-    /** Simple reference class */
-    protected static final class Ref<V> {
+    /**
+     * Get the user language based on the current {@link Session}.
+     *
+     * @param session The session used for the language lookup.
+     * @return <code>null</code> or the preferred language of the user in a "en-gb" like notation.
+     */
+    public static String getUserLanguage(ServerSession session) {
+        User sessionUser = session.getUser();
+        return null == sessionUser ? null : sessionUser.getPreferredLanguage();
+    }
 
-        private V value;
+    /**
+     * Checks if a {@link ResourceCache} is enabled fo the given context.
+     *
+     * @param contextId The context identifier
+     * @return true if a {@link ResourceCache} is enabled for the context
+     * @throws OXException if check fails
+     */
+    public static boolean isResourceCacheEnabled(int contextId) throws OXException {
+        return isResourceCacheEnabled(contextId, -1);
+    }
 
-        Ref() {
-            super();
-            this.value = null;
+    /**
+     * Checks if a {@link ResourceCache} is enabled fo the given context and user.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return true if a {@link ResourceCache} is enabled for the context, user
+     * @throws OXException if check fails
+     */
+    public static boolean isResourceCacheEnabled(int contextId, int userId) throws OXException {
+        boolean isEnabled = false;
+        final ResourceCache cache = ResourceCaches.getResourceCache();
+        if (cache != null) {
+            isEnabled = cache.isEnabledFor(contextId, userId);
+        }
+        return isEnabled;
+    }
+
+    /**
+     * Get the {@link ResourceCache}.
+     *
+     * @return The preview cache or null if cache is either absent or not enabled for context, user
+     */
+    public static ResourceCache getResourceCache(int contextId, int userId) {
+        try {
+            return isResourceCacheEnabled(contextId, userId) ? ResourceCaches.getResourceCache() : null;
+        } catch (OXException e) {
+            LOGGER.warn("Failed to check if ResourceCache is enabled for context {} and user {}", contextId, userId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Try to get a context global cached resource.
+     *
+     * @param session The current session
+     * @param cacheKey The cacheKey
+     * @param resourceCache The resourceCache to use
+     * @return Null or the found {@link CachedResource}
+     */
+    public static CachedResource getCachedResourceForContext(ServerSession session, String cacheKey, ResourceCache resourceCache) {
+        CachedResource cachedResource= null;
+        final int contextId = session.getContextId();
+        if(!Strings.isEmpty(cacheKey)) {
+            if(resourceCache != null) {
+                try {
+                    cachedResource = resourceCache.get(cacheKey, 0, contextId);
+                } catch (OXException e) {
+                    LOGGER.debug("Error while trying to look up CachedResource with key {} in context {}", e);
+                }
+            }
+        }
+        return cachedResource;
+    }
+
+    /**
+     * Try to get a cached resource from preview service.
+     *
+     * @param session The current session
+     * @param cacheKey The cacheKey
+     * @param resourceCache The resourceCache to use
+     * @return Null or the found {@link CachedResource}
+     */
+    public static CachedResource getCachedResourceFromPreviewService(ServerSession session, AJAXRequestResult result, AJAXRequestData requestData, PreviewService previewService, PreviewOutput output) {
+        final Object resultObject = result.getResultObject();
+        final String mimeType = ((null != resultObject) && (resultObject instanceof IFileHolder)) ? MimeType2ExtMap.getContentType(((IFileHolder) resultObject).getName(), null) : null;
+        PreviewService candidate = (previewService instanceof RemoteInternalPreviewService ? previewService : null);
+        CachedResource ret = null;
+
+        if ((null == candidate) && (previewService instanceof Delegating) && (null != mimeType)) {
+            // Determine candidate
+            try {
+                candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, output);
+            } catch (OXException e) {
+                LOGGER.debug("Error while trying to look up CachedResource from RemoteInternalPeviewService in context {}", e);
+            }
+
+            if ((null != candidate) && !(candidate instanceof RemoteInternalPreviewService)) {
+                candidate = null;
+            }
         }
 
-        /**
-         * Gets the value
-         *
-         * @return The value
-         */
-        V getValue() {
-            return value;
+        if (null != candidate) {
+            IFileHolder fileHolder = null;
+
+            // Check file holder's content
+            try {
+                if (!(resultObject instanceof IFileHolder)) {
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                }
+
+                fileHolder = (IFileHolder) resultObject;
+
+                if (0 == fileHolder.getLength()) {
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
+                }
+
+                // Prepare properties for preview generation
+                final DataProperties dataProperties = new DataProperties(12);
+                final String srcMimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
+
+                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, srcMimeType);
+                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+                dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
+                dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
+                dataProperties.put("PreviewWidth", requestData.getParameter("width"));
+                dataProperties.put("PreviewHeight", requestData.getParameter("height"));
+                dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
+                dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
+                dataProperties.put("PreviewLanguage", getUserLanguage(session));
+
+                // Generate preview
+                final Data<InputStream> data = new SimpleData<InputStream>(fileHolder.getStream(), dataProperties);
+                final PreviewDocument previewDocument = ((RemoteInternalPreviewService) candidate).getCachedPreviewFor(data, output, session, 1);
+
+                if (null != previewDocument) {
+                    byte[] thumbnailBuffer = null;
+
+                    // we like to have the result as a byte buffer
+                    if (previewDocument instanceof RemoteInternalPreviewDocument) {
+                        thumbnailBuffer = ((RemoteInternalPreviewDocument) previewDocument).getThumbnailBuffer();
+                    } else {
+                        final InputStream thumbnailStm = previewDocument.getThumbnail();
+
+                        if (null != thumbnailStm) {
+                            try {
+                                thumbnailBuffer = IOUtils.toByteArray(thumbnailStm);
+                            } catch (IOException e) {
+                                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+                            } finally {
+                                IOUtils.closeQuietly(thumbnailStm);
+                            }
+                        }
+                    }
+
+                    if (null != thumbnailBuffer) {
+                        final Map<String, String> metadata = previewDocument.getMetaData();
+                        final String fileName = metadata.get("resourcename");
+                        final String contentType = metadata.get("content-type");
+
+                        ret = new CachedResource(thumbnailBuffer, fileName, contentType, thumbnailBuffer.length);
+                    }
+                }
+            } catch (OXException e) {
+                LOGGER.debug("Error while trying to look up CachedResource from RemotePreviewService", e);
+            }
         }
 
-        /**
-         * Sets the value
-         *
-         * @param value The value to set
-         */
-        Ref<V> setValue(final V value) {
-            this.value = value;
-            return this;
+        return ret;
+    }
+
+    /**
+     * Detects if specified preview service should be called via a current thread or worker thread strategy.
+     *
+     * @param previewService The preview service to check
+     * @return The await time (worker thread) or <code>0</code> (current thread)
+     */
+    public static long getAwaitThreshold(PreviewService previewService) {
+        return previewService instanceof RemoteInternalPreviewService ? ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis() : 0L;
+    }
+
+    /**
+     * Add the default thumbnail as result to the current response
+     *
+     * @param requestData The current {@link AJAXRequestData} needed to set format and prevent further transformation.
+     * @param result The current {@link AJAXRequestResult}
+     */
+    public static void setDefaulThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
+        setJpegThumbnail(requestData, result, PreviewConst.DEFAULT_THUMBNAIL);
+    }
+
+    /**
+     * Add the 1x1 white jpeg thumbnail as result to the current response. This indicates an accepted thumbnail request that can't deliver
+     * an immediate response from cache but initiated the generation of the needed thumbnail.
+     *
+     * @param requestData The current {@link AJAXRequestData} needed to set format and prevent further transformation.
+     * @param result The current {@link AJAXRequestResult}
+     * TODO: Remove when ui can properly handle 202/Retry-After responses
+     */
+    public static void setMissingThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
+        setJpegThumbnail(requestData, result, PreviewConst.MISSING_THUMBNAIL);
+    }
+
+    private static void setJpegThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result, byte[] thumbnailBytes) {
+        requestData.setFormat("file");
+        InputStream thumbnail = Streams.newByteArrayInputStream(thumbnailBytes);
+        requestData.putParameter("transformationNeeded", "false");
+        final FileHolder responseFileHolder = new FileHolder(thumbnail, thumbnailBytes.length, "image/jpeg", "thumbs.jpg");
+        result.setResultObject(responseFileHolder, "file");
+    }
+
+    /**
+     * Get the {@link IFileHolder} from the given {@link AJAXRequestResult}.
+     *
+     * @param result
+     * @return The {@link IFileHolder} from the given {@link AJAXRequestResult}.
+     * @throws OXException if the result object isn't compatible
+     */
+    public static IFileHolder getFileHolderFromResult(AJAXRequestResult result) throws OXException {
+        final Object resultObject = result.getResultObject();
+        if (!(resultObject instanceof IFileHolder)) {
+            throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
         }
+        return (IFileHolder) resultObject;
+    }
+
+    /**
+     * Check if the client actively wants to prevent caching.
+     *
+     * @param requestData The requestData
+     * @return True if the client didn't actively specify caching=false
+     */
+    public static boolean useCache(AJAXRequestData requestData) {
+        return AJAXRequestDataTools.parseBoolParameter("cache", requestData, true);
+    }
+
+    /**
+     * Check if the ETag is valid iow. non empty
+     *
+     * @param eTag The ETag to check
+     * @return True if !Strings.isEmpty(eTag)
+     */
+    public static boolean isValidETag(String eTag) {
+        return !Strings.isEmpty(eTag);
+    }
+
+    /**
+     * Detect if the {@link PreviewDocument} needs further transformations or not and set <code>transformationNeeded</code> parameter on the
+     * given {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the client.
+     *
+     * @param requestData The {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the
+     *            client.
+     * @param previewDocument The current {@link PreviewDocument}
+     */
+    public static void preventTransformations(AJAXRequestData requestData, PreviewDocument previewDocument) {
+        if ("com.openexchange.documentpreview.OfficePreviewDocument".equals(previewDocument.getClass().getName())) {
+            preventTransformations(requestData);
+        }
+    }
+
+    /**
+     * Set <code>transformationNeeded</code> parameter to <code>false</code> on the given {@link AJAXRequestData}.
+     *
+     * @param requestData The {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the
+     *            client.
+     */
+    public static void preventTransformations(AJAXRequestData requestData) {
+        requestData.putParameter("transformationNeeded", "false");
     }
 
 }

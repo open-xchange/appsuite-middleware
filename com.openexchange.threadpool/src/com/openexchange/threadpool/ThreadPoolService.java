@@ -54,12 +54,14 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ThreadPoolService} - The thread pool service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface ThreadPoolService {
 
     /**

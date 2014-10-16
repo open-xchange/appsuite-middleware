@@ -53,7 +53,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.util.server.ListServer;

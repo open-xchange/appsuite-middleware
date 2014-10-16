@@ -85,6 +85,7 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.ConcurrentEnumMap;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -153,8 +154,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     // ------------------------------------------------------------------------------------------------ //
 
-    private static final ConcurrentEnumMap<Permission, Capability> p2capabilities = new ConcurrentEnumMap<Permission, Capability>(Permission.class);
-    private static final ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>(96);
+    private static final ConcurrentEnumMap<Permission, Capability> P2CAPABILITIES = new ConcurrentEnumMap<Permission, Capability>(Permission.class);
+    private static final ConcurrentMap<String, Capability> CAPABILITIES = new ConcurrentHashMap<String, Capability>(96);
 
     /**
      * Gets the singleton capability for given identifier
@@ -162,13 +163,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * @param permission The permission
      * @return The singleton capability
      */
-    public static Capability getCapability(final Permission permission) {
+    public static Capability getCapability(Permission permission) {
         if (null == permission) {
             return null;
         }
+        ConcurrentEnumMap<Permission, Capability> p2capabilities = P2CAPABILITIES;
         Capability capability = p2capabilities.get(permission);
         if (null == capability) {
-            final Capability newcapability = getCapability(permission.getCapabilityName());
+            Capability newcapability = getCapability(permission.getCapabilityName());
             capability = p2capabilities.putIfAbsent(permission, newcapability);
             if (null == capability) {
                 capability = newcapability;
@@ -183,15 +185,16 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * @param id The identifier
      * @return The singleton capability
      */
-    public static Capability getCapability(final String id) {
+    public static Capability getCapability(String id) {
         if (null == id) {
             return null;
         }
+        ConcurrentMap<String, Capability> capabilities = CAPABILITIES;
         Capability capability = capabilities.get(id);
         if (capability != null) {
             return capability;
         }
-        final Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id));
+        Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id));
         return existingCapability == null ? capability : existingCapability;
     }
 
@@ -369,10 +372,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     capabilities.remove("pim");
                 }
                 // Spam
-                if (serverSession.getUserSettingMail().isSpamEnabled()) {
-                    capabilities.add(getCapability("spam"));
-                } else {
-                    capabilities.remove("spam");
+                {
+                    UserSettingMail mailSettings = serverSession.getUserSettingMail();
+                    if (null != mailSettings && mailSettings.isSpamEnabled()) {
+                        capabilities.add(getCapability("spam"));
+                    } else {
+                        capabilities.remove("spam");
+                    }
                 }
                 // Global Address Book
                 if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
@@ -590,10 +596,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * Gets all currently known capabilities.
      *
      * @return All capabilities
-     * @throws OXException If operation fails
      */
-    public Set<Capability> getAllKnownCapabilities() throws OXException {
-        return new HashSet<Capability>(capabilities.values());
+    public Set<Capability> getAllKnownCapabilities() {
+        return new HashSet<Capability>(CAPABILITIES.values());
     }
 
     @Override

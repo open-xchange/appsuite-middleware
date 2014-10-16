@@ -118,6 +118,8 @@ public interface MailAccountFields {
 
     public static final String UNIFIED_INBOX_ENABLED = "unified_inbox_enabled";
 
+    public static final String INBOX_FULLNAME = "inbox_fullname";
+
     public static final String TRASH_FULLNAME = "trash_fullname";
 
     public static final String ARCHIVE_FULLNAME = "archive_fullname";

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Publish Plug-in
 Bundle-SymbolicName: com.openexchange.publish
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.context,
@@ -12,6 +12,7 @@ Import-Package: com.openexchange.context,
  com.openexchange.groupware.contexts,
  com.openexchange.i18n,
  com.openexchange.log,
+ com.openexchange.osgi.annotation,
  org.apache.commons.logging,
  org.slf4j
 Export-Package: com.openexchange.publish

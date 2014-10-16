@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.groupware.infostore.utils.UploadSizeValidation.checkSize;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -76,13 +77,13 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -103,7 +104,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private byte[] contentData;
     private List<File.Field> fields;
     private File file;
-    private IDBasedFileAccess files;
+    private IDBasedFileAccess fileAccess;
+    private IDBasedFolderAccess folderAccess;
     private Map<String, String> folderMapping;
     private Map<String, Set<String>> versionMapping;
     private List<String> folders;
@@ -218,15 +220,23 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public IDBasedFileAccess getFileAccess() {
-        if(files != null) {
-            return files;
+        if (fileAccess != null) {
+            return fileAccess;
         }
-        return files = Services.getFileAccessFactory().createAccess(session);
+        return fileAccess = Services.getFileAccessFactory().createAccess(session);
+    }
+
+    @Override
+    public IDBasedFolderAccess getFolderAccess() throws OXException {
+        if (folderAccess != null) {
+            return folderAccess;
+        }
+        return folderAccess = Services.getFolderAccessFactory().createAccess(session);
     }
 
     @Override
     public String getFolderAt(final int index) {
-        return folders.get(index);
+        return index < 0 || index >= folders.size() ? null : folders.get(index);
     }
 
     @Override
@@ -393,17 +403,18 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public InputStream getUploadedFileData() throws OXException {
-        if(data.hasUploads()) {
+        if (data.hasUploads()) {
             try {
                 final UploadFile uploadFile = data.getFiles().get(0);
-                checkSize( uploadFile );
-                return new FileInputStream(uploadFile.getTmpFile());
+                checkSize(uploadFile.getSize());
+                java.io.File tmpFile = uploadFile.getTmpFile();
+                return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
             } catch (final FileNotFoundException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
         if (contentData != null) {
-        	return new UnsynchronizedByteArrayInputStream(contentData);
+            return new UnsynchronizedByteArrayInputStream(contentData);
         }
         return null;
     }
@@ -482,18 +493,6 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     @Override
     public InfostoreRequest requireFileMetadata() throws OXException {
         return requireBody();
-    }
-
-    private void checkSize(final UploadFile uploadFile) throws OXException{
-        final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
-        if (maxSize == 0) {
-            return;
-        }
-
-        final long size = uploadFile.getSize();
-        if (size > maxSize) {
-            throw UploadSizeExceededException.create(size, maxSize, true);
-        }
     }
 
     private int getInt(final Param param) {
@@ -583,6 +582,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 file.setFileMIMEType(uploadFile.getContentType());
                 fields.add(File.Field.FILE_MIMETYPE);
             }
+
+            file.setFileSize(uploadFile.getSize());
+            fields.add(File.Field.FILE_SIZE);
             // TODO: Guess Content-Type
         }
 
@@ -600,6 +602,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (object.has("content")) {
         	try {
 				contentData = object.opt("content").toString().getBytes("UTF-8");
+
+                file.setFileSize(contentData.length);
+                fields.add(File.Field.FILE_SIZE);
 			} catch (UnsupportedEncodingException e) {
 				// IGNORE;
 			}

@@ -111,24 +111,6 @@ public class MutableUserConfiguration extends UserConfiguration {
     }
 
     /**
-     * Enables/Disables forum access in user configuration.
-     *
-     * @param enableForum
-     */
-    public void setForum(final boolean enableForum) {
-        setPermission(enableForum, FORUM);
-    }
-
-    /**
-     * Enables/Disables pinboard write access in user configuration.
-     *
-     * @param enablePinboardWriteAccess
-     */
-    public void setPinboardWriteAccess(final boolean enablePinboardWriteAccess) {
-        setPermission(enablePinboardWriteAccess, PINBOARD_WRITE_ACCESS);
-    }
-
-    /**
      * Enables/Disables WebDAV XML access in user configuration.
      *
      * @param enableWebDAVXML
@@ -162,24 +144,6 @@ public class MutableUserConfiguration extends UserConfiguration {
      */
     public void setVCard(final boolean enableVCard) {
         setPermission(enableVCard, VCARD);
-    }
-
-    /**
-     * Enables/Disables RSS bookmarks access in user configuration.
-     *
-     * @param enableRSSBookmarks
-     */
-    public void setRSSBookmarks(final boolean enableRSSBookmarks) {
-        setPermission(enableRSSBookmarks, RSS_BOOKMARKS);
-    }
-
-    /**
-     * Enables/Disables RSS portal access in user configuration.
-     *
-     * @param enableRSSPortal
-     */
-    public void setRSSPortal(final boolean enableRSSPortal) {
-        setPermission(enableRSSPortal, RSS_PORTAL);
     }
 
     /**

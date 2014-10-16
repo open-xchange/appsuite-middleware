@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.zip.CRC32;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class OXTestToolkit {
 

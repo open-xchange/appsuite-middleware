@@ -125,11 +125,10 @@ public class ConfigCascade implements ConfigViewFactory {
 
     private final class View implements ConfigView {
 
-        int context;
+        final int context;
+        final int user;
 
-        int user;
-
-        public View(final int user, final int context) {
+        View(int user, int context) {
             this.user = user;
             this.context = context;
         }

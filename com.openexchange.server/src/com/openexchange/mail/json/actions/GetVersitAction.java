@@ -52,6 +52,7 @@ package com.openexchange.mail.json.actions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.mail.MessageRemovedException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -161,7 +162,7 @@ public final class GetVersitAction extends AbstractMailAction {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

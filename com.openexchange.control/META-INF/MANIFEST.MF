@@ -2,11 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Control
 Bundle-SymbolicName: com.openexchange.control
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.control.osgi.ControlActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.database.migration,
+ com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.groupware.update,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.management,

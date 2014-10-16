@@ -23,9 +23,25 @@ setConfigFilePermissions() {
     ox_update_permissions /opt/open-xchange/etc/filestore-s3.properties root:open-xchange 640
 }
 
+postFix() {
+    local version=${1%-*}
+    version=${version//[-.]/}
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+    PFILE=/opt/open-xchange/etc/filestore-s3.properties
+
+    # SoftwareChange_Request-2061
+    ox_add_property com.openexchange.filestore.s3.[filestoreID].bucketName "" $PFILE
+    ox_add_property com.openexchange.filestore.s3.[filestoreID].pathStyleAccess true $PFILE
+}
+
 case "$1" in
     configure)
         setConfigFilePermissions
+        test -n "$2" && {
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+        }
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

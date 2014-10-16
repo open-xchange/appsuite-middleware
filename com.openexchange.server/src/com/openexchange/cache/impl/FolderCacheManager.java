@@ -150,7 +150,7 @@ public final class FolderCacheManager {
      */
     public static FolderCacheManager getInstance() throws OXException {
         if (!OXFolderProperties.isEnableFolderCache()) {
-            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create("foldercache.properties");
         }
         if (instance == null) {
             synchronized (FolderCacheManager.class) {
@@ -219,7 +219,7 @@ public final class FolderCacheManager {
 
     public void clearFor(final Context ctx, final boolean async) {
         final Runnable task = new Runnable() {
-            
+
             @Override
             public void run() {
                 final int contextId = ctx.getContextId();
@@ -285,6 +285,9 @@ public final class FolderCacheManager {
             // Conditional put into cache: Put only if absent.
             if (null != readCon) {
                 putIfAbsentInternal(new LoadingFolderProvider(objectId, ctx, readCon), ctx, null);
+            } else {
+                // This will save one folderCache.get call additionaly, it will have the same effect as the later called putFolderObject(fo, ctx, false == fromCache, null);
+                putFolderObject(loadFolderObjectInternal(objectId, ctx, readCon), ctx, false, null);
             }
         } else {
             // Forced put into cache: Always put.
@@ -295,6 +298,7 @@ public final class FolderCacheManager {
         if (object instanceof FolderObject) {
             return ((FolderObject) object).clone();
         }
+        // It should be nearly impossible to end at this point but to be sure to always return a working FolderObject, the following lines are necessary
         final FolderObject fo = loadFolderObjectInternal(objectId, ctx, readCon);
         putFolderObject(fo, ctx, false == fromCache, null);
         return fo.clone();
@@ -446,7 +450,7 @@ public final class FolderCacheManager {
      */
     public FolderObject putIfAbsent(final FolderObject folderObj, final Context ctx, final ElementAttributes elemAttribs) throws OXException {
         if (null == folderCache) {
-            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create("foldercache.properties");
         }
         if (!folderObj.containsObjectID()) {
             throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(DataFields.ID, I(-1), I(ctx.getContextId()));

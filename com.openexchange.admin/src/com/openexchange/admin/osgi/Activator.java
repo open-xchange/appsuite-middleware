@@ -82,6 +82,7 @@ import com.openexchange.auth.Authenticator;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -107,6 +108,7 @@ public class Activator extends HousekeepingActivator {
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
         track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
+        track(ConfigViewFactory.class, new RegistryServiceTrackerCustomizer<ConfigViewFactory>(context, AdminServiceRegistry.getInstance(), ConfigViewFactory.class));
         AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
@@ -230,7 +232,6 @@ public class Activator extends HousekeepingActivator {
             daemon.unregisterRMI(context);
             this.daemon = null;
         }
-        log.info("Thanks for using Open-Xchange AdminDaemon");
     }
 
     @Override

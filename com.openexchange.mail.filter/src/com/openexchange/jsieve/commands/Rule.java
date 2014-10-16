@@ -193,11 +193,11 @@ public class Rule implements Comparable<Rule> {
      */
     public final TestCommand getTestCommand() {
         final IfCommand ifCommand = getIfCommand();
-        if (null != ifCommand) {
-            return ifCommand.getTestcommand();
-        } else {
+        if (null == ifCommand) {
             return null;
         }
+
+        return ifCommand.getTestcommand();
     }
 
     /**
@@ -205,11 +205,11 @@ public class Rule implements Comparable<Rule> {
      * @return -1 if there is no unique id for this rule; a value > -1 otherwise
      */
     public int getUniqueId() {
-        if (null != this.ruleComment) {
-            return this.ruleComment.getUniqueid();
-        } else {
+        if (null == this.ruleComment) {
             return -1;
         }
+
+        return this.ruleComment.getUniqueid();
     }
 
     public final void setRuleComments(final RuleComment ruleComment) {

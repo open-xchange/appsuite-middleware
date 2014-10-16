@@ -51,10 +51,32 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.SQLException;
+import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class CreateVersionAction extends AbstractDocumentListAction {
+
+    /**
+     * Initializes a new {@link CreateVersionAction}.
+     */
+    public CreateVersionAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link CreateVersionAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param versions The versions to create
+     */
+    public CreateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> versions) {
+        super(provider, queryCatalog, context, versions);
+    }
 
     @Override
     protected void undoAction() throws OXException {

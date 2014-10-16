@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
+import com.openexchange.java.Collators;
 
 /**
  * This is an updated version with enhancements made by Daniel Migowski,
@@ -63,8 +64,7 @@ public class AlphanumComparator implements Comparator<String> {
     private static final Collator DEFAULT_COLLATOR;
 
     static {
-        final Collator collator = Collator.getInstance(DEFAULT_LOCALE);
-        collator.setStrength(Collator.SECONDARY);
+        final Collator collator = Collators.getSecondaryInstance(DEFAULT_LOCALE);
         DEFAULT_COLLATOR = collator;
         COLLATOR_OVERRIDES = Collections.unmodifiableMap(initCollatorOverrides());
     }
@@ -95,8 +95,7 @@ public class AlphanumComparator implements Comparator<String> {
             this.collator = COLLATOR_OVERRIDES.get(locale);
         } else {
             this.locale = locale;
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
     }
 

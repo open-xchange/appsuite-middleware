@@ -49,10 +49,10 @@
 
 package com.openexchange.find.basic.calendar;
 
-import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -75,11 +75,11 @@ import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.calendar.CalendarFacetValues;
 import com.openexchange.find.calendar.CalendarStrings;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -210,7 +210,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     private static Facet getRelativeDateFacet() {
         List<String> fields = Collections.singletonList(CalendarFacetType.RELATIVE_DATE.getId());
         return newExclusiveBuilder(CalendarFacetType.RELATIVE_DATE)
-            .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_COMING, CalendarStrings.RELATIVE_DATE_COMING, fields))
+            .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_FUTURE, CalendarStrings.RELATIVE_DATE_FUTURE, fields))
             .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_PAST, CalendarStrings.RELATIVE_DATE_PAST, fields))
             .build();
     }
@@ -378,7 +378,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             if (null != filter) {
                 String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
                 contactFacets.add(FacetValue.newBuilder(valueId)
-                    .withDisplayItem(new ContactDisplayItem(contact))
+                    .withDisplayItem(DisplayItems.convert(contact))
                     .withFilter(filter)
                     .build());
             }

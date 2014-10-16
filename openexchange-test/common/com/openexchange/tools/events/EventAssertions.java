@@ -48,7 +48,7 @@
  */
 package com.openexchange.tools.events;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import com.openexchange.event.CommonEvent;

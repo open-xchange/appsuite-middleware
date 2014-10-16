@@ -60,6 +60,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -92,6 +93,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
@@ -105,6 +107,7 @@ import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -125,7 +128,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements FolderStorage {
+public final class CacheFolderStorage implements FolderStorage, FolderCacheInvalidationService {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -515,16 +518,14 @@ public final class CacheFolderStorage implements FolderStorage {
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
                 cache.removeFromGroup(cacheKey, sContextId);
                 // Cleanse parent from caches, too
-                folderMapManagement.dropFor(folder.getParentID(), treeId, userId, contextId, session);
-                folderMapManagement.dropFor(folder.getParentID(), realTreeId, userId, contextId, session);
+                folderMapManagement.dropFor(folder.getParentID(), tid, userId, contextId, session);
             }
-            if (null != createdFolder) {
+            if (null != createdFolder && false == createdFolder.getParentID().equals(folder.getParentID())) {
                 for (final String tid : new String[] { treeId, realTreeId }) {
                     final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
                     cache.removeFromGroup(cacheKey, sContextId);
                     // Cleanse parent from caches, too
-                    folderMapManagement.dropFor(folder.getParentID(), treeId, userId, contextId, session);
-                    folderMapManagement.dropFor(folder.getParentID(), realTreeId, userId, contextId, session);
+                    folderMapManagement.dropFor(createdFolder.getParentID(), tid, userId, contextId, session);
                 }
             }
             /*
@@ -534,7 +535,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, realTreeId, storageParameters, true);
             }
-            if (null != createdFolder) {
+            if (null != createdFolder && false == createdFolder.getParentID().equals(folder.getParentID())) {
                 parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
                 if (parentFolder.isCacheable()) {
                     putFolder(parentFolder, realTreeId, storageParameters, true);
@@ -564,6 +565,16 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
+    public void invalidateSingle(String folderId, String treeId, Session session) throws OXException {
+        removeFromCache(folderId, treeId, true, session);
+    }
+
+    @Override
+    public void invalidate(String folderId, String treeId, boolean includeParents, Session session) throws OXException {
+        removeFromCache(folderId, treeId, !includeParents, session);
+    }
+
     /**
      * Removes specified folder and all of its predecessor folders from cache.
      *
@@ -574,46 +585,85 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param session The session providing user information
      * @throws OXException If removal fails
      */
-    public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws OXException {
-        final Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
+    public void removeFromCache(String id, String treeId, boolean singleOnly, Session session) throws OXException {
+        removeFromCache(id, treeId, singleOnly, session, null);
+    }
+
+    /**
+     * Removes specified folder and all of its predecessor folders from cache.
+     *
+     * @param id The folder identifier
+     * @param treeId The tree identifier
+     * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
+     *            path to root folder
+     * @param session The session providing user information
+     * @param folderPath The folderPath to <code>rootFolder</code>, if known
+     * @throws OXException If removal fails
+     */
+    public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session, List<String> folderPath) throws OXException {
+        Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
         acquire(lock);
         try {
             if (singleOnly) {
                 removeSingleFromCache(id, treeId, session.getUserId(), session, true);
             } else {
-                removeFromCache(id, treeId, session, new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry));
+                if (null != folderPath) {
+                    removeFromCache(id, treeId, session, null, folderPath);
+                } else {
+                    removeFromCache(id, treeId, session, new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry));
+                }
+
             }
         } finally {
             lock.unlock();
         }
     }
 
-    private void removeFromCache(final String id, final String treeId, final Session session, final PathPerformer pathPerformer) throws OXException {
+    private void removeFromCache(String id, String treeId, Session session, PathPerformer pathPerformer) throws OXException {
+        removeFromCache(id, treeId, session, pathPerformer, null);
+    }
+
+    private void removeFromCache(final String id, final String treeId, final Session session, final PathPerformer pathPerformer, List<String> folderPath) throws OXException {
         if (null == id) {
+            return;
+        }
+        // at least one way to get paths should be provided
+        if (null == pathPerformer && null == folderPath) {
+            return;
+        }
+        // but not both
+        if (null != pathPerformer && null != folderPath) {
             return;
         }
         {
             List<String> ids;
-            try {
-                if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
-                    final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
-                    ids = new ArrayList<String>(path.length);
-                    for (final UserizedFolder userizedFolder : path) {
-                        ids.add(userizedFolder.getID());
-                    }
-                } else {
-                    ids = Collections.singletonList(id);
-                }
-            } catch (final Exception e) {
-                final org.slf4j.Logger log =
-                    org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
-                log.debug("", e);
+            if (null != pathPerformer) {
                 try {
-                    ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));
-                } catch (final Exception e1) {
-                    log.debug("", e1);
-                    ids = Collections.singletonList(id);
+                    pathPerformer.getStorageParameters().setIgnoreCache(true);
+                    if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
+                        final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
+                        ids = new ArrayList<String>(path.length);
+                        for (final UserizedFolder userizedFolder : path) {
+                            ids.add(userizedFolder.getID());
+                        }
+                    } else {
+                        ids = Collections.singletonList(id);
+                    }
+                } catch (final Exception e) {
+                    final org.slf4j.Logger log =
+                        org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
+                    log.debug("", e);
+                    try {
+                        ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));
+                    } catch (final Exception e1) {
+                        log.debug("", e1);
+                        ids = Collections.singletonList(id);
+                    }
+                } finally {
+                    pathPerformer.getStorageParameters().setIgnoreCache(null);
                 }
+            } else {
+                ids = folderPath;
             }
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
@@ -899,14 +949,6 @@ public final class CacheFolderStorage implements FolderStorage {
             }
             if (!ROOT_ID.equals(parentId)) {
                 removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
-                try {
-                    final Folder parentFolder = loadFolder(realTreeId, parentId, StorageType.WORKING, true, storageParameters);
-                    if (parentFolder.isCacheable()) {
-                        putFolder(parentFolder, realTreeId, storageParameters, true);
-                    }
-                } catch (final Exception e) {
-                    // Ignore
-                }
             }
         } finally {
             lock.unlock();
@@ -1139,7 +1181,12 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Try global cache key
          */
-        Folder folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+        Folder folder;
+        if (folderId.length() <= 0 || Strings.isDigit(folderId.charAt(0))) {
+            folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+        } else {
+            folder = null;
+        }
         if (null != folder) {
             /*
              * Return a cloned version from global cache
@@ -1206,29 +1253,26 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Load the ones from storage
              */
-            final Map<String, Folder> fromStorage;
-            if (toLoad.isEmpty()) {
-                fromStorage = Collections.emptyMap();
-            } else {
-                fromStorage = loadFolders(treeId, Arrays.asList(toLoad.keys(new String[toLoad.size()])), storageType, storageParameters);
-            }
-            /*
-             * Fill return value
-             */
-            for (final Entry<String, Folder> entry : fromStorage.entrySet()) {
-                Folder folder = entry.getValue();
-                final int index = toLoad.get(entry.getKey());
+            if (!toLoad.isEmpty()) {
+                Map<String, Folder> fromStorage = loadFolders(treeId, Arrays.asList(toLoad.keys(new String[toLoad.size()])), storageType, storageParameters);
                 /*
-                 * Put into cache
+                 * Fill return value
                  */
-                if (folder.isCacheable()) {
+                for (final Entry<String, Folder> entry : fromStorage.entrySet()) {
+                    Folder folder = entry.getValue();
+                    final int index = toLoad.get(entry.getKey());
                     /*
-                     * Put to cache and create a cloned version
+                     * Put into cache
                      */
-                    putFolder(folder, treeId, storageParameters, false);
-                    folder = (Folder) folder.clone();
+                    if (folder.isCacheable()) {
+                        /*
+                         * Put to cache and create a cloned version
+                         */
+                        putFolder(folder, treeId, storageParameters, false);
+                        folder = (Folder) folder.clone();
+                    }
+                    ret[index] = folder;
                 }
-                ret[index] = folder;
             }
             /*
              * Return
@@ -1289,89 +1333,100 @@ public final class CacheFolderStorage implements FolderStorage {
         final Lock lock = readLockFor(treeId, storageParameters);
         acquire(lock);
         try {
-            final Folder parent = getFolder(treeId, parentId, storageParameters);
-            final String[] subfolders = ROOT_ID.equals(parentId) ? null : parent.getSubfolderIDs();
-            final SortableId[] ret;
-            if (null == subfolders) {
-                /*
-                 * Get needed storages
-                 */
-                final FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
-                if (0 == neededStorages.length) {
-                    return new SortableId[0];
+            Folder parent = getFolder(treeId, parentId, storageParameters);
+            String[] subfolders = ROOT_ID.equals(parentId) ? null : parent.getSubfolderIDs();
+            if (null != subfolders) {
+                SortableId[] ret = new SortableId[subfolders.length];
+                for (int i = 0; i < ret.length; i++) {
+                    ret[i] = new CacheSortableId(subfolders[i], i, null);
                 }
-                try {
-                    final java.util.List<SortableId> allSubfolderIds;
-                    if (1 == neededStorages.length) {
+                return ret;
+            }
+
+            // Get needed storages
+            FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
+            if (0 == neededStorages.length) {
+                return new SortableId[0];
+            }
+
+            try {
+                java.util.List<SortableId> allSubfolderIds;
+                if (1 == neededStorages.length) {
+                    FolderStorage neededStorage = neededStorages[0];
+                    boolean started = neededStorage.startTransaction(storageParameters, false);
+                    try {
+                        allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
+                        if (started) {
+                            neededStorage.commitTransaction(storageParameters);
+                            started = false;
+                        }
+                    } finally {
+                        if (started) {
+                            neededStorage.rollback(storageParameters);
+                        }
+                    }
+                } else {
+                    allSubfolderIds = new LinkedList<SortableId>();
+
+                    // Query storages (except first one) using dedicated threads
+                    CompletionService<java.util.List<SortableId>> completionService = new ThreadPoolCompletionService<java.util.List<SortableId>>(ThreadPools.getThreadPool()).setTrackable(true);
+                    int submittedTasks = 0;
+                    for (int i = 1; i < neededStorages.length; i++) {
+                        final FolderStorage neededStorage = neededStorages[i];
+                        completionService.submit(new TrackableCallable<java.util.List<SortableId>>() {
+
+                            @Override
+                            public java.util.List<SortableId> call() throws Exception {
+                                StorageParameters newParameters = newStorageParameters(storageParameters);
+                                boolean started = neededStorage.startTransaction(newParameters, false);
+                                try {
+                                    java.util.List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
+                                    if (started) {
+                                        neededStorage.commitTransaction(newParameters);
+                                        started = false;
+                                    }
+                                    return l;
+                                } finally {
+                                    if (started) {
+                                        neededStorage.rollback(newParameters);
+                                    }
+                                }
+                            }
+                        });
+                        submittedTasks++;
+                    }
+
+                    // Query the first one with this thread
+                    {
                         final FolderStorage neededStorage = neededStorages[0];
                         boolean started = neededStorage.startTransaction(storageParameters, false);
                         try {
-                            allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
+                            java.util.List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
                             if (started) {
                                 neededStorage.commitTransaction(storageParameters);
                                 started = false;
                             }
+                            allSubfolderIds.addAll(l);
                         } finally {
                             if (started) {
                                 neededStorage.rollback(storageParameters);
                             }
                         }
-                    } else {
-                        allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
-                        final CompletionService<java.util.List<SortableId>> completionService =
-                            new ThreadPoolCompletionService<java.util.List<SortableId>>(ThreadPools.getThreadPool()).setTrackable(true);
-                        /*
-                         * Get all visible subfolders from each storage
-                         */
-                        for (final FolderStorage neededStorage : neededStorages) {
-                            completionService.submit(new TrackableCallable<java.util.List<SortableId>>() {
-
-                                @Override
-                                public java.util.List<SortableId> call() throws Exception {
-                                    final StorageParameters newParameters = newStorageParameters(storageParameters);
-                                    boolean started = neededStorage.startTransaction(newParameters, false);
-                                    try {
-                                        final java.util.List<SortableId> l =
-                                            Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
-                                        if (started) {
-                                            neededStorage.commitTransaction(newParameters);
-                                            started = false;
-                                        }
-                                        return l;
-                                    } finally {
-                                        if (started) {
-                                            neededStorage.rollback(newParameters);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                        /*
-                         * Wait for completion
-                         */
-                        final List<List<SortableId>> results =
-                            ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
-                        for (final List<SortableId> result : results) {
-                            allSubfolderIds.addAll(result);
-                        }
                     }
-                    /*
-                     * Sort them
-                     */
-                    Collections.sort(allSubfolderIds);
-                    ret = allSubfolderIds.toArray(new SortableId[allSubfolderIds.size()]);
-                } catch (final OXException e) {
-                    throw e;
-                } catch (final Exception e) {
-                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+
+                    // Wait for completion
+                    List<List<SortableId>> results = ThreadPools.takeCompletionService(completionService, submittedTasks, FACTORY);
+                    for (List<SortableId> result : results) {
+                        allSubfolderIds.addAll(result);
+                    }
                 }
-            } else {
-                ret = new SortableId[subfolders.length];
-                for (int i = 0; i < ret.length; i++) {
-                    ret[i] = new CacheSortableId(subfolders[i], i, null);
-                }
+
+                // Sort them
+                Collections.sort(allSubfolderIds);
+                return allSubfolderIds.toArray(new SortableId[allSubfolderIds.size()]);
+            } catch (RuntimeException e) {
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-            return ret;
         } finally {
             lock.unlock();
         }
@@ -1646,7 +1701,7 @@ public final class CacheFolderStorage implements FolderStorage {
         return loadFolder(treeId, folderId, storageType, false, storageParameters);
     }
 
-    private Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final boolean readWrite, final StorageParameters storageParameters) throws OXException {
+    private Folder loadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
         final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
@@ -1654,6 +1709,7 @@ public final class CacheFolderStorage implements FolderStorage {
         final boolean started = startTransaction(readWrite ? Mode.WRITE_AFTER_READ : Mode.READ, storageParameters, storage);
         boolean rollback = true;
         try {
+            storageParameters.setIgnoreCache(Boolean.valueOf(readWrite));
             final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);
             if (started) {
                 storage.commitTransaction(storageParameters);
@@ -1663,6 +1719,7 @@ public final class CacheFolderStorage implements FolderStorage {
         } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            storageParameters.setIgnoreCache(null);
             if (started && rollback) {
                 storage.rollback(storageParameters);
             }
@@ -1756,13 +1813,10 @@ public final class CacheFolderStorage implements FolderStorage {
             completionService = new CallerRunsCompletionService<Object>();
             paramsProvider = new InstanceStorageParametersProvider(storageParameters);
         } else {
-            completionService =
-                new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true)).setTrackable(true);
+            completionService = new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true)).setTrackable(true);
 
             final Session session = storageParameters.getSession();
-            paramsProvider =
-                null == session ? new SessionStorageParametersProvider(storageParameters.getUser(), storageParameters.getContext()) : new SessionStorageParametersProvider(
-                    (ServerSession) storageParameters.getSession());
+            paramsProvider = null == session ? new SessionStorageParametersProvider(storageParameters.getUser(), storageParameters.getContext()) : new SessionStorageParametersProvider((ServerSession) session);
         }
         /*
          * Create destination map
@@ -1795,7 +1849,7 @@ public final class CacheFolderStorage implements FolderStorage {
                         /*
                          * Load them & commit
                          */
-                        final List<Folder> folders = fs.getFolders(treeId, ids, storageType, newParameters);
+                        List<Folder> folders = fs.getFolders(treeId, ids, storageType, newParameters);
                         if (started) {
                             fs.commitTransaction(newParameters);
                             started = false;
@@ -1803,14 +1857,14 @@ public final class CacheFolderStorage implements FolderStorage {
                         /*
                          * Fill into map
                          */
-                        for (final Folder folder : folders) {
+                        for (Folder folder : folders) {
                             ret.put(folder.getID(), folder);
                         }
                         /*
                          * Return
                          */
                         return null;
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e);
                     } finally {
                         if (started) {

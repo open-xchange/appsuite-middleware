@@ -778,7 +778,6 @@ class UpdateData {
             final TaskSearchObject search = new TaskSearchObject();
             search.setTitle(updated.getTitle());
             search.setStatus(updated.getStatus());
-            search.setPriority(updated.getPriority());
 
             try {
                 Permission.checkReadInFolder(ctx, user, permissionBits, folder);

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.QUOTA_AWARE;
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -85,7 +84,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
- * {@link FileStoreResourceCacheImpl} - The database-backed preview cache implementation for documents.
+ * {@link FileStoreResourceCacheImpl} - The filestore-backed preview cache implementation for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -95,20 +94,9 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStoreResourceCacheImpl.class);
 
-    private static final ConcurrentTIntObjectHashMap<FileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<FileStorage>();
-
     private static FileStorage getFileStorage(final Context ctx, final boolean quotaAware) throws OXException {
-        final int key = ctx.getContextId();
-        FileStorage fs = FILE_STORE_CACHE.get(key);
-        if (null == fs) {
-            final URI uri = FilestoreStorage.createURI(ctx);
-            final FileStorage newFileStorage = quotaAware ? QuotaFileStorage.getInstance(uri, ctx) : FileStorage.getInstance(uri);
-            fs = FILE_STORE_CACHE.putIfAbsent(key, newFileStorage);
-            if (null == fs) {
-                fs = newFileStorage;
-            }
-        }
-        return fs;
+        final URI uri = FilestoreStorage.createURI(ctx);
+        return quotaAware ? QuotaFileStorage.getInstance(uri, ctx) : FileStorage.getInstance(uri);
     }
 
     private static FileStorage getFileStorage(final int contextId, final boolean quotaAware) throws OXException {
@@ -130,7 +118,10 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     private void batchDeleteFiles(final Collection<String> ids, final FileStorage fileStorage) {
         try {
-            fileStorage.deleteFiles(ids.toArray(new String[0]));
+            Set<String> notDeleted = fileStorage.deleteFiles(ids.toArray(new String[0]));
+            if (!notDeleted.isEmpty()) {
+                LOG.warn("Some cached files could not be deleted from filestore. Consider using 'checkconsistency' to clean up manually.");
+            }
         } catch (final Exception e) {
             LOG.warn("Error while deleting a batch of preview files. Trying one-by-one now...", e);
             // Retry one-by-one
@@ -224,9 +215,14 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                 con.commit();
                 committed = true;
                 return true;
-            } catch (final DataTruncation e) {
+            } catch (DataTruncation e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-            } catch (final SQLException e) {
+            } catch (java.sql.SQLIntegrityConstraintViolationException e) {
+                // Duplicate key conflict; just leave
+                long transactionDuration = System.currentTimeMillis() - start;
+                LOG.warn("Caching a resource failed due to a duplicate key conflict, this should happen very rarely otherwise this may indicate a performance problem."
+                    + " The transaction lasted {}ms. Original message: {}.", transactionDuration, e.getMessage());
+            } catch (SQLException e) {
                 // duplicate key conflict
                 if (e.getErrorCode() == 1022) {
                     long transactionDuration = System.currentTimeMillis() - start;
@@ -368,8 +364,17 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     @Override
     public void remove(final int userId, final int contextId) throws OXException {
+        remove0(userId, contextId);
+    }
+
+    @Override
+    public void clearFor(final int contextId) throws OXException {
+        remove0(-1, contextId);
+    }
+
+    private void remove0(int userId, int contextId) throws OXException {
+        long start = System.currentTimeMillis();
         ResourceCacheMetadataStore metadataStore = getMetadataStore();
-        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         List<ResourceCacheMetadata> removed = metadataStore.removeAll(contextId, userId);
         List<String> refIds = new ArrayList<String>();
         for (ResourceCacheMetadata metadata : removed) {
@@ -377,7 +382,9 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                 refIds.add(metadata.getRefId());
             }
         }
+        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         batchDeleteFiles(refIds, fileStorage);
+        LOG.info("Cleared resource cache for user {} in context {} in {}ms.", userId, contextId, System.currentTimeMillis() - start);
     }
 
     @Override
@@ -387,7 +394,6 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         }
 
         ResourceCacheMetadataStore metadataStore = getMetadataStore();
-        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         List<ResourceCacheMetadata> removed = metadataStore.removeAll(contextId, userId, id);
         List<String> refIds = new ArrayList<String>();
         for (ResourceCacheMetadata metadata : removed) {
@@ -395,12 +401,8 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                 refIds.add(metadata.getRefId());
             }
         }
+        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         batchDeleteFiles(refIds, fileStorage);
-    }
-
-    @Override
-    public void clearFor(final int contextId) throws OXException {
-        remove(-1, contextId);
     }
 
     @Override
@@ -410,7 +412,6 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         }
 
         ResourceCacheMetadataStore metadataStore = getMetadataStore();
-        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         ResourceCacheMetadata metadata = metadataStore.load(contextId, userId, id);
         if (metadata == null) {
             return null;
@@ -422,6 +423,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             return null;
         }
 
+        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         InputStream file = fileStorage.getFile(metadata.getRefId());
         return new CachedResource(file, metadata.getFileName(), metadata.getFileType(), metadata.getSize());
     }
@@ -432,7 +434,6 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             return false;
         }
 
-        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         ResourceCacheMetadataStore metadataStore = getMetadataStore();
         ResourceCacheMetadata metadata = metadataStore.load(contextId, userId, id);
         if (metadata == null) {
@@ -445,6 +446,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             return false;
         }
 
+        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         try {
             Streams.close(fileStorage.getFile(metadata.getRefId()));
         } catch (final OXException e) {

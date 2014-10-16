@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -74,11 +75,14 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -93,6 +97,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -121,12 +126,15 @@ public final class NewAction extends AbstractMailAction {
     private static final String FROM = MailJSONField.FROM.getKey();
     private static final String UPLOAD_FORMFIELD_MAIL = AJAXServlet.UPLOAD_FORMFIELD_MAIL;
 
+    private final EnumSet<ComposeType> draftTypes;
+
     /**
      * Initializes a new {@link NewAction}.
      * @param services
      */
     public NewAction(final ServiceLookup services) {
         super(services);
+        draftTypes = EnumSet.of(ComposeType.DRAFT, ComposeType.DRAFT_DELETE_ON_TRANSPORT, ComposeType.DRAFT_EDIT, ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT);
     }
 
     @Override
@@ -148,8 +156,9 @@ public final class NewAction extends AbstractMailAction {
     }
 
     private AJAXRequestResult performWithUploads(final MailRequest req, final AJAXRequestData request, final List<OXException> warnings) throws OXException, JSONException {
-        final ServerSession session = req.getSession();
-        final UploadEvent uploadEvent = request.getUploadEvent();
+        ServerSession session = req.getSession();
+        String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
+        UploadEvent uploadEvent = request.getUploadEvent();
         String msgIdentifier = null;
         UserSettingMail userSettingMail = null;
         {
@@ -160,6 +169,10 @@ public final class NewAction extends AbstractMailAction {
                     throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL), new Object[0]);
                 }
                 jMail = new JSONObject(json0);
+
+                if (null == csid) {
+                    csid = jMail.optString("csid", null);
+                }
             }
             /*-
              * Parse
@@ -190,15 +203,26 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * ... and save draft
                  */
-                final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
-                final ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
+                MailPath msgref = composedMail.getMsgref();
+                ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
                 if (null != sendType) {
                     composedMail.setSendType(sendType);
                 }
-                msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
+                msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId).toString();
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
                 }
+
+                if (null != csid) {
+                    if (null != msgref) {
+                        CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                        space.addCleanUp(msgref);
+                    }
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+                    CompositionSpaces.destroy(csid, session);
+                }
+
                 warnings.addAll(mailInterface.getWarnings());
             } else {
                 /*
@@ -209,9 +233,19 @@ public final class NewAction extends AbstractMailAction {
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
                 if (null != folder) {
-                    final MailTransport mailTransport = MailTransport.getInstance(session, accountId);
-                    final MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
-                    final String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
+                    // Do the transport
+                    MailTransport mailTransport = MailTransport.getInstance(session, accountId);
+                    MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
+
+                    // Apply composition space state(s)
+                    mailInterface.openFor(folder);
+                    if (null != csid) {
+                        CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+                        CompositionSpaces.destroy(csid, session);
+                    }
+
+                    // Append messages
+                    String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
                     msgIdentifier = ids[0];
                     mailInterface.updateMessageFlags(folder, ids, MailMessage.FLAG_SEEN, true);
                     final JSONObject responseObj = new JSONObject(2);
@@ -221,6 +255,14 @@ public final class NewAction extends AbstractMailAction {
                     return result;
                 }
                 // Normal transport
+                if (draftTypes.contains(sendType)) {
+                    for (final ComposedMailMessage cm : composedMails) {
+                        if (null != cm) {
+                            cm.removeHeader("Message-ID");
+                            cm.removeMessageId();
+                        }
+                    }
+                }
                 if (ComposeType.DRAFT.equals(sendType)) {
                     final String paramName = "deleteDraftOnTransport";
                     if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
@@ -244,6 +286,8 @@ public final class NewAction extends AbstractMailAction {
                             }
                         }
                     }
+                } else if (ComposeType.DRAFT.equals(sendType)) {
+
                 }
                 for (final ComposedMailMessage cm : composedMails) {
                     if (null != cm) {
@@ -283,13 +327,20 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * Check
                  */
-                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm);
+                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo());
                 for (int i = 1; i < composedMails.length; i++) {
                     final ComposedMailMessage cm = composedMails[i];
                     if (null != cm) {
                         mailInterface.sendMessage(cm, sendType, accountId, usm);
                     }
                 }
+
+                // Apply composition space state(s)
+                if (null != csid) {
+                    CompositionSpaces.applyCompositionSpace(csid, session, null);
+                    CompositionSpaces.destroy(csid, session);
+                }
+
                 warnings.addAll(mailInterface.getWarnings());
                 /*
                  * Trigger contact collector
@@ -384,7 +435,7 @@ public final class NewAction extends AbstractMailAction {
         // Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
         final JSONValue responseData;
         if (folder == null) {
-            responseData = appendDraft(session, flags, force, data.getFromAddress(), data.getMail());
+            responseData = transportMessage(session, flags, force, data.getFromAddress(), data.getMail());
         } else {
             final String[] ids;
             final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
@@ -413,7 +464,7 @@ public final class NewAction extends AbstractMailAction {
         MailMessage getMail();
     }
 
-    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, JSONException {
+    private JSONObject transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */

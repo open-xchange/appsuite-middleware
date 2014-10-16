@@ -55,7 +55,9 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
+import com.openexchange.osgi.annotation.SingletonService;
 
+@SingletonService
 public interface CalendarAdministrationService extends DeleteListener {
 
     @Override

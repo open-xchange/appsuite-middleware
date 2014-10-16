@@ -59,6 +59,7 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link SQL}
@@ -79,8 +80,8 @@ public class SQL {
             "sequence BIGINT(20) NOT NULL," +
             "checksum BINARY(16) NOT NULL," +
             "PRIMARY KEY (cid, uuid)," +
-            "INDEX (folder, cid)," +
-            "INDEX (checksum, cid)" +
+            "INDEX (cid, folder)," +
+            "INDEX (cid, checksum)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
 
@@ -89,15 +90,31 @@ public class SQL {
             "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
             "user INT4 UNSIGNED DEFAULT NULL," +
+            "view INT NOT NULL DEFAULT 0," +
             "folder VARCHAR(512) NOT NULL," +
             "sequence BIGINT(20) DEFAULT NULL," +
             "etag VARCHAR(255) DEFAULT NULL," +
             "checksum BINARY(16) NOT NULL," +
             "PRIMARY KEY (cid, uuid)," +
-            "INDEX (folder, cid)," +
-            "INDEX (checksum, cid)" +
+            "INDEX (cid, user, folder)," +
+            "INDEX (cid, checksum)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
+
+    /**
+     * Gets all known update tasks.
+     *
+     * @return The update tasks
+     */
+    public static UpdateTaskV2[] getUpdateTasks() {
+        return new UpdateTaskV2[] {
+            new DriveCreateTableTask(),
+            new DirectoryChecksumsAddUserAndETagColumnTask(),
+            new DirectoryChecksumsReIndexTask(),
+            new FileChecksumsReIndexTask(),
+            new DirectoryChecksumsAddViewColumnTask()
+        };
+    };
 
     public static final String INSERT_FILE_CHECKSUM_STMT =
         "INSERT INTO fileChecksums (uuid,cid,folder,file,version,sequence,checksum) " +
@@ -156,8 +173,8 @@ public class SQL {
         "WHERE cid=? AND checksum=UNHEX(?);";
 
     public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
-        "INSERT INTO directoryChecksums (uuid,cid,user,folder,sequence,etag,checksum) " +
-        "VALUES (UNHEX(?),?,?,REVERSE(?),?,?,UNHEX(?));";
+        "INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum) " +
+        "VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?));";
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
         "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,etag=?,checksum=UNHEX(?) " +
@@ -174,9 +191,8 @@ public class SQL {
     /**
      * DELETE FROM fileChecksums
      * WHERE cid=? AND REVERSE(folder) IN (...);"
-     * @throws OXException
      */
-    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(int length) throws OXException {
+    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM fileChecksums WHERE cid=? AND folder");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
@@ -185,9 +201,8 @@ public class SQL {
     /**
      * DELETE FROM directoryChecksums
      * WHERE cid=? AND folder IN (?,?,...);"
-     * @throws OXException
      */
-    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) throws OXException {
+    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM directoryChecksums WHERE cid=? AND folder");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
@@ -195,14 +210,13 @@ public class SQL {
 
     /**
      * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums
-     * WHERE cid=? AND user=? AND folder IN (?,?,...);"
-     * @throws OXException
+     * WHERE cid=? AND user=? AND folder IN (?,?,...) AND view=?;"
      */
-    public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(int length) throws OXException {
+    public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums ");
         stringBuilder.append("WHERE cid=? AND user=? AND folder");
-        return appendPlaceholders(stringBuilder, length).append(';').toString();
+        return appendPlaceholders(stringBuilder, length).append(" AND view=?;").toString();
     }
 
     /**
@@ -260,7 +274,6 @@ public class SQL {
 
     public static String escape(String value) throws OXException {
         if (null == value) {
-            //System.out.println(value);
             return null;
         }
         try {
@@ -291,16 +304,6 @@ public class SQL {
             bytes[i / 2] = (byte) ((Character.digit(checksum.charAt(i), 16) << 4) + Character.digit(checksum.charAt(i + 1), 16));
         }
         return bytes;
-    }
-
-    /**
-     * Returns the reverse of the supplied character sequence.
-     *
-     * @param string The string to reverse
-     * @return The reversed string
-     */
-    public static String reverse(String string) {
-        return new StringBuilder(string).reverse().toString();
     }
 
     /**

@@ -93,9 +93,26 @@ public class TaskParser extends CalendarParser {
     protected void parseElementTask(final Task taskobject, final JSONObject json, Locale locale) throws JSONException, OXException {
         if (json.has(CalendarFields.START_DATE)) {
             taskobject.setStartDate(parseDate(json, CalendarFields.START_DATE));
+            taskobject.setFullTime(true); // implicitly
         }
         if (json.has(CalendarFields.END_DATE)) {
             taskobject.setEndDate(parseDate(json, CalendarFields.END_DATE));
+            taskobject.setFullTime(true); // implicitly
+        }
+        boolean isFullTime = json.has(CalendarFields.FULL_TIME) && parseBoolean(json, CalendarFields.FULL_TIME);
+        if (json.has(TaskFields.START_TIME)) {
+            if (isFullTime) {
+                taskobject.setStartDate(parseDate(json, TaskFields.START_TIME));
+            } else {
+                taskobject.setStartDate(parseTime(json, TaskFields.START_TIME, timeZone));
+            }
+        }
+        if (json.has(TaskFields.END_TIME)) {
+            if (isFullTime) {
+                taskobject.setEndDate(parseDate(json, TaskFields.END_TIME));
+            } else {
+                taskobject.setEndDate(parseTime(json, TaskFields.END_TIME, timeZone));
+            }
         }
         if (json.has(TaskFields.STATUS)) {
             taskobject.setStatus(parseInt(json, TaskFields.STATUS));
@@ -138,7 +155,7 @@ public class TaskParser extends CalendarParser {
             }
         }
         if (json.has(TaskFields.PRIORITY)) {
-            taskobject.setPriority(parseInt(json, TaskFields.PRIORITY));
+            taskobject.setPriority(parseInteger(json, TaskFields.PRIORITY));
         }
         if (json.has(TaskFields.CURRENCY)) {
             taskobject.setCurrency(parseString(json, TaskFields.CURRENCY));

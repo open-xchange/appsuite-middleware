@@ -74,6 +74,7 @@ import com.openexchange.index.IndexProperties;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.solr.ModuleSet;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.service.indexing.impl.internal.JobConstants;
@@ -241,8 +242,7 @@ public class ProgressiveRecurringJob implements Job {
     private void executeJob(JobInfo jobInfo) {
         Class<? extends IndexingJob> jobClass = jobInfo.jobClass;
         if (jobClass == null) {
-            String msg = "JobInfo did not contain valid job class. " + jobInfo.toString();
-            LOG.error(msg);
+            LOG.error("JobInfo did not contain valid job class. {}", jobInfo.toString());
             return;
         }
 
@@ -250,8 +250,8 @@ public class ProgressiveRecurringJob implements Job {
         try {
             indexingJob = jobClass.newInstance();
         } catch (Throwable t) {
-            String msg = "Could not instantiate IndexingJob from class object. " + jobInfo.toString();
-            LOG.error(msg, t);
+            ExceptionUtils.handleThrowable(t);
+            LOG.error("Could not instantiate IndexingJob from class object. {}", jobInfo.toString(), t);
             return;
         }
 
@@ -259,8 +259,8 @@ public class ProgressiveRecurringJob implements Job {
             LOG.debug("Executing job {}", jobInfo);
             indexingJob.execute(jobInfo);
         } catch (Throwable t) {
-            String msg = "Error during IndexingJob execution. " + jobInfo.toString();
-            LOG.error(msg, t);
+            ExceptionUtils.handleThrowable(t);
+            LOG.error("Error during IndexingJob execution. {}", jobInfo.toString(), t);
             return;
         }
     }

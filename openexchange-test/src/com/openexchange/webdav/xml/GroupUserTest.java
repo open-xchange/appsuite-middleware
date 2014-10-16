@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.logging.LogFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
@@ -159,7 +158,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 
-        LOG.debug("Request Body: " + new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8));
+        LOG.debug("Request Body: {}", new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8));
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 

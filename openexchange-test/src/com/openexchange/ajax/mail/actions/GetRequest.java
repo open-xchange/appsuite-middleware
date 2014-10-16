@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
@@ -72,6 +73,7 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
     private boolean source;
     private boolean save;
     private boolean failOnError = true;
+    private TimeZone timeZone;
 
     public GetRequest(final String folder, final String id) {
         this(folder, id, null, false, true);
@@ -146,6 +148,9 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         if (source && isSave()) {
             l.add(new Parameter(Mail.PARAMETER_SAVE, 1));
         }
+        if (timeZone != null) {
+            l.add(new URLParameter(Mail.PARAMETER_TIMEZONE, timeZone.getID()));
+        }
         return l.toArray(new Parameter[l.size()]);
     }
 
@@ -156,6 +161,10 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
 
     public boolean isSave() {
         return save;
+    }
+
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
     }
 
     private class GetParser extends AbstractAJAXParser<GetResponse> {
@@ -180,7 +189,8 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
 
     public enum View {
         RAW("raw"),
-        TEXT("text");
+        TEXT("text"),
+        HTML("html");
         String value;
         View(String value) {
             this.value = value;

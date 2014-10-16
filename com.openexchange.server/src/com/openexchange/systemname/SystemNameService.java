@@ -49,11 +49,14 @@
 
 package com.openexchange.systemname;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * {@link SystemNameService} - Provides access to system name
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface SystemNameService {
 
     /**

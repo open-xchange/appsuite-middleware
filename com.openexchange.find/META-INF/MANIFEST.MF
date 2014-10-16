@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find
 Bundle-SymbolicName: com.openexchange.find
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.find.osgi.FindActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -12,6 +12,8 @@ Import-Package: com.google.common.base,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.folderstorage,
+ com.openexchange.groupware.contact,
+ com.openexchange.groupware.contact.datasource,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
@@ -19,10 +21,13 @@ Import-Package: com.google.common.base,
  com.openexchange.groupware.tasks,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
+ com.openexchange.image,
  com.openexchange.java,
+ com.openexchange.java.util,
  com.openexchange.jslob,
  com.openexchange.mail.dataobjects,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.osgi.framework,
@@ -35,5 +40,6 @@ Export-Package: com.openexchange.find,
  com.openexchange.find.drive,
  com.openexchange.find.facet,
  com.openexchange.find.mail,
+ com.openexchange.find.spi,
  com.openexchange.find.tasks,
- com.openexchange.find.spi
+ com.openexchange.find.util

@@ -75,6 +75,6 @@ public interface MimeRawSource {
      *
      * @return The {@link Part part} or <code>null</code>
      */
-    public Part getPart();
+    Part getPart();
 
 }

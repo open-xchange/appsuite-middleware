@@ -65,17 +65,18 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -122,6 +123,7 @@ import com.openexchange.imap.command.MessageFetchIMAPCommand.FetchProfileModifie
 import com.openexchange.imap.command.MoveIMAPCommand;
 import com.openexchange.imap.command.SimpleFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
+import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.Services;
@@ -365,6 +367,43 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    /**
+     * Gets the associated IMAP store.
+     *
+     * @return The IMAP store
+     */
+    public IMAPStore getImapStore() {
+        return imapStore;
+    }
+
+    /**
+     * Gets the current IMAP folder in use.
+     *
+     * @return The IMAP folder or <code>null</code>
+     */
+    public IMAPFolder getImapFolder() {
+        return imapFolder;
+    }
+
+    /**
+     * Gets the IMAP configuration
+     *
+     * @return The IMAP configuration
+     */
+    public IMAPConfig getImapConfig() {
+        return imapConfig;
+    }
+
+    /**
+     * Handles specified {@link MessagingException} instance.
+     *
+     * @param e The {@link MessagingException} instance
+     * @return The appropriate {@link OXException} instance
+     */
+    public OXException handleMessagingException(final MessagingException e) {
+        return IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+    }
+
     @Override
     public void clearCache() throws OXException {
         IMAPFolderWorker.clearCache(imapFolder);
@@ -528,7 +567,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -842,7 +881,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 }
             } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(e, Long.valueOf(msgUID), fullName);
                 }
                 // Ignore
@@ -943,7 +982,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -1006,7 +1045,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", imapFolder.getFullName()));
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -1065,6 +1104,85 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     };
 
     @Override
+    public Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException {
+        if (null == id) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create("null", fullName);
+        }
+        try {
+            final int desiredMode = markSeen ? READ_WRITE : READ_ONLY;
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            if (0 >= imapFolder.getMessageCount()) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            final long uid = parseUnsignedLong(id);
+            IMAPMessage msg;
+            try {
+                final long start = System.currentTimeMillis();
+                msg = (IMAPMessage) imapFolder.getMessageByUID(uid);
+                imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            } catch (final java.lang.NullPointerException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (final java.lang.IndexOutOfBoundsException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (final MessageRemovedException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (final MessagingException e) {
+                final Exception cause = e.getNextException();
+                if (!(cause instanceof BadCommandException)) {
+                    throw e;
+                }
+                // Hm... Something weird with executed "UID FETCH" command; retry manually...
+                final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { uid });
+                if ((null == seqNums) || (0 == seqNums.length)) {
+                    LOG.warn("No message with UID '{}' found in folder '{}'", id, fullName, cause);
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+                }
+                final int msgnum = seqNums[0];
+                if (msgnum < 1) {
+                    /*
+                     * message-numbers start at 1
+                     */
+                    LOG.warn("No message with UID '{}' found in folder '{}'", id, fullName, cause);
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+                }
+                msg = (IMAPMessage) imapFolder.getMessage(msgnum);
+            }
+            if (msg == null || msg.isExpunged()) {
+                // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
+                // String.valueOf(msgUID), imapFolder
+                // .toString());
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            return msg;
+        } catch (final MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         if (msgUID < 0) {
             return null;
@@ -1085,10 +1203,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             IMAPMessage msg;
             try {
-                final long start = System.currentTimeMillis();
+                long start = System.currentTimeMillis();
                 msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                long duration = System.currentTimeMillis() - start;
+
+                if (duration > 1000L) {
+                    LOG.warn("Retrieval of message {} in folder {} from IMAP mailbox {} took {}msec", msgUID, fullName, imapStore, duration);
+                }
+
+                mailInterfaceMonitor.addUseTime(duration);
             } catch (final java.lang.NullPointerException e) {
                 /*
                  * Obviously message was removed in the meantime
@@ -1112,7 +1236,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Hm... Something weird with executed "UID FETCH" command; retry manually...
                 final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { msgUID });
                 if ((null == seqNums) || (0 == seqNums.length)) {
-                    LOG.warn("No message with UID '{}' found in folder '{}{}", msgUID, fullName, '\'', cause);
+                    LOG.debug("No message with UID '{}' found in folder '{}{}", msgUID, fullName, '\'', cause);
                     return null;
                 }
                 final int msgnum = seqNums[0];
@@ -1120,7 +1244,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * message-numbers start at 1
                      */
-                    LOG.warn("No message with UID '{}' found in folder '{}{}", msgUID, fullName, '\'', cause);
+                    LOG.debug("No message with UID '{}' found in folder '{}{}", msgUID, fullName, '\'', cause);
                     return null;
                 }
                 msg = (IMAPMessage) imapFolder.getMessage(msgnum);
@@ -1182,6 +1306,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     setSeenFlag(fullName, mail, msg);
                 }
             }
+            clearCache(imapFolder);
             return setAccountInfo(mail);
         } catch (final MessagingException e) {
             if (ImapUtility.isInvalidMessageset(e)) {
@@ -1285,7 +1410,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 {
                     final int length = mails.length;
-                    final List<MailMessage> msgList = new ArrayList<MailMessage>(length);
+                    final List<MailMessage> msgList = new LinkedList<MailMessage>();
                     for (int i = 0; i < length; i++) {
                         final MailMessage tmp = mails[i];
                         if (null != tmp) {
@@ -1293,7 +1418,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         }
                     }
                     Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
-                    final MailMessage[] tmp = msgList.toArray(new MailMessage[0]);
+                    final MailMessage[] tmp = msgList.toArray(new MailMessage[msgList.size()]);
                     mailMessages = applyIndexRange(tmp, indexRange);
                 }
             } else {
@@ -1303,7 +1428,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Fetch (possibly) filtered and sorted sequence numbers
                  */
                 if (body) {
-                    final List<MailMessage> list = new ArrayList<MailMessage>(finalIds.length);
+                    final List<MailMessage> list = new LinkedList<MailMessage>();
                     final Message[] messages = imapFolder.getMessages(finalIds);
                     imapFolder.fetch(messages, FETCH_PROFILE_ENVELOPE_UID);
                     for (final Message message : messages) {
@@ -1559,11 +1684,37 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (mergeWithSent) {
                 // Switch folder
                 openReadOnly(sentFullName);
-                final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, byEnvelope);
-                for (final Conversation conversation : conversations) {
-                    for (final MailMessage sentMessage : sentMessages) {
-                        if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                            conversation.addMessage(sentMessage);
+                // Get sent messages
+                List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, byEnvelope);
+                if (false == sentMessages.isEmpty()) {
+                    // Filter messages already contained in conversations
+                    {
+                        Set<String> allMessageIds = new HashSet<String>(conversations.size());
+                        for (final Conversation conversation : conversations) {
+                            conversation.addMessageIdsTo(allMessageIds);
+                        }
+                        List<MailMessage> tmp = null;
+                        for (MailMessage sentMessage : sentMessages) {
+                            if (false == allMessageIds.contains(sentMessage.getMessageId())) {
+                                if (null == tmp) {
+                                    tmp = new LinkedList<MailMessage>();
+                                }
+                                tmp.add(sentMessage);
+                            }
+                        }
+                        if (null != tmp) {
+                            sentMessages = tmp;
+                        }
+                    }
+
+                    if (false == sentMessages.isEmpty()) {
+                        // Add to conversation if references or referenced-by
+                        for (Conversation conversation : conversations) {
+                            for (MailMessage sentMessage : sentMessages) {
+                                if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                    conversation.addMessage(sentMessage);
+                                }
+                            }
                         }
                     }
                 }
@@ -1574,24 +1725,24 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         // Fold it
         Conversations.fold(conversations);
         // Comparator
-        final MailMessageComparator threadComparator = COMPARATOR_DESC;
+        MailMessageComparator threadComparator = COMPARATOR_DESC;
         // Sort
-        List<List<MailMessage>> list = new ArrayList<List<MailMessage>>(conversations.size());
+        List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
         for (final Conversation conversation : conversations) {
             list.add(conversation.getMessages(threadComparator));
         }
         conversations = null;
         // Sort root elements
         {
-            final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-            final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+            MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+            Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
             Collections.sort(list, listComparator);
         }
         // Check for index range
         if (null != indexRange) {
-            final int fromIndex = indexRange.start;
+            int fromIndex = indexRange.start;
             int toIndex = indexRange.end;
-            final int size = list.size();
+            int size = list.size();
             if ((fromIndex) > size) {
                 // Return empty iterator if start is out of range
                 return Collections.emptyList();
@@ -1624,9 +1775,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         } else {
             if (body) {
-                List<List<MailMessage>> newlist = new ArrayList<List<MailMessage>>(list.size());
+                List<List<MailMessage>> newlist = new LinkedList<List<MailMessage>>();
                 for (List<MailMessage> conversation : list) {
-                    List<MailMessage> newconversation = new ArrayList<MailMessage>(conversation.size());
+                    List<MailMessage> newconversation = new LinkedList<MailMessage>();
                     for (MailMessage mailMessage : conversation) {
                         newconversation.add(getMessage(mailMessage.getFolder(), mailMessage.getMailId(), false));
                     }
@@ -1684,7 +1835,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             final MailMessageComparator threadComparator = COMPARATOR_DESC;
             // Sort
-            list = new ArrayList<List<MailMessage>>(conversations.size());
+            list = new LinkedList<List<MailMessage>>();
             for (final Conversation conversation : conversations) {
                 list.add(conversation.getMessages(threadComparator));
             }
@@ -1761,9 +1912,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             // Fill selected chunk
             if (body) {
-                List<List<MailMessage>> newlist = new ArrayList<List<MailMessage>>(list.size());
+                List<List<MailMessage>> newlist = new LinkedList<List<MailMessage>>();
                 for (List<MailMessage> conversation : list) {
-                    List<MailMessage> newconversation = new ArrayList<MailMessage>(conversation.size());
+                    List<MailMessage> newconversation = new LinkedList<MailMessage>();
                     for (MailMessage mailMessage : conversation) {
                         newconversation.add(getMessage(mailMessage.getFolder(), mailMessage.getMailId(), false));
                     }
@@ -1934,7 +2085,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Output as flat list
                  */
-                final List<MailMessage> flatList = new ArrayList<MailMessage>(mapping.size());
+                final List<MailMessage> flatList = new LinkedList<MailMessage>();
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     for (final MailMessage mail : flatList) {
                         setAccountInfo(mail);
@@ -2005,7 +2156,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Output as flat list
              */
-            final List<MailMessage> flatList = new ArrayList<MailMessage>(msgs.length);
+            final List<MailMessage> flatList = new LinkedList<MailMessage>();
             ThreadSortUtil.toFlatList(structuredList, flatList);
             return flatList.toArray(new MailMessage[flatList.size()]);
         } catch (final MessagingException e) {
@@ -2614,10 +2765,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 try {
                     if (hasUIDPlus) {
                         // Perform append expecting APPENUID response code
-                        retval = longs2uids(checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[0]))));
+                        retval = longs2uids(checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]))));
                     } else {
                         // Perform simple append
-                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[0]));
+                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]));
                     }
                 } catch (final MessagingException e) {
                     final Exception nextException = e.getNextException();
@@ -2789,10 +2940,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 try {
                     if (hasUIDPlus) {
                         // Perform append expecting APPENUID response code
-                        retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[0])));
+                        retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()])));
                     } else {
                         // Perform simple append
-                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[0]));
+                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]));
                     }
                 } catch (final MessagingException e) {
                     final Exception nextException = e.getNextException();
@@ -3137,6 +3288,69 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     imapFolder.close(false);
                     resetIMAPFolder();
                 }
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
+            }
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
+    public void updateMessageUserFlagsLong(String fullName, long[] mailIds, String[] flags, boolean set) throws OXException {
+        if (null == mailIds || 0 == mailIds.length) {
+            // Nothing to do
+            return;
+        }
+        try {
+            if (!MailProperties.getInstance().isUserFlagsEnabled()) {
+                /*
+                 * User flags are disabled
+                 */
+                LOG.debug("User flags are disabled or not supported. Update of color flag ignored.");
+                return;
+            }
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            try {
+                if (!holdsMessages()) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
+                }
+                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+            } catch (final MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
+            }
+            if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
+                LOG.error("Folder \"{}\" does not support user-defined flags. Update of color flag ignored.", imapFolder.getFullName());
+                return;
+            }
+            final OperationKey opKey = new OperationKey(Type.MSG_USER_FLAGS_UPDATE, accountId, new Object[] { fullName });
+            final boolean marked = setMarker(opKey);
+            try {
+                /*
+                 * Remove all old color label flag(s) and set new color label flag
+                 */
+                imapFolderStorage.removeFromCache(fullName);
+                IMAPCommandsCollection.setUserFlags(imapFolder, mailIds, flags, set);
+
+                /*
+                 * Force JavaMail's cache update through folder closure
+                 */
+                imapFolder.close(false);
+                resetIMAPFolder();
             } finally {
                 if (marked) {
                     unsetMarker(opKey);
@@ -3785,7 +3999,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return Collections.emptyList();
         }
         final int length = elements.length;
-        final List<E> list = new ArrayList<E>(length);
+        final List<E> list = new LinkedList<E>();
         for (int i = 0; i < length; i++) {
             final E elem = elements[i];
             if (null != elem) {

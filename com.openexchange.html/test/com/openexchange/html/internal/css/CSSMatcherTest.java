@@ -54,11 +54,25 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
+import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
-
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * Simple unit tests for {@link CSSMatcher}
@@ -66,6 +80,8 @@ import com.openexchange.java.Stringer;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ ThreadPools.class })
 public class CSSMatcherTest {
 
     @Test
@@ -97,23 +113,17 @@ public class CSSMatcherTest {
         final String saneCss = cssBuffer.toString().trim();
         final String[] lines = saneCss.split("\r?\n");
 
-        final String line0 = lines[0];
-        String expectedLine0 = "@namespace \"http://www.w3.org/1999/xhtml\";   @namespace svg \"http://www.w3.org/2000/svg\";   #test  * { font-size: 1px; line-height: 1px; margin: 0; padding: 0; }";
-        assertTrue(
-            "Unexpected CSS in line0! Expected to start with: " + expectedLine0 + ", but was " + line0,
-            line0.trim().startsWith(expectedLine0));
+        final String line0 = lines[0].replaceAll("\\s+", " ");
+        String expectedLine0 = "@namespace \"http://www.w3.org/1999/xhtml\";   @namespace svg \"http://www.w3.org/2000/svg\";   #test  * { font-size: 1px; line-height: 1px; margin: 0; padding: 0; }".replaceAll("\\s+", " ");
+        assertTrue("Unexpected CSS in line0! Expected to start with: " + expectedLine0 + ", but was " + line0, line0.trim().startsWith(expectedLine0));
 
-        final String line1 = lines[1];
-        String expectedLine1 = "#test abbr , #test address , #test article , #test aside";
-        assertTrue(
-            "Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1,
-            line1.trim().startsWith(expectedLine1));
+        final String line1 = lines[1].replaceAll("\\s+", " ");
+        String expectedLine1 = "#test abbr , #test address , #test article , #test aside".replaceAll("\\s+", " ");
+        assertTrue("Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1, line1.trim().startsWith(expectedLine1));
 
-        final String line10 = lines[10];
-        String expectedLine10 = "#test html { direction: ltr;";
-        assertTrue(
-            "Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10.trim(),
-            line10.trim().startsWith(expectedLine10));
+        final String line10 = lines[10].replaceAll("\\s+", " ");
+        String expectedLine10 = "#test html { direction: ltr;".replaceAll("\\s+", " ");
+        assertTrue("Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10.trim(), line10.trim().startsWith(expectedLine10));
     }
 
     @Test
@@ -128,21 +138,15 @@ public class CSSMatcherTest {
 
         final String line0 = lines[0];
         String expectedLine0 = "/* +++++++++++++++++++++ RESET +++++++++++++++++++++ */ @namespace \"http://www.w3.org/1999/xhtml\";   @namespace svg \"http://www.w3.org/2000/svg\";   body * { font-size: 1px; line-height: 1px;";
-        assertTrue(
-            "Unexpected CSS in line0! Expected to start with: " + expectedLine0 + ", but was " + line0,
-            line0.trim().startsWith(expectedLine0.trim()));
+        assertTrue("Unexpected CSS in line0! Expected to start with: " + expectedLine0 + ", but was " + line0, line0.trim().startsWith(expectedLine0.trim()));
 
         final String line1 = lines[1];
         String expectedLine1 = "abbr, address, article, aside, audio, b, blockquote,";
-        assertTrue(
-            "Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1.trim(),
-            line1.trim().startsWith(expectedLine1.trim()));
+        assertTrue("Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1.trim(), line1.trim().startsWith(expectedLine1.trim()));
 
         final String line10 = lines[10];
         String expectedLine10 = "/* +++++++++++++++++++++ BASICS +++++++++++++++++++++ */ html {";
-        assertTrue(
-            "Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10,
-            line10.trim().startsWith(expectedLine10.trim()));
+        assertTrue("Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10, line10.trim().startsWith(expectedLine10.trim()));
     }
 
     @Test
@@ -188,4 +192,217 @@ public class CSSMatcherTest {
         assertTrue(checkCSSElements);
     }
 
+    private final String bug34659CSS = "<style type=\"text/css\">                                                                                                          \n" +
+        "        /* Client-specific Styles */                                                                                                                        \n" +
+        "        #outlook a{padding:0;} /* Force Outlook to provide a \"view in browser\" button. */                                                                 \n" +
+        "        body{width:100% !important;} .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */              \n" +
+        "        body{-webkit-text-size-adjust:none; -ms-text-size-adjust:none;} /* Prevent Webkit and Windows Mobile platforms from changing default font sizes. */ \n" +
+        "                                                                                                                                                            \n" +
+        "        /* Reset Styles */                                                                                                                                  \n" +
+        "        body{margin:0; padding:0;}                                                                                                                          \n" +
+        "        img{outline:none; text-decoration:none;}                                                                                                            \n" +
+        "        #backgroundTable{height:100% !important; margin:0; padding:0; width:100% !important;}                                                               \n" +
+        "                                                                                                                                                            \n" +
+        "       p {                                                                                                                                                  \n" +
+        "           margin: 1em 0;                                                                                                                                   \n" +
+        "       }                                                                                                                                                    \n" +
+        "                                                                                                                                                            \n" +
+        "        .top,                                                                                                                                               \n" +
+        "        .footer a:link,                                                                                                                                     \n" +
+        "        .footer a:visited,                                                                                                                                  \n" +
+        "        .footer a:active { color:#a9a9a9; }                                                                                                                 \n" +
+        "                                                                                                                                                            \n" +
+        "        .body { color:#494949;}                                                                                                                             \n" +
+        "        .body a,                                                                                                                                            \n" +
+        "        .body a:active,                                                                                                                                     \n" +
+        "        .body a:link,                                                                                                                                       \n" +
+        "        .body a:visited{                                                                                                                                    \n" +
+        "            color:#f7941e;                                                                                                                                  \n" +
+        "        }                                                                                                                                                   \n" +
+        "                                                                                                                                                            \n" +
+        "                                                                                                                                                            \n" +
+        "       h1, h2, h3, h4, h5, h6 {                                                                                                                             \n" +
+        "           color: black !important;                                                                                                                         \n" +
+        "           line-height: 100% !important;                                                                                                                    \n" +
+        "       }                                                                                                                                                    \n" +
+        "                                                                                                                                                            \n" +
+        "       h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {                                                                                                                 \n" +
+        "           color: #ff0000 !important;                                                                                                                       \n" +
+        "       }                                                                                                                                                    \n" +
+        "                                                                                                                                                            \n" +
+        "       h1 a:active, h2 a:active,  h3 a:active, h4 a:active, h5 a:active, h6 a:active {                                                                      \n" +
+        "           color: #d60000 !important; /* Preferably not the same color as the normal header link color.  There is limited support for psuedo classes in email clients, this was added just for good measure. */    \n" +
+        "       }                                                                                                                                                    \n" +
+        "                                                                                                                                                            \n" +
+        "       h1 a:visited, h2 a:visited,  h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited {                                                                \n" +
+        "           color: #ff7070 !important; /* Preferably not the same color as the normal header link color. There is limited support for psuedo classes in email clients, this was added just for good measure. */     \n" +
+        "       }                                                                                                                                                    \n" +
+        "                                                                                                                                                            \n" +
+        "       .yshortcuts, .yshortcuts a, .yshortcuts a:link,.yshortcuts a:visited, .yshortcuts a:hover, .yshortcuts a span { color: black; text-decoration: none !important; border-bottom: none !important; background: none !important;} /* Body text color for the New Yahoo.  This example sets the font of Yahoo's Shortcuts to black. */     \n" +
+        "                                                                                                                                                            \n" +
+        "        .ExternalClass {                                                                                                                                    \n" +
+        "            width: 100%;                                                                                                                                    \n" +
+        "            line-height: 18px                                                                                                                               \n" +
+        "        }                                                                                                                                                   \n" +
+        "        .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td {                                                                     \n" +
+        "            line-height: 18px                                                                                                                               \n" +
+        "        }                                                                                                                                                   \n" +
+        "                                                                                                                                                            \n" +
+        "    </style>";
+
+    @Test
+    public void testDoCheckCss_returnCorrectStartTag() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
+        String convertedCss = cssBld.toString();
+
+        String startTag = "<style type=\"text/#123456 css\">";
+
+        Assert.assertTrue("Processed CSS does not start with the desired parameter " + startTag, convertedCss.startsWith(startTag));
+    }
+
+    @Test
+    public void testDoCheckCss_returnStyleEndTag() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
+        String convertedCss = cssBld.toString();
+
+        String endTag = "</style>";
+
+        Assert.assertTrue("Processed CSS does not end with the desired parameter " + endTag, convertedCss.endsWith(endTag));
+    }
+
+    @Test
+    public void testDoCheckCss_includesActiveForHTags() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
+        String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
+
+        String content = "#123456 h1 a:active , #123456 h2 a:active , #123456 h3 a:active , #123456 h4 a:active";
+
+        Assert.assertTrue("Processed CSS does not contain desired content " + content, convertedCss.contains(content));
+    }
+
+    @Test
+    public void testDoCheckCss_includesCSSParamsWithPrefix() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
+        String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
+
+        String content = "#123456 .123456-top , #123456 .123456-footer a:link , #123456 .123456-footer a:visited , #123456 .123456-footer a:active { color: #a9a9a9; }";
+
+        Assert.assertTrue("Processed CSS does not contain desired content " + content, convertedCss.contains(content));
+    }
+
+    @Test
+    public void testDoCheckCss_removeBodyTag() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
+        String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
+
+        String content = "#123456  {width: 100%;}".replaceAll("\\s+", " ");
+
+        Assert.assertTrue("Processed CSS does not contain desired content " + content, convertedCss.contains(content));
+    }
+
+    @Test
+    public void testDoCheckCss_bug34806() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("font-family:\"MS Mincho\";\n" +
+            "    panose-1:2 2 6 9 4 2 5 8 3 4;\n" +
+            "    mso-font-alt:\"MS \u660e\u671d\";\n" +
+            "    mso-font-charset:128;\n" +
+            "    mso-generic-font-family:modern;\n" +
+            "    mso-font-pitch:fixed;\n" +
+            "    mso-font-signature:-536870145 1791491579 18 0 131231 0;"));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+
+        String content = "font-family: \"MS Mincho\";";
+        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
+    }
+
+    @Test
+    public void testCheckCss_threadpoolAvailableAndNotInternallyInvoked_createAdditionalThread() throws InterruptedException, ExecutionException, TimeoutException {
+        PowerMockito.mockStatic(ThreadPools.class);
+        ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
+        PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(threadPoolService);
+        Future future = Mockito.mock(Future.class);
+        PowerMockito.when(threadPoolService.submit((Task<Boolean>) Matchers.any())).thenReturn(future);
+        PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456-prefix", true, false);
+
+        Mockito.verify(threadPoolService, Mockito.times(1)).submit((Task<Boolean>) Matchers.any());
+    }
+
+    @Test
+    public void testCheckCss_threadpoolAvailableAndInternallyInvoked_createNoThread() throws InterruptedException, ExecutionException, TimeoutException {
+        PowerMockito.mockStatic(ThreadPools.class);
+        ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
+        PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(threadPoolService);
+        Future future = Mockito.mock(Future.class);
+        PowerMockito.when(threadPoolService.submit((Task<Boolean>) Matchers.any())).thenReturn(future);
+        PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456-prefix", true, true);
+
+        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
+    }
+
+    @Test
+    public void testCheckCss_threadpoolNotAvailableAndNotInternallyInvoked_createNoThread() throws InterruptedException, ExecutionException, TimeoutException {
+        PowerMockito.mockStatic(ThreadPools.class);
+        ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
+        PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(null);
+        Future future = Mockito.mock(Future.class);
+        PowerMockito.when(threadPoolService.submit((Task<Boolean>) Matchers.any())).thenReturn(future);
+        PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456-prefix", true, false);
+
+        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
+    }
+
+    @Test
+    public void testCheckCss_threadpoolNotAvailableAndInternallyInvoked_createNoThread() throws InterruptedException, ExecutionException, TimeoutException {
+        PowerMockito.mockStatic(ThreadPools.class);
+        ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
+        PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(null);
+        Future future = Mockito.mock(Future.class);
+        PowerMockito.when(threadPoolService.submit((Task<Boolean>) Matchers.any())).thenReturn(future);
+        PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456-prefix", true, true);
+
+        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
+    }
 }

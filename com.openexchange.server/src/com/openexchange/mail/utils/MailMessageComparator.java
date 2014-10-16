@@ -58,6 +58,7 @@ import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.java.Collators;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -108,6 +109,9 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         public int compareFieldsDesc(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
             // Negate ASC order
             int result = compareFields(msg1, msg2);
+            if (0 == result) {
+                return result;
+            }
             result = -result;
             return result;
         }
@@ -122,8 +126,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         public LocalizedFieldComparer(final Locale locale) {
             super();
             this.locale = locale;
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
     }

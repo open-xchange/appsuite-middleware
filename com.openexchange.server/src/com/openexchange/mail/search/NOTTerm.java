@@ -51,6 +51,7 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import java.util.Set;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.search.NotTerm;
 import com.openexchange.exception.OXException;
@@ -122,6 +123,11 @@ public final class NOTTerm extends SearchTerm<SearchTerm<?>> {
     @Override
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return new NotTerm(term.getNonWildcardJavaMailSearchTerm());
+    }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        term.contributeTo(fetchProfile);
     }
 
     @Override

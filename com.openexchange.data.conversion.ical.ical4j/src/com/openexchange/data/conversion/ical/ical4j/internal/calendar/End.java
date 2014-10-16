@@ -83,7 +83,7 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
     public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final DtEnd end = new DtEnd();
         String tz = EmitterTools.extractTimezoneIfPossible(calendar);
-        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getEndDate(),tz) : toDateTime(mode.getZoneInfo(), calendar.getEndDate(),tz);
+        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getEndDate()) : toDateTime(mode.getZoneInfo(), calendar.getEndDate(),tz);
         end.setDate(date);
         component.getProperties().add(end);
     }

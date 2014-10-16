@@ -107,10 +107,12 @@ public class Capability2JSON implements ResultConverter {
         }
     }
 
+    private static final JSONObject EMPTY_JSON = new JSONObject(0);
+
     private JSONObject transform(Capability resultObject) throws JSONException {
         final JSONObject object = new JSONObject(3);
         object.put("id", resultObject.getId());
-        object.put("attributes", new JSONObject(resultObject.getAttributes()));
+        object.put("attributes", EMPTY_JSON);
         return object;
     }
 
@@ -118,7 +120,7 @@ public class Capability2JSON implements ResultConverter {
         int size = resultObjects.size();
         JSONArray array = new JSONArray(size);
         Iterator<Capability> iterator = resultObjects.iterator();
-        for (int i = 0; i < size; i++) {
+        for (int i = size; i-- > 0 ;) {
             array.put(transform(iterator.next()));
         }
         return array;

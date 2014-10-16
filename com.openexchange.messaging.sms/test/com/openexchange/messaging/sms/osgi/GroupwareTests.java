@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;

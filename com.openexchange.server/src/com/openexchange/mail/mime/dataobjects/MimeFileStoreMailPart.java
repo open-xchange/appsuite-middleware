@@ -56,6 +56,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collection;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.MessageRemovedException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -111,7 +112,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
      * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected MimeFileStoreMailPart(final DataSource dataSource, final Session session) throws OXException {
+    protected MimeFileStoreMailPart(final DataSource dataSource, final long size, final Session session) throws OXException {
         super();
         try {
             final File file = new DefaultFile();
@@ -133,6 +134,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
             file.setFileName(name);
             file.setFileMIMEType(getContentType().toString());
             file.setTitle(name);
+            file.setFileSize(size);
             /*
              * Put attachment's document to dedicated infostore folder
              */
@@ -191,7 +193,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
             userId = session.getUserId();
             contextId = session.getContextId();
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -314,7 +316,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
         try {
             return getDataSource().getInputStream();
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

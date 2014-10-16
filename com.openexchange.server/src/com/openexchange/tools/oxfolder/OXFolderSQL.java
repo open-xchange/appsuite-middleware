@@ -1110,6 +1110,75 @@ public final class OXFolderSQL {
         return subfolderIDs;
     }
 
+    /**
+     * Gets the identifiers of all parent folders in the tree down to the root folder.
+     *
+     * @param folderId The ID of the folder to get the path for
+     * @param readConnection A connection with read capability, or <code>null</code> to fetch from pool dynamically
+     * @param context The context
+     * @return The IDs of all parent folders on the path in (hierarchical) descending order; the supplied folder ID itself is not included
+     */
+    public static List<Integer> getPathToRoot(int folderId, Connection readConnection, Context context) throws OXException, SQLException {
+        List<Integer> subfolderIDs = new ArrayList<Integer>();
+        boolean closeReadConnection = false;
+        try {
+            /*
+             * acquire local read connection if not supplied
+             */
+            if (null == readConnection) {
+                readConnection = DBPool.pickup(context);
+                closeReadConnection = true;
+            }
+            /*
+             * get parent folders recursively
+             */
+            int currentID = folderId;
+            while (FolderObject.SYSTEM_ROOT_FOLDER_ID != currentID) {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = readConnection.prepareStatement("SELECT parent FROM oxfolder_tree WHERE cid=? AND fuid=?;");
+                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(2, currentID);
+                    rs = executeQuery(stmt);
+                    currentID = rs.next() ? Integer.valueOf(rs.getInt(1)) : 0;
+                } finally {
+                    closeSQLStuff(rs, stmt);
+                }
+                subfolderIDs.add(Integer.valueOf(currentID));
+            }
+        } finally {
+            closeResources(null, null, closeReadConnection ? readConnection : null, true, context);
+        }
+        return subfolderIDs;
+    }
+
+    /**
+     * Gets a folder's path down to the root folder, ready to be used in events.
+     *
+     * @param folder The folder to get the path for
+     * @param connection A connection to use
+     * @return The folder path
+     * @throws OXException
+     * @throws SQLException
+     */
+    public static String[] getFolderPath(int folder, Connection connection, Context ctx) throws OXException {
+        List<String> folderPath = new ArrayList<String>();
+        folderPath.add(String.valueOf(folder));
+        int startID = folder;
+        if (FolderObject.SYSTEM_ROOT_FOLDER_ID != startID) {
+            try {
+                List<Integer> pathToRoot = getPathToRoot(startID, connection, ctx);
+                for (Integer id : pathToRoot) {
+                    folderPath.add(String.valueOf(id));
+                }
+            } catch (SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+        return folderPath.toArray(new String[folderPath.size()]);
+    }
+
     private static final String SQL_UDTSUBFLDFLG = "UPDATE oxfolder_tree SET subfolder_flag = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
 
     /**
@@ -2224,11 +2293,11 @@ public final class OXFolderSQL {
             if (null != eventAdmin) {
                 TIntIterator iter = deletePerms.iterator();
                 for (int i = deletePerms.size(); i-- > 0;) {
-                    broadcastEvent(iter.next(), false, entity, ctx.getContextId(), eventAdmin);
+                    broadcastEvent(iter.next(), false, entity, ctx, eventAdmin, readCon);
                 }
                 iter = reassignPerms.iterator();
                 for (int i = reassignPerms.size(); i-- > 0;) {
-                    broadcastEvent(iter.next(), false, entity, ctx.getContextId(), eventAdmin);
+                    broadcastEvent(iter.next(), false, entity, ctx, eventAdmin, readCon);
                 }
             }
         } finally {
@@ -2236,12 +2305,18 @@ public final class OXFolderSQL {
         }
     }
 
-    private static void broadcastEvent(final int fuid, final boolean deleted, final int entity, final int contextId, final EventAdmin eventAdmin) {
+    private static void broadcastEvent(final int fuid, final boolean deleted, final int entity, final Context ctx, final EventAdmin eventAdmin, Connection readCon) throws OXException {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
-        properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
+        properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(ctx.getContextId()));
         properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(entity));
         properties.put(FolderEventConstants.PROPERTY_FOLDER, Integer.toString(fuid));
         properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(!deleted));
+        if (deleted) {
+            //get path to root and send it this is only needed if folder is changed
+            String[] pathToRootString = getFolderPath(fuid, readCon, ctx);
+            properties.put(FolderEventConstants.PROPERTY_FOLDER_PATH, pathToRootString);
+        }
+
         /*
          * Create event with push topic
          */
@@ -2250,7 +2325,7 @@ public final class OXFolderSQL {
          * Finally deliver it
          */
         eventAdmin.sendEvent(event);
-        LOG.debug("Notified content-related-wise changed folder \"{} in context {}", fuid, contextId);
+        LOG.debug("Notified content-related-wise changed folder \"{} in context {}", fuid, ctx);
     }
 
     private static final String SQL_DELETE_PERMS = "DELETE FROM " + TMPL_PERM_TABLE + " WHERE cid = ? AND fuid = ? AND permission_id = ?";
@@ -2627,11 +2702,11 @@ public final class OXFolderSQL {
             if (null != eventAdmin) {
                 TIntIterator iterator = deleteFolders.iterator();
                 for (int i = deleteFolders.size(); i-- > 0;) {
-                    broadcastEvent(iterator.next(), true, entity, ctx.getContextId(), eventAdmin);
+                    broadcastEvent(iterator.next(), true, entity, ctx, eventAdmin, readCon);
                 }
                 iterator = reassignFolders.iterator();
                 for (int i = reassignFolders.size(); i-- > 0;) {
-                    broadcastEvent(iterator.next(), false, entity, ctx.getContextId(), eventAdmin);
+                    broadcastEvent(iterator.next(), false, entity, ctx, eventAdmin, readCon);
                 }
             }
         } finally {

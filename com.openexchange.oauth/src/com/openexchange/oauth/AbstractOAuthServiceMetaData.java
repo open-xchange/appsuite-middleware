@@ -147,7 +147,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public void setAPISecretName(final String apiSecretName) {
         this.apiSecretName = apiSecretName;
     }
-    
+
     /**
      * Used to look up the consumerKey in the confic cascade
      * @param consumerKeyName
@@ -155,7 +155,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public void setConsumerKeyName(final String consumerKeyName) {
         this.consumerKeyName = consumerKeyName;
     }
-    
+
     /**
      * Used to look up the consumerSecret in the config cascade
      *
@@ -199,7 +199,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         user = session.getUserId();
         return Services.getService(ConfigViewFactory.class).getView(user, context).get(apiSecretName, String.class);
     }
-    
+
     @Override
     public String getConsumerKey() {
         if (consumerKey == null && consumerKeyName != null) {
@@ -211,7 +211,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         }
         return consumerKey;
     }
-    
+
     @Override
     public String getConsumerSecret() {
         if (consumerSecret == null && consumerSecretName != null) {
@@ -304,6 +304,11 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     @Override
     public boolean registerTokenBasedDeferrer() {
     	return false;
+    }
+
+    @Override
+    public String getRegisterToken(String authUrl) {
+        return null;
     }
 
     /**

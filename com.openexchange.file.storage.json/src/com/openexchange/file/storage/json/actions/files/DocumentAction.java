@@ -49,16 +49,21 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.google.common.net.HttpHeaders.ETAG;
+import static com.google.common.net.HttpHeaders.LAST_MODIFIED;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
+import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
+import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -67,7 +72,7 @@ import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,7 +86,9 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "version", optional = true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned"),
     @Parameter(name = "content_type", optional = true, description = "If present the response declares the given content_type in the Content-Type header.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
-public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService {
+public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
+
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DocumentAction.class);
 
     public static final String DOCUMENT = "com.openexchange.file.storage.json.DocumentAction.DOCUMENT";
 
@@ -113,31 +120,73 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             }, document.getSize(), document.getMimeType(), document.getName());
 
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            result.setHeader("ETag", document.getEtag());
+            String etag = document.getEtag();
+            if (null != etag) {
+                result.setHeader(ETAG, etag);
+            }
+            long lastModified = document.getLastModified();
+            if (lastModified > 0) {
+                result.setHeader(LAST_MODIFIED, Tools.formatHeaderDate(new Date(lastModified)));
+            }
             return result;
         }
 
+
         final File fileMetadata = fileAccess.getFileMetadata(id, version);
 
-        // Download file
-        final IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
+        IFileHolder.InputStreamClosure isClosure;
+        if (seemsLikeThumbnailRequest(request.getRequestData())) {
+            isClosure = new IFileHolder.InputStreamClosure() {
 
-            @Override
-            public InputStream newStream() throws OXException, IOException {
-                final InputStream inputStream = fileAccess.getDocument(id, version);
-                if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                    return inputStream;
+                @Override
+                public InputStream newStream() throws OXException, IOException {
+                    InputStream inputStream;
+                    try {
+                        inputStream = fileAccess.optThumbnailStream(id, version);
+                    } catch (OXException e) {
+                        LOGGER.debug("Unable to retrieve thumbnail for file: {}", id, e);
+                        inputStream = null;
+                    }
+                    if (null == inputStream) {
+                        inputStream = fileAccess.getDocument(id, version);
+                    }
+                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                        return inputStream;
+                    }
+                    return new BufferedInputStream(inputStream, 65536);
                 }
-                return new BufferedInputStream(inputStream, 65536);
-            }
-        };
+            };
+        } else {
+            isClosure = new IFileHolder.InputStreamClosure() {
+
+                @Override
+                public InputStream newStream() throws OXException, IOException {
+                    InputStream inputStream = fileAccess.getDocument(id, version);
+                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                        return inputStream;
+                    }
+                    return new BufferedInputStream(inputStream, 65536);
+                }
+            };
+        }
 
         final FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         createAndSetETag(fileMetadata, request, result);
 
+        Date lastModified = fileMetadata.getLastModified();
+        if (null != lastModified) {
+            result.setHeader(LAST_MODIFIED, Tools.formatHeaderDate(lastModified));
+        }
+
         return result;
+    }
+
+    private static final String COVER = com.openexchange.tools.images.ScaleType.COVER.getKeyword();
+
+    private boolean seemsLikeThumbnailRequest(AJAXRequestData requestData) {
+        return "thumbnail_image".equals(requestData.getFormat()) || COVER.equals(requestData.getParameter("scaleType"));
     }
 
     private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
@@ -156,11 +205,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         if (document != null) {
             requestData.setProperty(DOCUMENT, document);
             String etag = document.getEtag();
-            if (etag != null && etag.equals(clientETag)) {
-                return true;
-            } else {
-                return false;
-            }
+            return etag != null && etag.equals(clientETag);
         }
 
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
@@ -168,24 +213,32 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     }
 
     @Override
+    public boolean checkLastModified(long clientLastModified, AJAXRequestData requestData, ServerSession session) throws OXException {
+        AJAXInfostoreRequest request = new AJAXInfostoreRequest(requestData, session);
+        IDBasedFileAccess fileAccess = request.getFileAccess();
+
+        final String id = request.getId();
+        final String version = request.getVersion();
+
+        final Document document = fileAccess.getDocumentAndMetadata(id, version);
+        if (document != null) {
+            requestData.setProperty(DOCUMENT, document);
+            long lastModified = document.getLastModified();
+            return lastModified > 0 ? false : clientLastModified > lastModified;
+        }
+
+        File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+
+        Date lastModified = fileMetadata.getLastModified();
+        return null == lastModified ? false : clientLastModified > lastModified.getTime();
+    }
+
+    @Override
     public void setETag(String eTag, long expires, AJAXRequestResult result) throws OXException {
         result.setExpires(expires);
         if (eTag != null) {
-            result.setHeader("ETag", eTag);
+            result.setHeader(ETAG, eTag);
         }
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }

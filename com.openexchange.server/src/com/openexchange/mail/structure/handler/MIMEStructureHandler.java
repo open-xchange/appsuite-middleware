@@ -69,6 +69,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
@@ -718,7 +719,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -764,7 +765,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -787,7 +788,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                         bytes = out.toByteArray();
                     } catch (final IOException e) {
-                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                         }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -1024,9 +1025,15 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
-        final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
+            if (null == cs) {
+                // No charset parameter available
+                // Auto-detect it or use default
+                return contentType.startsWith(PRIMARY_TEXT) ? CharsetDetector.detectCharset(mailPart.getInputStream()) : MailProperties.getInstance().getDefaultMimeCharset();
+            }
+
+            // Check validity
             if (!CharsetDetector.isValid(cs)) {
                 final String prev = cs;
                 if (contentType.startsWith(PRIMARY_TEXT)) {
@@ -1037,15 +1044,12 @@ public final class MIMEStructureHandler implements StructureHandler {
                     LOG.warn("Illegal or unsupported encoding \"{}\". Using fallback encoding:: \"{}\"", prev, cs);
                 }
             }
-            charset = cs;
-        } else {
-            if (contentType.startsWith(PRIMARY_TEXT)) {
-                charset = CharsetDetector.detectCharset(mailPart.getInputStream());
-            } else {
-                charset = MailProperties.getInstance().getDefaultMimeCharset();
-            }
+            return cs;
         }
-        return charset;
+
+        // No Content-Type available in mail part
+        // Auto-detect it or use default
+        return contentType.startsWith(PRIMARY_TEXT) ? CharsetDetector.detectCharset(mailPart.getInputStream()) : MailProperties.getInstance().getDefaultMimeCharset();
     }
 
     private static String readContent(final InputStreamProvider isp, final ContentType contentType) throws IOException {

@@ -49,11 +49,14 @@
 
 package com.openexchange.dispatcher;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * {@link DispatcherPrefixService} - Provides the dispatcher prefix
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface DispatcherPrefixService {
 
     /**

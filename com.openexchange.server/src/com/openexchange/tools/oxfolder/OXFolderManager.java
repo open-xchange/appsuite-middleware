@@ -166,12 +166,18 @@ public abstract class OXFolderManager {
      * Possible operations here: rename, move and/or permissions update: When a rename should be performed, given folder object should
      * contain field 'folder name', so that invocation of <tt>FolderObject.containsFolderName()</tt> returns <tt>true</tt>. If a move should
      * be done, routine <tt>FolderObject.containsParentFolderID()</tt> should return <tt>true</tt>. Last, but not least, if an update of
-     * folder's permissions should be done, routine <tt>FolderObject.containsPermissions()</tt> should return <tt>true</tt>.
+     * folder's permissions should be done, routine <tt>FolderObject.containsPermissions()</tt> should return <tt>true</tt>. Changed
+     * permissions are not handed down to subfolders implicitly.
      * </p>
      *
+     * @param fo The folder to update
+     * @param checkPermissions <code>true</code> to check permissions, <code>false</code>, otherwise
+     * @param lastModified The last-modified time stamp which is written into database; usually {@link System#currentTimeMillis()}
      * @return An instance of <tt>FolderObject</tt> representing modified folder
      */
-    public abstract FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
+    public FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException {
+        return updateFolder(fo, checkPermissions, false, lastModified);
+    }
 
     /**
      * Updates an existing folder according to changes contained in given folder object. <b>NOTE:</b> given instance of
@@ -184,6 +190,10 @@ public abstract class OXFolderManager {
      * folder's permissions should be done, routine <tt>FolderObject.containsPermissions()</tt> should return <tt>true</tt>.
      * </p>
      *
+     * @param fo The folder to update
+     * @param checkPermissions <code>true</code> to check permissions, <code>false</code>, otherwise
+     * @param handDown <code>true</code> if permissions are supposed to be handed down to subfolders, <code>false</code>, otherwise
+     * @param lastModified The last-modified time stamp which is written into database; usually {@link System#currentTimeMillis()}
      * @return An instance of <tt>FolderObject</tt> representing modified folder
      */
     public abstract FolderObject updateFolder(FolderObject fo, boolean checkPermissions, boolean handDown, long lastModified) throws OXException;
@@ -203,7 +213,9 @@ public abstract class OXFolderManager {
      * @param lastModified The last-modified time stamp which is written into database; usually {@link System#currentTimeMillis()}.
      * @return An instance of <tt>FolderObject</tt> representing deleted folder
      */
-    public abstract FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
+    public FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException {
+        return deleteFolder(fo, checkPermissions, lastModified, false);
+    }
 
     /**
      * Deletes a folder identified by given folder object. This operation causes a recursive traversal of all folder's subfolders to check

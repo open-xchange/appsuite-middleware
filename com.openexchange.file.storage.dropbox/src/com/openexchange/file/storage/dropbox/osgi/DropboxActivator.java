@@ -60,7 +60,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.dropbox.session.DropboxEventHandler;
+import com.openexchange.file.storage.dropbox.access.DropboxEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;

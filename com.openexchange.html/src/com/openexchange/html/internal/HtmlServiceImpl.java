@@ -92,6 +92,7 @@ import org.jsoup.Jsoup;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.jericho.JerichoParser;
@@ -121,8 +122,6 @@ public final class HtmlServiceImpl implements HtmlService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlServiceImpl.class);
 
     private static final String CHARSET_UTF_8 = "UTF-8";
-
-    // private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
     private static final String TAG_E_HEAD = "</head>";
 
@@ -324,7 +323,7 @@ public final class HtmlServiceImpl implements HtmlService {
             int lastMatch = 0;
             while (m.find()) {
                 final String url = m.group();
-                if (HtmlServices.isNonJavaScriptURL(url)) {
+                if (HtmlServices.isSafe(url)) {
                     final int startOpeningPos = m.start();
                     targetBuilder.append(content.substring(lastMatch, startOpeningPos));
                     sb.setLength(0);
@@ -535,42 +534,77 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlCodec.encode(immune, input);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
+        return sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, -1).getContent();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public HtmlSanitizeResult sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix, final int maxContentSize) {
+        HtmlSanitizeResult htmlSanitizeResult = new HtmlSanitizeResult(htmlContent);
         if (isEmpty(htmlContent)) {
-            return htmlContent;
+            return htmlSanitizeResult;
         }
         try {
             String html = htmlContent;
+
             // Normalize the string
-            html = Normalizer.normalize(html, Form.NFKC);
+            {
+                int length = html.length();
+                StringBuilder tmp = new StringBuilder(length);
+                OneCharSequence helper = null;
+                for (int i = 0; i < length; i++) {
+                    char c = html.charAt(i);
+                    if (c < 128) {
+                        tmp.append(c);
+                    } else {
+                        if (null == helper) {
+                            helper = new OneCharSequence(c);
+                        } else {
+                            helper.setCharacter(c);
+                        }
+                        tmp.append(Normalizer.normalize(helper, Form.NFKC));
+                    }
+                }
+                html = tmp.toString();
+            }
+
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
+
             // CSS- and tag-wise sanitizing
             try {
-                // Determine the definition to use
-                final String definition;
-                {
-                    String confName = optConfigName;
-                    if (null != confName && !confName.endsWith(".properties")) {
-                        confName += ".properties";
-                    }
-                    definition = null == confName ? null : getConfiguration().getText(confName);
+                // Initialize the handler
+                FilterJerichoHandler handler;
+                if (null == optConfigName) {
+                    handler = new FilterJerichoHandler(html.length(), this);
+                } else {
+                    String definition = getConfiguration().getText(optConfigName.endsWith(".properties") ? optConfigName : optConfigName + ".properties");
+                    handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
                 }
-                // Handle HTML content
-                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
-                JerichoParser.getInstance().parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+                handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
+
+                // Parse the HTML content
+                JerichoParser.getInstance().parse(html, handler);
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
                 html = handler.getHTML();
+                htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
-                LOG.warn("HTML content will be returned un-white-listed. Reason: " + e.getMessage(), e);
+                LOG.warn("HTML content will be returned un-white-listed.", e);
             }
+
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
             while (sanitized[0]) {
@@ -578,12 +612,14 @@ public final class HtmlServiceImpl implements HtmlService {
                 // Start sanitizing round
                 html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
+
             // Replace HTML entities
             html = keepUnicodeForEntities(html);
-            return html;
+            htmlSanitizeResult.setContent(html);
+            return htmlSanitizeResult;
         } catch (final RuntimeException e) {
-            LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
-            return htmlContent;
+            LOG.warn("HTML content will be returned un-sanitized.", e);
+            return htmlSanitizeResult;
         }
     }
 
@@ -828,18 +864,43 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String htmlFormat(final String plainText, final boolean withQuote, final String commentId) {
-        String retval = PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
-        retval = keepUnicodeForEntities(retval);
-        return retval;
+    public HtmlSanitizeResult htmlFormat(final String plainText, final boolean withQuote, final String commentId, int maxContentSize) {
+        String content = PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
+        HtmlSanitizeResult htmlSanitizeResult = new HtmlSanitizeResult(content);
+
+        if (!(maxContentSize >= 10000) && !(maxContentSize <= 0)) {
+            maxContentSize = 10000;
+        }
+
+        if ((maxContentSize > 0) && (maxContentSize < content.length())) {
+            int endOfSentence = content.indexOf('.', maxContentSize) + 1;
+            content = content.substring(0, endOfSentence);
+            htmlSanitizeResult.setTruncated(true);
+        }
+        content = keepUnicodeForEntities(content);
+        htmlSanitizeResult.setContent(content);
+
+        return htmlSanitizeResult;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String htmlFormat(final String plainText, final boolean withQuote, final String commentId) {
+        return htmlFormat(plainText, withQuote, commentId, -1).getContent();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String htmlFormat(final String plainText, final boolean withQuote) {
-        String retval = PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
-        retval = keepUnicodeForEntities(retval);
-        return retval;
+        return htmlFormat(plainText, withQuote, null);
     }
 
     private String escape(final String s, final boolean withQuote, final String commentId) {
@@ -902,15 +963,7 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     /**
-     * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
-     * <code>&quot;&amp;lt;&quot;</code>.
-     * <p>
-     * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
-     * <code>true</code>.
-     *
-     * @param plainText The plain text
-     * @return The properly escaped HTML content
-     * @see #htmlFormat(String, boolean)
+     * {@inheritDoc}
      */
     @Override
     public String htmlFormat(final String plainText) {
@@ -1386,7 +1439,6 @@ public final class HtmlServiceImpl implements HtmlService {
         final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
         if (start >= headTagLen) {
             final int end = html.indexOf(TAG_E_HEAD);
-            // final Matcher m = PAT_META_CT.matcher(html.substring(start, end));
             if (!occursWithin(html, start, end, true, "http-equiv=\"content-type\"", "http-equiv=content-type")) {
                 final StringBuilder sb = new StringBuilder(html);
                 final String cs;
@@ -1409,7 +1461,6 @@ public final class HtmlServiceImpl implements HtmlService {
             }
         }
         html = processDownlevelRevealedConditionalComments(html);
-        // html = removeXHTMLCData(html);
         /*
          * Check URLs
          */
@@ -1418,9 +1469,6 @@ public final class HtmlServiceImpl implements HtmlService {
             HtmlParser.parse(html, handler);
             html = handler.getHTML();
         }
-        /*
-         * Retun...
-         */
         return html;
     }
 
@@ -1588,7 +1636,7 @@ public final class HtmlServiceImpl implements HtmlService {
             if (isValidCondition(condition)) {
                 sb.append(CC_START_IF).append(condition);
                 final String wrappedContent = m.group(3);
-                if (!wrappedContent.startsWith("-->", 0)) {
+                if (!wrappedContent.startsWith("-->", 0) && !condition.endsWith("-->")) {
                     sb.append(CC_END_IF);
                 }
                 sb.append(wrappedContent);
@@ -1639,7 +1687,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
-    private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);");
 
     private static String replaceHexEntities(final String htmlContent) {
         final Matcher m = PAT_HEX_ENTITIES.matcher(htmlContent);
@@ -1796,7 +1844,7 @@ public final class HtmlServiceImpl implements HtmlService {
         Pattern.compile("&#9824;|&spades;", Pattern.CASE_INSENSITIVE),
         Pattern.compile("&#9827;|&clubs;", Pattern.CASE_INSENSITIVE),
         Pattern.compile("&#9830;|&diams;", Pattern.CASE_INSENSITIVE)
-    ));
+        ));
 
     private static final List<String> S_HTMLE = Collections.unmodifiableList(Arrays.asList(
         "\u00a9",
@@ -1806,7 +1854,7 @@ public final class HtmlServiceImpl implements HtmlService {
         "\u2660",
         "\u2663",
         "\u2666"
-    ));
+        ));
 
     private static String keepUnicodeForEntities(final String html) {
         String ret = html;

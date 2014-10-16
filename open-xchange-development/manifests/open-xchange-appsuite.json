@@ -294,6 +294,11 @@
     },
     {
         "namespace": "portal",
+        "requires": "oauth xing",
+        "path": "plugins/portal/xing/register"
+    },
+    {
+        "namespace": "portal",
         "requires": "oauth facebook",
         "path": "plugins/portal/facebook/register"
     },
@@ -349,5 +354,21 @@
     {
         "namespace": "portal",
         "path": "plugins/portal/userSettings/register"
-    }
+    },
+    {
+  		"namespace": ["io.ox/settings/main"],
+  		"requires": "mailfilter",
+  		"path": "io.ox/mail/autoforward/settings/register"
+	},
+	{
+	  	"namespace": ["io.ox/settings/main"],
+  		"requires": "mailfilter",
+  		"device": "!small",
+  		"path": "io.ox/mail/mailfilter/settings/register"
+	},
+	{
+    	"namespace": ["io.ox/settings/main"],
+	    "requires": "mailfilter",
+    	"path": "io.ox/mail/vacationnotice/settings/register"
+  	}
 ]

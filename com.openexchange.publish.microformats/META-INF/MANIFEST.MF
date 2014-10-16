@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Microformats Publish Plug-in
 Bundle-SymbolicName: com.openexchange.publish.microformats
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.publish.microformats.osgi.ServletActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -26,6 +26,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.infostore,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.html,
  com.openexchange.i18n,
@@ -36,6 +37,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.publish.helpers,
  com.openexchange.publish.interfaces,
  com.openexchange.publish.tools,
+ com.openexchange.server,
  com.openexchange.session,
  com.openexchange.templating,
  com.openexchange.tools.encoding,

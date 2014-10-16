@@ -179,7 +179,19 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @return <code>true</code> if in memory; otherwise <code>false</code>
      */
     public boolean isInMemory() {
-        return (null == tempFile);
+        return (null == tempFile) && (buf != null);
+    }
+
+    /**
+     * Gets the optional temporary file.
+     * <p>
+     * If {@link #isInMemory()} signals <code>true</code>, then this method will return <code>null</code>, and the content should rather be obtained by {@link #getBuffer()}.
+     *
+     * @return The temporary file or <code>null</code>
+     * @see #isInMemory()
+     */
+    public File getTempFile() {
+        return tempFile;
     }
 
     /**

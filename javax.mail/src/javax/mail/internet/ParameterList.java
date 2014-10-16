@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -255,7 +255,8 @@ public class ParameterList {
 		    break;
 		// parameter name must be a MIME Atom
 		if (tk.getType() != HeaderTokenizer.Token.ATOM)
-		    throw new ParseException("Expected parameter name, " +
+		    throw new ParseException("In parameter list <" + s + ">" +
+					    ", expected parameter name, " +
 					    "got \"" + tk.getValue() + "\"");
 		name = tk.getValue().toLowerCase(Locale.ENGLISH);
 
@@ -313,8 +314,9 @@ public class ParameterList {
 		    value = lastValue + " " + tk.getValue();
 		    list.put(lastName, value);
                 } else {
-		    throw new ParseException("Expected ';', " +
-					    "got \"" + tk.getValue() + "\"");
+		    throw new ParseException("In parameter list <" + s + ">" +
+					    ", expected ';', got \"" +
+					    tk.getValue() + "\"");
 		}
 	    }
         }

@@ -56,6 +56,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
@@ -69,8 +70,6 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthJSONActivator extends AJAXModuleActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class);
 
     private volatile OSGiOAuthService oAuthService;
     private volatile WhiteboardSecretService secretService;
@@ -106,8 +105,12 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             getService(CapabilityService.class).declareCapability("oauth");
 
             trackService(HostnameService.class);
+            UtilizerRegistry registry = UtilizerRegistry.initInstance(context);
+            track(OAuthUtilizerCreator.class, registry);
+
+            openTrackers();
         } catch (final Exception e) {
-            LOG.error("", e);
+            org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class).error("", e);
             throw e;
         }
     }
@@ -115,17 +118,18 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            super.stopBundle();
             final WhiteboardSecretService secretService = this.secretService;
             if (secretService != null) {
                 secretService.close();
                 this.secretService = null;
             }
-            cleanUp();
             final OSGiOAuthService oAuthService = this.oAuthService;
             if (null != oAuthService) {
                 oAuthService.stop();
                 this.oAuthService = null;
             }
+            UtilizerRegistry.freeInstance();
             AbstractOAuthAJAXActionService.setOAuthService(null);
             AbstractOAuthAJAXActionService.PREFIX.set(null);
             Services.setServiceLookup(null);

@@ -54,17 +54,22 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.tasks.InsertData;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import com.openexchange.groupware.tasks.TaskQuotaProvider;
 import com.openexchange.groupware.tasks.database.CreateTaskTables;
 import com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.osgi.UpdateTaskRegisterer;
-import com.openexchange.quota.QuotaService;
+import com.openexchange.osgi.DependentServiceRegisterer;
+import com.openexchange.quota.QuotaProvider;
 
 /**
  * {@link TaskActivator}
@@ -83,7 +88,7 @@ public class TaskActivator extends AJAXModuleActivator {
     }
 
     @Override
-    protected void startBundle() {
+    protected void startBundle() throws Exception {
         registerService(CreateTableService.class, new CreateTaskTables());
 
         track(DatabaseService.class, new UpdateTaskRegisterer(context) {
@@ -96,7 +101,27 @@ public class TaskActivator extends AJAXModuleActivator {
         final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
         registerService(TargetService.class, new ModifyThroughDependant(), props);
+        DependentServiceRegisterer<QuotaProvider> quotaProviderRegisterer = new DependentServiceRegisterer<QuotaProvider>(
+            context,
+            QuotaProvider.class,
+            TaskQuotaProvider.class,
+            null,
+            DatabaseService.class,
+            ConfigViewFactory.class) {
 
-        track(QuotaService.class, new QuotaServiceCustomizer(context));
+            @Override
+            protected void register() {
+                super.register();
+                InsertData.setQuotaProvider((TaskQuotaProvider) registeredService);
+            }
+
+            @Override
+            protected void unregister(ServiceRegistration<?> unregister, Object service) {
+                InsertData.setQuotaProvider(null);
+                super.unregister(unregister, service);
+            }
+        };
+        track(quotaProviderRegisterer.getFilter(), quotaProviderRegisterer);
+        openTrackers();
     }
 }

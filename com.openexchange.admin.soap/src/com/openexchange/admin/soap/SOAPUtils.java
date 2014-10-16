@@ -76,13 +76,9 @@ public final class SOAPUtils {
         out.setContacts(in.getContacts());
         out.setDelegateTask(in.getDelegateTask());
         out.setEditPublicFolders(in.getEditPublicFolders());
-        out.setForum(in.getForum());
         out.setIcal(in.getIcal());
         out.setInfostore(in.getInfostore());
-        out.setPinboardWrite(in.getPinboardWrite());
         out.setReadCreateSharedFolders(in.getReadCreateSharedFolders());
-        out.setRssBookmarks(in.getRssBookmarks());
-        out.setRssPortal(in.getRssPortal());
         out.setSyncml(in.getSyncml());
         out.setTasks(in.getTasks());
         out.setVcard(in.getVcard());
@@ -132,26 +128,14 @@ public final class SOAPUtils {
         if( null != access.getEditPublicFolders() ) {
             ret.setEditPublicFolders(access.getEditPublicFolders());
         }
-        if( null != access.getForum() ) {
-            ret.setForum(access.getForum());
-        }
         if( null != access.getIcal() ) {
             ret.setIcal(access.getIcal());
         }
         if( null != access.getInfostore() ) {
             ret.setInfostore(access.getInfostore());
         }
-        if( null != access.getPinboardWrite() ) {
-            ret.setPinboardWrite(access.getPinboardWrite());
-        }
         if( null != access.getReadCreateSharedFolders() ) {
             ret.setReadCreateSharedFolders(access.getReadCreateSharedFolders());
-        }
-        if( null != access.getRssBookmarks() ) {
-            ret.setRssBookmarks(access.getRssBookmarks());
-        }
-        if( null != access.getRssPortal() ) {
-            ret.setRssPortal(access.getRssPortal());
         }
         if( null != access.getSyncml() ) {
             ret.setSyncml(access.getSyncml());

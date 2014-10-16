@@ -51,6 +51,7 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,6 +144,7 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     @Override
     public void clear() throws OXException {
         delegate.clear();
+        fireClear();
     }
 
     @Override
@@ -240,6 +242,12 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     @Override
+    public void remove(List<Serializable> keys) throws OXException {
+        delegate.remove(keys);
+        fireInvalidate(keys);
+    }
+
+    @Override
     public void localRemove(Serializable key) throws OXException {
         delegate.localRemove(key);
     }
@@ -253,6 +261,12 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     public void removeFromGroup(Serializable key, String group) {
         delegate.removeFromGroup(key, group);
         fireInvalidate(key, group);
+    }
+
+    @Override
+    public void removeFromGroup(List<Serializable> keys, String group) {
+        delegate.removeFromGroup(keys, group);
+        fireInvalidate(keys, group);
     }
 
     @Override
@@ -311,10 +325,13 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
                     break;
                 case INVALIDATE:
                     if (null != cacheEvent.getGroupName()) {
-                        delegate.removeFromGroup(cacheEvent.getKey(), cacheEvent.getGroupName());
+                        delegate.removeFromGroup(cacheEvent.getKeys(), cacheEvent.getGroupName());
                     } else {
-                        delegate.remove(cacheEvent.getKey());
+                        delegate.remove(cacheEvent.getKeys());
                     }
+                    break;
+                case CLEAR:
+                    delegate.clear();
                     break;
                 default:
                     LOG.warn("Unknown cache event operation: {}", cacheEvent.getOperation());
@@ -337,10 +354,30 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
         fireInvalidate(key, null);
     }
 
+    private void fireInvalidate(List<Serializable> keys) {
+        fireInvalidate(keys, null);
+    }
+
     private void fireInvalidate(Serializable key, String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
             LOG.debug("fireInvalidate: {}", event);
+            eventService.notify(this, event, false);
+        }
+    }
+
+    private void fireInvalidate(List<Serializable> keys, String groupName) {
+        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
+            CacheEvent event = CacheEvent.INVALIDATE(region, groupName, keys);
+            LOG.debug("fireInvalidate: {}", event);
+            eventService.notify(this, event, false);
+        }
+    }
+
+    private void fireClear() {
+        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
+            CacheEvent event = CacheEvent.CLEAR(region);
+            LOG.debug("fireClear: {}", event);
             eventService.notify(this, event, false);
         }
     }

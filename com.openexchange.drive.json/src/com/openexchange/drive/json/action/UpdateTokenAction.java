@@ -52,7 +52,7 @@ package com.openexchange.drive.json.action;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -71,7 +71,7 @@ public class UpdateTokenAction extends AbstractDriveAction {
     }
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
          * get parameters
          */

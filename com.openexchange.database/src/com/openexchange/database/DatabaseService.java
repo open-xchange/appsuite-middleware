@@ -52,11 +52,13 @@ package com.openexchange.database;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * Service interface class for accessing the database system.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@SingletonService
 public interface DatabaseService extends ConfigDatabaseService {
 
     /**
@@ -117,12 +119,12 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @throws OXException if no connection can be obtained.
      */
     Connection getNoTimeout(int poolId, String schema) throws OXException;
-    
+
     /**
-     * Retrieve a monitored connection used for reading from the master/slave db pool referenced by the poolIds and schema. This features tracking of the 
+     * Retrieve a monitored connection used for reading from the master/slave db pool referenced by the poolIds and schema. This features tracking of the
      * replication state and an automatic fallback to the writedb if the slave has not caught up yet. The partitionId can be chosen arbitrarily by clients (just make sure a
      * corresponding entry is available in the replication monitoring table), and controls how parts of the database are invalidated with regards to the replication monitor. When
-     * in doubt just set this to 0 always and invalidate the whole schema. 
+     * in doubt just set this to 0 always and invalidate the whole schema.
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -130,12 +132,12 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @return The connection to the database
      */
     public Connection getReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException;
-    
+
     /**
-     * Retrieve a monitored connection used for writing to the master/slave db pool referenced by the poolIds and schema. This features tracking of the 
+     * Retrieve a monitored connection used for writing to the master/slave db pool referenced by the poolIds and schema. This features tracking of the
      * replication state and an automatic fallback to the writedb if the slave has not caught up yet. The partitionId can be chosen arbitrarily by clients (just make sure a
      * corresponding entry is available in the replication monitoring table), and controls how parts of the database are invalidated with regards to the replication monitor. When
-     * in doubt just set this to 0 always and invalidate the whole schema. 
+     * in doubt just set this to 0 always and invalidate the whole schema.
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -143,13 +145,13 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @return The connection to the database
      */
     public Connection getWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException;
-    
+
     /**
-     * Retrieve a monitored connection used for writing to the master/slave db pool referenced by the poolIds and schema not bound by an automatic timeout. 
-     * This is useful for long running database operations like modifying the schema. This features tracking of the 
+     * Retrieve a monitored connection used for writing to the master/slave db pool referenced by the poolIds and schema not bound by an automatic timeout.
+     * This is useful for long running database operations like modifying the schema. This features tracking of the
      * replication state and an automatic fallback to the writedb if the slave has not caught up yet. The partitionId can be chosen arbitrarily by clients (just make sure a
      * corresponding entry is available in the replication monitoring table), and controls how parts of the database are invalidated with regards to the replication monitor. When
-     * in doubt just set this to 0 always and invalidate the whole schema. 
+     * in doubt just set this to 0 always and invalidate the whole schema.
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -157,7 +159,7 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @return The connection to the database
      */
     public Connection getWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException;
-    
+
     /**
      * This method is only for administrative access to contexts.
      * @param poolId identifier of the pool the connection should be returned to.
@@ -222,7 +224,7 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @param con Writable connection to return.
      */
     void backForUpdateTask(int contextId, Connection con);
-    
+
     /**
      * Returns a writable connection to the database of the context with the specified identifier to the pool. It should be used to return
      * a writable connection if it was only used for reading information from the master database server. This method must be used if
@@ -238,7 +240,7 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @param con connection to return.
      */
     void back(int poolId, Connection con);
-    
+
     /**
      * Returns a read only connection to the database master/slave pair referenced by the poolIds, schema and partitionId.
      * @param readPoolId The id referencing the slave db server.
@@ -248,7 +250,7 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @param con The connection to return.
      **/
     public void backReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con);
-    
+
     /**
      * Returns a writable connection to the database master/slave pair referenced by the poolIds, schema and partitionId.
      * @param readPoolId The id referencing the slave db server.
@@ -258,7 +260,7 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @param con The connection to return.
      */
     public void backWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con);
-    
+
     /**
      * Returns a writable connection without timeout to the database master/slave pair referenced by the poolIds, schema and partitionId.
      * @param readPoolId The id referencing the slave db server.
@@ -268,14 +270,14 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @param con The connection to return.
      */
     public void backWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId, Connection con);
-    
+
     /**
      * Creates the replication monitoring tables in the schema on the given writePool. Does nothing if the tables already exist
      * @param writePoolId The id referencing the master db server
      * @param schema The name of the schema
      */
     public void initMonitoringTables(int writePoolId, String schema) throws OXException;
-    
+
     /**
      * Add these partition ids to the replication monitor table
      * @param writePoolId The id referencing the master db server

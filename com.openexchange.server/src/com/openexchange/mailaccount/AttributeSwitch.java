@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
  *
  */
 public interface AttributeSwitch {
+
     public Object id();
     public Object login();
     public Object password();
@@ -100,4 +101,6 @@ public interface AttributeSwitch {
     public Object pop3Path();
     public Object addresses();
     public Object replyTo();
+    public Object transportAuth();
+
 }

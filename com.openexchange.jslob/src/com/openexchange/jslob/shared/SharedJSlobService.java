@@ -49,7 +49,6 @@
 
 package com.openexchange.jslob.shared;
 
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.session.Session;
@@ -67,18 +66,11 @@ public interface SharedJSlobService {
     public static final String EVENT_ADDED = "com/openexchange/jslob/sharedJSlob/added";
 
     public static final String EVENT_REMOVED = "com/openexchange/jslob/sharedJSlob/removed";
-    
+
     /**
      * Default id for shared jslobs
      */
     public static final String DEFAULT_ID = "io.ox/shared";
-
-    /**
-     * Returns the jslob service id
-     *
-     * @return The jslob service id
-     */
-    String getServiceId();
 
     /**
      * Returns the shared jslob
@@ -88,24 +80,17 @@ public interface SharedJSlobService {
     JSlob getJSlob(Session session) throws OXException;
 
     /**
-     * Returns the jslob's id
+     * Returns the jslob's identifier
      *
-     * @return The jslob's id
+     * @return The jslob's identifier
      */
     String getId();
 
     /**
-     * Set the jslob's JSONObject
+     * Returns the jslob's service identifier
      *
-     * @param jsonObject The JSONObject to set
+     * @return The jslob's service identifier
      */
-    void setJSONObject(JSONObject jsonObject);
-
-    /**
-     * Set the jslob's meta data JSONObject
-     *
-     * @param metaObject The JSONObject to set
-     */
-    void setMetaObject(JSONObject metaObject);
+    String getServiceId();
 
 }

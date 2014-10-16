@@ -59,8 +59,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
@@ -894,7 +896,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             up.setConfirm(CalendarObject.ACCEPT);
             recColl.checkAndFillIfUserIsParticipant(cdao, up);
             if (null != edao && FolderObject.SHARED == edao.getFolderType()) {
-                recColl.removeParticipant(cdao, edao.getSharedFolderOwner());
+                recColl.removeUserParticipant(cdao, edao.getSharedFolderOwner());
             }
         } else if (cdao.getFolderType() == FolderObject.SHARED) {
             if (cdao.containsParentFolderID()) {
@@ -911,8 +913,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else {
                 if (!recColl.checkIfUserIsParticipant(edao, up)) {
                     if (edao.getFolderType() == FolderObject.PRIVATE) {
-                        recColl.removeUserParticipant(cdao, uid);
                         recColl.removeParticipant(cdao, uid);
+                        recColl.removeUserParticipant(cdao, uid);
                     }
                     recColl.checkAndFillIfUserIsUser(cdao, up);
                     recColl.checkAndFillIfUserIsParticipant(cdao, up);
@@ -1259,9 +1261,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
 
                 if (check_folder_id != cdao.getParentFolderID()) {
-                    LOG.error(
-                        "Object Not Found: " + "Object not found : uid:oid:fid:InFolder " + so.getUserId() + ':' + cdao.getObjectID() + ':' + cdao.getParentFolderID() + ':' + check_folder_id,
-                        new Throwable());
+                    LOG.error("Object Not Found: Object not found : uid:oid:fid:InFolder {}{}{}{}{}{}{}", so.getUserId(), ':', cdao.getObjectID(), ':', cdao.getParentFolderID(), ':', check_folder_id, new Throwable());
                     throw OXException.notFound("");
                 }
                 cdao.setActionFolder(check_folder_id);
@@ -1398,12 +1398,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
     }
 
-    static final Participant[] getNewParticipants(final Participant np[], final Participant op[]) {
-        return getNotContainedParticipants(np, op).getList();
+    static final Set<Participant> getNewParticipants(final Participant np[], final Participant op[]) {
+        return new HashSet<Participant>(Arrays.asList(getNotContainedParticipants(np, op).getList()));
     }
 
-    static final Participant[] getDeletedParticipants(final Participant np[], final Participant op[]) {
-        return getNotContainedParticipants(np, op).getList();
+    static final Set<Participant> getDeletedParticipants(final Participant np[], final Participant op[]) {
+        return new HashSet<Participant>(Arrays.asList(getNotContainedParticipants(np, op).getList()));
     }
 
     static final Participants getNotContainedParticipants(final Participant[] toCheck, final Participant[] participants) {

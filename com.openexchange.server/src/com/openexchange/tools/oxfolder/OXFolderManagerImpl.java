@@ -101,7 +101,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.modules.Module;
@@ -448,9 +448,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         try {
             OXFolderSQL.insertFolderSQL(fuid, user.getId(), folderObj, createTime, ctx, writeCon);
             folderObj.setObjectID(fuid);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
@@ -481,7 +478,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (FolderCacheManager.isInitialized()) {
                     final FolderCacheManager manager = FolderCacheManager.getInstance();
                     manager.removeFolderObject(parentFolder.getObjectID(), ctx);
-                    // manager.putFolderObject(parentFolder, ctx);
+                    manager.loadFolderObject(parentFolder.getObjectID(), ctx, wc);
                     folderObj.fill(manager.getFolderObject(fuid, false, ctx, wc));
                 } else {
                     folderObj.fill(FolderObject.loadFolderObjectFromDB(fuid, ctx, wc));
@@ -493,7 +490,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
                 try {
-                    new EventClient(session).create(folderObj);
+                    if (FolderObject.INFOSTORE == folderObj.getModule()) {
+                        new EventClient(session).create(folderObj, parentFolder, getFolderPath(folderObj, folderObj, wc));
+                    } else {
+                        new EventClient(session).create(folderObj, parentFolder);
+                    }
                 } catch (final OXException e) {
                     LOG.warn("Create event could not be enqueued", e);
                 }
@@ -505,11 +506,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
             }
         }
-    }
-
-    @Override
-    public FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException {
-        return updateFolder(fo, checkPermissions, false, lastModified);
     }
 
     @Override
@@ -585,6 +581,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     if (parentFolderID > 0) {
                         /*
                          * Update parent, too
+                         * it is needed to do this by removing the folder object so the invalidation is distributed every time also in the
+                         * event that it is not in the local cache
                          */
                         cacheManager.removeFolderObject(parentFolderID, ctx);
                         cacheManager.loadFolderObject(parentFolderID, ctx, wc);
@@ -608,7 +606,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (FolderObject.SYSTEM_MODULE != fo.getModule()) {
                     try {
                         FolderObject newParentFolder = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false);
-                        new EventClient(session).modify(originalFolder, fo, newParentFolder);
+                        if (FolderObject.INFOSTORE == fo.getModule()) {
+                            new EventClient(session).modify(originalFolder, fo, newParentFolder, getFolderPath(fo, newParentFolder, wc));
+                        } else {
+                            new EventClient(session).modify(originalFolder, fo, newParentFolder);
+                        }
                     } catch (final OXException e) {
                         LOG.warn("Update event could not be enqueued", e);
                     }
@@ -825,9 +827,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             OXFolderSQL.updateFolderSQL(user.getId(), fo, lastModified, ctx, writeCon);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, fo, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
@@ -935,7 +934,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
             return contactService.isFolderEmpty(session, String.valueOf(folderId));
         } else if (module == FolderObject.INFOSTORE) {
-            final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+            final InfostoreFacade db = new EventFiringInfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
             return db.isFolderEmpty(folderId, ctx);
         } else if (module == FolderObject.SYSTEM_MODULE) {
             return true;
@@ -1050,9 +1049,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             OXFolderSQL.renameFolderSQL(user.getId(), folderObj, lastModified, ctx, writeCon);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
@@ -1215,9 +1211,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         try {
             storageSrc.setFolderName(newName);
             OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, storageSrc, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
@@ -1249,9 +1242,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     folderIDs.addAll(OXFolderSQL.getSubfolderIDs(folderId, readCon, ctx, true));
                 }
                 OXFolderSQL.updateFolderType(writeCon, ctx, storageDest.getType(), folderIDs);
-                if (null != writeCon && !writeCon.getAutoCommit()) {
-                    writeCon.commit();
-                }
             } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
@@ -1263,9 +1253,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             OXFolderSQL.updateLastModified(storageSrc.getParentFolderID(), lastModified, user.getId(), writeCon, ctx);
             OXFolderSQL.updateLastModified(storageSrc.getObjectID(), lastModified, user.getId(), writeCon, ctx);
             OXFolderSQL.updateLastModified(storageDest.getObjectID(), lastModified, user.getId(), writeCon, ctx);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -1415,11 +1402,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     @Override
-    public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
-        return deleteFolder(fo, checkPermissions, lastModified, false);
-    }
-
-    @Override
     public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified, boolean hardDelete) throws OXException {
         final int folderId = fo.getObjectID();
         if (folderId <= 0) {
@@ -1565,6 +1547,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                  * Update cache
                  */
                 if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
+                    FolderCacheManager.getInstance().removeFolderObject(parentFolder.getObjectID(), ctx);
                     FolderCacheManager.getInstance().loadFolderObject(parentFolder.getObjectID(), ctx, wc);
                 }
                 /*
@@ -1825,9 +1808,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              */
             try {
                 OXFolderSQL.delOXFolder(folderID, session.getUserId(), lastModified, true, false, ctx, writeCon);
-                if (null != writeCon && !writeCon.getAutoCommit()) {
-                    writeCon.commit();
-                }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
@@ -1859,9 +1839,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              */
             try {
                 OXFolderSQL.delWorkingOXFolder(folderID, session.getUserId(), lastModified, ctx, writeCon);
-                if (null != writeCon && !writeCon.getAutoCommit()) {
-                    writeCon.commit();
-                }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
@@ -1925,7 +1902,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     "del_oxfolder_tree",
                     "del_oxfolder_permissions");
                 try {
-                    new EventClient(session).delete(fo);
+                    if (FolderObject.INFOSTORE == fo.getModule()) {
+                        FolderObject parentFolder = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false);
+                        new EventClient(session).delete(fo, parentFolder, getFolderPath(fo, parentFolder, wc));
+                    } else {
+                        new EventClient(session).delete(fo);
+                    }
                 } catch (final OXException e) {
                     LOG.warn("Delete event could not be enqueued", e);
                 }
@@ -1995,9 +1977,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private void deleteContainedDocuments(final int folderID) throws OXException {
         final InfostoreFacade infostoreFacade;
         if (writeCon == null) {
-            infostoreFacade = new InfostoreFacadeImpl(new DBPoolProvider());
+            infostoreFacade = new EventFiringInfostoreFacadeImpl(new DBPoolProvider());
         } else {
-            infostoreFacade = new InfostoreFacadeImpl(new StaticDBPoolProvider(writeCon));
+            infostoreFacade = new EventFiringInfostoreFacadeImpl(new StaticDBPoolProvider(writeCon));
             infostoreFacade.setCommitsTransaction(false);
         }
         infostoreFacade.setTransactional(true);
@@ -2130,6 +2112,40 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             gatherDeleteableSubfoldersRecursively(subfolders.get(i), userId, userPerms, permissionIDs, subMap, initParent, specials);
         }
         deleteableIDs.put(folderID, subMap);
+    }
+
+    /**
+     * Gets a folder's path down to the root folder, ready to be used in events.
+     *
+     * @param folder The folder to get the path for
+     * @param parentFolder The parent folder if known, or <code>null</code> if not
+     * @param connection A connection to use
+     * @return The folder path
+     * @throws OXException
+     */
+    private String[] getFolderPath(FolderObject folder, FolderObject parentFolder, Connection connection) throws OXException {
+        List<String> folderPath = new ArrayList<String>();
+        folderPath.add(String.valueOf(folder.getObjectID()));
+        int startID;
+        if (null == parentFolder) {
+            startID = folder.getParentFolderID();
+            folderPath.add(String.valueOf(startID));
+        } else {
+            folderPath.add(String.valueOf(parentFolder.getObjectID()));
+            startID = parentFolder.getParentFolderID();
+            folderPath.add(String.valueOf(startID));
+        }
+        if (FolderObject.SYSTEM_ROOT_FOLDER_ID != startID) {
+            try {
+                List<Integer> pathToRoot = OXFolderSQL.getPathToRoot(startID, connection, ctx);
+                for (Integer id : pathToRoot) {
+                    folderPath.add(String.valueOf(id));
+                }
+            } catch (SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+        return folderPath.toArray(new String[folderPath.size()]);
     }
 
     /**

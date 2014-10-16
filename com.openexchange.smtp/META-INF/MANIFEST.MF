@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SMTP
 Bundle-SymbolicName: com.openexchange.smtp
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.api2,
@@ -21,6 +21,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.i18n.tools,
  com.openexchange.java,
  com.openexchange.java.util,
+ com.openexchange.json.io,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.api,
@@ -47,8 +48,11 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.tools.net,
  com.openexchange.tools.ssl,
  com.openexchange.tools.stream,
+ com.sun.mail.auth,
+ com.sun.mail.dsn,
  com.sun.mail.handlers,
  com.sun.mail.smtp,
+ com.sun.mail.util,
  gnu.trove,
  gnu.trove.map,
  gnu.trove.map.hash,
@@ -68,4 +72,5 @@ Import-Package: com.openexchange.ajax.container,
  org.slf4j
 Bundle-Activator: com.openexchange.smtp.osgi.SMTPActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: com.openexchange.smtp.config
+Export-Package: com.openexchange.smtp,
+ com.openexchange.smtp.config

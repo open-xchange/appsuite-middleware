@@ -2,12 +2,11 @@
 Name:          open-xchange-oauth
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -32,14 +31,13 @@ Obsoletes:     open-xchange-oauth-twitter < %{version}
 Provides:      open-xchange-oauth-yahoo = %{version}
 Obsoletes:     open-xchange-oauth-yahoo < %{version}
 
-
 %description
 The Open-Xchange OAuth implementation.
 
 Authors:
 --------
     Open-Xchange
-    
+
 %prep
 %setup -q
 
@@ -51,7 +49,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties msnoauth.properties twitteroauth.properties yahoooauth.properties"
+CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties twitteroauth.properties yahoooauth.properties"
 for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
@@ -62,20 +60,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    PROTECT="facebookoauth.properties linkedinoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
     for FILE in $PROTECT; do
         ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
     done
 
     # SoftwareChange_Request-1494
-    pfile=/opt/open-xchange/etc/msnoauth.properties
-    if ! ox_exists_property com.openexchange.oauth.msn $pfile; then
-       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
-           ox_set_property com.openexchange.oauth.msn false $pfile
-       else
-           ox_set_property com.openexchange.oauth.msn true $pfile
-       fi
-    fi
     pfile=/opt/open-xchange/etc/yahoooauth.properties
     if ! ox_exists_property com.openexchange.oauth.yahoo $pfile; then
        if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
@@ -100,6 +90,15 @@ if [ ${1:-0} -eq 2 ]; then
            ox_set_property com.openexchange.oauth.facebook true $pfile
        fi
     fi
+
+    # SoftwareChange_Request-2146
+    PFILE=/opt/open-xchange/etc/xingoauth.properties
+    ox_add_property com.openexchange.oauth.xing.consumerKey REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_KEY /opt/open-xchange/etc/xingoauth.properties
+    ox_add_property com.openexchange.oauth.xing.consumerSecret REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_SECRET /opt/open-xchange/etc/xingoauth.properties
+    VALUE=$(ox_read_property com.openexchange.oauth.xing $PFILE)
+    if [ "$VALUE" = "false" ]; then
+        ox_set_property com.openexchange.oauth.xing true $PFILE
+    fi
 fi
 
 %clean
@@ -112,56 +111,91 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/boxcomoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/dropboxoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msnoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
-%config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/etc/settings/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/flickroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
+%config(noreplace) /opt/open-xchange/etc/*
+%dir /opt/open-xchange/etc/settings/
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Tue Oct 14 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Fifth candidate for 7.6.1 release
+* Fri Oct 10 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Fourth candidate for 7.6.1 release
 * Thu Oct 09 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-10-09
 * Tue Oct 07 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-10-09
+* Tue Oct 07 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-10-10
+* Thu Oct 02 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Third release candidate for 7.6.1
 * Tue Sep 30 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-10-06
 * Fri Sep 26 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-09-29
+* Fri Sep 26 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-10-06
 * Tue Sep 23 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-09-23
+* Tue Sep 16 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Second release candidate for 7.6.1
 * Mon Sep 08 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-09-15
+* Mon Sep 08 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-09-15
+* Fri Sep 05 2014 Steffen Templin <marcus.klein@open-xchange.com>
+First release candidate for 7.6.1
 * Thu Aug 21 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
+* Wed Aug 13 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-08-15
 * Tue Aug 05 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-08-06
 * Mon Aug 04 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-08-11
+* Mon Aug 04 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-08-11
 * Mon Jul 28 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-07-30
+* Mon Jul 21 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-07-28
 * Tue Jul 15 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-07-21
 * Mon Jul 14 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-07-24
 * Thu Jul 10 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-07-15
+* Mon Jul 07 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-07-14
+* Mon Jul 07 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-07-07
 * Tue Jul 01 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-07-07
+* Thu Jun 26 2014 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.6.1
 * Mon Jun 23 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Sixth release candidate for 7.6.0
+* Wed Jun 18 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-06-30
 * Fri Jun 13 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Steffen Templin <marcus.klein@open-xchange.com>

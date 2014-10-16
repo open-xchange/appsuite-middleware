@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.impl;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,17 +68,19 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.directory.Resource;
-import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.directory.RoutingInfo;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.dispatch.Utils;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.hazelcast.Utils;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
+import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.osgi.Services;
+import com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
@@ -88,15 +91,15 @@ import com.openexchange.threadpool.ThreadPools;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJanitor {
+public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor implements MessageDispatcher {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalMessageDispatcherImpl.class);
 
-    private final ResourceDirectory directory;
+    private final HazelcastResourceDirectory directory;
 
     private ResponseChannel channel = null;
 
-    public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
+    public GlobalMessageDispatcherImpl(HazelcastResourceDirectory directory) {
         super();
         this.directory = directory;
         this.channel = new ResponseChannel(directory);
@@ -144,20 +147,56 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
         for (Entry<ID, Resource> recipient : recipients.entrySet()) {
             ID id = recipient.getKey();
             Resource resource = recipient.getValue();
-            Object routingInfo = resource.getRoutingInfo();
-            if (routingInfo != null && Member.class.isInstance(routingInfo)) {
-                Member member = (Member) routingInfo;
-                Set<ID> ids = targets.get(member);
-                if (ids == null) {
-                    ids = new HashSet<ID>();
-                    targets.put(member, ids);
+            RoutingInfo routingInfo = resource.getRoutingInfo();
+            if (routingInfo != null) {
+                Member member = memberFromRoutingInfo(routingInfo);
+                if(member != null) {
+                    Set<ID> ids = targets.get(member);
+                    if (ids == null) {
+                        ids = new HashSet<ID>();
+                        targets.put(member, ids);
+                    }
+                    
+                    ids.add(id);
+                } else {
+                    LOG.error("No member matches {}", routingInfo);
                 }
-
-                ids.add(id);
+            } else {
+                LOG.error("RoutingInfo for {} was null", resource);
             }
         }
 
         return deliver(stanza, targets);
+    }
+
+    /**
+     * Filter the set of cluster {@link Member}s for a node matching the given {@link RoutingInfo}.
+     * 
+     * @param routingInfo The {@link RoutingInfo} to filter the cluster {@link Member}s
+     * @return null if no matching {@link Member} can be found, otherwise the first matching {@link Member}
+     * @throws OXException
+     */
+    private Member memberFromRoutingInfo(final RoutingInfo routingInfo) throws OXException {
+        String uuid = routingInfo.getId();
+        InetSocketAddress socketAddress = routingInfo.getSocketAddress();
+        final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
+        Set<Member> members = hazelcastInstance.getCluster().getMembers();
+
+        if(!Strings.isEmpty(uuid)) {
+            for(Member member : members) {
+                    if(uuid.equals(member.getUuid())) {
+                        return member;
+                    }
+            }
+        } else {
+            for(Member member : members) {
+                    if(socketAddress.equals(member.getSocketAddress())) {
+                        return member;
+                    }
+            }
+        }
+
+        return null;
     }
 
     private Map<ID, OXException> deliver(Stanza stanza, Map<Member, Set<ID>> targets) throws OXException {
@@ -185,7 +224,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             LOG.debug("Sending to '{}' @ {}", stanza.getTo(), receiver);
             stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);
-            Future<Map<ID, OXException>> task = executorService.submitToMember(new StanzaDispatcher(stanza, ids), receiver);
+            Future<Map<ID, OXException>> task = executorService.submitToMember(new PortableStanzaDispatcher(stanza, ids), receiver);
             futures.add(task);
         }
         // Await completion of send requests and extract their exceptions (if any)
@@ -197,7 +236,6 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
                 Thread.currentThread().interrupt();
                 throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
             } catch (ExecutionException e) {
-                resend(stanza);
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -215,7 +253,6 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      * @throws OXException
      */
     private void resend(Stanza stanza) throws OXException {
-        directory.remove(stanza.getTo());
         send(stanza);
     }
 
@@ -230,7 +267,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      * directed at different nodes still work.Consider client0 and client1 being connected to node1 and client2 being connected to node2.
      * client0 wants to chat with client1 and client2 and sends messages with strictly ascending sequence numbers reaching node1 that he is
      * connected to:
-     * 
+     *
      * <pre>
      * Seq 0 delivered to client1 via node 1
      * Seq 1 delivered to client1 via node 1
@@ -255,10 +292,8 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      */
     private void ensureSequence(Stanza stanza, Member receiver) throws OXException {
         if (stanza.getSequenceNumber() != -1) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("peerMapsPerID before ensuring Sequence: " + peerMapPerID);
-                LOG.debug("SequencePrincipal for peerMapPerID lookup is: " + stanza.getSequencePrincipal());
-            }
+            LOG.debug("peerMapsPerID before ensuring Sequence: {}", peerMapPerID);
+            LOG.debug("SequencePrincipal for peerMapPerID lookup is: {}", stanza.getSequencePrincipal());
             ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
@@ -274,19 +309,13 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
                 AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
                 if(otherNextNumber != null) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
-                    }
+                    LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
                     nextNumber = otherNextNumber;
                 }
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
-                }
+                LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
             }
             Long ensuredSequence = nextNumber.incrementAndGet() - 1;
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
-            }
+            LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
             stanza.setSequenceNumber(ensuredSequence);
             stanza.trace("Updating sequence number for " + receiver.getUuid() + ": " + ensuredSequence);
             if(LOG.isDebugEnabled()) {

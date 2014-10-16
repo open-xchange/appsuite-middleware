@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.results;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -58,8 +58,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 public abstract class AbstractTimedResult<T> implements TimedResult<T> {
 
     private final LastModifiedExtractorIterator results;
-
-    private long sequenceNumber;
+    long sequenceNumber;
 
     public AbstractTimedResult(final SearchIterator<T> results) {
         this.results = new LastModifiedExtractorIterator(results);
@@ -143,13 +142,14 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
             return nextObject;
         }
 
-        public void fastForward() throws OXException {
-            final List<T> moreValues = new ArrayList<T>();
+        void fastForward() throws OXException {
+            List<T> moreValues = new LinkedList<T>();
             while (hasNext()) {
                 try {
                     moreValues.add(next());
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     this.oxexception = e;
+                    break;
                 }
             }
             final OXException[] warnings = results.getWarnings();

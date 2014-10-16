@@ -176,7 +176,7 @@ public class SyncTracker {
                     for (DirectoryVersion directoryVersion : affectedDirectoryVersions) {
                         OXException e = DriveExceptionCodes.REPEATED_SYNC_PROBLEMS.create(
                             directoryVersion.getPath(), directoryVersion.getChecksum());
-                        LOG.warn("Requesting client to stop synchronization: " + session, e);
+                        LOG.warn("Requesting client to stop synchronization: {}", session, e);
                         optimizedActionsForClient.add(new ErrorDirectoryAction(null, directoryVersion, null, e, false, true));
                     }
                 }

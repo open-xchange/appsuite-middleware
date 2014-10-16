@@ -2,15 +2,32 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Realtime Hazelcast Serialization
 Bundle-SymbolicName: com.openexchange.realtime.hazelcast.serialization
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.realtime.hazelcast.serialization.osgi.HazelcastSerializationActivator
-Bundle-Vendor: OPENEXCHANGE
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.hazelcast.nio.serialization,
+Import-Package: com.hazelcast.core,
+ com.hazelcast.nio.serialization,
+ com.hazelcast.query,
  com.openexchange.exception,
  com.openexchange.hazelcast.serialization,
  com.openexchange.osgi,
+ com.openexchange.realtime.cleanup,
+ com.openexchange.realtime.directory,
+ com.openexchange.realtime.dispatch,
+ com.openexchange.realtime.exception,
+ com.openexchange.realtime.group,
  com.openexchange.realtime.packet,
- org.osgi.framework
+ com.openexchange.realtime.payload,
+ com.openexchange.realtime.util,
+ com.openexchange.server,
+ org.apache.commons.lang,
+ org.osgi.framework,
+ org.slf4j
 Bundle-ActivationPolicy: lazy
-Export-Package: com.openexchange.realtime.hazelcast.serialization
+Export-Package: com.openexchange.realtime.hazelcast.serialization,
+ com.openexchange.realtime.hazelcast.serialization.channel,
+ com.openexchange.realtime.hazelcast.serialization.cleanup,
+ com.openexchange.realtime.hazelcast.serialization.directory,
+ com.openexchange.realtime.hazelcast.serialization.group,
+ com.openexchange.realtime.hazelcast.serialization.packet

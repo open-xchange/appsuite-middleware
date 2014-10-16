@@ -60,6 +60,7 @@ import java.util.Set;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveConstants;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
@@ -67,7 +68,6 @@ import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.IDUtil;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.drive.sync.IntermediateSyncResult;
@@ -252,7 +252,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                     String md5 = file.getFileMD5Sum();
                     if (false == Strings.isEmpty(md5)) {
                         FileChecksum fileChecksum = new FileChecksum(
-                            IDUtil.getFileID(file), file.getVersion(), file.getSequenceNumber(), md5);
+                            DriveUtils.getFileID(file), file.getVersion(), file.getSequenceNumber(), md5);
                         checksumsToInsert.add(fileChecksum);
                         matchingFileVersions.put(fileChecksum.getChecksum(), new ServerFileVersion(file, fileChecksum));
                     }

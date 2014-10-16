@@ -103,6 +103,8 @@ public final class NewAction extends SnippetAction {
         if (null == jsonSnippet) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
+        //TESTING: UI should set the key "content-type" in order to specify the content type of the snippet, if none provided then text/plain would be set as default
+        //jsonSnippet.getJSONObject("misc").put("content-type", "text/html");
         // Parse from JSON to snippet
         final DefaultSnippet snippet = new DefaultSnippet();
         SnippetJsonParser.parse(jsonSnippet, snippet);

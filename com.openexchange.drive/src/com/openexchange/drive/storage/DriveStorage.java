@@ -61,16 +61,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveStrings;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.filter.FileNameFilter;
-import com.openexchange.drive.storage.filter.Filter;
-import com.openexchange.drive.storage.filter.SynchronizedFileFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -189,8 +189,8 @@ public class DriveStorage {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(targetPath, targetFileName));
         }
-        String targetId = getFileAccess().copy(
-            sourceFile.getId(), sourceFile.getVersion(), copiedFile.getFolderId(), copiedFile, null, fileFields);
+        String sourceVersion = sourceFile.isCurrentVersion() ? FileStorageFileAccess.CURRENT_VERSION : sourceFile.getVersion();
+        String targetId = getFileAccess().copy(sourceFile.getId(), sourceVersion, copiedFile.getFolderId(), copiedFile, null, fileFields);
         copiedFile.setId(targetId);
         return copiedFile;
     }
@@ -569,18 +569,23 @@ public class DriveStorage {
         if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
             return Collections.emptyList();
         }
-        SearchIterator<File> filesIterator = searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
+        FileNameFilter filter;
         if (all) {
-            return Filter.apply(filesIterator, new FileNameFilter() {
+            filter = FileNameFilter.ACCEPT_ALL;
+        } else {
+            final String path = getPath(folderID);
+            final Set<String> existingNames = DriveUtils.getNormalizedFolderNames(session.getStorage().getSubfolders(path).values());
+            filter = new FileNameFilter() {
 
                 @Override
                 protected boolean accept(String fileName) throws OXException {
-                    return null != fileName && false == Strings.isEmpty(fileName);
+                    return false == DriveUtils.isInvalidFileName(fileName) &&
+                        false == DriveUtils.isIgnoredFileName(session.getDriveSession(), path, fileName) &&
+                        false == existingNames.contains(PathNormalizer.normalize(fileName));
                 }
-            });
-        } else {
-            return Filter.apply(filesIterator, SynchronizedFileFilter.getInstance());
+            };
         }
+        return filter.findAll(searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS));
     }
 
     /**
@@ -634,24 +639,12 @@ public class DriveStorage {
     }
 
     private File findFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        List<File> files = Filter.apply(searchDocuments(getFolderID(path), name, fields), new FileNameFilter() {
-
-            @Override
-            protected boolean accept(String fileName) throws OXException {
-                return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
-            }
-        });
+        List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(searchDocuments(getFolderID(path), name, fields));
         return selectFile(files, name);
     }
 
     private File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        List<File> files = Filter.apply(getDocuments(getFolderID(path), name, fields), new FileNameFilter() {
-
-            @Override
-            protected boolean accept(String fileName) throws OXException {
-                return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
-            }
-        });
+        List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(getDocuments(getFolderID(path), name, fields));
         return selectFile(files, name);
     }
 
@@ -755,14 +748,28 @@ public class DriveStorage {
      * Gets all folders in the storage recursively. The "temp" folder, as well as the trash folder including all subfolders are ignored
      * implicitly.
      *
-     * @return The folders, each one mapped to its corresponsing relative path
+     * @return The folders, each one mapped to its corresponding relative path
      * @throws OXException
      */
     public Map<String, FileStorageFolder> getFolders() throws OXException {
         Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
         FileStorageFolder rootFolder = getRootFolder();
         folders.put(ROOT_PATH, rootFolder);
-        addSubfolders(folders, rootFolder, ROOT_PATH);
+        addSubfolders(folders, rootFolder, ROOT_PATH, true);
+        return folders;
+    }
+
+    /**
+     * Gets all (direct) subfolders in the supplied path. The "temp" folder, as well as the trash folder are ignored implicitly.
+     *
+     * @param path The path to get the direct subfolders for
+     * @return The subfolders, each one mapped to its corresponding relative path, or an empty map if there are none
+     * @throws OXException
+     */
+    public Map<String, FileStorageFolder> getSubfolders(String path) throws OXException {
+        Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
+        FileStorageFolder folder = getFolder(path);
+        addSubfolders(folders, folder, path, false);
         return folders;
     }
 
@@ -854,22 +861,26 @@ public class DriveStorage {
     }
 
     /**
-     * Adds all found subfolders of the supplied parent folder recursively. The "temp" folder, as well as the trash folder(s) including
-     * all subfolders are ignored implicitly.
+     * Adds all found subfolders of the supplied parent folder. The "temp" folder, as well as the trash folder(s) including all subfolders
+     * are ignored implicitly.
      *
      * @param folders The map to add the subfolders
      * @param parent The parent folder
      * @param path The path of the parent folder
+     * @param recursive <code>true</code> to add the subfolders recursively, <code>false</code> to only add the direct subfolders
      * @throws OXException
      */
-    private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path) throws OXException {
+    private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path, boolean recursive) throws OXException {
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(parent.getId(), false);
         for (FileStorageFolder subfolder : subfolders) {
-            String subPath = path + PathNormalizer.normalize(subfolder.getName());
+            String name = PathNormalizer.normalize(subfolder.getName());
+            String subPath = DriveConstants.ROOT_PATH.equals(path) ? path + name : path + DriveConstants.PATH_SEPARATOR + name;
             knownFolders.remember(subPath, subfolder);
             if (false == isExcludedSubfolder(subfolder, subPath)) {
                 folders.put(subPath, subfolder);
-                addSubfolders(folders, subfolder, subPath + PATH_SEPARATOR);
+                if (recursive) {
+                    addSubfolders(folders, subfolder, subPath, true);
+                }
             }
         }
     }

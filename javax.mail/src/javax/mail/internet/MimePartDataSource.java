@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,6 +44,7 @@ import javax.mail.*;
 import javax.activation.*;
 import java.io.*;
 import java.net.UnknownServiceException;
+import com.sun.mail.util.MessageRemovedIOException;
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.FolderClosedIOException;
 
@@ -68,6 +69,8 @@ public class MimePartDataSource implements DataSource, MessageAware {
 
     /**
      * Constructor, that constructs a DataSource from a MimePart.
+     *
+     * @param	part	the MimePart
      */
     public MimePartDataSource(MimePart part) {
 	this.part = part;
@@ -76,7 +79,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
     /**
      * Returns an input stream from this  MimePart. <p>
      *
-     * This method applies the appropriate transfer-decoding, based 
+     * This method applies the appropriate transfer-decoding, based
      * on the Content-Transfer-Encoding attribute of this MimePart.
      * Thus the returned input stream is a decoded stream of bytes.<p>
      *
@@ -99,7 +102,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
 		is = ((MimeMessage)part).getContentStream();
 	    else
 		throw new MessagingException("Unknown part");
-	    
+
 	    String encoding =
 		MimeBodyPart.restrictEncoding(part, part.getEncoding());
 	    if (encoding != null)
@@ -109,7 +112,9 @@ public class MimePartDataSource implements DataSource, MessageAware {
 	} catch (FolderClosedException fex) {
 	    throw new FolderClosedIOException(fex.getFolder(),
 						fex.getMessage());
-	} catch (MessagingException mex) {
+	} catch (MessageRemovedException mex) {
+        throw new MessageRemovedIOException(mex.getMessage(), mex);
+    } catch (MessagingException mex) {
 	    throw new IOException(mex.getMessage(), mex);
 	}
     }

@@ -65,6 +65,7 @@ import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.SieveParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.Command;
@@ -75,8 +76,8 @@ import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
-import com.openexchange.mailfilter.ajax.Credentials;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.mailfilter.Credentials;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 
 /**
  * This class will be used to filter out special things which are not part of
@@ -139,7 +140,6 @@ public final class SieveTextFilter {
         public final Map<String, List<Rule>> getFlaggedRules() {
             return flaggedRules;
         }
-
     }
 
     public class RuleListAndNextUid {
@@ -334,7 +334,7 @@ public final class SieveTextFilter {
         final Map<String, List<Rule>> flagged = new HashMap<String, List<Rule>>();
         ClientRulesAndRequire retval = new ClientRulesAndRequire(requires, rules);
         // The flag is checked here because if no flag is given we can omit some checks which increases performance
-        if (null != flag) {
+        if (!Strings.isEmpty(flag)) {
             for (final Rule rule : rules) {
                 final RuleComment ruleComment = rule.getRuleComment();
                 final RequireCommand requireCommand = rule.getRequireCommand();
@@ -664,7 +664,7 @@ public final class SieveTextFilter {
         if (null != errormsg) {
             rightrule.setCommands(null);
             addPlainTextToRule(wholetext, commentedtext, rulename, rightrule);
-            printErrorForUser(OXMailfilterExceptionCode.SIEVE_ERROR.create(errormsg));
+            printErrorForUser(MailFilterExceptionCode.SIEVE_ERROR.create(errormsg));
             return true;
         }
         return false;

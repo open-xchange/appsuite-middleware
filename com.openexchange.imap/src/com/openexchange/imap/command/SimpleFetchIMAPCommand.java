@@ -68,7 +68,6 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.UIDFolder;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
@@ -79,7 +78,6 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.Response;
@@ -415,6 +413,13 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                         mailMessage.addBcc(MimeMessageConverter.getAddressHeader(hdr.getValue()));
                     }
                 });
+                put(MessageHeaders.HDR_REPLY_TO, new HeaderHandler() {
+
+                    @Override
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                        mailMessage.addReplyTo(MimeMessageConverter.getAddressHeader(hdr.getValue()));
+                    }
+                });
                 put(MessageHeaders.HDR_DISP_NOT_TO, new HeaderHandler() {
 
                     @Override
@@ -683,21 +688,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             msg.addTo(env.to);
             msg.addCc(env.cc);
             msg.addBcc(env.bcc);
-            try {
-                final InternetAddress[] replyTo = QuotedInternetAddress.toQuotedAddresses(env.replyTo);
-                if (null != replyTo && replyTo.length > 0) {
-                    for (final InternetAddress internetAddress : replyTo) {
-                        msg.addHeader("Reply-To", internetAddress.toString());
-                    }
-                }
-            } catch (final AddressException addressException) {
-                final InternetAddress[] replyTo = env.replyTo;
-                if (null != replyTo && replyTo.length > 0) {
-                    for (final InternetAddress internetAddress : replyTo) {
-                        msg.addHeader("Reply-To", internetAddress.toString());
-                    }
-                }
-            }
+            msg.addReplyTo(env.replyTo);
             msg.addHeader("In-Reply-To", env.inReplyTo);
             msg.addHeader("Message-Id", env.messageId);
             msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject));
@@ -710,11 +701,8 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             msg.addTo((InternetAddress[]) message.getRecipients(RecipientType.TO));
             msg.addCc((InternetAddress[]) message.getRecipients(RecipientType.CC));
             msg.addBcc((InternetAddress[]) message.getRecipients(RecipientType.BCC));
-            String[] header = message.getHeader("Reply-To");
-            if (null != header && header.length > 0) {
-                msg.addHeader("Reply-To", header[0]);
-            }
-            header = message.getHeader("In-Reply-To");
+            msg.addReplyTo((InternetAddress[]) message.getReplyTo());
+            String[] header = message.getHeader("In-Reply-To");
             if (null != header && header.length > 0) {
                 msg.addHeader("In-Reply-To", header[0]);
             }

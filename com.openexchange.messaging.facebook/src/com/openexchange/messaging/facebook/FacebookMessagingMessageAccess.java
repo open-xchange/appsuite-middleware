@@ -104,6 +104,7 @@ import com.openexchange.messaging.generic.AttachmentFinderHandler;
 import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.messaging.generic.MessagingComparator;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
@@ -538,9 +539,16 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 return null;
             } catch (final JSONException e) {
                 throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            } catch (final OXException e) {
+            } catch (org.scribe.exceptions.OAuthException e) {
+                // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+                Throwable cause = e.getCause();
+                if (cause instanceof java.net.SocketTimeoutException) {
+                    // A socket timeout
+                    throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+                }
+
                 throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
-            } catch (final Exception e) {
+            } catch (final RuntimeException e) {
                 throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         } else if (FacebookConstants.TYPE_POST.equalsIgnoreCase(action)) {

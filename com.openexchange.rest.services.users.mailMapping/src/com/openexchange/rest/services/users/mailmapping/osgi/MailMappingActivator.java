@@ -56,22 +56,34 @@ import com.openexchange.rest.services.osgiservice.OXRESTActivator;
 import com.openexchange.rest.services.users.mailmapping.MailMappingService;
 import com.openexchange.user.UserService;
 
+/**
+ * {@link MailMappingActivator} - The activator for <i>com.openexchange.rest.services.users.mailmapping</i>.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
+ */
 public class MailMappingActivator extends OXRESTActivator {
+
+    /**
+     * Initializes a new {@link MailMappingActivator}.
+     */
+    public MailMappingActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{UserService.class, ContextService.class};
+        return new Class<?>[] { UserService.class, ContextService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         OSGIMailMappingService mapper = new OSGIMailMappingService();
         track(MailResolver.class, mapper);
-        
+
         registerWebService(MailMappingService.class, mapper);
-        
+
         openTrackers();
     }
-
 
 }

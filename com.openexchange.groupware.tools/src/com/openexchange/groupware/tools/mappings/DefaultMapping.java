@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.tools.mappings;
 
-import java.text.Collator;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Collators;
 
 /**
  * {@link DefaultMapping} - Abstract {@link Mapping} implementation.
@@ -108,7 +108,7 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
         } else if (null == value2) {
             return 1;
         } else if (null != locale && String.class.isInstance(value1)) {
-            return Collator.getInstance(locale).compare((String)value1, (String)value2);
+            return Collators.getDefaultInstance(locale).compare((String)value1, (String)value2);
         } else if (Comparable.class.isInstance(value1)) {
             return ((Comparable)value1).compareTo(value2);
         } else {

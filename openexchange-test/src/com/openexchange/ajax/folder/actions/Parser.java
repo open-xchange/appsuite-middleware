@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.exception.OXException;
@@ -125,7 +124,7 @@ public final class Parser {
             }
             break;
         default:
-            LOG.error("Can't parse column: " + column);
+            LOG.error("Can't parse column: {}", column);
         }
     }
 }

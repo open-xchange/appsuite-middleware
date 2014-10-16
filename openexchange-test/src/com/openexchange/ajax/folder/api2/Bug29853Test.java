@@ -89,7 +89,7 @@ public class Bug29853Test extends AbstractFolderTest {
     @Override
     protected void tearDown() throws Exception {
         if (null != folder) {
-            super.deleteFolders(folder);
+            super.deleteFolders(true,folder);
         }
         super.tearDown();
     }

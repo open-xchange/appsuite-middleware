@@ -50,8 +50,6 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
-import static com.openexchange.ajax.SessionServlet.removeJSESSIONID;
-import static com.openexchange.ajax.SessionServlet.removeOXCookies;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.File;
@@ -282,8 +280,8 @@ public class LoginServlet extends AJAXServlet {
                     final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                     if (session != null) {
                         final LoginConfiguration conf = confReference.get();
-                        SessionServlet.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
-                        final String secret = SessionServlet.extractSecret(
+                        SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
+                        final String secret = SessionUtility.extractSecret(
                             conf.getHashSource(),
                             req,
                             session.getHash(),
@@ -297,8 +295,8 @@ public class LoginServlet extends AJAXServlet {
 
                         LoginPerformer.getInstance().doLogout(sessionId);
                         // Drop relevant cookies
-                        removeOXCookies(session.getHash(), req, resp);
-                        removeJSESSIONID(req, resp);
+                        SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                        SessionUtility.removeJSESSIONID(req, resp);
                     }
                 } catch (final OXException e) {
                     LOG.error("Logout failed", e);
@@ -338,7 +336,7 @@ public class LoginServlet extends AJAXServlet {
                         session = sessiondService.getSessionByRandomToken(randomToken);
                         if (null != session) {
                             final String oldIP = session.getLocalIp();
-                            if (null == oldIP || SessionServlet.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
+                            if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
                                     LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
@@ -365,7 +363,7 @@ public class LoginServlet extends AJAXServlet {
                 LogProperties.putSessionProperties(session);
                 // Remove old cookies to prevent usage of the old autologin cookie
                 if (conf.isInsecure()) {
-                    SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
                 }
                 try {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
@@ -430,8 +428,8 @@ public class LoginServlet extends AJAXServlet {
                         LogProperties.putSessionProperties(session);
                         // Check
                         final LoginConfiguration conf = confReference.get();
-                        SessionServlet.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
-                        final String secret = SessionServlet.extractSecret(
+                        SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
+                        final String secret = SessionUtility.extractSecret(
                             conf.getHashSource(),
                             req,
                             session.getHash(),
@@ -501,7 +499,7 @@ public class LoginServlet extends AJAXServlet {
                         session = sessiondService.getSessionByRandomToken(randomToken);
                         if (null != session) {
                             final String oldIP = session.getLocalIp();
-                            if (null == oldIP || SessionServlet.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
+                            if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
                                     LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
@@ -528,7 +526,7 @@ public class LoginServlet extends AJAXServlet {
                 LogProperties.putSessionProperties(session);
                 // Remove old cookies to prevent usage of the old autologin cookie
                 if (conf.isInsecure()) {
-                    SessionServlet.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
                 }
                 try {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
@@ -729,9 +727,9 @@ public class LoginServlet extends AJAXServlet {
         if (null == sessionId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
         }
-        final Session session = SessionServlet.getSession(conf.getHashSource(), req, sessionId, sessiond);
+        final Session session = SessionUtility.getSession(conf.getHashSource(), req, sessionId, sessiond);
         try {
-            SessionServlet.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
+            SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
             if (type == CookieType.SESSION) {
                 writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
             } else {
@@ -783,7 +781,7 @@ public class LoginServlet extends AJAXServlet {
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
      * @param serverName The HTTP request's server name
      */
-    protected void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
+    public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
         final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
         configureCookie(cookie, secure, serverName, confReference.get());
         resp.addCookie(cookie);

@@ -49,16 +49,37 @@
 
 package com.openexchange.database;
 
-import static com.openexchange.database.DBPoolingExceptionStrings.*;
+import static com.openexchange.database.DBPoolingExceptionStrings.ACTIVE_STATEMENTS_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.ALREADY_INITIALIZED_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.INSERT_FAILED_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.MISSING_CONFIGURATION_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.NOT_INITIALIZED_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.NOT_RESOLVED_SERVER_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.NO_CONFIG_DB_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.NO_CONNECTION_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.NO_DRIVER_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.NO_SERVER_NAME_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.NULL_CONNECTION_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.PARAMETER_PROBLEM_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.PROPERTY_MISSING_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.RESOLVE_FAILED_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.RETURN_FAILED_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.SCHEMA_FAILED_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.SQL_ERROR_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.TOO_LONG_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.TRANSACTION_MISSING_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.UNKNOWN_POOL_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for the database pooling exception.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum DBPoolingExceptionCodes {
+public enum DBPoolingExceptionCodes implements OXExceptionCode {
 
     /**
      * Cannot get connection to config DB.
@@ -177,15 +198,18 @@ public enum DBPoolingExceptionCodes {
         this.detailNumber = detailNumber;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
-    public int getDetailNumber() {
+    @Override
+    public int getNumber() {
         return detailNumber;
     }
 
@@ -224,5 +248,15 @@ public enum DBPoolingExceptionCodes {
         return new OXException(detailNumber, OXExceptionStrings.MESSAGE, cause).setPrefix(PREFIX).addCategory(category).setLogMessage(
             message,
             logArguments);
+    }
+
+    @Override
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
     }
 }

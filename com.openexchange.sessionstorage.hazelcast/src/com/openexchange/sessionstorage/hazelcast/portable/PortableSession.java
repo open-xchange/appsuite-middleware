@@ -50,10 +50,18 @@
 package com.openexchange.sessionstorage.hazelcast.portable;
 
 import java.io.IOException;
+import java.util.BitSet;
+import java.util.LinkedList;
+import java.util.List;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAppender;
 import com.openexchange.session.Session;
+import com.openexchange.sessionstorage.SessionStorageConfiguration;
 import com.openexchange.sessionstorage.StoredSession;
 
 /**
@@ -62,6 +70,31 @@ import com.openexchange.sessionstorage.StoredSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class PortableSession extends StoredSession implements CustomPortable {
+
+    private static final long serialVersionUID = -2346327568417617677L;
+
+    /**
+     * BitSet of www-form-url safe characters.
+     */
+    protected static final BitSet BIT_SET_PARAMS;
+
+    // Static initializer for BIT_SET_PARAMS
+    static {
+        final BitSet bitSet = new BitSet(256);
+
+        // Exclude ':' and '%' from printable ASCII characters
+        for (int i = 32; i < 37; i++) {
+            bitSet.set(i);
+        }
+        for (int i = 38; i < 58; i++) {
+            bitSet.set(i);
+        }
+        for (int i = 59; i < 127; i++) {
+            bitSet.set(i);
+        }
+
+        BIT_SET_PARAMS = bitSet;
+    }
 
     /** The unique portable class ID of the {@link PortableSession} */
     public static final int CLASS_ID = 1;
@@ -80,8 +113,8 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_CLIENT = "client";
     public static final String PARAMETER_USER_LOGIN = "userLogin";
     public static final String PARAMETER_ALT_ID = "altId";
-
-    private static final long serialVersionUID = -2346327568417617677L;
+    public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
+    public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
 
     /**
      * Initializes a new {@link PortableSession}.
@@ -130,8 +163,40 @@ public class PortableSession extends StoredSession implements CustomPortable {
         /*
          * special handling for parameters map
          */
-        Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
-        writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
+        {
+            Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
+            writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
+        }
+        {
+            List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
+            if (remoteParameterNames.isEmpty()) {
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
+            } else {
+                StringAppender names = null;
+                StringAppender values = null;
+                for (String parameterName : remoteParameterNames) {
+                    Object value = parameters.get(parameterName);
+                    if (value instanceof String) {
+                        String sValue = value.toString();
+                        if (null == names) {
+                            int capacity = remoteParameterNames.size() << 4;
+                            names = new StringAppender(':', capacity);
+                            values = new StringAppender(':', capacity);
+                        }
+                        names.append(parameterName);
+                        values.append(getSafeValue(sValue));
+                    }
+                }
+                if (null == names) {
+                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
+                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
+                } else {
+                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
+                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
+                }
+            }
+        }
     }
 
     @Override
@@ -155,10 +220,50 @@ public class PortableSession extends StoredSession implements CustomPortable {
         /*
          * special handling for parameters map
          */
-        String altId = reader.readUTF(PARAMETER_ALT_ID);
-        if (null != altId) {
-            parameters.put(PARAM_ALTERNATIVE_ID, altId);
+        {
+            String altId = reader.readUTF(PARAMETER_ALT_ID);
+            if (null != altId) {
+                parameters.put(PARAM_ALTERNATIVE_ID, altId);
+            }
         }
+        {
+            String sNames = reader.readUTF(PARAMETER_REMOTE_PARAMETER_NAMES);
+            if (null != sNames) {
+                List<String> names = parseColonString(sNames);
+                List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
+                for (int i = 0, size = names.size(); i < size; i++) {
+                    try {
+                        parameters.put(names.get(i), decodeSafeValue(values.get(i)));
+                    } catch (DecoderException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
+    private static List<String> parseColonString(String str) {
+        List<String> retval = new LinkedList<String>();
+        int length = str.length();
+        {
+            int prev = 0;
+            int pos;
+            while (prev < length && (pos = str.indexOf(':', prev)) >= 0) {
+                if (pos > 0) {
+                    retval.add(str.substring(prev, pos));
+                }
+                prev = pos + 1;
+            }
+        }
+        return retval;
+    }
+
+    private static String getSafeValue(String sValue) {
+        return sValue.indexOf(':') < 0 ? sValue : Charsets.toAsciiString(URLCodec.encodeUrl(BIT_SET_PARAMS, sValue.getBytes(Charsets.UTF_8)));
+    }
+
+    private static String decodeSafeValue(String value) throws DecoderException {
+        return value.indexOf('%') < 0 ? value : new String(URLCodec.decodeUrl(Charsets.toAsciiBytes(value)), Charsets.UTF_8);
     }
 
 }

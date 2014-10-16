@@ -57,6 +57,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
@@ -68,7 +69,7 @@ import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
-import com.openexchange.oauth.internal.CallbackRegistry;
+import com.openexchange.oauth.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
@@ -80,6 +81,7 @@ import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.SessionHolder;
 
@@ -91,6 +93,7 @@ import com.openexchange.tools.session.SessionHolder;
 public final class OAuthActivator extends HousekeepingActivator {
 
     private volatile OSGiDelegateServiceMap delegateServices;
+    private volatile ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link OAuthActivator}.
@@ -103,7 +106,7 @@ public final class OAuthActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class,
-            CryptoService.class, ConfigViewFactory.class, TimerService.class };
+            CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -134,9 +137,29 @@ public final class OAuthActivator extends HousekeepingActivator {
             /*
              * Register
              */
-            CallbackRegistry cbRegistry = new CallbackRegistry();
-            getService(TimerService.class).scheduleAtFixedRate(cbRegistry, 600000, 600000);
+            final CallbackRegistryImpl cbRegistry = new CallbackRegistryImpl();
+            {
+                final TimerService timerService = getService(TimerService.class);
+                final ScheduledTimerTask timerTask = timerService.scheduleAtFixedRate(cbRegistry, 600000, 600000);
+                this.timerTask = new ScheduledTimerTask() {
 
+                    @Override
+                    public boolean cancel() {
+                        cbRegistry.clear();
+                        boolean retval = timerTask.cancel();
+                        timerService.purge();
+                        return retval;
+                    }
+
+                    @Override
+                    public boolean cancel(boolean mayInterruptIfRunning) {
+                        cbRegistry.clear();
+                        boolean retval = timerTask.cancel(mayInterruptIfRunning);
+                        timerService.purge();
+                        return retval;
+                    }
+                };
+            }
             final OSGiDelegateServiceMap delegateServices = new OSGiDelegateServiceMap();
             this.delegateServices = delegateServices;
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
@@ -190,12 +213,24 @@ public final class OAuthActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OAuthActivator.class);
         try {
             log.info("stopping bundle: com.openexchange.oauth");
-            cleanUp();
-            final OSGiDelegateServiceMap delegateServices = this.delegateServices;
-            if (null != delegateServices) {
-                delegateServices.clear();
-                this.delegateServices = null;
+            super.stopBundle();
+
+            {
+                final OSGiDelegateServiceMap delegateServices = this.delegateServices;
+                if (null != delegateServices) {
+                    delegateServices.clear();
+                    this.delegateServices = null;
+                }
             }
+
+            {
+                ScheduledTimerTask timerTask = this.timerTask;
+                if (null != timerTask) {
+                    this.timerTask = null;
+                    timerTask.cancel();
+                }
+            }
+
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
             Services.setServiceLookup(null);

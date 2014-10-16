@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Realtime Directory
 Bundle-SymbolicName: com.openexchange.realtime.directory
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
@@ -11,6 +11,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.realtime.packet,
  com.openexchange.realtime.util,
  com.openexchange.server,
+ org.apache.commons.lang;version="2.6.0",
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.realtime.directory

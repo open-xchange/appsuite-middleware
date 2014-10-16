@@ -73,8 +73,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> implements Cloneable {
 
     private final TIntObjectHashMap<V> map;
-
-    private ReadWriteLock readWriteLock;
+    private final ReadWriteLock readWriteLock;
 
     /**
      * Initializes a new {@link ConcurrentTIntObjectHashMap}.
@@ -108,16 +107,18 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> i
         readWriteLock = new ReentrantReadWriteLock();
     }
 
+    /**
+     * Copy constructor.
+     */
+    protected ConcurrentTIntObjectHashMap(ConcurrentTIntObjectHashMap<V> another) {
+        super();
+        map = new TIntObjectHashMap<V>(another.map);
+        readWriteLock = new ReentrantReadWriteLock();
+    }
+
     @Override
     public ConcurrentTIntObjectHashMap<V> clone() {
-        try {
-            final ConcurrentTIntObjectHashMap<V> clone = (ConcurrentTIntObjectHashMap<V>) super.clone();
-            clone.readWriteLock = new ReentrantReadWriteLock();
-            return clone;
-        } catch (final CloneNotSupportedException e) {
-            // Cannot occur
-            throw new InternalError("Clone not supported although Cloneable implemented.");
-        }
+        return new ConcurrentTIntObjectHashMap<V>(this);
     }
 
     /**

@@ -63,7 +63,6 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
@@ -147,7 +146,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		try {
 			con = provider.getWriteConnection(getSession().getContext());
 			final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), con, con);
-			oxma.deleteFolder(new FolderObject(id), true, FileStorageFileAccess.DISTANT_FUTURE);
+			oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
 			exists = false;
 			factory.removed(this);
 		} catch (final OXException x) {

@@ -63,6 +63,9 @@ import static com.openexchange.drive.DriveExceptionMessages.INVALID_FILENAME_MSG
 import static com.openexchange.drive.DriveExceptionMessages.INVALID_FILEVERSION_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.INVALID_FILE_OFFSET_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.INVALID_PATH_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.INVALID_PATTERN_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_FILENAME_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_PATH_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NO_CREATE_DIRECTORY_PERMISSION_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NO_CREATE_FILE_PERMISSION_MSG;
@@ -132,13 +135,13 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
     /** You are not allowed to create directories at \"%1$s\" */
     NO_CREATE_DIRECTORY_PERMISSION(NO_CREATE_DIRECTORY_PERMISSION_MSG, NO_CREATE_DIRECTORY_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 15),
 
-    /** The allowed Quota is reached */
+    /** The allowed Quota is reached. */
     QUOTA_REACHED(QUOTA_REACHED_MSG, QUOTA_REACHED_MSG, Category.CATEGORY_CAPACITY, 16),
 
-    /** The file name \"%1$s\" is invalid */
+    /** The file name \"%1$s\" is invalid. */
     INVALID_FILENAME(INVALID_FILENAME_MSG, INVALID_FILENAME_MSG, Category.CATEGORY_USER_INPUT, 17),
 
-    /** The file name \"%1$s\" is ignored */
+    /** The file name \"%1$s\" is ignored. */
     IGNORED_FILENAME(IGNORED_FILENAME_MSG, IGNORED_FILENAME_MSG, Category.CATEGORY_USER_INPUT, 18),
 
     /** The directory path \"%1$s\" is conflicting */
@@ -173,6 +176,15 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
 
     /** The client application you're using is outdated and no longer supported - please upgrade to a newer version. */
     CLIENT_VERSION_UPDATE_AVAILABLE("Client update available - current: \"%1$s\", available: \"%2$s\"", CLIENT_VERSION_UPDATE_AVAILABLE_MSG, Category.CATEGORY_WARNING, 29),
+
+    /** The pattern \"%1$s\" is invalid: \"%2$s\" */
+    INVALID_PATTERN("The pattern \"%1$s\" is invalid: \"%2$s\"", INVALID_PATTERN_MSG, Category.CATEGORY_USER_INPUT, 30),
+
+    /** The file name \"%1$s\" is conflicting with an equally named directory at \"%2$s\". */
+    LEVEL_CONFLICTING_FILENAME(LEVEL_CONFLICTING_FILENAME_MSG, LEVEL_CONFLICTING_FILENAME_MSG, Category.CATEGORY_CONFLICT, 31),
+
+    /** "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"." */
+    LEVEL_CONFLICTING_PATH(LEVEL_CONFLICTING_PATH_MSG, LEVEL_CONFLICTING_PATH_MSG, Category.CATEGORY_CONFLICT, 32),
 
     ;
 

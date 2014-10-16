@@ -72,6 +72,7 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.outlook.OutlookFolder;
 import com.openexchange.folderstorage.outlook.OutlookPermission;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Collators;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -909,8 +910,7 @@ public final class Select {
 
         public FolderNameComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -926,8 +926,7 @@ public final class Select {
 
         public PrivateSubfolderIDComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override

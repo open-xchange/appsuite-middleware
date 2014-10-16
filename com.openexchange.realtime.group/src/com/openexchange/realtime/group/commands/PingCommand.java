@@ -49,22 +49,39 @@
 
 package com.openexchange.realtime.group.commands;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
+import com.openexchange.realtime.group.NotMember;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link PingCommand}
- *
+ * {@link PingCommand} - A PingCommand is issued periodically by each member of a {@link GroupDispatcher} as some {@link GroupDispatcher}s
+ * may have a timeout policy. When no message arrives at a {@link GroupDispatcher} for a certain time, the group dispatcher is shut down. To
+ * prevent this from happening members are supposed to send a {@link Stanza} representing a {@link PingCommand} to a given group.
+ * Furthermore this ping periodically checks if the sending client is still a member of the addressed {@link GroupDispatcher} as
+ * {@link GroupDispatcher}s may be destroyed when a node is shut down. The next {@link Stanza} addressed at this {@link GroupDispatcher} will
+ * recreate the {@link GroupDispatcher} on another backend node. This will force clients to rejoin the {@link GroupDispatcher}.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PingCommand implements GroupCommand {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PingCommand.class);
+    
     @Override
     public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        // Just consume this
+        ID from = stanza.getFrom();
+        ID groupId = groupDispatcher.getId();
+        if(!groupDispatcher.isMember(from)) {
+            LOG.debug("Refusing to send to GroupDispatcher as sender {} is no member of the GroupDispatcher {}", stanza.getFrom(), groupId);
+            groupDispatcher.send(new NotMember(groupId, from, stanza.getSelector()));
+        }
     }
 
 }

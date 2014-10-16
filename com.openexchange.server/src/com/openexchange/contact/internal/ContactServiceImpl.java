@@ -50,6 +50,7 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -59,6 +60,8 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
@@ -67,6 +70,7 @@ import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactMergerator;
+import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -982,6 +986,47 @@ public class ContactServiceImpl extends DefaultContactService {
                 public SearchIterator<Contact> call() throws Exception {
                     return queriedStorage.getKey().searchByAnniversary(
                         session, queriedStorage.getValue(), from, until, queryFields.getFields(), sOptions);
+                }
+            });
+        }
+        /*
+         * get results, filtered respecting object permission restrictions, adding attachment info as needed
+         */
+        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
+    }
+
+    @Override
+    protected SearchIterator<Contact> doAutocompleteContacts(final Session session, List<String> folderIDs, final String query, final AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        /*
+         * check supplied search
+         */
+        Search.checkPatternLength(query);
+        /*
+         * determine queried storages according to searched folders
+         */
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
+            (null != folderIDs && 0 < folderIDs.size()) ? folderIDs : Tools.getSearchFolders(contextID, userID, true));
+        Check.hasStorages(queriedStorages);
+        /*
+         * prepare fields and sort options
+         */
+        final QueryFields queryFields = new QueryFields(fields);
+        final SortOptions sOptions = null != sortOptions ? sortOptions : SortOptions.EMPTY;
+        /*
+         * create tasks
+         */
+        List<AbstractTask<SearchIterator<Contact>>> tasks = new ArrayList<AbstractTask<SearchIterator<Contact>>>(queriedStorages.size());
+        for (final Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+            /*
+             * use folders specific to this storage in each contact search
+             */
+            tasks.add(new AbstractTask<SearchIterator<Contact>>() {
+                @Override
+                public SearchIterator<Contact> call() throws Exception {
+                    return queriedStorage.getKey().autoComplete(
+                        session, queriedStorage.getValue(), query, parameters, queryFields.getFields(), sOptions);
                 }
             });
         }

@@ -50,6 +50,7 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.util.concurrent.ExecutorService;
+import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
@@ -61,6 +62,7 @@ import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -69,7 +71,9 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.service.comet.CometContextService;
 import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
+import com.openexchange.http.grizzly.service.http.FilterProxy;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
+import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
@@ -113,6 +117,12 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     }
                 }
             });
+
+            ServletFilterRegistration.initInstance();
+            {
+                ServiceTracker<Filter, FilterProxy> tracker = new ServiceTracker<Filter, FilterProxy>(context, Filter.class, new ServletFilterTracker(context));
+                rememberTracker(tracker);
+            }
 
             final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
             grizzlyConfig.start();
@@ -203,6 +213,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
         super.stopBundle();
 
         Services.setServiceLookup(null);
+        ServletFilterRegistration.dropInstance();
     }
 
     /**

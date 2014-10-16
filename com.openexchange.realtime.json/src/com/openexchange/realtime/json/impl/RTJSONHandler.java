@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
@@ -70,6 +71,7 @@ import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -87,8 +89,8 @@ public class RTJSONHandler implements StanzaSender {
     protected final StateManager stateManager;
     protected final RTProtocol protocol;
     protected final StanzaSequenceGate gate;
-
     JSONProtocolHandler protocolHandler;
+    private volatile ScheduledTimerTask startCleanupTimer;
 
     public RTJSONHandler() {
         super();
@@ -105,7 +107,18 @@ public class RTJSONHandler implements StanzaSender {
         ManagementHouseKeeper.getInstance().addManagementObject(gate.getManagementObject());
         RealtimeJanitors.getInstance().addJanitor(gate);
         protocolHandler = new JSONProtocolHandler(protocol, gate);
-        startCleanupTimer();
+        startCleanupTimer = startCleanupTimer();
+    }
+
+    /**
+     * Shuts down associated cleanup task.
+     */
+    public void shutDownCleanupTimer() {
+        ScheduledTimerTask startCleanupTimer = this.startCleanupTimer;
+        if (null != startCleanupTimer) {
+            startCleanupTimer.cancel();
+            this.startCleanupTimer = null;
+        }
     }
 
     protected void handlePost(String postData, ID constructedId, ServerSession serverSession, StateEntry entry) throws RealtimeException {
@@ -153,14 +166,16 @@ public class RTJSONHandler implements StanzaSender {
     /**
      * Starts the timer that times out clients if they were silent for too long
      */
-    private void startCleanupTimer() {
-        JSONServiceRegistry.getInstance().getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
+    private ScheduledTimerTask startCleanupTimer() {
+        final Logger logger = LOG;
+        return JSONServiceRegistry.getInstance().getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
                 stateManager.timeOutStaleStates(System.currentTimeMillis());
                 } catch (Throwable t) {
-                    LOG.error("Error during CleanupTimer run.", t);
+                    ExceptionUtils.handleThrowable(t);
+                    logger.error("Error during CleanupTimer run.", t);
                 }
             }
 

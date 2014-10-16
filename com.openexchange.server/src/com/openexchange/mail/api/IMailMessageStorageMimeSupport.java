@@ -77,4 +77,15 @@ public interface IMailMessageStorageMimeSupport extends IMailMessageStorage {
      */
     String[] appendMimeMessages(String destFolder, Message[] msgs) throws OXException;
 
+    /**
+     * Gets the denoted MIME message.
+     *
+     * @param fullName The folder full name
+     * @param id The message identifier
+     * @param markSeen Whether to mark as seen or not
+     * @return The denoted MIME message
+     * @throws OXException If MIME message cannot be returned
+     */
+    Message getMimeMessage(String fullName, final String id, boolean markSeen) throws OXException;
+
 }

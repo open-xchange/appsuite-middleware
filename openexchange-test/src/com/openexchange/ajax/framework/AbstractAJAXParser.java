@@ -50,12 +50,12 @@
 package com.openexchange.ajax.framework;
 
 import java.io.IOException;
-import junit.framework.Assert;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
+import org.junit.Assert;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.exception.Category;
@@ -85,7 +85,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
     }
 
     protected Response getResponse(String body) throws JSONException {
-        if (body.startsWith("<!DOCTYPE HTML")) {
+        if (body.length() > 15 && body.substring(0, 14).equalsIgnoreCase("<!DOCTYPE HTML")) {
             final int pos1 = body.indexOf('{');
             final int pos2 = body.indexOf("})</script>");
             body = body.substring(pos1, pos2 + 1);

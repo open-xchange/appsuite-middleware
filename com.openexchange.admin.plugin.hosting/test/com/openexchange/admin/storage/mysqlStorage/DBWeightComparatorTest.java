@@ -4,7 +4,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static java.util.Collections.reverseOrder;
 import static java.util.Collections.sort;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;

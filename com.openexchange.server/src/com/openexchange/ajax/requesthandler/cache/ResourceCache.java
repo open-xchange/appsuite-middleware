@@ -61,7 +61,7 @@ public interface ResourceCache {
     /**
      * Checks whether caching is allowed for the given (contextId, userId) tuple. This must
      * be invoked before any other operation.
-     * @param userId The user identifier. May be < 0 for context-global caching.
+     * @param userId The user identifier. May be &lt;= 0 for context-global caching.
      * @param contextId The context identifier.
      * @return <code>true</code> if caching is allowed, <code>false</code> if not.
      * @throws OXException If operations fails
@@ -74,7 +74,7 @@ public interface ResourceCache {
      *
      * @param id The identifier (cache key) for the cached document
      * @param resource The cached preview
-     * @param userId The user identifier. May be < 0 context-global caching.
+     * @param userId The user identifier. May be &lt;= 0 context-global caching.
      * @param contextId The context identifier
      * @return <code>true</code> if successfully saved; otherwise <code>false</code> if impossible to store (e.g. due to quota restrictions)
      * @throws OXException If operations fails
@@ -85,7 +85,7 @@ public interface ResourceCache {
      * Gets the resource.
      *
      * @param id The document identifier
-     * @param userId The user identifier or <code>-1</code> for context-global document
+     * @param userId The user identifier or &lt;= 0 for context-global document
      * @param contextId The context identifier
      * @return The preview document or <code>null</code>
      * @throws OXException If retrieving document data fails
@@ -95,7 +95,7 @@ public interface ResourceCache {
     /**
      * Removes the resources associated with specified user.
      *
-     * @param userId The user identifier or <code>-1</code> for context-global document
+     * @param userId The user identifier or &lt;= 0 for context-global document
      * @param contextId The context identifier
      * @throws OXException If deleting document data fails
      */
@@ -123,7 +123,7 @@ public interface ResourceCache {
      * Tests for existence of denoted resource.
      *
      * @param id The identifier (cache key) for the cached resource
-     * @param userId The user identifier or <code>-1</code> for context-global document
+     * @param userId The user identifier or &lt;= 0 for context-global document
      * @param contextId The context identifier
      * @return <code>true</code> if exists; otherwise <code>false</code>
      * @throws OXException If an error occurs while checking existence

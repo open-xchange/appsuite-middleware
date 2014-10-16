@@ -86,7 +86,7 @@ CREATE TABLE server (
 
 CREATE TABLE login2context (
     cid INT4 UNSIGNED NOT NULL,
-    login_info VARCHAR(128) NOT NULL,
+    login_info VARCHAR(255) NOT NULL,
     PRIMARY KEY (`login_info`),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

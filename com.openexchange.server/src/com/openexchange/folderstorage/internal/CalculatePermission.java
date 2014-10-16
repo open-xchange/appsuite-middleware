@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.tools.session.ServerSession;
@@ -90,20 +89,20 @@ public final class CalculatePermission {
      * @param folder The folder whose effective user permissions shall be calculated
      * @param context The context
      */
-    public static void calculateUserPermissions(final Folder folder, final Context context) {
-        final Permission[] staticPermissions = folder.getPermissions();
+    public static void calculateUserPermissions(Folder folder, Context context) {
+        Permission[] staticPermissions = folder.getPermissions();
         if (null == staticPermissions || 0 == staticPermissions.length) {
             return;
         }
-        final UserPermissionBitsStorage userConfStorage = UserPermissionBitsStorage.getInstance();
-        final String id = folder.getID();
-        final Type type = folder.getType();
-        final ContentType contentType = folder.getContentType();
+        UserPermissionBitsStorage userConfStorage = UserPermissionBitsStorage.getInstance();
+        String id = folder.getID();
+        Type type = folder.getType();
+        ContentType contentType = folder.getContentType();
 
-        final Permission[] userizedPermissions = new Permission[staticPermissions.length];
-        final TIntIntHashMap toLoad = new TIntIntHashMap(staticPermissions.length);
+        Permission[] userizedPermissions = new Permission[staticPermissions.length];
+        TIntIntHashMap toLoad = new TIntIntHashMap(staticPermissions.length);
         for (int index = 0; index < staticPermissions.length; index++) {
-            final Permission staticPermission = staticPermissions[index];
+            Permission staticPermission = staticPermissions[index];
             if (0 == staticPermission.getSystem()) {
                 // A non-system permission
                 if (staticPermission.isGroup()) {
@@ -118,14 +117,13 @@ public final class CalculatePermission {
          * Batch-load user configurations
          */
         if (!toLoad.isEmpty()) {
-            final int[] userIds = toLoad.keys();
+            int[] userIds = toLoad.keys();
             try {
-                final UserPermissionBits[] configurations =
-                    userConfStorage.getUserPermissionBits(context, UserStorage.getInstance().getUser(context, userIds));
+                UserPermissionBits[] configurations = userConfStorage.getUserPermissionBits(context, userIds);
                 for (int i = 0; i < configurations.length; i++) {
-                    final int userId = userIds[i];
+                    int userId = userIds[i];
                     if (toLoad.containsKey(userId)) {
-                        final int index = toLoad.get(userId);
+                        int index = toLoad.get(userId);
                         UserPermissionBits userPermissionBits = configurations[i];
                         if (null == userPermissionBits) {
                             userPermissionBits = userConfStorage.getUserPermissionBits(userId, context);
@@ -139,7 +137,7 @@ public final class CalculatePermission {
                             Collections.<ContentType> emptyList()).setEntityInfo(userId, context);
                     }
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CalculatePermission.class);
                 logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             }
@@ -147,9 +145,9 @@ public final class CalculatePermission {
         /*
          * Remove possible null values & apply to folder
          */
-        final java.util.List<Permission> tmp = new ArrayList<Permission>(userizedPermissions.length);
+        java.util.List<Permission> tmp = new ArrayList<Permission>(userizedPermissions.length);
         for (int i = 0; i < userizedPermissions.length; i++) {
-            final Permission p = userizedPermissions[i];
+            Permission p = userizedPermissions[i];
             if (null != p) {
                 tmp.add(p);
             }

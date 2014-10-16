@@ -99,6 +99,14 @@ public class AJAXClient {
             }
             login += "@" + context;
         }
+        if (hostname == null) {
+            this.hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        }
+
+        if (protocol == null) {
+            this.protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+        }
+
         final String password = AJAXConfig.getProperty(user.getPassword());
         if (null == password) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getPassword().getPropertyName());
@@ -218,5 +226,24 @@ public class AJAXClient {
             // ignore
             return null;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Protocol: " + this.protocol + ", ");
+        builder.append("Hostname: " + this.hostname + ", ");
+        try {
+            builder.append("ContextId: " + this.getValues().getContextId() + ", ");
+            builder.append("UserId: " + this.getValues().getUserId());
+        } catch (OXException e) {
+        } catch (IOException e) {
+        } catch (JSONException e) {
+        }
+
+        return builder.toString();
     }
 }

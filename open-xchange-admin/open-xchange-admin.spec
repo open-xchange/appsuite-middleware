@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -133,7 +133,7 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## end update from < 6.21
     ##
-    
+
     # SoftwareChange_Request-1846
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/AdminUser.properties
@@ -143,21 +143,37 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property SPAM_MAILFOLDER_EN_GB Spam $pfile
     ox_add_property CONFIRMED_SPAM_MAILFOLDER_EN_GB confirmed-spam $pfile
     ox_add_property CONFIRMED_HAM_MAILFOLDER_EN_GB confirmed-ham $pfile
-    
+
     # SoftwareChange_Request-1831
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    
+
 	if grep -E "projects" $pfile > /dev/null; then
 	   ptmp=${pfile}.$$
-	   
+
 	   sed -e 's;projects *,;;g' -e 's;, *projects;;g' $pfile > $ptmp
-	
+
 	   if [ -s $ptmp ]; then
 	      cp $ptmp $pfile
 	   fi
 	   rm -f $ptmp
-	fi 
+	fi
+
+    # SoftwareChange_Request-2074
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    for key in rssbookmarks rssportal forum pinboardwrite; do
+        if grep -E $key $pfile > /dev/null; then
+            ptmp=${pfile}.$$
+
+            sed -e "s;$key *,;;g" -e "s;, *$key;;g" $pfile > $ptmp
+
+            if [ -s $ptmp ]; then
+                cp $ptmp $pfile
+            fi
+            rm -f $ptmp
+        fi
+    done
 
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
@@ -185,44 +201,76 @@ fi
 %doc com.openexchange.admin/ChangeLog
 
 %changelog
+* Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.6.1 release
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.6.1 release
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-09
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-09
+* Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-10
+* Thu Oct 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.6.1
 * Tue Sep 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-06
 * Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-29
+* Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-06
 * Tue Sep 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-23
+* Tue Sep 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-15
+* Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-15
+* Fri Sep 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.6.1
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
+* Wed Aug 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-15
 * Tue Aug 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-06
 * Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-11
+* Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-11
 * Mon Jul 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-30
+* Mon Jul 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-28
 * Tue Jul 15 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-21
 * Mon Jul 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-24
 * Thu Jul 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-15
+* Mon Jul 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-14
+* Mon Jul 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-07
 * Tue Jul 01 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-07
+* Thu Jun 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.1
 * Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 7.6.0
+* Wed Jun 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-30
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>

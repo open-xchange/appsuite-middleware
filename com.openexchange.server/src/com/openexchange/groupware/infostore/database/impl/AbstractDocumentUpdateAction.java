@@ -50,6 +50,8 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.util.List;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
@@ -58,6 +60,32 @@ public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListA
 	private List<DocumentMetadata> oldDocuments;
 	private Metadata[] modified;
 	private long timestamp;
+
+    /**
+     * Initializes a new {@link AbstractDocumentUpdateAction}.
+     */
+    protected AbstractDocumentUpdateAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link AbstractDocumentUpdateAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param documents The versions to update
+     * @param oldDocuments The versions being updated
+     * @param modifiedColums The columns to update
+     * @param The sequence number to catch concurrent modifications
+     */
+    protected AbstractDocumentUpdateAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, Metadata[] modifiedColums, long sequenceNumber) {
+        super(provider, queryCatalog, context, documents);
+        setOldDocuments(oldDocuments);
+        setModified(modifiedColums);
+        setTimestamp(sequenceNumber);
+    }
 
 	public void setOldDocuments(final List<DocumentMetadata> oldDocuments) {
 		this.oldDocuments = oldDocuments;
@@ -82,6 +110,5 @@ public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListA
 	public long getTimestamp(){
 		return this.timestamp;
 	}
-
 
 }

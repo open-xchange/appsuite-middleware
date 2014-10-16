@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Unified Inbox
 Bundle-SymbolicName: com.openexchange.unifiedinbox
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.caching,
  com.openexchange.config,
@@ -21,6 +21,7 @@ Import-Package: com.openexchange.caching,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.api,
+ com.openexchange.mail.api.unified,
  com.openexchange.mail.config,
  com.openexchange.mail.dataobjects,
  com.openexchange.mail.dataobjects.compose,

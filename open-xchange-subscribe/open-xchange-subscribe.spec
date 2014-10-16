@@ -2,32 +2,27 @@
 Name:          open-xchange-subscribe
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant
 BuildRequires: ant-nodeps
-BuildRequires: open-xchange-core
 BuildRequires: open-xchange-oauth
-BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/ 
+URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-oauth >= @OXVERSION@
-Requires:      open-xchange-xerces
 Provides:      open-xchange-subscribe-crawler = %{version}
 Obsoletes:     open-xchange-subscribe-crawler < %{version}
 Provides:      open-xchange-subscribe-facebook = %{version}
 Obsoletes:     open-xchange-subscribe-facebook < %{version}
 Provides:      open-xchange-subscribe-json = %{version}
 Obsoletes:     open-xchange-subscribe-json < %{version}
-Provides:      open-xchange-subscribe-linkedin = %{version} 
+Provides:      open-xchange-subscribe-linkedin = %{version}
 Obsoletes:     open-xchange-subscribe-linkedin < %{version}
 Provides:      open-xchange-subscribe-microformats = %{version}
 Obsoletes:     open-xchange-subscribe-microformats < %{version}
@@ -61,9 +56,9 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
+    CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties yahoosubscribe.properties"
     for FILE in ${CONFFILES}; do
-	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
+        ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
     done
 
     #SoftwareChange_Request-1318
@@ -85,7 +80,7 @@ if [ ${1:-0} -eq 2 ]; then
     pfile=/opt/open-xchange/etc/crawler.properties
     if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
         ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
-    fi    
+    fi
 
     #SoftwareChange_Request-1099
     # obsoleted by SoftwareChange_Request-1710
@@ -96,8 +91,8 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-1501
     # updated by SoftwareChange_Request-1710
-    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties )
-    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.de.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.socialplugin.facebook.autorunInterval com.openexchange.subscribe.socialplugin.linkedin.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.msn.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
+    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties microformatSubscription.properties yahoosubscribe.properties )
+    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.de.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.socialplugin.facebook.autorunInterval com.openexchange.subscribe.socialplugin.linkedin.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
     for I in $(seq 1 ${#NEWPROPS[@]}); do
         NEWPROP=${NEWPROPS[$I-1]}
         PFILE=/opt/open-xchange/etc/${FILES[$I-1]}
@@ -148,6 +143,22 @@ if [ ${1:-0} -eq 2 ]; then
         ox_update_permissions "$i" open-xchange:root 644
     done
     ox_update_permissions "/opt/open-xchange/etc/crawlers" open-xchange:root 755
+
+    #SoftwareChange_Request-2145
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.crawler.googlemail com.openexchange.subscribe.crawler.google.calendar com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
+
+    # SoftwareChange_Request-2147
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.xing com.openexchange.subscribe.xing.autorunInterval; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
 fi
 
 %clean
@@ -163,47 +174,80 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 %dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
 %config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
 %doc docs/
 
 %changelog
+* Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.6.1 release
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.6.1 release
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-09
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-09
+* Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-10
+* Thu Oct 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.6.1
 * Tue Sep 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-06
 * Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-29
+* Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-06
 * Tue Sep 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-23
+* Tue Sep 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-15
+* Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-15
+* Fri Sep 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.6.1
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
+* Wed Aug 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-15
 * Tue Aug 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-06
 * Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-11
+* Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-11
 * Mon Jul 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-30
+* Mon Jul 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-28
 * Tue Jul 15 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-21
 * Mon Jul 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-24
 * Thu Jul 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-15
+* Mon Jul 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-14
+* Mon Jul 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-07
 * Tue Jul 01 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-07
+* Thu Jun 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.1
 * Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 7.6.0
+* Wed Jun 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-30
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>

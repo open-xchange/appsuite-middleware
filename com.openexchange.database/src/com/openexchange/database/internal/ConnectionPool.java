@@ -117,7 +117,6 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
 
     static {
         DEFAULT_CONFIG = new ReentrantLockPool.Config();
-        DEFAULT_CONFIG.minIdle = 0;
         DEFAULT_CONFIG.maxIdle = -1;
         DEFAULT_CONFIG.maxIdleTime = 60000;
         DEFAULT_CONFIG.maxActive = -1;

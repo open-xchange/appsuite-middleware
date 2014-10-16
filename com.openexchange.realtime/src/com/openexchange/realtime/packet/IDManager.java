@@ -49,52 +49,25 @@
 
 package com.openexchange.realtime.packet;
 
-import java.util.Collections;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 
 /**
- * {@link IDManager} - Manages {@link IDEventHandler}s, {@link Lock}s and disposing states associated with {@link ID}s and can be instructed
- * to clean those states as it acts as a {@link RealtimeJanitor}.
+ * {@link IDManager} - Manages {@link Lock}s associated with {@link ID}s and can be instructed to clean those states as it acts as a
+ * {@link RealtimeJanitor}.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class IDManager implements RealtimeJanitor {
-
-    protected final ConcurrentHashMap<ID, ConcurrentHashMap<String, Set<IDEventHandler>>> EVENT_HANDLERS;
+public class IDManager extends AbstractRealtimeJanitor {
 
     protected final ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> LOCKS;
 
-    protected final ConcurrentHashMap<ID, Boolean> DISPOSING;
-
     public IDManager() {
-        EVENT_HANDLERS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Set<IDEventHandler>>>();
         LOCKS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
-        DISPOSING = new ConcurrentHashMap<ID, Boolean>();
-    }
-
-    /**
-     * Get all registered {@link IDEventHandler}s that are registered for a given {@link ID} for a given event. 
-     * @param id The id 
-     * @param event The event
-     * @return The all registered {@link IDEventHandler}s that are registered for the given {@link ID} for the given event or an empty map.
-     */
-    public Set<IDEventHandler> getEventHandlers(ID id, String event) {
-        ConcurrentHashMap<String, Set<IDEventHandler>> events = EVENT_HANDLERS.get(id);
-        if (events == null) {
-            events = new ConcurrentHashMap<String, Set<IDEventHandler>>();
-            EVENT_HANDLERS.put(id, events);
-        }
-        Set<IDEventHandler> handlers = events.get(event);
-        if (handlers == null) {
-            handlers = Collections.newSetFromMap(new ConcurrentHashMap<IDEventHandler, Boolean>());
-            events.put(event, handlers);
-        }
-        return handlers;
     }
 
     /**
@@ -120,30 +93,8 @@ public class IDManager implements RealtimeJanitor {
         return lock;
     }
 
-    /**
-     * Mark an {@link ID} as disposing.
-     * 
-     * @param id The {@link ID} to mark
-     * @param isDisposing True or false whether the {@link ID} should be marked as disposing
-     * @return true if the {@link ID} could be marked as disposing according to the given isDisposing parameter, false if the disposing
-     *         state couldn't be changed e.g. because the {@link ID} is currently already being disposed.
-     */
-    public Boolean setDisposing(ID id, boolean isDisposing) {
-        if(isDisposing) {
-             Boolean previous = DISPOSING.putIfAbsent(id, Boolean.TRUE);
-             if(previous == null) {
-                 return true;
-             }
-             return false;
-        } else {
-            Boolean removed = DISPOSING.remove(id);
-            return removed != null;
-        }
-    }
-
     @Override
     public void cleanupForId(ID id) {
-        EVENT_HANDLERS.remove(id);
         LOCKS.remove(id);
     }
 

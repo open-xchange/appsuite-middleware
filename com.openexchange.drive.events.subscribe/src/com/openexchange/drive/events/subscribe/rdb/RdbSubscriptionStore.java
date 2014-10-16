@@ -65,6 +65,7 @@ import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -184,6 +185,40 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     }
 
     @Override
+    public List<Subscription> getSubscriptions(String serviceID) throws OXException {
+        String[] services = new String[] { serviceID };
+        List<Subscription> subscriptions = new ArrayList<Subscription>();
+        ContextService contextService = SubscribeServiceLookup.getService(ContextService.class, true);
+        Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
+        while (false == allContextIDs.isEmpty()) {
+            /*
+             * Select for whole schema using connection for first context
+             */
+            int contextID = allContextIDs.iterator().next().intValue();
+            Connection connection = databaseService.getReadOnly(contextID);
+            try {
+                subscriptions.addAll(selectSubscriptions(connection, services));
+            } catch (SQLException e) {
+                if ("42S02".equals(e.getSQLState())) {
+                    // "Table 'driveEventSubscriptions' doesn't exist" => no update task for drive tables in this schema yet, so ignore
+                } else {
+                    throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+                }
+            } finally {
+                databaseService.backWritable(contextID, connection);
+            }
+            /*
+             * Remember processed contexts
+             */
+            int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextID);
+            for (int cid : contextsInSameSchema) {
+                allContextIDs.remove(Integer.valueOf(cid));
+            }
+        }
+        return subscriptions;
+    }
+
+    @Override
     public boolean removeSubscription(Subscription subscription) throws OXException {
         return 0 < removeSubscriptions(subscription.getContextID(), subscription.getServiceID(), subscription.getToken());
     }
@@ -260,8 +295,15 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SUBSCRIPTIONS_STMT(services, rootFolderIDs));
-            stmt.setInt(1, cid);
+            stmt = connection.prepareStatement(SQL.SELECT_SUBSCRIPTIONS_STMT(services.length, rootFolderIDs.size()));
+            int parameterIndex = 0;
+            stmt.setInt(++parameterIndex, cid);
+            for (String service : services) {
+                stmt.setString(++parameterIndex, service);
+            }
+            for (String rootFolderID : rootFolderIDs) {
+                stmt.setString(++parameterIndex, Strings.reverse(SQL.escape(rootFolderID)));
+            }
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 String service = resultSet.getString(1);
@@ -269,6 +311,31 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
                 int user = resultSet.getInt(3);
                 String folder = SQL.unescape(resultSet.getString(4));
                 long timestamp = resultSet.getLong(5);
+                subscriptions.add(new Subscription(cid, user, service, token, folder, timestamp));
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return subscriptions;
+    }
+
+    private static List<Subscription> selectSubscriptions(Connection connection, String[] services) throws SQLException, OXException {
+        List<Subscription> subscriptions = new ArrayList<Subscription>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_SUBSCRIPTIONS_STMT(services.length));
+            int parameterIndex = 0;
+            for (String service : services) {
+                stmt.setString(++parameterIndex, service);
+            }
+            ResultSet resultSet = SQL.logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                int cid = resultSet.getInt(1);
+                String service = resultSet.getString(2);
+                String token = resultSet.getString(3);
+                int user = resultSet.getInt(4);
+                String folder = SQL.unescape(resultSet.getString(5));
+                long timestamp = resultSet.getLong(6);
                 subscriptions.add(new Subscription(cid, user, service, token, folder, timestamp));
             }
         } finally {

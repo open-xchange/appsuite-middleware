@@ -70,8 +70,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -136,24 +134,16 @@ public final class RdbSnippetManagement implements SnippetManagement {
         }
     }
 
-    private static final ConcurrentMap<Integer, QuotaFileStorage> FILE_STORE_CACHE = new ConcurrentHashMap<Integer, QuotaFileStorage>();
-
     private static QuotaFileStorage getFileStorage(final Context ctx) throws OXException {
-        final Integer key = Integer.valueOf(ctx.getContextId());
-        QuotaFileStorage qfs = FILE_STORE_CACHE.get(key);
-        if (null == qfs) {
-            final QuotaFileStorage quotaFileStorage = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-            qfs = FILE_STORE_CACHE.putIfAbsent(key, quotaFileStorage);
-            if (null == qfs) {
-                qfs = quotaFileStorage;
-            }
-        }
-        return qfs;
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     private final int contextId;
+
     private final int userId;
+
     private final Session session;
+
     private final boolean supportsAttachments;
 
     /**
@@ -171,7 +161,9 @@ public final class RdbSnippetManagement implements SnippetManagement {
         } else {
             boolean supportsAttachments;
             try {
-                final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property("com.openexchange.snippet.rdb.supportsAttachments", boolean.class);
+                final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property(
+                    "com.openexchange.snippet.rdb.supportsAttachments",
+                    boolean.class);
                 supportsAttachments = property.isDefined() ? property.get().booleanValue() : false;
             } catch (final Exception e) {
                 LOG.error("", e);
@@ -200,6 +192,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
     public static final class QuotaFileStorageStreamProvider implements DefaultAttachment.InputStreamProvider {
 
         private final String filestoreLocation;
+
         private final QuotaFileStorage fileStorage;
 
         /**
@@ -534,7 +527,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 }
             }
             // Store snippet
-            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "+ReferenceType.GENCONF.getType()+")");
+            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + ReferenceType.GENCONF.getType() + ")");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, Integer.toString(id));
@@ -607,7 +600,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 stmt.setLong(++pos, contextId);
                 stmt.setLong(++pos, userId);
                 stmt.setString(++pos, Integer.toString(id));
-                LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", modifiableProperties, stmt.toString().substring(stmt.toString().indexOf(':') + 1));
+                LOG.debug(
+                    "Trying to perform SQL update query for attributes {} :\n{}",
+                    modifiableProperties,
+                    stmt.toString().substring(stmt.toString().indexOf(':') + 1));
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
                 stmt = null;
@@ -639,7 +635,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 {
                     ResultSet rs = null;
                     try {
-                        stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
+                        stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + ReferenceType.GENCONF.getType());
                         int pos = 0;
                         stmt.setLong(++pos, contextId);
                         stmt.setLong(++pos, userId);
@@ -875,7 +871,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             {
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
+                    stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + ReferenceType.GENCONF.getType());
                     pos = 0;
                     stmt.setLong(++pos, contextId);
                     stmt.setLong(++pos, userId);
@@ -893,7 +889,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 storageService.delete(con, getContext(contextId), confId);
             }
             // Delete snippet
-            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
+            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + ReferenceType.GENCONF.getType());
             pos = 0;
             stmt.setLong(++pos, contextId);
             stmt.setLong(++pos, userId);

@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface Setting {
+public interface Setting extends Ranked {
 
     /**
      * @return the multi value.

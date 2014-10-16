@@ -107,12 +107,27 @@ public final class IMAPSort {
      * @throws MessagingException If sort attempt fails horribly
      */
     public static int[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final IMAPConfig imapConfig) throws MessagingException {
+        return sortMessages(imapFolder, filter, sortField, orderDir, imapConfig, imapConfig.isImapSort(), MailProperties.getInstance().getMailFetchLimit());
+    }
+
+    /**
+     * Attempts to perform a IMAP-based sort.
+     *
+     * @param imapFolder The IMAP folder
+     * @param filter The optional filter
+     * @param sortField The sort field
+     * @param orderDir The sort order
+     * @param imapConfig The IMAP configuration
+     * @return The IMAP-sorted sequence number or <code>null</code> if unable to do IMAP sort
+     * @throws MessagingException If sort attempt fails horribly
+     */
+    public static int[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final IMAPConfig imapConfig, final boolean doImapSort, final int threshold) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             return new int[0];
         }
         final int size = filter == null ? messageCount : filter.length;
-        if (imapConfig.isImapSort() || (imapConfig.getCapabilities().hasSort() && (size >= MailProperties.getInstance().getMailFetchLimit()))) {
+        if (doImapSort || (imapConfig.getCapabilities().hasSort() && (size >= threshold))) {
             try {
                 // Get IMAP sort criteria
                 final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;

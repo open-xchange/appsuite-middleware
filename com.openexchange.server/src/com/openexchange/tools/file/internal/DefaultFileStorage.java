@@ -74,8 +74,10 @@ import com.openexchange.tools.file.external.FileStorageCodes;
 public abstract class DefaultFileStorage implements FileStorage {
 
     private static final String READ = "r";
+
     private static final String READ_WRITE = "rw";
 
+    /** The storage's root file */
     protected final File storage;
 
     /**
@@ -134,9 +136,34 @@ public abstract class DefaultFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * Checks if <tt>"storage"</tt> file does exist.
+     *
+     * @throws OXException If <tt>"storage"</tt> file does not exist (<tt>"FLS-0021"</tt>)
+     */
+    protected void ensureStorageExists() throws OXException {
+        if (!storage.exists()) {
+            throw FileStorageCodes.NO_SUCH_FILE_STORAGE.create(storage.getPath());
+        }
+    }
+
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        return file(identifier).delete();
+        try {
+            File file = file(identifier);
+            boolean deleted = file.delete();
+            if (deleted) {
+                File parent = file.getParentFile();
+                while (!parent.equals(storage) && parent.list().length == 0 && deleted) {
+                    File newParent = parent.getParentFile();
+                    deleted = parent.delete();
+                    parent = newParent;
+                }
+            }
+            return deleted;
+        } catch (Exception e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -212,8 +239,7 @@ public abstract class DefaultFileStorage implements FileStorage {
                 try {
                     eraf.close();
                 } catch (IOException e) {
-                    LoggerFactory.getLogger(DefaultFileStorage.class)
-                        .warn("error closing random access file", e);
+                    LoggerFactory.getLogger(DefaultFileStorage.class).warn("error closing random access file", e);
                 }
             }
         }

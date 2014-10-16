@@ -183,9 +183,19 @@ public class FolderTestManager implements TestManager{
      * Deletes a folder via HTTP-API
      */
     public void deleteFolderOnServer(final FolderObject folderToDelete) throws OXException, IOException, SAXException, JSONException {
+        deleteFolderOnServer(folderToDelete, Boolean.FALSE);
+    }
+
+    /**
+     * Deletes a folder via HTTP-API
+     */
+    public void deleteFolderOnServer(final FolderObject folderToDelete, Boolean hardDelete) throws OXException, IOException, SAXException, JSONException {
         final DeleteRequest request = new DeleteRequest(EnumAPI.OX_OLD, folderToDelete);
+        request.setHardDelete(hardDelete);
         setLastResponse(client.execute(request));
-        removeFolderFromCleanupList(folderToDelete);
+        if (hardDelete) {
+            removeFolderFromCleanupList(folderToDelete);
+        }
     }
 
     /**
@@ -203,16 +213,17 @@ public class FolderTestManager implements TestManager{
      * identifying folders is different for normal folders and mail folders
      */
     private void removeFolderFromCleanupList(final FolderObject folderToDelete) {
-        final LinkedList<FolderObject> createdItemsCopy = new LinkedList<FolderObject>(createdItems);
-        for (final FolderObject folder : createdItemsCopy) {
+        Iterator<FolderObject> it = createdItems.iterator();
+        while (it.hasNext()) {
+            FolderObject folder = it.next();
             // normal folder
             if (folder.getObjectID() == folderToDelete.getObjectID() && !folder.containsFullName() && !folderToDelete.containsFullName()) {
-                createdItems.remove(folder);
+                it.remove();
             }
             // mail folder:
             if (folder.containsFullName() && folderToDelete.containsFullName() && !folder.containsObjectID() && !folderToDelete.containsObjectID() && folder.getFullName().equals(
                 folderToDelete.getFullName())) {
-                createdItemsCopy.remove(folder);
+                it.remove();
             }
         }
     }
@@ -312,7 +323,7 @@ public class FolderTestManager implements TestManager{
         try {
             for (final FolderObject folder : deleteMe) {
                 folder.setLastModified(new Date(Long.MAX_VALUE));
-                deleteFolderOnServer(folder);
+                deleteFolderOnServer(folder, Boolean.TRUE);
             }
         } catch (final Exception e) {
             doExceptionHandling(e, "clean-up");

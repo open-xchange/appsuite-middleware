@@ -75,6 +75,11 @@ import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceHolderListener;
 
+/**
+ * {@link I18nActivator}
+ *
+ * @since 7.6.1
+ */
 public class I18nActivator extends HousekeepingActivator {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nActivator.class);
@@ -199,26 +204,33 @@ public class I18nActivator extends HousekeepingActivator {
         return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
     }
 
-    private ConfigurationServiceHolder csh;
+    private volatile ConfigurationServiceHolder csh;
+    private volatile I18nServiceHolderListener listener;
 
-    private I18nServiceHolderListener listener;
+    /**
+     * Initializes a new {@link I18nActivator}.
+     */
+    public I18nActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.debug("I18n Starting");
         try {
-            csh = ConfigurationServiceHolder.newInstance();
+            ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
+            this.csh = csh;
 
             track(ConfigurationService.class, new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class));
             openTrackers();
 
-            listener = new I18nServiceHolderListener(context, csh);
+            I18nServiceHolderListener listener = new I18nServiceHolderListener(context, csh);
+            this.listener = listener;
             csh.addServiceHolderListener(listener);
 
         } catch (final Throwable e) {
@@ -233,20 +245,23 @@ public class I18nActivator extends HousekeepingActivator {
         LOG.debug("Stopping I18n");
 
         try {
-            csh.removeServiceHolderListenerByName(listener.getClass().getName());
-            /*
-             * Unregister through listener
-             */
+            I18nServiceHolderListener listener = this.listener;
             if (null != listener) {
+                ConfigurationServiceHolder csh = this.csh;
+                if (null != csh) {
+                    csh.removeServiceHolderListenerByName(listener.getClass().getName());
+                    csh = null;
+                }
+                /*
+                 * Unregister through listener
+                 */
                 listener.unregisterAll();
                 listener = null;
             }
-            csh = null;
             /*
-             * Close service trackers
+             * Stop rest...
              */
-            closeTrackers();
-            cleanUp();
+            super.stopBundle();
         } catch (final Throwable e) {
             LOG.error("I18nActivator: stop: ", e);
             throw e instanceof Exception ? (Exception) e : new Exception(e);

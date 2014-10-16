@@ -283,25 +283,6 @@ public final class JerichoParser {
                     break;
                 }
             }
-            /*-
-             *
-            if (tagType == StartTagType.NORMAL) {
-                handler.handleStartTag((StartTag) tag);
-            } else if (tagType == EndTagType.NORMAL) {
-                handler.handleEndTag((EndTag) tag);
-            } else if (tagType == StartTagType.DOCTYPE_DECLARATION) {
-                handler.handleDocDeclaration(segment.toString());
-            } else if (tagType == StartTagType.CDATA_SECTION) {
-                handler.handleCData(segment.toString());
-            } else if (tagType == StartTagType.COMMENT) {
-                handler.handleComment(segment.toString());
-            } else {
-                if (!segment.isWhiteSpace()) {
-                    handler.handleUnknownTag(tag);
-                }
-            }
-             *
-             */
         } else if (segment instanceof CharacterReference) {
             final CharacterReference characterReference = (CharacterReference) segment;
             handler.handleCharacterReference(characterReference);

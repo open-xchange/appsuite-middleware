@@ -81,6 +81,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The allowed quota is reached. Please delete some items in order to store new ones.
     public static final String QUOTA_REACHED_MSG = "The allowed quota is reached. Please delete some items in order to store new ones.";
 
+    // ZIP archive exceeds max. allowed size of %1$s
+    public static final String ARCHIVE_MAX_SIZE_EXCEEDED_MSG = "ZIP archive exceeds max. allowed size of %1$s";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

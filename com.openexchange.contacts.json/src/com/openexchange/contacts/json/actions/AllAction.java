@@ -49,9 +49,11 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
@@ -62,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -99,12 +102,35 @@ public class AllAction extends ContactAction {
         if (null == request.optFolderID()) {
             searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions());
         } else {
-            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields,
-                request.getSortOptions());
+            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields, request.getSortOptions());
         }
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new LinkedList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
         request.sortInternalIfNeeded(contacts);
+
+        int leftHandLimit = request.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+        int rightHandLimit = request.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
+        if (leftHandLimit >= 0 || rightHandLimit > 0) {
+            final int size = contacts.size();
+            final int fromIndex = leftHandLimit > 0 ? leftHandLimit : 0;
+            final int toIndex = rightHandLimit > 0 ? (rightHandLimit > size ? size : rightHandLimit) : size;
+            if ((fromIndex) > size) {
+                contacts = Collections.<Contact> emptyList();
+            } else if (fromIndex >= toIndex) {
+                contacts = Collections.<Contact> emptyList();
+            } else {
+                /*
+                 * Check if end index is out of range
+                 */
+                if (toIndex < size) {
+                    contacts = contacts.subList(fromIndex, toIndex);
+                } else if (fromIndex > 0) {
+                    contacts = contacts.subList(fromIndex, size);
+                }
+            }
+            contacts = new PropertizedList<Contact>(contacts).setProperty("more", Integer.valueOf(size));
+        }
+
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

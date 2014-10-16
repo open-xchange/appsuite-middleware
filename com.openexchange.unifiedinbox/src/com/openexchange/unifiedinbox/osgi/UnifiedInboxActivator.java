@@ -60,10 +60,13 @@ import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.unifiedinbox.Enabled;
+import com.openexchange.unifiedinbox.UnifiedInboxMessageStorage;
 import com.openexchange.unifiedinbox.UnifiedInboxProvider;
 import com.openexchange.unifiedinbox.services.Services;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxSynchronousQueueProvider;
@@ -89,29 +92,26 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class,
-            ThreadPoolService.class, ConfigViewFactory.class };
+            ThreadPoolService.class, ConfigViewFactory.class, UnifiedInboxManagement.class };
     }
 
     @Override
     public void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
-            /*
-             * Create & open trackers
-             */
+
+            // Create & open trackers
             track(I18nService.class, new I18nCustomizer(context));
             trackService(ContinuationRegistryService.class);
             openTrackers();
-            /*
-             * Register service(s)
-             */
+
+            // Register service(s)
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
             registerService(MailProvider.class, UnifiedInboxProvider.getInstance(), dictionary);
             registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
-            /*
-             * Detect what SynchronousQueue to use
-             */
+
+            // Detect what SynchronousQueue to use
             String property = System.getProperty("java.specification.version");
             if (null == property) {
                 property = System.getProperty("java.runtime.version");
@@ -126,6 +126,9 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
                 // "java.specification.version=1.5" OR "java.specification.version=1.6"
                 UnifiedInboxSynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
             }
+
+            // Register unified service
+            registerService(UnifiedViewService.class, new UnifiedInboxMessageStorage());
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;

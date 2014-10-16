@@ -69,8 +69,11 @@ import com.openexchange.ajax.session.LoginTools;
  */
 public class FormLoginRequest extends AbstractRequest<FormLoginResponse> {
 
+    private boolean cookiesNeeded;
+
     public FormLoginRequest(String login, String password, String authId, String client, String version, boolean autologin) {
         super(createParameter(login, password, authId, client, version, autologin));
+        cookiesNeeded = true;
     }
 
     private static Parameter[] createParameter(String login, String password, String authId, String client, String version, boolean autologin) {
@@ -97,6 +100,24 @@ public class FormLoginRequest extends AbstractRequest<FormLoginResponse> {
 
     @Override
     public FormLoginParser getParser() {
-        return new FormLoginParser();
+        return new FormLoginParser(cookiesNeeded, true);
+    }
+
+    /**
+     * Gets the cookiesNeeded
+     *
+     * @return The cookiesNeeded
+     */
+    public boolean isCookiesNeeded() {
+        return cookiesNeeded;
+    }
+
+    /**
+     * Sets the cookiesNeeded
+     *
+     * @param cookiesNeeded The cookiesNeeded to set
+     */
+    public void setCookiesNeeded(boolean cookiesNeeded) {
+        this.cookiesNeeded = cookiesNeeded;
     }
 }

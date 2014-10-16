@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.kata.appointments;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.InsertRequest;

@@ -53,6 +53,8 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -72,7 +74,7 @@ import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.FoursquareApi;
-import org.scribe.builder.api.GoogleApi;
+import org.scribe.builder.api.Google2Api;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
@@ -84,6 +86,7 @@ import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.html.HtmlService;
@@ -137,7 +140,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     private final ContextService contexts;
 
-    private final CallbackRegistry callbackRegistry;
+    private final CallbackRegistryImpl callbackRegistry;
 
     /**
      * Initializes a new {@link OAuthServiceImpl}.
@@ -145,7 +148,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
      * @param provider
      * @param simIDGenerator
      */
-    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, final ContextService contexts, CallbackRegistry cbRegistry) {
+    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, final ContextService contexts, CallbackRegistryImpl cbRegistry) {
         super();
         this.registry = registry;
         this.provider = provider;
@@ -279,27 +282,61 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Check for available deferrer service
              */
-            final DeferringURLService ds = Services.getService(DeferringURLService.class);
+            DeferringURLService ds = Services.getService(DeferringURLService.class);
             {
+                boolean deferred = false;
                 if (isDeferrerAvailable(ds, userId, contextId)) {
-                    final String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
+                    String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
                         cbUrl = deferredURL;
+                        deferred = true;
                     }
+                }
+                if (false == deferred && metaData.registerTokenBasedDeferrer()) {
+                    // Not yet deferred, but wants to
                 }
             }
             /*
-             * Get associated Scribe service
+             * Get token & authorization URL
              */
-            final org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
-            final Token scribeToken = metaData.needsRequestToken() ? service.getRequestToken() : null;
-            final StringBuilder authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+            boolean tokenRegistered = false;
+            Token scribeToken;
+            StringBuilder authorizationURL;
+            if (metaData.registerTokenBasedDeferrer() && metaData.needsRequestToken()) {
+                try {
+                    URI uri = new URI(cbUrl);
+
+                    DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+                    String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
+                    if (!path.startsWith("/")) {
+                        path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
+                    }
+
+                    String prevCbUrl = cbUrl;
+                    cbUrl = new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString();
+
+                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                    scribeToken = service.getRequestToken();
+                    authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+
+                    callbackRegistry.add(scribeToken.getToken(), prevCbUrl);
+                    tokenRegistered = true;
+                } catch (URISyntaxException e) {
+                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                    scribeToken = service.getRequestToken();
+                    authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+                }
+            } else {
+                org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                scribeToken = metaData.needsRequestToken() ? service.getRequestToken() : null;
+                authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+            }
             /*
              * Add optional scope
              */
             {
                 final String scope = metaData.getScope();
-                if (scope != null) {
+                if (scope != null && authorizationURL.indexOf("&scope=") < 0) {
                     authorizationURL.append("&scope=").append(urlEncode(scope));
                 }
             }
@@ -310,30 +347,41 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Register deferrer
              */
-            if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
-                // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
-                if (isDeferrerAvailable(ds, userId, contextId)) {
-                    if (ds.seemsDeferred(cbUrl, userId, contextId)) {
-                        callbackRegistry.add(scribeToken.getToken(), cbUrl);
-                    } else {
-                        LOG.warn("Call-back URL cannot be registered as it is not deferred: {}", Strings.abbreviate(cbUrl, 32));
-                    }
+            if (!tokenRegistered && metaData.registerTokenBasedDeferrer()) {
+                // Register by token
+                if (null != scribeToken) {
+                    registerTokenForDeferredAccess(scribeToken.getToken(), cbUrl, ds, userId, contextId);
                 } else {
-                    // No chance to check
-                    callbackRegistry.add(scribeToken.getToken(), cbUrl);
+                    String registerToken = metaData.getRegisterToken(authURL);
+                    if (null != registerToken) {
+                        registerTokenForDeferredAccess(registerToken, cbUrl, ds, userId, contextId);
+                    }
                 }
             }
             /*
              * Return interaction
              */
-            return new OAuthInteractionImpl(
-                scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
-                authURL,
-                cbUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
+            OAuthToken requestToken = scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken);
+            OAuthInteractionType interactionType = cbUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK;
+            return new OAuthInteractionImpl(requestToken, authURL, interactionType);
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void registerTokenForDeferredAccess(final String token, String cbUrl, final DeferringURLService ds, final int userId, final int contextId) {
+        // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
+        if (isDeferrerAvailable(ds, userId, contextId)) {
+            if (ds.seemsDeferred(cbUrl, userId, contextId)) {
+                callbackRegistry.add(token, cbUrl);
+            } else {
+                LOG.warn("Call-back URL cannot be registered as it is not deferred: {}", Strings.abbreviate(cbUrl, 32));
+            }
+        } else {
+            // No chance to check
+            callbackRegistry.add(token, cbUrl);
         }
     }
 
@@ -791,7 +839,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             } else if (serviceId.indexOf("linkedin") >= 0) {
                 apiClass = LinkedInApi.class;
             } else if (serviceId.indexOf("google") >= 0) {
-                apiClass = GoogleApi.class;
+                apiClass = Google2Api.class;
             } else if (serviceId.indexOf("yahoo") >= 0) {
                 apiClass = YahooApi.class;
             } else if (serviceId.indexOf("foursquare") >= 0) {
@@ -1188,6 +1236,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 final String msg = toText(message.substring(pos + str.length()));
                 return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, msg);
             }
+        }
+        if (e instanceof org.scribe.exceptions.OAuthConnectionException) {
+            return OAuthExceptionCodes.CONNECT_ERROR.create(e, e.getMessage());
         }
         return OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
     }

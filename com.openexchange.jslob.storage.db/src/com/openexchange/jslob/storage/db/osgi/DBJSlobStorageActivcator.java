@@ -71,6 +71,7 @@ import com.openexchange.jslob.storage.db.cache.CachingJSlobStorage;
 import com.openexchange.jslob.storage.db.cache.Constants;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableService;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableTask;
+import com.openexchange.jslob.storage.db.groupware.DBJSlobIncreaseBlobSizeTask;
 import com.openexchange.jslob.storage.db.groupware.JSlobDBDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -105,7 +106,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
              * Register services for table creation
              */
             registerService(CreateTableService.class, new DBJSlobCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBJSlobCreateTableTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBJSlobCreateTableTask(this), new DBJSlobIncreaseBlobSizeTask(this)));
             /*
              * Register delete listener
              */
@@ -129,12 +130,12 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                                    + "jcs.region." + regionName + ".cacheattributes.MaxObjects=10000000\n"
                                    + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n"
                                    + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n"
-                                   + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=180\n"
+                                   + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=360\n"
                                    + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n"
                                    + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n"
                                    + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n"
-                                   + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=300\n"
-                                   + "jcs.region." + regionName + ".elementattributes.IdleTime=180\n"
+                                   + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n"
+                                   + "jcs.region." + regionName + ".elementattributes.IdleTime=360\n"
                                    + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n"
                                    + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n"
                                    + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();

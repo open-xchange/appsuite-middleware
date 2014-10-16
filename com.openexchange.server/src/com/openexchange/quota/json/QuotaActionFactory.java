@@ -52,10 +52,12 @@ package com.openexchange.quota.json;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.quota.json.actions.GetAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -73,12 +75,13 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
      *
      * @param services The service look-up
      */
-    public QuotaActionFactory(final ServiceLookup services) {
+    public QuotaActionFactory(final ServiceLookup services, final BundleContext context) {
         super();
         actions = new ConcurrentHashMap<String, AJAXActionService>(5);
-        final com.openexchange.quota.json.actions.GetAction getAction = new com.openexchange.quota.json.actions.GetAction(services);
+        GetAction getAction = new com.openexchange.quota.json.actions.GetAction(context);
         actions.put("get", getAction);
-        actions.put("filestore", getAction);
+        actions.put("GET", getAction);
+        actions.put("filestore", new com.openexchange.quota.json.actions.FilestoreAction(services));
         actions.put("mail", new com.openexchange.quota.json.actions.MailAction(services));
     }
 

@@ -81,7 +81,7 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
     private final Class<?>[] neededServices;
     private final Object[] foundServices;
 
-    private S registeredService;
+    protected S registeredService;
     private ServiceRegistration<?> registration;
 
     public DependentServiceRegisterer(BundleContext context, Class<S> serviceType, Class<? extends S> serviceClass, Dictionary<String, ?> properties, Class<?>... neededServices) {
@@ -133,6 +133,7 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
             LOG.trace("Registering service {}", serviceClass.getName());
             registration = context.registerService(serviceType, registeredService, properties);
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("Can not register {}", serviceClass.getName(), t);
         }
     }
@@ -186,6 +187,7 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
         } catch (NoSuchMethodException e) {
             // Service does not have a shutDown() method.
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("Can not shut down {}", serviceClass.getName(), t);
         }
     }

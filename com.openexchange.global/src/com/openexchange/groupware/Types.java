@@ -100,8 +100,6 @@ public interface Types {
 
     public static final int CONTACT = 7;
 
-    // public static final int FORUM = 17;
-    // public static final int PINBOARD = 18;
     public static final int EMAIL = 19;
 
     public static final int FOLDER = 20;

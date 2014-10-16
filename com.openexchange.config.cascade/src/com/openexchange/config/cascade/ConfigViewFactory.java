@@ -50,12 +50,14 @@
 package com.openexchange.config.cascade;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ConfigViewFactory} - The factory to yield {@link ConfigView}s.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface ConfigViewFactory {
 
     /**
@@ -71,7 +73,7 @@ public interface ConfigViewFactory {
      * @return The user-sensitive configuration view
      * @throws OXException If user-sensitive configuration view cannot be returned
      */
-    public ConfigView getView(int user, int context) throws OXException;
+    ConfigView getView(int user, int context) throws OXException;
 
     /**
      * Gets a server/global configuration view.
@@ -79,7 +81,7 @@ public interface ConfigViewFactory {
      * @return The configuration view
      * @throws OXException If configuration view cannot be returned
      */
-    public ConfigView getView() throws OXException;
+    ConfigView getView() throws OXException;
 
     /**
      * The search path order.
@@ -87,5 +89,5 @@ public interface ConfigViewFactory {
      * @return The search path order
      * @throws OXException If search path cannot be returned
      */
-    public String[] getSearchPath() throws OXException;
+    String[] getSearchPath() throws OXException;
 }

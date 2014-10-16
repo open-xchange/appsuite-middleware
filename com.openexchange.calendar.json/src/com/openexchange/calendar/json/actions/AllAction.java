@@ -81,6 +81,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -333,9 +334,7 @@ public final class AllAction extends AppointmentAction {
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
-            if (it != null) {
-                it.close();
-            }
+            SearchIterators.close(it);
         }
     }
 

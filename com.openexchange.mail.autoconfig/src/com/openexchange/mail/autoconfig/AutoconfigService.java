@@ -52,12 +52,14 @@ package com.openexchange.mail.autoconfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link AutoconfigService}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
+@SingletonService
 public interface AutoconfigService {
 
     /**

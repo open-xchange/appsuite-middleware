@@ -53,12 +53,14 @@ import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * This service defines the API to the groups component.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@SingletonService
 public interface GroupService {
 
     /**

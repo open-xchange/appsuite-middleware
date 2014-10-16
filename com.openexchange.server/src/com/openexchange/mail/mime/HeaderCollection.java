@@ -67,6 +67,7 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.mail.MessageRemovedException;
 import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
@@ -143,7 +144,7 @@ public class HeaderCollection implements Serializable {
      * @param name The header name to check
      * @return The case-sensitive header name
      */
-    public static String caseSensitiveHeadreNameFor(final String name) {
+    public static String caseSensitiveHeaderNameFor(final String name) {
         final String cshn = CASE_SENSITIVE_LOOKUP.get(name.toLowerCase(ENGLISH));
         return null == cshn ? name : cshn;
     }
@@ -254,7 +255,7 @@ public class HeaderCollection implements Serializable {
             }
             load(new String(buffer.toByteArray(), Charsets.ISO_8859_1));
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -447,7 +448,7 @@ public class HeaderCollection implements Serializable {
              */
             return;
         }
-        final HeaderName headerName = HeaderName.valueOf(caseSensitiveHeadreNameFor(name));
+        final HeaderName headerName = HeaderName.valueOf(caseSensitiveHeaderNameFor(name));
         List<String> values = map.get(headerName);
         if (values == null) {
             values = new ArrayList<String>(2);

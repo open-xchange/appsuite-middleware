@@ -75,6 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogProperties;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -153,7 +154,7 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws OXException If login fails
      */
-    private LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
+    public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
         sanityChecks(request);
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
@@ -210,6 +211,7 @@ public final class LoginPerformer {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
+            LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             if (SessionEnhancement.class.isInstance(authed)) {
                 ((SessionEnhancement) authed).enhanceSession(session);
@@ -252,7 +254,14 @@ public final class LoginPerformer {
         }
     }
 
-    private static Context findContext(final String contextInfo) throws OXException {
+    /**
+     * Looks up the context for the supplied context info, throwing appropriate exceptions if not found.
+     *
+     * @param contextInfo The context info (as usually supplied in the login name)
+     * @return The context
+     * @throws OXException
+     */
+    public static Context findContext(final String contextInfo) throws OXException {
         final ContextStorage contextStor = ContextStorage.getInstance();
         final int contextId = contextStor.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
@@ -265,7 +274,15 @@ public final class LoginPerformer {
         return context;
     }
 
-    private static User findUser(final Context ctx, final String userInfo) throws OXException {
+    /**
+     * Looks up the user for the supplied user info in a context, throwing appropriate exceptions if not found.
+     *
+     * @param ctx The context
+     * @param userInfo The user info (as usually supplied in the login name)
+     * @return The context
+     * @throws OXException
+     */
+    public static User findUser(final Context ctx, final String userInfo) throws OXException {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         final UserStorage us = UserStorage.getInstance();
         int userId = 0;

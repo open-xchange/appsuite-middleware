@@ -58,6 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.activation.DataHandler;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -107,6 +108,9 @@ public final class CompositeMailMessage extends MailMessage {
         }
         if (delegate.containsBcc()) {
             addBcc(delegate.getBcc());
+        }
+        if (delegate.containsReplyTo()) {
+            addReplyTo(delegate.getReplyTo());
         }
         if (delegate.containsCc()) {
             addCc(delegate.getCc());
@@ -449,7 +453,7 @@ public final class CompositeMailMessage extends MailMessage {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

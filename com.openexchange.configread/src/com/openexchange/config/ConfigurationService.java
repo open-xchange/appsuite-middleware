@@ -55,12 +55,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ConfigurationService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface ConfigurationService {
 
     /**

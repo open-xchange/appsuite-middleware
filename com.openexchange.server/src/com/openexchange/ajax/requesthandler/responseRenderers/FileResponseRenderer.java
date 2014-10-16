@@ -85,6 +85,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
+import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -118,11 +119,13 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     /** The default in-memory threshold of 1MB. */
     private static final int DEFAULT_IN_MEMORY_THRESHOLD = 1024 * 1024; // 1MB
+
     private static final int INITIAL_CAPACITY = 8192;
 
     private static final int BUFLEN = 2048;
 
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
+
     private static final String PARAMETER_CONTENT_TYPE = "content_type";
 
     private static final String SAVE_AS_TYPE = "application/octet-stream";
@@ -132,6 +135,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     private static final String DELIVERY = AJAXServlet.PARAMETER_DELIVERY;
 
     private static final String DOWNLOAD = "download";
+
     private static final String VIEW = "view";
 
     private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
@@ -441,7 +445,13 @@ public class FileResponseRenderer implements ResponseRenderer {
              * Browsers don't like the Pragma header the way we usually set this. Especially if files are sent to the browser. So removing
              * pragma header.
              */
-            Tools.removeCachingHeader(resp);
+            boolean keepCachingHeaders = false;
+            if (requestData.isSet("keepCachingHeaders")) {
+                keepCachingHeaders = requestData.getParameter("keepCachingHeaders", Boolean.class).booleanValue();
+            }
+            if (!keepCachingHeaders) {
+                Tools.removeCachingHeader(resp);
+            }
             if (delivery == null || !delivery.equalsIgnoreCase(DOWNLOAD)) {
                 /*
                  * ETag present and caching?
@@ -455,6 +465,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if (expires > 0) {
                         Tools.setExpires(expires, resp);
                     }
+                }
+                /*
+                 * Last-Modified
+                 */
+                final String sLastModified = result.getHeader("Last-Modified");
+                if (null != sLastModified) {
+                    resp.setHeader("Last-Modified", sLastModified);
                 }
             }
             /*
@@ -662,16 +679,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     private String getContentTypeByFileName(final String fileName) {
-        if (null == fileName) {
-            // Not known
-            return null;
-        }
-        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-        if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
-            // Not known
-            return null;
-        }
-        return contentTypeByFileName;
+        return null == fileName ? null : MimeType2ExtMap.getContentType(fileName, null);
     }
 
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
@@ -757,8 +765,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
         final boolean isValidEtag = !com.openexchange.java.Strings.isEmpty(eTag);
+        final String previewLanguage = AbstractPreviewResultConverter.getUserLanguage(request.getSession());
         if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
-            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
+            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
             final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
             if (null != cachedResource) {
                 // Scaled version already cached
@@ -894,6 +903,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String fileName = file.getName();
             final String contentType = fileContentType;
             final AbstractTask<Void> task = new AbstractTask<Void>() {
+
                 @Override
                 public Void call() {
                     try {
@@ -1099,10 +1109,13 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         /** The begin position (inclusive) */
         final long start;
+
         /** The end position (inclusive) */
         final long end;
+
         /** The length */
         final long length;
+
         /** The total length */
         final long total;
 
@@ -1121,6 +1134,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         private static final long serialVersionUID = 8094333124726048736L;
 
         private final long off;
+
         private final long available;
 
         /**

@@ -78,6 +78,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.java.Collators;
 import com.openexchange.session.Session;
 import com.openexchange.tx.AbstractService;
 import com.openexchange.tx.TransactionException;
@@ -129,7 +130,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
-        FolderID folderID = new FolderID(folderId);
+        return getFolder(new FolderID(folderId));
+    }
+
+    @Override
+    public FileStorageFolder getFolder(FolderID folderID) throws OXException {
         FileStorageFolder folder = getFolderAccess(folderID).getFolder(folderID.getFolderId());
         return withUniqueID(folder, folderID.getService(), folderID.getAccountId());
     }
@@ -324,25 +329,28 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public FileStorageFolder[] getRootFolders(final Locale locale) throws OXException {
-        final List<AccessWrapper> accessWrappers = getAllAccountAccesses();
-        final List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
         // Sort according to account name
+        List<AccessWrapper> accessWrappers = getAllAccountAccesses();
         Collections.sort(accessWrappers, new AccessWrapperComparator(locale == null ? Locale.US : locale));
-        for (final AccessWrapper accessWrapper : accessWrappers) {
-            final FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
-            final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
+
+        // Get root folders
+        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
+        for (AccessWrapper accessWrapper : accessWrappers) {
+            FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
+            FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
             try {
-                final FileStorageFolder rootFolder = folderAccess.getRootFolder();
+                FileStorageFolder rootFolder = folderAccess.getRootFolder();
                 if (null != rootFolder) {
                     folders.add(IDManglingFolder.withUniqueID(rootFolder, accountAccess.getService().getId(), accountAccess.getAccountId()));
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Check for com.openexchange.folderstorage.FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE -- 'FLD-0003'
                 if (3 != e.getCode() || !"FLD".equals(e.getPrefix())) {
-                    throw e;
+                    LOG.warn("Could not load root folder for account {}", accessWrapper.displayName, e);
                 }
             }
         }
+
         return folders.toArray(new FileStorageFolder[folders.size()]);
     }
 
@@ -358,9 +366,16 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
                 accounts = fsService.getAccountManager().getAccounts(session);
             }
             for (FileStorageAccount fileStorageAccount : accounts) {
-                FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                connect(accountAccess);
-                accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
+                try {
+                    FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
+                    connect(accountAccess);
+                    accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
+                } catch (OXException e) {
+                    // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
+                    if (4 != e.getCode() || !"OAUTH".equals(e.getPrefix())) {
+                        throw e;
+                    }
+                }
             }
         }
         return accountAccesses;
@@ -493,8 +508,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
         AccessWrapperComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override

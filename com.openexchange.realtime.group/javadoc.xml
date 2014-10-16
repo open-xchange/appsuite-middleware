@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="uml">
+	<taskdef name="plantuml" classname="net.sourceforge.plantuml.ant.PlantUmlTask" />
+	<target name="uml">
+		<plantuml>
+			<fileset dir="./src">
+				<include name="**/*.java" />
+			</fileset>
+		</plantuml>
+	</target>
+	<target name="javadoc" depends="uml">
+		<javadoc access="private" author="true" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.6" sourcepath="src" splitindex="true" use="true" version="true" />
+		<copy todir="doc">
+			<fileset dir="src">
+				<include name="**/doc-files/*" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean_javadoc">
+		<delete includeemptydirs="true">
+			<fileset dir="doc">
+				<include name="**/*" />
+				<exclude name="overview.html" />
+			</fileset>
+			<fileset dir="src">
+				<include name="**/doc-files" />
+			</fileset>
+		</delete>
+	</target>
+</project>

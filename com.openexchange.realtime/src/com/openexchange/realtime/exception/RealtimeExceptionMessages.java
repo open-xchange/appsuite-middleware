@@ -76,7 +76,8 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     public static final String STANZA_NOT_ALLOWED_MSG = "";
     public static final String STANZA_PAYMENT_REQUIRED_MSG = "";
     public static final String STANZA_POLICY_VIOLATION_MSG = "";
-    public static final String STANZA_RECIPIENT_UNAVAILABLE_MSG = "";
+    /** The recipient you tried to reach is currently unavailable */
+    public static final String STANZA_RECIPIENT_UNAVAILABLE_MSG = "The recipient you tried to reach is currently unavailable: %1$s";
     public static final String STANZA_REDIRECT_MSG = "";
     public static final String STANZA_REGISTRATION_REQUIRED_MSG = "";
     public static final String STANZA_REMOTE_SERVER_NOT_FOUND_MSG = "";

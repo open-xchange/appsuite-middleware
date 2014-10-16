@@ -59,6 +59,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
+import com.openexchange.groupware.contact.helpers.ContactSwitcherForEmailAddresses;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.container.Contact;
@@ -329,7 +331,7 @@ public class CSVContactImporter extends AbstractImporter {
                 atLeastOneFieldWithWrongName = true;
                 wrongFields.add(fieldName);
             } else {
-                if (currEntry.length() > 0 && isValid(currEntry)) {
+                if (currEntry.length() > 0) {
                     currField.doSwitch(conSet, contactObj, currEntry);
                     final Collection<OXException> warns = contactObj.getWarnings();
                     if (!warns.isEmpty()) {
@@ -348,28 +350,6 @@ public class CSVContactImporter extends AbstractImporter {
             addErrorInformation(result, lineNumber, fields);
         }
         return contactObj;
-    }
-
-    /**
-     * Validates if the given value can be parsed and a date object can be created. Based on regular expressions only dates will be
-     * evaluated
-     * 
-     * @param currEntry - string to be validated
-     * @return true if the value can be used for processing, false if the given string is not valid
-     */
-    protected boolean isValid(String currEntry) {
-        boolean valid = true;
-
-        if (currEntry == null) {
-            valid = false;
-        }
-
-        String dotDate = currEntry.replace('/', '.').replace('-', '.');
-        if (dotDate.matches("0?0\\.0?0\\.(00){1,2}") || dotDate.trim().equals("")) {
-            valid = false;
-        }
-
-        return valid;
     }
 
     /**
@@ -403,10 +383,12 @@ public class CSVContactImporter extends AbstractImporter {
 
         final ContactSwitcherForTimestamp timestampSwitch = new ContactSwitcherForTimestamp();
         final ContactSwitcherForBooleans boolSwitch = new ContactSwitcherForBooleans();
+        ContactSwitcherForEmailAddresses emailSwitch = new ContactSwitcherForEmailAddresses();
+        emailSwitch.setDelegate(boolSwitch);
         boolSwitch.setDelegate(timestampSwitch);
         timestampSwitch.setDelegate(dateSwitch);
         dateSwitch.setDelegate(new ContactSetter());
-        return boolSwitch;
+        return emailSwitch;
     }
 
     public static final class ImportIntention {
@@ -434,8 +416,14 @@ public class CSVContactImporter extends AbstractImporter {
 
         List<List<String>> retval = null;
 
+        Map<String, String> csvByEncodings = new HashMap<String, String>();
         for (ContactFieldMapper mapper : getMappers()) {
-            String csvStr = transformInputStreamToString(input, mapper.getEncoding(), false);
+            String encoding = mapper.getEncoding();
+            String csvStr = csvByEncodings.get(encoding);
+            if (null == csvStr) {
+                csvStr = transformInputStreamToString(input, encoding, false);
+                csvByEncodings.put(encoding, csvStr);
+            }
             final CSVParser csvParser = getCSVParser();
             List<List<String>>  csv = csvParser.parse(csvStr);
             int mappedFields = 0;

@@ -50,7 +50,7 @@
 package com.openexchange.dav;
 
 import java.io.IOException;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;

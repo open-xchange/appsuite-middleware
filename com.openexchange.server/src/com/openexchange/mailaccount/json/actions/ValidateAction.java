@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -74,10 +75,12 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
@@ -117,9 +120,18 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
                 Integer.valueOf(session.getContextId()));
         }
 
-        final MailAccountDescription accountDescription = new MailAccountDescription();
-        final List<OXException> warnings = new LinkedList<OXException>();
-        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        MailAccountDescription accountDescription = new MailAccountDescription();
+        List<OXException> warnings = new LinkedList<OXException>();
+        Set<Attribute> availableAttributes = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+
+        if (accountDescription.getId() == MailAccount.DEFAULT_ID) {
+            return new AJAXRequestResult(Boolean.TRUE);
+        }
+
+        if (!availableAttributes.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
+            accountDescription.setTransportAuth(TransportAuth.MAIL);
+            availableAttributes.add(Attribute.TRANSPORT_AUTH_LITERAL);
+        }
 
         if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
             /*

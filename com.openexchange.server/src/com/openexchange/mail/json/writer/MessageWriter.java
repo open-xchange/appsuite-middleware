@@ -193,12 +193,12 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false);
+        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false, -1);
     }
 
     /**
-     * Writes whole mail as a JSON object.
-     *
+     * Writes whole mail as a JSON object by trimming the mail content to the length provided by maxContentSize parameter
+     * 
      * @param accountId The account ID
      * @param mail The mail to write
      * @param displayMode The display mode
@@ -208,11 +208,12 @@ public final class MessageWriter {
      * @param warnings A container for possible warnings
      * @param tokenTimeout
      * @param mimeFilter The MIME filter
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @token <code>true</code> to add attachment tokens
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter, final TimeZone optTimeZone, final boolean exactLength) throws OXException {
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter, final TimeZone optTimeZone, final boolean exactLength, final int maxContentSize) throws OXException {
         final MailPath mailPath;
         final String fullName = mail.getFolder();
         final String mailId = mail.getMailId();
@@ -236,8 +237,9 @@ public final class MessageWriter {
                 LogProperties.putProperty(LogProperties.Name.MAIL_MAIL_ID, mailId);
             }
         }
+
         try {
-            final JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
+            final JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout, maxContentSize);
             handler.setExactLength(exactLength);
             if (null != optTimeZone) {
                 handler.setTimeZone(optTimeZone);
@@ -348,8 +350,8 @@ public final class MessageWriter {
                 return headerValues[0];
             }
             final JSONArray ja = new JSONArray();
-            for (int j = 0; j < headerValues.length; j++) {
-                ja.put(headerValues[j]);
+            for (String headerValue : headerValues) {
+                ja.put(headerValue);
             }
             return ja;
         }

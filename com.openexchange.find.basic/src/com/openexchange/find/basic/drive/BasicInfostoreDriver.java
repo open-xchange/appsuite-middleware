@@ -49,9 +49,9 @@
 
 package com.openexchange.find.basic.drive;
 
-import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.drive.Utils.prepareSearchTerm;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,9 +63,11 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
+import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
@@ -74,9 +76,10 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonConstants;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderType;
-import com.openexchange.find.drive.DriveConstants;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.facet.DefaultFacet;
@@ -131,18 +134,27 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         if (null == registry) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageServiceRegistry.class.getName());
         }
-        List<FileStorageService> services = registry.getAllServices();
-        for (FileStorageService service : services) {
-            List<FileStorageAccount> accounts = service.getAccountManager().getAccounts(session);
-            if (accounts.size() == 0 || accounts.size() > 1) {
-                return false;
-            }
-            if (!"com.openexchange.infostore".equals(service.getId())) {
-                return false;
-            }
-            return true;
+        /*
+         * only available, if "com.openexchange.infostore" is the only account for the user
+         */
+        List<FileStorageAccount> allAccounts = new ArrayList<FileStorageAccount>();
+        for (FileStorageService service : registry.getAllServices()) {
+            allAccounts.addAll(service.getAccountManager().getAccounts(session));
         }
-        return false;
+        return 1 == allAccounts.size() && "com.openexchange.infostore".equals(allAccounts.get(0).getFileStorageService().getId());
+    }
+
+    @Override
+    public boolean isValidFor(ServerSession session, AbstractFindRequest findRequest) throws OXException {
+        if (false == session.getUserConfiguration().hasInfostore()) {
+            return false;
+        }
+        String folderId = findRequest.getFolderId();
+        if (null == folderId) {
+            return isValidFor(session);
+        } else {
+            return "com.openexchange.infostore".equals(new FolderID(folderId).getService());
+        }
     }
 
     @Override
@@ -244,19 +256,19 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
         // Add static time facet
         {
-            final String fieldTime = Constants.FIELD_TIME;
-            facets.add(Facets.newExclusiveBuilder(DriveFacetType.TIME)
-                .addValue(FacetValue.newBuilder(DriveConstants.FACET_VALUE_LAST_WEEK)
-                    .withLocalizableDisplayItem(DriveStrings.LAST_WEEK)
-                    .withFilter(Filter.of(fieldTime, DriveConstants.FACET_VALUE_LAST_WEEK))
+            final String fieldDate = CommonConstants.FIELD_DATE;
+            facets.add(Facets.newExclusiveBuilder(CommonFacetType.DATE)
+                .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_WEEK)
+                    .withLocalizableDisplayItem(CommonStrings.LAST_WEEK)
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_WEEK))
                     .build())
-                .addValue(FacetValue.newBuilder(DriveConstants.FACET_VALUE_LAST_MONTH)
-                    .withLocalizableDisplayItem(DriveStrings.LAST_MONTH)
-                    .withFilter(Filter.of(fieldTime, DriveConstants.FACET_VALUE_LAST_MONTH))
+                .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_MONTH)
+                    .withLocalizableDisplayItem(CommonStrings.LAST_MONTH)
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_MONTH))
                     .build())
-                .addValue(FacetValue.newBuilder(DriveConstants.FACET_VALUE_LAST_YEAR)
-                    .withLocalizableDisplayItem(DriveStrings.LAST_YEAR)
-                    .withFilter(Filter.of(fieldTime, DriveConstants.FACET_VALUE_LAST_YEAR))
+                .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_YEAR)
+                    .withLocalizableDisplayItem(CommonStrings.LAST_YEAR)
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_YEAR))
                     .build())
                 .build());
         }

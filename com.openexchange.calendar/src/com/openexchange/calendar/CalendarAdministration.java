@@ -657,6 +657,10 @@ public class CalendarAdministration implements CalendarAdministrationService {
             replaceOrganizerId.append(" pd SET ");
             replaceOrganizerId.append(collection.getFieldName(CalendarObject.ORGANIZER_ID));
             replaceOrganizerId.append(" = ");
+            replaceOrganizerId.append(deleteEvent.getContext().getMailadmin());
+            replaceOrganizerId.append(", ");
+            replaceOrganizerId.append(collection.getFieldName(CalendarObject.ORGANIZER));
+            replaceOrganizerId.append(" = ");
             replaceOrganizerId.append("NULL ");
             replaceOrganizerId.append(", ");
             replaceOrganizerId.append(collection.getFieldName(DataObject.LAST_MODIFIED));

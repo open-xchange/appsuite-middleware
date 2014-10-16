@@ -53,14 +53,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link DistributedFileManagementImpl}
@@ -85,73 +96,177 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
     private final String mapName;
     private final String address;
     private final ServiceLookup services;
+    private final BundleContext bundleContext;
+    private ServiceRegistration<HazelcastInstanceNotActiveException> hzDownRegistration;
+    private final Runnable shutDownTask;
 
-    public DistributedFileManagementImpl(ServiceLookup services, String address, String mapName) {
+    /**
+     * Initializes a new {@link DistributedFileManagementImpl}.
+     */
+    public DistributedFileManagementImpl(ServiceLookup services, String address, String mapName, BundleContext bundleContext, Runnable shutDownTask) {
         super();
         this.services = services;
         this.address = address;
         this.mapName = mapName;
+        this.bundleContext = bundleContext;
+        this.shutDownTask = shutDownTask;
+    }
+
+    /**
+     * Performs necessary clean-up actions before destroying this distributed file management service.
+     */
+    public synchronized void cleanUp() {
+        ServiceRegistration<HazelcastInstanceNotActiveException> hzDownRegistration = this.hzDownRegistration;
+        if (null != hzDownRegistration) {
+            hzDownRegistration.unregister();
+            this.hzDownRegistration = null;
+        }
+    }
+
+    /**
+     * Handles special {@link HazelcastInstanceNotActiveException} exception instance.
+     *
+     * @param hzDown The {@link HazelcastInstanceNotActiveException} exception instance signaling a broken Hazelcast cluster
+     */
+    protected synchronized void handleHzNotActiveException(HazelcastInstanceNotActiveException hzDown) {
+        if (null == hzDownRegistration) {
+            hzDownRegistration = bundleContext.registerService(HazelcastInstanceNotActiveException.class, hzDown, null);
+            LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
+            shutDownTask.run();
+        }
     }
 
     @Override
     public void register(String id) throws OXException {
-        map().put(id, getURI());
+        try {
+            map().put(id, getURI());
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleHzNotActiveException(e);
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public void unregister(String id) throws OXException {
-        map().remove(id);
+        try {
+            map().remove(id);
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleHzNotActiveException(e);
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public InputStream get(String id) throws OXException {
-        String url = map().get(id);
-        InputStream retval = null;
-        if (url != null) {
-            try {
-                retval = loadFile("http://" + url + "/" + id);
-            } catch (IOException e) {
-                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        try {
+            String url = map().get(id);
+            InputStream retval = null;
+            if (url != null) {
+                try {
+                    retval = loadFile("http://" + url + "/" + id);
+                } catch (IOException e) {
+                    throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+                }
             }
-        }
 
-        return retval;
+            return retval;
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleHzNotActiveException(e);
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public void touch(String id) throws OXException {
-        String url = map().get(id);
-        if (url != null) {
-            try {
-                URL remoteUrl = new URL("http://" + url + "/" + id);
-                HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
-                con.setRequestMethod("POST");
-                con.setConnectTimeout(CONNECT_TIMEOUT);
-                con.connect();
-            } catch (IOException e) {
-                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        try {
+            String url = map().get(id);
+            if (url != null) {
+                try {
+                    URL remoteUrl = new URL("http://" + url + "/" + id);
+                    HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setConnectTimeout(CONNECT_TIMEOUT);
+                    con.connect();
+                } catch (IOException e) {
+                    throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+                }
             }
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleHzNotActiveException(e);
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean exists(final String id, long timeout, TimeUnit unit) throws OXException, TimeoutException {
+        Future<Boolean> f = services.getService(ThreadPoolService.class).getExecutor().submit(new Callable<Boolean>() {
+
+            @Override
+            public Boolean call() throws OXException {
+                try {
+                    return Boolean.valueOf(map().containsKey(id));
+                } catch (HazelcastInstanceNotActiveException e) {
+                    handleHzNotActiveException(e);
+                    throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } catch (RuntimeException e) {
+                    throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+
+        try {
+            return f.get(timeout, unit).booleanValue();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, "Thread interrupted");
+        } catch (ExecutionException e) {
+            throw ThreadPools.launderThrowable(e, OXException.class);
+        } catch (TimeoutException e) {
+            f.cancel(true);
+            throw e;
         }
     }
 
     @Override
     public boolean exists(String id) throws OXException {
-        return map().containsKey(id);
+        try {
+            return map().containsKey(id);
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleHzNotActiveException(e);
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public void remove(String id) throws OXException {
-        String url = map().get(id);
-        if (url != null) {
-            try {
-                URL remoteUrl = new URL("http://" + url + "/" + id);
-                HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
-                con.setRequestMethod("DELETE");
-                con.setConnectTimeout(CONNECT_TIMEOUT);
-                con.connect();
-            } catch (IOException e) {
-                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        try {
+            String url = map().get(id);
+            if (url != null) {
+                try {
+                    URL remoteUrl = new URL("http://" + url + "/" + id);
+                    HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
+                    con.setRequestMethod("DELETE");
+                    con.setConnectTimeout(CONNECT_TIMEOUT);
+                    con.connect();
+                } catch (IOException e) {
+                    throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+                }
             }
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleHzNotActiveException(e);
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -159,12 +274,25 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         return address + PATH;
     }
 
-    private IMap<String, String> map() throws OXException {
+    /**
+     * Gets the associyated Hazelcast map.
+     *
+     * @return The Hazelcast map
+     * @throws OXException If Hazelcast map cannot be returned
+     */
+    protected IMap<String, String> map() throws OXException {
         HazelcastInstance hazelcastInstance = REFERENCE.get();
         if (hazelcastInstance == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
         }
-        return hazelcastInstance.getMap(mapName);
+        try {
+            return hazelcastInstance.getMap(mapName);
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleHzNotActiveException(e);
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     private InputStream loadFile(String url) throws IOException {

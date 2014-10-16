@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
-import com.openexchange.report.appsuite.Report;
+import com.openexchange.report.appsuite.serialization.Report;
 
 
 /**
@@ -67,30 +67,30 @@ public class Total implements ContextReportCumulator{
     public boolean appliesTo(String reportType) {
         return "default".equals(reportType);
     }
-    
+
     @Override
     public void merge(ContextReport contextReport, Report report) {
         // Count up one for each context
         long contexts = report.get("total", "contexts", 0l, Long.class);
         report.set("total", "contexts", contexts + 1);
-        
+
         // Sum up the totals of the capabilities combinations from the CapabilityHandler
         long users = report.get("total", "users", 0l, Long.class);
-        
+
         Map<String, Object> macdetail = contextReport.getNamespace("macdetail");
-        
+
         for(Map.Entry<String, Object> entry: macdetail.entrySet()) {
             HashMap<String, Long> counts = (HashMap) entry.getValue();
-            
+
             if (counts != null && counts.containsKey("total")) {
                 users += counts.get("total");
             }
         }
-        
+
         report.set("total", "users", users);
-        
+
         report.set("total", "report-format", "appsuite-short");
     }
-        
+
 
 }

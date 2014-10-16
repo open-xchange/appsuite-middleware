@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.outlook.sql;
 
-import static com.openexchange.folderstorage.outlook.OutlookServiceRegistry.getServiceRegistry;
 import static com.openexchange.folderstorage.outlook.sql.Utility.debugSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -96,7 +96,7 @@ public final class Insert {
      * @throws OXException If insertion fails
      */
     public static void insertFolder(final int cid, final int tree, final int user, final Folder folder) throws OXException {
-        final DatabaseService databaseService = getServiceRegistry().getService(DatabaseService.class, true);
+        final DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
         final Connection con = databaseService.getWritable(cid);
         try {

@@ -106,6 +106,7 @@ public class CopyAction extends ContactAction {
         contact.removeObjectID();
         contact.removeParentFolderID();
         contact.removeInternalUserId();
+        contact.removeUid();
         boolean hasAttachments = 0 < contact.getNumberOfAttachments();
         /*
          * create copy

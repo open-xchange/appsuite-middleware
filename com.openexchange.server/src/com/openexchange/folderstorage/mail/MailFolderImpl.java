@@ -52,7 +52,9 @@ package com.openexchange.folderstorage.mail;
 import static com.openexchange.folderstorage.mail.MailFolderStorage.closeMailAccess;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.hash.TIntIntHashMap;
+import java.util.EnumSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -70,11 +72,13 @@ import com.openexchange.folderstorage.mail.contentType.SentContentType;
 import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
-import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -84,6 +88,7 @@ import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -147,6 +152,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         }
 
     }
+
+    private static Set<MailFolderType> STANDARD_FOLDER_TYPES = EnumSet.of(MailFolderType.INBOX, MailFolderType.TRASH, MailFolderType.DRAFTS, MailFolderType.SENT, MailFolderType.SPAM);
 
     private final MailFolderType mailFolderType;
     private final boolean cacheable;
@@ -220,11 +227,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         for (int i = 0; i < mailPermissions.length; i++) {
             permissions[i] = new MailPermissionImpl(mailPermissions[i]);
         }
-        type = SystemType.getInstance();
+        type = MailType.getInstance();
         final boolean ignoreSubscription = mailConfig.getMailProperties().isIgnoreSubscription();
         subscribed = ignoreSubscription ? true : mailFolder.isSubscribed(); // || mailFolder.hasSubscribedSubfolders();
         subscribedSubfolders = ignoreSubscription ? mailFolder.hasSubfolders() : mailFolder.hasSubscribedSubfolders();
-        this.capabilities = mailConfig.getCapabilities().getCapabilities();
         {
             final String value =
                 mailFolder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(mailFolder.getMessageCount()).append('/').append(
@@ -352,6 +358,28 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 mailFolderType = MailFolderType.NONE;
             }
             this.mailFolderType = mailFolderType;
+        }
+
+        {
+            String client = Strings.asciiLowerCase(mailAccess.getSession().getClient());
+            if (null == client || !client.startsWith("usm-")) {
+                if (MailFolderType.NONE.equals(this.mailFolderType)) {
+                    if (mailFolder.containsShared() && mailFolder.isShared()) {
+                        type = SharedType.getInstance();
+                    } else if (mailFolder.containsPublic() && mailFolder.isPublic()) {
+                        type = PublicType.getInstance();
+                    }
+                }
+            }
+        }
+
+        {
+            int caps = mailConfig.getCapabilities().getCapabilities();
+            if ((caps & MailCapabilities.BIT_SUBSCRIPTION) > 0 && STANDARD_FOLDER_TYPES.contains(this.mailFolderType)) {
+                // Subscribe/unsubscribe not allowed for standard folder
+                caps &= ~MailCapabilities.BIT_SUBSCRIPTION;
+            }
+            this.capabilities = caps;
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
@@ -646,11 +674,6 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     @Override
     public void setDefaultType(final int defaultType) {
         // Nothing to do
-    }
-
-    @Override
-    public Type getType() {
-        return MailType.getInstance();
     }
 
     @Override

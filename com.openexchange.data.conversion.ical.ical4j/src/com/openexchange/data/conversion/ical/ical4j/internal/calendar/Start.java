@@ -82,15 +82,16 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
 
     @Override
     public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
-        final DtStart start = new DtStart();
-        String tz = EmitterTools.extractTimezoneIfPossible(calendar);
-        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getStartDate()) : toDateTime(mode.getZoneInfo(), calendar.getStartDate(),tz);
-        start.setDate(date);
+        /*
+         * emit as date or date-time depending on fulltime flag
+         */
+        DtStart start = new DtStart();
+        if (calendar.getFullTime()) {
+            start.setDate(toDate(calendar.getStartDate()));
+        } else {
+            start.setDate(toDateTime(mode.getZoneInfo(), calendar.getStartDate(), EmitterTools.extractTimezoneIfPossible(calendar)));
+        }
         component.getProperties().add(start);
-    }
-
-    private boolean needsDate(final U calendar) {
-        return Appointment.class.isAssignableFrom(calendar.getClass()) && ((Appointment)calendar).getFullTime();
     }
 
     @Override
@@ -104,7 +105,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     }
 
     @Override
-    public void parse(final int index, final T component, final U calendar,        final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+    public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         if (overrideFullTimeSetting(component, calendar)) {
             return;
         }
@@ -113,8 +114,8 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         final boolean isDateTime = isDateTime(component, dtStart);
         final TimeZone UTC = TimeZone.getTimeZone("UTC");
         final Date start = parseDateConsideringDateType(component, dtStart, timeZone);
-
         calendar.setStartDate(start);
+        calendar.setFullTime(false == isDateTime);
         if (component.getProperty(Property.DTEND) == null && calendar instanceof Appointment) {
             // If an end is specified end date will be overwritten.
             if (isDateTime) {
@@ -136,22 +137,15 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
                 // Special flag for appointments.
             }
         }
-
-        if (!isDateTime && calendar instanceof Appointment) {
-            final Appointment appointment = (Appointment) calendar;
-            appointment.setFullTime(true);
-        }
     }
 
     /**
      * Overrides fulltime setting depending on Exchange Property: X-MICROSOFT-CDO-ALLDAYEVENT
-     * 
+     *
      * @param component
      * @param calendar
      */
     private boolean overrideFullTimeSetting(T component, U calendar) {
-        boolean retval = false;
-        
         DtStart dtStart = new DtStart();
         Property msAllDay = component.getProperty(XMicrosoftCdoAlldayEvent.property);
         if (msAllDay != null && msAllDay.getValue().equalsIgnoreCase("true")) {
@@ -160,15 +154,9 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
             Date s = new Date(dateProperty.getDate().getTime() + timeZoneOffset);
             calendar.setStartDate(s);
             calendar.setEndDate(s);
-            
-            if (calendar instanceof Appointment) {
-                Appointment appointment = (Appointment) calendar;
-                appointment.setFullTime(true);
-            }
-            
-            retval = true;
+            calendar.setFullTime(true);
+            return true;
         }
-        
-        return retval;
+        return false;
     }
 }

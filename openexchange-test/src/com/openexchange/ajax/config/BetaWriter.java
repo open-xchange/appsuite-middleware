@@ -51,53 +51,46 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Random;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 
 /**
- * {@link Runnable} that constantly writes 
+ * {@link Runnable} that constantly writes
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class BetaWriter implements Runnable {
+public final class BetaWriter extends AttributeWriter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BetaWriter.class);
 
-    private final User user;
-    private boolean run = true;
+    private final Random rand;
 
-    private Throwable t;
+    private final boolean ignoreConcurrentModification;
 
     public BetaWriter(User user) {
-        super();
-        this.user = user;
+        this(user, false);
     }
 
-    public void stop() {
-        run = false;
-    }
-
-    public Throwable getThrowable() {
-        return t;
+    public BetaWriter(User user, boolean ignoreConcurrentModification) {
+        super(Tree.Beta, user);
+        rand = new Random(System.currentTimeMillis());
+        this.ignoreConcurrentModification = ignoreConcurrentModification;
     }
 
     @Override
-    public void run() {
-        Random rand = new Random(System.currentTimeMillis());
-        try {
-            // This does a login which also touches the user attributes for the last login time stamp.
-            AJAXClient client = new AJAXClient(user);
-            while (run) {
-                // Touches the user attributes a second time.
-                client.execute(new SetRequest(Tree.Beta, B(rand.nextBoolean())));
-            }
-            client.logout();
-        } catch (Throwable t2) {
-            LOG.error(t2.getMessage(), t2);
-            t = t2;
+    protected Object getValue() {
+        return B(rand.nextBoolean());
+    }
+
+    @Override
+    protected Throwable handleError(Throwable t) {
+        if (ignoreConcurrentModification && t instanceof OXException && UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.equals((OXException) t)) {
+            LOG.warn(t.getMessage());
+            return null;
         }
+
+        return t;
     }
 }

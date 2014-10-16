@@ -87,7 +87,7 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
-        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override

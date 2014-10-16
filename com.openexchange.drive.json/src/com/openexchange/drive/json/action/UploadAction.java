@@ -57,9 +57,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.drive.json.json.JsonFileVersion;
@@ -78,7 +78,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class UploadAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
          * no limits for upload
          */

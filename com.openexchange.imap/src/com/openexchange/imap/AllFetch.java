@@ -204,7 +204,7 @@ public final class AllFetch {
                 m.addFrom(envelope.from);
                 // Sender and Reply-To
                 m.addHeader("Sender", addrs2String(envelope.sender));
-                m.addHeader("Reply-To", addrs2String(envelope.replyTo));
+                m.addReplyTo(envelope.replyTo);
                 // In-Reply-To and Message-Id
                 m.addHeader("In-Reply-To", envelope.inReplyTo);
                 m.addHeader("Message-Id", envelope.messageId);

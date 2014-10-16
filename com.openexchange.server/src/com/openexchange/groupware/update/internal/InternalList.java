@@ -735,6 +735,23 @@ public final class InternalList {
         // Ensures that each folder located below a user's default infostore trash folder is of type 16
         list.add(new com.openexchange.groupware.update.tasks.FolderInheritTrashFolderTypeTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.6.1 starts here. +++++++++++++++++++++++++++++++++
+
+        // Removes invalid priority values from tasks
+        list.add(new com.openexchange.groupware.update.tasks.TasksDeleteInvalidPriorityTask());
+
+        // Corrects values in the 'changing_date' column that are set to {@link Long#MAX_VALUE}.
+        list.add(new com.openexchange.groupware.update.tasks.FolderCorrectChangingDateTask());
+
+        // (Re-)adds indexes in prg_contacts for "auto-complete" queries
+        list.add(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearchV2());
+
+        // Check if foreign keys in date tables are dropped and drop them if necessary
+        list.add(new com.openexchange.groupware.update.tasks.CheckAndDropDateExternalForeignKeysUpdateTask());
+
+        // Adds the 'full_time' column to the tasks tables
+        list.add(new com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

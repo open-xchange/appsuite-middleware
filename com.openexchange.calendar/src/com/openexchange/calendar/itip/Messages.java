@@ -268,7 +268,7 @@ public class Messages implements LocalizableStrings {
 
     public static final String ASK_RESCHEDULE = "Reschedule the event. Original date: %1$s. New date: %2$s";
 
-    public static final String INTENTION_RESCHEDULE = "Reschedule the event. Original date: %1$s. New date: %2$s";
+    public static final String INTENTION_RESCHEDULE = "Reschedule the event. Original date/time: %1$s. New date/time: %2$s";
 
     public static final String LABEL_RESOURCES = "Resources";
 

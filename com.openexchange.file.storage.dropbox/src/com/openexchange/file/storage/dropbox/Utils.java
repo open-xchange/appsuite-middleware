@@ -49,7 +49,13 @@
 
 package com.openexchange.file.storage.dropbox;
 
+import java.util.Date;
+import com.dropbox.client2.RESTUtility;
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxServerException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -64,6 +70,19 @@ public final class Utils {
      */
     private Utils() {
         super();
+    }
+
+    /**
+     * Normalizes given folder identifier
+     *
+     * @param folderId The folder identifier
+     * @return The normalizes folder identifier
+     */
+    public static String normalizeFolderId(String folderId) {
+        if (null == folderId) {
+            return folderId;
+        }
+        return folderId.endsWith("/") ? folderId.substring(0, folderId.length() - 1) : folderId;
     }
 
     /**
@@ -123,4 +142,45 @@ public final class Utils {
         }
         return fileId;
     }
+
+    /**
+     * Parses a date from the supplied dropbox date format string.
+     *
+     * @param dateString The dropbox date
+     * @return The date, or <code>null</code>, if the supplied input string was <code>null</code> or not parsable
+     */
+    public static Date parseDate(String dateString) {
+        if (Strings.isEmpty(dateString)) {
+            return null;
+        }
+        synchronized (RESTUtility.class) {
+            return RESTUtility.parseDate(dateString);
+        }
+    }
+
+    /**
+     * Wraps the supplied exception into the most appropriate OX exception.
+     *
+     * @param e The exception
+     * @param path The path of the dropbox entry where the exception occurred, or <code>null</code> if not relevant
+     * @return The most appropriate OX exception, ready to be re-thrown
+     */
+    public static OXException handle(Exception e, String path) {
+        if (OXException.class.isInstance(e)) {
+            return (OXException) e;
+        }
+        if (DropboxServerException.class.isInstance(e)) {
+            DropboxServerException serverException = (DropboxServerException) e;
+            if (null != path && DropboxServerException._404_NOT_FOUND == serverException.error) {
+                return DropboxExceptionCodes.NOT_FOUND.create(e, path);
+            }
+            return DropboxExceptionCodes.DROPBOX_SERVER_ERROR.create(serverException, Integer.valueOf(serverException.error),
+                null == serverException.body.userError ? serverException.body.error : serverException.body.userError);
+        }
+        if (DropboxException.class.isInstance(e)) {
+            return DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        }
+        return DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+    }
+
 }

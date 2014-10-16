@@ -53,6 +53,7 @@ import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.isTransactionRollbackException;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -122,6 +123,7 @@ public final class TaskLogic {
         checkPrivateFlag(task.getPrivateFlag(), false, participants, null);
         checkParticipants(participants);
         checkRecurrence(task, null);
+        checkPriority(task);
     }
 
     /**
@@ -163,6 +165,7 @@ public final class TaskLogic {
         final Set<TaskParticipant> destParts = changedParts ? newParts : oldParts;
         checkParticipants(destParts);
         checkRecurrence(task, oldTask);
+        checkPriority(task);
     }
 
     /**
@@ -393,6 +396,20 @@ public final class TaskLogic {
         }
         // Move first due date to first occurrence like appointments do.
         moveToFirstOccurrence(task);
+    }
+
+    /**
+     * Verifies that the priority of tasks is only in the allowed range.
+     * @param task task that priority should be tested.
+     * @throws OXException if task contains an invalid priority value.
+     */
+    private static void checkPriority(Task task) throws OXException {
+        if (task.containsPriority() && null != task.getPriority()) {
+            int priority = i(task.getPriority());
+            if (priority < Task.LOW || priority > Task.HIGH) {
+                throw TaskExceptionCode.INVALID_PRIORITY.create(task.getPriority());
+            }
+        }
     }
 
     /**

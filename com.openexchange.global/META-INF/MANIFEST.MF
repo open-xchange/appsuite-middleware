@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Global
 Bundle-SymbolicName: com.openexchange.global
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.ajax.meta,
@@ -18,6 +18,7 @@ Export-Package: com.openexchange.ajax.meta,
  com.openexchange.dispatcher,
  com.openexchange.event,
  com.openexchange.exception,
+ com.openexchange.exception.interception,
  com.openexchange.filemanagement,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
@@ -25,11 +26,14 @@ Export-Package: com.openexchange.ajax.meta,
  com.openexchange.i18n,
  com.openexchange.id,
  com.openexchange.json.cache,
+ com.openexchange.json.io,
  com.openexchange.lock,
  com.openexchange.log,
  com.openexchange.marker,
  com.openexchange.mime,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
+ com.openexchange.servlet,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.startup,
@@ -140,7 +144,7 @@ Import-Package: ch.qos.logback.classic,
  org.osgi.util.tracker,
  org.slf4j,
  org.slf4j.spi
-Bundle-Activator: com.openexchange.server.GlobalActivator
+Bundle-Activator: com.openexchange.global.osgi.GlobalActivator
 Bundle-ClassPath: lib/stringsearch-2.jar,
  lib/stringsearch-1.0.0.jar,
  .

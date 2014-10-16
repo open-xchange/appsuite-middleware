@@ -49,9 +49,9 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -103,13 +103,13 @@ public class UpdatesAction extends ContactAction {
         /*
          * add modified contacts
          */
-        List<Contact> modifiedContacts = new ArrayList<Contact>();
+        List<Contact> modifiedContacts = new LinkedList<Contact>();
         Date lastModified = addContacts(modifiedContacts, contactService.getModifiedContacts(
             request.getSession(), request.getFolderID(), since, fields), excludedAdminID);
         /*
          * add deleted contacts
          */
-        List<Contact> deletedContacts = new ArrayList<Contact>();
+        List<Contact> deletedContacts = new LinkedList<Contact>();
         if (false == "deleted".equals(request.getIgnore())) {
             Date lastModified2 = addContacts(deletedContacts, contactService.getDeletedContacts(
                 request.getSession(), request.getFolderID(), since, fields), excludedAdminID);

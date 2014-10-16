@@ -86,6 +86,7 @@ import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.json.io.Jsonable;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -186,6 +187,36 @@ public final class ResponseWriter {
                         }
                     }));
                     includeStackTraceOnError = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
+    static volatile Boolean includeArguments;
+    private static boolean includeArguments() {
+        Boolean b = includeArguments;
+        if (null == b) {
+            synchronized (ResponseWriter.class) {
+                b = includeArguments;
+                if (null == b) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return false;
+                    }
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeArguments", false, new PropertyListener() {
+
+                        @Override
+                        public void onPropertyChange(PropertyEvent event) {
+                            final Type type = event.getType();
+                            if (Type.DELETED == type) {
+                                includeArguments = Boolean.FALSE;
+                            } else if (Type.CHANGED == type) {
+                                includeArguments = Boolean.valueOf(event.getValue().trim());
+                            }
+                        }
+                    }));
+                    includeArguments = b;
                 }
             }
         }
@@ -800,6 +831,9 @@ public final class ResponseWriter {
         writer.key(ERROR_DESC).value(exc.getSoleMessage());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
+        if (includeArguments()) {
+            writeArguments(exc, writer);
+        }
         if (exc.getLogArgs() != null) {
             final JSONArray array = new JSONArray();
             for (final Object tmp : exc.getLogArgs()) {
@@ -850,6 +884,36 @@ public final class ResponseWriter {
                 }
             }
             writer.key(TRUNCATED).value(array);
+        }
+    }
+
+    private static void writeArguments(final OXException exc, final JSONWriter writer) throws JSONException {
+        Map<String, Object> arguments = exc.getArguments();
+        if (!arguments.isEmpty()) {
+            try {
+                JSONObject jArguments = null;
+                for (Entry<String, Object> argument : arguments.entrySet()) {
+                    Object value = argument.getValue();
+                    if (value instanceof Jsonable) {
+                        Object jValue = ((Jsonable) value).toJson();
+                        if (null != jValue) {
+                            if (null == jArguments) {
+                                jArguments = new JSONObject(4);
+                            }
+                            jArguments.put(argument.getKey(), jValue);
+                        }
+                    }
+                }
+                if (null != jArguments) {
+                    writer.key(ARGUMENTS).value(jArguments);
+                }
+            } catch (IOException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof JSONException) {
+                    throw (JSONException) cause;
+                }
+                throw new JSONException("Error while composing JSON", e);
+            }
         }
     }
 

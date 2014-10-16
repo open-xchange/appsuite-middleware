@@ -52,6 +52,7 @@ package com.openexchange.mailaccount.json.fields;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.TransportAuth;
 
 /**
  * {@link SetSwitch}
@@ -299,6 +300,17 @@ public class SetSwitch implements AttributeSwitch {
     @Override
     public Object archiveFullname() {
         desc.setArchiveFullname((String) value);
+        return null;
+    }
+
+    @Override
+    public Object transportAuth() {
+        if (value instanceof TransportAuth) {
+            desc.setTransportAuth((TransportAuth) value);
+        } else {
+            TransportAuth tmp = null == value ? null : TransportAuth.transportAuthFor(value.toString());
+            desc.setTransportAuth(tmp);
+        }
         return null;
     }
 

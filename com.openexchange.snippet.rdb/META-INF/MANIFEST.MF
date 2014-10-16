@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippted RDB Bundle
 Bundle-SymbolicName: com.openexchange.snippet.rdb
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.snippet.rdb.osgi.RdbSnippetActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -44,7 +44,7 @@ Import-Package: com.openexchange.cache,
  gnu.trove.list.array,
  gnu.trove.procedure,
  org.apache.commons.logging,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Require-Bundle: ch.qos.logback.classic

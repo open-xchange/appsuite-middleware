@@ -113,7 +113,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         @Override
         public boolean accept(final File pathname) {
-            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext);
+            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext) || !pathname.getName().contains(".");
         }
 
     }

@@ -55,9 +55,14 @@ import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tx.TransactionAware;
 
+/**
+ * {@link InfostoreSearchEngine} - The Infostore search engine.
+ */
+@SingletonService
 public interface InfostoreSearchEngine extends TransactionAware{
 
 	public static final int DESC = -1;

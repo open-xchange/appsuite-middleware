@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.infostore.folder;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -114,7 +113,7 @@ public final class ParsedFolder implements Folder {
 
     protected String newId;
 
-    protected Map<String, Object> meta = new HashMap<String,Object>();
+    protected Map<String, Object> meta;
 
     protected Set<String> supportedCapbilitites;
 

@@ -49,60 +49,38 @@
 
 package com.openexchange.quota;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.List;
 
 /**
- * {@link QuotaService} - The quota service.
+ * Open-Xchange consists of a set of modules that serve user requests.
+ * Every module that allows users to store data may provide limits for a
+ * certain amount of storage and a certain number of items that it will handle
+ * for each user. In other words, every module can have user-specific quotas
+ * for storage size and items. Those quotas may be set by definition or
+ * by configuration and can also be unlimited. The responsibility to
+ * enforce quotas lies within the modules themselves, but they can announce
+ * their quotas via this service. That enables a client to provide a
+ * combined overview over all quotas. Each module that wants to contribute
+ * to this service has to implement a {@link QuotaProvider}.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
 public interface QuotaService {
 
     /**
-     * Gets the quota for denoted resource that needs no {@link ResourceDescription resource description}.
-     * <p>
-     * <b>Note</b>: In order to query possible quota restriction, an appropriate {@link QuotaRestriction} needs to be registered for desired
-     * {@link Resource resource}.
-     * <p>
-     * Pre-Defined resources are:
-     * <ul>
-     * <li>{@link Resource#CALENDAR}</li>
-     * <li>{@link Resource#CONTACT}</li>
-     * <li>{@link Resource#TASK}</li>
-     * <li>{@link Resource#INFOSTORE_FILES}</li>
-     * <ul>
-     * <p>
+     * Gets all currently known {@link QuotaProvider}s.
      *
-     * @param resource The resource
-     * @param session The user session
-     * @return The quota
-     * @throws OXException If querying quota fails
+     * @return A list of providers. Never <code>null</code> but possibly empty.
      */
-    Quota getQuotaFor(Resource resource, Session session) throws OXException;
+    List<QuotaProvider> getAllProviders();
 
     /**
-     * Gets the quota for denoted resource.
-     * <p>
-     * <b>Note</b>: In order to query possible quota restriction, an appropriate {@link QuotaRestriction} needs to be registered for desired
-     * {@link Resource resource}.
-     * <p>
-     * Pre-Defined resources are:
-     * <ul>
-     * <li>{@link Resource#CALENDAR}</li>
-     * <li>{@link Resource#CONTACT}</li>
-     * <li>{@link Resource#TASK}</li>
-     * <li>{@link Resource#INFOSTORE_FILES}</li>
-     * <ul>
-     * <p>
+     * Gets the provider for a specific module, if available.
      *
-     * @param resource The resource
-     * @param desc The resource description (if needed to determine resource's quota); or
-     *            {@link ResourceDescription#getEmptyResourceDescription()} if none needed
-     * @param session The user session
-     * @return The quota
-     * @throws OXException If querying quota fails
-     * @see ResourceDescription#getEmptyResourceDescription()
+     * @param moduleID The modules unique identifier.
+     * @return The modules provider or <code>null</code>, if unknown.
      */
-    Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException;
+    QuotaProvider getProvider(String moduleID);
+
 }

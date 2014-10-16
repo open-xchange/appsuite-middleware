@@ -83,6 +83,14 @@ public class ProtocolException extends Exception {
     }
 
     /**
+     * Constructs a ProtocolException with the specified Response object.
+     */
+    public ProtocolException(Response r, Throwable cause) {
+    super(r.toString(), cause);
+    response = r;
+    }
+
+    /**
      * Return the offending Response object.
      */
     public Response getResponse() {

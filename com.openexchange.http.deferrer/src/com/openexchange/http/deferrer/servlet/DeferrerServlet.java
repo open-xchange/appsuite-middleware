@@ -49,7 +49,7 @@
 
 package com.openexchange.http.deferrer.servlet;
 
-import static com.openexchange.ajax.AJAXServlet.encodeUrl;
+import static com.openexchange.ajax.AJAXUtility.encodeUrl;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.net.URL;
@@ -64,7 +64,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
@@ -101,7 +100,7 @@ public class DeferrerServlet extends HttpServlet {
         }
 
         final Map<String, String> params = parseQueryStringFromUrl(redirectURL);
-        final StringBuilder builder = new StringBuilder(AJAXUtility.encodeUrl(redirectURL, true, false));
+        final StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, true, false));
         for (final Enumeration<?> parameterNames = req.getParameterNames(); parameterNames.hasMoreElements();) {
             final String name = (String) parameterNames.nextElement();
             if ("redirect".equals(name) || params.containsKey(name)) {
@@ -110,7 +109,7 @@ public class DeferrerServlet extends HttpServlet {
             final String parameter = req.getParameter(name);
             builder.append(concat);
             concat = '&';
-            builder.append(name).append('=').append(AJAXUtility.encodeUrl(parameter, true, true));
+            builder.append(name).append('=').append(encodeUrl(parameter, true, true));
         }
         resp.sendRedirect(builder.toString());
     }

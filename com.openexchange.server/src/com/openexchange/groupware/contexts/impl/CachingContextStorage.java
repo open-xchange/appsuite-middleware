@@ -50,10 +50,13 @@
 package com.openexchange.groupware.contexts.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
@@ -128,6 +131,11 @@ public class CachingContextStorage extends ContextStorage {
     public List<Integer> getAllContextIds() throws OXException {
         return persistantImpl.getAllContextIds();
     }
+    
+    @Override
+    public List<Integer> getAllContextIdsForFilestore(int filestoreId) throws OXException {
+        return persistantImpl.getAllContextIdsForFilestore(filestoreId);
+    }
 
     @Override
     protected void startUp() throws OXException {
@@ -159,24 +167,38 @@ public class CachingContextStorage extends ContextStorage {
 
     @Override
     public void invalidateContext(final int contextId) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (cacheService == null) {
+        invalidateContexts(new int[] { contextId });
+    }
+
+    @Override
+    public void invalidateContexts(int[] contextIDs) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null == cacheService) {
             // Cache not initialized.
             return;
         }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        try {
-            final Object object = cache.get(I(contextId));
-            if (object instanceof ContextExtended) {
-                for (final String loginInfo : ((ContextExtended) object).getLoginInfo()) {
-                    cache.remove(loginInfo);
+        /*
+         * gather cache keys to invalidate
+         */
+        Cache cache = cacheService.getCache(REGION_NAME);
+        List<Serializable> keys = new ArrayList<Serializable>();
+        for (int contextID : contextIDs) {
+            Integer key = Integer.valueOf(contextID);
+            keys.add(key);
+            Object cached = cache.get(key);
+            if (null != cached && Context.class.isInstance(cached)) {
+                String[] loginInfos = ((Context) cached).getLoginInfo();
+                if (null != loginInfos && 0 < loginInfos.length) {
+                    for (String loginInfo : loginInfos) {
+                        keys.add(loginInfo);
+                    }
                 }
             }
-        } catch (final Exception e) {
-            // Ignore
         }
-        // Finally remove context
-        cache.remove(I(contextId));
+        /*
+         * invalidate cache
+         */
+        cache.remove(keys);
     }
 
     @Override
@@ -215,5 +237,4 @@ public class CachingContextStorage extends ContextStorage {
         }
         return retval;
     }
-
 }

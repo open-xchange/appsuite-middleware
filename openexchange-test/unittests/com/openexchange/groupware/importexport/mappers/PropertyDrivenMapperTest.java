@@ -69,7 +69,7 @@ public class PropertyDrivenMapperTest extends TestCase {
         final Properties props = new Properties();
         props.put(myField.getAjaxName(), "Surname");
 
-        final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+        final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props, "test");
 
         assertTrue("Surname should be a supported field", mapper.getSupportedFields().contains(myField));
         assertFalse("Given name should not be a supported field", mapper.getSupportedFields().contains(notMyField));

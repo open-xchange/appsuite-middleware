@@ -62,11 +62,6 @@ import com.openexchange.i18n.LocalizableStrings;
 public class MailStrings implements LocalizableStrings {
 
     // Context: Searching in mail.
-    // Displayed as: [Search for] 'user input' in emails.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_GLOBAL = "in emails";
-
-    // Context: Searching in mail.
     // Displayed as: [Search for] 'user input' in subject.
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_SUBJECT = "in subject";
@@ -76,25 +71,16 @@ public class MailStrings implements LocalizableStrings {
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_MAIL_TEXT = "in mail text";
 
-    // Search in senders and recipients.
-    public static final String FACET_SENDER_AND_RECIPIENT = "Sender/Recipient";
+    // Search for mail conversations by people
+    public static final String FACET_PEOPLE = "People";
 
-    // Search in for sender.
-    public static final String FACET_SENDER = "Sender";
+    // Search for mails sent from or to ...
+    public static final String FACET_FROM_AND_TO = "From/To";
 
-    // Search in for recipient.
-    public static final String FACET_RECIPIENT = "Recipient";
+    // Search for mails sent from ...
+    public static final String FACET_FROM = "From";
 
-    // Search criteria time
-    public static final String FACET_TIME = "Time";
-
-    // Search mails from last week
-    public static final String LAST_WEEK = "last week";
-
-    // Search mails from last month
-    public static final String LAST_MONTH = "last month";
-
-    // Search mails from last year
-    public static final String LAST_YEAR = "last year";
+    // Search for mails sent to ...
+    public static final String FACET_TO = "To";
 
 }

@@ -54,10 +54,14 @@ import static com.openexchange.mail.mime.MimeTypes.equalPrimaryTypes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.mail.MessageRemovedException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -71,14 +75,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
+import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
@@ -89,6 +92,9 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
+import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
+import com.openexchange.mail.attachment.storage.StoreOperation;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
@@ -101,6 +107,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.HashUtility;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -117,7 +124,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "save", description = "1 overwrites the defined mimetype for this attachment to force the download dialog, otherwise 0."),
     @Parameter(name = "filter", optional = true, description = "1 to apply HTML white-list filter rules if and only if requested attachment is of MIME type text/htm* AND parameter save is set to 0.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.")
 @DispatcherNotes(allowPublicSession = true)
-public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService {
+public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final class ReconnectingInputStreamClosure implements IFileHolder.InputStreamClosure {
 
@@ -190,6 +197,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     private static final String PARAMETER_MAILATTCHMENT = Mail.PARAMETER_MAILATTCHMENT;
     private static final String PARAMETER_DELIVERY = Mail.PARAMETER_DELIVERY;
 
+    private final String lastModified;
+
     /**
      * Initializes a new {@link GetAttachmentAction}.
      *
@@ -197,6 +206,15 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
      */
     public GetAttachmentAction(final ServiceLookup services) {
         super(services);
+        lastModified = Tools.formatHeaderDate(new Date(309049200000L));
+    }
+
+    @Override
+    public boolean checkLastModified(long clientLastModified, AJAXRequestData request, ServerSession session) throws OXException {
+        /*
+         * Any Last-Modified is valid because an attachment cannot change
+         */
+        return clientLastModified > 0;
     }
 
     @Override
@@ -333,12 +351,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              * Set ETag
              */
             setETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), EXPIRES_MILLIS_YEAR, result);
+            result.setHeader("Last-Modified", lastModified);
             /*
              * Return result
              */
             return result;
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -358,97 +377,88 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         return new StringBuilder("file.").append(fileExtension).toString();
     }
 
-    private AJAXRequestResult performPUT(final MailRequest req, final JSONObject bodyObject) throws OXException {
+    private AJAXRequestResult performPUT(final MailRequest req, final JSONObject jsonFileObject) throws OXException {
         try {
-            final ServerSession session = req.getSession();
-            /*
-             * Read in parameters
-             */
-            final String folderPath = req.checkParameter(PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(PARAMETER_ID);
-            final String sequenceId = req.checkParameter(PARAMETER_MAILATTCHMENT);
-            final String destFolderIdentifier = req.checkParameter(Mail.PARAMETER_DESTINATION_FOLDER);
-            /*
-             * Get mail interface
-             */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-            final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
-            boolean performRollback = false;
-            try {
-                if (!session.getUserPermissionBits().hasInfostore()) {
-                    throw MailExceptionCode.NO_MAIL_ACCESS.create();
-                }
-                final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
-                if (mailPart == null) {
-                    throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
-                }
-                final String destFolderID = destFolderIdentifier;
-                /*
-                 * Create document's meta data
-                 */
-                final FileMetadataParserService parser = serviceRegistry.getService(FileMetadataParserService.class, true);
-                final JSONObject jsonFileObject = bodyObject;
-                final File file = parser.parse(jsonFileObject);
-                final List<Field> fields = parser.getFields(jsonFileObject);
-                final Set<Field> set = EnumSet.copyOf(fields);
-                String mimeType = mailPart.getContentType().getBaseType();
-                String fileName = mailPart.getFileName();
-                if (isEmpty(fileName)) {
-                    fileName = "part_" + sequenceId + ".dat";
-                } else {
-                    final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                    if (!MIME_APPL_OCTET.equals(contentTypeByFileName) && !equalPrimaryTypes(mimeType, contentTypeByFileName)) {
-                        mimeType = contentTypeByFileName;
-                    }
-                }
-                /*
-                 * Check file name for possible invalid characters
-                 */
-                fileName = fileName.replaceAll(Pattern.quote("/"), "_");
-                /*
-                 * Apply to file
-                 */
-                if (!set.contains(Field.FILENAME) || isEmpty(file.getFileName())) {
-                    file.setFileName(fileName);
-                }
-                file.setFileMIMEType(mimeType);
-                /*
-                 * Since file's size given from IMAP server is just an estimation and therefore does not exactly match the file's size a
-                 * future file access via webdav can fail because of the size mismatch. Thus set the file size to 0 to make the infostore
-                 * measure the size.
-                 */
-                file.setFileSize(0);
-                if (!set.contains(Field.TITLE) || isEmpty(file.getTitle())) {
-                    file.setTitle(fileName);
-                }
-                file.setFolderId(destFolderID);
-                /*
-                 * Start writing to infostore folder
-                 */
-                fileAccess.startTransaction();
-                performRollback = true;
-                fileAccess.saveDocument(file, mailPart.getInputStream(), System.currentTimeMillis(), fields);
-                fileAccess.commit();
-                performRollback = false;
-                /*
-                 * JSON response object
-                 */
-                final JSONObject jFileData = new JSONObject(8);
-                jFileData.put("mailFolder", folderPath);
-                jFileData.put("mailUID", uid);
-                jFileData.put("id", file.getId());
-                jFileData.put("folder_id", file.getFolderId());
-                jFileData.put("filename", file.getFileName());
-                return new AJAXRequestResult(jFileData, "json");
-            } finally {
-                if (fileAccess != null) {
-                    if (performRollback) {
-                        fileAccess.rollback();
-                    }
-                    fileAccess.finish();
+            ServerSession session = req.getSession();
+
+            // Read parameters
+            String folderPath = req.checkParameter(PARAMETER_FOLDERID);
+            String uid = req.checkParameter(PARAMETER_ID);
+            String sequenceId = req.checkParameter(PARAMETER_MAILATTCHMENT);
+            String destFolderIdentifier = req.checkParameter(Mail.PARAMETER_DESTINATION_FOLDER);
+
+            // Get mail interface
+            MailServletInterface mailInterface = getMailInterface(req);
+
+            // Get attachment storage
+            MailAttachmentStorage attachmentStorage = DefaultMailAttachmentStorageRegistry.getInstance().getMailAttachmentStorage();
+
+            if (!session.getUserPermissionBits().hasInfostore()) {
+                throw MailExceptionCode.NO_MAIL_ACCESS.create();
+            }
+
+            // Get mail part
+            MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
+            if (mailPart == null) {
+                throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+            }
+
+            // Destination folder
+            String destFolderID = destFolderIdentifier;
+
+            // Parse file from JSON data
+            FileMetadataParserService parser = ServerServiceRegistry.getInstance().getService(FileMetadataParserService.class, true);
+            File parsedFile = parser.parse(jsonFileObject);
+            List<Field> fields = parser.getFields(jsonFileObject);
+            Set<Field> set = EnumSet.copyOf(fields);
+
+            // Apply to mail part
+            String mimeType = mailPart.getContentType().getBaseType();
+            String fileName = mailPart.getFileName();
+            if (isEmpty(fileName)) {
+                fileName = "part_" + sequenceId + ".dat";
+            } else {
+                String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName, null);
+                if (null != contentTypeByFileName && !equalPrimaryTypes(mimeType, contentTypeByFileName)) {
+                    mimeType = contentTypeByFileName;
+                    mailPart.getContentType().setBaseType(mimeType);
                 }
             }
+
+            // Set file name
+            if (set.contains(Field.FILENAME) && !isEmpty(parsedFile.getFileName())) {
+                String givenFileName = parsedFile.getFileName();
+                givenFileName = givenFileName.replaceAll(Pattern.quote("/"), "_");
+                mailPart.setFileName(givenFileName);
+            } else {
+                fileName = fileName.replaceAll(Pattern.quote("/"), "_");
+                mailPart.setFileName(fileName);
+            }
+
+            // Store properties
+            Map<String, Object> storeProps = new HashMap<String, Object>(4);
+            storeProps.put("folder", destFolderID);
+
+            {
+                String description = parsedFile.getDescription();
+                if (null != description) {
+                    storeProps.put("description", description);
+                }
+            }
+
+            // Store
+            String id = attachmentStorage.storeAttachment(mailPart, StoreOperation.SIMPLE_STORE, storeProps, session);
+
+            /*
+             * JSON response object
+             */
+            final JSONObject jFileData = new JSONObject(8);
+            jFileData.put("mailFolder", folderPath);
+            jFileData.put("mailUID", uid);
+            jFileData.put("id", id);
+            jFileData.put("folder_id", destFolderID);
+            jFileData.put("filename", mailPart.getFileName());
+            return new AJAXRequestResult(jFileData, "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

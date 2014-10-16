@@ -74,6 +74,14 @@ public interface GlobalRealtimeCleanup extends RealtimeCleanup {
     public Collection<ID> removeFromResourceDirectory(ID id) throws OXException;
 
     /**
+     * Clean up states that were kept for the given id but only if the timestamp didn't change in the meantime 
+     * 
+     * @param id The {@link ID} to clean up
+     * @param stamp The timestamp of the ID at the time the cleanup was initiated.
+     */
+    public void cleanForId(ID id, long timestamp);
+
+    /**
      * Removes all available ResourceDirectory entries for the supplied IDs. For each ID, if it is in general form, all matching entries are
      * removed from the directory. If an ID denotes a concrete resource, i.e. it's resource-part is set, only one entry is removed if found.
      *

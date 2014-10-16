@@ -49,17 +49,20 @@
 
 package com.openexchange.realtime.cleanup;
 
+import java.util.Dictionary;
 import com.openexchange.realtime.packet.ID;
 
 /**
  * {@link RealtimeJanitor} - A service that can be instructed to execute different housekeeping and cleanup tasks. The service should be
  * implemented by realtime components that keep a local state so that a node-wide cleanup an be initiated by the
  * {@link LocalRealtimeCleanup} service that just collects all {@link RealtimeJanitor}s from the service registry (see OSGI whiteboard
- * pattern).
+ * pattern). Janitors can indicate a priority via {@link Constant.SERVICE_RANKING}
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface RealtimeJanitor {
+
+    static final int RANKING_SYNTHETIC_CHANNEL = 500;
 
     /**
      * Clean up states that were kept for the given id.
@@ -67,5 +70,14 @@ public interface RealtimeJanitor {
      * @param id
      */
     void cleanupForId(ID id);
+
+    /**
+     * Get the properties used when registering the service. The SERVICE_RANKING property is used to determine the order when instructing
+     * all the RealtimeJanitors to execute a cleanup task. The first entry is the service with the highest ranking and the lowest service
+     * id.
+     * 
+     * @return the properties used when registering the service
+     */
+    Dictionary<String, Object> getServiceProperties();
 
 }

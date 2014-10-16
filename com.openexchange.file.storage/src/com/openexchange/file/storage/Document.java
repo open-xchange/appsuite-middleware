@@ -52,67 +52,147 @@ package com.openexchange.file.storage;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link Document}
+ * {@link Document} - An efficient document view on a file.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class Document {
-    
+
     private String name, mimeType, etag;
     private long size;
-    
-    public Document() {
-        
+    private long lastModified;
+
+    /**
+     * Initializes a new {@link Document}.
+     */
+    protected Document() {
+        super();
+        size = -1L;
+        lastModified = -1L;
     }
-    
-    public Document(Document other) {
+
+    /**
+     * Initializes a new {@link Document} from given instance.
+     *
+     * @param other The instance to copy from
+     */
+    protected Document(Document other) {
+        this();
         this.name = other.getName();
         this.mimeType = other.getMimeType();
         this.etag = other.getEtag();
         this.size = other.getSize();
+        this.lastModified = other.getLastModified();
     }
-    
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
     public String getName() {
         return name;
     }
-    
-    public void setName(String name) {
+
+    /**
+     * Sets the name
+     *
+     * @param name The name
+     * @return This reference
+     */
+    public Document setName(String name) {
         this.name = name;
+        return this;
     }
-    
+
+    /**
+     * Gets the MIME type
+     *
+     * @return The MIME type
+     */
     public String getMimeType() {
         return mimeType;
     }
-    
+
+    /**
+     * Sets the MIME type
+     *
+     * @param mimeType The MIME type
+     * @return This reference
+     */
     public Document setMimeType(String mimeType) {
         this.mimeType = mimeType;
         return this;
     }
-    
+
+    /**
+     * Gets the eTag
+     *
+     * @return The eTag
+     */
     public String getEtag() {
         return etag;
     }
-    
+
+    /**
+     * Sets the eTag
+     *
+     * @param etag The eTag
+     * @return This reference
+     */
     public Document setEtag(String etag) {
         this.etag = etag;
         return this;
     }
-    
+
+    /**
+     * Gets the size in bytes
+     *
+     * @return The size in bytes or <code>-1</code> if unavailable
+     */
     public long getSize() {
         return size;
     }
-    
+
+    /**
+     * Sets the size in bytes
+     *
+     * @param size The size in bytes
+     * @return This reference
+     */
     public Document setSize(long size) {
         this.size = size;
         return this;
     }
-    
-    
+
+    /**
+     * Gets the last-modified time stamp
+     *
+     * @return The last-modified time stamp or <code>-1</code> if unavailable
+     */
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Sets the last-modified time stamp
+     *
+     * @param lastModified The last-modified time stamp to set
+     * @return This reference
+     */
+    public Document setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+        return this;
+    }
+
+    /**
+     * Gets the data input stream
+     *
+     * @return The input stream
+     * @throws OXException If input stream cannot be provided
+     */
     public abstract InputStream getData() throws OXException;
-    
-    
-    
-    
+
 }

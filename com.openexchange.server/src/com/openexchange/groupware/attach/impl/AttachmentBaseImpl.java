@@ -96,10 +96,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.Resource;
-import com.openexchange.quota.ResourceDescription;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -116,17 +112,6 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
-    private static final AtomicReference<QuotaService> QUOTA_SERVICE_REF = new AtomicReference<QuotaService>();
-
-    /**
-     * Sets {@link QuotaService} reference to given instance.
-     *
-     * @param quotaService The {@link QuotaService} instance or <code>null</code>
-     */
-    public static void setQuotaService(QuotaService quotaService) {
-        QUOTA_SERVICE_REF.set(quotaService);
-    }
-
     // ------------------------------------------------------------------------------------------------------------- //
 
     public static enum FetchMode {
@@ -134,6 +119,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     private static final FetchMode fetchMode = FetchMode.PREFETCH;
+
+    private static final AtomicReference<AttachmentQuotaProvider> QUOTA_PROVIDER_REF = new AtomicReference<AttachmentQuotaProvider>();
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentBaseImpl.class);
 
@@ -155,6 +142,10 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         super(provider);
     }
 
+    public static void setQuotaProvider(AttachmentQuotaProvider quotaProvider) {
+        QUOTA_PROVIDER_REF.set(quotaProvider);
+    }
+
     @Override
     public long attachToObject(final AttachmentMetadata attachment, final InputStream data, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
@@ -167,16 +158,16 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         final boolean newAttachment = attachment.getId() == NEW || attachment.getId() == 0;
 
         if (newAttachment) {
-            // Check if over quota
-            final QuotaService quotaService = QUOTA_SERVICE_REF.get();
-            if (null != quotaService) {
-                final Quota quota = quotaService.getQuotaFor(Resource.ATTACHMENT, ResourceDescription.getEmptyResourceDescription(), session);
-                final long amount = quota.getQuota(QuotaType.AMOUNT);
-                if (amount > 0) {
-                    final long numberOfAttachments = countAttachmentsInContext(ctx.getContextId());
-                    if (numberOfAttachments + 1 > amount) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_ATTACHMENTS.create(Long.valueOf(numberOfAttachments), Long.valueOf(amount));
-                    }
+            // Check quota
+            AttachmentQuotaProvider quotaProvider = QUOTA_PROVIDER_REF.get();
+            if (quotaProvider == null) {
+                LOG.warn("AttachmentQuotaProvider is not available, an attachment will be created without quota check!");
+            } else {
+                Quota amountQuota = quotaProvider.getAmountQuota(session);
+                long limit = amountQuota.getLimit();
+                long usage = amountQuota.getUsage();
+                if (limit > 0 && amountQuota.getUsage() >= limit) {
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_ATTACHMENTS.create(usage, limit);
                 }
             }
         }

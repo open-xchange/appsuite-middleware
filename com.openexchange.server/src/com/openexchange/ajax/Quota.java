@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -64,19 +65,18 @@ import com.openexchange.tools.session.ServerSession;
 
 public class Quota extends SessionServlet {
 
-	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Quota.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Quota.class);
 
     private static final long serialVersionUID = 6477434510302882905L;
 
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
-			IOException {
-	    final ServerSession session = getSessionObject(req);
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
+        final ServerSession session = getSessionObject(req);
         final Response response = new Response(session);
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             if (null == action) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION);
             }
             final QuotaRequest fsReq = new QuotaRequest(session);
             final JSONValue responseObj = fsReq.action(action);
@@ -87,10 +87,8 @@ public class Quota extends SessionServlet {
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 /*
-                 * Throw proper I/O error since a serious socket error could
-                 * been occurred which prevents further communication. Just
-                 * throwing a JSON error possibly hides this fact by trying to
-                 * write to/read from a broken socket connection.
+                 * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
+                 * throwing a JSON error possibly hides this fact by trying to write to/read from a broken socket connection.
                  */
                 throw (IOException) cause;
             }
@@ -102,6 +100,6 @@ public class Quota extends SessionServlet {
             response.setException(e);
         }
         writeResponse(response, res, session);
-	}
+    }
 
 }

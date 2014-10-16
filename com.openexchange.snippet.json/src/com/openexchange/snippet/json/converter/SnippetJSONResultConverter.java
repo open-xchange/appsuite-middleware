@@ -179,6 +179,10 @@ public class SnippetJSONResultConverter implements ResultConverter {
                 if (null != tmp) {
                     jsonAttachment.put("mimetype", tmp);
                 }
+                tmp = attachment.getContentId();
+                if (null != tmp) {
+                    jsonAttachment.put("contentid", tmp);
+                }
                 tmp = attachment.getId();
                 if (null != tmp) {
                     jsonAttachment.put("id", tmp);

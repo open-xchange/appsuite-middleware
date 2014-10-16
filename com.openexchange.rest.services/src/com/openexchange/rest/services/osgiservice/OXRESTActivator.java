@@ -58,6 +58,8 @@ import com.openexchange.rest.services.internal.OXRESTServiceFactory;
  * An {@link OXRESTActivator} knows how to publish OXRESTService implementations to the system.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
 public abstract class OXRESTActivator extends HousekeepingActivator {
 

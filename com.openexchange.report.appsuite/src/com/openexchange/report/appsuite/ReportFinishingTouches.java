@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite;
 
+import com.openexchange.report.appsuite.serialization.Report;
 
 /**
  * The {@link ReportFinishingTouches} run after all analyzers and cumulators and can be used to reformat the report.
@@ -60,7 +61,7 @@ public interface ReportFinishingTouches {
      * Declare whether to run as part of this reportType
      */
     boolean appliesTo(String reportType);
-    
+
     /**
      * Modify the report, as needed
      */

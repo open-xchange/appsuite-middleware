@@ -50,6 +50,7 @@
 package com.openexchange.oauth.json.oauthaccount.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
@@ -57,10 +58,13 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -122,78 +126,103 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
     //FIXME: Refactor this. These methods are pretty similar. DRY
 
     private AJAXRequestResult createCallbackAction(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
-        final OAuthService oAuthService = getOAuthService();
-        /*
-         * Parse parameters
-         */
-        final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
-        if (serviceId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
-        }
-        final String name = AccountField.DISPLAY_NAME.getName();
-        final String displayName = request.getParameter(name);
-        if (isEmpty(displayName)) {
-            throw OAuthExceptionCodes.MISSING_DISPLAY_NAME.create();
-        }
-        /*
-         * Generate UUID
-         */
-        final String uuid = UUID.randomUUID().toString();
-        /*
-         * OAuth token for session
-         */
-        final String oauthSessionToken = UUID.randomUUID().toString();
-        /*
-         * Compose call-back URL
-         */
-        final String callbackUrl;
-        {
-            final StringBuilder callbackUrlBuilder = request.constructURL(new StringBuilder(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
-            // Append query string
-            callbackUrlBuilder.append("?action=create");
-            callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
-            callbackUrlBuilder.append('&').append(name).append('=').append(urlEncode(displayName));
-            callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
-            callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
-            callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
-            final String cb = request.getParameter("cb");
-            if (!isEmpty(cb)) {
-            	callbackUrlBuilder.append("&callback=").append(cb);
+        try {
+            final OAuthService oAuthService = getOAuthService();
+            /*
+             * Parse parameters
+             */
+            final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
+            if (serviceId == null) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
             }
-            callbackUrl = callbackUrlBuilder.toString();
-        }
-        /*
-         * Invoke
-         */
-        final String currentHost = determineHost(request, session);
-        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl, currentHost, session);
-        final OAuthToken requestToken = interaction.getRequestToken();
-        /*
-         * Create a container to set some state information: Request token's secret, call-back URL, whatever
-         */
-        final Map<String, Object> oauthState = new HashMap<String, Object>();
-        if (interaction instanceof Parameterizable) {
-            final Parameterizable params = (Parameterizable) interaction;
-            for (final String key : params.getParamterNames()) {
-                final Object value = params.getParameter(key);
-                if (null != value) {
-                    oauthState.put(key, value);
+            final String name = AccountField.DISPLAY_NAME.getName();
+            final String displayName = request.getParameter(name);
+            if (isEmpty(displayName)) {
+                throw OAuthExceptionCodes.MISSING_DISPLAY_NAME.create();
+            }
+            /*
+             * Generate UUID
+             */
+            final String uuid = UUID.randomUUID().toString();
+            /*
+             * OAuth token for session
+             */
+            final String oauthSessionToken = UUID.randomUUID().toString();
+            /*
+             * Compose call-back URL
+             */
+            final String callbackUrl;
+            {
+                final StringBuilder callbackUrlBuilder = request.constructURL(new StringBuilder(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
+                // Append query string
+                callbackUrlBuilder.append("?action=create");
+                callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
+                callbackUrlBuilder.append('&').append(name).append('=').append(urlEncode(displayName));
+                callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
+                callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
+                callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
+                final String cb = request.getParameter("cb");
+                if (!isEmpty(cb)) {
+                	callbackUrlBuilder.append("&callback=").append(cb);
+                }
+                callbackUrl = callbackUrlBuilder.toString();
+            }
+            /*
+             * Invoke
+             */
+            final String currentHost = determineHost(request, session);
+            final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl, currentHost, session);
+            final OAuthToken requestToken = interaction.getRequestToken();
+            /*
+             * Create a container to set some state information: Request token's secret, call-back URL, whatever
+             */
+            final Map<String, Object> oauthState = new HashMap<String, Object>();
+            if (interaction instanceof Parameterizable) {
+                final Parameterizable params = (Parameterizable) interaction;
+                for (final String key : params.getParamterNames()) {
+                    final Object value = params.getParameter(key);
+                    if (null != value) {
+                        oauthState.put(key, value);
+                    }
                 }
             }
+            oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
+            oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrl);
+            oauthState.put(OAuthConstants.ARGUMENT_CURRENT_HOST, currentHost);
+            oauthState.put(OAuthConstants.ARGUMENT_AUTH_URL, interaction.getAuthorizationURL());
+            session.setParameter(uuid, oauthState);
+            session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
+            /*
+             * Check redirect parameter
+             */
+            if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("redirect"))) {
+                // Request for redirect
+                HttpServletResponse response = request.optHttpServletResponse();
+                if (null != response) {
+                    try {
+                        response.sendRedirect(interaction.getAuthorizationURL());
+                        //response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(ResultType.DIRECT);
+                    } catch (IOException e) {
+                        throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    }
+                }
+            }
+            /*
+             * Write as JSON
+             */
+            final JSONObject jsonInteraction = AccountWriter.write(interaction, uuid);
+            /*
+             * Return appropriate result
+             */
+            return new AJAXRequestResult(jsonInteraction);
+        } catch (OXException e) {
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_OK, e.getMessage());
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_OK, e.getMessage());
+        } catch (RuntimeException e) {
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_OK, e.getMessage());
         }
-        oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
-        oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrl);
-        oauthState.put(OAuthConstants.ARGUMENT_CURRENT_HOST, currentHost);
-        session.setParameter(uuid, oauthState);
-        session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
-        /*
-         * Write as JSON
-         */
-        final JSONObject jsonInteraction = AccountWriter.write(interaction, uuid);
-        /*
-         * Return appropriate result
-         */
-        return new AJAXRequestResult(jsonInteraction);
     }
 
     private AJAXRequestResult reauthorizeCallbackAction(final String accountId, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
@@ -245,6 +274,22 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrlBuilder.toString());
         session.setParameter(uuid, oauthState);
         session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
+        /*
+         * Check redirect parameter
+         */
+        if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("redirect"))) {
+            // Request for redirect
+            HttpServletResponse response = request.optHttpServletResponse();
+            if (null != response) {
+                try {
+                    response.sendRedirect(interaction.getAuthorizationURL());
+                    //response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+                    return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(ResultType.DIRECT);
+                } catch (IOException e) {
+                    throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
         /*
          * Write as JSON
          */

@@ -75,8 +75,9 @@ import com.openexchange.java.Charsets;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
+import com.openexchange.tools.encoding.Hex;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -87,8 +88,6 @@ import com.openexchange.mailfilter.services.Services;
 public class SieveHandler {
 
     private static final Pattern LITERAL_S2C_PATTERN = Pattern.compile("^.*\\{([^\\}]*)\\}.*$");
-
-    private static final Pattern STRING_PATTERN = Pattern.compile("^.*\"([^\"]*)\".*$");
 
 	/**
      * The logger.
@@ -473,6 +472,7 @@ public class SieveHandler {
         }
         boolean inQuote = false;
         boolean okStart = false;
+        boolean inComment = false;
         while (true) {
             int ch = bis_sieve.read();
             switch (ch) {
@@ -483,20 +483,36 @@ public class SieveHandler {
                 {
                     okStart = false;
                     sb.append((char) ch);
-                    ch = bis_sieve.read();
-                    if (ch == -1) {
-                        // End of stream
-                        throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                    final StringBuilder octetBuilder = new StringBuilder();
+                    int limit = 0;
+                    int index = 0;
+                    do {
+                        ch = bis_sieve.read();
+                        if (ch == -1) {
+                            // End of stream
+                            throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                        } else if (ch >= 48 && ch <= 55) {
+                            octetBuilder.append((char)ch);
+                            limit = 3;
+                            index++;
+                        } else {
+                            sb.append((char) ch);
+                        }
+                    } while (index < limit);
+                    if (octetBuilder.length() > 1) {
+                        sb.setLength(sb.length() - 1);
+                        sb.append((char)Integer.parseInt(octetBuilder.toString()));
                     }
-                    sb.append((char) ch);
                 }
                 break;
             case '"':
                 {
-                    if (inQuote) {
-                        inQuote = false;
-                    } else {
-                        inQuote = true;
+                    if (!inComment) {
+                        if (inQuote) {
+                            inQuote = false;
+                        } else {
+                            inQuote = true;
+                        }
                     }
                     okStart = false;
                     sb.append((char) ch);
@@ -512,12 +528,26 @@ public class SieveHandler {
                 break;
             case 'K': // OK\r\n
                 {
-                    if (!inQuote && okStart) {
+                    if (!inQuote && okStart && !inComment) {
                         sb.setLength(sb.length() - 1);
                         consumeUntilCRLF(); // OK "Getscript completed."\r\n
                         return returnScript(sb);
                     }
                     okStart = false;
+                    sb.append((char) ch);
+                }
+                break;
+            case '#':
+                {
+                    inComment = true;
+                    sb.append((char) ch);
+                }
+                break;
+            case '\n':
+                {
+                    if (inComment) {
+                        inComment = false;
+                    }
                     sb.append((char) ch);
                 }
                 break;
@@ -586,7 +616,7 @@ public class SieveHandler {
                 if (c2 != '\n') {
                     // If the reader supports it (which we hope will always be the case), reset to after the first CR.
                     // Otherwise, we wrap a PushbackReader around the stream so we can unread the characters we don't need.
-                    if (in.markSupported()) {
+                    if (in.markSupported()) { // Always true for BufferedReader
                         in.reset();
                     } else {
                         if (!(in instanceof PushbackReader)) {
@@ -961,7 +991,7 @@ public class SieveHandler {
      * @deprecated use {@link #parseSIEVEResponse(String, String)} instead
      */
     @Deprecated
-    protected SIEVEResponse.Code parseSIEVEResponse(final String resp) {
+    protected SieveResponse.Code parseSIEVEResponse(final String resp) {
         return parseSIEVEResponse(resp, null);
     }
 
@@ -972,7 +1002,7 @@ public class SieveHandler {
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
-    protected SIEVEResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
+    protected SieveResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
         if( ! useSIEVEResponseCodes ) {
             return null;
         }
@@ -982,7 +1012,7 @@ public class SieveHandler {
         if( m.matches() ) {
             final int gcount = m.groupCount();
             if( gcount > 1 ) {
-                final SIEVEResponse.Code ret = SIEVEResponse.Code.getCode(m.group(1));
+                final SieveResponse.Code ret = SieveResponse.Code.getCode(m.group(1));
                 final String group = m.group(2);
                 if (group.startsWith("{")) {
                 	// Multi line, use the multiline parsed before here
@@ -1136,7 +1166,6 @@ public class SieveHandler {
         final StringBuilder sb = new StringBuilder();
         final String answer = actualline.substring(3);
         final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
-        final Matcher stringMatcher = STRING_PATTERN.matcher(answer);
         if (matcher.matches()) {
             final String group = matcher.group(1);
             final int octetsToRead = Integer.parseInt(group);
@@ -1147,12 +1176,62 @@ public class SieveHandler {
             } else {
                 sb.append(buf, 0, octetsRead);
             }
-        } else if (stringMatcher.matches()) {
-            sb.append(stringMatcher.group(1));
+            return sb.toString();
         } else {
-            throw new OXSieveHandlerException("Unable to parse server answer", sieve_host, sieve_host_port, null);
+            return parseQuotedErrorMessage(answer);
         }
-        return sb.toString();
+    }
+
+    private String parseQuotedErrorMessage(final String answer) throws IOException, OXSieveHandlerException {
+        StringBuilder inputBuilder = new StringBuilder();
+        String line = answer;
+        while (line != null) {
+            inputBuilder.append("\n").append(line);
+            line = bis_sieve.readLine();
+        }
+
+        char[] msgChars = inputBuilder.toString().toCharArray();
+        boolean inQuotes = false;
+        boolean inEscape = false;
+        StringBuilder errMsgBuilder = new StringBuilder();
+        loop: for (char c : msgChars) {
+            switch (c) {
+            case '"':
+                if (inQuotes) {
+                    if (inEscape) {
+                        errMsgBuilder.append(c);
+                        inEscape = false;
+                    } else {
+                        inQuotes = false;
+                        break loop;
+                    }
+                } else {
+                    inQuotes = true;
+                }
+                break;
+
+            case '\\':
+                if (inEscape) {
+                    errMsgBuilder.append(c);
+                    inEscape = false;
+                } else {
+                    inEscape = true;
+                }
+                break;
+
+            default:
+                if (inEscape) {
+                    inEscape = false;
+                }
+
+                if (inQuotes) {
+                    errMsgBuilder.append(c);
+                }
+                break;
+            }
+        }
+
+        return errMsgBuilder.toString();
     }
 
     /**

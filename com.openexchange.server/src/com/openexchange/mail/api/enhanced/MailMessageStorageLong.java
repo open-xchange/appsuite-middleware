@@ -70,6 +70,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * {@link MailMessageStorageLong} - Enhances {@link MailMessageStorage} to delegate its methods to number-based invocations.
@@ -268,6 +269,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             try {
                 text = textFinder.getText(getMessageLong(folder, mailIds[i], false));
             } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
                 LOG.warn("Error while getting primary content for mail ''{}'' in folder ''{}''. Returning null.", mailIds[i], folder, t);
             }
 
@@ -520,6 +522,29 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
+    public void updateMessageUserFlags(String folder, String[] mailIds, String[] flags, boolean set) throws OXException {
+        updateMessageUserFlagsLong(folder, uids2longs(mailIds), flags, set);
+    }
+
+    /**
+     * Updates the user flags of the messages specified by given mail IDs located in given folder. If parameter <code>set</code> is
+     * <code>true</code> the affected flags denoted by <code>flags</code> are added; otherwise removed.
+     * <p>
+     * If no mail could be found for a given mail ID, it is treated as a no-op.
+     * <p>
+     * Mail folder in question requires to support user flags (storing individual strings per message)
+     *
+     * @param folder The folder full name
+     * @param mailIds The mail IDs
+     * @param flags The user flags
+     * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
+     * @throws OXException If user flags cannot be updated
+     */
+    public void updateMessageUserFlagsLong(String folder, long[] mailIds, String[] flags, boolean set) throws OXException {
+        // Empty body here
+    }
+
+    @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         updateMessageFlagsLong(folder, uids2longs(mailIds), flags, set);
     }
@@ -592,7 +617,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         final String[] retval = new String[len];
         for (int i = 0; i < len; i++) {
             final long l = longs[i];
-            if (-1 == l) {
+            if (l < 0) {
                 retval[i] = null;
             } else {
                 retval[i] = Long.toString(longs[i], RADIX);

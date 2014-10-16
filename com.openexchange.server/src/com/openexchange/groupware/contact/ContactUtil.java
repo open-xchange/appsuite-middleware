@@ -52,8 +52,14 @@ package com.openexchange.groupware.contact;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.java.util.MsisdnCheck;
+import com.openexchange.java.util.Pair;
 
 /**
  * First start of a utility class for contacts. This class should contain methods that are useful for the complete backend and not only the
@@ -186,6 +192,37 @@ public class ContactUtil {
             set.add(tmp);
         }
         return set;
+    }
+
+    /**
+     * Prepares an {@link ImageDataSource} and an {@link ImageLocation} for a given contact. Both
+     * can be used to e.g. generate an URL to the contacts image.
+     *
+     * @param contact The contact, never <code>null</code>
+     * @return A {@link Pair} containing both, the {@link ImageDataSource} and {@link ImageLocation}.
+     *         If The contact misses an image, <code>null</code> is returned.
+     */
+    public static Pair<ImageDataSource, ImageLocation> prepareImageData(Contact contact) {
+        if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
+            String timestamp = null != contact.getLastModified() ? String.valueOf(contact.getLastModified().getTime()) : null;
+            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == contact.getParentFolderID() && contact.containsInternalUserId()) {
+                /*
+                 * prefer user contact image url
+                 */
+                ImageLocation imageLocation = new ImageLocation.Builder().id(
+                    String.valueOf(contact.getInternalUserId())).timestamp(timestamp).build();
+                return new Pair<ImageDataSource, ImageLocation>(UserImageDataSource.getInstance(), imageLocation);
+            } else {
+                /*
+                 * use default contact image data source
+                 */
+                ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(
+                    String.valueOf(contact.getObjectID())).timestamp(timestamp).build();
+                return new Pair<ImageDataSource, ImageLocation>(ContactImageDataSource.getInstance(), imageLocation);
+            }
+        }
+
+        return null;
     }
 
 }

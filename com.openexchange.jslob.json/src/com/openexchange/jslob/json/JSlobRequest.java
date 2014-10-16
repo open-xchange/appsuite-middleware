@@ -111,13 +111,14 @@ public class JSlobRequest {
      *
      * @param name The parameter name
      * @param coerceTo The type the parameter should be interpreted as
+     * @param optional TODO
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
-        return requestData.getParameter(name, coerceTo);
+    public <T> T getParameter(final String name, final Class<T> coerceTo, boolean optional) throws OXException {
+        return requestData.getParameter(name, coerceTo, optional);
     }
-
+    
     /**
      * Gets the parsed <code>int</code> value of denoted parameter.
      *

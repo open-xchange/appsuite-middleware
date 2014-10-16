@@ -29,17 +29,13 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="editPassword" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="editPublicFolders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="editResource" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="forum" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="globalAddressBookDisabled" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="ical" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="infostore" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="multipleMailAccounts" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="pinboardWrite" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="publicFolderEditable" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="publication" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="readCreateSharedFolders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="rssBookmarks" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="rssPortal" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="subscription" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="syncml" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="tasks" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
@@ -69,17 +65,13 @@ import javax.xml.bind.annotation.XmlType;
     "editPassword",
     "editPublicFolders",
     "editResource",
-    "forum",
     "globalAddressBookDisabled",
     "ical",
     "infostore",
     "multipleMailAccounts",
-    "pinboardWrite",
     "publicFolderEditable",
     "publication",
     "readCreateSharedFolders",
-    "rssBookmarks",
-    "rssPortal",
     "subscription",
     "syncml",
     "tasks",
@@ -115,8 +107,6 @@ public class UserModuleAccess {
     @XmlElement(nillable = true)
     protected Boolean editResource;
     @XmlElement(nillable = true)
-    protected Boolean forum;
-    @XmlElement(nillable = true)
     protected Boolean globalAddressBookDisabled;
     @XmlElement(nillable = true)
     protected Boolean ical;
@@ -125,17 +115,11 @@ public class UserModuleAccess {
     @XmlElement(nillable = true)
     protected Boolean multipleMailAccounts;
     @XmlElement(nillable = true)
-    protected Boolean pinboardWrite;
-    @XmlElement(nillable = true)
     protected Boolean publicFolderEditable;
     @XmlElement(nillable = true)
     protected Boolean publication;
     @XmlElement(nillable = true)
     protected Boolean readCreateSharedFolders;
-    @XmlElement(nillable = true)
-    protected Boolean rssBookmarks;
-    @XmlElement(nillable = true)
-    protected Boolean rssPortal;
     @XmlElement(nillable = true)
     protected Boolean subscription;
     @XmlElement(nillable = true)
@@ -440,30 +424,6 @@ public class UserModuleAccess {
     }
 
     /**
-     * Ruft den Wert der forum-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
-     */
-    public Boolean isForum() {
-        return forum;
-    }
-
-    /**
-     * Legt den Wert der forum-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
-     */
-    public void setForum(Boolean value) {
-        this.forum = value;
-    }
-
-    /**
      * Ruft den Wert der globalAddressBookDisabled-Eigenschaft ab.
      *
      * @return
@@ -560,30 +520,6 @@ public class UserModuleAccess {
     }
 
     /**
-     * Ruft den Wert der pinboardWrite-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
-     */
-    public Boolean isPinboardWrite() {
-        return pinboardWrite;
-    }
-
-    /**
-     * Legt den Wert der pinboardWrite-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
-     */
-    public void setPinboardWrite(Boolean value) {
-        this.pinboardWrite = value;
-    }
-
-    /**
      * Ruft den Wert der publicFolderEditable-Eigenschaft ab.
      *
      * @return
@@ -653,54 +589,6 @@ public class UserModuleAccess {
      */
     public void setReadCreateSharedFolders(Boolean value) {
         this.readCreateSharedFolders = value;
-    }
-
-    /**
-     * Ruft den Wert der rssBookmarks-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
-     */
-    public Boolean isRssBookmarks() {
-        return rssBookmarks;
-    }
-
-    /**
-     * Legt den Wert der rssBookmarks-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
-     */
-    public void setRssBookmarks(Boolean value) {
-        this.rssBookmarks = value;
-    }
-
-    /**
-     * Ruft den Wert der rssPortal-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
-     */
-    public Boolean isRssPortal() {
-        return rssPortal;
-    }
-
-    /**
-     * Legt den Wert der rssPortal-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
-     */
-    public void setRssPortal(Boolean value) {
-        this.rssPortal = value;
     }
 
     /**

@@ -61,8 +61,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.lang.Validate;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
@@ -71,20 +73,19 @@ import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
-import org.apache.commons.lang.Validate;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity to another. Actual Data is held as leafs of a tree-like
  * structure identified by an ElementPath leading to that data. A Stanza can carry multiple of those trees, each again identified by an
  * Elementpath.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza implements Serializable {
 
     public static final String DEFAULT_SELECTOR = "default";
-    
+
     public static final ElementPath ERROR_PATH = new ElementPath("error");
 
     private static final long serialVersionUID = 1L;
@@ -322,9 +323,7 @@ public abstract class Stanza implements Serializable {
      * @param tree The PayloadTreeNoode to add to this Stanza
      * @return true if the PayloadTreeNode could be added to this Stanza
      */
-    public void addPayload(final PayloadTree tree) {
-        addPayloadToMap(tree, this.payloads);
-    }
+    public abstract void addPayload(final PayloadTree tree);
 
     /**
      * Add a PayloadTree into a Map containing lists of PayloadTrees mapped to their ElementPaths.
@@ -332,7 +331,7 @@ public abstract class Stanza implements Serializable {
      * @param tree The tree to add
      * @param payloadTreeMap The Map containing the trees
      */
-    private void addPayloadToMap(PayloadTree tree, Map<ElementPath, List<PayloadTree>> payloadTreeMap) {
+    protected void addPayloadToMap(PayloadTree tree, Map<ElementPath, List<PayloadTree>> payloadTreeMap) {
         ElementPath elementPath = tree.getElementPath();
         List<PayloadTree> list = payloadTreeMap.get(elementPath);
         if (list == null) {
@@ -389,7 +388,7 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * 
+     *
      * @param nodePaths
      * @return
      */
@@ -399,10 +398,10 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Filter matching PayloadElements from a PayloadTree 
-     *  
+     * Filter matching PayloadElements from a PayloadTree
+     *
      * @param treePath The {@link ElementPath} identifying the PayloadTree
-     * @param nodePaths The {@link ElementPath} identifying the matching PayloadElements 
+     * @param nodePaths The {@link ElementPath} identifying the matching PayloadElements
      * @return
      */
     public Collection<PayloadElement> filterPayloadElementsFromTree(ElementPath treePath, ElementPath... nodePaths) {
@@ -412,7 +411,7 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Filter matching PayloadElements 
+     * Filter matching PayloadElements
      * @param trees
      * @param nodePaths
      * @return
@@ -438,7 +437,7 @@ public abstract class Stanza implements Serializable {
      * Filter a single payload from this {@link Stanza} based only on the {@link ElementPath} of the wanted payload. This will search in all
      * of
      * this {@link Stanza}'s {@link PayloadTree}s.
-     * 
+     *
      * @param elementPath The {@link ElementPath} of the wanted payload
      * @param clazz The {@link Class} of the wanted Payload
      * @return An {@link Optional} containing the single Payload or an empty {@link Optional} if the Stanza did contain exactly one matching
@@ -451,7 +450,7 @@ public abstract class Stanza implements Serializable {
     /**
      * Filter a single Payload from this {@link Stanza}'s {@link PayloadTree} based on the {@link ElementPath}s of the wanted Payload and
      * the {@link PayloadTree} to search.
-     * 
+     *
      * @param treePath The {@link ElementPath} identifying a {@link PayloadTree} within this {@link Stanza} that should be searched
      * @param elementPath The {@link ElementPath} of the wanted Payload
      * @param clazz The {@link Class} of the wanted Payload
@@ -473,16 +472,14 @@ public abstract class Stanza implements Serializable {
         }
         int numResults = filteredPayloadElements.size();
         if (numResults != 1) {
-            LOG.debug("Was expecting a single " + elementPath + " payload but found " + numResults 
-                + " within the Stanza. Returning absent Optional instead.");
+            LOG.debug("Was expecting a single {} payload but found {} within the Stanza. Returning absent Optional instead.", elementPath, numResults);
             return retval;
         }
         Object data = filteredPayloadElements.iterator().next().getData();
         if (clazz.isInstance(data)) {
             retval = Optional.of(clazz.cast(data));
         } else {
-            LOG.warn("Was expecting a payload  of class " + clazz + " but found " + data == null ? "null" : data.getClass().getName() 
-                + " within the Stanza. Returning absent Optional instead.");
+            LOG.warn("Was expecting a payload  of class \"{}\", but found {} within the Stanza. Returning absent Optional instead.", clazz.getName(), data == null ? "null" : data.getClass().getName());
         }
         return retval;
     }
@@ -608,32 +605,40 @@ public abstract class Stanza implements Serializable {
      * @param data The payload data to write into the root node.
      */
     protected void writeThrough(ElementPath path, Object data) {
-        List<PayloadTree> payloadTrees = payloads.get(path);
-        if (payloadTrees == null) {
-            payloadTrees = new ArrayList<PayloadTree>();
-        }
-        if (payloadTrees.size() > 1) {
-            throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
-        }
-        PayloadTree tree;
-        if (payloadTrees.isEmpty()) {
-            PayloadElement payloadElement = new PayloadElement(
-                data,
-                data.getClass().getSimpleName(),
-                path.getNamespace(),
-                path.getElement());
-            PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
-            tree = new PayloadTree(payloadTreeNode);
-            addPayload(tree);
-        } else {
-            tree = payloadTrees.get(0);
-            PayloadTreeNode node = tree.getRoot();
-            if (node == null) {
-                throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
+        if (data == null) {
+            Collection<PayloadTree> payloadTrees = getPayloadTrees(path);
+            if (payloadTrees.size() == 1) {
+                removePayload(payloadTrees.iterator().next());
+            } else {
+                throw new IllegalStateException("Number of basic elementPaths should have been equal to 1.");
             }
-            node.setData(data, data.getClass().getSimpleName());
+        } else {
+            List<PayloadTree> payloadTrees = payloads.get(path);
+            if (payloadTrees == null) {
+                payloadTrees = new ArrayList<PayloadTree>();
+            }
+            if (payloadTrees.size() > 1) {
+                throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
+            }
+            PayloadTree tree;
+            if (payloadTrees.isEmpty()) {
+                PayloadElement payloadElement = new PayloadElement(
+                    data,
+                    data.getClass().getSimpleName(),
+                    path.getNamespace(),
+                    path.getElement());
+                PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
+                tree = new PayloadTree(payloadTreeNode);
+                addPayload(tree);
+            } else {
+                tree = payloadTrees.get(0);
+                PayloadTreeNode node = tree.getRoot();
+                if (node == null) {
+                    throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
+                }
+                node.setData(data, data.getClass().getSimpleName());
+            }
         }
-
     }
     /**
      * Init default fields from values found in the PayloadTrees of the Stanza.
@@ -714,6 +719,14 @@ public abstract class Stanza implements Serializable {
     @Override
     public String toString() {
 
-        return "From: " + from + "\nTo: " + to + "\nPayloads:\n" + payloads;
+        StringBuilder sb = new StringBuilder();
+        for(Entry<ElementPath, List<PayloadTree>> entry : payloads.entrySet()) {
+            sb.append("\n").append(entry.getKey()).append(":");
+            for(PayloadTree tree : entry.getValue()) {
+                sb.append("\t\n").append(tree);
+            }
+            sb.append("\n");
+        }
+        return "\nFrom: " + from + "\nTo: " + to + "\nPayloads:\n" + sb.toString();
     }
 }

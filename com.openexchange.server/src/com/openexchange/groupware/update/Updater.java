@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.internal.UpdaterImpl;
@@ -100,4 +101,12 @@ public abstract class Updater {
     public abstract void startUpdate(int contextId) throws OXException;
 
     public abstract UpdateTask[] getAvailableUpdateTasks();
+
+    /**
+     * Gets a list of schemas whose update tasks have been scheduled for execution
+     * or are currently running on this node.
+     *
+     * @return The list of schemas
+     */
+    public abstract Collection<String> getLocallyScheduledTasks();
 }

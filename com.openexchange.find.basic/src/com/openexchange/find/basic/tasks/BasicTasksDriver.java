@@ -49,12 +49,12 @@
 
 package com.openexchange.find.basic.tasks;
 
-import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.tasks.Constants.FIELD_STATUS;
 import static com.openexchange.find.basic.tasks.Constants.FIELD_TYPE;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,7 +69,6 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
@@ -79,6 +78,7 @@ import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.tasks.TasksDocument;
 import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.find.tasks.TasksStrings;
+import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
@@ -200,7 +200,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
                 queries = extractMailAddessesFrom(c);
             }
 
-            participants.add(buildParticipantFacet(valueId, new ContactDisplayItem(c), queries));
+            participants.add(buildParticipantFacet(valueId, DisplayItems.convert(c), queries));
         }
 
         if (!prefix.isEmpty() && !prefixTokens.isEmpty()) {

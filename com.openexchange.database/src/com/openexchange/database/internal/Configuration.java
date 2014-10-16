@@ -214,7 +214,6 @@ public final class Configuration {
      * Reads the pooling configuration from the configdb.properties file.
      */
     private void initPoolConfig() {
-        poolConfig.minIdle = getInt(Property.MIN_IDLE, poolConfig.minIdle);
         poolConfig.maxIdle = getInt(Property.MAX_IDLE, poolConfig.maxIdle);
         poolConfig.maxIdleTime = getLong(Property.MAX_IDLE_TIME, poolConfig.maxIdleTime);
         poolConfig.maxActive = getInt(Property.MAX_ACTIVE, poolConfig.maxActive);
@@ -246,8 +245,6 @@ public final class Configuration {
         WRITE_DRIVER_CLASS("writeDriverClass"),
         /** Interval of the cleaner threads. */
         CLEANER_INTERVAL("cleanerInterval"),
-        /** Minimum of idle connections. */
-        MIN_IDLE("minIdle"),
         /** Maximum of idle connections. */
         MAX_IDLE("maxIdle"),
         /** Maximum idle time. */

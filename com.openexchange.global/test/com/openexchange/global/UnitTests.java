@@ -51,6 +51,7 @@ package com.openexchange.global;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
 import com.openexchange.global.tools.id.IDManglerTest;
 import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
 
@@ -69,6 +70,7 @@ public class UnitTests {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(IDManglerTest.class);
         tests.addTestSuite(MergingSearchIteratorTest.class);
+        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
         return tests;
     }
 }

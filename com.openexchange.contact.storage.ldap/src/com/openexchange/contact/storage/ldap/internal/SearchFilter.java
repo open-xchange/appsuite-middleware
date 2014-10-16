@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -59,6 +58,7 @@ import com.openexchange.contact.storage.ldap.mapping.LdapMapper;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Collators;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -208,7 +208,7 @@ public class SearchFilter {
             } else if (null == locale) {
                 return value1.compareTo(value2);
             } else {
-                return Collator.getInstance(locale).compare(value1, value2);
+                return Collators.getDefaultInstance(locale).compare(value1, value2);
             }
         } else if (Comparable.class.isInstance(o1)) {
             return ((Comparable)o1).compareTo(o2);

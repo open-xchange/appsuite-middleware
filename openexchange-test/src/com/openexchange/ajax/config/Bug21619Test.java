@@ -54,8 +54,8 @@ import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
  * If 2 threads have been writing the same configuration value the internal compare and set method failed and entered an endless loop. This
@@ -96,7 +96,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
             threads[i] = new Thread(writers[i]);
             threads[i].start();
         }
-        Thread.sleep(60000);
+        Thread.sleep(20000);
         for (final ValueWriter writer : writers) {
             writer.stop();
         }
@@ -107,7 +107,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
             if (null != writer.getThrowable()) {
                 fail(writer.getThrowable().getMessage());
             }
-        }        
+        }
     }
 
     private static class ValueWriter implements Runnable {

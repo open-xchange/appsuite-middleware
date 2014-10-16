@@ -73,30 +73,23 @@ public class DefaultAttachment implements Attachment {
         InputStream getInputStream() throws IOException;
     }
 
-    /**
-     * The identifier.
-     */
+    /** The identifier. */
     protected String id;
 
-    /**
-     * The content type.
-     */
+    /** The content type. */
     protected String contentType;
 
-    /**
-     * The content disposition.
-     */
+    /** The content disposition. */
     protected String contentDisposition;
 
-    /**
-     * The size.
-     */
+    /** The size. */
     protected long size;
 
-    /**
-     * The input stream provider
-     */
+    /** The input stream provider */
     protected InputStreamProvider streamProvider;
+
+    /** The <code>Content-Id</code> value */
+    protected String contentId;
 
     /**
      * Initializes a new {@link DefaultAttachment}.
@@ -119,6 +112,11 @@ public class DefaultAttachment implements Attachment {
     @Override
     public String getContentDisposition() {
         return contentDisposition;
+    }
+
+    @Override
+    public String getContentId() {
+        return contentId;
     }
 
     @Override
@@ -160,6 +158,15 @@ public class DefaultAttachment implements Attachment {
      */
     public void setContentDisposition(final String contentDisposition) {
         this.contentDisposition = contentDisposition;
+    }
+
+    /**
+     * Sets the <code>Content-Id</code> value
+     *
+     * @param contentId The <code>Content-Id</code> value to set
+     */
+    public void setContentId(String contentId) {
+        this.contentId = contentId;
     }
 
     /**

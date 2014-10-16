@@ -50,12 +50,14 @@
 package com.openexchange.search;
 
 import java.util.Collection;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link SearchService} - The search service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface SearchService {
 
     /**
@@ -66,7 +68,7 @@ public interface SearchService {
      * @param attributeFetcher The attribute fetcher for specified candidate
      * @return <code>true</code> if specified candidate satisfies given search term; otherwise <code>false</code>.
      */
-    public <C> boolean matches(C candidate, SearchTerm<?> searchTerm, SearchAttributeFetcher<C> attributeFetcher);
+    <C> boolean matches(C candidate, SearchTerm<?> searchTerm, SearchAttributeFetcher<C> attributeFetcher);
 
     /**
      * Filters specified candidates by given search term.
@@ -76,5 +78,6 @@ public interface SearchService {
      * @param attributeFetcher The attribute fetcher for specified candidates
      * @return The filtered candidates which satisfy given search term.
      */
-    public <C> Collection<C> filter(Collection<C> candidates, SearchTerm<?> searchTerm, SearchAttributeFetcher<C> attributeFetcher);
+    <C> Collection<C> filter(Collection<C> candidates, SearchTerm<?> searchTerm, SearchAttributeFetcher<C> attributeFetcher);
+
 }

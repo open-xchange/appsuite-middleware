@@ -126,14 +126,10 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
                     }
                     writeRecurrenceDatePosition(con, appointment.getContextID(), appointment.getObjectID(), recurrence_date_position);
                 } catch (final UnsupportedOperationException e) {
-                    LOG.info(
-                        "Unable to repair appointment " + appointment.getObjectID() + " in context " + appointment.getContextID() + ".",
-                        e);
+                    LOG.info("Unable to repair appointment {} in context {}.", appointment.getObjectID(), appointment.getContextID(), e);
                     continue;
                 } catch (final OXException e) {
-                    LOG.info(
-                        "Unable to repair appointment " + appointment.getObjectID() + " in context " + appointment.getContextID() + ".",
-                        e);
+                    LOG.info("Unable to repair appointment {} in context {}.", appointment.getObjectID(), appointment.getContextID(), e);
                     continue;
                 }
             }

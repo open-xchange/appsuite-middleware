@@ -105,13 +105,10 @@ public class OsgiOXConsistency extends Consistency {
         // for Java.
         // Thanks
         //   Francisco
-
-        return filter(getAllContexts(), new Filter() {
-            @Override
-            public boolean accepts(final Context ctx) {
-                return ctx.getFilestoreId() == filestoreId;
-            }
-        });
+        
+        final ContextStorage ctxstor = ContextStorage.getInstance();
+        final List<Integer> list = ctxstor.getAllContextIdsForFilestore(filestoreId);
+        return loadContexts(list);
     }
 
     @Override
@@ -123,16 +120,6 @@ public class OsgiOXConsistency extends Consistency {
             ctxIds.add(com.openexchange.java.Autoboxing.I(contextIds[i]));
         }
         return loadContexts(ctxIds);
-    }
-
-    private List<Context> filter(final List<Context> contexts, final Filter filter) {
-        final List<Context> filtered = new ArrayList<Context>();
-        for(final Context ctx : contexts) {
-            if(filter.accepts(ctx)) {
-                filtered.add(ctx);
-            }
-        }
-        return filtered;
     }
 
     @Override

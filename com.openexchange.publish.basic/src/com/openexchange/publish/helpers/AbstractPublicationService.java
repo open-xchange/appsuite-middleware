@@ -100,6 +100,14 @@ public abstract class AbstractPublicationService implements PublicationService {
     }
 
     @Override
+    public void delete(Context ctx, int publicationId) throws OXException {
+        Publication publication = loadInternally(ctx, publicationId);
+        if (null != publication) {
+            delete(publication);
+        }
+    }
+
+    @Override
     public void delete(final Publication publication) throws OXException {
         // Check delete permission
         {

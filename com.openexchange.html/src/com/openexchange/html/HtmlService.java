@@ -49,12 +49,17 @@
 
 package com.openexchange.html;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
+
+
 
 /**
  * {@link HtmlService} - The HTML service provides several methods concerning processing of HTML content.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface HtmlService {
 
     /**
@@ -123,6 +128,19 @@ public interface HtmlService {
     String filterExternalImages(String htmlContent, boolean[] modified);
 
     /**
+     * Sanitizes specified HTML content by limiting the content size to the character count provided with maxContentSize.
+     *
+     * @param htmlContent The HTML content to sanitize
+     * @param optConfigName The optional configuration name to read whitelist from
+     * @param dropExternalImages Whether to drop image URLs
+     * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status
+     * @param cssPrefix The optional CSS prefix
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited. Below 10000 will be ignor
+     * @return {@link HtmlSanitizeResult} with the content and additional information, e. g. if the content was truncated
+     */
+    HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize);
+
+    /**
      * Sanitizes specified HTML content.
      *
      * @param htmlContent The HTML content to sanitize
@@ -145,6 +163,19 @@ public interface HtmlService {
      * @see #getConformHTML(String, String)
      */
     String html2text(String htmlContent, boolean appendHref);
+
+    /**
+     * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
+     * <code>&quot;&amp;lt;&quot;</code>. Additionally limiting the content size to the character count provided with maxContentSize.
+     *
+     * @param plainText The plain text
+     * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
+     * @param commentId The identifier wrapped in a comment prepended to each formatted URL:<br>
+     *            <code>"&lt;!--" + &lt;<i>comment</i>&gt; + " " + <i>&lt;anchor-tag&gt;</i> + "--&gt;"</code>
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
+     * @return {@link HtmlSanitizeResult} with the content and additional information, e. g. if the content was truncated
+     */
+    HtmlSanitizeResult htmlFormat(String plainText, boolean withQuote, String commentId, int maxContentSize);
 
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to

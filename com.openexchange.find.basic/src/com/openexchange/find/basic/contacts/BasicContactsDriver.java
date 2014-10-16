@@ -49,14 +49,17 @@
 
 package com.openexchange.find.basic.contacts;
 
-import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
-import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
+import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contacts.json.mapping.ColumnParser;
@@ -72,14 +75,14 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Folders;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
+import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
@@ -238,15 +241,17 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          * add ContactsFacetType.CONTACT facet dynamically
          */
         {
-            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
+        	AutocompleteParameters parameters = AutocompleteParameters.newInstance();
+        	parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
+            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
             if (null != contacts && !contacts.isEmpty()) {
-                ExclusiveFacetBuilder builder = newExclusiveBuilder(ContactsFacetType.CONTACT);
+                DefaultFacetBuilder builder = newDefaultBuilder(ContactsFacetType.CONTACT);
                 for (Contact contact : contacts) {
                     String id = ContactsFacetType.CONTACT.getId();
                     Filter filter = Filter.of(id, String.valueOf(contact.getObjectID()));
                     String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(contact.getObjectID()));
                     builder.addValue(FacetValue.newBuilder(valueId)
-                        .withDisplayItem(new ContactDisplayItem(contact))
+                        .withDisplayItem(DisplayItems.convert(contact))
                         .withFilter(filter)
                         .build());
                 }

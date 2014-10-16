@@ -51,11 +51,46 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class DeleteVersionAction extends AbstractDocumentListAction {
+
+    /**
+     * Initializes a new {@link DeleteVersionAction}.
+     */
+    public DeleteVersionAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link DeleteVersionAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param version The version to delete
+     */
+    public DeleteVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata version) {
+        this(provider, queryCatalog, context, Collections.singletonList(version));
+    }
+
+    /**
+     * Initializes a new {@link DeleteVersionAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param versions The versions to delete
+     */
+    public DeleteVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        List<DocumentMetadata> versions) {
+        super(provider, queryCatalog, context, versions);
+    }
 
     @Override
     protected void undoAction() throws OXException {

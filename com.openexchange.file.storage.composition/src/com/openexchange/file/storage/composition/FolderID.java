@@ -101,30 +101,65 @@ public class FolderID {
         }
     }
 
+    /**
+     * Gets the service identifier
+     *
+     * @return The service identifier
+     */
     public String getService() {
         return service;
     }
 
+    /**
+     * Sets the service identifier
+     *
+     * @param service The service identifier
+     */
     public void setService(String service) {
         this.service = service;
     }
 
+    /**
+     * Gets the account identifier
+     *
+     * @return The account identifier
+     */
     public String getAccountId() {
         return accountId;
     }
 
+    /**
+     * Sets the account identifier
+     *
+     * @param accountId The account identifier
+     */
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
+    /**
+     * Gets the folder identifier
+     *
+     * @return The fodler identifier
+     */
     public String getFolderId() {
         return folderId;
     }
 
+    /**
+     * Sets the folder identifier
+     *
+     * @param folderId The folder identifier
+     */
     public void setFolderId(String folderId) {
         this.folderId = folderId;
     }
 
+    /**
+     * Gets the unified identifier
+     *
+     * @return The unified identifier
+     */
     public String toUniqueID() {
         if (service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
             return folderId;

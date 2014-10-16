@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.diff;
 
+import java.io.File;
+import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -56,73 +58,80 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.io.FileUtils;
+import com.openexchange.admin.diff.result.DiffResult;
 
 /**
- * {@link ConfigDiffCLT}
- * 
+ * CLT to execute the configuration diff tool.
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @SuppressWarnings("static-access")
 public class ConfigDiffCLT {
 
     private static final Options options = new Options();
+
     static {
-        options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX").isRequired(true).create("o"));
-        options.addOption(OptionBuilder.withLongOpt("installed").hasArgs(1).withDescription("The installed configuration folder").isRequired(true).create("i"));
         options.addOption(OptionBuilder.withLongOpt("file").hasArgs(1).withDescription("Export diff to file").isRequired(false).create("f"));
         options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Print usage").isRequired(false).create("h"));
     }
 
     /**
      * Entry point
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) {
         CommandLineParser parser = new PosixParser();
-        final String originalFolder;
-        final String installedFolder;
         final String file;
         try {
             CommandLine cl = parser.parse(options, args);
+
             if (cl.hasOption("h")) {
                 printUsage(0);
-            } else if (cl.hasOption("o") && cl.hasOption("i")) {
-                originalFolder = cl.getOptionValue("o");
-                installedFolder = cl.getOptionValue("i");
-                if (cl.hasOption("f")) {
-                    file = cl.getOptionValue("f");
-                } else {
-                    file = null;
-                }
-                executeDiff(originalFolder, installedFolder, file);
-            } else {
-                printUsage(-1);
             }
+            if (cl.hasOption("f")) {
+                file = cl.getOptionValue("f");
+            } else {
+                file = null;
+            }
+
+            executeDiff(file);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            printUsage(-1);
+            printUsage(1);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            printUsage(1);
         }
     }
 
     /**
      * Execute diff
-     * 
-     * @param original folder
-     * @param installed folder
+     *
      * @param file optional file to store the diff
+     * @throws IOException
      */
-    private static void executeDiff(String original, String installed, String file) {
+    private static void executeDiff(String file) throws IOException {
+        ConfigDiff configDiff = new ConfigDiff();
+        DiffResult diffResult = configDiff.run();
+
         if (file == null) {
-            // do not export diff to file
+            System.out.println(diffResult.toString());
         } else {
-            // execute diff and display to default output
+            File output = new File(file);
+
+            FileUtils.write(output, diffResult.toString());
+        }
+
+        if (diffResult.getProcessingErrors().size() > 0) {
+            System.exit(1);
         }
     }
 
     /**
      * Print usage
-     * 
+     *
      * @param exitCode
      */
     private static final void printUsage(int exitCode) {

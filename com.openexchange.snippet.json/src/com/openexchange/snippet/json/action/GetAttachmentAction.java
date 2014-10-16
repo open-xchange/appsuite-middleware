@@ -140,7 +140,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
         final String attachmentId = snippetRequest.checkParameter("attachmentid");
         boolean saveToDisk;
         {
-            final String saveParam = snippetRequest.getParameter(Mail.PARAMETER_SAVE, String.class);
+            final String saveParam = snippetRequest.getParameter(Mail.PARAMETER_SAVE, String.class, true);
             try {
                 saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
             } catch (final NumberFormatException e) {

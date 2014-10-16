@@ -56,7 +56,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -82,6 +82,15 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
         this.account = account;
         this.session = session;
         dropboxOAuthAccess = DropboxOAuthAccess.accessFor(account, session);
+    }
+
+    /**
+     * Gets the associated account
+     *
+     * @return The account
+     */
+    public FileStorageAccount getAccount() {
+        return account;
     }
 
     @Override
@@ -121,7 +130,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        return new DropboxFolderAccess(dropboxOAuthAccess, account, session, this);
+        return new DropboxFolderAccess(dropboxOAuthAccess, account, session);
     }
 
     @Override

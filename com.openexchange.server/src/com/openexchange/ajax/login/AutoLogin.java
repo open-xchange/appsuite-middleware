@@ -65,7 +65,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -86,6 +86,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -154,7 +155,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             updateIPAddress(conf, req.getRemoteAddr(), session);
                         } else {
                             final String newIP = req.getRemoteAddr();
-                            SessionServlet.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
+                            SessionUtility.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
                             // IP check passed: update IP address if necessary
                             updateIPAddress(conf, newIP, session);
                         }
@@ -171,8 +172,11 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                         }
 
+                        // Trigger client-specific ramp-up
+                        Future<JSONObject> optRampUp = rampUpAsync(ServerSessionAdapter.valueOf(session), req);
+
                         // Request modules
-                        final Future<Object> optModules = getModulesAsync(session, req);
+                        Future<Object> optModules = getModulesAsync(session, req);
 
                         // Create JSON object
                         final JSONObject json = new JSONObject(8);
@@ -196,7 +200,23 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             }
                         }
 
-                        performRampUp(req, json, ServerSessionAdapter.valueOf(session));
+                        // Await client-specific ramp-up and add to JSON object
+                        if (null != optRampUp) {
+                            try {
+                                JSONObject jsonObject = optRampUp.get();
+                                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                                    json.put(entry.getKey(), entry.getValue());
+                                }
+                            } catch (InterruptedException e) {
+                                // Keep interrupted state
+                                Thread.currentThread().interrupt();
+                                throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                            } catch (ExecutionException e) {
+                                // Cannot occur
+                                final Throwable cause = e.getCause();
+                                LOG.warn("Ramp-up information could not be added to login JSON response", cause);
+                            }
+                        }
 
                         // Set data
                         response.setData(json);
@@ -217,8 +237,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 }
             }
             if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
-                SessionServlet.removeOXCookies(hash, req, resp);
-                SessionServlet.removeJSESSIONID(req, resp);
+                SessionUtility.removeOXCookies(hash, req, resp);
+                SessionUtility.removeJSESSIONID(req, resp);
                 if (doAutoLogin(req, resp)) {
                     throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                 }
@@ -236,12 +256,12 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             } else {
                 e.log(LOG);
             }
-            if (SessionServlet.isIpCheckError(e) && null != session) {
+            if (SessionUtility.isIpCheckError(e) && null != session) {
                 try {
                     // Drop Open-Xchange cookies
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                    SessionServlet.removeOXCookies(session.getHash(), req, resp);
-                    SessionServlet.removeJSESSIONID(req, resp);
+                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeJSESSIONID(req, resp);
                     sessiondService.removeSession(session.getSessionID());
                 } catch (final Exception e2) {
                     LOG.error("Cookies could not be removed.", e2);
@@ -308,4 +328,5 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             req.getServerPort(),
             httpSessionId);
     }
+
 }

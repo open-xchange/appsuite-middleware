@@ -353,7 +353,6 @@ public class TestCommand extends Command {
         public List<String[]> getJsonMatchTypes() {
             return jsonMatchTypes;
         }
-
     }
 
     private Commands command;
@@ -377,7 +376,7 @@ public class TestCommand extends Command {
         this.tagarguments = new ArrayList<String>();
     }
 
-    public TestCommand(final Commands command, final List<Object> arguments, final ArrayList<TestCommand> testcommands) throws SieveException {
+    public TestCommand(final Commands command, final List<Object> arguments, final List<TestCommand> testcommands) throws SieveException {
         this.command = command;
         this.tagarguments = new ArrayList<String>();
         this.arguments = arguments;

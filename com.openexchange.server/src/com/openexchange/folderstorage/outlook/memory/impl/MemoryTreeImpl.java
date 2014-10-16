@@ -72,6 +72,7 @@ import com.openexchange.folderstorage.outlook.memory.MemoryCRUD;
 import com.openexchange.folderstorage.outlook.memory.MemoryFolder;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Collators;
 
 /**
  * {@link MemoryTreeImpl}
@@ -361,8 +362,7 @@ public final class MemoryTreeImpl implements MemoryTree {
 
         private FolderNameComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -400,8 +400,7 @@ public final class MemoryTreeImpl implements MemoryTree {
 
         public MemoryFolderComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
             stringHelper = StringHelper.valueOf(locale);
         }
 
@@ -440,8 +439,7 @@ public final class MemoryTreeImpl implements MemoryTree {
 
         private PrivateSubfolderIDComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override

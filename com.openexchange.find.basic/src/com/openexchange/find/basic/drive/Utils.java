@@ -50,11 +50,13 @@
 package com.openexchange.find.basic.drive;
 
 import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
+import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.java.Strings.isEmpty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -81,11 +83,13 @@ import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.file.storage.search.VersionCommentTerm;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.SearchRequest;
-import com.openexchange.find.basic.drive.BasicDriveDriver.Comparison;
-import com.openexchange.find.drive.DriveConstants;
+import com.openexchange.find.basic.common.Comparison;
+import com.openexchange.find.common.CommonConstants;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.util.TimeFrame;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
@@ -125,6 +129,41 @@ public final class Utils {
                 }
 
                 facetTerms.add(prepareFilterTerm(filters, ops.getFirst(), ops.getSecond()));
+            }
+        }
+
+        List<ActiveFacet> dateFacets = searchRequest.getActiveFacets(CommonFacetType.DATE);
+        if (dateFacets != null && !dateFacets.isEmpty()) {
+            ActiveFacet dateFacet = dateFacets.get(0);
+            Filter dateFilter = dateFacet.getFilter();
+            if (dateFilter == Filter.NO_FILTER) {
+                String timeFramePattern = dateFacet.getValueId();
+                TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
+                if (timeFrame == null) {
+                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_DATE);
+                }
+
+                Comparison fromComparison;
+                Comparison toComparison;
+                if (timeFrame.isInclusive()) {
+                    fromComparison = Comparison.GREATER_EQUALS;
+                    toComparison = Comparison.LOWER_EQUALS;
+                } else {
+                    fromComparison = Comparison.GREATER_THAN;
+                    toComparison = Comparison.LOWER_THAN;
+                }
+
+                long from = timeFrame.getFrom();
+                long to = timeFrame.getTo();
+                if (to < 0L) {
+                    facetTerms.add(buildDateTerm(fromComparison, from));
+                }
+
+                SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from);
+                SearchTerm<?> toTerm = buildDateTerm(toComparison, to);
+                facetTerms.add(new AndTerm(Arrays.<SearchTerm<?>> asList(fromTerm, toTerm)));
+            } else {
+                facetTerms.add(prepareFilterTerm(Collections.singletonList(dateFilter), OP.OR, OP.OR));
             }
         }
 
@@ -247,9 +286,9 @@ public final class Utils {
 
             };
             return new FileSizeTerm(pattern);
-        } else if (Constants.FIELD_TIME.equals(field)) {
-            final Pair<Comparison, Long> pair = parseTimeQuery(query);
-            return buildTimeTerm(pair.getFirst(), pair.getSecond().longValue());
+        } else if (CommonConstants.FIELD_DATE.equals(field)) {
+            final Pair<Comparison, Long> pair = parseDateQuery(query);
+            return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
         }
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
@@ -671,81 +710,34 @@ public final class Utils {
         throw FindExceptionCode.PARSING_ERROR.create(query);
     }
 
-    private static Pair<Comparison, Long> parseTimeQuery(final String query) throws OXException {
+    private static Pair<Comparison, Long> parseDateQuery(final String query) throws OXException {
         if (Strings.isEmpty(query)) {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, Constants.FIELD_TIME);
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CommonConstants.FIELD_DATE);
         }
 
         Comparison comparison;
         long timestamp;
         Calendar cal = new GregorianCalendar(TimeZones.UTC);
-        if (DriveConstants.FACET_VALUE_LAST_WEEK.equals(query)) {
+        if (CommonConstants.QUERY_LAST_WEEK.equals(query)) {
             cal.add(Calendar.WEEK_OF_YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (DriveConstants.FACET_VALUE_LAST_MONTH.equals(query)) {
+        } else if (CommonConstants.QUERY_LAST_MONTH.equals(query)) {
             cal.add(Calendar.MONTH, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (DriveConstants.FACET_VALUE_LAST_YEAR.equals(query)) {
+        } else if (CommonConstants.QUERY_LAST_YEAR.equals(query)) {
             cal.add(Calendar.YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
         } else {
-            /*
-             * This block just preserves the code, as we likely have to implement
-             * custom time ranges in the future. Currently this else path should
-             * never be called.
-             *
-             * Idea: Introduce an additional custom time facet that might be set,
-             * but is not part of autocomplete responses. If it is set, we also
-             * should not deliver the normal time facet in autocomplete responses.
-             *
-             * {
-             *   'facet':'time_custom',
-             *   'value':'>=12345678900'
-             * }
-             */
-            char[] chars = query.toCharArray();
-            String sTimestamp;
-            if (chars.length > 1) {
-                int offset = 0;
-                final char firstChar = chars[0];
-                if (firstChar == '<') {
-                    offset = 1;
-                    comparison = Comparison.LOWER_THAN;
-                    if (chars[1] == '=') {
-                        offset = 2;
-                        comparison = Comparison.LOWER_EQUALS;
-                    }
-                } else if (firstChar == '>') {
-                    offset = 1;
-                    comparison = Comparison.GREATER_THAN;
-                    if (chars[1] == '=') {
-                        offset = 2;
-                        comparison = Comparison.GREATER_EQUALS;
-                    }
-                } else {
-                    comparison = Comparison.EQUALS;
-                }
-
-                sTimestamp = String.copyValueOf(chars, offset, chars.length);
-            } else {
-                comparison = Comparison.EQUALS;
-                sTimestamp = query;
-            }
-
-            try {
-                timestamp = Long.parseLong(sTimestamp);
-            } catch (NumberFormatException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, Constants.FIELD_TIME);
-            }
+            return null;
         }
 
         return new Pair<Comparison, Long>(comparison, Long.valueOf(timestamp));
     }
 
-    private static SearchTerm<?> buildTimeTerm(final Comparison comparison, final long timestamp) {
+    private static SearchTerm<?> buildDateTerm(final Comparison comparison, final long timestamp) {
         ComparablePattern<Date> pattern = null;
         switch (comparison) {
         case EQUALS:

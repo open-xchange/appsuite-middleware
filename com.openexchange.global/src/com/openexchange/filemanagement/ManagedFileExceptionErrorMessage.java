@@ -63,6 +63,10 @@ import com.openexchange.exception.OXExceptionStrings;
 public enum ManagedFileExceptionErrorMessage implements DisplayableOXExceptionCode {
 
     /**
+     * An unexpected error occurred: %1$s
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", CATEGORY_ERROR, 9999, null),
+    /**
      * File not found: %1$s
      */
     FILE_NOT_FOUND("File not found: %1$s", CATEGORY_ERROR, 1, ManagedFileExceptionMessages.FILE_NOT_FOUND_MSG),
@@ -87,7 +91,7 @@ public enum ManagedFileExceptionErrorMessage implements DisplayableOXExceptionCo
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
-        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override

@@ -72,6 +72,9 @@ public final class CommonStrings implements LocalizableStrings {
 
     public static final String FACET_TYPE_FOLDER = "Folder";
 
+    // Search for items by their creation date
+    public static final String DATE = "Date";
+
     // ------------------------- i18n strings for folder types ------------------------------------- //
 
     public static final String FOLDER_TYPE_PRIVATE = "Private";
@@ -79,5 +82,16 @@ public final class CommonStrings implements LocalizableStrings {
     public static final String FOLDER_TYPE_PUBLIC = "Public";
 
     public static final String FOLDER_TYPE_SHARED = "Shared";
+
+ // ------------------------- i18n strings for facet values -------------------------------------- //
+
+    // Search mails from last week
+    public static final String LAST_WEEK = "last week";
+
+    // Search mails from last month
+    public static final String LAST_MONTH = "last month";
+
+    // Search mails from last year
+    public static final String LAST_YEAR = "last year";
 
 }

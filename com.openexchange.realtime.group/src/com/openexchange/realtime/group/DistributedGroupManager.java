@@ -50,59 +50,88 @@
 package com.openexchange.realtime.group;
 
 import java.util.Collection;
-import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.Duration;
 
 
 /**
- * {@link DistributedGroupManager} - Allows acces to the distributed group infos stored in Hazelcast.
- *
+ * {@link DistributedGroupManager} - Allows acces to the distributed client, group infos stored in Hazelcast. It tracks client -> groups(
+ * {@link SelectorChoice} actually) and group -> members({@link SelectorChoice} actually) mappings. See {@link SelectorChoice} for more details.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
 public interface DistributedGroupManager {
 
     /**
-     * Adds a client <-> group mapping to this manager
+     * Adds client -> group({@link SelectorChoice} actually), group -> client({@link SelectorChoice} actually) mapping to this manager.
      * 
-     * @param client The {@link ID} of the client that joined a group.
-     * @param group The {@link ID} of the group that client joined.
-     * @return True if the mapping was added to the manager, false otherwise.
+     * @param selectorChoice The {@link SelectorChoice} containing the needed client, group and selector to add the mappings
+     * @return True if the mapping was added to the manager, false otherwise
+     * @throws IllegalStateException if any parameter is null
      */
-    boolean add(ID client, ID group)  throws OXException;
+    boolean addChoice(SelectorChoice selectorChoice) throws OXException;
 
     /**
-     * Remove all client <-> group mappings for a given client {@link ID}.
+     * Remove single clientX -> groupY({@link SelectorChoice} actually), groupY -> clientX({@link SelectorChoice} actually) mappings without
+     * sending a LeaveCommand
+     * 
+     * @param selectorChoice The {@link SelectorChoice} containing the needed client, group and selector
+     * @return true if the client <-> group mappings were removed from the manager, false otherwise
+     * @throws IllegalStateException if any parameter is null
+     */
+    boolean removeChoice(SelectorChoice selectorChoice) throws OXException;
+
+    /**
+     * Remove a single client -> group ({@link SelectorChoice} actually) mapping
+     * 
+     * @param selectorChoice contains all needed infos to remove the mapping
+     * @return true if the mapping could be removed, false otherwise
+     */
+    boolean removeClientToSelectorChoice(SelectorChoice selectorChoice) throws OXException;
+
+    /**
+     * Remove a single group -> member({@link SelectorChoice} actually) mapping
+     * 
+     * @param selectorChoice contains all needed infos to remove the mapping
+     * @return true if the mapping could be removed, false otherwise
+     */
+    boolean removeGroupToSelectorChoice(SelectorChoice selectorChoice) throws OXException;
+
+    /**
+     * Remove all client -> group mappings for a given client {@link ID}. This will send a {@link LeaveCommand} to all GroupDispatchers that
+     * hold the client as member and thus remove the group -> client mapping.
      * 
      * @param client The client {@link ID}
      * @return A {@link Collection} of groups {@link ID}s that the client was member of
      */
-    Collection<ID> remove(ID client)  throws OXException;
-    
+    Collection<? extends SelectorChoice> removeClient(ID client) throws OXException;
+
     /**
-     * Remove a single client <-> group mapping.
+     * Remove all group -> member mappings for a given group {@link ID} and additionally remove all client -> group mappings of affected
+     * members. This will send a {@link NotMember} to all members of that group.
      * 
-     * @param client The client {@link ID}.
-     * @return true if the client <-> group mapping was removed from the manager, false otherwise.
+     * @param group The group {@link ID}
+     * @return A collection of {@link SelectorChoice}s representing the previous members of the group
      */
-    boolean remove(ID client, ID group) throws OXException;
-    
+    Collection<? extends SelectorChoice> removeGroup(ID group) throws OXException;
+
     /**
-     * Get the Groups that a given client is a member of.
+     * Get the groups that a given client is a member of.
      * @param id The client {@link ID}
-     * @return The Groups that a given client is a member of.
+     * @return The {@link SelectorChoices} representing the joined groups.
      */
-    Set<ID> getGroups(ID id) throws OXException;
+    Collection<? extends SelectorChoice> getGroups(ID id) throws OXException;
 
     /**
      * Get the current members of a given GroupDispatcher.
      * 
      * @param id The {@link GroupDispatcher}'s {@link ID}
-     * @return The current members of a given GroupDispatcher.
+     * @return The {@link SelectorChoices} representing the members that joined the group.
      */
-    Set<ID> getMembers(ID id)  throws OXException;
+    Collection<? extends SelectorChoice> getMembers(ID id)  throws OXException;
 
     /**
      * Set the duration of inactivity for a given client. The GroupManagerService will inform all Groups the client had joined previously

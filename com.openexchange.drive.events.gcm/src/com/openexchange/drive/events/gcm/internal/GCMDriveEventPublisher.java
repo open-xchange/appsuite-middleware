@@ -119,7 +119,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 for (int j = 0; j < length; j++) {
                     Subscription subscription = subscriptions.get(i + j);
                     if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
-                        LOG.trace("Skipping push notification for subscription: " + subscription);
+                        LOG.trace("Skipping push notification for subscription: {}", subscription);
                         continue;
                     }
                     registrationIDs.add(subscription.getToken());

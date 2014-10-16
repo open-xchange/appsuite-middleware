@@ -191,7 +191,7 @@ public class AntXmlRunListener extends RunListener
         return sw.toString();
     }
 
-    private static final String[] DEFAULT_TRACE_FILTERS = new String[] { "junit.framework.TestCase", "junit.framework.TestResult", "junit.framework.TestSuite", "junit.framework.Assert.", // don't filter AssertionFailure
+    private static final String[] DEFAULT_TRACE_FILTERS = new String[] { "junit.framework.TestCase", "junit.framework.TestResult", "junit.framework.TestSuite", "org.junit.Assert.", // don't filter AssertionFailure
             "junit.swingui.TestRunner", "junit.awtui.TestRunner", "junit.textui.TestRunner", "java.lang.reflect.Method.invoke(", "sun.reflect.", "org.apache.tools.ant.",
                         // JUnit 4 support:
             "org.junit.", "junit.framework.JUnit4TestAdapter",

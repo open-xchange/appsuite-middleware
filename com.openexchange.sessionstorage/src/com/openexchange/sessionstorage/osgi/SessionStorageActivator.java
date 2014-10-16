@@ -49,12 +49,14 @@
 
 package com.openexchange.sessionstorage.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessionstorage.SessionStorageConfiguration;
 
 /**
  * {@link SessionStorageActivator}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionStorageActivator extends HousekeepingActivator {
 
@@ -67,17 +69,18 @@ public class SessionStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        // nothing to do
+        SessionStorageConfiguration.initInstance(getService(ConfigurationService.class));
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        // nothing to do
+        SessionStorageConfiguration.releaseInstance();
+        super.stopBundle();
     }
 
 }

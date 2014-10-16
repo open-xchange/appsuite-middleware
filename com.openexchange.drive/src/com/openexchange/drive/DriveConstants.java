@@ -125,6 +125,11 @@ public class DriveConstants {
     public static int DEFAULT_MIN_API_VERSION = 1;
 
     /**
+     * The API version the backend supports currently.
+     */
+    public static int SUPPORTED_API_VERSION = 2;
+
+    /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.
      */
     public static final ThreadLocal<SimpleDateFormat> LOG_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {

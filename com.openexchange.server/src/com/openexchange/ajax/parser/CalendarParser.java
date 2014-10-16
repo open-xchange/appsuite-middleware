@@ -56,6 +56,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
@@ -204,6 +205,10 @@ public class CalendarParser extends CommonParser {
 
         if (jsonobject.has(CalendarFields.PRINCIPAL_ID)) {
             calendarobject.setPrincipalId(parseInt(jsonobject, CalendarFields.PRINCIPAL_ID));
+        }
+
+        if (jsonobject.has(AppointmentFields.FULL_TIME)) {
+            calendarobject.setFullTime(parseBoolean(jsonobject, CalendarFields.FULL_TIME));
         }
 
         parseField(parseAll, calendarobject, timeZone, jsonobject);

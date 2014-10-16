@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange sessionstorage hazelcast bundle
 Bundle-SymbolicName: com.openexchange.sessionstorage.hazelcast
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.sessionstorage.hazelcast.osgi.HazelcastSessionStorageActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -16,6 +16,7 @@ Import-Package: com.hazelcast.config,
  com.openexchange.hazelcast.configuration,
  com.openexchange.hazelcast.serialization,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
@@ -24,6 +25,10 @@ Import-Package: com.hazelcast.config,
  com.openexchange.sessionstorage,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
+ org.apache.commons.codec.digest,
+ org.apache.commons.codec.net,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,

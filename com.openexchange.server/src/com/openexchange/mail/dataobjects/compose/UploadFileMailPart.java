@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.MessageRemovedException;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
@@ -139,9 +140,13 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         }
         final String retval;
         {
-            final int mlen = contentType.length() - 1;
-            if (0 == contentType.indexOf('"') && mlen == contentType.lastIndexOf('"')) {
-                retval = contentType.substring(1, mlen);
+            if (0 == contentType.indexOf('"')) {
+                final int mlen = contentType.length() - 1;
+                if (mlen == contentType.lastIndexOf('"')) {
+                    retval = contentType.substring(1, mlen);
+                } else {
+                    retval = contentType;
+                }
             } else {
                 retval = contentType;
             }
@@ -166,7 +171,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                      */
                     final String cs = detectCharset(new FileInputStream(uploadFile));
                     getContentType().setCharsetParameter(cs);
-                    LOG.warn("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", cs);
+                    LOG.debug("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", cs);
                 }
                 dataSource = new FileDataSource(uploadFile, getContentType().toString());
             } catch (final IOException e) {
@@ -196,7 +201,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
             if (charset == null) {
                 try {
                     charset = detectCharset(new FileInputStream(uploadFile));
-                    LOG.warn("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
+                    LOG.debug("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
                 } catch (final FileNotFoundException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
@@ -208,7 +213,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
             } catch (final FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

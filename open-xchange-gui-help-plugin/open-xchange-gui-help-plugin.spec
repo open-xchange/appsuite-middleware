@@ -1,21 +1,20 @@
 
 Name:           open-xchange-gui-help-plugin
-BuildArch: 	noarch
-#!BuildIgnore: post-build-checks
-BuildRequires:  ant
+BuildArch:      noarch
+#!BuildIgnore:  post-build-checks
 BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
-Version:	@OXVERSION@
-%define		ox_release 24
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
+Version:        @OXVERSION@
+%define         ox_release 5
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Open-Xchange GUI Help Server Plug-In
-Autoreqprov:   no
-Requires:	open-xchange-core
+Autoreqprov:    no
+Requires:       open-xchange-core
 
 %description
 Open-Xchange GUI Help Plug-In
@@ -46,44 +45,76 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.6.1 release
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.6.1 release
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-09
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-09
+* Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-10
+* Thu Oct 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.6.1
 * Tue Sep 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-06
 * Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-29
+* Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-06
 * Tue Sep 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-23
+* Tue Sep 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-15
+* Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-15
+* Fri Sep 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.6.1
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
+* Wed Aug 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-15
 * Tue Aug 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-06
 * Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-11
+* Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-11
 * Mon Jul 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-30
+* Mon Jul 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-28
 * Tue Jul 15 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-21
 * Mon Jul 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-24
 * Thu Jul 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-15
+* Mon Jul 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-14
+* Mon Jul 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-07
 * Tue Jul 01 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-07
+* Thu Jun 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.1
 * Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 7.6.0
+* Wed Jun 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-30
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>

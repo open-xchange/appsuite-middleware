@@ -59,6 +59,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Collators;
 import com.openexchange.user.json.Utility;
 import com.openexchange.user.json.field.UserField;
 

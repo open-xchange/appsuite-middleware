@@ -50,10 +50,12 @@
 package com.openexchange.html.internal.jericho.handler;
 
 import static com.openexchange.html.HtmlServices.isNonJavaScriptURL;
+import static com.openexchange.html.HtmlServices.isSafe;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
+import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,8 +63,11 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,6 +98,19 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FilterJerichoHandler implements JerichoHandler {
+
+    private static final CellPadding CELLPADDING_EMPTY = new CellPadding(null);
+
+    private static class CellPadding {
+        final String cellPadding;
+
+        CellPadding(String cellPadding) {
+            super();
+            this.cellPadding = cellPadding;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------- //
 
     private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_', '/', ';', '=', ' ' };
 
@@ -172,7 +190,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
     /*-
      * Member stuff
      */
-
     private final Map<String, Map<String, Set<String>>> htmlMap;
     private final Map<String, Set<String>> styleMap;
 
@@ -197,7 +214,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private int depth;
 
     /**
-     * The max. content size.
+     * The max. content size (-1 or >=10000)
      */
     private int maxContentSize;
 
@@ -208,6 +225,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private boolean imageURLFound;
     private boolean replaceUrls = true;
     private String cssPrefix;
+    private final Queue<CellPadding> tablePaddings;
 
     private final boolean changed = false;
 
@@ -216,18 +234,19 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public FilterJerichoHandler(final int capacity, final HtmlServiceImpl htmlService) {
         super();
+        tablePaddings = new LinkedList<FilterJerichoHandler.CellPadding>();
         this.htmlService = htmlService;
-        maxContentSize = -1;
-        maxContentSizeExceeded = false;
-        urlBuilder = new StringBuilder(256);
-        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
-        htmlBuilder = new StringBuilder(capacity);
-        attrBuilder = new StringBuilder(128);
+        this.maxContentSize = -1;
+        this.maxContentSizeExceeded = false;
+        this.urlBuilder = new StringBuilder(256);
+        this.cssBuffer = new StringBuilderStringer(new StringBuilder(256));
+        this.htmlBuilder = new StringBuilder(capacity);
+        this.attrBuilder = new StringBuilder(128);
         if (null == staticHTMLMap) {
             loadWhitelist();
         }
-        htmlMap = staticHTMLMap;
-        styleMap = staticStyleMap;
+        this.htmlMap = staticHTMLMap;
+        this.styleMap = staticStyleMap;
     }
 
     /**
@@ -235,13 +254,14 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public FilterJerichoHandler(final int capacity, final String mapStr, final HtmlServiceImpl htmlService) {
         super();
+        tablePaddings = new LinkedList<FilterJerichoHandler.CellPadding>();
         this.htmlService = htmlService;
-        maxContentSize = -1;
-        maxContentSizeExceeded = false;
-        urlBuilder = new StringBuilder(256);
-        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
-        htmlBuilder = new StringBuilder(capacity);
-        attrBuilder = new StringBuilder(128);
+        this.maxContentSize = -1;
+        this.maxContentSizeExceeded = false;
+        this.urlBuilder = new StringBuilder(256);
+        this.cssBuffer = new StringBuilderStringer(new StringBuilder(256));
+        this.htmlBuilder = new StringBuilder(capacity);
+        this.attrBuilder = new StringBuilder(128);
         final Map<String, Map<String, Set<String>>> map = parseHTMLMap(mapStr);
         if (!map.containsKey("html")) {
             map.put("html", null);
@@ -262,14 +282,19 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     /**
-     * Sets the max. content size
+     * Sets the max. content size. <= 0 means unlimited, <10000 will be set to 10000.
      *
      * @param maxContentSize The max. content size to set
      * @return This handler with new behavior applied
      */
     public FilterJerichoHandler setMaxContentSize(final int maxContentSize) {
-        this.maxContentSize = maxContentSize;
-        maxContentSizeExceeded = false;
+        if ((maxContentSize >= 10000) || (maxContentSize <= 0)) {
+            this.maxContentSize = maxContentSize;
+        } else {
+            this.maxContentSize = 10000;
+        }
+
+        this.maxContentSizeExceeded = false;
         return this;
     }
 
@@ -282,6 +307,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public FilterJerichoHandler setCssPrefix(final String cssPrefix) {
         this.cssPrefix = cssPrefix;
         return this;
+    }
+
+    /**
+     * Returns if maxContentSize is exceeded
+     *
+     * @return true, if exceeded, otherwise false
+     */
+    public boolean isMaxContentSizeExceeded() {
+        return maxContentSizeExceeded;
     }
 
     /**
@@ -393,6 +427,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         if (maxContentSizeExceeded) {
             return false;
         }
+
         maxContentSizeExceeded = htmlBuilder.length() + addLen > maxContentSize;
         return !maxContentSizeExceeded;
     }
@@ -427,7 +462,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     cssBuffer.setLength(0);
                     if (dropExternalImages) {
                         imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
-                        // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
                         checkedCSS = cssBuffer.toString();
                         cssBuffer.setLength(0);
                     }
@@ -461,6 +495,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 body = false;
             } else if (isCss && HTMLElementName.STYLE == name) {
                 isCss = false;
+            } else if (HTMLElementName.TABLE == name) {
+                tablePaddings.poll();
             }
             if (depth == 0) {
                 htmlBuilder.append("</").append(name).append('>');
@@ -562,32 +598,72 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     private void addStartTag(final StartTag startTag, final boolean simple, final Map<String, Set<String>> allowedAttributes) {
         attrBuilder.setLength(0);
-        final String tagName = startTag.getName();
-        final Attributes attributes = startTag.getAttributes();
-        if (simple && HTMLElementName.META.equals(tagName) && null != attributes.get("http-equiv") && allowedAttributes.containsKey("http-equiv")) {
-            /*
-             * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
-             */
-            for (final Attribute attribute : attributes) {
-                final String val = attribute.getValue();
-                if (isNonJavaScriptURL(val, "url=")) {
-                    attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
-                } else {
-                    attrBuilder.setLength(0);
-                    break;
+        String tagName = startTag.getName();
+
+        if (simple && HTMLElementName.META == tagName && allowedAttributes.containsKey("http-equiv")) {
+            Attributes attributes = startTag.getAttributes();
+            if (null != attributes.get("http-equiv")) {
+                /*
+                 * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
+                 */
+                for (final Attribute attribute : attributes) {
+                    final String val = attribute.getValue();
+                    if (isNonJavaScriptURL(val, "url=")) {
+                        attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
+                    } else {
+                        attrBuilder.setLength(0);
+                        break;
+                    }
+                }
+                if (attrBuilder.length() > 0) {
+                    htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+                }
+                return;
+            }
+        }
+
+        // Handle start tag
+        Map<String, String> attrMap = createMapFrom(startTag.getAttributes());
+        if (HTMLElementName.IMG == tagName) {
+            String width = attrMap.get("width");
+            if (null != width) {
+                String height = attrMap.get("height");
+                if (null != height) {
+                    prependToStyle("width: " + width + "px; height: " + height + "px;", attrMap);
                 }
             }
-            if (attrBuilder.length() > 0) {
-                htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+        } else if (HTMLElementName.TABLE == tagName) {
+            // Has attribute "bgcolor"
+            String bgcolor = attrMap.get("bgcolor");
+            if (null != bgcolor) {
+                prependToStyle("background-color: " + bgcolor + ';', attrMap);
             }
-            return;
+
+            // Has attribute "cellpadding"?
+            String cellpadding = attrMap.get("cellpadding");
+            if (null == cellpadding) {
+                tablePaddings.offer(CELLPADDING_EMPTY);
+            } else {
+                if ("0".equals(attrMap.get("cellspacing"))) {
+                    prependToStyle("border-collapse: collapse;", attrMap);
+                }
+
+                // Table has cell padding -> Remember it for all child elements
+                tablePaddings.offer(new CellPadding(cellpadding));
+            }
+        } else if (HTMLElementName.TD == tagName || HTMLElementName.TH == tagName) {
+            CellPadding cellPadding = tablePaddings.peek();
+            if (CELLPADDING_EMPTY != cellPadding && null != cellPadding) {
+                String style = attrMap.get("style");
+                if (null == style || style.indexOf("padding") < 0) {
+                    prependToStyle("padding: " + cellPadding.cellPadding + "px;", attrMap);
+                }
+            }
         }
-        /*
-         * Non-simple start tag
-         */
-        final List<Attribute> uriAttributes = startTag.getURIAttributes();
-        for (final Attribute attribute : attributes) {
-            final String attr = attribute.getKey();
+
+        List<Attribute> uriAttributes = startTag.getURIAttributes();
+        for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
+            String attr = attribute.getKey();
             if ("style".equals(attr)) {
                 /*
                  * Handle style attribute
@@ -613,7 +689,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             } else {
                 final String val = attribute.getValue();
                 if (null == allowedAttributes) { // No restrictions
-                    if (isNonJavaScriptURL(val)) {
+                    if (isSafe(val)) {
                         if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                             attrBuilder.append(' ').append(attr).append("=\"\"");
                             imageURLFound = true;
@@ -640,7 +716,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                         } else {
                             final Set<String> allowedValues = allowedAttributes.get(attr);
                             if (null == allowedValues || allowedValues.contains(toLowerCase(val))) {
-                                if (isNonJavaScriptURL(val)) {
+                                if (isSafe(val)) {
                                     if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                                         attrBuilder.append(' ').append(attr).append("=\"\"");
                                         imageURLFound = true;
@@ -673,11 +749,30 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 } // End of else
             }
         }
+
         htmlBuilder.append('<').append(tagName).append(attrBuilder.toString());
         if (startTag.isSyntacticalEmptyElementTag()) {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
+    }
+
+    private void prependToStyle(String stylePrefix, Map<String, String> attrMap) {
+        String style = attrMap.get("style");
+        if (null == style) {
+            style = stylePrefix;
+        } else {
+            style = stylePrefix + " " + style;
+        }
+        attrMap.put("style", style);
+    }
+
+    private Map<String, String> createMapFrom(List<Attribute> attributes) {
+        Map<String, String> map = new LinkedHashMap<String, String>(attributes.size());
+        for (Attribute attribute : attributes) {
+            map.put(attribute.getKey(), attribute.getValue());
+        }
+        return map;
     }
 
     // --------------------------------- Image check --------------------------------------- //
@@ -821,7 +916,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
                     imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
-                    // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
                     checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                 }
@@ -841,219 +935,219 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
 
     private static final byte[] DEFAULT_WHITELIST = String
-            .valueOf(
-                    "# HTML tags and attributes\n"
-                            + "\n"
-                            + "html.tag.a=\",href,name,tabindex,target,type,\"\n"
-                            + "html.tag.area=\",alt,coords,href,nohref[nohref],shape[:rect:circle:poly:default:],tabindex,target,\"\n"
-                            + "html.tag.b=\"\"\n"
-                            + "html.tag.basefont=\",color,face,size,\"\n"
-                            + "html.tag.bdo=\",dir[:ltr:rtl:]\"\n"
-                            + "html.tag.blockquote=\",type,\"\n"
-                            + "html.tag.body=\",alink,background,bgcolor,link,text,vlink,\"\n"
-                            + "html.tag.br=\",clear[:left:right:all:none:]\"\n"
-                            + "html.tag.button=\",disabled[disabled],name,tabindex,type[:button:submit:reset:],value,\"\n"
-                            + "html.tag.caption=\",align[:top:bottom:left:right:]\"\n"
-                            + "html.tag.col=\",align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width,\"\n"
-                            + "html.tag.colgroup=\",align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width,\"\n"
-                            + "html.tag.del=\",datetime,\"\n"
-                            + "html.tag.dir=\",compact[compact]\"\n"
-                            + "html.tag.div=\",align[:left:center:right:justify:]\"\n"
-                            + "html.tag.dl=\",compact[compact]\"\n"
-                            + "html.tag.em=\"\"\n"
-                            + "html.tag.font=\",color,face,size,\"\n"
-                            + "html.tag.form=\",action,accept,accept-charset,enctype,method[:get:post:],name,target,\"\n"
-                            + "html.tag.h1=\",align[:left:center:right:justify:]\"\n"
-                            + "html.tag.h2=\",align[:left:center:right:justify:]\"\n"
-                            + "html.tag.h3=\",align[:left:center:right:justify:]\"\n"
-                            + "html.tag.h4=\",align[:left:center:right:justify:]\"\n"
-                            + "html.tag.h5=\",align[:left:center:right:justify:]\"\n"
-                            + "html.tag.h6=\",align[:left:center:right:justify:]\"\n"
-                            + "html.tag.hr=\",align[:left:center:right:],noshade[noshade],size,width,\"\n"
-                            + "html.tag.html=\",version,xmlns,\"\n"
-                            + "html.tag.img=\",align[:top:middle:bottom:left:right:],alt,border,height,hspace,ismap[ismap],name,src,usemap,vspace,width,\"\n"
-                            + "html.tag.input=\",accept,align[:top:middle:bottom:left:right:center:],alt,checked[checked],disabled[disabled],maxlength[],name,readonly[readonly],size,src,tabindex,type[:text:checkbox:radio:submit:reset:hidden:image:button:password:],value,\"\n"
-                            + "html.tag.ins=\",datetime,\"\n"
-                            + "html.tag.label=\",for,\"\n"
-                            + "html.tag.legend=\",align[:left:top:right:bottom:]\"\n"
-                            + "html.tag.li=\",type[:disc:square:circle:1:a:A:i:I:],value[],\"\n"
-                            + "html.tag.map=\",name,\"\n"
-                            + "html.tag.meta=\",http-equiv[:content-type:],\"\n"
-                            + "html.tag.ol=\",compact[compact],start[],type[:1:a:A:i:I:],\"\n"
-                            + "html.tag.optgroup=\",disabled[disabled],label,\"\n"
-                            + "html.tag.option=\",disabled[disabled],label,selected[selected],value,\"\n"
-                            + "html.tag.p=\",align[:left:center:right:justify:]\"\n"
-                            + "html.tag.pre=\",width[],\"\n"
-                            + "html.tag.select=\",disabled[disabled],multiple[multiple],name,size,tabindex[],\"\n"
-                            + "html.tag.span=\"\"\n"
-                            + "html.tag.strong=\"\"\n"
-                            + "html.tag.style=\",media,type,\"\n"
-                            + "html.tag.table=\",align[:left:center:right:],background,border,bgcolor,cellpadding,cellspacing,frame[:void:above:below:hsides:ihs:rhs:vsides:box:border:],rules[:none:groups:rows:cols:all:],summary,width,\"\n"
-                            + "html.tag.tbody=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
-                            + "html.tag.td=\",abbr,align[:left:center:right:justify:char:],axis,background,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width,\"\n"
-                            + "html.tag.textarea=\",cols[],disabled[disabled],name,readonly[readonly],rows[],tabindex[],\"\n"
-                            + "html.tag.tfoot=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
-                            + "html.tag.th=\",abbr,align[:left:center:right:justify:char:],axis,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width,\"\n"
-                            + "html.tag.thead=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
-                            + "html.tag.tr=\",align[:left:center:right:justify:char:],bgcolor,char,charoff,valign[:top:middle:bottom:baseline:],height,\"\n"
-                            + "html.tag.u=\"\"\n"
-                            + "html.tag.ul=\",compact[compact],type[:disc:square:circle:],\"\n"
-                            + "\n"
-                            + "\n"
-                            + "# CSS key-value-pairs.\n"
-                            + "# An empty value indicates a reference to style's combi-map.\n"
-                            + "# Placeholders:\n"
-                            + "# c: Any CSS color value\n"
-                            + "# u: An URL; e.g. url(http://www.somewhere.com/myimage.jpg);\n"
-                            + "# n: Any CSS number value without '%'\n"
-                            + "# N: Any CSS number value\n"
-                            + "# *: Any value allowed\n"
-                            + "# d: delete\n"
-                            + "# t: time\n"
-                            + "\n"
-                            + "html.style.azimuth=\",left-side,left-side behind,far-left,far-left behind,left,left behind,center-left,center-left behind,center,center behind,center-right,center-right behind,right,right behind,far-right,far-right behind,right-side,right behind,\"\n"
-                            + "html.style.background=\"\"\n"
-                            + "html.style.background-attachment=\",scroll,fixed,\"\n"
-                            + "html.style.background-color=\"c,transparent,\"\n"
-                            + "html.style.background-image=\"u\"\n"
-                            + "html.style.background-position=\",top,bottom,center,left,right,\"\n"
-                            + "html.style.background-repeat=\",repeat,repeat-x,repeat-y,no-repeat,\"\n"
-                            + "html.style.border=\"\"\n"
-                            + "html.style.border-bottom=\"\"\n"
-                            + "html.style.border-bottom-color=\"c,transparent,\"\n"
-                            + "html.style.border-bottom-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.border-bottom-width=\"n\"\n"
-                            + "html.style.border-collapse=\",separate,collapse,\"\n"
-                            + "html.style.border-color=\"c,transparent,\"\n"
-                            + "html.style.border-left=\"\"\n"
-                            + "html.style.border-left-color=\"c,transparent,\"\n"
-                            + "html.style.border-left-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.border-left-width=\"n\"\n"
-                            + "html.style.border-right=\"\"\n"
-                            + "html.style.border-right-color=\"c,transparent,\"\n"
-                            + "html.style.border-right-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.border-right-width=\"n\"\n"
-                            + "html.style.border-spacing=\"N\"\n"
-                            + "html.style.border-style=\"\"\n"
-                            + "html.style.border-top=\"\"\n"
-                            + "html.style.border-top-color=\"c,transparent,\"\n"
-                            + "html.style.border-top-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.border-top-width=\"n\"\n"
-                            + "html.style.border-width=\"\"\n"
-                            + "html.style.bottom=\"N,auto,\"\n"
-                            + "html.style.caption-side=\",top,bottom,left,right,\"\n"
-                            + "html.style.centerline=\"d\"\n"
-                            + "html.style.clear=\",left,right,both,none,\"\n"
-                            + "html.style.clip=\"d\"\n"
-                            + "html.style.color=\"c,transparent,\"\n"
-                            + "html.style.content=\"d\"\n"
-                            + "html.style.counter-increment=\"d\"\n"
-                            + "html.style.counter-reset=\"d\"\n"
-                            + "html.style.counter=\"d\"\n"
-                            + "html.style.cue=\"u\"\n"
-                            + "html.style.cue-after=\"u\"\n"
-                            + "html.style.cue-before=\"u\"\n"
-                            + "html.style.cursor=\",auto,default,crosshair,pointer,move,n-resize,ne-resize,e-resize,se-resize,s-resize,sw-resize,w-resize,nw-resize,text,wait,help,\"\n"
-                            + "html.style.definition-src=\"d\"\n"
-                            + "html.style.direction=\",ltr,rtl,\"\n"
-                            + "html.style.display=\",block,inline,list-item,marker,run-in,compact,none,table,inline-table,table-row,table-cell,table-row-group,table-header-group,table-footer-group,table-column,table-column-group,table-caption,\"\n"
-                            + "html.style.empty-cells=\",show,hide,\"\n"
-                            + "html.style.elevation=\",below,level,above,higher,lower,\"\n"
-                            + "html.style.filter=\"d\" \n"
-                            + "html.style.float=\",left,right,none,\"\n"
-                            + "html.style.font=\"\"\n"
-                            + "html.style.font-family=\"*\"\n"
-                            + "html.style.font-color=\"c,transparent,\"\n"
-                            + "html.style.font-size=\"N,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,\"\n"
-                            + "html.style.font-stretch=\",wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,\"\n"
-                            + "html.style.font-style=\",italic,oblique,normal,\"\n"
-                            + "html.style.font-variant=\",small-caps,normal,\"\n"
-                            + "html.style.font-weight=\",bold,bolder,lighter,100,200,300,400,500,600,700,800,900,normal,\"\n"
-                            + "html.style.height=\"N,auto,\"\n"
-                            + "html.style.left=\"N,auto,\"\n"
-                            + "html.style.letter-spacing=\"n\"\n"
-                            + "html.style.line-height=\"N\"\n"
-                            + "html.style.list-style=\"\"    \n"
-                            + "html.style.list-style-image=\"u,none,\"\n"
-                            + "html.style.list-style-position=\",inside,outside,\"\n"
-                            + "html.style.list-style-type=\",decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,none,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha,\"\n"
-                            + "html.style.margin=\"\"\n"
-                            + "html.style.margin-bottom=\"N,auto,inherit,\"\n"
-                            + "html.style.margin-left=\"N,auto,inherit,\"\n"
-                            + "html.style.margin-right=\"N,auto,inherit,\"\n"
-                            + "html.style.margin-top=\"N,auto,inherit,\"\n"
-                            + "html.style.max-height=\"N\"\n"
-                            + "html.style.max-width=\"N\"\n"
-                            + "html.style.min-height=\"N\"\n"
-                            + "html.style.min-width=\"N\"\n"
-                            + "html.style.orphans=\"0\"\n"
-                            + "html.style.overflow=\",visible,hidden,scroll,auto,\"\n"
-                            + "html.style.padding=\"\"\n"
-                            + "html.style.padding-bottom=\"N\"\n"
-                            + "html.style.padding-left=\"N\"\n"
-                            + "html.style.padding-right=\"N\"\n"
-                            + "html.style.padding-top=\"N\"\n"
-                            + "html.style.page-break-after=\",always,avoid,left,right,inherit,auto,\"\n"
-                            + "html.style.page-break-before=\",always,avoid,left,right,inherit,auto,\"\n"
-                            + "html.style.page-break-inside=\",avoid,auto,\"\n"
-                            + "html.style.pause=\"t\"\n"
-                            + "html.style.pause-after=\"t\"\n"
-                            + "html.style.pause-before=\"t\"\n"
-                            + "html.style.pitch=\",x-low,low,medium,high,x-high,\"\n"
-                            + "html.style.pitch-range=\"0\"\n"
-                            + "html.style.play-during=\"u,mix,repeat,auto,\"\n"
-                            + "html.style.position=\",absolute,fixed,relative,static,\"\n"
-                            + "html.style.quotes=\"d\"\n"
-                            + "html.style.richness=\"0\"\n"
-                            + "html.style.right=\"N,auto,\"\n"
-                            + "html.style.scrollbar-3dlight-color=\"c\"\n"
-                            + "html.style.scrollbar-arrow-color=\"c\"\n"
-                            + "html.style.scrollbar-base-color=\"c\"\n"
-                            + "html.style.scrollbar-darkshadow-color=\"c\"\n"
-                            + "html.style.scrollbar-face-color=\"c\"\n"
-                            + "html.style.scrollbar-highlight-color=\"c\"\n"
-                            + "html.style.scrollbar-shadow-color=\"c\"\n"
-                            + "html.style.scrollbar-track-color=\"c\"\n"
-                            + "html.style.speak=\",none,normal,spell-out,\"\n"
-                            + "html.style.speak-header=\",always,once,\"\n"
-                            + "html.style.speak-numeral=\",digits,continuous,\"\n"
-                            + "html.style.speak-punctuation=\",code,none,\"\n"
-                            + "html.style.speech-rate=\"0,x-slow,slow,slower,medium,faster,fast,x-fase,\"\n"
-                            + "html.style.stress=\"0\"\n"
-                            + "html.style.table-layout=\",auto,fixed,\"\n"
-                            + "html.style.text-align=\",left,center,right,justify,\"\n"
-                            + "html.style.text-decoration=\",underline,overline,line-through,blink,none,\"\n"
-                            + "html.style.text-indent=\"N\"\n"
-                            + "html.style.text-shadow=\"nc,none,\" or color\n"
-                            + "html.style.text-transform=\",capitalize,uppercase,lowercase,none,\"\n"
-                            + "html.style.top=\"N,auto,\"\n"
-                            + "html.style.vertical-align=\",top,middle,bottom,baseline,sub,super,text-top,text-bottom,\"\n"
-                            + "html.style.visibility=\",hidden,visible,\"\n"
-                            + "html.style.voice-family=\",male,female,old,young,child,\"\n"
-                            + "html.style.volume=\"0,silent,x-soft,soft,medium,loud,x-loud,\"\n"
-                            + "html.style.white-space=\",normal,pre,nowrap,\"\n"
-                            + "html.style.widows=\"0\"\n"
-                            + "html.style.width=\"N,auto,\"\n"
-                            + "html.style.word-spacing=\"n\"\n"
-                            + "html.style.z-index=\"0\"\n"
-                            + "\n"
-                            + "\n"
-                            + "# CSS combi-map\n"
-                            + "\n"
-                            + "html.style.combimap.background=\"uNc,scroll,fixed,transparent,top,bottom,center,left,right,repeat,repeat-x,repeat-y,no-repeat,\"\n"
-                            + "html.style.combimap.border=\"Nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,separate,collapse,\"\n"
-                            + "html.style.combimap.border-bottom=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.combimap.border-left=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.combimap.border-right=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.combimap.border-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.combimap.border-top=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                            + "html.style.combimap.border-width=\"n\"\n"
-                            + "html.style.combimap.font=\"N*,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,italic,oblique,small-caps,bold,bolder,lighter,100,200,300,400,500,600,700,800,900,\"\n"
-                            + "html.style.combimap.list-style=\"u,none,inside,outside,decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha,\"\n"
-                            + "html.style.combimap.margin=\"N,auto,inherit,\"\n" + "html.style.combimap.padding=\"N\"\n").getBytes();
+        .valueOf(
+            "# HTML tags and attributes\n"
+                + "\n"
+                + "html.tag.a=\",href,name,tabindex,target,type,\"\n"
+                + "html.tag.area=\",alt,coords,href,nohref[nohref],shape[:rect:circle:poly:default:],tabindex,target,\"\n"
+                + "html.tag.b=\"\"\n"
+                + "html.tag.basefont=\",color,face,size,\"\n"
+                + "html.tag.bdo=\",dir[:ltr:rtl:]\"\n"
+                + "html.tag.blockquote=\",type,\"\n"
+                + "html.tag.body=\",alink,background,bgcolor,link,text,vlink,\"\n"
+                + "html.tag.br=\",clear[:left:right:all:none:]\"\n"
+                + "html.tag.button=\",disabled[disabled],name,tabindex,type[:button:submit:reset:],value,\"\n"
+                + "html.tag.caption=\",align[:top:bottom:left:right:]\"\n"
+                + "html.tag.col=\",align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width,\"\n"
+                + "html.tag.colgroup=\",align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width,\"\n"
+                + "html.tag.del=\",datetime,\"\n"
+                + "html.tag.dir=\",compact[compact]\"\n"
+                + "html.tag.div=\",align[:left:center:right:justify:]\"\n"
+                + "html.tag.dl=\",compact[compact]\"\n"
+                + "html.tag.em=\"\"\n"
+                + "html.tag.font=\",color,face,size,\"\n"
+                + "html.tag.form=\",action,accept,accept-charset,enctype,method[:get:post:],name,target,\"\n"
+                + "html.tag.h1=\",align[:left:center:right:justify:]\"\n"
+                + "html.tag.h2=\",align[:left:center:right:justify:]\"\n"
+                + "html.tag.h3=\",align[:left:center:right:justify:]\"\n"
+                + "html.tag.h4=\",align[:left:center:right:justify:]\"\n"
+                + "html.tag.h5=\",align[:left:center:right:justify:]\"\n"
+                + "html.tag.h6=\",align[:left:center:right:justify:]\"\n"
+                + "html.tag.hr=\",align[:left:center:right:],noshade[noshade],size,width,\"\n"
+                + "html.tag.html=\",version,xmlns,\"\n"
+                + "html.tag.img=\",align[:top:middle:bottom:left:right:],alt,border,height,hspace,ismap[ismap],name,src,usemap,vspace,width,\"\n"
+                + "html.tag.input=\",accept,align[:top:middle:bottom:left:right:center:],alt,checked[checked],disabled[disabled],maxlength[],name,readonly[readonly],size,src,tabindex,type[:text:checkbox:radio:submit:reset:hidden:image:button:password:],value,\"\n"
+                + "html.tag.ins=\",datetime,\"\n"
+                + "html.tag.label=\",for,\"\n"
+                + "html.tag.legend=\",align[:left:top:right:bottom:]\"\n"
+                + "html.tag.li=\",type[:disc:square:circle:1:a:A:i:I:],value[],\"\n"
+                + "html.tag.map=\",name,\"\n"
+                + "html.tag.meta=\",http-equiv[:content-type:],\"\n"
+                + "html.tag.ol=\",compact[compact],start[],type[:1:a:A:i:I:],\"\n"
+                + "html.tag.optgroup=\",disabled[disabled],label,\"\n"
+                + "html.tag.option=\",disabled[disabled],label,selected[selected],value,\"\n"
+                + "html.tag.p=\",align[:left:center:right:justify:]\"\n"
+                + "html.tag.pre=\",width[],\"\n"
+                + "html.tag.select=\",disabled[disabled],multiple[multiple],name,size,tabindex[],\"\n"
+                + "html.tag.span=\"\"\n"
+                + "html.tag.strong=\"\"\n"
+                + "html.tag.style=\",media,type,\"\n"
+                + "html.tag.table=\",align[:left:center:right:],background,border,bgcolor,cellpadding,cellspacing,frame[:void:above:below:hsides:ihs:rhs:vsides:box:border:],rules[:none:groups:rows:cols:all:],summary,width,\"\n"
+                + "html.tag.tbody=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
+                + "html.tag.td=\",abbr,align[:left:center:right:justify:char:],axis,background,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width,\"\n"
+                + "html.tag.textarea=\",cols[],disabled[disabled],name,readonly[readonly],rows[],tabindex[],\"\n"
+                + "html.tag.tfoot=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
+                + "html.tag.th=\",abbr,align[:left:center:right:justify:char:],axis,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width,\"\n"
+                + "html.tag.thead=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
+                + "html.tag.tr=\",align[:left:center:right:justify:char:],bgcolor,char,charoff,valign[:top:middle:bottom:baseline:],height,\"\n"
+                + "html.tag.u=\"\"\n"
+                + "html.tag.ul=\",compact[compact],type[:disc:square:circle:],\"\n"
+                + "\n"
+                + "\n"
+                + "# CSS key-value-pairs.\n"
+                + "# An empty value indicates a reference to style's combi-map.\n"
+                + "# Placeholders:\n"
+                + "# c: Any CSS color value\n"
+                + "# u: An URL; e.g. url(http://www.somewhere.com/myimage.jpg);\n"
+                + "# n: Any CSS number value without '%'\n"
+                + "# N: Any CSS number value\n"
+                + "# *: Any value allowed\n"
+                + "# d: delete\n"
+                + "# t: time\n"
+                + "\n"
+                + "html.style.azimuth=\",left-side,left-side behind,far-left,far-left behind,left,left behind,center-left,center-left behind,center,center behind,center-right,center-right behind,right,right behind,far-right,far-right behind,right-side,right behind,\"\n"
+                + "html.style.background=\"\"\n"
+                + "html.style.background-attachment=\",scroll,fixed,\"\n"
+                + "html.style.background-color=\"c,transparent,\"\n"
+                + "html.style.background-image=\"u\"\n"
+                + "html.style.background-position=\",top,bottom,center,left,right,\"\n"
+                + "html.style.background-repeat=\",repeat,repeat-x,repeat-y,no-repeat,\"\n"
+                + "html.style.border=\"\"\n"
+                + "html.style.border-bottom=\"\"\n"
+                + "html.style.border-bottom-color=\"c,transparent,\"\n"
+                + "html.style.border-bottom-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.border-bottom-width=\"n\"\n"
+                + "html.style.border-collapse=\",separate,collapse,\"\n"
+                + "html.style.border-color=\"c,transparent,\"\n"
+                + "html.style.border-left=\"\"\n"
+                + "html.style.border-left-color=\"c,transparent,\"\n"
+                + "html.style.border-left-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.border-left-width=\"n\"\n"
+                + "html.style.border-right=\"\"\n"
+                + "html.style.border-right-color=\"c,transparent,\"\n"
+                + "html.style.border-right-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.border-right-width=\"n\"\n"
+                + "html.style.border-spacing=\"N\"\n"
+                + "html.style.border-style=\"\"\n"
+                + "html.style.border-top=\"\"\n"
+                + "html.style.border-top-color=\"c,transparent,\"\n"
+                + "html.style.border-top-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.border-top-width=\"n\"\n"
+                + "html.style.border-width=\"\"\n"
+                + "html.style.bottom=\"N,auto,\"\n"
+                + "html.style.caption-side=\",top,bottom,left,right,\"\n"
+                + "html.style.centerline=\"d\"\n"
+                + "html.style.clear=\",left,right,both,none,\"\n"
+                + "html.style.clip=\"d\"\n"
+                + "html.style.color=\"c,transparent,\"\n"
+                + "html.style.content=\"d\"\n"
+                + "html.style.counter-increment=\"d\"\n"
+                + "html.style.counter-reset=\"d\"\n"
+                + "html.style.counter=\"d\"\n"
+                + "html.style.cue=\"u\"\n"
+                + "html.style.cue-after=\"u\"\n"
+                + "html.style.cue-before=\"u\"\n"
+                + "html.style.cursor=\",auto,default,crosshair,pointer,move,n-resize,ne-resize,e-resize,se-resize,s-resize,sw-resize,w-resize,nw-resize,text,wait,help,\"\n"
+                + "html.style.definition-src=\"d\"\n"
+                + "html.style.direction=\",ltr,rtl,\"\n"
+                + "html.style.display=\",block,inline,list-item,marker,run-in,compact,none,table,inline-table,table-row,table-cell,table-row-group,table-header-group,table-footer-group,table-column,table-column-group,table-caption,\"\n"
+                + "html.style.empty-cells=\",show,hide,\"\n"
+                + "html.style.elevation=\",below,level,above,higher,lower,\"\n"
+                + "html.style.filter=\"d\" \n"
+                + "html.style.float=\",left,right,none,\"\n"
+                + "html.style.font=\"\"\n"
+                + "html.style.font-family=\"*\"\n"
+                + "html.style.font-color=\"c,transparent,\"\n"
+                + "html.style.font-size=\"N,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,\"\n"
+                + "html.style.font-stretch=\",wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,\"\n"
+                + "html.style.font-style=\",italic,oblique,normal,\"\n"
+                + "html.style.font-variant=\",small-caps,normal,\"\n"
+                + "html.style.font-weight=\",bold,bolder,lighter,100,200,300,400,500,600,700,800,900,normal,\"\n"
+                + "html.style.height=\"N,auto,\"\n"
+                + "html.style.left=\"N,auto,\"\n"
+                + "html.style.letter-spacing=\"n\"\n"
+                + "html.style.line-height=\"N\"\n"
+                + "html.style.list-style=\"\"    \n"
+                + "html.style.list-style-image=\"u,none,\"\n"
+                + "html.style.list-style-position=\",inside,outside,\"\n"
+                + "html.style.list-style-type=\",decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,none,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha,\"\n"
+                + "html.style.margin=\"\"\n"
+                + "html.style.margin-bottom=\"N,auto,inherit,\"\n"
+                + "html.style.margin-left=\"N,auto,inherit,\"\n"
+                + "html.style.margin-right=\"N,auto,inherit,\"\n"
+                + "html.style.margin-top=\"N,auto,inherit,\"\n"
+                + "html.style.max-height=\"N\"\n"
+                + "html.style.max-width=\"N\"\n"
+                + "html.style.min-height=\"N\"\n"
+                + "html.style.min-width=\"N\"\n"
+                + "html.style.orphans=\"0\"\n"
+                + "html.style.overflow=\",visible,hidden,scroll,auto,\"\n"
+                + "html.style.padding=\"\"\n"
+                + "html.style.padding-bottom=\"N\"\n"
+                + "html.style.padding-left=\"N\"\n"
+                + "html.style.padding-right=\"N\"\n"
+                + "html.style.padding-top=\"N\"\n"
+                + "html.style.page-break-after=\",always,avoid,left,right,inherit,auto,\"\n"
+                + "html.style.page-break-before=\",always,avoid,left,right,inherit,auto,\"\n"
+                + "html.style.page-break-inside=\",avoid,auto,\"\n"
+                + "html.style.pause=\"t\"\n"
+                + "html.style.pause-after=\"t\"\n"
+                + "html.style.pause-before=\"t\"\n"
+                + "html.style.pitch=\",x-low,low,medium,high,x-high,\"\n"
+                + "html.style.pitch-range=\"0\"\n"
+                + "html.style.play-during=\"u,mix,repeat,auto,\"\n"
+                + "html.style.position=\",absolute,fixed,relative,static,\"\n"
+                + "html.style.quotes=\"d\"\n"
+                + "html.style.richness=\"0\"\n"
+                + "html.style.right=\"N,auto,\"\n"
+                + "html.style.scrollbar-3dlight-color=\"c\"\n"
+                + "html.style.scrollbar-arrow-color=\"c\"\n"
+                + "html.style.scrollbar-base-color=\"c\"\n"
+                + "html.style.scrollbar-darkshadow-color=\"c\"\n"
+                + "html.style.scrollbar-face-color=\"c\"\n"
+                + "html.style.scrollbar-highlight-color=\"c\"\n"
+                + "html.style.scrollbar-shadow-color=\"c\"\n"
+                + "html.style.scrollbar-track-color=\"c\"\n"
+                + "html.style.speak=\",none,normal,spell-out,\"\n"
+                + "html.style.speak-header=\",always,once,\"\n"
+                + "html.style.speak-numeral=\",digits,continuous,\"\n"
+                + "html.style.speak-punctuation=\",code,none,\"\n"
+                + "html.style.speech-rate=\"0,x-slow,slow,slower,medium,faster,fast,x-fase,\"\n"
+                + "html.style.stress=\"0\"\n"
+                + "html.style.table-layout=\",auto,fixed,\"\n"
+                + "html.style.text-align=\",left,center,right,justify,\"\n"
+                + "html.style.text-decoration=\",underline,overline,line-through,blink,none,\"\n"
+                + "html.style.text-indent=\"N\"\n"
+                + "html.style.text-shadow=\"nc,none,\" or color\n"
+                + "html.style.text-transform=\",capitalize,uppercase,lowercase,none,\"\n"
+                + "html.style.top=\"N,auto,\"\n"
+                + "html.style.vertical-align=\",top,middle,bottom,baseline,sub,super,text-top,text-bottom,\"\n"
+                + "html.style.visibility=\",hidden,visible,\"\n"
+                + "html.style.voice-family=\",male,female,old,young,child,\"\n"
+                + "html.style.volume=\"0,silent,x-soft,soft,medium,loud,x-loud,\"\n"
+                + "html.style.white-space=\",normal,pre,nowrap,\"\n"
+                + "html.style.widows=\"0\"\n"
+                + "html.style.width=\"N,auto,\"\n"
+                + "html.style.word-spacing=\"n\"\n"
+                + "html.style.z-index=\"0\"\n"
+                + "\n"
+                + "\n"
+                + "# CSS combi-map\n"
+                + "\n"
+                + "html.style.combimap.background=\"uNc,scroll,fixed,transparent,top,bottom,center,left,right,repeat,repeat-x,repeat-y,no-repeat,\"\n"
+                + "html.style.combimap.border=\"Nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,separate,collapse,\"\n"
+                + "html.style.combimap.border-bottom=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.combimap.border-left=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.combimap.border-right=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.combimap.border-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.combimap.border-top=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
+                + "html.style.combimap.border-width=\"n\"\n"
+                + "html.style.combimap.font=\"N*,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,italic,oblique,small-caps,bold,bolder,lighter,100,200,300,400,500,600,700,800,900,\"\n"
+                + "html.style.combimap.list-style=\"u,none,inside,outside,decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha,\"\n"
+                + "html.style.combimap.margin=\"N,auto,inherit,\"\n" + "html.style.combimap.padding=\"N\"\n").getBytes();
 
     private static final Pattern PATTERN_TAG_LINE = Pattern.compile("html\\.tag\\.(\\p{Alnum}+)\\s*(?:=\\s*\"(\\p{Print}*)\")?",
-            Pattern.CASE_INSENSITIVE);
+        Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PATTERN_ATTRIBUTE = Pattern.compile("([\\p{Alnum}-_]+)(?:\\[([\\p{Print}&&[^\\]]]*)\\])?");
 
@@ -1084,7 +1178,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     } else {
                         final Set<String> valueSet = new HashSet<String>();
                         final String[] valArr = values.charAt(0) == ':' ? values.substring(1).split("\\s*:\\s*") : values
-                                .split("\\s*:\\s*");
+                            .split("\\s*:\\s*");
                         for (final String value : valArr) {
                             valueSet.add(toLowerCase(value));
                         }
@@ -1098,7 +1192,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
-            "html\\.style\\.([\\p{Alnum}-_]+)\\s*=\\s*\"([\\p{Print}&&[^\"]]*)\"", Pattern.CASE_INSENSITIVE);
+        "html\\.style\\.([\\p{Alnum}-_]+)\\s*=\\s*\"([\\p{Print}&&[^\"]]*)\"", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PATTERN_VALUE = Pattern.compile("([\\p{Alnum}*-_ &&[^,]]+)");
 
@@ -1136,7 +1230,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     private static final Pattern PATTERN_COMBI_LINE = Pattern.compile(
-            "html\\.style\\.combimap\\.([\\p{Alnum}-_]+)\\s*=\\s*\"([\\p{Print}&&[^\"]]+)\"", Pattern.CASE_INSENSITIVE);
+        "html\\.style\\.combimap\\.([\\p{Alnum}-_]+)\\s*=\\s*\"([\\p{Print}&&[^\"]]+)\"", Pattern.CASE_INSENSITIVE);
 
     /**
      * Parses specified combination map for CSS elements.
@@ -1224,20 +1318,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
             staticHTMLMap = null;
             staticStyleMap = null;
         }
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }

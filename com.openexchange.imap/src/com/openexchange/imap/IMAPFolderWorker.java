@@ -49,10 +49,7 @@
 
 package com.openexchange.imap;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -84,7 +81,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights.Right;
 
@@ -382,6 +378,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
              */
             synchronized (imapFolder) {
                 IMAPCommandsCollection.forceNoopCommand(imapFolder);
+                clearCache(imapFolder);
                 try {
                     /*
                      * This call also checks if folder is opened
@@ -391,9 +388,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         /*
                          * Identical folder is already opened in an appropriate mode.
                          */
-                        // IMAPCommandsCollection.updateIMAPFolder(imapFolder,
-                        // mode);
-                        clearCache(imapFolder);
                         return imapFolder;
                     }
                     /*
@@ -520,46 +514,16 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         return MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
 
-    protected static volatile Field messagesField;
-    protected static volatile Field messageCacheField;
-    protected static volatile Field uidTableField;
-
-    /** Clears the cache */
-    protected static void clearCache(final IMAPFolder imapFolder) {
+    /**
+     * Clears given IMAP folder's {@link com.sun.mail.imap.MessageCache message cache} and UID table.
+     *
+     * @param imapFolder The IMAP folder
+     */
+    public static void clearCache(final IMAPFolder imapFolder) {
         if (null == imapFolder) {
             return;
         }
-        final Field messageCacheField = IMAPFolderWorker.messageCacheField;
-        if (null == messageCacheField) {
-            return;
-        }
-        final Field messagesField = IMAPFolderWorker.messagesField;
-        if (null == messagesField) {
-            return;
-        }
-        final Field uidTableField = IMAPFolderWorker.uidTableField;
-        if (null == uidTableField) {
-            return;
-        }
-
-        try {
-            final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
-            if (null != mc) {
-                final IMAPMessage[] messages = (IMAPMessage[]) messagesField.get(mc);
-                if (null != messages) {
-                    Arrays.fill(messages, null);
-                }
-            }
-
-            final Hashtable<?, ?> uidTable = (Hashtable<?, ?>) uidTableField.get(imapFolder);
-            if (null != uidTable) {
-                uidTable.clear();
-            }
-        } catch (final IllegalArgumentException e) {
-            LOG.error("", e);
-        } catch (final IllegalAccessException e) {
-            LOG.error("", e);
-        }
+        imapFolder.clearMessageCache();
     }
 
     /** Safely clears the cache */

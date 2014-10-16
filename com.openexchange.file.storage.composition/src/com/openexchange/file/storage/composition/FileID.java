@@ -66,6 +66,11 @@ public class FileID {
 
     /**
      * Initializes a new {@link FileID}.
+     *
+     * @param serviceId The service identifier
+     * @param accountId The account identifier
+     * @param folderId The folder identifier
+     * @param fileId The file identifier
      */
     public FileID(String serviceId, String accountId, String folderId, String fileId) {
         super();
@@ -75,6 +80,11 @@ public class FileID {
         this.fileId = fileId;
     }
 
+    /**
+     * Initializes a new {@link FileID}.
+     *
+     * @param uniqueID The unified identifier
+     */
     public FileID(String uniqueID) {
         List<String> unmangled = IDMangler.unmangle(uniqueID);
 
@@ -97,38 +107,83 @@ public class FileID {
         }
     }
 
+    /**
+     * Gets the service identifier
+     *
+     * @return The service identifier
+     */
     public String getService() {
         return serviceId;
     }
 
+    /**
+     * Sets the service identifier
+     *
+     * @param serviceId The service identifier
+     */
     public void setService(String serviceId) {
         this.serviceId = serviceId;
     }
 
+    /**
+     * Gets the account identifier
+     *
+     * @return The account identifier
+     */
     public String getAccountId() {
         return accountId;
     }
 
+    /**
+     * Sets the account identifier
+     *
+     * @param accountId The account identifier
+     */
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
+    /**
+     * Gets the folder identifier
+     *
+     * @return The folder identifier
+     */
     public String getFolderId() {
         return folderId;
     }
 
+    /**
+     * Sets the folder identifier
+     *
+     * @param folderId The folder identifier
+     */
     public void setFolderId(String folderId) {
         this.folderId = folderId;
     }
 
+    /**
+     * Gets the file identifier
+     *
+     * @return The file identifier
+     */
     public String getFileId() {
         return fileId;
     }
 
+    /**
+     * Sets the file identifier
+     *
+     * @param fileId The file identifier
+     */
     public void setFileId(String fileId) {
         this.fileId = fileId;
     }
 
+    /**
+     * Gets the unified identifier
+     *
+     * @return The unified identifier
+     */
     public String toUniqueID() {
         if (serviceId.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
             return fileId;

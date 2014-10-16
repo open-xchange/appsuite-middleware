@@ -70,6 +70,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
+import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
@@ -102,7 +103,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure, IMailMessageStorageMimeSupport {
+public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageDelegator, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure, IMailMessageStorageMimeSupport {
 
     /**
      * Initializes a new {@link SmalMessageStorage}.
@@ -111,6 +112,11 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
      */
     public SmalMessageStorage(final Session session, final int accountId, final SmalMailAccess smalMailAccess) throws OXException {
         super(session, accountId, smalMailAccess);
+    }
+
+    @Override
+    public IMailMessageStorage getDelegateMessageStorage() throws OXException {
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage();
     }
 
     @Override
@@ -143,6 +149,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) messageStorage;
             if (streamSupport.isMimeSupported()) {
                 return streamSupport.appendMimeMessages(destFolder, msgs);
+            }
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
+    public Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
+        if (messageStorage instanceof IMailMessageStorageMimeSupport) {
+            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) messageStorage;
+            if (streamSupport.isMimeSupported()) {
+                return streamSupport.getMimeMessage(fullName, id, markSeen);
             }
         }
         throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
@@ -385,6 +403,22 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         return smalMailAccess.getDelegateMailAccess().getMessageStorage().saveDraft(draftFullname, draftMail);
+    }
+
+    @Override
+    public void updateMessageUserFlags(String folder, String[] mailIds, String[] flags, boolean set) throws OXException {
+        smalMailAccess.getDelegateMailAccess().getMessageStorage().updateMessageUserFlags(folder, mailIds, flags, set);
+        /*
+         * Enqueue change job.
+         */
+        try {
+            final Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
+            builder.folder(folder);
+            builder.addProperty(ChangeByIdsJob.IDS, mailIds);
+            submitJob(builder.build());
+        } catch (final Exception e) {
+            LOG.warn("Could not schedule indexing job.", e);
+        }
     }
 
     @Override

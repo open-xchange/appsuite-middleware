@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -59,6 +60,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface Dispatcher {
 
     /**
@@ -79,6 +81,14 @@ public interface Dispatcher {
      * @see AJAXRequestDataTools#parseRequest(javax.servlet.http.HttpServletRequest, boolean, boolean, ServerSession, String)
      */
     AJAXRequestResult perform(AJAXRequestData requestData, AJAXState state, ServerSession session) throws OXException;
+
+    /**
+     * Looks-up denoted factory
+     *
+     * @param module The module to look-up by
+     * @return The factory or <code>null</code>
+     */
+    AJAXActionServiceFactory lookupFactory(String module);
 
     /**
      * Begins a dispatcher cycle.

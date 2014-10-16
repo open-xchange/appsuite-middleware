@@ -2,6 +2,7 @@
 package com.openexchange.filemanagement.distributed.osgi;
 
 import java.util.Map;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
@@ -15,6 +16,7 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link DistributedFileManagementActivator}
@@ -23,36 +25,68 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DistributedFileManagementActivator extends HousekeepingActivator {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DistributedFileManagementActivator.class);
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, ConfigurationService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, ConfigurationService.class, DispatcherPrefixService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.filemanagement.distributed");
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DistributedFileManagementActivator.class);
+        logger.info("Starting bundle: com.openexchange.filemanagement.distributed");
 
         HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
         final String prefix = getService(DispatcherPrefixService.class).getPrefix();
         final int port = getService(ConfigurationService.class).getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
         final ServiceLookup services = this;
+        final BundleContext context = this.context;
         if (hazelcastConfig.isEnabled()) {
             track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
+
+                volatile DistributedFileManagementImpl distributedFileManagement;
 
                 @Override
                 public void added(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
                     DistributedFileManagementImpl.setHazelcastInstance(service);
-                    String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
-                    String mapName = discoverMapName(service.getConfig());
+
+                    // Address and map name
+                    String address = service.getCluster().getLocalMember().getSocketAddress().getHostName();
+                    String mapName = discoverMapName(service.getConfig(), logger);
                     address = address + ":" + port + prefix;
-                    registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(services, address, mapName));
+
+                    // Clean-up task
+                    Runnable shutDownTask = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                shutDownDistributedFileManagement();
+                            } catch (Exception e) {
+                                logger.error("Failed to shut-down distributed file management", e);
+                            }
+                        }
+                    };
+
+                    // Register distributed file management service
+                    DistributedFileManagementImpl distributedFileManagement = new DistributedFileManagementImpl(services, address, mapName, context, shutDownTask);
+                    this.distributedFileManagement = distributedFileManagement;
+                    registerService(DistributedFileManagement.class, distributedFileManagement);
                 }
 
                 @Override
                 public void removed(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
+                    shutDownDistributedFileManagement();
+                }
+
+                void shutDownDistributedFileManagement() {
                     DistributedFileManagementImpl.setHazelcastInstance(null);
+
+                    DistributedFileManagementImpl distributedFileManagement = this.distributedFileManagement;
+                    if(distributedFileManagement != null) {
+                        this.distributedFileManagement = null;
+                        unregisterService(distributedFileManagement);
+                        distributedFileManagement.cleanUp();
+                    }
                 }
             });
 
@@ -76,7 +110,8 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.filemanagement.distributed");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DistributedFileManagementActivator.class);
+        logger.info("Stopping bundle: com.openexchange.filemanagement.distributed");
         super.stopBundle();
     }
 
@@ -85,12 +120,17 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         super.registerService(clazz, service);
     }
 
-    String discoverMapName(Config config) throws IllegalStateException {
+    @Override
+    public <S> void unregisterService(S service) {
+        super.unregisterService(service);
+    }
+
+    String discoverMapName(Config config, org.slf4j.Logger logger) throws IllegalStateException {
         Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && !mapConfigs.isEmpty()) {
             for (String mapName : mapConfigs.keySet()) {
                 if (mapName.startsWith("distributedFiles-")) {
-                    LOG.info("Using distributed map '{}'.", mapName);
+                    logger.info("Using distributed map '{}'.", mapName);
                     return mapName;
                 }
             }

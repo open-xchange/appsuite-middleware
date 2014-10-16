@@ -234,6 +234,12 @@ public class DataWriter {
         }
     }
 
+    public static void writeParameter(String name, Integer value, JSONObject json, boolean condition) throws JSONException {
+        if (null != value) {
+            writeParameter(name, Integer.toString(value.intValue()), json, condition);
+        }
+    }
+
     /**
      * Puts given name-<code>Date</code>-pair into specified JSON object with respect to time zone
      * provided that <code>Date</code> value is not <code>null</code>
@@ -434,7 +440,15 @@ public class DataWriter {
     public static void writeValue(final Long value, final JSONArray json, final boolean condition) {
         // Large values of long must be written as string. See bug 11311.
         if (condition) {
-            writeValue(value.toString(), json);
+            writeValue(Long.toString(value.longValue()), json);
+        } else {
+            writeNull(json);
+        }
+    }
+
+    public static void writeValue(Integer value, JSONArray json, boolean condition) {
+        if (condition) {
+            writeValue(Integer.toString(value.intValue()), json);
         } else {
             writeNull(json);
         }

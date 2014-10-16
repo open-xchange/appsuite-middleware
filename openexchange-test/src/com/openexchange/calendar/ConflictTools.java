@@ -50,7 +50,7 @@
 package com.openexchange.calendar;
 
 import java.util.Collection;
-import junit.framework.Assert;
+import org.junit.Assert;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 
 /**

@@ -50,7 +50,7 @@
 package com.openexchange.ajax.user;
 
 import java.io.IOException;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.WebConversation;

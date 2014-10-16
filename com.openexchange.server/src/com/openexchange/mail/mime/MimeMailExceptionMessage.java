@@ -125,14 +125,19 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     public final static String MESSAGE_TOO_LARGE_MSG_DISPLAY = "Message could not be sent because it is too large.";
 
     /**
+     * Message could not be sent because it is too large.
+     */
+    public final static String MESSAGE_TOO_LARGE_EXT_MSG_DISPLAY = "Message could not be sent because it is too large (%1$s).";
+
+    /**
      * Message could not be sent to following recipients: %1$s.
      */
     public final static String SEND_FAILED_MSG_DISPLAY = "Message could not be sent to the following recipients: %1$s.";
 
     /**
-     * Message could not be sent to following recipients: %1$s %2$s
+     * Message could not be sent to following recipients: %1$s (%2$s)
      */
-    public final static String SEND_FAILED_EXT_MSG_DISPLAY = "Message could not be sent to the following recipients: %1$s %2$s";
+    public final static String SEND_FAILED_EXT_MSG_DISPLAY = "Message could not be sent to the following recipients: %1$s (%2$s)";
 
     /**
      * Lost connection to mail server.

@@ -137,5 +137,4 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
         }
         return new StringBuilder(deferrerURL).append(PREFIX.get().getPrefix()).append("defer").toString();
     }
-
 }

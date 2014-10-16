@@ -53,6 +53,7 @@ import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.find.FindTestSuite;
+import com.openexchange.ajax.jslob.JSlobTestSuite;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -93,6 +94,9 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
         tests.addTest(com.openexchange.ajax.xing.XINGTestSuite.suite());
+        tests.addTest(com.openexchange.subscribe.google.GoogleTestSuite.suite());
+        // TODO: enable when MSLiveOAuthClient is implemented
+        // tests.addTest(com.openexchange.subscribe.mslive.MSLiveTestSuite.suite());
 
         tests.addTest(com.openexchange.dav.caldav.tests.CalDAVTestSuite.suite());
         tests.addTest(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.suite());
@@ -110,8 +114,10 @@ public final class InterfaceTests {
 
         tests.addTest(com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.suite());
         tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
-        /* TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
-        tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class); */
+        /*
+         * TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
+         * tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class);
+         */
         tests.addTestSuite(com.openexchange.ajax.FunambolTests.class);
         tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class);
         tests.addTestSuite(com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class);
@@ -122,6 +128,8 @@ public final class InterfaceTests {
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.oauth.OAuthTests.class));
         tests.addTestSuite(com.openexchange.test.resourcecache.ResourceCacheTest.class);
         tests.addTest(FindTestSuite.suite());
+        tests.addTest(com.openexchange.ajax.quota.QuotaTestSuite.suite());
+        tests.addTest(JSlobTestSuite.suite());
         // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
         // tests.addTest(ManifestsTestSuite.suite());
         return tests;

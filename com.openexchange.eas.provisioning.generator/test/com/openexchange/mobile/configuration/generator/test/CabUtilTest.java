@@ -1,7 +1,7 @@
 package com.openexchange.mobile.configuration.generator.test;
 
 import java.util.Calendar;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.mobile.configuration.generator.CabUtil;
 

@@ -80,6 +80,20 @@ public class Response {
     // The sixth bit indicates whether a BYE response is synthetic or real
     public final static int SYNTHETIC 	 = 0x20;
 
+    /**
+     * An ATOM is any CHAR delimited by:
+     * SPACE | CTL | '(' | ')' | '{' | '%' | '*' | '"' | '\' | ']'
+     * (CTL is handled in readDelimString.)
+     */
+    private static String ATOM_CHAR_DELIM = " (){%*\"\\]";
+
+    /**
+     * An ASTRING_CHAR is any CHAR delimited by:
+     * SPACE | CTL | '(' | ')' | '{' | '%' | '*' | '"' | '\'
+     * (CTL is handled in readDelimString.)
+     */
+    private static String ASTRING_CHAR_DELIM = " (){%*\"\\";
+
     public Response(String s) {
 	buffer = ASCIIUtility.getBytes(s);
 	size = buffer.length;
@@ -163,7 +177,7 @@ public class Response {
 
     /**
      * Sets the BYE exception.
-     * 
+     *
      * @see #byeResponse(Exception)
      */
     public Response setByeException(final Exception byeException) {
@@ -212,29 +226,23 @@ public class Response {
      * @return an Atom
      */
     public String readAtom() {
-	return readAtom('\0');
+	return readDelimString(ATOM_CHAR_DELIM);
     }
 
     /**
-     * Extract an ATOM, but stop at the additional delimiter
-     * (if not NUL).  Used to parse a response code inside [].
+     * Extract a string stopping at control characters or any
+     * character in delim.
      */
-    public String readAtom(char delim) {
+    private String readDelimString(String delim) {
 	skipSpaces();
 
 	if (index >= size) // already at end of response
 	    return null;
 
-	/*
-	 * An ATOM is any CHAR delimited by :
-	 * SPACE | CTL | '(' | ')' | '{' | '%' | '*' | '"' | '\' | ']'
-	 */
 	byte b;
 	int start = index;
 	while (index < size && ((b = buffer[index]) > ' ') &&
-	       b != '(' && b != ')' && b != '%' && b != '*' && 
-	       b != '"' && b != '\\'  && b != ']' && b != 0x7f &&
-	       (delim == '\0' || b != delim))
+	       delim.indexOf((char)b) < 0 && b >= ' ' && b != 0x7f)
 	    index++;
 
 	return ASCIIUtility.toString(buffer, start, index);
@@ -273,23 +281,21 @@ public class Response {
 	    return null;
 	index++; // skip '('
 
-	Vector v = new Vector();
+	List<String> v = new LinkedList<String>();
 	do {
-	    v.addElement(atom ? readAtomString() : readString());
+	    v.add(atom ? readAtomString() : readString());
 	} while (buffer[index++] != ')');
 
 	int size = v.size();
 	if (size > 0) {
-	    String[] s = new String[size];
-	    v.copyInto(s);
-	    return s;
+	    return v.toArray(new String[size]);
 	} else  // empty list
 	    return null;
     }
 
     /**
      * Extract an integer, starting at the current position. Updates the
-     * internal index to beyond the number. Returns -1 if  a number was 
+     * internal index to beyond the number. Returns -1 if  a number was
      * not found.
      *
      * @return  a number
@@ -386,14 +392,14 @@ public class Response {
     /**
      * Extract an ASTRING, starting at the current position
      * and return as a String. An ASTRING can be a QuotedString, a
-     * Literal or an Atom
+     * Literal or an Atom (plus ']').
      *
      * Any errors in parsing returns null
      *
-     * ASTRING := QuotedString | Literal | Atom
+     * ASTRING := QuotedString | Literal | 1*ASTRING_CHAR
      *
      * @return a String
-     */ 
+     */
     public String readAtomString() {
 	return (String)parseString(true, true);
     }
@@ -408,7 +414,7 @@ public class Response {
 
 	// Skip leading spaces
 	skipSpaces();
-	
+
 	b = buffer[index];
 	if (b == '"') { // QuotedString
 	    index++; // skip the quote
@@ -419,7 +425,7 @@ public class Response {
 		if (b == '\\') // skip escaped byte
 		    index++;
 		if (index != copyto) { // only copy if we need to
-		    // Beware: this is a destructive copy. I'm 
+		    // Beware: this is a destructive copy. I'm
 		    // pretty sure this is OK, but ... ;>
 		    buffer[copyto] = buffer[index];
 		}
@@ -434,7 +440,7 @@ public class Response {
 	    } else
 		index++; // skip past the terminating quote
 
-	    if (returnString) 
+	    if (returnString)
 		return ASCIIUtility.toString(buffer, start, copyto);
 	    else
 		return new ByteArray(buffer, start, copyto-start);
@@ -447,7 +453,7 @@ public class Response {
 	    int count = 0;
 	    try {
 		count = ASCIIUtility.parseInt(buffer, start, index);
-	    } catch (NumberFormatException nex) { 
+	    } catch (NumberFormatException nex) {
 	   	// throw new ParsingException();
 		return null;
 	    }
@@ -459,10 +465,10 @@ public class Response {
 		return ASCIIUtility.toString(buffer, start, start + count);
 	    else
 	    	return new ByteArray(buffer, start, count);
-	} else if (parseAtoms) { // parse as an ATOM
+	} else if (parseAtoms) { // parse as ASTRING-CHARs
 	    int start = index;	// track this, so that we can use to
 				// creating ByteArrayInputStream below.
-	    String s = readAtom();
+	    String s = readDelimString(ASTRING_CHAR_DELIM);
 	    if (returnString)
 		return s;
 	    else  // *very* unlikely

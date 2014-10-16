@@ -176,16 +176,20 @@ public interface OAuthServiceMetaData {
      * Gets the optional OAuth token.
      *
      * @param arguments The OAuth arguments
+     * @param session The associated session
      * @return The OAuth token or <code>null</code>
      * @throws OXException If an error occurs returning the token
      */
     OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException;
 
     /**
-     * Initiates contact and returns the initial oauth interaction. This is an optional method, just return null when you
-     * do not need to do anything special here.
-     * @param callbackUrl
-     * @return
+     * Initiates contact and returns the initial OAuth interaction.
+     * <p>
+     * This is an optional method, just return <code>null</code> when you do not need to do anything special here.
+     *
+     * @param callbackUrl The call-back URL
+     * @param session The associated session
+     * @return The OAuth interaction or <code>null</code>
      */
     OAuthInteraction initOAuth(String callbackUrl, Session session) throws OXException;
 
@@ -195,19 +199,33 @@ public interface OAuthServiceMetaData {
      * @param callbackUrl The call-back URL
      * @param currentHost The name of the current host
      * @param session The associated session
-     * @return the modified callback URL
+     * @return The modified callback URL
      */
     String modifyCallbackURL(String callbackUrl, String currentHost, Session session);
 
     /**
      * Gets the style of API (e.g. Facebook, Twitter...).
-     * @return
+     *
+     * @return The API reference
      */
 	API getAPI();
 
 	/**
 	 * Whether to register a token based deferrer.
+	 * <p>
+	 * Note: This method is only considered if {@link #doCustomRegistration(String, CallbackRegistry)} did not return <code>null</code>
+	 *
+	 * @return <code>true</code> to register a token based deferrer; otherwise <code>false</code>
 	 */
-	boolean registerTokenBasedDeferrer();
+    boolean registerTokenBasedDeferrer();
+
+    /**
+     * Gets an optional registration token in case {@link #registerTokenBasedDeferrer()} returns <code>true</code>, but there is no common
+     * <code>"oauth_token"</code>.
+     *
+     * @param authUrl The authorization URL from which to yield the token
+     * @return A registration token (starting with <code>"__ox"</code>) or <code>null</code>
+     */
+    String getRegisterToken(String authUrl);
 
 }

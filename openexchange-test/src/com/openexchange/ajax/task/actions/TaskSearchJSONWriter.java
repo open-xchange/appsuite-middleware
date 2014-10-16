@@ -86,9 +86,6 @@ public class TaskSearchJSONWriter {
         if (TaskSearchObject.NO_TITLE != search.getTitle()) {
             json.put(TaskFields.TITLE, search.getTitle());
         }
-        if (TaskSearchObject.NO_PRIORITY != search.getPriority()) {
-            json.put(TaskFields.PRIORITY, search.getPriority());
-        }
         if (search.isSearchInNote()) {
             json.put("searchinnote", true);
         }

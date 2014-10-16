@@ -209,6 +209,15 @@ class OSGiCleanMapper {
     }
 
     /**
+     * Looks up {@link HttpHandler}s.
+     *
+     * @return The unmodifiable {@link HttpHandler}s.
+     */
+    Set<Entry<String, HttpHandler>> getHttpHandlers() {
+        return Collections.unmodifiableSet(registrations.entrySet());
+    }
+
+    /**
      * Remove registration information for internal book keeping.
      *
      * @param alias Alias to unregister.

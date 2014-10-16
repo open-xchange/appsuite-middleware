@@ -1,9 +1,8 @@
 Manifest-Version: 1.0
-Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Hazelcast Realtime Components
 Bundle-SymbolicName: com.openexchange.realtime.hazelcast
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.realtime.hazelcast.osgi.HazelcastRealtimeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -31,8 +30,15 @@ Import-Package: com.google.common.base,
  com.openexchange.realtime.group,
  com.openexchange.realtime.group.commands,
  com.openexchange.realtime.handle,
+ com.openexchange.realtime.hazelcast.group,
  com.openexchange.realtime.hazelcast.serialization,
+ com.openexchange.realtime.hazelcast.serialization.channel,
+ com.openexchange.realtime.hazelcast.serialization.cleanup,
+ com.openexchange.realtime.hazelcast.serialization.directory,
+ com.openexchange.realtime.hazelcast.serialization.group,
+ com.openexchange.realtime.hazelcast.serialization.packet,
  com.openexchange.realtime.packet,
+ com.openexchange.realtime.payload,
  com.openexchange.realtime.synthetic,
  com.openexchange.realtime.util,
  com.openexchange.server,
@@ -46,3 +52,4 @@ Import-Package: com.google.common.base,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
+Export-Package: com.openexchange.realtime.hazelcast.group

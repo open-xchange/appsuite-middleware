@@ -51,9 +51,7 @@ package com.openexchange.realtime.group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -69,6 +67,7 @@ import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
 import com.openexchange.realtime.packet.ID;
@@ -122,6 +121,7 @@ public class GroupDispatcher implements ComponentHandle {
      */
     public GroupDispatcher(ID id) {
         this(id, null);
+        LOG.info("Creating GroupDispatcher {} - {}", groupId, super.hashCode());
     }
 
     /**
@@ -134,7 +134,6 @@ public class GroupDispatcher implements ComponentHandle {
         super();
         this.groupId = id;
         this.handler = handler;
-        final AtomicReference<Set<ID>> idsRef = this.idsRef;
     }
 
     /**
@@ -146,9 +145,13 @@ public class GroupDispatcher implements ComponentHandle {
      */
     @Override
     public void process(Stanza stanza) throws OXException {
-        stanza.trace("Arrived in group dispatcher: " + groupId);
-        if (!handleGroupCommand(stanza)) {
-            processStanza(stanza);
+        if (isDisposed) {
+            LOG.debug("Discarding Stanza as GroupDispatcher {} is already disposed: {}", groupId, stanza);
+        } else {
+            stanza.trace("Arrived in group dispatcher: " + groupId);
+            if (!handleGroupCommand(stanza)) {
+                processStanza(stanza);
+            }
         }
     }
 
@@ -289,16 +292,29 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     /**
-     * Add a member to this group. Can be invoked by sending the following message to this groups address. { element: "message", selector:
-     * "mygroupSelector", to: "synthetic.componentName://roomID", session: "da86ae8fc93340d389c51a1d92d6e997" payloads: [ { namespace:
-     * 'group', element: 'command', data: 'join' } ], } A selector provided in this stanza will be added to all stanzas sent by this group,
-     * so clients can know the message was part of a given group.
-     *
+     * Add a member to this group. Can be invoked by sending the following message to this groups address.
+     * 
+     * <pre>
+     * {   element:     "message"
+     *   , selector:    "mygroupSelector"
+     *   , to:          "synthetic.componentName://roomID"
+     *   , session:     "da86ae8fc93340d389c51a1d92d6e997"
+     *   , payloads:    [ { namespace: 'group', element: 'command', data: 'join' } ]
+     * }
+     * </pre>
+     * 
+     * A selector provided in this stanza will be added to all stanzas sent by this group, so clients can know the message was part of a
+     * given group. Trying to join an already disposed GroupDispatcher will result in a RealtimeExceptionCodes.STANZA_RECIPIENT_UNAVAILABLE
+     * Exception being thrown so the client can try to join again.
+     * 
      * @param id The id of the client joining the the Group
      * @param stamp The selector used in the Stanza to join the group
-     * @throws OXException 
+     * @throws OXException
      */
     public void join(ID id, String stamp, Stanza stanza) throws OXException {
+        if(isDisposed) {
+            throw RealtimeExceptionCodes.STANZA_RECIPIENT_UNAVAILABLE.create(groupId);
+        }
         if (idsRef.get().contains(id)) {
             LOG.info("{} is already a member of {}.", id, groupId);
             return;
@@ -336,7 +352,7 @@ public class GroupDispatcher implements ComponentHandle {
             if(groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
-                groupManager.add(id, groupId);
+                groupManager.addChoice(new SelectorChoice(id , groupId, stamp));
             }
             onJoin(id, stanza);
         }
@@ -364,36 +380,23 @@ public class GroupDispatcher implements ComponentHandle {
             empty = ids.isEmpty();
         } while (!idsRef.compareAndSet(expected, ids));
 
-        stamps.remove(id);
 
         if (removed) {
             DistributedGroupManager groupManager = GROUPMANAGER_REF.get();
             if (groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
-                groupManager.remove(id, groupId);
+                groupManager.removeChoice(new SelectorChoice(id, groupId, getStamp(id)));
             }
             onLeave(id, stanza);
         }
 
+        stamps.remove(id);
+
         if (empty) {
-            Map<String, Object> properties = new HashMap<String, Object>();
-            properties.put("id", id);
             onDispose(id, stanza);
             isDisposed = true;
-            boolean isDisposable = groupId.isDisposable();
-            /*
-             * If nobody vetoed the disposal of this GroupDispatcher we have to issue a cluster wide cleanup to remove entries from
-             * StanzaSequenceGate instances
-             */
-            if(isDisposable) {
-                GlobalRealtimeCleanup globalRealtimeCleanup = GroupServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-                if(globalRealtimeCleanup == null) {
-                    LOG.error("Unable to initiate global cleanup for {} cleanup", id, ServiceExceptionCode.serviceUnavailable(GlobalRealtimeCleanup.class));
-                } else {
-                    globalRealtimeCleanup.cleanForId(groupId);
-                }
-            }
+            doGlobalCleanup(groupId);
         }
     }
 
@@ -543,7 +546,11 @@ public class GroupDispatcher implements ComponentHandle {
      * @throws OXException
      */
     protected void onDispose(ID id, Stanza stanza) throws OXException {
-        onDispose(id);
+        try {
+            onDispose(id);
+        } catch (Exception e) {
+            LOG.info("Caught exception during onDispose, trying to continue.", e);
+        }
     }
     
     protected void onDispose(ID id) throws OXException {
@@ -611,21 +618,50 @@ public class GroupDispatcher implements ComponentHandle {
 
     @Override
     public void dispose() {
-        try {
           if (!isDisposed) {
               isDisposed = true;
-           // Find any valid member identifier
+              // Find any valid member identifier
               ID memberId = null;
               final Set<ID> ids = idsRef.get();
               memberId = ids.isEmpty() ? null : ids.iterator().next();
               if (memberId == null) {
-                  memberId = groupId;
+                  LOG.info("No member left in GroupDispatcher {}, skipping onDispose", groupId);
+              } else {
+                  try {
+                      onDispose(memberId);
+                  } catch (Exception e) {
+                      LOG.info("Caught exception during onDispose, trying to continue.", e);
+                  }
               }
-              onDispose(memberId);
+              idsRef.set(null);
+              stamps.clear();
+                /*
+                 * Global Cleanup does several things for us:
+                 * 1: Trigger cleanup of SyntheticChannel to create a new Instance when clients try to rejoin, see
+                 *    SyntheticChannel#cleanupForId(ID id)
+                 * 2: Send all current members a NotMember so they are forced to rejoin/reload the resource represented by this
+                 *    GroupDispatcher
+                 * 3: Clean groupId from ResourceDirectory so it has to be conjured again when a client tries to reload it
+                 */
+              doGlobalCleanup(groupId);
           }
-      } catch (OXException e) {
-          LOG.error("", e);
-      }
+    }
+
+    /**
+     * Do a global cleanup for a given ID
+     * 
+     * @param id the ID
+     */
+    private void doGlobalCleanup(ID id) {
+        GlobalRealtimeCleanup globalRealtimeCleanup = GroupServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+        if (globalRealtimeCleanup == null) {
+            LOG.error(
+                "Unable to initiate global cleanup for {} cleanup",
+                id,
+                ServiceExceptionCode.serviceUnavailable(GlobalRealtimeCleanup.class));
+        } else {
+            globalRealtimeCleanup.cleanForId(groupId);
+        }
     }
 
 }

@@ -105,7 +105,12 @@ public final class OAuthConstants {
     /**
      * The argument name for current host name. <code>java.lang.String</code>
      */
-    public static final String ARGUMENT_CURRENT_HOST = null;
+    public static final String ARGUMENT_CURRENT_HOST = "current_host";
+
+    /**
+     * The argument name for authorization URL. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_AUTH_URL = "auth_url";
 
     /*-
      * ------------------- URL parameters -------------------

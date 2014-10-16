@@ -2,14 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Osgi
 Bundle-SymbolicName: com.openexchange.osgi
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.google.common.collect,
+ com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.management,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.tools.global,
  javax.annotation.concurrent,

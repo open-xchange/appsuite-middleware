@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,12 +40,17 @@
 
 package com.sun.mail.iap;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 import java.util.Properties;
 import java.io.*;
+import java.nio.channels.SocketChannel;
 import java.net.*;
 import java.util.logging.Level;
+
 import javax.net.ssl.SSLSocket;
+
 import com.sun.mail.util.*;
 
 /**
@@ -70,7 +75,6 @@ public class Protocol {
     protected Properties props;
     protected String prefix;
 
-    private boolean connected = false;		// did constructor succeed?
     private TraceInputStream traceInput;	// the Tracer
     private volatile ResponseInputStream input;
 
@@ -108,6 +112,7 @@ public class Protocol {
 		    Properties props, String prefix,
 		    boolean isSSL, MailLogger logger)
 		    throws IOException, ProtocolException {
+	boolean connected = false;		// did constructor succeed?
 	try {
 	    this.host = host;
 	    this.port = port;
@@ -302,7 +307,7 @@ public class Protocol {
      */
     public synchronized Response[] command(String command, Argument args) {
 	commandStart(command);
-	Vector v = new Vector();
+	List<Response> v = new LinkedList<Response>();
 	boolean done = false;
 	String tag = null;
 	Response r = null;
@@ -311,11 +316,11 @@ public class Protocol {
 	try {
 	    tag = writeCommand(command, args);
 	} catch (LiteralException lex) {
-	    v.addElement(lex.getResponse());
+	    v.add(lex.getResponse());
 	    done = true;
 	} catch (Exception ex) {
 	    // Convert this into a BYE response
-	    v.addElement(Response.byeResponse(ex));
+	    v.add(Response.byeResponse(ex));
 	    done = true;
 	}
 
@@ -337,7 +342,7 @@ public class Protocol {
 		continue;
 	    }
 
-	    v.addElement(r);
+	    v.add(r);
 
 	    // If this is a matching command completion response, we are done
 	    if (r.isTagged() && r.getTag().equals(tag))
@@ -345,9 +350,8 @@ public class Protocol {
 	}
 
 	if (byeResp != null)
-		v.addElement(byeResp);	// must be last
-	Response[] responses = new Response[v.size()];
-	v.copyInto(responses);
+		v.add(byeResp);	// must be last
+	Response[] responses = v.toArray(new Response[v.size()]);
         timestamp = System.currentTimeMillis();
 	commandEnd();
 	return responses;
@@ -365,6 +369,10 @@ public class Protocol {
 	    throw new BadCommandException(response);
 	else if (response.isBYE()) {
 	    disconnect();
+	    Exception byeException = response.byeException;
+	    if (null != byeException) {
+	        throw new ConnectionException(this, response, byeException);
+        }
 	    throw new ConnectionException(this, response);
 	}
     }
@@ -412,6 +420,25 @@ public class Protocol {
     }
 
     /**
+     * Return the address the socket connected to.
+     *
+     * @return	the InetAddress the socket is connected to
+     * @since	JavaMail 1.5.2
+     */
+    public InetAddress getInetAddress() {
+	return socket.getInetAddress();
+    }
+
+    /**
+     * Return the SocketChannel associated with this connection, if any.
+     *
+     * @since	JavaMail 1.5.2
+     */
+    public SocketChannel getChannel() {
+	return socket.getChannel();
+    }
+
+    /**
      * Disconnect.
      */
     protected synchronized void disconnect() {
@@ -427,7 +454,8 @@ public class Protocol {
 
     /**
      * Get the name of the local host.
-     * The property <prefix>.localhost overrides <prefix>.localaddress,
+     * The property &lt;prefix&gt;.localhost overrides
+     * &lt;prefix&gt;.localaddress,
      * which overrides what InetAddress would tell us.
      */
     protected synchronized String getLocalHost() {

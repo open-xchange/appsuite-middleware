@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
-import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.server.ServiceLookup;
 

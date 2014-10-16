@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -62,6 +63,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface UnifiedInboxManagement {
 
     /**
@@ -166,6 +168,17 @@ public interface UnifiedInboxManagement {
      * @throws OXException If checking Unified Mail account's enabled status fails
      */
     public boolean exists(int userId, int contextId, Connection con) throws OXException;
+
+    /**
+     * Checks if the Unified Mail account is enabled for given user in specified context.
+     * <p>
+     * The Unified Mail account is considered to be enabled if at least one account indicates its subscription to Unified Mail.
+     *
+     * @param session The associated session
+     * @return <code>true</code> if the Unified Mail account is enabled for given user in specified context; otherwise <code>false</code>
+     * @throws OXException If checking Unified Mail account's enabled status fails
+     */
+    public boolean isEnabled(Session session) throws OXException;
 
     /**
      * Checks if the Unified Mail account is enabled for given user in specified context.

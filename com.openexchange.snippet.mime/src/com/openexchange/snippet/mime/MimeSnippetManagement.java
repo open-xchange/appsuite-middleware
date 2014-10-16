@@ -53,7 +53,6 @@ import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,6 +92,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -109,6 +109,7 @@ import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -163,19 +164,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return getService(ContextService.class).getContext(session.getContextId());
     }
 
-    private static final ConcurrentTIntObjectHashMap<QuotaFileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<QuotaFileStorage>();
-
     private static QuotaFileStorage getFileStorage(final Context ctx) throws OXException {
-        final int key = ctx.getContextId();
-        QuotaFileStorage qfs = FILE_STORE_CACHE.get(key);
-        if (null == qfs) {
-            final QuotaFileStorage quotaFileStorage = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-            qfs = FILE_STORE_CACHE.putIfAbsent(key, quotaFileStorage);
-            if (null == qfs) {
-                qfs = quotaFileStorage;
-            }
-        }
-        return qfs;
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     private final int contextId;
@@ -384,6 +374,15 @@ public final class MimeSnippetManagement implements SnippetManagement {
             final DefaultAttachment attachment = new DefaultAttachment();
             attachment.setContentDisposition(contentDisposition == null ? null : contentDisposition.toString());
             attachment.setContentType(contentType.toString());
+
+            header = part.getHeader(MessageHeaders.HDR_CONTENT_ID, null);
+            if (null != header) {
+                if (header.startsWith("<")) {
+                    header = header.substring(1, header.length() - 1);
+                }
+                attachment.setContentId(header);
+            }
+
             attachment.setSize(part.getSize());
             header = part.getHeader("attachmentid", null);
             if (null != header) {
@@ -442,7 +441,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", textPart);
+                    MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == misc ? "plain" : determineContentSubtype(misc), textPart);
                     // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
                     multipart.addBodyPart(textPart);
                 }
@@ -468,10 +467,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
                 // Apply multipart
                 MessageUtility.setContent(multipart, mimeMessage);
-                // mimeMessage.setContent(multipart);
             } else {
+                // The variable "misc" can only be null at this location
                 MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", mimeMessage);
-                // mimeMessage.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
             }
             // Save
             mimeMessage.saveChanges();
@@ -712,8 +710,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 final Multipart primaryMultipart = new MimeMultipart();
                 // Add text part
                 final MimeBodyPart textPart = new MimeBodyPart();
-                MessageUtility.setText(sanitizeContent(content), "UTF-8", "plain", textPart);
-                // textPart.setText(sanitizeContent(content), "UTF-8", "plain");
+                // MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == miscPart ? "plain" : determineContentSubtype(MessageUtility.readMimePart(miscPart, "UTF-8")), textPart);
+                textPart.setText(sanitizeContent(content), "UTF-8", "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
                 // Add attachment parts
@@ -727,7 +725,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     primaryMultipart.addBodyPart((BodyPart) miscPart);
                 }
                 // Apply to message
-                MessageUtility.setContent(primaryMultipart, updateMessage);
+                updateMessage.setContent(primaryMultipart);
+
+                // MessageUtility.setContent(primaryMultipart, updateMessage);
                 // updateMessage.setContent(primaryMultipart);
             } else {
                 MessageUtility.setText(sanitizeContent(content), "UTF-8", "plain", updateMessage);
@@ -923,6 +923,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
             attachmentId = UUID.randomUUID().toString();
         }
         bodyPart.setHeader("attachmentid", attachmentId);
+        header = attachment.getContentId();
+        if (null == header) {
+            header = "<" + UUIDs.getUnformattedString(UUID.randomUUID()) + ">";
+        }
+        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_ID, header.startsWith("<") ? header : "<" + header + ">");
         /*
          * Force base64 encoding
          */
@@ -943,5 +948,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
     private static boolean isEmpty(final String string) {
         return com.openexchange.java.Strings.isEmpty(string);
+    }
+
+    private static String determineContentSubtype(final Object misc) throws OXException {
+        if (misc == null) {
+            return "plain";
+        }
+        final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
+        return new ContentType(ct).getSubType();
     }
 }

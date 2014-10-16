@@ -1,16 +1,15 @@
 # #-#-#-#-#  server.it_IT.po (server)  #-#-#-#-#
 # #-#-#-#-#  errors.it_IT.po (errors)  #-#-#-#-#
 # Daniele Ricciulli <daniele@bureau-cornavin.com>, 2009.
-# Vincenzo Reale <vincenzo@bureau-cornavin.com>, 2010, 2011, 2012.
 # Monica Raggioli <monica@bureau-cornavin.com>, 2011, 2012.
 # Antje Faber, 2012.
-# Vincenzo Reale <vincenzo@bureau-cornavin.com>, 2011, 2012, 2013, 2014.
+# Vincenzo Reale <vincenzo@bureau-cornavin.com>, 2010, 2011, 2012, 2013, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-06-06 09:21+0200\n"
+"PO-Revision-Date: 2014-10-07 23:45+0200\n"
 "Last-Translator: Vincenzo Reale <vincenzo@bureau-cornavin.com>\n"
 "Language-Team: Italian <it@bureau-cornavin.com>\n"
 "Language: it\n"
@@ -90,12 +89,12 @@ msgstr "Commenti"
 
 #. Status
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:90
 msgid "Accepted"
 msgstr "Accettato"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:92
 msgid "Declined"
 msgstr "Rifiutato"
 
@@ -778,11 +777,15 @@ msgstr ""
 "L'appuntamento è stato ripianificato. Data originale: %1$s. Nuova data: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:269
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr ""
 "Esegui una nuova pianificazione dell'evento. Data originale: %1$s. Nuova "
 "data: %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
+msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
+msgstr ""
+"Pianifica nuovamente l'evento. Data/Ora originale: %1$s. Nuova data/ora: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
@@ -1343,7 +1346,7 @@ msgstr "UID"
 
 #. Search in file name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
 msgid "File name"
 msgstr "Nome file"
 
@@ -1621,10 +1624,139 @@ msgstr ""
 "Una nuova versione dell'applicazione client è disponibile per lo "
 "scaricamento."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
+msgid ""
+"The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
+msgstr ""
+"Il modello \"%1$s\" non è valido. Utilizza un modello valido e prova ancora."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The file name \"%1$s\" is conflicting with an equally named directory at "
+"\"%2$s\"."
+msgstr ""
+"Il nome file \"%1$s\" è in conflitto con una cartella con lo stesso nome in "
+"\"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgstr ""
+"Il percorso \"%1$s\" è in conflitto con un file con lo stesso nome in \"%"
+"2$s\"."
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
 msgstr "Caricato con %1$s (%2$s)"
+
+#. A Box error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:62
+msgid "A Box error occurred: %1$s"
+msgstr "Si è verificato un errore di Box: %1$s"
+
+#. A Box error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:65
+msgid ""
+"A Box server error occurred with HTTP status code %1$s. Error message: %2$s"
+msgstr ""
+"Si è verificato un errore del server Box con codice di stato HTTP %1$s. "
+"Messaggio di errore: %2$s"
+
+#. Invalid Box URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:68
+msgid "The provided Box URL: %1$s is invalid"
+msgstr "L'URL di Box fornito: %1$s non è valido"
+
+#. Box URL does not denote a directory: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:71
+msgid "The provided Box URL does not denote a directory: %1$s"
+msgstr "L'URL di Box fornito non indica una cartella: %1$s"
+
+#. The Box resource does not exist: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:74
+msgid "The provided Box resource does not exist: %1$s"
+msgstr "La risorsa Box fornita non esiste: %1$s"
+
+#. Update denied for Box resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:77
+msgid "Update denied for the provided Box resource: %1$s"
+msgstr "Aggiornamento negato per la risorsa Box fornita: %1$s"
+
+#. Delete denied for Box resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:80
+msgid "Delete denied for the provided Box resource: %1$s"
+msgstr "Eliminazione non consentita per la risorsa Box fornita: %1$s"
+
+#. Box URL does not denote a file: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:83
+msgid "The provided Box URL does not denote a file: %1$s"
+msgstr "L'URL di Box fornito non indica un file: %1$s"
+
+#. Missing file name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:86
+msgid "Missing file name. Please provide one and try again."
+msgstr "Nome file mancante. Assegnane uno e prova ancora."
+
+#. Versioning not supported by Box file storage.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:89
+msgid "Versioning not supported by Box file storage."
+msgstr "Controllo di versione non supportato dal deposito file di Box."
+
+#. Missing configuration for account "%1$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:77
+msgid "Missing configuration for account \"%1$s\"."
+msgstr "Configurazione mancante per l'account \"%1$s\"."
+
+#. Bad or expired access token. Need to re-authenticate user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
+msgid "Bad or expired access token. Need to re-authenticate user."
+msgstr ""
+"Token di accesso errato o scaduto. È necessario autenticare nuovamente "
+"l'utente."
+
+#. An I/O error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:98
+msgid "An I/O error occurred: %1$s"
+msgstr "Si è verificato un errore di I/O: %1$s"
+
+#. Authentication failed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:101
+msgid "Authentication failed: %1$s"
+msgstr "Autenticazione non riuscita: %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.facebook/src/com/openexchange/subscribe/facebook/FormStrings.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
+msgid "Select an existing account"
+msgstr "Seleziona un account esistente"
 
 #. A CIFS/SMB error occurred.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:63
@@ -1996,72 +2128,213 @@ msgstr "L'URL CMIS non indica un file: %1$s"
 msgid "Versioning not supported by CMIS file storage."
 msgstr "Controllo di versione non supportato dal deposito file CMIS"
 
+#. A Copy.com error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:62
+msgid "A Copy.com error occurred: %1$s"
+msgstr "Si è verificato un errore di Copy.com: %1$s"
+
+#. A Copy.com error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:65
+msgid ""
+"A Copy.com server error occurred with HTTP status code %1$s. Error message: "
+"%2$s"
+msgstr ""
+"Si è verificato un errore del server Copy.com con codice di stato HTTP %1$s. "
+"Messaggio di errore: %2$s"
+
+#. Invalid Copy.com URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:68
+msgid "The provided Copy.com URL: %1$s is invalid"
+msgstr "L'URL di Copy.com fornito: %1$s non è valido"
+
+#. Copy.com URL does not denote a directory: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:71
+msgid "The provided Copy.com URL does not denote a directory: %1$s"
+msgstr "L'URL di Copy.com fornito non indica una cartella: %1$s"
+
+#. The Copy.com resource does not exist: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:74
+msgid "The provided Copy.com resource does not exist: %1$s"
+msgstr "La risorsa di Copy.com fornita non esiste: %1$s"
+
+#. Update denied for Copy.com resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:77
+msgid "Update denied for the provided Copy.com resource: %1$s"
+msgstr "Aggiornamento negato per la risorsa di Copy.com fornita: %1$s"
+
+#. Delete denied for Copy.com resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:80
+msgid "Delete denied for the provided Copy.com resource: %1$s"
+msgstr "Eliminazione non consentita per la risorsa Copy.com fornita: %1$s"
+
+#. Copy.com URL does not denote a file: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:83
+msgid "The provided Copy.com URL does not denote a file: %1$s"
+msgstr "L'URL di Copy.com fornito non indica un file: %1$s"
+
+#. Versioning not supported by Copy.com file storage.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:89
+msgid "Versioning not supported by Copy.com file storage."
+msgstr "Controllo di versione non supportato dal deposito file di Copy.com."
+
+#. The Copy.com resource does not exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:104
+msgid "The Copy.com resource does not exist"
+msgstr "La risorsa Copy.com non esiste"
+
 #. A Dropbox error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:62
 msgid "A Dropbox error occurred: %1$s"
 msgstr "Si è verificato un errore di Dropbox: %1$s"
 
-#. Invalid Dropbox URL: %1$s
+#. A Dropbox error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:65
+msgid ""
+"A Dropbox server error occurred with HTTP status code %1$s. Error message: "
+"%2$s"
+msgstr ""
+"Si è verificato un errore del server Dropbox con codice di stato HTTP %1$s. "
+"Messaggio di errore: %2$s"
+
+#. Invalid Dropbox URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:68
 msgid "The provided Dropbox URL: %1$s is invalid"
 msgstr "L'URL di Dropbox fornito: %1$s non è valido"
 
 #. Dropbox URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:71
 msgid "The provided Dropbox URL does not denote a directory: %1$s"
 msgstr "L'URL di Dropbox fornito non indica una cartella: %1$s"
 
 #. The Dropbox resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:74
 msgid "The provided Dropbox resource does not exist: %1$s"
 msgstr "La risorsa di Dropbox fornita non esiste: %1$s"
 
 #. Update denied for Dropbox resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:77
 msgid "Update denied for the provided Dropbox resource: %1$s"
 msgstr "Aggiornamento negato per la risorsa di Dropbox fornita: %1$s"
 
 #. Delete denied for Dropbox resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:80
 msgid "Delete denied for the provided Dropbox resource: %1$s"
 msgstr "Eliminazione non consentita per la risorsa di Dropbox fornita: %1$s"
 
 #. Dropbox URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:83
 msgid "The provided Dropbox URL does not denote a file: %1$s"
 msgstr "L'URL di Dropbox fornito non indica un file: %1$s"
 
-#. Missing file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:83
-msgid "Missing file name. Please provide one and try again."
-msgstr "Nome file mancante. Assegnane uno e prova ancora."
-
 #. Versioning not supported by Dropbox file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:89
 msgid "Versioning not supported by Dropbox file storage."
 msgstr "Controllo di versione non supportato dal deposito file di Dropbox."
 
-#. Missing configuration for account "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:77
-msgid "Missing configuration for account \"%1$s\"."
-msgstr "Configurazione mancante per l'account \"%1$s\"."
+#. A Google Drive error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:62
+msgid "A Google Drive error occurred: %1$s"
+msgstr "Si è verificato un errore di Google Drive: %1$s"
 
-#. Bad or expired access token. Need to re-authenticate user.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
-msgid "Bad or expired access token. Need to re-authenticate user."
+#. A Google Drive error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:65
+msgid ""
+"A Google Drive server error occurred with HTTP status code %1$s. Error "
+"message: %2$s"
 msgstr ""
-"Token di accesso errato o scaduto. È necessario autenticare nuovamente "
-"l'utente."
+"Si è verificato un errore del server Google Drive con codice di stato HTTP "
+"%1$s. Messaggio di errore: %2$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.facebook/src/com/openexchange/subscribe/facebook/FormStrings.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
-msgid "Select an existing account"
-msgstr "Seleziona un account esistente"
+#. Google Drive URL does not denote a directory: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
+msgid "The provided Google Drive URL does not denote a directory: %1$s"
+msgstr "L'URL di Google Drive fornito non indica una cartella: %1$s"
+
+#. The Google Drive resource does not exist: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:71
+msgid "The provided Google Drive resource does not exist: %1$s"
+msgstr "La risorsa Google Drive fornita non esiste: %1$s"
+
+#. Update denied for Google Drive resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:74
+msgid "Update denied for the provided Google Drive resource: %1$s"
+msgstr "Aggiornamento negato per la risorsa di Google Drive fornita: %1$s"
+
+#. Delete denied for Google Drive resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:77
+msgid "Delete denied for the provided Google Drive resource: %1$s"
+msgstr ""
+"Eliminazione non consentita per la risorsa di Google Drive fornita: %1$s"
+
+#. Google Drive URL does not denote a file: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:80
+msgid "The provided Google Drive URL does not denote a file: %1$s"
+msgstr "L'URL di Google Drive fornito non indica un file: %1$s"
+
+#. Versioning not supported by Google Drive file storage.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:86
+msgid "Versioning not supported by Google Drive file storage."
+msgstr ""
+"Controllo di versione non supportato dal deposito file di Google Drive."
+
+#. The file %1$s doesn't have any content stored on Drive
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:98
+msgid "The file %1$s doesn't have any content stored on Drive"
+msgstr "Il file %1$s non ha alcun contenuto archiviato su Drive"
+
+#. A OneDrive error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:62
+msgid "A OneDrive error occurred: %1$s"
+msgstr "Si è verificato un errore di OneDrive: %1$s"
+
+#. A OneDrive error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:65
+msgid ""
+"A OneDrive server error occurred with HTTP status code %1$s. Error message: "
+"%2$s"
+msgstr ""
+"Si è verificato un errore del server OneDrive con codice di stato HTTP %1$s. "
+"Messaggio di errore: %2$s"
+
+#. Invalid OneDrive URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:68
+msgid "The provided OneDrive URL: %1$s is invalid"
+msgstr "L'URL di OneDrive fornito: %1$s non è valido"
+
+#. OneDrive URL does not denote a directory: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:71
+msgid "The provided OneDrive URL does not denote a directory: %1$s"
+msgstr "L'URL di OneDrive fornito non indica una cartella: %1$s"
+
+#. The OneDrive resource does not exist: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:74
+msgid "The provided OneDrive resource does not exist: %1$s"
+msgstr "La risorsa di OneDrive fornita non esiste: %1$s"
+
+#. Update denied for OneDrive resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:77
+msgid "Update denied for the provided OneDrive resource: %1$s"
+msgstr "Aggiornamento negato per la risorsa di OneDrive fornita: %1$s"
+
+#. Delete denied for OneDrive resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:80
+msgid "Delete denied for the provided OneDrive resource: %1$s"
+msgstr "Eliminazione non consentita per la risorsa di OneDrive fornita: %1$s"
+
+#. OneDrive URL does not denote a file: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:83
+msgid "The provided OneDrive URL does not denote a file: %1$s"
+msgstr "L'URL di OneDrive fornito non indica un file: %1$s"
+
+#. Versioning not supported by OneDrive file storage.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:89
+msgid "Versioning not supported by OneDrive file storage."
+msgstr "Controllo di versione non supportato dal deposito file di OneDrive."
+
+#. The OneDrive resource does not exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:104
+msgid "The OneDrive resource does not exist"
+msgstr "La risorsa OneDrive non esiste"
 
 #. Directory "%1$s" must not be deleted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:64
@@ -2120,7 +2393,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:123
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
@@ -2139,6 +2412,11 @@ msgid ""
 msgstr ""
 "La quota consentita è stata raggiunta. Elimina alcuni elementi per "
 "archiviarne di nuovi."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "L'archivio ZIP eccede il valore massimo consentito di %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -2388,20 +2666,13 @@ msgid "You are not allowed to search in module \"%1$s\"."
 msgstr "Non ti è consentito cercare nel modulo \"%1$s\"."
 
 #. Context: Searching in appointments.
-#. Displayed as: [Search for] 'user input' in appointments.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
-msgid "in appointments"
-msgstr "negli appuntamenti"
-
-#. Context: Searching in appointments.
 #. Displayed as: [Search for] 'user input' in subject.
 #. The 'user input' part is always prepended, please heed this in translations.
 #. Context: Searching in mail.
 #. Displayed as: [Search for] 'user input' in subject.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
 msgid "in subject"
 msgstr "nell'oggetto"
 
@@ -2411,15 +2682,15 @@ msgstr "nell'oggetto"
 #. Context: Searching in tasks.
 #. Displayed as: [Search for] 'user input' in description.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:74
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:83
 msgid "in description"
 msgstr "nella descrizione"
 
 #. Context: Searching in appointments.
 #. Displayed as: [Search for] 'user input' in location.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:74
 msgid "in location"
 msgstr "nella posizione"
 
@@ -2429,59 +2700,61 @@ msgstr "nella posizione"
 #. Context: Searching in tasks.
 #. Displayed as: [Search for] 'user input' in attachment name.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:88
 msgid "in attachment name"
 msgstr "nel nome dell'allegato"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:81
 msgid "My Status"
 msgstr "Il mio stato"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:88
+#. Search for items by their creation date
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:76
 msgid "Date"
 msgstr "Data"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:62
 msgid "Type"
 msgstr "Tipo"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:87
 msgid "Participant"
 msgstr "Partecipante"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:94
 msgid "Tentative"
 msgstr "Provvisorio"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:96
 msgid "None"
 msgstr "Nessuno"
 
 #. Relative date
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:104
-msgid "Coming"
-msgstr "Prossimo"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
+msgid "Future"
+msgstr "Futuro"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
 msgid "Past"
 msgstr "Passato"
 
 #. Recurring type
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:104
 msgid "Single"
 msgstr "Singolo"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:111
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:104
 msgid "Series"
 msgstr "Ripetizione"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Search in folder type (private, public, shared, external)
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:75
 msgid "Folder type"
 msgstr "Tipo di cartella"
 
@@ -2490,143 +2763,139 @@ msgid "Folder"
 msgstr "Cartella"
 
 #. ------------------------- i18n strings for folder types ------------------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:80
 msgid "Private"
 msgstr "Privata"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:82
 msgid "Public"
 msgstr "Pubblica"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:84
 msgid "Shared"
 msgstr "Condivisa"
 
+#. ------------------------- i18n strings for facet values -------------------------------------- //
+#. Search mails from last week
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:89
+msgid "last week"
+msgstr "settimana scorsa"
+
+#. Search mails from last month
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:92
+msgid "last month"
+msgstr "mese scorso"
+
+#. Search mails from last year
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:95
+msgid "last year"
+msgstr "anno scorso"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:86
 msgid "Contact"
 msgstr "Contatto"
 
 #. Context: Searching in contacts.
-#. Displayed as: [Search for] 'user input' in contacts.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:69
-msgid "in contacts"
-msgstr "nei contatti"
-
-#. Context: Searching in contacts.
 #. Displayed as: [Search for] 'user input' in names.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:69
 msgid "in names"
 msgstr "nei nomi"
 
 #. Context: Searching in contacts.
 #. Displayed as: [Search for] 'user input' in e-mail addresses.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:74
 msgid "in e-mail addresses"
 msgstr "negli indirizzi di posta"
 
 #. Context: Searching in contacts.
 #. Displayed as: [Search for] 'user input' in phone numbers.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:79
 msgid "in phone numbers"
 msgstr "nei numeri di telefono"
 
 #. Context: Searching in contacts.
 #. Displayed as: [Search for] 'user input' in addresses.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:84
 msgid "in addresses"
 msgstr "negli indirizzi"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:88
 msgid "Distribution List"
 msgstr "Lista di distribuzione"
 
-#. Context: Searching in drive.
-#. Displayed as: [Search for] 'user input' in drive.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:65
-msgid "in drive"
-msgstr "in Drive"
-
 #. Search in file content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:66
 msgid "File content"
 msgstr "Contenuto del file"
 
 #. Search in folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:69
 msgid "Folders"
 msgstr "Cartelle"
 
 #. Search in Persons.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
 msgstr "Contatti"
 
 #. Search in file description.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:78
 msgid "File description"
 msgstr "Descrizione del file"
 
 #. Search in file type.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
 msgid "File type"
 msgstr "Tipo di file"
 
 #. Search in file size
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:84
 msgid "File size"
 msgstr "Dimensione del file"
 
-#. Search criteria time
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
-msgid "Time"
-msgstr "Ora"
-
 #. -------------------------- i18n strings for file types ---------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:88
 msgid "Images"
 msgstr "Immagini"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:90
 msgid "Audio"
 msgstr "Audio"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:92
 msgid "Video"
 msgstr "Video"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
 msgid "Documents"
 msgstr "Documenti"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
 msgid "Other"
 msgstr "Altro"
 
 #. ---------------------------------------------------------------------------------- //
 #. Public folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:101
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "Cartelle pubbliche"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
 msgstr "Cartelle private"
 
 #. Shared folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "Cartelle condivise"
@@ -2634,135 +2903,107 @@ msgstr "Cartelle condivise"
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file name.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:120
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
 msgid "in file name"
 msgstr "nel nome del file"
 
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file description.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:117
 msgid "in file description"
 msgstr "nella descrizione del file"
 
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file content.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:122
 msgid "in file content"
 msgstr "nel contenuto del file"
-
-#. ------------------------------- Time --------------------------------------------- //
-#. Search mails from last week
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:135
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
-msgid "last week"
-msgstr "settimana scorsa"
-
-#. Search mails from last month
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:138
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:95
-msgid "last month"
-msgstr "mese scorso"
-
-#. Search mails from last year
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:141
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:98
-msgid "last year"
-msgstr "anno scorso"
-
-#. Context: Searching in mail.
-#. Displayed as: [Search for] 'user input' in emails.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
-msgid "in emails"
-msgstr "nei messaggi di posta"
 
 #. Context: Searching in mail.
 #. Displayed as: [Search for] 'user input' in mail text.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:72
 msgid "in mail text"
 msgstr "nel testo del messaggio"
 
-#. Search in senders and recipients.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
-msgid "Sender/Recipient"
-msgstr "Mittente/destinatario"
+#. Search for mail conversations by people
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:75
+msgid "People"
+msgstr "Persone"
 
-#. Search in for sender.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
-msgid "Sender"
-msgstr "Mittente"
+#. Search for mails sent from or to ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:78
+msgid "From/To"
+msgstr "Da/A"
 
-#. Search in for recipient.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
-msgid "Recipient"
-msgstr "Destinatario"
+#. Search for mails sent from ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:81
+msgid "From"
+msgstr "Da"
+
+#. Search for mails sent to ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:84
+msgid "To"
+msgstr "A"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Context: Searching in tasks.
-#. Displayed as: [Search for] 'user input' in tasks.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:66
-msgid "in tasks"
-msgstr "nelle attività"
-
-#. Context: Searching in tasks.
 #. Displayed as: [Search for] 'user input' in title.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:66
 msgid "in title"
 msgstr "nel titolo"
 
 #. Search in folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:69
 msgid "Task folders"
 msgstr "Cartella delle attività"
 
 #. Search in persons.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:72
 msgid "Task participants"
 msgstr "Partecipanti all'attività"
 
 #. Search in task type.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:75
 msgid "Task type"
 msgstr "Tipo di attività"
 
 #. Search in task status
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:78
 msgid "Task status"
 msgstr "Stato dell'attività"
 
 #. ------------------------- i18n strings for folder types ------------------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:92
 msgid "Not Started"
 msgstr "Non iniziata"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:94
 msgid "In Progress"
 msgstr "In corso"
 
 #. Done
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:96
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:768
 msgid "Done"
 msgstr "Completata"
 
 #. Waiting
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:98
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:771
 msgid "Waiting"
 msgstr "In attesa"
 
 #. Deferred
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:100
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:774
 msgid "Deferred"
 msgstr "Rinviata"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:102
 msgid "Single Task"
 msgstr "Attività singola"
 
@@ -3490,29 +3731,29 @@ msgstr ""
 "Il JSlob %1$s specificato non deve essere configurato per il servizio %2$s. "
 "Non sarà eseguita alcuna operazione."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "L'indirizzo di posta %1$s per non è valido."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/ajax/exceptions/MailfilterExceptionMessages.java:60
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
 msgid "The redirect address \"%1$s\" is not valid."
 msgstr "L'indirizzo di redirezione \"%1$s\" non è valido."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/ajax/exceptions/MailfilterExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:62
 msgid "The redirect address \"%1$s\" has been rejected."
 msgstr "L'indirizzo di redirezione \"%1$s\" è stato rifiutato."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/ajax/exceptions/MailfilterExceptionMessages.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:64
 msgid "Invalid SIEVE rule specified. Please review your mail filter rules"
 msgstr ""
 "È stata specificata un regola SIEVE non valida. Controlla le regole di "
 "filtraggio della tua posta"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/ajax/exceptions/MailfilterExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:66
 msgid ""
 "Please review your mail filter rules as they seem to be invalid. Response "
 "from server: \"%1$s\""
@@ -3713,6 +3954,13 @@ msgstr "Il processo di autenticazione OAuth è stato annullato."
 msgid "Could not get a valid response from the associated OAuth provider."
 msgstr ""
 "Impossibile ottenere una risposta valida dal fornitore OAuth associato."
+
+#. There was a problem while creating a connection to the remote service.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
+msgid "There was a problem while creating a connection to the remote service."
+msgstr ""
+"Si è verificato un errore durante la creazione di una connessione al "
+"servizio remoto."
 
 #. *
 #. * New password too short.
@@ -4447,13 +4695,20 @@ msgstr ""
 "Il server non può elaborare la stanza a causa di una errata configurazione o "
 "di un errore interno del server non specificato: %1$s"
 
+#. * The recipient you tried to reach is currently unavailable
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
+msgid "The recipient you tried to reach is currently unavailable: %1$s"
+msgstr ""
+"Il destinatario che hai provato a raggiungere non è attualmente disponibile: "
+"%1$s"
+
 #. * Your session is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:92
 msgid "Your session is invalid."
 msgstr "La sessione non è valida."
 
 #. * You are no member of the GroupDispatcher: %1$s. Please join first.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:95
 msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
 msgstr "Non sei membro del GroupDispatcher: %1$s. Devi prima farne parte."
 
@@ -4667,7 +4922,7 @@ msgstr "Il gruppo contiene dati non validi."
 #. You are not allowed to create groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:87
 msgid "You are not allowed to create groups."
-msgstr "Non si è abilitati a creare gruppi."
+msgstr "Non ti è consentito creare gruppi."
 
 #. Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh
 #. or synchronize and try again.
@@ -4684,12 +4939,12 @@ msgstr ""
 #. You are not allowed to change groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:95
 msgid "You are not allowed to change groups."
-msgstr "Non si è abilitati a modificare i gruppi."
+msgstr "Non ti è consentito modificare gruppi."
 
 #. You are not allowed to delete groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:98
 msgid "You are not allowed to delete groups."
-msgstr "Non si è abilitati a eliminare gruppi."
+msgstr "Non ti è consentito eliminare gruppi."
 
 #. Group "%1$s" can not be deleted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:101
@@ -4740,6 +4995,11 @@ msgid ""
 msgstr ""
 "Parametro inviato nella richiesta non valido. Il parametro '%1$s' era '%2$s' "
 "che non sembra essere un numero."
+
+#. The module attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
+msgid "Attachments"
+msgstr "Allegati"
 
 #. *
 #. * Appointments must have at least one participant.
@@ -5128,12 +5388,8 @@ msgid "Required  value \"last name\" was not supplied."
 msgstr "Il valore richiesto \"cognome\" non è stato fornito."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
-msgid ""
-"You do not have the appropriate permission to change objects in the folder "
-"\"%2$s\"."
-msgstr ""
-"Non disponi dei permessi appropriati per modificare gli oggetti nella "
-"cartella \"%2$s\"."
+msgid "You are not allowed to modify that contact"
+msgstr "Non ti è consentito modificare il contatto"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -6921,6 +7177,45 @@ msgstr ""
 "bloccare gli attributi di %1$d utenti."
 
 #. *
+#. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:161
+msgid ""
+"The entered password is illegal and can't be saved. Allowed characters are: "
+"%1$s"
+msgstr ""
+"La password digitata non è consentita e non può essere salvata. I caratteri "
+"consentiti sono: %1$s"
+
+#. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"La password attuale non è corretta. Digita la password corretta e prova "
+"ancora."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr "Manca la password attuale. Digita la password attuale e prova ancora."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Manca la nuova password. Digita la nuova password e prova ancora."
+
+#. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
@@ -7143,29 +7438,33 @@ msgid "Start date \"%1$s\" must be before end date \"%2$s\"."
 msgstr "La data iniziale \"%1$s\" deve precedere la data finale \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:109
-msgid "The task could not be saved. Please shorten the \"%1$s\" and try again."
+msgid ""
+"The task could not be saved. Please shorten the \"%1$s\" and try again. "
+"Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
-"L'attività non può essere salvata. Riduci il \"%1$s\" e provare ancora."
+"L'attività non può essere salvata. Riduci il \"%1$s\" e provare ancora. "
+"Durata attuale \"%3$d\" è maggiore della durata consentita di \"%2$d\" "
+"caratteri."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:111
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
 msgstr ""
 "Le attività con contrassegno privato non possono essere spostate in una "
 "cartella pubblica \"%1$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
 msgstr ""
 "Il contrassegno privato può essere impostato solo da chi ha creato "
 "l'attività."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:116
 msgid "External participants without E-Mail address can not be added."
 msgstr ""
 "Impossibile aggiungere partecipanti esterni senza indirizzo di posta "
 "elettronica."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:117
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:118
 msgid ""
 "You do not have the appropriate permisson to see the task %1$d in folder "
 "%2$s."
@@ -7173,24 +7472,28 @@ msgstr ""
 "Non disponi dei permessi appropriati per vedere l'attività %1$d nella "
 "cartella %2$s."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:119
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Task contains invalid data: \"%1$s\"."
 msgstr "L'attività contiene dati non validi: \"%1$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:121
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
 msgid "The task %1$d is not stored in folder %2$s."
 msgstr "L'attività %1$d non è conservata nella cartella %2$s."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
 msgid "Group %1$d is empty. You can not add an empty group to a task."
 msgstr ""
 "Il gruppo %1$d è vuoto. Non puoi aggiungere un gruppo vuoto a un'attività."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr ""
 "Il valore \"%1$s\" dell'attributo \"%2$s\" contiene caratteri che non sono "
 "cifre."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
+msgid "Priority is %d but must be between 1 and 3."
+msgstr "La priorità è %d ma deve essere compresa tra 1 e 3."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
@@ -7798,37 +8101,45 @@ msgid "Message could not be sent because it is too large."
 msgstr "Il messaggio non può essere inviato perché è troppo grande."
 
 #. *
-#. * Message could not be sent to following recipients: %1$s.
+#. * Message could not be sent because it is too large.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:130
+msgid "Message could not be sent because it is too large (%1$s)."
+msgstr "Il messaggio non può essere inviato perché è troppo grande (%1$s)."
+
+#. *
+#. * Message could not be sent to following recipients: %1$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:135
 msgid "Message could not be sent to the following recipients: %1$s."
 msgstr "Il messaggio non può essere inviato ai seguenti destinatari: %1$s."
 
 #. *
-#. * Message could not be sent to following recipients: %1$s %2$s
+#. * Message could not be sent to following recipients: %1$s (%2$s)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:135
-msgid "Message could not be sent to the following recipients: %1$s %2$s"
-msgstr "Il messaggio non può essere inviato ai seguenti destinatari: %1$s %2$s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:140
+msgid "Message could not be sent to the following recipients: %1$s (%2$s)"
+msgstr ""
+"Il messaggio non può essere inviato ai seguenti destinatari: %1$s (%2$s)"
 
 #. *
 #. * Lost connection to mail server.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
 msgid "Lost connection to mail server."
 msgstr "Connessione al server di posta terminata."
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
 msgid "Connection closed to mail server %1$s."
 msgstr "Connessione al server di posta %1$s terminata."
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
 "attempting to connect."
@@ -7839,35 +8150,35 @@ msgstr ""
 #. *
 #. * The allowed quota on mail server exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "The allowed quota on mail server exceeded."
 msgstr "La quota consentita sul server di posta è stata superata."
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
 msgstr "La quota consentita sul server di posta \"%1$s\" è stata superata."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid "The mailbox is already in use. Please try again later."
 msgstr "La casella di posta è già utilizzata. Riprova più tardi."
 
 #. *
 #. * The mailbox on mail server %1$s is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
 msgid ""
 "The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr ""
 "La casella postale sul server di posta %1$s è già in uso. Riprova più tardi."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:173
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:178
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
@@ -8373,6 +8684,10 @@ msgstr ""
 "I permessi amministrativi del proprietario \"%1$s\" nella cartella \"%2$s\" "
 "sono stati ripristinati."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+msgid "You must enter a folder name."
+msgstr "Devi digitare il nome di una cartella."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr ""
@@ -8408,6 +8723,10 @@ msgid ""
 msgstr ""
 "L'operazione richiesta necessita di una sessione valida. Accedi e prova "
 "ancora."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:68
+msgid "Missing the following field in JSON data: %1$s"
+msgstr "Manca il seguente campo nei dati JSON: %1$s"
 
 #. *
 #. * The provided cookie is invalid. Please login.
@@ -8519,7 +8838,6 @@ msgstr ""
 msgid "You provided an invalid URL."
 msgstr "Hai fornito un URL non valido."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.msn/src/com/openexchange/subscribe/msn/FormStrings.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
 msgid "The OAuth Account to use"
@@ -8584,8 +8902,8 @@ msgid ""
 msgstr ""
 "Il fornitore di servizio ha richiesto una conferma dell'identità. Ciò si "
 "verifica per alcuni account e non può essere risolto da noi. Ricade nella "
-"responsabilità del fornitore. Per questo motivo, la sottoscrizione non "
-"può essere completata."
+"responsabilità del fornitore. Per questo motivo, la sottoscrizione non può "
+"essere completata."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
@@ -8743,7 +9061,7 @@ msgstr "Si è verificato un errore di XING: %1$s"
 #. The XING resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:65
 msgid "The XING resource does not exist: %1$s"
-msgstr "La risorsa di XING non esiste: %1$s"
+msgstr "La risorsa XING non esiste: %1$s"
 
 #. Update denied for XING resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:68
@@ -10907,6 +11225,43 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
+#~ msgstr ""
+#~ "Non disponi dei permessi appropriati per modificare gli oggetti nella "
+#~ "cartella \"%2$s\"."
+
+#~ msgid "in appointments"
+#~ msgstr "negli appuntamenti"
+
+#~ msgid "Coming"
+#~ msgstr "Prossimo"
+
+#~ msgid "in contacts"
+#~ msgstr "nei contatti"
+
+#~ msgid "in drive"
+#~ msgstr "in Drive"
+
+#~ msgid "Time"
+#~ msgstr "Ora"
+
+#~ msgid "in emails"
+#~ msgstr "nei messaggi di posta"
+
+#~ msgid "Sender/Recipient"
+#~ msgstr "Mittente/destinatario"
+
+#~ msgid "Sender"
+#~ msgstr "Mittente"
+
+#~ msgid "Recipient"
+#~ msgstr "Destinatario"
+
+#~ msgid "in tasks"
+#~ msgstr "nelle attività"
+
 #~ msgid "%1$s <i>in appointments</i>"
 #~ msgstr "%1$s <i>in appuntamenti</i>"
 
@@ -10954,12 +11309,6 @@ msgstr "Zulu"
 
 #~ msgid "The user identifier is invalid: \"%1$s\"."
 #~ msgstr "L'identificatore utente non è valido: \"%1$s\"."
-
-#~ msgid "An error occurred: %1$s"
-#~ msgstr "Si è verificato un errore: %1$s"
-
-#~ msgid "An I/O error occurred: %1$s"
-#~ msgstr "Si è verificato un errore di I/O: %1$s"
 
 #~ msgid "The event cannot be claimed."
 #~ msgstr "L'evento non può essere richiesto."
@@ -11401,9 +11750,6 @@ msgstr "Zulu"
 #~ msgid "This link already exists."
 #~ msgstr "Il collegamento esiste già."
 
-#~ msgid "Invalid folder name."
-#~ msgstr "Nome della cartella non valido."
-
 #~ msgid "Unable to connect to mail server."
 #~ msgstr "Impossibile connettersi al server di posta."
 
@@ -11491,9 +11837,6 @@ msgstr "Zulu"
 
 #~ msgid "XING URL does not denote a file: %1$s"
 #~ msgstr "L'URL di XING non indica un file: %1$s"
-
-#~ msgid "Versioning not supported by XING file storage."
-#~ msgstr "Controllo di versione non supportato dal deposito file di XING"
 
 #~ msgid "Please try again later."
 #~ msgstr "Provare più tardi."
@@ -13638,9 +13981,6 @@ msgstr "Zulu"
 #~ "Una o più date che costituiscono eccezioni sono contenute "
 #~ "nell'appuntamento ricorrente"
 
-#~ msgid "An event error occurred: %1$s"
-#~ msgstr "Si è verificato un errore: %1$s"
-
 #~ msgid "Value %1$d exceeds max. supported value of %2$d."
 #~ msgstr "Il valore %1$d eccede il valore massimo supportato di %2$d."
 
@@ -13822,9 +14162,6 @@ msgstr "Zulu"
 
 #~ msgid "Your last name is mandatory. Please enter it."
 #~ msgstr "Il cognome è obbligatorio. Inseriscilo."
-
-#~ msgid "You are not allowed to modify contact %1$d in context %2$d."
-#~ msgstr "Non sei abilitato a modificare il contatto %1$d nel contesto %2$d."
 
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Impossibile caricare oggetti: contesto %1$d utente %2$d"
@@ -15088,9 +15425,6 @@ msgstr "Zulu"
 #~ msgid "Unknown AJAX action %1$s in module %2$s."
 #~ msgstr "Azione AJAX %1$s sconosciuta nel modulo %2$s."
 
-#~ msgid "Missing the following request parameter: %s"
-#~ msgstr "Manca il seguente parametro richiesto: %s"
-
 #~ msgid "Missing upload image."
 #~ msgstr "Immagine inviata mancante."
 
@@ -15115,9 +15449,6 @@ msgstr "Zulu"
 #~ msgid "A parameter conflict occurred."
 #~ msgstr "Si è verificato un conflitto di parametri."
 
-#~ msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-#~ msgstr "Parametro \"%1$s\" è in conflitto con il parametro \"%2$s\"."
-
 #~ msgid "The action \"%1$s\" is disabled due to server configuration"
 #~ msgstr ""
 #~ "L'azione \"%1$s\" è disabilitata a causa della configurazione del server"
@@ -15134,9 +15465,6 @@ msgstr "Zulu"
 
 #~ msgid "Missing request body."
 #~ msgstr "Corpo della richiesta mancante."
-
-#~ msgid "An HTTP error occurred. Status %1$s. Message %2$s."
-#~ msgstr "Si è verificato un errore HTTP. Stato: %1$s. Messaggio %2$s."
 
 #~ msgid "Unsupported format: %1$s"
 #~ msgstr "Formato non supportato: %1$s"
@@ -15821,9 +16149,6 @@ msgstr "Zulu"
 
 #~ msgid "Input string \"%1$s\" is not a number."
 #~ msgstr "La stringa inserita \"%1$s\" non è un numero."
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr "Il valore intero supera il valore massimo consentito (65535): %1$d"
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Valore content-type dell'intestazione non valido: %1$s"

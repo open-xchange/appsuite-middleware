@@ -2,12 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange sessionstorage bundle
 Bundle-SymbolicName: com.openexchange.sessionstorage
-Bundle-Version: 7.6.0
+Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.sessionstorage.osgi.SessionStorageActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.session,
  org.osgi.framework

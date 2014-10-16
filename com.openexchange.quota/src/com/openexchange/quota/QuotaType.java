@@ -51,7 +51,7 @@ package com.openexchange.quota;
 
 
 /**
- * {@link QuotaType} - A quota type.
+ * A {@link Quota} can denote a number of items or a size of items.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

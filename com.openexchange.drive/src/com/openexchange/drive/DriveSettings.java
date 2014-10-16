@@ -60,6 +60,8 @@ public class DriveSettings {
     private String helpLink;
     private String serverVersion;
     private DriveQuota quota;
+    private String supportedApiVersion;
+    private String minApiVersion;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -120,6 +122,42 @@ public class DriveSettings {
      */
     public String getServerVersion() {
         return serverVersion;
+    }
+
+    /**
+     * Gets the supportedApiVersion
+     *
+     * @return The supportedApiVersion
+     */
+    public String getSupportedApiVersion() {
+        return supportedApiVersion;
+    }
+
+    /**
+     * Sets the supportedApiVersion
+     *
+     * @param supportedApiVersion The supportedApiVersion to set
+     */
+    public void setSupportedApiVersion(String supportedApiVersion) {
+        this.supportedApiVersion = supportedApiVersion;
+    }
+
+    /**
+     * Gets the minApiVersion
+     *
+     * @return The minApiVersion
+     */
+    public String getMinApiVersion() {
+        return minApiVersion;
+    }
+
+    /**
+     * Sets the minApiVersion
+     *
+     * @param minApiVersion The minApiVersion to set
+     */
+    public void setMinApiVersion(String minApiVersion) {
+        this.minApiVersion = minApiVersion;
     }
 
 }

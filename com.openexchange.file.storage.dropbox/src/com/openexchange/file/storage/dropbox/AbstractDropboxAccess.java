@@ -52,10 +52,12 @@ package com.openexchange.file.storage.dropbox;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.session.WebAuthSession;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -68,8 +70,6 @@ public abstract class AbstractDropboxAccess {
     protected final DropboxOAuthAccess dropboxOAuthAccess;
     protected final Session session;
     protected final FileStorageAccount account;
-    protected final long dropboxUserId;
-    protected final String dropboxUserName;
     protected final DropboxAPI<WebAuthSession> dropboxAPI;
 
     /**
@@ -81,17 +81,27 @@ public abstract class AbstractDropboxAccess {
         this.account = account;
         this.session = session;
         // Other fields
-        this.dropboxUserId = dropboxOAuthAccess.getDropboxUserId();
-        this.dropboxUserName = dropboxOAuthAccess.getDropboxUserName();
         this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
     }
 
-    public String getDropboxUserName() {
-        return dropboxUserName;
+    /**
+     * Handles given server error.
+     *
+     * @param id The file/folder identifier
+     * @param e The server exception
+     * @return The handled exception
+     */
+    protected OXException handleServerError(final String id, final DropboxServerException e) {
+        if (null != id && 404 == e.error) {
+            return DropboxExceptionCodes.NOT_FOUND.create(e, id);
+        }
+        com.dropbox.client2.exception.DropboxServerException.Error body = e.body;
+        int error = e.error;
+        return DropboxExceptionCodes.DROPBOX_SERVER_ERROR.create(e, Integer.valueOf(error), null == body.userError ? body.error : body.userError);
     }
 
     /**
-     * Gets the path for specified folder identifier.
+     * Gets the (dropbox-)path for specified folder identifier.
      *
      * @param folderId The folder identifier
      * @return The associated path
@@ -101,6 +111,18 @@ public abstract class AbstractDropboxAccess {
             return null;
         }
         return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? "/" : folderId;
+    }
+
+    /**
+     * Gets the (dropbox-)path for the specified folder- and file-identifier.
+     *
+     * @param folderId The folder identifier
+     * @param fileId The file identifier
+     * @return The associated path
+     */
+    protected static String toPath(String folderId, String fileId) {
+        String parentPath = toPath(folderId);
+        return parentPath.endsWith("/") ? parentPath + fileId : parentPath + '/' + fileId;
     }
 
     /**

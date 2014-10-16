@@ -52,6 +52,7 @@ package com.openexchange.mail.text;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.activation.DataHandler;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import net.freeutils.tnef.Attr;
 import net.freeutils.tnef.CompressedRTFInputStream;
@@ -82,6 +83,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.openexchange.tools.tnef.TNEF2ICal;
 
 /**
@@ -151,6 +153,7 @@ public final class TextFinder {
                         LOG.warn("StackOverflowError while rendering html content. Returning null.");
                         content = extractPlainText(content);
                     } catch (Throwable t) {
+                        ExceptionUtils.handleThrowable(t);
                         LOG.warn("Error while rendering html content. Returning null.", t);
                         content = null;
                     }
@@ -200,7 +203,7 @@ public final class TextFinder {
             }
             return null;
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -297,7 +300,7 @@ public final class TextFinder {
             }
             return getTextRecursive(MimeMessageConverter.convertPart(rtfPart));
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

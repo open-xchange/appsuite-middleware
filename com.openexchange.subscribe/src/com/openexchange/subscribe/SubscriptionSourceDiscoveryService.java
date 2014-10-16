@@ -52,14 +52,15 @@ package com.openexchange.subscribe;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
  * {@link SubscriptionSourceDiscoveryService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
+@SingletonService
 public interface SubscriptionSourceDiscoveryService {
     public List<SubscriptionSource> getSources();
     public List<SubscriptionSource> getSources(int folderModule);

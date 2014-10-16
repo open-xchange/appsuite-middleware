@@ -48,9 +48,9 @@
  */
 package com.openexchange.admin.rmi;
 
-import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
@@ -521,13 +521,9 @@ public class UserTest extends AbstractTest {
         srv_response.setContacts(!srv_response.getContacts());
         srv_response.setDelegateTask(!srv_response.getDelegateTask());
         srv_response.setEditPublicFolders(!srv_response.getEditPublicFolders());
-        srv_response.setForum(!srv_response.getForum());
         srv_response.setIcal(!srv_response.getIcal());
         srv_response.setInfostore(!srv_response.getInfostore());
-        srv_response.setPinboardWrite(!srv_response.getPinboardWrite());
         srv_response.setReadCreateSharedFolders(!srv_response.getReadCreateSharedFolders());
-        srv_response.setRssBookmarks(!srv_response.getRssBookmarks());
-        srv_response.setRssPortal(!srv_response.getRssPortal());
         srv_response.setSyncml(!srv_response.getSyncml());
         srv_response.setTasks(!srv_response.getTasks());
         srv_response.setVcard(!srv_response.getVcard());
@@ -1624,13 +1620,9 @@ public class UserTest extends AbstractTest {
         assertEquals("access contacts not equal", a.getContacts(), b.getContacts());
         assertEquals("access delegatetasks not equal", a.getDelegateTask(), b.getDelegateTask());
         assertEquals("access edit public folders not equal", a.getEditPublicFolders(), b.getEditPublicFolders());
-        assertEquals("access forum not equal", a.getForum(), b.getForum());
         assertEquals("access ical not equal", a.getIcal(), b.getIcal());
         assertEquals("access infostore not equal", a.getInfostore(), b.getInfostore());
-        assertEquals("access pinboard write not equal", a.getPinboardWrite(), b.getPinboardWrite());
         assertEquals("access ReadCreateSharedFolders not equal", a.getReadCreateSharedFolders(), b.getReadCreateSharedFolders());
-        assertEquals("access rss bookmarks not equal", a.getRssBookmarks(), b.getRssBookmarks());
-        assertEquals("access rss portal not equal", a.getRssPortal(), b.getRssPortal());
         assertEquals("access syncml not equal", a.getSyncml(), b.getSyncml());
         assertEquals("access tasks not equal", a.getTasks(), b.getTasks());
         assertEquals("access vcard not equal", a.getVcard(), b.getVcard());

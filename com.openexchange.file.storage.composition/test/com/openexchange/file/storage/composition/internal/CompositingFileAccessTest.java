@@ -60,13 +60,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
@@ -82,13 +86,16 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
 import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.threadpool.SimThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CompositingFileAccessTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ ThreadPools.class })
 public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAccess implements FileStorageService, FileStorageAccountAccess, FileStorageAccountManager {
 
     private static final InputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
@@ -225,14 +232,18 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         defaultFile.setId(fileId.getFileId());
         defaultFile.setFolderId(fileId.getFolderId());
 
-        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
-            true);
-        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
-            defaultFile);
-        fileAccess.expectCall("exists", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
-            true);
-        fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
-            defaultFile);
+
+        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
+        final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
+
+        fileAccess.expectCall("hashCode").andReturn(1);// Look if it's there
+        //      fileAccess.expectCall("hashCode").andReturn(1); // Store it (uncomment this line if running in eclipse.
+        // There is an optimization when running on jenkins, as there is no second hash needed
+        fileAccess.expectCall("hashCode").andReturn(1);
+        fileAccess.expectCall("getDocuments", Arrays.asList(tuple,tuple2), Arrays.asList(
+            File.Field.TITLE));
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
 
         getDocuments(Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID()), Arrays.asList(File.Field.TITLE));
 
@@ -402,25 +413,13 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     @Test
     public void testSearchInAllFolders() throws OXException {
-        fileAccess.expectCall(
-            "search",
-            "query",
-            Arrays.asList(File.Field.TITLE, File.Field.ID, File.Field.FOLDER_ID, File.Field.LAST_MODIFIED),
-            FileStorageFileAccess.ALL_FOLDERS,
-            File.Field.TITLE,
-            SortDirection.DESC,
-            10,
-            20).andReturn(SearchIteratorAdapter.emptyIterator());
+        MockitoAnnotations.initMocks(this);
+        PowerMockito.mockStatic(ThreadPools.class);
+
+        SimThreadPoolService testThreadPool = new SimThreadPoolService();
+        PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(testThreadPool);
+
         fileAccess.expectCall("getAccountAccess").andReturn(this);
-        fileAccess.expectCall(
-            "search",
-            "query",
-            Arrays.asList(File.Field.TITLE, File.Field.ID, File.Field.FOLDER_ID, File.Field.LAST_MODIFIED),
-            FileStorageFileAccess.ALL_FOLDERS,
-            File.Field.TITLE,
-            SortDirection.DESC,
-            10,
-            20).andReturn(SearchIteratorAdapter.emptyIterator());
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
         search("query", Arrays.asList(File.Field.TITLE), FileStorageFileAccess.ALL_FOLDERS, File.Field.TITLE, SortDirection.DESC, 10, 20);
@@ -604,7 +603,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         // Secondly the original must be deleted
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
@@ -645,7 +644,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         // And lastly the original must be deleted
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
@@ -684,7 +683,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         // Lastly the original must be deleted
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
@@ -725,7 +724,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         // And lastly the original must be deleted
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 

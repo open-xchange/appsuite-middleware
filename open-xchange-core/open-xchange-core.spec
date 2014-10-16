@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -20,6 +20,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
+Requires:      open-xchange-system
 Provides:      open-xchange-cache = %{version}
 Obsoletes:     open-xchange-cache < %{version}
 Provides:      open-xchange-calendar = %{version}
@@ -982,9 +983,120 @@ fi
 VALUE=$(ox_read_property com.openexchange.hazelcast.network.symmetricEncryption /opt/open-xchange/etc/hazelcast.properties)
 ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" /opt/open-xchange/etc/hazelcast.properties
 
+# SoftwareChange_Request-2037
+PFILE=/opt/open-xchange/etc/sessiond.properties
+ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
+
 # SoftwareChange_Request-2055
-ox_add_property com.openexchange.rest.services.basic-auth.login open-xchange /opt/open-xchange/etc/server.properties
-ox_add_property com.openexchange.rest.services.basic-auth.password secret /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.rest.services.basic-auth.password "" /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2081
+PFILE=/opt/open-xchange/etc/configdb.properties
+KEY=minIdle
+if ox_exists_property $KEY $PFILE; then
+    ox_remove_property $KEY $PFILE
+fi
+
+# SoftwareChange_Request-2094
+PFILE=/opt/open-xchange/etc/mail.properties
+KEY=com.openexchange.mail.imageHost
+ox_add_property $KEY "" $PFILE
+
+# SoftwareChagne_Request-2110
+ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
+
+# SoftwareChange_Request-2108
+pfile=/opt/open-xchange/etc/mime.types
+if ! grep vnd.openxmlformats-officedocument.spreadsheetml.template $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   cp $pfile $ptmp
+   cat<<EOF >> $ptmp
+application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx
+application/vnd.openxmlformats-officedocument.presentationml.slideshow ppsx
+application/vnd.openxmlformats-officedocument.presentationml.presentation pptx
+application/vnd.openxmlformats-officedocument.presentationml.slide sldx
+application/vnd.ms-excel.addin.macroEnabled.12 xlam
+application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
+fi
+
+# SoftwareChange_Request-2148
+ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-2079
+ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
+ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
+
+# SoftwareChange_Request-2171
+PFILE=/opt/open-xchange/etc/server.properties
+VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.login $PFILE)
+if [ "open-xchange" = "$VALUE" ]; then
+    ox_set_property com.openexchange.rest.services.basic-auth.login "" $PFILE
+fi
+VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
+if [ "secret" = "$VALUE" ]; then
+    ox_set_property com.openexchange.rest.services.basic-auth.password "" $PFILE
+fi
+
+# SoftwareChange_Request-2177
+ox_add_property com.openexchange.preview.thumbnail.blockingWorker false /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2190
+pfile=/opt/open-xchange/etc/cache.ccf
+if ! grep "jcs.region.UserPermissionBits=LTCP" > /dev/null $pfile; then
+    echo -e "\n# # Pre-defined cache for user configuration\n" >> $pfile
+    echo "jcs.region.UserPermissionBits=LTCP\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile
+fi
+
+# SoftwareChange_Request-2197
+PFILE=/opt/open-xchange/etc/cache.ccf
+NAMES=( jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds jcs.region.OXFolderCache.elementattributes.IdleTime jcs.region.OXFolderQueryCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.OXFolderQueryCache.elementattributes.MaxLifeSeconds jcs.region.OXFolderQueryCache.elementattributes.IdleTime jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.UserSettingMail.elementattributes.MaxLifeSeconds jcs.region.UserSettingMail.elementattributes.IdleTime jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.MailAccount.elementattributes.MaxLifeSeconds jcs.region.MailAccount.elementattributes.IdleTime jcs.region.GlobalFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds jcs.region.GlobalFolderCache.elementattributes.IdleTime )
+OLDDEFAULTS=( 180 300 180 150 300 150 180 300 180 180 300 180 180 300 180 )
+NEWDEFAULTS=( 360 -1 360 360 -1 360 360 -1 360 360 -1 360 360 -1 360 )
+for I in $(seq 1 ${#NAMES[@]}); do
+    VALUE=$(ox_read_property ${NAMES[$I-1]} $PFILE)
+    if [ "${VALUE}" = "${OLDDEFAULTS[$I-1]}" ]; then
+        ox_set_property ${NAMES[$I-1]} "${NEWDEFAULTS[$I-1]}" $PFILE
+    fi
+done
+
+# SoftwareChange_Request-2199
+ox_add_property com.openexchange.servlet.maxRateLenientRemoteAddresses "" /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2204
+ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2206
+NAMES=( com.openexchange.quota.calendar com.openexchange.quota.task com.openexchange.quota.contact com.openexchange.quota.infostore com.openexchange.quota.attachment )
+for I in "${NAMES[@]}"; do
+    VALUE=$(ox_read_property $I /opt/open-xchange/etc/quota.properties)
+    ox_set_property $I "$VALUE" /opt/open-xchange/etc/quota.properties
+done
+
+# SoftwareChange_Request-2219
+VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
+if [ "1500" = "${VALUE}" ]; then
+    ox_set_property com.openexchange.servlet.maxRate 500 /opt/open-xchange/etc/server.properties
+fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1010,7 +1122,6 @@ exit 0
 %dir /opt/open-xchange/importCSV/
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
-/opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 /opt/open-xchange/osgi/config.ini.template
@@ -1025,44 +1136,76 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.6.1 release
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.6.1 release
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-09
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-09
+* Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-10
+* Thu Oct 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.6.1
 * Tue Sep 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-06
 * Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-29
+* Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-06
 * Tue Sep 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-23
+* Tue Sep 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-15
+* Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-15
+* Fri Sep 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.6.1
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
+* Wed Aug 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-15
 * Tue Aug 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-06
 * Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-11
+* Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-11
 * Mon Jul 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-30
+* Mon Jul 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-28
 * Tue Jul 15 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-21
 * Mon Jul 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-24
 * Thu Jul 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-15
+* Mon Jul 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-14
+* Mon Jul 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-07
 * Tue Jul 01 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-07
+* Thu Jun 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.1
 * Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 7.6.0
+* Wed Jun 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-30
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>

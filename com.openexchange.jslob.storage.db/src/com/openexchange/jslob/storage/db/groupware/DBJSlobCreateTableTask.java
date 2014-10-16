@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
@@ -111,21 +110,15 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
             }
             writeCon.commit(); // COMMIT
             rollback = false;
-        } catch (final OXException e) {
-            if (rollback) {
-                DBUtils.rollback(writeCon);
-            }
-            throw e;
-        } catch (final Exception e) {
-            if (rollback) {
-                DBUtils.rollback(writeCon);
-            }
-            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
             if (rollback) {
                 DBUtils.autocommit(writeCon);
             }
+            closeSQLStuff(stmt);
             dbService.backForUpdateTask(contextId, writeCon);
         }
     }

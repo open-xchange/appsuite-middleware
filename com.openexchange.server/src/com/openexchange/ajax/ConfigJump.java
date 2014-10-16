@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import java.io.IOException;
 import java.net.URL;
 import javax.servlet.ServletException;

@@ -52,6 +52,8 @@ package com.openexchange.contactcollector.folder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -64,6 +66,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -89,6 +92,9 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
+        if (!necessary()) {
+            return;
+        }
         Session session = login.getSession();
         Context ctx = login.getContext();
         DatabaseService databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class);
@@ -116,6 +122,17 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
                 databaseService.backWritableAfterReading(ctx, con);
             }
         }
+    }
+
+    /**
+     * @return
+     */
+    private boolean necessary() {
+        ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        if (ContactCollectorServiceImpl.class.isInstance(ccs)) {
+            return true;
+        }
+        return false; // Other Services don't need this handler
     }
 
     public static boolean exists(Session session, Context ctx, Connection con) throws OXException {

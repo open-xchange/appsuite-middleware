@@ -52,6 +52,7 @@ package com.openexchange.report.appsuite;
 import java.io.Serializable;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.report.appsuite.serialization.Report;
 
 
 /**
@@ -62,9 +63,9 @@ import com.openexchange.groupware.contexts.Context;
 public @NotThreadSafe class ContextReport extends Report {
 
     private static final long serialVersionUID = 3879587797122632468L;
-    
+
     private final Context ctx;
-    
+
     /**
      * Initializes a new {@link ContextReport}.
      * @param uuid The UUID of the report this context report belongs to
@@ -75,7 +76,7 @@ public @NotThreadSafe class ContextReport extends Report {
         super(uuid, type, -1);
         this.ctx = ctx;
     }
-    
+
     /**
      * @see Report#set(String, String, Serializable)
      */
@@ -84,9 +85,9 @@ public @NotThreadSafe class ContextReport extends Report {
         super.set(ns, key, value);
         return this;
     }
-    
+
     public Context getContext() {
         return ctx;
     }
-    
+
 }

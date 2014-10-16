@@ -67,6 +67,11 @@ public interface CustomPortable extends Portable {
     static final int FACTORY_ID = DynamicPortableFactory.FACTORY_ID;
 
     /**
+     * Unique id for PortableReport
+     */
+    public static final int PORTABLEREPORT_CLASS_ID = 9;
+
+    /**
      * Gets the ID of the dynamic portable factory.<p/>
      *
      * Make sure to supply {@link CustomPortable#FACTORY_ID} here.
@@ -77,11 +82,11 @@ public interface CustomPortable extends Portable {
     int getFactoryId();
 
     /**
-     * Gets the class ID of this portable implementation.<p/>
-     *
-     * Choose a not yet used arbitrary identifier <code>> 0</code> for your portable class here and ensure to return the same class ID in the
-     * corresponding {@link CustomPortableFactory#getClassId()} method.<p/>
-     *
+     * Gets the class ID of this portable implementation.
+     * <p/>
+     * Choose a not yet used arbitrary identifier <code>> 0</code> for your portable class here and ensure to return the same class ID in
+     * the corresponding {@link CustomPortableFactory#getClassId()} method.
+     * <p/>
      * The following list gives an overview about the <b>already used</b> class IDs (add your IDs here):
      * <ul>
      * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.portable.PortableSession</li>
@@ -89,6 +94,19 @@ public interface CustomPortable extends Portable {
      * <li><code>  3</code>: com.openexchange.ms.internal.portable.PortableMessage</li>
      * <li><code>  4</code>: com.openexchange.caching.events.ms.internal.PortableCacheEvent</li>
      * <li><code>  5</code>: com.openexchange.realtime.hazelcast.serialization.PortableID</li>
+     * <li><code>  6</code>: com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoice</li>
+     * <li><code>  7</code>: com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate</li>
+     * <li><code>  8</code>: com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate</li>
+     * <li><code>  9</code>: com.openexchange.report.appsuite.internal.PortableReport, used via
+     * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLEREPORT_CLASS_ID}</li>
+     * <li><code>  10</code>: com.openexchange.realtime.hazelcast.serialization.PortableHazelcastResource</li>
+     * <li><code>  11</code>: com.openexchange.realtime.hazelcast.serialization.PortablePresence</li>
+     * <li><code>  12</code>: com.openexchange.realtime.hazelcast.serialization.PortableRoutingInfo</li>
+     * <li><code>  13</code>: com.openexchange.realtime.hazelcast.serialization.PortableContextPredicate</li>
+     * <li><code>  14</code>: com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher</li>
+     * <li><code>  15</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher</li>
+     * <li><code>  16</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatus</li>
+     * <li><code> 17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
      * </ul>
      *
      * @return The class ID

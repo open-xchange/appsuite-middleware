@@ -50,11 +50,11 @@
 package com.openexchange.groupware.contact.helpers;
 
 import java.text.Collator;
-import java.text.RuleBasedCollator;
 import java.util.Comparator;
 import java.util.Locale;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Collators;
 
 /**
  * Compares two contacts based on the value of one of their fields.
@@ -67,7 +67,7 @@ public class CollationContactComparator implements Comparator<Contact>{
 
 	private int orderDir;
 	private final ContactField orderBy;
-	private final RuleBasedCollator collator;
+	private final Collator collator;
 
 	public CollationContactComparator(ContactField orderBy, Order order, Locale locale) {
 	    super();
@@ -83,7 +83,7 @@ public class CollationContactComparator implements Comparator<Contact>{
 	    default:
             orderDir = 0;
 		}
-		this.collator = (RuleBasedCollator)Collator.getInstance(locale);
+		this.collator = Collators.getDefaultInstance(locale);
 	}
 
 	@Override

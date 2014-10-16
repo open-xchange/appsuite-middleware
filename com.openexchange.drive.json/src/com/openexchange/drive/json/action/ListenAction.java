@@ -57,9 +57,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.json.LongPollingListener;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDriveAction;
@@ -76,7 +76,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class ListenAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
          * get request data
          */

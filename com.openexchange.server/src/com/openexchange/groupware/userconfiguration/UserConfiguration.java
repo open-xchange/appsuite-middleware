@@ -95,19 +95,19 @@ public class UserConfiguration implements Serializable, Cloneable {
     public static final int INFOSTORE = UserPermissionBits.INFOSTORE;
 
     /**
-     * The permission bit for projects access.
+     * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    public static final int PROJECTS = UserPermissionBits.PROJECTS;
+    private static final int PROJECTS = UserPermissionBits.PROJECTS;
 
     /**
-     * The permission bit for forum access.
+     * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    public static final int FORUM = UserPermissionBits.FORUM;
+    private static final int FORUM = UserPermissionBits.FORUM;
 
     /**
-     * The permission bit for pinboard access.
+     * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    public static final int PINBOARD_WRITE_ACCESS = UserPermissionBits.PINBOARD_WRITE_ACCESS;
+    private static final int PINBOARD_WRITE_ACCESS = UserPermissionBits.PINBOARD_WRITE_ACCESS;
 
     /**
      * The permission bit for WebDAV/XML access.
@@ -130,14 +130,14 @@ public class UserConfiguration implements Serializable, Cloneable {
     public static final int VCARD = UserPermissionBits.VCARD;
 
     /**
-     * The permission bit for RSS bookmarks access.
+     * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    public static final int RSS_BOOKMARKS = UserPermissionBits.RSS_BOOKMARKS;
+    private static final int RSS_BOOKMARKS = UserPermissionBits.RSS_BOOKMARKS;
 
     /**
-     * The permission bit for RSS portal access.
+     * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    public static final int RSS_PORTAL = UserPermissionBits.RSS_PORTAL;
+    private static final int RSS_PORTAL = UserPermissionBits.RSS_PORTAL;
 
     /**
      * The permission bit for mobility access.
@@ -407,24 +407,6 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Detects if user configuration allows forum access.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasForum() {
-        return hasPermission(FORUM);
-    }
-
-    /**
-     * Detects if user configuration allows pinboard write access.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasPinboardWriteAccess() {
-        return hasPermission(PINBOARD_WRITE_ACCESS);
-    }
-
-    /**
      * Detects if user configuration allows WebDAV XML.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
@@ -458,24 +440,6 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean hasVCard() {
         return hasPermission(VCARD);
-    }
-
-    /**
-     * Detects if user configuration allows RSS bookmarks.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasRSSBookmarks() {
-        return hasPermission(RSS_BOOKMARKS);
-    }
-
-    /**
-     * Detects if user configuration allows RSS portal.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasRSSPortal() {
-        return hasPermission(RSS_PORTAL);
     }
 
     /**

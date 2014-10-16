@@ -71,7 +71,7 @@ public final class DatabaseId implements SortableId {
      * @param ordinal The ordinal
      * @param name The name
      */
-    public DatabaseId(final int folderId, final int ordinal, final String name) {
+    public DatabaseId(int folderId, int ordinal, String name) {
         super();
         this.folderId = String.valueOf(folderId);
         this.ordinal = ordinal;
@@ -85,7 +85,7 @@ public final class DatabaseId implements SortableId {
      * @param ordinal The ordinal
      * @param name The name
      */
-    public DatabaseId(final String folderId, final int ordinal, final String name) {
+    public DatabaseId(String folderId, int ordinal, String name) {
         super();
         this.folderId = folderId;
         this.ordinal = ordinal;
@@ -111,34 +111,34 @@ public final class DatabaseId implements SortableId {
     }
 
     @Override
-    public int compareTo(final SortableId o) {
+    public int compareTo(SortableId o) {
         if (o instanceof DatabaseId) {
-            final int thisVal = ordinal;
-            final int anotherVal = ((DatabaseId) o).ordinal;
+            int thisVal = ordinal;
+            int anotherVal = ((DatabaseId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }
-        final int thisPrio = getPriority().ordinal();
-        final int anotherPrio = (o).getPriority().ordinal();
+        int thisPrio = getPriority().ordinal();
+        int anotherPrio = (o).getPriority().ordinal();
         return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
+        int prime = 31;
         int result = 1;
         result = prime * result + ordinal;
         return result;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (!(obj instanceof DatabaseId)) {
             return false;
         }
-        final DatabaseId other = (DatabaseId) obj;
+        DatabaseId other = (DatabaseId) obj;
         if (ordinal != other.ordinal) {
             return false;
         }

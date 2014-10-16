@@ -1,0 +1,15 @@
+Source: open-xchange-system
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), default-jdk
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-system
+Architecture: all
+Depends: ${misc:Depends}, adduser
+Pre-Depends: ${dist:Pre-Depends}
+Breaks: open-xchange-core (<< 7.6.1)
+Replaces: open-xchange-core (<< 7.6.1)
+Description: system integration specific infrastructure
