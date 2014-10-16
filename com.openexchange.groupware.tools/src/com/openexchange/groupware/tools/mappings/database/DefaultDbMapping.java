@@ -119,10 +119,15 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
         }
     }
 
-	@Override
-	public String getColumnLabel() {
-		return this.columnLabel;
-	}
+    @Override
+    public String getColumnLabel() {
+        return this.columnLabel;
+    }
+
+    @Override
+    public String getColumnLabel(String prefix) {
+        return prefix + this.columnLabel;
+    }
 
 	@Override
 	public String getReadableName(O Object) {

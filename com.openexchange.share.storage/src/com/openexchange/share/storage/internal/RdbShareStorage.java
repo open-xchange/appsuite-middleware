@@ -397,73 +397,19 @@ public class RdbShareStorage implements ShareStorage {
      * @throws OXException
      */
     private static Collection<DefaultShare> selectShareAndTargets(Connection connection, int cid, String[] tokens, int createdBy, int[] guests) throws SQLException, OXException {
-        /*
-         * build statement
-         */
         ShareField[] shareFields = { ShareField.TOKEN, ShareField.CREATION_DATE, ShareField.CREATED_BY, ShareField.LAST_MODIFIED,
             ShareField.MODIFIED_BY, ShareField.GUEST_ID, ShareField.AUTHENTICATION };
         ShareTargetField[] targetFields = { ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM,
             ShareTargetField.ACTIVATION_DATE, ShareTargetField.EXPIRY_DATE, ShareTargetField.META };
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT ").append(SHARE_MAPPER.getColumns(shareFields, "s.")).append(',')
-            .append(TARGET_MAPPER.getColumns(targetFields, "t."))
-            .append(" FROM share AS s LEFT JOIN share_target AS t")
-            .append(" ON s.").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel())
-            .append("=t.").append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel())
-            .append(" AND s.").append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel())
-            .append("=t.").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel())
-            .append(" WHERE s.").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?")
-        ;
-        if (null != tokens && 0 < tokens.length) {
-            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel());
-            if (1 == tokens.length) {
-                stringBuilder.append("=?");
-            } else {
-                stringBuilder.append(" IN (?");
-                for (int i = 1; i < tokens.length; i++) {
-                    stringBuilder.append(",?");
-                }
-                stringBuilder.append(')');
-            }
-        }
-        if (0 < createdBy) {
-            stringBuilder.append(" AND s.").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?");
-        }
-        if (null != guests && 0 < guests.length) {
-            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel());
-            if (1 == tokens.length) {
-                stringBuilder.append("=?");
-            } else {
-                stringBuilder.append(" IN (?");
-                for (int i = 1; i < tokens.length; i++) {
-                    stringBuilder.append(",?");
-                }
-                stringBuilder.append(')');
-            }
-        }
         Map<String, DefaultShare> sharesByToken = new HashMap<String, DefaultShare>();
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
-            stmt = connection.prepareStatement(stringBuilder.toString());
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, cid);
-            if (null != tokens) {
-                for (String token : tokens) {
-                    stmt.setBytes(parameterIndex++, UUIDs.toByteArray(UUIDs.fromUnformattedString(token)));
-                }
-            }
-            if (0 < createdBy) {
-                stmt.setInt(parameterIndex++, createdBy);
-            }
-            if (null != guests) {
-                for (int guest : guests) {
-                    stmt.setInt(parameterIndex++, guest);
-                }
-            }
+            stmt = new SelectShareBuilder(cid, shareFields, targetFields)
+                .tokens(tokens).createdBy(createdBy).guests(guests).prepare(connection);
             resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                DefaultShare currentShare = SHARE_MAPPER.fromResultSet(resultSet, shareFields, "s.");
+                DefaultShare currentShare = SHARE_MAPPER.fromResultSet(resultSet, shareFields, SelectShareBuilder.ALIAS_SHARE + '.');
                 DefaultShare share = sharesByToken.get(currentShare.getToken());
                 if (null == share) {
                     share = currentShare;
@@ -471,7 +417,7 @@ public class RdbShareStorage implements ShareStorage {
                     share.setContextID(cid);
                     sharesByToken.put(share.getToken(), share);
                 }
-                RdbShareTarget target = TARGET_MAPPER.fromResultSet(resultSet, targetFields, "t.");
+                RdbShareTarget target = TARGET_MAPPER.fromResultSet(resultSet, targetFields, SelectShareBuilder.ALIAS_SHARE_TARGET + '.');
                 if (0 < target.getModule()) {
                     share.getTargets().add(target);
                 }

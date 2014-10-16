@@ -75,12 +75,19 @@ public interface DbMapping<T, O> extends Mapping<T, O> {
 	 */
 	T get(ResultSet resultSet, String columnLabel) throws SQLException;
 
-	/**
-	 * Gets the column label of the mapped property.
-	 *
-	 * @return the column label
-	 */
-	String getColumnLabel();
+    /**
+     * Gets the column label of the mapped property.
+     *
+     * @return the column label
+     */
+    String getColumnLabel();
+
+    /**
+     * Gets the column label of the mapped property, prefixed with the supplied value.
+     *
+     * @return the prefixed column label
+     */
+    String getColumnLabel(String prefix);
 
 	/**
 	 * Gets the readable name of the mapped property.
@@ -122,7 +129,7 @@ public interface DbMapping<T, O> extends Mapping<T, O> {
      *
      * @param resultSet the result set to read out the value from
      * @param object the object to set the value
-     * @param columnLabel the label for the column specified with the SQL AS clause, or, if the SQL AS clause was not specified, the 
+     * @param columnLabel the label for the column specified with the SQL AS clause, or, if the SQL AS clause was not specified, the
      *                    label of the column name
      * @throws SQLException
      * @throws OXException
