@@ -75,10 +75,10 @@ public class XML {
      * @return The escaped string.
      */
     public static String escape(final String string) {
-    	final StringBuilder sb = new StringBuilder();
-    	final int len = string.length();
+        final StringBuilder sb = new StringBuilder();
+        final int len = string.length();
         for (int i = 0; i < len; i++) {
-        	final char c = string.charAt(i);
+            final char c = string.charAt(i);
             switch (c) {
             case '&':
                 sb.append("&amp;");
@@ -110,7 +110,7 @@ public class XML {
      * @throws JSONException
      */
     private static boolean parse(final XMLTokener x, final JSONObject context, final String name) throws JSONException {
-        return parse(x, context, name, Collections.<String> emptySet());
+        return parse(x, context, name, java.util.Collections.<String> emptySet());
     }
 
     /**
@@ -184,7 +184,7 @@ public class XML {
 
 // Close tag </
 
-        	t = x.nextToken();
+            t = x.nextToken();
             if (name == null) {
                 throw x.syntaxError("Mismatched close tag" + t);
             }
@@ -290,8 +290,8 @@ public class XML {
      * @throws JSONException
      */
     public static JSONObject toJSONObject(final String string) throws JSONException {
-    	final JSONObject o = new JSONObject();
-    	final XMLTokener x = new XMLTokener(string);
+        final JSONObject o = new JSONObject();
+        final XMLTokener x = new XMLTokener(string);
         while (x.more() && x.skipPast("<")) {
             parse(x, o, null);
         }
@@ -345,7 +345,7 @@ public class XML {
      */
     public static String toString(final Object o, final String tagName)
             throws JSONException {
-    	final StringBuilder b = new StringBuilder();
+        final StringBuilder b = new StringBuilder();
         int          i;
         JSONArray    ja;
         JSONObject   jo;
