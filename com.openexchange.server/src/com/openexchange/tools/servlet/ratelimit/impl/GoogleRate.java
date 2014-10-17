@@ -64,15 +64,19 @@ public class GoogleRate implements Rate {
 
     private final AtomicLong lastLogStamp;
     private final AtomicLong lastAccessTime;
-    private final RateLimiter googleRateLimiter;
+    private volatile RateLimiter googleRateLimiter;
     private volatile boolean deprecated;
+    private volatile int permits;
+    private volatile long millis;
 
     /**
      * Initializes a new {@link GoogleRate}.
      */
     public GoogleRate(int numberCalls, int timeLength, TimeUnit timeUnit) {
         super();
-        double rate = ((double) numberCalls) / ((double) TimeUnit.SECONDS.convert(timeLength, timeUnit));
+        permits = numberCalls;
+        millis = TimeUnit.SECONDS.convert(timeLength, timeUnit);
+        double rate = ((double) numberCalls) / ((double) millis);
         googleRateLimiter = RateLimiter.create(rate);
         lastLogStamp = new AtomicLong(0L);
         lastAccessTime = new AtomicLong(Long.MIN_VALUE);
@@ -115,6 +119,30 @@ public class GoogleRate implements Rate {
         }
         boolean permitted = googleRateLimiter.tryAcquire(1);
         return permitted ? Rate.Result.SUCCESS : Rate.Result.FAILED;
+    }
+
+    @Override
+    public void setPermits(int permits) {
+        this.permits = permits;
+        double rate = ((double) permits) / ((double) millis);
+        googleRateLimiter = RateLimiter.create(rate);
+    }
+
+    @Override
+    public void setTimeInMillis(long timeInMillis) {
+        millis = timeInMillis;
+        double rate = ((double) permits) / ((double) timeInMillis);
+        googleRateLimiter = RateLimiter.create(rate);
+    }
+
+    @Override
+    public int getPermits() {
+        return permits;
+    }
+
+    @Override
+    public long getTimeInMillis() {
+        return millis;
     }
 
 }

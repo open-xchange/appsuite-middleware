@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.tools.servlet.ratelimit.Rate;
-import com.openexchange.tools.servlet.ratelimit.Rate.Result;
 
 /**
  * {@link RateImpl} - Implements time stamp based rate limit.
@@ -67,28 +66,28 @@ import com.openexchange.tools.servlet.ratelimit.Rate.Result;
 public class RateImpl implements Rate {
 
     private final AtomicLong lastLogStamp;
-    private final int numberCalls;
-    private final long timeInMillis;
+    private int permits;
+    private long timeInMillis;
     private final Deque<Long> callHistory;
     private boolean deprecated;
 
     /**
      * Initializes a new {@link RateImpl}.
      *
-     * @param numberCalls The number of allowed calls
+     * @param permits The number of allowed calls
      * @param timeLength The time length
      * @param timeUnit The time unit
      */
-    public RateImpl(final int numberCalls, final int timeLength, final TimeUnit timeUnit) {
+    public RateImpl(int permits, int timeLength, TimeUnit timeUnit) {
         super();
         lastLogStamp = new AtomicLong(0L);
         deprecated = false;
         callHistory = new LinkedList<Long>();
-        this.numberCalls = numberCalls;
+        this.permits = permits;
         this.timeInMillis = timeUnit.toMillis(timeLength);
     }
 
-    private void cleanOld(final long now) {
+    private void cleanOld(long now) {
         final long threshold = now - timeInMillis;
         Long first;
         while ((first = callHistory.peekFirst()) != null && first.longValue() <= threshold) {
@@ -96,10 +95,10 @@ public class RateImpl implements Rate {
         }
     }
 
-    private long callTime(final long now) {
+    private long callTime(long now) {
         cleanOld(now);
         final int size = callHistory.size();
-        if (size < numberCalls) {
+        if (size < permits) {
             return now;
         }
         final long lastStart = callHistory.peekLast().longValue() - timeInMillis;
@@ -113,7 +112,7 @@ public class RateImpl implements Rate {
             count++;
             firstPeriodCall = call;
         }
-        return count < numberCalls ? (firstPeriodCall + 1) : (firstPeriodCall + timeInMillis + 1);
+        return count < permits ? (firstPeriodCall + 1) : (firstPeriodCall + timeInMillis + 1);
     }
 
     @Override
@@ -160,6 +159,29 @@ public class RateImpl implements Rate {
         }
     }
 
+    @Override
+    public int getPermits() {
+        return permits;
+    }
+
+    @Override
+    public long getTimeInMillis() {
+        return timeInMillis;
+    }
+
+    @Override
+    public void setPermits(int permits) {
+        synchronized (callHistory) {
+            this.permits = permits;
+        }
+    }
+
+    @Override
+    public void setTimeInMillis(long timeInMillis) {
+        synchronized (callHistory) {
+            this.timeInMillis = timeInMillis;
+        }
+    }
 
     // ----------------------------------------------------------------------------- //
 
