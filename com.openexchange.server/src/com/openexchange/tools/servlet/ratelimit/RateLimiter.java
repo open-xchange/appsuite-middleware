@@ -80,6 +80,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.ratelimit.Rate.Result;
+import com.openexchange.tools.servlet.ratelimit.impl.RateImpl;
 
 /**
  * {@link RateLimiter}
@@ -412,10 +413,11 @@ public final class RateLimiter {
      * @param maxRateTimeWindow The associated time window
      * @param createIfAbsent Whether to create the rate limit trace or not
      * @param optRequest The checked HTTP request (rather for logging purposes); may be <code>null</code>
+     * @return <code>true</code> if a rate permit was consumed; otherwise false
      * @throws RateLimitedException If rate limit is exceeded
      */
-    public static void optRateLimitFor(Key key, int maxRate, int maxRateTimeWindow, HttpServletRequest optRequest) {
-        checkRateLimitForRequest(key, maxRate, maxRateTimeWindow, false, optRequest);
+    public static boolean optRateLimitFor(Key key, int maxRate, int maxRateTimeWindow, HttpServletRequest optRequest) {
+        return checkRateLimitForRequest(key, maxRate, maxRateTimeWindow, false, optRequest);
     }
 
     /**
@@ -428,22 +430,22 @@ public final class RateLimiter {
      * @param optRequest The checked HTTP request (rather for logging purposes); may be <code>null</code>
      * @throws RateLimitedException If rate limit is exceeded
      */
-    private static void checkRateLimitForRequest(Key key, int maxRate, int maxRateTimeWindow, boolean createIfAbsent, HttpServletRequest optRequest) {
+    private static boolean checkRateLimitForRequest(Key key, int maxRate, int maxRateTimeWindow, boolean createIfAbsent, HttpServletRequest optRequest) {
         ConcurrentMap<Key, Rate> bucketMap = bucketMap();
         if (null == bucketMap) {
             // Not yet fully initialized
-            return;
+            return false;
         }
         while (true) {
             Rate rate = bucketMap.get(key);
             if (null == rate) {
                 if (false == createIfAbsent) {
                     // No rate limit trace available
-                    return;
+                    return false;
                 }
 
                 // Requested to create a rate limit trace, hence do so
-                Rate newRate = new Rate(maxRate, maxRateTimeWindow, TimeUnit.MILLISECONDS);
+                Rate newRate = new RateImpl(maxRate, maxRateTimeWindow, TimeUnit.MILLISECONDS);
                 rate = bucketMap.putIfAbsent(key, newRate);
                 if (null == rate) {
                     rate = newRate;
@@ -457,7 +459,7 @@ public final class RateLimiter {
             } else {
                 // Success or failure?
                 if (Result.SUCCESS == res) {
-                    return;
+                    return true;
                 }
 
                 // Rate limit exceeded
