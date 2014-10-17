@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
@@ -129,6 +130,7 @@ import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
  * Servlet doing the login and logout stuff.
@@ -687,6 +689,13 @@ public class LoginServlet extends AJAXServlet {
                 logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
                 return;
             }
+        } catch (RateLimitedException e) {
+            resp.setContentType("text/plain; charset=UTF-8");
+            int retryAfter = e.getRetryAfter();
+            if (retryAfter > 0) {
+                resp.setHeader(RETRY_AFTER, Integer.toString(retryAfter));
+            }
+            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } finally {
             LogProperties.removeProperties(LOG_PROPERTIES);
         }
@@ -768,11 +777,7 @@ public class LoginServlet extends AJAXServlet {
 
     public static void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
         LOG.debug("", e);
-        Tools.disableCaching(resp);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        final Response response = new Response();
-        response.setException(e);
-        Send.sendResponse(response, resp);
+        Send.sendResponse(new Response().setException(e), resp);
     }
 
     @Override

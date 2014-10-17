@@ -71,6 +71,7 @@ import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResultCode;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.Setting;
@@ -81,12 +82,15 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginJsonEnhancer;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.ratelimit.Key;
+import com.openexchange.tools.servlet.ratelimit.RateLimiter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -99,6 +103,52 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractLoginRequestHandler.class);
 
+    private static final String USER_AGENT = "user-agent";
+
+    private static volatile Integer maxLoginRate;
+
+    private static int maxLoginRate() {
+        Integer tmp = maxLoginRate;
+        if (null == tmp) {
+            synchronized (RateLimiter.class) {
+                tmp = maxLoginRate;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return 50;
+                    }
+                    tmp = Integer.valueOf(service.getProperty("com.openexchange.ajax.login.maxRate", "50"));
+                    maxLoginRate = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Integer maxLoginRateTimeWindow;
+
+    private static int maxLoginRateTimeWindow() {
+        Integer tmp = maxLoginRateTimeWindow;
+        if (null == tmp) {
+            synchronized (RateLimiter.class) {
+                tmp = maxLoginRateTimeWindow;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return 300000;
+                    }
+                    tmp = Integer.valueOf(service.getProperty("com.openexchange.ajax.login.maxRateTimeWindow", "300000"));
+                    maxLoginRateTimeWindow = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------ //
+
     private final Set<LoginRampUpService> rampUpServices;
 
     /**
@@ -107,6 +157,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      * @param rampUpServices The optional ramp-up services
      */
     protected AbstractLoginRequestHandler(final Set<LoginRampUpService> rampUpServices) {
+        super();
         this.rampUpServices = rampUpServices;
     }
 
@@ -149,9 +200,34 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
         LoginResult result = null;
         try {
             // Do the login...
-            result = login.doLogin(req);
-            if (null == result) {
-                return true;
+            {
+                int rate = maxLoginRate();
+                int timeWindow = maxLoginRateTimeWindow();
+                if (rate <= 0 || timeWindow <= 0) {
+                    // No rate limit enabled
+                    result = login.doLogin(req);
+                    if (null == result) {
+                        return true;
+                    }
+                } else {
+                    Key rateLimitKey = new Key(req, req.getHeader(USER_AGENT), "__login.failed");
+                    // Optionally consume one permit
+                    RateLimiter.optRateLimitFor(rateLimitKey, rate, timeWindow, req);
+                    try {
+                        result = login.doLogin(req);
+                        if (null == result) {
+                            return true;
+                        }
+                        // Successful login (so far) -- clean rate limit trace
+                        RateLimiter.removeRateLimit(rateLimitKey);
+                    } catch (OXException e) {
+                        if (LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
+                            // Consume one permit
+                            RateLimiter.checkRateLimitFor(rateLimitKey, rate, timeWindow, req);
+                        }
+                        throw e;
+                    }
+                }
             }
 
             // The associated session
@@ -182,7 +258,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             Future<Object> optModules = getModulesAsync(session, req);
 
             // Remember User-Agent
-            session.setParameter("user-agent", req.getHeader("user-agent"));
+            session.setParameter(USER_AGENT, req.getHeader(USER_AGENT));
             ServerSession serverSession = ServerSessionAdapter.valueOf(session);
 
             // Trigger client-specific ramp-up

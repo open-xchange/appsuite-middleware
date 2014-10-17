@@ -550,10 +550,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 // Common request
                 super.service(new CountingHttpServletRequest(req), resp);
             }
-        } catch (final RateLimitedException e) {
+        } catch (RateLimitedException e) {
             resp.setContentType("text/plain; charset=UTF-8");
-            if(e.getRetryAfter() > 0) {
-                resp.setHeader(RETRY_AFTER, String.valueOf(e.getRetryAfter()));
+            int retryAfter = e.getRetryAfter();
+            if (retryAfter > 0) {
+                resp.setHeader(RETRY_AFTER, Integer.toString(retryAfter));
             }
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final RuntimeException e) {
