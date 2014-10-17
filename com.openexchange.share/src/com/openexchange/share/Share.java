@@ -124,4 +124,18 @@ public interface Share {
      */
     AuthenticationMode getAuthentication();
 
+    /**
+     * Gets the common module identifier if all contained share targets are pointing to the same module.
+     *
+     * @return The common module ID, or <code>0</code> if the modules are different between the share targets
+     */
+    int getCommonModule();
+
+    /**
+     * Gets the common folder identifier if all contained share targets are pointing to the same folder.
+     *
+     * @return The common folder ID, or <code>null</code> if the folders are different between the share targets
+     */
+    String getCommonFolder();
+
 }

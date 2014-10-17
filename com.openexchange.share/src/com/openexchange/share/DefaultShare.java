@@ -143,6 +143,39 @@ public class DefaultShare implements Share, Serializable {
         return authentication;
     }
 
+    @Override
+    public int getCommonModule() {
+        if (null == targets || 0 == targets.size()) {
+            return 0;
+        } else {
+            int module = targets.get(0).getModule();
+            for (int i = 1; i < targets.size(); i++) {
+                if (module != targets.get(i).getModule()) {
+                    return 0;
+                }
+            }
+            return module;
+        }
+    }
+
+    @Override
+    public String getCommonFolder() {
+        if (null == targets || 0 == targets.size()) {
+            return null;
+        } else {
+            String folder = targets.get(0).getFolder();
+            if (null == folder) {
+                return null;
+            }
+            for (int i = 1; i < targets.size(); i++) {
+                if (false == folder.equals(targets.get(i).getFolder())) {
+                    return null;
+                }
+            }
+            return folder;
+        }
+    }
+
     /**
      * Sets the token
      *

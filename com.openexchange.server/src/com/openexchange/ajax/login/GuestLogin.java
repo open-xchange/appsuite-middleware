@@ -78,6 +78,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
@@ -282,10 +283,15 @@ public class GuestLogin extends AbstractLoginRequestHandler {
 
                         @Override
                         protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
-                            //TODO
-//                            jLoginResult.put("folder", share.getFolder());
-//                            jLoginResult.put("module", Module.getForFolderConstant(share.getModule()).getName());
-//                            jLoginResult.putOpt("item", share.getItem());
+                            int module = share.getCommonModule();
+                            if (0 != module) {
+                                Module folderModule = Module.getForFolderConstant(module);
+                                jLoginResult.put("module", null != folderModule ? folderModule.getName() : String.valueOf(module));
+                            }
+                            jLoginResult.putOpt("folder", share.getCommonFolder());
+                            if (null != share.getTargets() && 1 == share.getTargets().size()) {
+                                jLoginResult.putOpt("item", share.getTargets().get(0).getItem());
+                            }
                         }
                     };
                     retval.setContext(context);

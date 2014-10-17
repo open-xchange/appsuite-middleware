@@ -50,6 +50,7 @@
 package com.openexchange.share.servlet.handler;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -57,6 +58,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.Share;
@@ -195,37 +197,46 @@ public class RedirectingShareHandler extends AbstractShareHandler {
      * @return The redirect URL
      */
     protected static String getRedirectURL(Session session, User user, Share share, LoginConfiguration loginConfig) {
-        //TODO: check for single target, otherwise just return default link
-        return null;
-//        boolean isFolderShare = share.isFolder();
-//
-//        String redirectLink;
-//        {
-//            ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-//            if (isFolderShare) {
-//                redirectLink = configService.getProperty("com.openexchange.share.redirectLinkFolder",
-//                    "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
-//            } else {
-//                redirectLink = configService.getProperty("com.openexchange.share.redirectLinkItem",
-//                    "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
-//            }
-//        }
-//
-//        {
-//            String uiWebPath = loginConfig.getUiWebPath(); // uiWebPath = "/ox6/index.html";
-//            redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
-//        }
-//        redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
-//        redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
-//        redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
-//        redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
-//        redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(Module.getForFolderConstant(share.getModule()).getName()));
-//        redirectLink = P_FOLDER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(share.getFolder()));
-//        if (false == isFolderShare) {
-//            redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(share.getItem()));
-//        }
-//        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin() ? "true" : "false");
-//        return redirectLink;
+        /*
+         * prepare url
+         */
+        StringBuilder stringBuilder = new StringBuilder("/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]");
+        int module = share.getCommonModule();
+        String folder = share.getCommonFolder();
+        String item = null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
+        if (0 != module) {
+            stringBuilder.append("&m=[module]");
+        }
+        if (null != folder) {
+            stringBuilder.append("&f=[folder]");
+        }
+        if (null != item) {
+            stringBuilder.append("&i=[item]");
+        }
+        String redirectLink = stringBuilder.toString();
+        /*
+         * replace templates
+         */
+        String uiWebPath = loginConfig.getUiWebPath();
+        uiWebPath = "/ox6/index.html";
+        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
+        redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
+        redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
+        redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
+        redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
+        if (0 != module) {
+            Module folderModule = Module.getForFolderConstant(module);
+            String name = null != folderModule ? folderModule.getName() : String.valueOf(module);
+            redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(name));
+        }
+        if (null != folder) {
+            redirectLink = P_FOLDER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(folder));
+        }
+        if (null != item) {
+            redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(item));
+        }
+        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin() ? "true" : "false");
+        return redirectLink;
     }
 
     private static String trimSlashes(String path) {
