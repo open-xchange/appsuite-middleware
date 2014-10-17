@@ -212,6 +212,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     }
                 } else {
                     Key rateLimitKey = new Key(req, req.getHeader(USER_AGENT), "__login.failed");
+                    boolean doubleRate = true;
                     try {
                         // Optionally consume one permit
                         boolean consumed = RateLimiter.optRateLimitFor(rateLimitKey, rate, timeWindow, req);
@@ -225,13 +226,16 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                         } catch (OXException e) {
                             if (!consumed && LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
                                 // Consume one permit
+                                doubleRate = false;
                                 RateLimiter.checkRateLimitFor(rateLimitKey, rate, timeWindow, req);
                             }
                             throw e;
                         }
                     } catch (RateLimitedException rateLimitExceeded) {
                         // Double the rate
-                        RateLimiter.doubleRateLimitWindow(rateLimitKey);
+                        if (doubleRate) {
+                            RateLimiter.doubleRateLimitWindow(rateLimitKey);
+                        }
                         throw rateLimitExceeded;
                     }
                 }
