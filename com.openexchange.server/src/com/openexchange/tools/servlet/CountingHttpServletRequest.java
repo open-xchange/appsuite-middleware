@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.servlet;
 
-import static com.openexchange.tools.servlet.RateLimiter.checkRequest;
+import static com.openexchange.tools.servlet.ratelimit.RateLimiter.checkRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -68,6 +68,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.stream.CountingInputStream;
 
 /**

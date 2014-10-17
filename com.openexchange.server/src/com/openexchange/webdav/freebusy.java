@@ -79,7 +79,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
-import com.openexchange.tools.servlet.RateLimitedException;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
 /**

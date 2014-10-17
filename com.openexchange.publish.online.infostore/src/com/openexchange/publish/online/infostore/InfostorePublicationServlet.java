@@ -73,7 +73,7 @@ import com.openexchange.publish.online.infostore.util.InfostorePublicationUtils;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
-import com.openexchange.tools.servlet.RateLimitedException;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 

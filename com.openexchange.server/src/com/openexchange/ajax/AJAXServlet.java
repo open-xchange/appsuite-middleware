@@ -113,8 +113,8 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
-import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -544,7 +544,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             String contentType = Strings.asciiLowerCase(req.getContentType());
             if (contentType != null && contentType.startsWith(CONTENTTYPE_UPLOAD, 0)) {
                 // An upload request
-                com.openexchange.tools.servlet.RateLimiter.checkRequest(req);
+                com.openexchange.tools.servlet.ratelimit.RateLimiter.checkRequest(req);
                 super.service(req, resp);
             } else {
                 // Common request

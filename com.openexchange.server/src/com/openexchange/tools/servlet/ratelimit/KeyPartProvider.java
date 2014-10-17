@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,22 @@
  *
  */
 
-package com.openexchange.tools.servlet;
+package com.openexchange.tools.servlet.ratelimit;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
- * {@link RateLimitedException} - Thrown if associated request is rate limited.
+ * {@link KeyPartProvider} - Specifies a key portion.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RateLimitedException extends RuntimeException {
-
-    private static final long serialVersionUID = 5342199025241682441L;
-
-    private final int retryAfterSeconds;
+public interface KeyPartProvider {
 
     /**
-     * Initializes a new {@link RateLimitedException}.
+     * Gets the key portion to contribute
      *
-     * @param message The message
-     * @param retryAfterSeconds The time in seconds to wait before retrying
+     * @param servletRequest The associated HTTP request
+     * @return The key portion
      */
-    public RateLimitedException(final String message, final int retryAfterSeconds) {
-        super(message);
-        this.retryAfterSeconds = retryAfterSeconds;
-    }
-
-    /**
-     * Gets the time in seconds to wait before retrying
-     *
-     * @return The time in seconds to wait before retrying
-     */
-    public int getRetryAfter() {
-        return retryAfterSeconds;
-    }
-
+    String getValue(HttpServletRequest servletRequest);
 }
