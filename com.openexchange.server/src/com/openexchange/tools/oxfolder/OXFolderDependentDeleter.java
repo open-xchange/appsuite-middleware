@@ -129,7 +129,7 @@ public class OXFolderDependentDeleter {
 
             final int module = folder.getModule();
             final int folderID = folder.getObjectID();
-            if (null == subfolderIDs || 0 == subfolderIDs.size()) {
+            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
                 final List<GroupwareTarget> targets = new ArrayList<GroupwareTarget>(subfolderIDs.size() + 1);
 
                 targets.add(new GroupwareTarget(module, Integer.toString(folderID)));
