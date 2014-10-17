@@ -1,3 +1,8 @@
+* 2014-10-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34987: Added properties 'com.openexchange.oauth.google.redirectUrl' and 'com.openexchange.oauth.google.productName'
+                      to reloadable properties
+
 * 2014-10-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 34995: Removed Dropbox and Box.com remnants from packaging
