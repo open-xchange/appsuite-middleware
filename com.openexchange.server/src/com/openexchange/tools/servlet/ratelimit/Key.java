@@ -54,13 +54,27 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * {@link Key} - A key with which a certain rate limit is associated/tracked.
+ * {@link Key} - A key for whom a certain rate limit is associated/tracked.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Key {
 
+    private static int hashCode(List<String> l) {
+        if (l == null) {
+            return 0;
+        }
+
+        int result = 1;
+        for (String str : l) {
+            result = 31 * result + (str == null ? 0 : str.hashCode());
+        }
+        return result;
+    }
+
     private static final String USER_AGENT = "User-Agent";
+
+    // ----------------------------------------------------------------------------------------------------------------------------- //
 
     private final int remotePort;
     private final String remoteAddr;
@@ -90,26 +104,65 @@ public final class Key {
         remoteAddr = servletRequest.getRemoteAddr();
         this.userAgent = userAgent;
 
-        final List<String> parts;
+        List<String> parts;
         {
-            final List<KeyPartProvider> keyPartProviders = RateLimiter.keyPartProviders();
+            List<KeyPartProvider> keyPartProviders = RateLimiter.keyPartProviders();
             if (null == keyPartProviders || keyPartProviders.isEmpty()) {
                 parts = null;
             } else {
                 parts = new ArrayList<String>(keyPartProviders.size());
-                for (final KeyPartProvider keyPartProvider : keyPartProviders) {
+                for (KeyPartProvider keyPartProvider : keyPartProviders) {
                     parts.add(keyPartProvider.getValue(servletRequest));
                 }
             }
         }
         this.parts = parts;
 
-        final int prime = 31;
+        int prime = 31;
         int result = 1;
         result = prime * result + ((remoteAddr == null) ? 0 : remoteAddr.hashCode());
         result = prime * result + remotePort;
         result = prime * result + ((userAgent == null) ? 0 : userAgent.hashCode());
-        result = prime * result + ((parts == null) ? 0 : parts.hashCode());
+        result = prime * result + ((parts == null) ? 0 : hashCode(parts));
+        this.hash = result;
+    }
+
+    /**
+     * Initializes a new {@link Key}.
+     *
+     * @param servletRequest The HTTP request to determine the key for
+     * @param userAgent The User-Agent associated with the HTTP request
+     * @param parts Optional key parts to consider
+     */
+    public Key(HttpServletRequest servletRequest, String userAgent, String... parts) {
+        super();
+        remotePort = RateLimiter.considerRemotePort() ? servletRequest.getRemotePort() : 0;
+        remoteAddr = servletRequest.getRemoteAddr();
+        this.userAgent = userAgent;
+
+        List<String> l;
+        {
+            if (null == parts || 0 == parts.length) {
+                l = null;
+            } else {
+                int length = parts.length;
+                l = new ArrayList<String>(length);
+                for (int i = 0; i < length; i++) {
+                    String part = parts[i];
+                    if (null != part) {
+                        l.add(part);
+                    }
+                }
+            }
+        }
+        this.parts = l;
+
+        int prime = 31;
+        int result = 1;
+        result = prime * result + ((remoteAddr == null) ? 0 : remoteAddr.hashCode());
+        result = prime * result + remotePort;
+        result = prime * result + ((userAgent == null) ? 0 : userAgent.hashCode());
+        result = prime * result + ((l == null) ? 0 : hashCode(l));
         this.hash = result;
     }
 

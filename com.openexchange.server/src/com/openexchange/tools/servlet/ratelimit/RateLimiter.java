@@ -71,8 +71,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
@@ -233,6 +231,11 @@ public final class RateLimiter {
     private static volatile ScheduledTimerTask timerTask;
     private static volatile ConcurrentMap<Key, Rate> bucketMap;
 
+    /**
+     * Gets the bucket map for rate limit slots.
+     *
+     * @return The bucket map or <code>null</code> if not yet initialized
+     */
     private static ConcurrentMap<Key, Rate> bucketMap() {
         ConcurrentMap<Key, Rate> tmp = bucketMap;
         if (null == tmp) {
@@ -298,27 +301,6 @@ public final class RateLimiter {
         return tmp.intValue();
     }
 
-    private static volatile Integer maxLoginRate;
-
-    private static int maxLoginRate() {
-        Integer tmp = maxLoginRate;
-        if (null == tmp) {
-            synchronized (RateLimiter.class) {
-                tmp = maxLoginRate;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    if (null == service) {
-                        // Service not yet available
-                        return 50;
-                    }
-                    tmp = Integer.valueOf(service.getProperty("com.openexchange.ajax.login.maxRate", "50"));
-                    maxLoginRate = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
     private static volatile Integer maxRateTimeWindow;
 
     private static int maxRateTimeWindow() {
@@ -334,27 +316,6 @@ public final class RateLimiter {
                     }
                     tmp = Integer.valueOf(service.getProperty("com.openexchange.servlet.maxRateTimeWindow", "300000"));
                     maxRateTimeWindow = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
-    private static volatile Integer maxLoginRateTimeWindow;
-
-    private static int maxLoginRateTimeWindow() {
-        Integer tmp = maxLoginRateTimeWindow;
-        if (null == tmp) {
-            synchronized (RateLimiter.class) {
-                tmp = maxLoginRateTimeWindow;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    if (null == service) {
-                        // Service not yet available
-                        return 300000;
-                    }
-                    tmp = Integer.valueOf(service.getProperty("com.openexchange.ajax.login.maxRateTimeWindow", "300000"));
-                    maxLoginRateTimeWindow = tmp;
                 }
             }
         }
@@ -409,19 +370,6 @@ public final class RateLimiter {
      * @throws RateLimitedException If associated request is rate limited
      */
     public static void checkRequest(HttpServletRequest httpRequest) {
-        // Special treatment for login request
-        if (isLoginRequest(httpRequest)) {
-            int maxLoginRate = maxLoginRate();
-            if (maxLoginRate > 0) {
-                int maxLoginRateTimeWindow = maxLoginRateTimeWindow();
-                if (maxLoginRateTimeWindow > 0) {
-                    // Rate limit for login available
-                    checkRateLimitForRequest(new Key(httpRequest), maxLoginRate, maxLoginRateTimeWindow, httpRequest);
-                    return;
-                }
-            }
-        }
-
         // Any request...
         int maxRate = maxRate();
         if (maxRate <= 0) {
@@ -440,7 +388,7 @@ public final class RateLimiter {
         }
 
         // Do the rate limit check
-        checkRateLimitForRequest(new Key(httpRequest), maxRate, maxRateTimeWindow, httpRequest);
+        checkRateLimitFor(new Key(httpRequest), maxRate, maxRateTimeWindow, httpRequest);
     }
 
     /**
@@ -452,7 +400,35 @@ public final class RateLimiter {
      * @param optRequest The checked HTTP request (rather for logging purposes); may be <code>null</code>
      * @throws RateLimitedException If rate limit is exceeded
      */
-    public static void checkRateLimitForRequest(Key key, int maxRate, int maxRateTimeWindow, HttpServletRequest optRequest) {
+    public static void checkRateLimitFor(Key key, int maxRate, int maxRateTimeWindow, HttpServletRequest optRequest) {
+        checkRateLimitForRequest(key, maxRate, maxRateTimeWindow, true, optRequest);
+    }
+
+    /**
+     * Performs the actual rate limit check (only if a rate limit trace is already available).
+     *
+     * @param key The key calculated from associated HTTP request used to determine the appropriate rate limit bucket
+     * @param maxRate The associated rate
+     * @param maxRateTimeWindow The associated time window
+     * @param createIfAbsent Whether to create the rate limit trace or not
+     * @param optRequest The checked HTTP request (rather for logging purposes); may be <code>null</code>
+     * @throws RateLimitedException If rate limit is exceeded
+     */
+    public static void optRateLimitFor(Key key, int maxRate, int maxRateTimeWindow, HttpServletRequest optRequest) {
+        checkRateLimitForRequest(key, maxRate, maxRateTimeWindow, false, optRequest);
+    }
+
+    /**
+     * Performs the actual rate limit check.
+     *
+     * @param key The key calculated from associated HTTP request used to determine the appropriate rate limit bucket
+     * @param maxRate The associated rate
+     * @param maxRateTimeWindow The associated time window
+     * @param createIfAbsent Whether to create the rate limit trace or not
+     * @param optRequest The checked HTTP request (rather for logging purposes); may be <code>null</code>
+     * @throws RateLimitedException If rate limit is exceeded
+     */
+    private static void checkRateLimitForRequest(Key key, int maxRate, int maxRateTimeWindow, boolean createIfAbsent, HttpServletRequest optRequest) {
         ConcurrentMap<Key, Rate> bucketMap = bucketMap();
         if (null == bucketMap) {
             // Not yet fully initialized
@@ -461,14 +437,20 @@ public final class RateLimiter {
         while (true) {
             Rate rate = bucketMap.get(key);
             if (null == rate) {
-                final Rate newRate = new Rate(maxRate, maxRateTimeWindow, TimeUnit.MILLISECONDS);
+                if (false == createIfAbsent) {
+                    // No rate limit trace available
+                    return;
+                }
+
+                // Requested to create a rate limit trace, hence do so
+                Rate newRate = new Rate(maxRate, maxRateTimeWindow, TimeUnit.MILLISECONDS);
                 rate = bucketMap.putIfAbsent(key, newRate);
                 if (null == rate) {
                     rate = newRate;
                 }
             }
             // Acquire or fail to do so
-            final Rate.Result res = rate.consume(System.currentTimeMillis());
+            Rate.Result res = rate.consume(System.currentTimeMillis());
             if (Result.DEPRECATED == res) {
                 // Deprecated
                 bucketMap.remove(key, rate);
@@ -497,6 +479,24 @@ public final class RateLimiter {
         } else {
             LOG.debug("Request with IP '{}' to path '{}' has been rate limited.{}", servletRequest.getRemoteAddr(), servletRequest.getServletPath(), LINE_SEP);
         }
+    }
+
+    /**
+     * Removes the rate limit trace
+     *
+     * @param key The key associated with the rate limit trace
+     */
+    public static void removeRateLimit(Key key) {
+        if (null == key) {
+            return;
+        }
+        ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+        if (null == bucketMap) {
+            // Not yet fully initialized
+            return;
+        }
+
+        bucketMap.remove(key);
     }
 
     // ------------------------- Lenient clients ----------------------------------------- //
@@ -740,37 +740,6 @@ public final class RateLimiter {
             }
         }
         return tmp;
-    }
-
-    private static volatile String LOGIN_PATH = DefaultDispatcherPrefixService.getInstance().getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX;
-
-    private static final Set<String> LOGIN_ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(LoginServlet.ACTION_FORMLOGIN, LoginServlet.ACTION_TOKENLOGIN, AJAXServlet.ACTION_LOGIN)));
-
-    private static final Cache<String, Boolean> CACHE_NON_LOGIN = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
-
-    private static boolean isLoginRequest(HttpServletRequest servletRequest) {
-        String requestURI = servletRequest.getRequestURI();
-
-        // Check failure cache first
-        Boolean nonLogin = CACHE_NON_LOGIN.getIfPresent(requestURI);
-        if (null != nonLogin) {
-            return false;
-        }
-
-        // Check for login path prefix
-        if (false == requestURI.startsWith(LOGIN_PATH)) {
-            // Apparently not a login request, add to failure cache
-            CACHE_NON_LOGIN.put(requestURI, Boolean.FALSE);
-            return false;
-        }
-
-        // Check for login-specific action parameter
-        String action = servletRequest.getParameter(AJAXServlet.PARAMETER_ACTION);
-        if (null == action) {
-            return false;
-        }
-
-        return LOGIN_ACTIONS.contains(action);
     }
 
     private static final Cache<String, Boolean> CACHE_PATHS = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
