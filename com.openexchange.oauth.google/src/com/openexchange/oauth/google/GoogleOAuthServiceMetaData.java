@@ -86,10 +86,14 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(GoogleOAuthServiceMetaData.class);
 
-    private static final String[] PROPERTIES = new String[] {"com.openexchange.oauth.google.apiKey", "com.openexchange.oauth.google.apiSecret"};
+    private static final String[] PROPERTIES = new String[]
+        {"com.openexchange.oauth.google.apiKey",
+        "com.openexchange.oauth.google.apiSecret",
+        "com.openexchange.oauth.google.redirectUrl",
+        "com.openexchange.oauth.google.productName"};
 
     private final ServiceLookup services;
-    private final String redirectUrl;
+    private String redirectUrl;
 
     /**
      * Initializes a new {@link GoogleOAuthServiceMetaData}.
@@ -167,6 +171,13 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.google.apiSecret");
         }
         this.apiSecret = apiSecret;
+
+        String redirectUrl = configService.getProperty("com.openexchange.oauth.google.redirectUrl");
+        if (Strings.isEmpty(redirectUrl)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.google.redirectUrl");
+        }
+        redirectUrl = redirectUrl.replaceAll(":", "%3A").replaceAll("/", "%2F");
+        this.redirectUrl = redirectUrl;
     }
 
     @Override
