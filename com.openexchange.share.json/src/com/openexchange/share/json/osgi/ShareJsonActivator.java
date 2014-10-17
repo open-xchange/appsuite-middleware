@@ -49,32 +49,21 @@
 
 package com.openexchange.share.json.osgi;
 
-import java.sql.Connection;
-import java.util.List;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.json.GuestShareResultConverter;
 import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.share.json.internal.AbstractModuleHandler;
-import com.openexchange.share.json.internal.FileStorageHandler;
-import com.openexchange.share.json.internal.ModuleHandler;
-import com.openexchange.share.json.internal.ModuleHandlers;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -96,7 +85,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class };
+            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleHandlerProvider.class };
     }
 
     @Override
@@ -108,33 +97,9 @@ public class ShareJsonActivator extends AJAXModuleActivator {
         rememberTracker(translatorFactory);
         openTrackers();
 
-        ModuleHandlers.put(new FileStorageHandler(this));
-        ModuleHandlers.put(newFolderUpdater(Module.CALENDAR));
-        ModuleHandlers.put(newFolderUpdater(Module.CONTACTS));
-        ModuleHandlers.put(newFolderUpdater(Module.TASK));
-
         registerModule(new ShareActionFactory(this, translatorFactory), "share/management");
         registerService(ResultConverter.class, new GuestShareResultConverter(this));
 
-    }
-
-    private ModuleHandler newFolderUpdater(final Module module) {
-        return new AbstractModuleHandler(this) {
-            @Override
-            public int getModule() {
-                return module.getFolderConstant();
-            }
-
-            @Override
-            protected String getItemTitle(String folder, String item, ServerSession session) throws OXException {
-                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
-            }
-
-            @Override
-            public void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
-                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
-            }
-        };
     }
 
 }

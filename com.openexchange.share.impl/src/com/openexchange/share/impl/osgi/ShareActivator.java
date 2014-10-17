@@ -49,8 +49,10 @@
 
 package com.openexchange.share.impl.osgi;
 
+import java.sql.Connection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -63,20 +65,32 @@ import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.html.HtmlService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleHandler;
+import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.impl.DefaultShareService;
-import com.openexchange.share.impl.FileStorageShareCleanUp;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.ShareServiceLookup;
+import com.openexchange.share.impl.groupware.AbstractModuleHandler;
+import com.openexchange.share.impl.groupware.FileStorageHandler;
+import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
+import com.openexchange.share.impl.groupware.ModuleHandlerProviderImpl;
 import com.openexchange.share.impl.notification.DefaultNotificationService;
 import com.openexchange.share.impl.notification.mail.MailNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
@@ -198,9 +212,17 @@ public class ShareActivator extends HousekeepingActivator {
         });
 
         track(ManagementService.class, new ManagementServiceTracker(context, shareService));
+        trackService(IDBasedFileAccessFactory.class);
         openTrackers();
 
         registerService(ShareNotificationService.class, defaultNotificationService);
+
+        ModuleHandlerProviderImpl moduleHandlerProvider = new ModuleHandlerProviderImpl();
+        moduleHandlerProvider.put(new FileStorageHandler(this));
+        moduleHandlerProvider.put(newFolderUpdater(Module.CALENDAR));
+        moduleHandlerProvider.put(newFolderUpdater(Module.CONTACTS));
+        moduleHandlerProvider.put(newFolderUpdater(Module.TASK));
+        registerService(ModuleHandlerProvider.class, moduleHandlerProvider);
     }
 
     @Override
@@ -214,6 +236,25 @@ public class ShareActivator extends HousekeepingActivator {
         logger.info("stopping bundle: \"com.openexchange.share.impl\"");
         ShareServiceLookup.set(null);
         super.stopBundle();
+    }
+
+    private ModuleHandler newFolderUpdater(final Module module) {
+        return new AbstractModuleHandler(this) {
+            @Override
+            public int getModule() {
+                return module.getFolderConstant();
+            }
+
+            @Override
+            protected String getItemTitle(String folder, String item, Session session) throws OXException {
+                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
+            }
+
+            @Override
+            public void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
+                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
+            }
+        };
     }
 
 }

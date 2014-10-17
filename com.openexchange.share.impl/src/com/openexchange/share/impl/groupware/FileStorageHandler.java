@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.internal;
+package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -68,9 +68,9 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -94,7 +94,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
     }
 
     @Override
-    protected String getItemTitle(String folder, String item, ServerSession session) throws OXException {
+    protected String getItemTitle(String folder, String item, Session session) throws OXException {
         FileID fileID = new FileID(item);
         if (fileID.getFolderId() == null) {
             fileID.setFolderId(folder);
@@ -109,7 +109,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
     }
 
     @Override
-    public void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
+    public void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
         IDBasedFileAccess fileAccess = getFileAccess(session);
         try {
             fileAccess.startTransaction();
@@ -169,7 +169,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
         file.setObjectPermissions(newPermissions);
     }
 
-    private IDBasedFileAccess getFileAccess(ServerSession session) throws OXException {
+    private IDBasedFileAccess getFileAccess(Session session) throws OXException {
         IDBasedFileAccessFactory factory = getService(IDBasedFileAccessFactory.class);
         return factory.createAccess(session);
     }

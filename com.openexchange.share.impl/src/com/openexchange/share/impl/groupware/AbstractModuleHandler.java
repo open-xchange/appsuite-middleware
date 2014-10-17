@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.internal;
+package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -63,11 +63,14 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -89,10 +92,12 @@ public abstract class AbstractModuleHandler implements ModuleHandler {
     }
 
     @Override
-    public String getTargetTitle(ShareTarget target, ServerSession session) throws OXException {
+    public String getTargetTitle(ShareTarget target, Session session) throws OXException {
+        UserService userService = getService(UserService.class);
         if (target.isFolder()) {
             UserizedFolder folder = getFolderService().getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
-            String name = folder.getLocalizedName(session.getUser().getLocale(), true);
+            User user = userService.getUser(session.getUserId(), session.getContextId());
+            String name = folder.getLocalizedName(user.getLocale(), true);
             if (name == null) {
                 name = folder.getName();
                 if (name == null) {
@@ -115,10 +120,10 @@ public abstract class AbstractModuleHandler implements ModuleHandler {
      * @return The title; never <code>null</code>
      * @throws OXException
      */
-    protected abstract String getItemTitle(String folder, String item, ServerSession session) throws OXException;
+    protected abstract String getItemTitle(String folder, String item, Session session) throws OXException;
 
     @Override
-    public void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
+    public void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
         FolderService folderService = getFolderService();
         FolderServiceDecorator decorator = new FolderServiceDecorator();
         decorator.put(Connection.class.getName(), writeCon);

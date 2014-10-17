@@ -47,30 +47,39 @@
  *
  */
 
-package com.openexchange.share.json.internal;
+package com.openexchange.share.impl.groupware;
 
-import java.sql.Connection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.groupware.ModuleHandler;
+import com.openexchange.share.groupware.ModuleHandlerProvider;
 
 
 /**
- * {@link ModuleHandler}
+ * {@link ModuleHandlerProviderImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ModuleHandler {
+public class ModuleHandlerProviderImpl implements ModuleHandlerProvider {
 
-    int getModule();
+    private final Map<Integer, ModuleHandler> updaters = new HashMap<Integer, ModuleHandler>();
 
-    String getTargetTitle(ShareTarget target, ServerSession session) throws OXException;
+    @Override
+    public ModuleHandler getHandler(int module) throws OXException {
+        ModuleHandler handler = updaters.get(module);
+        if (handler == null) {
+            Module m = Module.getForFolderConstant(module);
+            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
+        }
+        return handler;
+    }
 
-    void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException;
-
-    void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException;
+    public void put(ModuleHandler updater) {
+        updaters.put(updater.getModule(), updater);
+    }
 
 }

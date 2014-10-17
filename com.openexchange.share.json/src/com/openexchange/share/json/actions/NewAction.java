@@ -67,12 +67,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.I18nTranslatorFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.json.internal.ModuleHandlers;
 import com.openexchange.share.json.internal.ShareStrings;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
@@ -90,9 +90,6 @@ import com.openexchange.user.UserService;
  */
 public class NewAction extends AbstractShareAction {
 
-    // TODO: remove
-    private static final boolean SEND_NOTIFICATIONS = false;
-
     /**
      * Initializes a new {@link NewAction}.
      *
@@ -108,9 +105,7 @@ public class NewAction extends AbstractShareAction {
         NewRequest request = NewRequest.parse(requestData);
         List<Share> shares = shareTargets(request, session);
         AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
-        if (SEND_NOTIFICATIONS) {
-            sendNotifications(shares, request, result, session);
-        }
+        sendNotifications(shares, request, result, session);
         return result;
     }
 
@@ -127,14 +122,14 @@ public class NewAction extends AbstractShareAction {
                     String url = urls.get(i);
                     User guest = userService.getUser(share.getGuest(), share.getContextID());
                     String mailAddress = guest.getMail();
-                    if (mailAddress != null) {
+                    if (!Strings.isEmpty(mailAddress)) {
                         String title;
-                        //TODO
-//                        if (targets.size() == 1) {
-//                            title = ModuleHandlers.forModule(share.getModule()).getTargetTitle(targets.get(0), session);
-//                        } else {
+                        if (targets.size() == 1) {
+                            ShareTarget target = targets.get(0);
+                            title = getModuleHandler(target.getModule()).getTargetTitle(target, session);
+                        } else {
                             title = getTranslator(session).translate(String.format(ShareStrings.GENERIC_TITLE, targets.size()));
-//                        }
+                        }
 
                         try {
                             notificationService.notify(new MailNotification(share, url, title, request.getMessage(), mailAddress), session);
@@ -217,7 +212,7 @@ public class NewAction extends AbstractShareAction {
         for (Entry<Integer, List<ShareTarget>> entry : objectsByModule.entrySet()) {
             int module = entry.getKey();
             List<ShareTarget> objects = entry.getValue();
-            ModuleHandlers.forModule(module).updateObjects(objects, finalRecipients, session, writeCon);
+            getModuleHandler(module).updateObjects(objects, finalRecipients, session, writeCon);
         }
     }
 
@@ -226,7 +221,7 @@ public class NewAction extends AbstractShareAction {
         for (Entry<Integer, List<ShareTarget>> entry : foldersByModule.entrySet()) {
             int module = entry.getKey();
             List<ShareTarget> folders = entry.getValue();
-            ModuleHandlers.forModule(module).updateFolders(folders, finalRecipients, session, writeCon);
+            getModuleHandler(module).updateFolders(folders, finalRecipients, session, writeCon);
         }
     }
 

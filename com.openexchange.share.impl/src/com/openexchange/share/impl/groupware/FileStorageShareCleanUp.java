@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.impl.groupware;
 
 import java.util.Collections;
 import org.osgi.service.event.Event;

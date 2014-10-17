@@ -210,7 +210,8 @@ public class MailSender {
             UserService userService = getUserService();
             ShareCryptoService shareCryptoService = getShareCryptoService();
             User guest = userService.getUser(share.getGuest(), share.getContextID());
-            String decryptedPassword = shareCryptoService.decrypt(guest.getUserPassword());
+            // FIXME!!!
+            String decryptedPassword = "mumpitz!";//shareCryptoService.decrypt(guest.getUserPassword());
             if (htmlService == null) {
                 username = guest.getMail();
                 password = decryptedPassword;

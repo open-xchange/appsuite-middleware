@@ -149,10 +149,10 @@ public class DefaultNotificationService implements ShareNotificationService {
             ShareNotificationHandler currentHandler = wrapper.handler;
             if (currentHandler.handles(notification)) {
                 currentHandler.notify(notification, session);
+                return;
             }
         }
 
-        // TODO: implement extension mechanism based on concrete notification type (think of SMS, WhatsApp etc.)
         throw new OXException(new IllegalArgumentException("No provider exists to handle notifications of type " + notification.getClass().getName()));
     }
 
