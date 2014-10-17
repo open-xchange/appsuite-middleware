@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-10-07 13:54+0100\n"
+"PO-Revision-Date: 2014-10-17 16:27+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -6944,7 +6944,7 @@ msgstr "Kaputte CSV-Datei."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:98
 msgid "The document you requested does not exist."
-msgstr "Das von Ihnen angeforderte Objekt ist nicht vorhanden"
+msgstr "Das von Ihnen angeforderte Dokument ist nicht vorhanden"
 
 #. Unable to load the document(s). Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:65
