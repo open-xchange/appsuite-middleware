@@ -1994,7 +1994,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr ""
@@ -7740,42 +7740,42 @@ msgid "No session found for identifier: %1$s"
 msgstr ""
 
 #. [John Doe] shared "[holiday pictures]" with you
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:64
 msgid "%1$s shared \"%2$s\" with you"
 msgstr ""
 
 #. Message from [John Doe]
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:67
 msgid "Message from %1$s"
 msgstr ""
 
 #. Click here to view [holiday pictures]
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:70
 msgid "Click here to view %1$s"
 msgstr ""
 
 #. Please use the following credentials if asked for
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:73
 msgid "Please use the following credentials if asked for"
 msgstr ""
 
 #. Username
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:76
 msgid "Username"
 msgstr ""
 
 #. John Doe shared 7 items with you
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.json/src/com/openexchange/share/json/internal/ShareStrings.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:82
 msgid "%d items"
 msgstr ""
 
 #. Your password has been reseted
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/internal/ResetPasswordStrings.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:85
 msgid "Your password has been reseted"
 msgstr ""
 
 #. Your password for the following URL has been reseted to %1$s:\n\n%2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/internal/ResetPasswordStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
 msgid ""
 "Your password for the following URL has been reseted to %1$s:\n"
 "\n"
