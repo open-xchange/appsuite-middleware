@@ -224,4 +224,9 @@ public class DefaultShare implements Share, Serializable {
         this.authentication = authentication;
     }
 
+    @Override
+    public String toString() {
+        return "DefaultShare [token=" + token + ", guest=" + guest + ", targets=" + targets + "]";
+    }
+
 }

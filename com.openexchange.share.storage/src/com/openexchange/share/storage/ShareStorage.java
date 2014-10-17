@@ -52,6 +52,7 @@ package com.openexchange.share.storage;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.Share;
 
 
@@ -149,25 +150,14 @@ public interface ShareStorage {
     List<Share> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException;
 
     /**
-     * Loads all shares that were created for a specific folder.
+     * Loads all shares that were created for a specific groupware target.
      *
      * @param contextID The context ID
-     * @param folder The ID of the folder to load the shares for
+     * @param target The groupware target to load the shares for
      * @param parameters The storage parameters
-     * @return The shares
+     * @return All shares holding a reference to the supplied groupware target
      */
-    List<Share> loadSharesForFolder(int contextID, String folder, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares that were created for a specific item.
-     *
-     * @param contextID The context ID
-     * @param folder The ID of the folder where the item is located in
-     * @param item The ID of the item to load the shares for
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<Share> loadSharesForItem(int contextID, String folder, String item, StorageParameters parameters) throws OXException;
+    List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, StorageParameters parameters) throws OXException;
 
     /**
      * Loads all shares that are expired after the given date.

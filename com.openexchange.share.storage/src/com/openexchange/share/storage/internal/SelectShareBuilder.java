@@ -54,8 +54,10 @@ import static com.openexchange.share.storage.internal.SQL.TARGET_MAPPER;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.storage.mapping.ShareField;
 import com.openexchange.share.storage.mapping.ShareTargetField;
 
@@ -75,6 +77,8 @@ public class SelectShareBuilder {
     private String[] tokens;
     private int createdBy;
     private int[] guests;
+    private GroupwareTarget target;
+    private Date expiredAfter;
 
     /**
      * Initializes a new {@link SelectShareBuilder}.
@@ -113,6 +117,17 @@ public class SelectShareBuilder {
     }
 
     /**
+     * Adds a date to filter by share targets with an earlier expiry date.
+     *
+     * @param expiredAfter The expiry date
+     * @return The builder
+     */
+    public SelectShareBuilder expiredAfter(Date expiredAfter) {
+        this.expiredAfter = expiredAfter;
+        return this;
+    }
+
+    /**
      * Adds one or more guest user IDs to restrict the results to.
      *
      * @param guests The IDs of the guests assigned to the shares, or <code>null</code> to not filter by the guest users
@@ -124,6 +139,17 @@ public class SelectShareBuilder {
     }
 
     /**
+     * Adds a groupware target definition to restrict the results to.
+     *
+     * @param targte The targte
+     * @return The builder
+     */
+    public SelectShareBuilder target(GroupwareTarget target) {
+        this.target = target;
+        return this;
+    }
+
+    /**
      * Prepares the statement and sets all required parameters.
      *
      * @param connection The connection to use
@@ -131,7 +157,7 @@ public class SelectShareBuilder {
      */
     public PreparedStatement prepare(Connection connection) throws SQLException, OXException {
         /*
-         * build statement
+         * build query
          */
         String prefixShare = ALIAS_SHARE + '.';
         String prefixTarget = ALIAS_SHARE_TARGET + '.';
@@ -172,6 +198,31 @@ public class SelectShareBuilder {
                 stringBuilder.append(')');
             }
         }
+        if (null != expiredAfter) {
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM share_target WHERE ")
+                .append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel()).append("=?")
+                .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel()).append('=')
+                .append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel(prefixShare))
+                .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.EXPIRY_DATE).getColumnLabel()).append(" IS NOT NULL")
+                .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.EXPIRY_DATE).getColumnLabel()).append("<?)")
+            ;
+        }
+        if (null != target) {
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM share_target WHERE ")
+                .append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel()).append("=?")
+                .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel()).append('=')
+                .append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel(prefixShare))
+                .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.MODULE).getColumnLabel()).append("=?")
+                .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.FOLDER).getColumnLabel()).append("=?")
+            ;
+            if (null != target.getItem()) {
+                stringBuilder.append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.ITEM).getColumnLabel()).append("=?");
+            }
+            stringBuilder.append(')');
+        }
+        /*
+         * prepare statement
+         */
         PreparedStatement stmt = connection.prepareStatement(stringBuilder.append(';').toString());
         int parameterIndex = 1;
         stmt.setInt(parameterIndex++, contextID);
@@ -186,6 +237,18 @@ public class SelectShareBuilder {
         if (null != guests) {
             for (int guest : guests) {
                 stmt.setInt(parameterIndex++, guest);
+            }
+        }
+        if (null != expiredAfter) {
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setLong(parameterIndex++, expiredAfter.getTime());
+        }
+        if (null != target) {
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, target.getModule());
+            stmt.setString(parameterIndex++, target.getFolder());
+            if (null != target.getItem()) {
+                stmt.setString(parameterIndex++, target.getItem());
             }
         }
         return stmt;

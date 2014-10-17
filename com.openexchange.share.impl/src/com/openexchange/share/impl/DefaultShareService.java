@@ -78,6 +78,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.DefaultShare;
+import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
@@ -718,7 +719,7 @@ public class DefaultShareService implements ShareService {
          * load known shares for folder
          */
         ShareStorage shareStorage = services.getService(ShareStorage.class);
-        List<Share> shares = shareStorage.loadSharesForFolder(contextID, folder, storageParameters);
+        List<Share> shares = shareStorage.loadSharesForTarget(contextID, new GroupwareTarget(module, folder), storageParameters);
         /*
          * collect share tokens for matching guest users
          */

@@ -52,25 +52,22 @@ package com.openexchange.share.storage.internal;
 import static com.openexchange.share.storage.internal.SQL.SHARE_MAPPER;
 import static com.openexchange.share.storage.internal.SQL.TARGET_MAPPER;
 import static com.openexchange.share.storage.internal.SQL.logExecuteBatch;
-import static com.openexchange.share.storage.internal.SQL.logExecuteQuery;
 import static com.openexchange.share.storage.internal.SQL.logExecuteUpdate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.DefaultShare;
+import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -159,10 +156,8 @@ public class RdbShareStorage implements ShareStorage {
     public Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            Collection<DefaultShare> shares = selectShareAndTargets(provider.get(), contextID, new String[] { token }, 0, null);
+            Collection<DefaultShare> shares = new ShareSelector(contextID).tokens(new String[] { token }).select(provider.get());
             return null != shares && 0 < shares.size() ? shares.iterator().next() : null;
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
         }
@@ -214,9 +209,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, createdBy, null));
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            return new ArrayList<Share>(new ShareSelector(contextID).createdBy(createdBy).select(provider.get()));
         } finally {
             provider.close();
         }
@@ -226,33 +219,28 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, tokens.toArray(new String[tokens.size()]), 0, null));
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            return new ArrayList<Share>(
+                new ShareSelector(contextID).tokens(tokens.toArray(new String[tokens.size()])).select(provider.get()));
         } finally {
             provider.close();
         }
     }
 
     @Override
-    public List<Share> loadSharesForFolder(int contextID, String folder, StorageParameters parameters) throws OXException {
-        // TODO
-        return null;
-    }
-
-    @Override
-    public List<Share> loadSharesForItem(int contextID, String folder, String item, StorageParameters parameters) throws OXException {
-        // TODO
-        return null;
+    public List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ArrayList<Share>(new ShareSelector(contextID).target(target).select(provider.get()));
+        } finally {
+            provider.close();
+        }
     }
 
     @Override
     public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, 0, null));
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            return new ArrayList<Share>(new ShareSelector(contextID).select(provider.get()));
         } finally {
             provider.close();
         }
@@ -260,8 +248,12 @@ public class RdbShareStorage implements ShareStorage {
 
     @Override
     public List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
-        // TODO
-        return null;
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ArrayList<Share>(new ShareSelector(contextID).expiredAfter(expires).select(provider.get()));
+        } finally {
+            provider.close();
+        }
     }
 
     @Override
@@ -273,9 +265,7 @@ public class RdbShareStorage implements ShareStorage {
     public List<Share> loadSharesForGuests(int contextID, int[] guestIDs, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(selectShareAndTargets(provider.get(), contextID, null, 0, guestIDs));
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            return new ArrayList<Share>(new ShareSelector(contextID).guests(guestIDs).select(provider.get()));
         } finally {
             provider.close();
         }
@@ -381,50 +371,6 @@ public class RdbShareStorage implements ShareStorage {
             return logExecuteBatch(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    /**
-     * Selects shares and their corresponding targets from the database.
-     *
-     * @param connection A readable db connection
-     * @param cid the context ID
-     * @param tokens The tokens of the shares to retrieve, or <code>null</code> to not filter by token
-     * @param createdBy The ID of the user who created the shares, or <code>0</code> to not filter by the creating user
-     * @param guests The IDs of the guests assigned to the shares, or <code>null</code> to not filter by the guest users
-     * @return The shares
-     * @throws SQLException
-     * @throws OXException
-     */
-    private static Collection<DefaultShare> selectShareAndTargets(Connection connection, int cid, String[] tokens, int createdBy, int[] guests) throws SQLException, OXException {
-        ShareField[] shareFields = { ShareField.TOKEN, ShareField.CREATION_DATE, ShareField.CREATED_BY, ShareField.LAST_MODIFIED,
-            ShareField.MODIFIED_BY, ShareField.GUEST_ID, ShareField.AUTHENTICATION };
-        ShareTargetField[] targetFields = { ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM,
-            ShareTargetField.ACTIVATION_DATE, ShareTargetField.EXPIRY_DATE, ShareTargetField.META };
-        Map<String, DefaultShare> sharesByToken = new HashMap<String, DefaultShare>();
-        PreparedStatement stmt = null;
-        ResultSet resultSet = null;
-        try {
-            stmt = new SelectShareBuilder(cid, shareFields, targetFields)
-                .tokens(tokens).createdBy(createdBy).guests(guests).prepare(connection);
-            resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                DefaultShare currentShare = SHARE_MAPPER.fromResultSet(resultSet, shareFields, SelectShareBuilder.ALIAS_SHARE + '.');
-                DefaultShare share = sharesByToken.get(currentShare.getToken());
-                if (null == share) {
-                    share = currentShare;
-                    share.setTargets(new ArrayList<ShareTarget>());
-                    share.setContextID(cid);
-                    sharesByToken.put(share.getToken(), share);
-                }
-                RdbShareTarget target = TARGET_MAPPER.fromResultSet(resultSet, targetFields, SelectShareBuilder.ALIAS_SHARE_TARGET + '.');
-                if (0 < target.getModule()) {
-                    share.getTargets().add(target);
-                }
-            }
-            return sharesByToken.values();
-        } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
 

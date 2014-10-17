@@ -49,114 +49,131 @@
 
 package com.openexchange.share;
 
-import java.util.Date;
-import java.util.Map;
 
 /**
- * {@link ShareTarget}
+ * {@link GroupwareTarget}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareTarget extends GroupwareTarget {
+public class GroupwareTarget {
 
-    protected Date expiryDate;
-    protected Date activationDate;
-    protected Map<String, Object> meta;
+    protected int module;
+    protected String folder;
+    protected String item;
 
     /**
-     * Initializes a new, empty {@link ShareTarget}.
+     * Initializes a new, empty {@link GroupwareTarget}.
      */
-    public ShareTarget() {
+    public GroupwareTarget() {
         super();
     }
 
     /**
-     * Initializes a new {@link ShareTarget}, pointing to a folder of a specific groupware module.
+     * Initializes a new {@link GroupwareTarget}, pointing to a folder of a specific groupware module.
      *
      * @param module The groupware module of the share's target folder
      * @param folder The identifier of the share's folder
      */
-    public ShareTarget(int module, String folder) {
-        super(module, folder);
+    public GroupwareTarget(int module, String folder) {
+        this(module, folder, null);
     }
 
     /**
-     * Initializes a new {@link ShareTarget}, pointing to an item located in a parent folder of a specific groupware module.
+     * Initializes a new {@link GroupwareTarget}, pointing to an item located in a parent folder of a specific groupware module.
      *
      * @param module The groupware module of the share's target folder
      * @param folder The identifier of the share's folder
      * @param item The identifier of the share's item
      */
-    public ShareTarget(int module, String folder, String item) {
-        super(module, folder, item);
+    public GroupwareTarget(int module, String folder, String item) {
+        super();
+        this.module = module;
+        this.folder = folder;
+        this.item = item;
     }
 
     /**
-     * If defined, gets the date when this share target becomes active, i.e. it should be accessible.
+     * Gets the groupware module of the share's target folder.
      *
-     * @return The activation date of the target, or <code>null</code> if not defined
+     * @return The module
      */
-    public Date getActivationDate() {
-        return activationDate;
+    public int getModule() {
+        return module;
     }
 
     /**
-     * Sets the date when this share target becomes active, i.e. it should be accessible.
+     * Gets the identifier of the share's folder.
      *
-     * @param activationDate The activation date of the target
+     * @return The folder ID
      */
-    public void setActivationDate(Date activationDate) {
-        this.activationDate = activationDate;
-    }
-
-    public boolean isActive() {
-        return null == activationDate || activationDate.before(new Date());
+    public String getFolder() {
+        return folder;
     }
 
     /**
-     * If defined, gets the date when this target expires, i.e. it should be no longer accessible.
+     * Gets the identifier of the share's item in case the share is not a folder share.
      *
-     * @return The expiry date of the share, or <code>null</code> if not defined
+     * @return The item ID, or <code>null</code> if the share references a folder
      */
-    public Date getExpiryDate() {
-        return expiryDate;
+    public String getItem() {
+        return item;
     }
 
     /**
-     * Sets the date when this share target, i.e. it should be no longer accessible.
+     * Gets a value indicating whether the share points to a folder or a single item.
      *
-     * @param expiryDate The expiry date of the target
+     * @return <code>true</code> if the share points to a folder, <code>false</code>, otherwise
      */
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
+    public boolean isFolder() {
+        return null == item;
     }
 
-    public boolean isExpired() {
-        return expiryDate != null && new Date().after(expiryDate);
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+        result = prime * result + ((item == null) ? 0 : item.hashCode());
+        result = prime * result + module;
+        return result;
     }
 
-    /**
-     * Gets arbitrary metadata in a map.
-     *
-     * @return The metadata
-     */
-    public Map<String, Object> getMeta() {
-        return meta;
-    }
-
-    /**
-     * Sets the metadata,
-     *
-     * @param meta The metadata to set
-     */
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof GroupwareTarget)) {
+            return false;
+        }
+        GroupwareTarget other = (GroupwareTarget) obj;
+        if (folder == null) {
+            if (other.folder != null) {
+                return false;
+            }
+        } else if (!folder.equals(other.folder)) {
+            return false;
+        }
+        if (item == null) {
+            if (other.item != null) {
+                return false;
+            }
+        } else if (!item.equals(other.item)) {
+            return false;
+        }
+        if (module != other.module) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
-        return "ShareTarget [module=" + module + ", folder=" + folder + (null != item ? (", item=" + item) : "") + "]";
+        return "GroupwareTarget [module=" + module + ", folder=" + folder + ", item=" + item + "]";
     }
 
 }
