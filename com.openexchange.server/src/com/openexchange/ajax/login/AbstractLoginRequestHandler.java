@@ -89,6 +89,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.Key;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.servlet.ratelimit.RateLimiter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -183,21 +184,26 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     }
                 } else {
                     Key rateLimitKey = new Key(req, req.getHeader(USER_AGENT), "__login.failed");
-                    // Optionally consume one permit
-                    boolean consumed = RateLimiter.optRateLimitFor(rateLimitKey, rate, timeWindow, req);
                     try {
-                        result = login.doLogin(req);
-                        if (null == result) {
-                            return true;
+                        // Optionally consume one permit
+                        boolean consumed = RateLimiter.optRateLimitFor(rateLimitKey, rate, timeWindow, req);
+                        try {
+                            result = login.doLogin(req);
+                            if (null == result) {
+                                return true;
+                            }
+                            // Successful login (so far) -- clean rate limit trace
+                            RateLimiter.removeRateLimit(rateLimitKey);
+                        } catch (OXException e) {
+                            if (!consumed && LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
+                                // Consume one permit
+                                RateLimiter.checkRateLimitFor(rateLimitKey, rate, timeWindow, req);
+                            }
+                            throw e;
                         }
-                        // Successful login (so far) -- clean rate limit trace
-                        RateLimiter.removeRateLimit(rateLimitKey);
-                    } catch (OXException e) {
-                        if (!consumed && LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
-                            // Consume one permit
-                            RateLimiter.checkRateLimitFor(rateLimitKey, rate, timeWindow, req);
-                        }
-                        throw e;
+                    } catch (RateLimitedException rateLimitExceeded) {
+                        // Double the rate
+                        RateLimiter.doubleRateLimitWindow(rateLimitKey);
                     }
                 }
             }

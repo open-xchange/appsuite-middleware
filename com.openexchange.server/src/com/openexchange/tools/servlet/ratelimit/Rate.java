@@ -50,4 +50,32 @@ public interface Rate {
      */
     Result consume(long now);
 
+    /**
+     * Gets the number of permits.
+     *
+     * @return The permits
+     */
+    int getPermits();
+
+    /**
+     * Gets the time window in milliseconds
+     *
+     * @return The time window
+     */
+    long getTimeInMillis();
+
+    /**
+     * Sets the number of permits.
+     *
+     * @param permits
+     */
+    void setPermits(int permits);
+
+    /**
+     * Sets the time window in milliseconds
+     *
+     * @param timeInMillis The time window
+     */
+    void setTimeInMillis(long timeInMillis);
+
 }
