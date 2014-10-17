@@ -49,10 +49,15 @@
 
 package com.openexchange.share.impl.notification.mail;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.BodyPart;
@@ -66,7 +71,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
-import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
@@ -76,13 +82,21 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.config.NoReplyConfig;
+import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.impl.ShareServiceLookup;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleHandler;
+import com.openexchange.share.groupware.ModuleHandlerProvider;
+import com.openexchange.share.impl.notification.NotificationStrings;
 import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -98,61 +112,203 @@ import com.openexchange.user.UserService;
  */
 public class MailSender {
 
+    /**
+     *
+     */
+    private static final String FIELD_PASSWORD = "password";
+
+    /**
+     *
+     */
+    private static final String FIELD_USERNAME = "username";
+
+    /**
+     *
+     */
+    private static final String FIELD_PASSWORD_FIELD = "password_field";
+
+    /**
+     *
+     */
+    private static final String FIELD_USERNAME_FIELD = "username_field";
+
+    /**
+     *
+     */
+    private static final String FIELD_CREDENTIALS_INTRO = "credentials_intro";
+
+    /**
+     *
+     */
+    private static final String FIELD_LINK = "link";
+
+    /**
+     *
+     */
+    private static final String FIELD_LINK_INTRO = "link_intro";
+
+    /**
+     *
+     */
+    private static final String FIELD_MESSAGE = "message";
+
+    /**
+     *
+     */
+    private static final String FIELD_MESSAGE_INTRO = "message_intro";
+
+    private static final Set<String> SHARE_CREATED_FIELDS = new HashSet<String>();
+    static {
+        SHARE_CREATED_FIELDS.add(FIELD_MESSAGE_INTRO);
+        SHARE_CREATED_FIELDS.add(FIELD_MESSAGE);
+        SHARE_CREATED_FIELDS.add(FIELD_LINK_INTRO);
+        SHARE_CREATED_FIELDS.add(FIELD_LINK);
+        SHARE_CREATED_FIELDS.add(FIELD_CREDENTIALS_INTRO);
+        SHARE_CREATED_FIELDS.add(FIELD_USERNAME_FIELD);
+        SHARE_CREATED_FIELDS.add(FIELD_USERNAME);
+        SHARE_CREATED_FIELDS.add(FIELD_PASSWORD_FIELD);
+        SHARE_CREATED_FIELDS.add(FIELD_PASSWORD);
+    }
+
+    private static final Set<String> PASSWORD_RESET_FIELDS = new HashSet<String>();
+    {
+        PASSWORD_RESET_FIELDS.add(FIELD_LINK_INTRO);
+        PASSWORD_RESET_FIELDS.add(FIELD_LINK);
+        PASSWORD_RESET_FIELDS.add(FIELD_CREDENTIALS_INTRO);
+        PASSWORD_RESET_FIELDS.add(FIELD_USERNAME_FIELD);
+        PASSWORD_RESET_FIELDS.add(FIELD_USERNAME);
+        PASSWORD_RESET_FIELDS.add(FIELD_PASSWORD_FIELD);
+        PASSWORD_RESET_FIELDS.add(FIELD_PASSWORD);
+    }
+
+    private final ServiceLookup services;
+
     private final MailNotification notification;
 
     private final ServerSession session;
 
     private final User user;
 
-    private final StringHelper stringHelper;
+    private final Translator translator;
 
-
-    public MailSender(MailNotification notification, ServerSession session) {
+    public MailSender(ServiceLookup services, MailNotification notification, ServerSession session) throws OXException {
         super();
+        this.services = services;
         this.notification = notification;
         this.session = session;
         user = session.getUser();
-        stringHelper = StringHelper.valueOf(user.getLocale());
+        translator = getTranslator();
     }
 
     public void send() throws OXException {
-        MimeMessage mail = new MimeMessage(MimeDefaultSession.getDefaultSession());
+        MimeMessage mail = null;
+        MailTransport transport = null;
+
         try {
-            mail.addFrom(new Address[] { getSenderAddress() });
-            mail.addRecipient(RecipientType.TO, notification.getTransportInfo());
-            mail.addHeader("X-Open-Xchange-Share", notification.getUrl());
-            String subject = String.format(stringHelper.getString(MailStrings.SUBJECT), user.getDisplayName(), notification.getTitle());
-            mail.setSubject(subject, "UTF-8");
-            mail.setContent(prepareContent());
+            switch (notification.getType()) {
+                case SHARE_CREATED:
+                    mail = buildShareCreatedMail();
+                    transport = MailTransport.getInstance(session);
+                    break;
+                case PASSWORD_RESET:
+                    NoReplyConfig noReplyConfig = NoReplyConfig.getInstance(session.getUserId(), session.getContextId());
+                    if (!noReplyConfig.isValid()) {
+                        // TODO: exception
+                    }
+
+                    mail = buildPasswordResetMail(noReplyConfig);
+                    TransportProvider transportProvider = com.openexchange.mail.transport.TransportProviderRegistry.getTransportProvider("smtp");
+                    transport = transportProvider.createNewMailTransport(session);
+                    TransportConfig transportConfig = transport.getTransportConfig();
+                    transportConfig.setLogin(noReplyConfig.getLogin());
+                    transportConfig.setPassword(noReplyConfig.getPassword());
+                    transportConfig.setServer(noReplyConfig.getServer());
+                    transportConfig.setPort(noReplyConfig.getPort());
+                    SecureMode secureMode = noReplyConfig.getSecureMode();
+                    transportConfig.setRequireTls(NoReplyConfig.SecureMode.TLS.equals(secureMode));
+                    transportConfig.setSecure(NoReplyConfig.SecureMode.SSL.equals(secureMode));
+                    break;
+                default:
+                    // TODO: exception
+            }
         } catch (MessagingException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (UnsupportedEncodingException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
-        MailTransport transport = MailTransport.getInstance(session);
         try {
             transport.sendMailMessage(new ContentAwareComposedMailMessage(mail, session, session.getContext()), ComposeType.NEW);
         } finally {
-            transport.close();
+            try {
+                transport.close();
+            } catch (OXException e) {
+                // ignore
+            }
         }
     }
 
-    private MimeMultipart prepareContent() throws MessagingException, OXException, UnsupportedEncodingException {
+    private MimeMessage buildPasswordResetMail(NoReplyConfig noReplyConfig) throws OXException, MessagingException, UnsupportedEncodingException {
+        String title = translator.translate(NotificationStrings.TITLE_RESET_PASSWORD);
+        MimeMessage mail = prepareEnvelope(title, noReplyConfig.getAddress());
+        mail.setContent(prepareContent(
+            "notify.share.pwreset.mail.txt.tmpl",
+            prepareTemplateVars(null, PASSWORD_RESET_FIELDS, title),
+            "notify.share.pwreset.mail.html.tmpl",
+            prepareTemplateVars(getHtmlService(), PASSWORD_RESET_FIELDS, title)));
+        mail.saveChanges();
+        return mail;
+    }
+
+    private MimeMessage buildShareCreatedMail() throws OXException, UnsupportedEncodingException, MessagingException {
+        List<ShareTarget> targets = notification.getShare().getTargets();
+        String title;
+        if (targets.size() == 1) {
+            ShareTarget target = targets.get(0);
+            title = getModuleHandler(target.getModule()).getTargetTitle(target, session);
+        } else {
+            title = translator.translate(String.format(NotificationStrings.GENERIC_TITLE, targets.size()));
+        }
+
+        String subject = String.format(translator.translate(NotificationStrings.SUBJECT), user.getDisplayName(), title);
+        MimeMessage mail = prepareEnvelope(subject, getSenderAddress());
+        mail.addHeader("X-Open-Xchange-Share", notification.getUrl());
+        mail.setContent(prepareContent(
+            "notify.share.create.mail.txt.tmpl",
+            prepareTemplateVars(null, SHARE_CREATED_FIELDS, title),
+            "notify.share.create.mail.html.tmpl",
+            prepareTemplateVars(getHtmlService(), SHARE_CREATED_FIELDS, title)));
+        mail.saveChanges();
+        return mail;
+    }
+
+    private MimeMessage prepareEnvelope(String subject, Address senderAddress) throws MessagingException {
+        MimeMessage mail = new MimeMessage(MimeDefaultSession.getDefaultSession());
+        mail.addFrom(new Address[] { senderAddress });
+        mail.addRecipient(RecipientType.TO, notification.getTransportInfo());
+        mail.setSubject(subject, "UTF-8");
+        return mail;
+    }
+
+    private MimeMultipart prepareContent(String txtTemplate, Map<String, Object> txtVars, String htmlTemplate, Map<String, Object> htmlVars) throws MessagingException, OXException, UnsupportedEncodingException {
         TemplateService templateService = getTemplateService();
-        BodyPart textPart = prepareTextPart(templateService);
-        BodyPart htmlPart = prepareHtmlPart(templateService);
+        OXTemplate template = templateService.loadTemplate(txtTemplate);
+        StringWriter writer = new StringWriter();
+        template.process(txtVars, writer);
+        BodyPart textPart = prepareTextPart(writer);
+
+        template = templateService.loadTemplate(htmlTemplate);
+        writer = new StringWriter();
+        template.process(htmlVars, writer);
+        BodyPart htmlPart = prepareHtmlPart(writer);
+
         MimeMultipart multipart = new MimeMultipart("alternative");
         multipart.addBodyPart(textPart);
         multipart.addBodyPart(htmlPart);
         return multipart;
     }
 
-    private BodyPart prepareTextPart(TemplateService templateService) throws OXException, MessagingException {
-        OXTemplate template = templateService.loadTemplate("notify.share.create.mail.txt.tmpl");
-        StringWriter writer = new StringWriter();
-        template.process(prepareTemplateVars(null), writer);
-
+    private BodyPart prepareTextPart(Writer writer) throws OXException, MessagingException {
         MimeBodyPart textPart = new MimeBodyPart();
         MessageUtility.setText(writer.toString(), "UTF-8", textPart);
         textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -165,12 +321,7 @@ public class MailSender {
         return textPart;
     }
 
-    private BodyPart prepareHtmlPart(TemplateService templateService) throws OXException, UnsupportedEncodingException, MessagingException {
-        HtmlService htmlService = getHtmlService();
-        OXTemplate template = templateService.loadTemplate("notify.share.create.mail.html.tmpl");
-        StringWriter writer = new StringWriter();
-        template.process(prepareTemplateVars(htmlService), writer);
-
+    private BodyPart prepareHtmlPart(Writer writer) throws OXException, UnsupportedEncodingException, MessagingException {
         MimeBodyPart htmlPart = new MimeBodyPart();
         ContentType ct = new ContentType();
         ct.setPrimaryType("text");
@@ -178,7 +329,7 @@ public class MailSender {
         ct.setCharsetParameter("UTF-8");
         String contentType = ct.toString();
 
-        String conformContent = htmlService.getConformHTML(writer.toString(), "UTF-8");
+        String conformContent = getHtmlService().getConformHTML(writer.toString(), "UTF-8");
         htmlPart.setDataHandler(new DataHandler(new MessageDataSource(conformContent, ct)));
         htmlPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
         htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
@@ -186,20 +337,18 @@ public class MailSender {
         return htmlPart;
     }
 
-    private Map<String, Object> prepareTemplateVars(HtmlService htmlService) throws OXException {
+    private Map<String, Object> prepareTemplateVars(HtmlService htmlService, Set<String> fields, String title) throws OXException {
         Share share = notification.getShare();
         String displayName;
-        String title;
         String message = null;
         String username = null;
         String password = null;
         if (htmlService == null) {
             displayName = user.getDisplayName();
-            title = notification.getTitle();
             message = notification.getMessage();
         } else {
-            displayName = htmlService.htmlFormat(user.getDisplayName());
-            title = htmlService.htmlFormat(notification.getTitle());
+            displayName = htmlService.htmlFormat(user.getDisplayName() == null ? "" : user.getDisplayName());
+            title = htmlService.htmlFormat(title);
             String tmpMessage = notification.getMessage();
             if (tmpMessage != null) {
                 message = htmlService.htmlFormat(tmpMessage);
@@ -223,20 +372,26 @@ public class MailSender {
 
         Map<String, Object> vars = new HashMap<String, Object>();
         if (!Strings.isEmpty(message)) {
-            vars.put("message_intro", String.format(stringHelper.getString(MailStrings.MESSAGE_INTRO), displayName));
-            vars.put("message", message);
+            checkAndPutField(fields, vars, FIELD_MESSAGE_INTRO, String.format(translator.translate(NotificationStrings.MESSAGE_INTRO), displayName));
+            checkAndPutField(fields, vars, FIELD_MESSAGE, message);
         }
-        vars.put("link_intro", String.format(stringHelper.getString(MailStrings.LINK_INTRO), title));
-        vars.put("link", notification.getUrl());
-        vars.put("credentials_intro", stringHelper.getString(MailStrings.CREDENTIALS_INTRO));
-        vars.put("username_field", stringHelper.getString(MailStrings.USERNAME_FIELD));
-        vars.put("password_field", stringHelper.getString(MailStrings.PASSWORD_FIELD));
+        checkAndPutField(fields, vars, FIELD_LINK_INTRO, String.format(translator.translate(NotificationStrings.LINK_INTRO), title));
+        checkAndPutField(fields, vars, FIELD_LINK, notification.getUrl());
+        checkAndPutField(fields, vars, FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.CREDENTIALS_INTRO));
+        checkAndPutField(fields, vars, FIELD_USERNAME_FIELD, translator.translate(NotificationStrings.USERNAME_FIELD));
+        checkAndPutField(fields, vars, FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
         if (username != null && password != null) {
-            vars.put("username", username);
-            vars.put("password", password);
+            checkAndPutField(fields, vars, FIELD_USERNAME, username);
+            checkAndPutField(fields, vars, FIELD_PASSWORD, password);
         }
 
         return vars;
+    }
+
+    private static void checkAndPutField(Set<String> fields, Map<String, Object> vars, String name, String value) {
+        if (fields.contains(name)) {
+            vars.put(name, value);
+        }
     }
 
     private Address getSenderAddress() throws OXException, UnsupportedEncodingException {
@@ -269,23 +424,34 @@ public class MailSender {
     }
 
     private UserService getUserService() throws OXException {
-        return ShareServiceLookup.getService(UserService.class, true);
+        return requireService(UserService.class, services);
     }
 
     private ShareCryptoService getShareCryptoService() throws OXException {
-        return ShareServiceLookup.getService(ShareCryptoService.class, true);
+        return requireService(ShareCryptoService.class, services);
     }
 
     private TemplateService getTemplateService() throws OXException {
-        return ShareServiceLookup.getService(TemplateService.class, true);
+        return requireService(TemplateService.class, services);
     }
 
     private HtmlService getHtmlService() throws OXException {
-        return ShareServiceLookup.getService(HtmlService.class, true);
+        return requireService(HtmlService.class, services);
     }
 
     private ConfigurationService getConfigService() throws OXException {
-        return ShareServiceLookup.getService(ConfigurationService.class, true);
+        return requireService(ConfigurationService.class, services);
+    }
+
+    private ModuleHandler getModuleHandler(int module) throws OXException {
+        ModuleHandlerProvider service = requireService(ModuleHandlerProvider.class, services);
+        return service.getHandler(module);
+    }
+
+    private Translator getTranslator() throws OXException {
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        Translator translator = translatorFactory.translatorFor(user.getLocale());
+        return translator;
     }
 
 }

@@ -54,8 +54,8 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
@@ -76,18 +76,15 @@ public abstract class AbstractShareAction implements AJAXActionService {
 
     protected final ServiceLookup services;
 
-    protected final I18nTranslatorFactory translatorFactory;
-
     /**
      * Initializes a new {@link AbstractShareAction}.
      *
      * @param services The service lookup reference
      * @param translatorFactory
      */
-    public AbstractShareAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
+    public AbstractShareAction(ServiceLookup services) {
         super();
         this.services = services;
-        this.translatorFactory = translatorFactory;
     }
 
     /**
@@ -135,8 +132,13 @@ public abstract class AbstractShareAction implements AJAXActionService {
      * Gets a {@link Translator} for the session users locale.
      * @param session The session
      * @return The translator
+     * @throws OXException
      */
-    protected Translator getTranslator(ServerSession session) {
+    protected Translator getTranslator(ServerSession session) throws OXException {
+        TranslatorFactory translatorFactory = services.getService(TranslatorFactory.class);
+        if (translatorFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(TranslatorFactory.class.getName());
+        }
         return translatorFactory.translatorFor(session.getUser().getLocale());
     }
 

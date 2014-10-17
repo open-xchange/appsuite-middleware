@@ -50,6 +50,7 @@
 package com.openexchange.share.impl.notification.mail;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationHandler;
@@ -65,16 +66,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class MailNotificationHandler implements ShareNotificationHandler {
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link MailNotificationHandler}.
      */
-    public MailNotificationHandler() {
+    public MailNotificationHandler(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
     public <T extends ShareNotification<?>> void notify(T notification, Session session) throws OXException {
-        new MailSender((MailNotification) notification, ServerSessionAdapter.valueOf(session)).send();
+        new MailSender(services, (MailNotification) notification, ServerSessionAdapter.valueOf(session)).send();
     }
 
     @Override

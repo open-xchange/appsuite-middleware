@@ -75,15 +75,15 @@ public class MailNotification extends AbstractNotification<InternetAddress> {
     /**
      * Initializes a new {@link MailNotification}.
      *
+     * @param type The notification type
      * @param share The share
      * @param url The URL that points to the share. See {@link ShareService#generateShareURLs(java.util.List, String, String)}.
-     * @param title The shares title
      * @param message The message (optional)
      * @param recipientAddress The mail address of the recipient
      * @throws OXException If the recipient address is not a valid mail address
      */
-    public MailNotification(Share share, String url, String title, String message, String recipientAddress) throws OXException {
-        super(share, url, title, message);
+    public MailNotification(NotificationType type, Share share, String url, String message, String recipientAddress) throws OXException {
+        super(type, share, url, message);
         if (Strings.isEmpty(recipientAddress)) {
             throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create("");
         }

@@ -61,6 +61,28 @@ import com.openexchange.share.Share;
 public interface ShareNotification<T> {
 
     /**
+     * Possible notification types. Meant to be extended for future requirements.
+     */
+    public enum NotificationType {
+        /**
+         * Notification type for a newly created share
+         */
+        SHARE_CREATED,
+
+        /**
+         * Notification type for a password-reset message
+         */
+        PASSWORD_RESET;
+    }
+
+    /**
+     * Gets the type of this notification (e.g. "a share has been created").
+     *
+     * @return The {@link NotificationType}, never <code>null</code>
+     */
+    NotificationType getType();
+
+    /**
      * Gets the share to notify the recipient about.
      *
      * @return The share, never <code>null</code>
@@ -74,16 +96,17 @@ public interface ShareNotification<T> {
      */
     String getUrl();
 
-    /**
-     * Gets the title of the share that is shown to the recipient
-     * (e.g. "My Photos").
-     *
-     * @return The title, never <code>null</code>
-     */
-    String getTitle();
+//    /**
+//     * Gets the title of the share that is shown to the recipient
+//     * (e.g. "My Photos").
+//     *
+//     * @return The title, never <code>null</code>
+//     */
+//    String getTitle();
 
     /**
-     * Gets the message that is shown to the recipient.
+     * Gets an optional message that will be shown to the recipient if appropriate.
+     * Whether a message is shown or not depends on the {@link NotificationType}.
      *
      * @return The message or <code>null</code>, if nothing was provided
      */

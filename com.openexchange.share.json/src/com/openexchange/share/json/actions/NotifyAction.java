@@ -56,11 +56,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -81,22 +81,20 @@ public class NotifyAction extends AbstractShareAction {
      * @param services The service lookup
      * @param translatorFactory
      */
-    public NotifyAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
-        super(services, translatorFactory);
+    public NotifyAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String token = null;
         String recipient = null;
-        String title = null;
         String message = null;
 
         try {
             JSONObject request = (JSONObject) requestData.requireData();
             token = request.getString("token");
             recipient = request.getString("recipient");
-            title = request.getString("title");
             message = request.optString("message");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -110,7 +108,7 @@ public class NotifyAction extends AbstractShareAction {
 
         List<String> urls = generateShareURLs(Collections.singletonList(share), requestData);
         ShareNotificationService notificationService = getNotificationService();
-        notificationService.notify(new MailNotification(share, urls.get(0), title, message, recipient), session);
+        notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share, urls.get(0), message, recipient), session);
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
 

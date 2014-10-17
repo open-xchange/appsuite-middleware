@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.DefaultShare;
 import com.openexchange.tools.session.ServerSession;
@@ -73,8 +72,8 @@ public class UpdateAction extends AbstractShareAction {
      * @param services The service lookup
      * @param translatorFactory
      */
-    public UpdateAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
-        super(services, translatorFactory);
+    public UpdateAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override

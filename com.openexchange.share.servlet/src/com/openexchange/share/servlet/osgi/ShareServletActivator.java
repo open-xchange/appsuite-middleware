@@ -62,12 +62,11 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.notification.ShareNotificationHandler;
+import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.servlet.handler.AbstractShareHandler;
 import com.openexchange.share.servlet.handler.LoginShareHandler;
 import com.openexchange.share.servlet.handler.RedirectingShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandler;
-import com.openexchange.share.servlet.internal.ResetPasswordShareNotificationHandler;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
@@ -97,6 +96,7 @@ public class ShareServletActivator extends HousekeepingActivator {
         rememberTracker(shareHandlerRegistry);
         trackService(HostnameService.class);
         trackService(DatabaseService.class);
+        trackService(ShareNotificationService.class);
 
         // Dependently registers Servlets
         {
@@ -126,9 +126,6 @@ public class ShareServletActivator extends HousekeepingActivator {
             ShareHandler handler = new LoginShareHandler();
             registerService(ShareHandler.class, handler, handler.getRanking());
         }
-
-        // Register notification handler
-        registerService(ShareNotificationHandler.class, new ResetPasswordShareNotificationHandler());
     }
 
     @Override

@@ -66,14 +66,13 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.i18n.I18nTranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.json.internal.ShareStrings;
+import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -96,8 +95,8 @@ public class NewAction extends AbstractShareAction {
      * @param services The service lookup
      * @param translatorFactory
      */
-    public NewAction(ServiceLookup services, I18nTranslatorFactory translatorFactory) {
-        super(services, translatorFactory);
+    public NewAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -116,23 +115,14 @@ public class NewAction extends AbstractShareAction {
                 List<String> urls = generateShareURLs(shares, request.getRequestData());
                 ShareNotificationService notificationService = getNotificationService();
                 UserService userService = getUserService();
-                List<ShareTarget> targets = request.getTargets();
                 for (int i = 0; i < urls.size(); i++) {
                     Share share = shares.get(i);
                     String url = urls.get(i);
                     User guest = userService.getUser(share.getGuest(), share.getContextID());
                     String mailAddress = guest.getMail();
                     if (!Strings.isEmpty(mailAddress)) {
-                        String title;
-                        if (targets.size() == 1) {
-                            ShareTarget target = targets.get(0);
-                            title = getModuleHandler(target.getModule()).getTargetTitle(target, session);
-                        } else {
-                            title = getTranslator(session).translate(String.format(ShareStrings.GENERIC_TITLE, targets.size()));
-                        }
-
                         try {
-                            notificationService.notify(new MailNotification(share, url, title, request.getMessage(), mailAddress), session);
+                            notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share, url, request.getMessage(), mailAddress), session);
                         } catch (Exception e) {
                             if (e instanceof OXException) {
                                 warnings.add((OXException) e);

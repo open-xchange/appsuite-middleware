@@ -56,7 +56,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.i18n.I18nTranslatorFactory;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
@@ -93,11 +93,10 @@ public class ShareJsonActivator extends AJAXModuleActivator {
         LOG.info("starting bundle: \"com.openexchange.share.json\"");
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
-        I18nTranslatorFactory translatorFactory = new I18nTranslatorFactory(context);
-        rememberTracker(translatorFactory);
+        trackService(TranslatorFactory.class);
         openTrackers();
 
-        registerModule(new ShareActionFactory(this, translatorFactory), "share/management");
+        registerModule(new ShareActionFactory(this), "share/management");
         registerService(ResultConverter.class, new GuestShareResultConverter(this));
 
     }

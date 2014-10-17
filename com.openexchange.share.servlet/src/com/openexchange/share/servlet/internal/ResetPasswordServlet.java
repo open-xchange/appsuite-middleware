@@ -55,7 +55,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
-import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -68,14 +67,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.user.UserService;
@@ -150,6 +149,10 @@ public class ResetPasswordServlet extends HttpServlet {
             // Generate a new password
             String newPassword = RandomStringUtils.random(10, true, true);
             PasswordMech passwordMech = PasswordMech.getPasswordMechFor(guest.getPasswordMech());
+            // FIXME:
+            if (passwordMech == null) {
+                passwordMech = PasswordMech.BCRYPT;
+            }
 
             // Update guest entry in database
             update(passwordMech.encode(newPassword), share.getGuest(), share.getContextID());
@@ -161,11 +164,7 @@ public class ResetPasswordServlet extends HttpServlet {
             ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
             String url = shareService.generateShareURLs(Collections.singletonList(share), Tools.getProtocol(request), request.getServerName()).get(0);
 
-            StringHelper stringHelper = StringHelper.valueOf(guest.getLocale());
-            String title = stringHelper.getString(ResetPasswordStrings.TITLE_RESET_PASSWORD);
-            String message = String.format(stringHelper.getString(ResetPasswordStrings.MESSAGE_RESET_PASSWORD), newPassword, url);
-
-            ResetPasswordShareNotification notification = new ResetPasswordShareNotification(share, url, title, message, new QuotedInternetAddress(mail));
+            MailNotification notification = new MailNotification(NotificationType.PASSWORD_RESET, share, url, null, mail);
             notificationService.notify(notification, new ResetPasswordSession(share.getGuest(), share.getContextID(), newPassword, request));
         } catch (RateLimitedException e) {
             response.setContentType("text/plain; charset=UTF-8");
@@ -177,9 +176,6 @@ public class ResetPasswordServlet extends HttpServlet {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (MessagingException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }

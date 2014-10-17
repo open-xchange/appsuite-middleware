@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,44 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.impl.notification;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link ShareServiceLookup}
+ * Translatable Strings to compose share notification mails.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public final class ShareServiceLookup {
+public class NotificationStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link ShareServiceLookup}.
-     */
-    private ShareServiceLookup() {
-        super();
-    }
+    // [John Doe] shared "[holiday pictures]" with you
+    public static final String SUBJECT = "%1$s shared \"%2$s\" with you";
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+    // Message from [John Doe]
+    public static final String MESSAGE_INTRO = "Message from %1$s";
 
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
-    }
+    // Click here to view [holiday pictures]
+    public static final String LINK_INTRO = "Click here to view %1$s";
 
-    /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
-    }
+    // Please use the following credentials if asked for
+    public static final String CREDENTIALS_INTRO = "Please use the following credentials if asked for";
 
-    public static <S extends Object> S getService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        return service;
-    }
+    // Username
+    public static final String USERNAME_FIELD = "Username";
 
-    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
-        S service = getService(c);
-        if (null == service && throwOnAbsence) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
-        }
-        return service;
-    }
+    // Password
+    public static final String PASSWORD_FIELD = "Password";
 
-    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-        return service;
-    }
+    // John Doe shared 7 items with you
+    public static final String GENERIC_TITLE = "%d items";
+
+    // Your password has been reseted
+    public static final String TITLE_RESET_PASSWORD = "Your password has been reseted";
+
+    // Your password for the following URL has been reseted to %1$s:\n\n%2$s
+    public static final String MESSAGE_RESET_PASSWORD = "Your password for the following URL has been reseted to %1$s:\n\n%2$s";
 
 }

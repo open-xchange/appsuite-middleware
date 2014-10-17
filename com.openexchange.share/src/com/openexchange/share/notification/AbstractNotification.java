@@ -62,24 +62,29 @@ import com.openexchange.share.Share;
  */
 public abstract class AbstractNotification<T> implements ShareNotification<T> {
 
+    protected final NotificationType type;
+
     protected final Share share;
 
     protected final String url;
 
-    protected final String title;
-
     protected final String message;
 
 
-    public AbstractNotification(Share share, String url, String title, String message) {
+    public AbstractNotification(NotificationType type, Share share, String url, String message) {
         super();
+        checkNotNull(type);
         checkNotNull(share);
         checkNotNull(url);
-        checkNotNull(title);
+        this.type = type;
         this.share = share;
         this.url = url;
-        this.title = title;
         this.message = message;
+    }
+
+    @Override
+    public NotificationType getType() {
+        return type;
     }
 
     @Override
@@ -90,11 +95,6 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
     @Override
     public String getUrl() {
         return url;
-    }
-
-    @Override
-    public String getTitle() {
-        return title;
     }
 
     @Override

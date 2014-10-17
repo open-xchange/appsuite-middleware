@@ -68,5 +68,9 @@ public interface ShareNotificationHandler extends ShareNotificationService, Rank
      * @return
      */
     <T extends ShareNotification<?>> boolean handles(T notification);
+//
+//    void notifyShareCreation() throws OXException;
+//
+//    void notifyPasswordReset() throws OXException;
 
 }

@@ -70,6 +70,7 @@ import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.html.HtmlService;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
@@ -81,7 +82,6 @@ import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
-import com.openexchange.share.impl.ShareServiceLookup;
 import com.openexchange.share.impl.groupware.AbstractModuleHandler;
 import com.openexchange.share.impl.groupware.FileStorageHandler;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
@@ -123,10 +123,6 @@ public class ShareActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
         logger.info("starting bundle: \"com.openexchange.share.impl\"");
         /*
-         * set references
-         */
-        ShareServiceLookup.set(this);
-        /*
          * register share crypto service based on underyling crypto service
          */
         final DefaultShareService shareService = new DefaultShareService(this);
@@ -139,8 +135,7 @@ public class ShareActivator extends HousekeepingActivator {
 
             @Override
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
-                String cryptKey = ShareServiceLookup.getService(ConfigurationService.class).getProperty(
-                    "com.openexchange.share.cryptKey", "erE2e8OhAo71");
+                String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
                 ShareCryptoServiceImpl shareCryptoService = new ShareCryptoServiceImpl(service, cryptKey);
                 addService(ShareCryptoService.class, shareCryptoService);
@@ -187,7 +182,7 @@ public class ShareActivator extends HousekeepingActivator {
         final DefaultNotificationService defaultNotificationService = new DefaultNotificationService();
 
         // Add in-place handlers
-        defaultNotificationService.add(new MailNotificationHandler());
+        defaultNotificationService.add(new MailNotificationHandler(this));
 
         // track additional share notification handlers
         track(ShareNotificationHandler.class, new ServiceTrackerCustomizer<ShareNotificationHandler, ShareNotificationHandler>() {
@@ -211,18 +206,19 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-        track(ManagementService.class, new ManagementServiceTracker(context, shareService));
-        trackService(IDBasedFileAccessFactory.class);
-        openTrackers();
-
-        registerService(ShareNotificationService.class, defaultNotificationService);
-
         ModuleHandlerProviderImpl moduleHandlerProvider = new ModuleHandlerProviderImpl();
         moduleHandlerProvider.put(new FileStorageHandler(this));
         moduleHandlerProvider.put(newFolderUpdater(Module.CALENDAR));
         moduleHandlerProvider.put(newFolderUpdater(Module.CONTACTS));
         moduleHandlerProvider.put(newFolderUpdater(Module.TASK));
         registerService(ModuleHandlerProvider.class, moduleHandlerProvider);
+        registerService(ShareNotificationService.class, defaultNotificationService);
+
+        trackService(ModuleHandlerProvider.class);
+        track(ManagementService.class, new ManagementServiceTracker(context, shareService));
+        trackService(IDBasedFileAccessFactory.class);
+        trackService(TranslatorFactory.class);
+        openTrackers();
     }
 
     @Override
@@ -234,7 +230,6 @@ public class ShareActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
         logger.info("stopping bundle: \"com.openexchange.share.impl\"");
-        ShareServiceLookup.set(null);
         super.stopBundle();
     }
 
