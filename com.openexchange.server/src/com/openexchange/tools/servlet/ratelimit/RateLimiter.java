@@ -501,6 +501,27 @@ public final class RateLimiter {
         bucketMap.remove(key);
     }
 
+    /**
+     * Doubles time windows for associated rate limit trace
+     *
+     * @param key The key associated with the rate limit trace
+     */
+    public static void doubleRateLimitWindow(Key key) {
+        if (null == key) {
+            return;
+        }
+        ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+        if (null == bucketMap) {
+            // Not yet fully initialized
+            return;
+        }
+
+        Rate rate = bucketMap.get(key);
+        if (null != rate) {
+            rate.setTimeInMillis(rate.getTimeInMillis() << 1);
+        }
+    }
+
     // ------------------------- Lenient clients ----------------------------------------- //
 
     private static interface StringChecker {
