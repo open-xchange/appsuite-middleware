@@ -831,29 +831,35 @@ public final class RateLimiter {
         return tmp;
     }
 
+    private static volatile String LOGIN_PATH = DefaultDispatcherPrefixService.getInstance().getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX;
+
     private static final Set<String> LOGIN_ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(LoginServlet.ACTION_FORMLOGIN, LoginServlet.ACTION_TOKENLOGIN, AJAXServlet.ACTION_LOGIN)));
 
-    private static final Cache<String, Boolean> CACHE_LOGIN = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
+    private static final Cache<String, Boolean> CACHE_NON_LOGIN = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
 
     private static boolean isLoginRequest(HttpServletRequest servletRequest) {
         String requestURI = servletRequest.getRequestURI();
-        Boolean result = CACHE_LOGIN.getIfPresent(requestURI);
-        if (null == result) {
-            // Check for login
-            if (asciiLowerCase(requestURI).startsWith(new StringBuilder(asciiLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix())).append(LoginServlet.SERVLET_PATH_APPENDIX).toString())) {
-                String action = servletRequest.getParameter(AJAXServlet.PARAMETER_ACTION);
-                if (null != action && LOGIN_ACTIONS.contains(action)) {
-                    result = Boolean.TRUE;
-                }
-            }
 
-            if (null == result) {
-                result = Boolean.FALSE;
-            }
-            CACHE_LOGIN.put(requestURI, result);
+        // Check failure cache first
+        Boolean nonLogin = CACHE_NON_LOGIN.getIfPresent(requestURI);
+        if (null != nonLogin) {
+            return false;
         }
 
-        return result.booleanValue();
+        // Check for login path prefix
+        if (false == requestURI.startsWith(LOGIN_PATH)) {
+            // Apparently not a login request, add to failure cache
+            CACHE_NON_LOGIN.put(requestURI, Boolean.FALSE);
+            return false;
+        }
+
+        // Check for login-specific action parameter
+        String action = servletRequest.getParameter(AJAXServlet.PARAMETER_ACTION);
+        if (null == action) {
+            return false;
+        }
+
+        return LOGIN_ACTIONS.contains(action);
     }
 
     private static final Cache<String, Boolean> CACHE_PATHS = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
