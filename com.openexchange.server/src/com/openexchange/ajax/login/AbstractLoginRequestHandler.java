@@ -162,7 +162,16 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
     }
 
     /**
-     * @return a boolean value indicated if an auto login should proceed afterwards
+     * Performs the login operation.
+     *
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @param login The closure performing the actual login
+     * @param conf The login configuration
+     * @return <code>true</code> if an auto login should proceed afterwards; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws RateLimitedException If login attempt gets rate limited
      */
     protected boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
         Tools.disableCaching(resp);
