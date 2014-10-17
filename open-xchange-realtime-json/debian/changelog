@@ -1,3 +1,9 @@
+open-xchange-realtime-json (7.6.1-6) stable; urgency=medium
+
+  * Build for patch 2014-10-24
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 17 Oct 2014 10:08:29 +0000
+
 open-xchange-realtime-json (7.6.1-5) stable; urgency=low
 
   * Fifth candidate for 7.6.1 release
