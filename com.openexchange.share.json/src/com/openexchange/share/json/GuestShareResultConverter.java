@@ -49,6 +49,7 @@
 
 package com.openexchange.share.json;
 
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -60,10 +61,12 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -161,9 +164,9 @@ public class GuestShareResultConverter implements ResultConverter {
             json.putOpt("last_modified", null != share.getLastModified() ? addTimeZoneOffset(share.getLastModified().getTime(), timeZone) : null);
             json.put("modified_by", share.getModifiedBy());
             /*
-             * share target & recipient
+             * share targets & recipient
              */
-            json.put("target", serializeShareTarget(guestShare));
+            json.put("targets", serializeShareTargets(guestShare, timeZone));
             json.put("recipient", serializeShareRecipient(guestShare, timeZone));
             return json;
         } catch (JSONException e) {
@@ -172,20 +175,48 @@ public class GuestShareResultConverter implements ResultConverter {
     }
 
     /**
-     * Extracts the share target from a guest share and serializes it to JSON.
+     * Extracts the share targets from a guest share and serializes it to JSON.
      *
-     * @param guestShare The guest share to serialize the share recipient for
+     * @param guestShare The guest share to serialize the share targets for
+     * @param timeZone The client timezone
+     * @return The serialized share targets
+     * @throws JSONException
+     */
+    private JSONArray serializeShareTargets(GuestShare guestShare, TimeZone timeZone) throws JSONException {
+        List<ShareTarget> targets = guestShare.getShare().getTargets();
+        if (null == targets) {
+            return null;
+        }
+        JSONArray jsonArray = new JSONArray(targets.size());
+        for (ShareTarget target : targets) {
+            jsonArray.put(serializeShareTarget(target, timeZone));
+        }
+        return jsonArray;
+    }
+
+    /**
+     * Serializes a share target to JSON.
+     *
+     * @param target The share target to serialize
      * @param timeZone The client timezone
      * @return The serialized share target
      * @throws JSONException
      */
-    private JSONObject serializeShareTarget(GuestShare guestShare) throws JSONException {
-        JSONObject jsonTarget = new JSONObject(3);
-        //TODO
-//        Module module = Module.getForFolderConstant(guestShare.getShare().getModule());
-//        jsonTarget.putOpt("module", null != module ? module.getName() : null);
-//        jsonTarget.putOpt("folder", guestShare.getShare().getFolder());
-//        jsonTarget.putOpt("item", guestShare.getShare().getItem());
+    private JSONObject serializeShareTarget(ShareTarget target, TimeZone timeZone) throws JSONException {
+        JSONObject jsonTarget = new JSONObject(8);
+        Module module = Module.getForFolderConstant(target.getModule());
+        jsonTarget.put("module", null == module ? String.valueOf(target.getModule()) : module.getName());
+        jsonTarget.putOpt("folder", target.getFolder());
+        jsonTarget.putOpt("item", target.getItem());
+        Date activationDate = target.getActivationDate();
+        if (null != activationDate) {
+            jsonTarget.put("activation_date", addTimeZoneOffset(activationDate.getTime(), timeZone));
+        }
+        Date expiryDate = target.getExpiryDate();
+        if (null != expiryDate) {
+            jsonTarget.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
+        }
+        jsonTarget.putOpt("meta", target.getMeta());
         return jsonTarget;
     }
 
@@ -223,15 +254,6 @@ public class GuestShareResultConverter implements ResultConverter {
             throw new UnsupportedOperationException("Unsupported authentication: " + guestShare.getShare().getAuthentication());
         }
         jsonRecipient.put("entity", String.valueOf(guestShare.getGuest().getId()));
-        //TODO
-//        Date activationDate = guestShare.getShare().getActivationDate();
-//        if (null != activationDate) {
-//            jsonRecipient.put("activation_date", addTimeZoneOffset(activationDate.getTime(), timeZone));
-//        }
-//        Date expiryDate = guestShare.getShare().getExpiryDate();
-//        if (null != expiryDate) {
-//            jsonRecipient.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
-//        }
         return jsonRecipient;
     }
 
