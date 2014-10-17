@@ -71,6 +71,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
@@ -830,6 +831,8 @@ public final class RateLimiter {
         return tmp;
     }
 
+    private static final Set<String> LOGIN_ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(LoginServlet.ACTION_FORMLOGIN, LoginServlet.ACTION_TOKENLOGIN, AJAXServlet.ACTION_LOGIN)));
+
     private static final Cache<String, Boolean> CACHE_LOGIN = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
 
     private static boolean isLoginRequest(HttpServletRequest servletRequest) {
@@ -837,9 +840,11 @@ public final class RateLimiter {
         Boolean result = CACHE_LOGIN.getIfPresent(requestURI);
         if (null == result) {
             // Check for login
-            // TODO: Consider certain "action" parameters, too?
             if (asciiLowerCase(requestURI).startsWith(new StringBuilder(asciiLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix())).append(LoginServlet.SERVLET_PATH_APPENDIX).toString())) {
-                result = Boolean.TRUE;
+                String action = servletRequest.getParameter(AJAXServlet.PARAMETER_ACTION);
+                if (null != action && LOGIN_ACTIONS.contains(action)) {
+                    result = Boolean.TRUE;
+                }
             }
 
             if (null == result) {
