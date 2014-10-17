@@ -100,7 +100,7 @@ public interface ShareService {
      * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the target is deleted for all shares that reference it
      * @throws OXException
      */
-    void deleteShareTarget(Session session, ShareTarget shareTarget, List<Integer> guestIDs) throws OXException;
+    void deleteTarget(Session session, GroupwareTarget shareTarget, List<Integer> guestIDs) throws OXException;
 
     /**
      * Deletes a list of share targets for all shares that belong to a certain list of guests.
@@ -110,7 +110,7 @@ public interface ShareService {
      * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the targets are deleted for all shares that reference it
      * @throws OXException
      */
-    void deleteShareTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
+    void deleteTargets(Session session, List<GroupwareTarget> targets, List<Integer> guestIDs) throws OXException;
 
     /**
      * Updates an existing share.

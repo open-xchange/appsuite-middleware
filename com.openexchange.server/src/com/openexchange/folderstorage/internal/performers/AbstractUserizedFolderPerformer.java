@@ -438,7 +438,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
-            shareService.deleteShareTarget(session, new ShareTarget(contentType.getModule(), folderID), guestIDs);
+            shareService.deleteTarget(session, new ShareTarget(contentType.getModule(), folderID), guestIDs);
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }

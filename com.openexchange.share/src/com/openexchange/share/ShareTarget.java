@@ -155,8 +155,44 @@ public class ShareTarget extends GroupwareTarget {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((activationDate == null) ? 0 : activationDate.hashCode());
+        result = prime * result + ((expiryDate == null) ? 0 : expiryDate.hashCode());
+        result = prime * result + ((meta == null) ? 0 : meta.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ShareTarget other = (ShareTarget) obj;
+        if (activationDate == null) {
+            if (other.activationDate != null)
+                return false;
+        } else if (!activationDate.equals(other.activationDate))
+            return false;
+        if (expiryDate == null) {
+            if (other.expiryDate != null)
+                return false;
+        } else if (!expiryDate.equals(other.expiryDate))
+            return false;
+        if (meta == null) {
+            if (other.meta != null)
+                return false;
+        } else if (!meta.equals(other.meta))
+            return false;
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "ShareTarget [module=" + module + ", folder=" + folder + (null != item ? (", item=" + item) : "") + "]";
     }
-
 }

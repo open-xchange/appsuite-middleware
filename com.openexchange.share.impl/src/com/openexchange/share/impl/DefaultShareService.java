@@ -131,12 +131,12 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public void deleteShareTarget(Session session, ShareTarget shareTarget, List<Integer> guestIDs) throws OXException {
-        deleteShareTargets(session, Collections.singletonList(shareTarget), guestIDs);
+    public void deleteTarget(Session session, GroupwareTarget shareTarget, List<Integer> guestIDs) throws OXException {
+        deleteTargets(session, Collections.singletonList(shareTarget), guestIDs);
     }
 
     @Override
-    public void deleteShareTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+    public void deleteTargets(Session session, List<GroupwareTarget> targets, List<Integer> guestIDs) throws OXException {
         int contextID = session.getContextId();
         LOG.info("Deleting share target(s) {} for guest user {} in context {}...", targets, session.getUserId(), contextID);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
@@ -152,8 +152,8 @@ public class DefaultShareService implements ShareService {
                     List<ShareTarget> origTargets = share.getTargets();
                     List<ShareTarget> modifiedTargets = new ArrayList<ShareTarget>(origTargets);
                     for (ShareTarget origTarget : origTargets) {
-                        for (ShareTarget toDelete : targets) {
-                            if (targetsEqual(origTarget, toDelete)) {
+                        for (GroupwareTarget toDelete : targets) {
+                            if (toDelete.equals(origTarget)) {
                                 modifiedTargets.remove(origTarget);
                                 break;
                             }
@@ -173,7 +173,7 @@ public class DefaultShareService implements ShareService {
                 if (!modifiedShares.isEmpty()) {
                     shareStorage.updateShares(contextID, modifiedShares, parameters);
                     if (!sharesToDelete.isEmpty()) {
-                        // TODO: maybe we keep empty shares for re-using them later and delete stale ones with a cron job
+                        // TODO: maybe we want to keep empty shares for re-using them later and delete stale ones with a cron job
                         if (!sharesToDelete.isEmpty()) {
                             List<String> tokens = new ArrayList<String>(sharesToDelete.size());
                             List<Integer> guestsToDelete = new ArrayList<Integer>(sharesToDelete.size());
@@ -196,20 +196,13 @@ public class DefaultShareService implements ShareService {
         }
     }
 
-    private static List<Share> loadSharesForTargetDeletion(ShareStorage shareStorage, StorageParameters parameters, int contextID, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+    private static List<Share> loadSharesForTargetDeletion(ShareStorage shareStorage, StorageParameters parameters, int contextID, List<GroupwareTarget> targets, List<Integer> guestIDs) throws OXException {
         List<Share> shares;
         if (guestIDs == null || guestIDs.isEmpty()) {
             shares = new LinkedList<Share>();
             Set<String> tokens = new HashSet<String>();
-            for (ShareTarget target : targets) {
-                List<Share> foundShares;
-                // TODO: maybe build loadSharesForTarget()
-                if (target.isFolder()) {
-                    foundShares = shareStorage.loadSharesForFolder(contextID, target.getFolder(), parameters); // TODO: module missing
-                } else {
-                    foundShares = shareStorage.loadSharesForItem(contextID, target.getFolder(), target.getItem(), parameters); // TODO: module missing
-                }
-
+            for (GroupwareTarget target : targets) {
+                List<Share> foundShares = shareStorage.loadSharesForTarget(contextID, target, parameters);
                 for (Share share : foundShares) {
                     String token = share.getToken();
                     if (!tokens.contains(token)) {
@@ -805,7 +798,7 @@ public class DefaultShareService implements ShareService {
      * @param t2
      * @return
      */
-    private static boolean targetsEqual(ShareTarget t1, ShareTarget t2) {
+    static boolean targetsEqual(ShareTarget t1, ShareTarget t2) {
         if (t1.getModule() != t2.getModule()) {
             return false;
         }
