@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.servlet;
+package com.openexchange.tools.servlet.ratelimit;
 
 import static com.openexchange.java.Strings.asciiLowerCase;
 import java.util.ArrayList;
@@ -79,8 +79,9 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.servlet.Rate.Result;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Cookies;
+import com.openexchange.tools.servlet.ratelimit.Rate.Result;
 
 /**
  * {@link RateLimiter}
@@ -96,11 +97,6 @@ public final class RateLimiter {
      */
     private RateLimiter() {
         super();
-    }
-
-    private static interface KeyPartProvider {
-
-        String getValue(HttpServletRequest servletRequest);
     }
 
     private static final KeyPartProvider HTTP_SESSION_KEY_PART_PROVIDER = new KeyPartProvider() {
@@ -230,105 +226,7 @@ public final class RateLimiter {
 
     // ----------------------------------------------------------------------------------- //
 
-    private static final class Key {
 
-        final int remotePort;
-        final String remoteAddr;
-        final String userAgent;
-        final List<String> parts;
-        private final int hash;
-
-        Key(final HttpServletRequest servletRequest, final String userAgent) {
-            super();
-            remotePort = considerRemotePort() ? servletRequest.getRemotePort() : 0;
-            remoteAddr = servletRequest.getRemoteAddr();
-            this.userAgent = userAgent;
-
-            final List<String> parts;
-            {
-                final List<KeyPartProvider> keyPartProviders = keyPartProviders();
-                if (null == keyPartProviders || keyPartProviders.isEmpty()) {
-                    parts = null;
-                } else {
-                    parts = new ArrayList<String>(keyPartProviders.size());
-                    for (final KeyPartProvider keyPartProvider : keyPartProviders) {
-                        parts.add(keyPartProvider.getValue(servletRequest));
-                    }
-                }
-            }
-            this.parts = parts;
-
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((remoteAddr == null) ? 0 : remoteAddr.hashCode());
-            result = prime * result + remotePort;
-            result = prime * result + ((userAgent == null) ? 0 : userAgent.hashCode());
-            result = prime * result + ((parts == null) ? 0 : parts.hashCode());
-            this.hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (remotePort != other.remotePort) {
-                return false;
-            }
-            if (remoteAddr == null) {
-                if (other.remoteAddr != null) {
-                    return false;
-                }
-            } else if (!remoteAddr.equals(other.remoteAddr)) {
-                return false;
-            }
-            if (userAgent == null) {
-                if (other.userAgent != null) {
-                    return false;
-                }
-            } else if (!userAgent.equals(other.userAgent)) {
-                return false;
-            }
-            if (parts == null) {
-                if (other.parts != null) {
-                    return false;
-                }
-            } else if (!parts.equals(other.parts)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder builder = new StringBuilder(256);
-            builder.append("Key [");
-            if (remotePort > 0) {
-                builder.append("remotePort=").append(remotePort).append(", ");
-            }
-            if (remoteAddr != null) {
-                builder.append("remoteAddr=").append(remoteAddr).append(", ");
-            }
-            if (userAgent != null) {
-                builder.append("userAgent=").append(userAgent).append(", ");
-            }
-            if (parts != null) {
-                builder.append("parts=").append(parts).append(", ");
-            }
-            builder.append("hash=").append(hash).append("]");
-            return builder.toString();
-        }
-
-    } // End of class Key
 
     // ----------------------------------------------------------------------------------- //
 
@@ -507,18 +405,18 @@ public final class RateLimiter {
     /**
      * Checks given request if possibly rate limited.
      *
-     * @param servletRequest The request to check
+     * @param httpRequest The request to check
      * @throws RateLimitedException If associated request is rate limited
      */
-    public static void checkRequest(HttpServletRequest servletRequest) {
+    public static void checkRequest(HttpServletRequest httpRequest) {
         // Special treatment for login request
-        if (isLoginRequest(servletRequest)) {
+        if (isLoginRequest(httpRequest)) {
             int maxLoginRate = maxLoginRate();
             if (maxLoginRate > 0) {
                 int maxLoginRateTimeWindow = maxLoginRateTimeWindow();
                 if (maxLoginRateTimeWindow > 0) {
                     // Rate limit for login available
-                    checkRateLimitForRequest(servletRequest, maxLoginRate, maxLoginRateTimeWindow);
+                    checkRateLimitForRequest(new Key(httpRequest), maxLoginRate, maxLoginRateTimeWindow, httpRequest);
                     return;
                 }
             }
@@ -533,23 +431,33 @@ public final class RateLimiter {
         if (maxRateTimeWindow <= 0) {
             return;
         }
-        if (omitLocals() && LOCALS.contains(servletRequest.getServerName())) {
+        if (omitLocals() && LOCALS.contains(httpRequest.getServerName())) {
             return;
         }
-        if (lenientCheckForRequest(servletRequest)) {
+        if (lenientCheckForRequest(httpRequest)) {
             return;
             //maxRatePerMinute <<= 2;
         }
-        checkRateLimitForRequest(servletRequest, maxRate, maxRateTimeWindow);
+
+        // Do the rate limit check
+        checkRateLimitForRequest(new Key(httpRequest), maxRate, maxRateTimeWindow, httpRequest);
     }
 
-    private static void checkRateLimitForRequest(HttpServletRequest servletRequest, int maxRate, int maxRateTimeWindow) {
+    /**
+     * Performs the actual rate limit check.
+     *
+     * @param key The key calculated from associated HTTP request used to determine the appropriate rate limit bucket
+     * @param maxRate The associated rate
+     * @param maxRateTimeWindow The associated time window
+     * @param optRequest The checked HTTP request (rather for logging purposes); may be <code>null</code>
+     * @throws RateLimitedException If rate limit is exceeded
+     */
+    public static void checkRateLimitForRequest(Key key, int maxRate, int maxRateTimeWindow, HttpServletRequest optRequest) {
         ConcurrentMap<Key, Rate> bucketMap = bucketMap();
         if (null == bucketMap) {
             // Not yet fully initialized
             return;
         }
-        Key key = new Key(servletRequest, servletRequest.getHeader("User-Agent"));
         while (true) {
             Rate rate = bucketMap.get(key);
             if (null == rate) {
@@ -559,18 +467,21 @@ public final class RateLimiter {
                     rate = newRate;
                 }
             }
-            // Acquire or fails to do so
+            // Acquire or fail to do so
             final Rate.Result res = rate.consume(System.currentTimeMillis());
             if (Result.DEPRECATED == res) {
                 // Deprecated
                 bucketMap.remove(key, rate);
             } else {
+                // Success or failure?
                 if (Result.SUCCESS == res) {
                     return;
                 }
 
                 // Rate limit exceeded
-                logRateLimitExceeded(rate, servletRequest);
+                if (null != optRequest) {
+                    logRateLimitExceeded(rate, optRequest);
+                }
                 throw new RateLimitedException("429 Too Many Requests", maxRateTimeWindow / 1000);
             }
             // Otherwise retry
