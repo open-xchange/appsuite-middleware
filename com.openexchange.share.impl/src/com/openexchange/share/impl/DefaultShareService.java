@@ -635,7 +635,11 @@ public class DefaultShareService implements ShareService {
         if (AnonymousRecipient.class.isInstance(recipient)) {
             guestUser = ShareTool.prepareGuestUser(services, sharingUser, (AnonymousRecipient) recipient);
         } else if (GuestRecipient.class.isInstance(recipient)) {
-            guestUser = ShareTool.prepareGuestUser(services, sharingUser, (GuestRecipient) recipient);
+            GuestRecipient guestRecipient = (GuestRecipient) recipient;
+            if (Strings.isEmpty(guestRecipient.getPassword())) {
+                guestRecipient.setPassword(PasswordUtility.generate());
+            }
+            guestUser = ShareTool.prepareGuestUser(services, sharingUser, guestRecipient);
         } else {
             throw new UnsupportedOperationException("unsupported share recipient: " + recipient);
         }
