@@ -74,11 +74,11 @@ public class XML {
      * @param string The string to be escaped.
      * @return The escaped string.
      */
-    public static String escape(final String string) {
-    	final StringBuilder sb = new StringBuilder();
-    	final int len = string.length();
+    public static String escape(String string) {
+        int len = string.length();
+        StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
-        	final char c = string.charAt(i);
+            char c = string.charAt(i);
             switch (c) {
             case '&':
                 sb.append("&amp;");
@@ -184,7 +184,7 @@ public class XML {
 
 // Close tag </
 
-        	t = x.nextToken();
+            t = x.nextToken();
             if (name == null) {
                 throw x.syntaxError("Mismatched close tag" + t);
             }
@@ -290,8 +290,8 @@ public class XML {
      * @throws JSONException
      */
     public static JSONObject toJSONObject(final String string) throws JSONException {
-    	final JSONObject o = new JSONObject();
-    	final XMLTokener x = new XMLTokener(string);
+        final JSONObject o = new JSONObject();
+        final XMLTokener x = new XMLTokener(string);
         while (x.more() && x.skipPast("<")) {
             parse(x, o, null);
         }
@@ -345,7 +345,7 @@ public class XML {
      */
     public static String toString(final Object o, final String tagName)
             throws JSONException {
-    	final StringBuilder b = new StringBuilder();
+        final StringBuilder b = new StringBuilder();
         int          i;
         JSONArray    ja;
         JSONObject   jo;
