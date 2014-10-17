@@ -184,7 +184,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 } else {
                     Key rateLimitKey = new Key(req, req.getHeader(USER_AGENT), "__login.failed");
                     // Optionally consume one permit
-                    RateLimiter.optRateLimitFor(rateLimitKey, rate, timeWindow, req);
+                    boolean consumed = RateLimiter.optRateLimitFor(rateLimitKey, rate, timeWindow, req);
                     try {
                         result = login.doLogin(req);
                         if (null == result) {
@@ -193,7 +193,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                         // Successful login (so far) -- clean rate limit trace
                         RateLimiter.removeRateLimit(rateLimitKey);
                     } catch (OXException e) {
-                        if (LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
+                        if (!consumed && LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
                             // Consume one permit
                             RateLimiter.checkRateLimitFor(rateLimitKey, rate, timeWindow, req);
                         }
