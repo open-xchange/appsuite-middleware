@@ -74,10 +74,10 @@ public class XML {
      * @return The escaped string.
      */
     public static String escape(final String string) {
-    	final StringBuilder sb = new StringBuilder();
-    	final int len = string.length();
+        final StringBuilder sb = new StringBuilder();
+        final int len = string.length();
         for (int i = 0; i < len; i++) {
-        	final char c = string.charAt(i);
+            final char c = string.charAt(i);
             switch (c) {
             case '&':
                 sb.append("&amp;");
@@ -108,8 +108,19 @@ public class XML {
      * @return true if the close tag is processed.
      * @throws JSONException
      */
-    private static boolean parse(final XMLTokener x, final JSONObject context,
-    		final String name) throws JSONException {
+    private static boolean parse(final XMLTokener x, final JSONObject context, final String name) throws JSONException {
+        return parse(x, context, name, java.util.Collections.<String> emptySet());
+    }
+
+    /**
+     * Scan the content following the named tag, attaching it to the context.
+     * @param x       The XMLTokener containing the source string.
+     * @param context The JSONObject that will include the new material.
+     * @param name    The tag name.
+     * @return true if the close tag is processed.
+     * @throws JSONException
+     */
+    private static boolean parse(final XMLTokener x, final JSONObject context, final String name, final Set<String> arrays) throws JSONException {
         char       c;
         int        i;
         String     n;
@@ -172,7 +183,7 @@ public class XML {
 
 // Close tag </
 
-        	t = x.nextToken();
+            t = x.nextToken();
             if (name == null) {
                 throw x.syntaxError("Mismatched close tag" + t);
             }
@@ -208,10 +219,10 @@ public class XML {
                         if (!(t instanceof String)) {
                             throw x.syntaxError("Missing value");
                         }
-                        o.accumulate(s, t);
+                        o.accumulate(s, t, arrays.contains(s));
                         t = null;
                     } else {
-                        o.accumulate(s, "");
+                        o.accumulate(s, "", arrays.contains(s));
                     }
 
 // Empty tag <.../>
@@ -220,7 +231,7 @@ public class XML {
                     if (x.nextToken() != GT) {
                         throw x.syntaxError("Misshaped tag");
                     }
-                    context.accumulate(n, o);
+                    context.accumulate(n, o, arrays.contains(n));
                     return false;
 
 // Content, between <...> and </...>
@@ -241,15 +252,15 @@ public class XML {
 
 // Nested element
 
-                        } else if (t == LT && parse(x, o, n)) {
+                        } else if (t == LT && parse(x, o, n, arrays)) {
                             //if (parse(x, o, n)) {
                                 if (o.length() == 0) {
-                                    context.accumulate(n, "");
+                                    context.accumulate(n, "", arrays.contains(n));
                                 } else if (o.length() == 1 &&
                                        o.opt(STR_CONTENT) != null) {
-                                    context.accumulate(n, o.opt(STR_CONTENT));
+                                    context.accumulate(n, o.opt(STR_CONTENT), arrays.contains(n));
                                 } else {
-                                    context.accumulate(n, o);
+                                    context.accumulate(n, o, arrays.contains(n));
                                 }
                                 return false;
                             //}
@@ -278,14 +289,40 @@ public class XML {
      * @throws JSONException
      */
     public static JSONObject toJSONObject(final String string) throws JSONException {
-    	final JSONObject o = new JSONObject();
-    	final XMLTokener x = new XMLTokener(string);
+        final JSONObject o = new JSONObject();
+        final XMLTokener x = new XMLTokener(string);
         while (x.more() && x.skipPast("<")) {
             parse(x, o, null);
         }
         return o;
     }
 
+    /**
+     * Convert a well-formed (but not necessarily valid) XML string into a
+     * JSONObject. Some information may be lost in this transformation
+     * because JSON is a data format and XML is a document format. XML uses
+     * elements, attributes, and content text, while JSON uses unordered
+     * collections of name/value pairs and arrays of values. JSON does not
+     * does not like to distinguish between elements and attributes.
+     * Sequences of similar elements are represented as JSONArrays. Content
+     * text may be placed in a "content" member. Comments, prologs, DTDs, and
+     * <code>&lt;[ [ ]]></code> are ignored.
+     * @param string The source string.
+     * @return A JSONObject containing the structured data from the XML string.
+     * @throws JSONException
+     */
+    public static JSONObject toJSONObject(final String string, final Set<String> arrays) throws JSONException {
+        if (null == arrays) {
+            return toJSONObject(string);
+        }
+
+        final JSONObject o = new JSONObject();
+        final XMLTokener x = new XMLTokener(string);
+        while (x.more() && x.skipPast("<")) {
+            parse(x, o, null, arrays);
+        }
+        return o;
+    }
 
     /**
      * Convert a JSONObject into a well-formed, element-normal XML string.
@@ -307,7 +344,7 @@ public class XML {
      */
     public static String toString(final Object o, final String tagName)
             throws JSONException {
-    	final StringBuilder b = new StringBuilder();
+        final StringBuilder b = new StringBuilder();
         int          i;
         JSONArray    ja;
         JSONObject   jo;
