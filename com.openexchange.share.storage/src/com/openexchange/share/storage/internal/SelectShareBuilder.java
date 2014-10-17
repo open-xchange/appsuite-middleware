@@ -188,11 +188,11 @@ public class SelectShareBuilder {
         }
         if (null != guests && 0 < guests.length) {
             stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel(prefixShare));
-            if (1 == tokens.length) {
+            if (1 == guests.length) {
                 stringBuilder.append("=?");
             } else {
                 stringBuilder.append(" IN (?");
-                for (int i = 1; i < tokens.length; i++) {
+                for (int i = 1; i < guests.length; i++) {
                     stringBuilder.append(",?");
                 }
                 stringBuilder.append(')');
