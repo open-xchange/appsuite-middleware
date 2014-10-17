@@ -139,6 +139,11 @@ public class LoginServlet extends AJAXServlet {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginServlet.class);
 
+    /**
+     * The path appendix for login servlet.
+     */
+    public static final String SERVLET_PATH_APPENDIX = "login";
+
     /** The log properties for login-related information. */
     protected static final Set<LogProperties.Name> LOG_PROPERTIES;
 

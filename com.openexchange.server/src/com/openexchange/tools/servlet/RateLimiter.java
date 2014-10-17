@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.servlet;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,6 +71,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
@@ -119,7 +121,7 @@ public final class RateLimiter {
 
         CookieKeyPartProvider(final String cookieName) {
             super();
-            this.cookieName = toLowerCase(cookieName);
+            this.cookieName = asciiLowerCase(cookieName);
         }
 
         @Override
@@ -185,7 +187,7 @@ public final class RateLimiter {
                     } else {
                         final List<KeyPartProvider> list = new LinkedList<KeyPartProvider>();
                         for (final String sProvider : Strings.splitByComma(sProviders)) {
-                            final String s = toLowerCase(sProvider);
+                            final String s = asciiLowerCase(sProvider);
                             if ("http-session".equals(s)) {
                                 list.add(HTTP_SESSION_KEY_PART_PROVIDER);
                             } else if (s.startsWith("cookie-")) {
@@ -387,10 +389,31 @@ public final class RateLimiter {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == service) {
                         // Service not yet available
-                        return 1500;
+                        return 500;
                     }
-                    tmp = Integer.valueOf(service.getProperty("com.openexchange.servlet.maxRate", "1500"));
+                    tmp = Integer.valueOf(service.getProperty("com.openexchange.servlet.maxRate", "500"));
                     maxRate = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Integer maxLoginRate;
+
+    private static int maxLoginRate() {
+        Integer tmp = maxLoginRate;
+        if (null == tmp) {
+            synchronized (RateLimiter.class) {
+                tmp = maxLoginRate;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return 50;
+                    }
+                    tmp = Integer.valueOf(service.getProperty("com.openexchange.ajax.login.maxRate", "50"));
+                    maxLoginRate = tmp;
                 }
             }
         }
@@ -412,6 +435,27 @@ public final class RateLimiter {
                     }
                     tmp = Integer.valueOf(service.getProperty("com.openexchange.servlet.maxRateTimeWindow", "300000"));
                     maxRateTimeWindow = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Integer maxLoginRateTimeWindow;
+
+    private static int maxLoginRateTimeWindow() {
+        Integer tmp = maxLoginRateTimeWindow;
+        if (null == tmp) {
+            synchronized (RateLimiter.class) {
+                tmp = maxLoginRateTimeWindow;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return 300000;
+                    }
+                    tmp = Integer.valueOf(service.getProperty("com.openexchange.ajax.login.maxRateTimeWindow", "300000"));
+                    maxLoginRateTimeWindow = tmp;
                 }
             }
         }
@@ -466,11 +510,25 @@ public final class RateLimiter {
      * @throws RateLimitedException If associated request is rate limited
      */
     public static void checkRequest(HttpServletRequest servletRequest) {
-        int maxRatePerMinute = maxRate();
-        if (maxRatePerMinute <= 0) {
+        // Special treatment for login request
+        if (isLoginRequest(servletRequest)) {
+            int maxLoginRate = maxLoginRate();
+            if (maxLoginRate > 0) {
+                int maxLoginRateTimeWindow = maxLoginRateTimeWindow();
+                if (maxLoginRateTimeWindow > 0) {
+                    // Rate limit for login available
+                    checkRateLimitForRequest(servletRequest, maxLoginRate, maxLoginRateTimeWindow);
+                    return;
+                }
+            }
+        }
+
+        // Any request...
+        int maxRate = maxRate();
+        if (maxRate <= 0) {
             return;
         }
-        final int maxRateTimeWindow = maxRateTimeWindow();
+        int maxRateTimeWindow = maxRateTimeWindow();
         if (maxRateTimeWindow <= 0) {
             return;
         }
@@ -481,16 +539,20 @@ public final class RateLimiter {
             return;
             //maxRatePerMinute <<= 2;
         }
-        final ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+        checkRateLimitForRequest(servletRequest, maxRate, maxRateTimeWindow);
+    }
+
+    private static void checkRateLimitForRequest(HttpServletRequest servletRequest, int maxRate, int maxRateTimeWindow) {
+        ConcurrentMap<Key, Rate> bucketMap = bucketMap();
         if (null == bucketMap) {
             // Not yet fully initialized
             return;
         }
-        final Key key = new Key(servletRequest, servletRequest.getHeader("User-Agent"));
+        Key key = new Key(servletRequest, servletRequest.getHeader("User-Agent"));
         while (true) {
             Rate rate = bucketMap.get(key);
             if (null == rate) {
-                final Rate newRate = new Rate(maxRatePerMinute, maxRateTimeWindow, TimeUnit.MILLISECONDS);
+                final Rate newRate = new Rate(maxRate, maxRateTimeWindow, TimeUnit.MILLISECONDS);
                 rate = bucketMap.putIfAbsent(key, newRate);
                 if (null == rate) {
                     rate = newRate;
@@ -541,14 +603,14 @@ public final class RateLimiter {
             final int size = prefixes.size();
             final String[] newArray = new String[size];
             for (int i = 0; i < size; i++) {
-                newArray[i] = toLowerCase(prefixes.get(i));
+                newArray[i] = asciiLowerCase(prefixes.get(i));
             }
             this.prefixes = newArray;
         }
 
         @Override
         public boolean matches(final String identifier) {
-            final String lc = toLowerCase(identifier);
+            final String lc = asciiLowerCase(identifier);
             for (final String prefix : prefixes) {
                 if (lc.startsWith(prefix)) {
                     return true;
@@ -565,12 +627,12 @@ public final class RateLimiter {
 
         IgnoreCaseStringChecker(final String userAgent) {
             super();
-            this.userAgent = toLowerCase(userAgent);
+            this.userAgent = asciiLowerCase(userAgent);
         }
 
         @Override
         public boolean matches(final String identifier) {
-            return this.userAgent.equals(toLowerCase(identifier));
+            return this.userAgent.equals(asciiLowerCase(identifier));
         }
 
     }
@@ -755,7 +817,7 @@ public final class RateLimiter {
                         for (final String sModule : Strings.splitByComma(sModules)) {
                             String s = unquote(sModule);
                             if (!com.openexchange.java.Strings.isEmpty(s)) {
-                                s = toLowerCase(s.trim());
+                                s = asciiLowerCase(s.trim());
                                 set.add(s);
                             }
                         }
@@ -768,21 +830,46 @@ public final class RateLimiter {
         return tmp;
     }
 
+    private static final Cache<String, Boolean> CACHE_LOGIN = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
+
+    private static boolean isLoginRequest(HttpServletRequest servletRequest) {
+        String requestURI = servletRequest.getRequestURI();
+        Boolean result = CACHE_LOGIN.getIfPresent(requestURI);
+        if (null == result) {
+            // Check for login
+            // TODO: Consider certain "action" parameters, too?
+            if (asciiLowerCase(requestURI).startsWith(new StringBuilder(asciiLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix())).append(LoginServlet.SERVLET_PATH_APPENDIX).toString())) {
+                result = Boolean.TRUE;
+            }
+
+            if (null == result) {
+                result = Boolean.FALSE;
+            }
+            CACHE_LOGIN.put(requestURI, result);
+        }
+
+        return result.booleanValue();
+    }
+
     private static final Cache<String, Boolean> CACHE_PATHS = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
 
-    private static boolean lenientCheckForRequest(final HttpServletRequest servletRequest) {
+    private static boolean lenientCheckForRequest(HttpServletRequest servletRequest) {
         // Servlet path check
         {
-            String requestURI = toLowerCase(servletRequest.getRequestURI());
+            String requestURI = servletRequest.getRequestURI();
             Boolean result = CACHE_PATHS.getIfPresent(requestURI);
             if (null == result) {
-                StringBuilder sb = new StringBuilder(toLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix()));
-                int reslen = sb.length();
-                for (String module : modules()) {
-                    sb.setLength(reslen);
-                    if (requestURI.startsWith(sb.append(module).toString())) {
-                        result = Boolean.TRUE;
-                        break;
+                // Check modules
+                {
+                    StringBuilder sb = new StringBuilder(asciiLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix()));
+                    int reslen = sb.length();
+                    String lcRequestURI = asciiLowerCase(requestURI);
+                    for (String module : modules()) {
+                        sb.setLength(reslen);
+                        if (lcRequestURI.startsWith(sb.append(module).toString())) {
+                            result = Boolean.TRUE;
+                            break;
+                        }
                     }
                 }
                 if (null == result) {
@@ -829,20 +916,6 @@ public final class RateLimiter {
         }
         s.append('$');
         return (s.toString());
-    }
-
-    /** ASCII-wise to lower-case */
-    static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     /** Checks for starts-with notation */

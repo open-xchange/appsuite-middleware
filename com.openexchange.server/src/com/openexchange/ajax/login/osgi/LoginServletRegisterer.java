@@ -77,7 +77,6 @@ import com.openexchange.osgi.ServiceSet;
 public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginServletRegisterer.class);
-    private static final String SERVLET_PATH_APPENDIX = "login";
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
@@ -145,7 +144,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.RANDOM_TOKEN);
             try {
                 LOG.info("Registering login servlet.");
-                httpService.registerServlet(prefixService.getPrefix() + SERVLET_PATH_APPENDIX, new LoginServlet(), params, null);
+                httpService.registerServlet(prefixService.getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX, new LoginServlet(), params, null);
             } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
             } catch (final NamespaceException e) {
@@ -200,7 +199,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");
-            unregister.unregister(DefaultDispatcherPrefixService.getInstance().getPrefix() + SERVLET_PATH_APPENDIX);
+            unregister.unregister(DefaultDispatcherPrefixService.getInstance().getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX);
         }
         context.ungetService(reference);
     }
