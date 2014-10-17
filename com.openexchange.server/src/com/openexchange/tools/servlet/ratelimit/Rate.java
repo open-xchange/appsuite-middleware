@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.servlet;
+package com.openexchange.tools.servlet.ratelimit;
 
 import java.util.Deque;
 import java.util.Iterator;

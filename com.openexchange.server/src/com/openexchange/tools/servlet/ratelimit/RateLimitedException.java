@@ -47,35 +47,37 @@
  *
  */
 
-package com.openexchange.tools.servlet;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.tools.servlet.ratelimit.RateLimiter;
-
+package com.openexchange.tools.servlet.ratelimit;
 
 /**
- * {@link ServletInitialization} - The Servlet initialization.
+ * {@link RateLimitedException} - Thrown if associated request is rate limited.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ServletInitialization implements Initialization {
+public final class RateLimitedException extends RuntimeException {
+
+    private static final long serialVersionUID = 5342199025241682441L;
+
+    private final int retryAfterSeconds;
 
     /**
-     * Initializes a new {@link ServletInitialization}.
+     * Initializes a new {@link RateLimitedException}.
+     *
+     * @param message The message
+     * @param retryAfterSeconds The time in seconds to wait before retrying
      */
-    public ServletInitialization() {
-        super();
+    public RateLimitedException(final String message, final int retryAfterSeconds) {
+        super(message);
+        this.retryAfterSeconds = retryAfterSeconds;
     }
 
-    @Override
-    public void start() throws OXException {
-        // Starters here
-    }
-
-    @Override
-    public void stop() throws OXException {
-        RateLimiter.stop();
+    /**
+     * Gets the time in seconds to wait before retrying
+     *
+     * @return The time in seconds to wait before retrying
+     */
+    public int getRetryAfter() {
+        return retryAfterSeconds;
     }
 
 }
