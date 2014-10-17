@@ -47,75 +47,80 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.i18n.impl;
 
-import java.util.Collection;
-import java.util.Stack;
+import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
+
 
 /**
- * {@link Tools}
+ * If strings shall be translated, you need to use an appropriate {@link I18nService},
+ * according to the desired locale. The {@link I18nTranslatorFactory} helps you to
+ * keep track of all {@link I18nService} instances and creates new {@link Translator}
+ * instances based on given locales.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class Tools {
+public class I18nTranslatorFactory extends ServiceTracker<I18nService, I18nService> implements TranslatorFactory {
+
+    private static final Logger LOG = LoggerFactory.getLogger(I18nTranslatorFactory.class);
+
+    private final ConcurrentMap<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
+
 
     /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
+     * Initializes a new {@link I18nTranslatorFactory}.
+     *
+     * @param context The bundle context
      */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
+    public I18nTranslatorFactory(BundleContext context) {
+        super(context, I18nService.class, null);
     }
 
-    public static final void open(Collection<ServiceTracker<?,?>> trackers) {
-        for (ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
+    @Override
+    public Translator translatorFor(Locale locale) {
+        if (locale == null) {
+            return I18nTranslator.EMPTY;
         }
-    }
 
-    public static final void close(Stack<ServiceTracker<?,?>> trackers) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
-
-    /**
-     * Obtains a service from the given {@link ServiceLookup} and returns it. If the
-     * service is not available, {@link ServiceExceptionCode#SERVICE_UNAVAILABLE} is thrown.
-     * @param serviceClass The service class to obtain
-     * @param serviceLookup The service lookup to obtain the service from
-     * @return The service
-     * @throws OXException if the service is not available
-     */
-    public static <T> T requireService(Class<T> serviceClass, ServiceLookup serviceLookup) throws OXException {
-        T service = serviceLookup.getService(serviceClass);
+        I18nService service = services.get(locale);
         if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(serviceClass.getName());
+            return I18nTranslator.EMPTY;
         }
 
+        return new I18nTranslator(service);
+    }
+
+    @Override
+    public I18nService addingService(ServiceReference<I18nService> reference) {
+        I18nService service = super.addingService(reference);
+        if (service != null) {
+            I18nService existing = services.putIfAbsent(service.getLocale(), service);
+            if (existing != null) {
+                LOG.warn("Ignoring duplicate I18nService for locale {}.", service.getLocale());
+                context.ungetService(reference);
+                return null;
+            }
+        }
         return service;
     }
 
-    private Tools() {
-        super();
+    @Override
+    public void removedService(ServiceReference<I18nService> reference, I18nService service) {
+        if (services.remove(service.getLocale(), service)) {
+            super.removedService(reference, service);
+        }
     }
+
 }

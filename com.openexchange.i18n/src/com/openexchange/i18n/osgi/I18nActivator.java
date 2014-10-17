@@ -65,8 +65,10 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.i18n.impl.CompositeI18nTools;
 import com.openexchange.i18n.impl.I18nImpl;
+import com.openexchange.i18n.impl.I18nTranslatorFactory;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.impl.TranslationsI18N;
@@ -222,11 +224,19 @@ public class I18nActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.debug("I18n Starting");
+
+
+
         try {
             ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
             this.csh = csh;
 
             track(ConfigurationService.class, new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class));
+
+            I18nTranslatorFactory translatorFactory = new I18nTranslatorFactory(context);
+            rememberTracker(translatorFactory);
+            registerService(TranslatorFactory.class, translatorFactory);
+
             openTrackers();
 
             I18nServiceHolderListener listener = new I18nServiceHolderListener(context, csh);
@@ -236,6 +246,7 @@ public class I18nActivator extends HousekeepingActivator {
         } catch (final Throwable e) {
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }
+
 
         LOG.debug("I18n Started");
     }

@@ -50,43 +50,18 @@
 package com.openexchange.i18n;
 
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
- * <p>If strings shall be translated, you need to use an appropriate {@link I18nService},
- * according to the desired locale. The {@link I18nTranslatorFactory} helps you to
- * keep track of all {@link I18nService} instances and creates new {@link Translator}
- * instances based on given locales.</p>
- *
- * <p>{@link I18nTranslatorFactory} is a {@link ServiceTracker}. Simply create a new
- * instance in your bundles {@link BundleActivator} and open it.</p>
+ * The {@link TranslatorFactory} creates {@link Translator} instances based for
+ * given locales. Underneath the {@link I18nService}s are used.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class I18nTranslatorFactory extends ServiceTracker<I18nService, I18nService> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(I18nTranslatorFactory.class);
-
-    private final ConcurrentMap<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
-
-
-    /**
-     * Initializes a new {@link I18nTranslatorFactory}.
-     *
-     * @param context The bundle context
-     */
-    public I18nTranslatorFactory(BundleContext context) {
-        super(context, I18nService.class, null);
-    }
+@SingletonService
+public interface TranslatorFactory {
 
     /**
      * Returns a translator for the given locale. If no {@link I18nService} for
@@ -97,38 +72,6 @@ public class I18nTranslatorFactory extends ServiceTracker<I18nService, I18nServi
      * @param locale The locale
      * @return A new translator instance
      */
-    public Translator translatorFor(Locale locale) {
-        if (locale == null) {
-            return I18nTranslator.EMPTY;
-        }
-
-        I18nService service = services.get(locale);
-        if (service == null) {
-            return I18nTranslator.EMPTY;
-        }
-
-        return new I18nTranslator(service);
-    }
-
-    @Override
-    public I18nService addingService(ServiceReference<I18nService> reference) {
-        I18nService service = super.addingService(reference);
-        if (service != null) {
-            I18nService existing = services.putIfAbsent(service.getLocale(), service);
-            if (existing != null) {
-                LOG.warn("Ignoring duplicate I18nService for locale {}.", service.getLocale());
-                context.ungetService(reference);
-                return null;
-            }
-        }
-        return service;
-    }
-
-    @Override
-    public void removedService(ServiceReference<I18nService> reference, I18nService service) {
-        if (services.remove(service.getLocale(), service)) {
-            super.removedService(reference, service);
-        }
-    }
+    Translator translatorFor(Locale locale);
 
 }
