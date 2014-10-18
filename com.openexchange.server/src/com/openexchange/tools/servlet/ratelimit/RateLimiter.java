@@ -413,7 +413,7 @@ public final class RateLimiter {
      * @param maxRateTimeWindow The associated time window
      * @param createIfAbsent Whether to create the rate limit trace or not
      * @param optRequest The checked HTTP request (rather for logging purposes); may be <code>null</code>
-     * @return <code>true</code> if a rate permit was consumed; otherwise false
+     * @return <code>true</code> if a rate permit was consumed; otherwise <code>false</code>
      * @throws RateLimitedException If rate limit is exceeded
      */
     public static boolean optRateLimitFor(Key key, int maxRate, int maxRateTimeWindow, HttpServletRequest optRequest) {
@@ -428,6 +428,7 @@ public final class RateLimiter {
      * @param maxRateTimeWindow The associated time window
      * @param createIfAbsent Whether to create the rate limit trace or not
      * @param optRequest The checked HTTP request (rather for logging purposes); may be <code>null</code>
+     * @return <code>true</code> if a rate permit was consumed; otherwise <code>false</code>
      * @throws RateLimitedException If rate limit is exceeded
      */
     private static boolean checkRateLimitForRequest(Key key, int maxRate, int maxRateTimeWindow, boolean createIfAbsent, HttpServletRequest optRequest) {
