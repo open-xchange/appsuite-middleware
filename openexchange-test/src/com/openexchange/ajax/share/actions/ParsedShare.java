@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.share.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -77,7 +80,7 @@ public class ParsedShare {
     private int createdBy;
     private Date lastModified;
     private int modifiedBy;
-    private ShareTarget target;
+    private List<ShareTarget> targets;
     private ShareRecipient recipient;
     private int guest;
 
@@ -108,9 +111,24 @@ public class ParsedShare {
             lastModified = new Date(json.getLong("last_modified"));
         }
         modifiedBy = json.optInt("modified_by");
-        if (json.has("target")) {
-            JSONObject jsonTarget = json.getJSONObject("target");
-            target = new ShareTarget(Module.getModuleInteger(jsonTarget.optString("module")), jsonTarget.optString("folder"), jsonTarget.optString("item", null));
+        if (json.has("targets")) {
+            targets = new ArrayList<ShareTarget>();
+            JSONArray jsonTargets = json.getJSONArray("targets");
+            for (int i = 0; i < jsonTargets.length(); i++) {
+                JSONObject jsonTarget = jsonTargets.getJSONObject(i);
+                ShareTarget target = new ShareTarget(
+                    Module.getModuleInteger(jsonTarget.optString("module")), jsonTarget.optString("folder"), jsonTarget.optString("item", null));
+                if (jsonTarget.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
+                    recipient.setExpiryDate(new Date(jsonTarget.getLong(FolderField.EXPIRY_DATE.getName())));
+                }
+                if (jsonTarget.hasAndNotNull(FolderField.ACTIVATION_DATE.getName())) {
+                    recipient.setActivationDate(new Date(jsonTarget.getLong(FolderField.ACTIVATION_DATE.getName())));
+                }
+                if (jsonTarget.hasAndNotNull("meta")) {
+                    //TODO
+                }
+                targets.add(target);
+            }
         }
         if (json.has("recipient")) {
             JSONObject jsonObject = json.getJSONObject("recipient");
@@ -136,12 +154,6 @@ public class ParsedShare {
             default:
                 Assert.fail("Unknown recipient type");
                 break;
-            }
-            if (jsonObject.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
-                recipient.setExpiryDate(new Date(jsonObject.getLong(FolderField.EXPIRY_DATE.getName())));
-            }
-            if (jsonObject.hasAndNotNull(FolderField.ACTIVATION_DATE.getName())) {
-                recipient.setActivationDate(new Date(jsonObject.getLong(FolderField.ACTIVATION_DATE.getName())));
             }
             if (jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
                 recipient.setBits(jsonObject.getInt(FolderField.BITS.getName()));
@@ -207,12 +219,12 @@ public class ParsedShare {
     }
 
     /**
-     * Gets the target
+     * Gets the targets
      *
-     * @return The target
+     * @return The targets
      */
-    public ShareTarget getTarget() {
-        return target;
+    public List<ShareTarget> getTargets() {
+        return targets;
     }
 
     /**
@@ -229,12 +241,12 @@ public class ParsedShare {
     }
 
     /**
-     * Sets the target
+     * Sets the targets
      *
-     * @param target The target to set
+     * @param targets The targets to set
      */
-    public void setTarget(ShareTarget target) {
-        this.target = target;
+    public void setTargets(List<ShareTarget> targets) {
+        this.targets = targets;
     }
 
 }

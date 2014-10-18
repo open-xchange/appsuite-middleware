@@ -129,9 +129,11 @@ public class TestGuestContact extends ShareTest {
         List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
         int guestId = -1;
         for (ParsedShare share : allShares) {
-            if (share.getTarget().equals(target)) {
-                guestId = share.getGuest();
-                break;
+            for (ShareTarget shareTarget : share.getTargets()) {
+                if (shareTarget.equals(target)) {
+                    guestId = share.getGuest();
+                    break;
+                }
             }
         }
         assertTrue("Guest id must not be -1", guestId > -1);

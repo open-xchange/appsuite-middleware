@@ -77,6 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -262,10 +263,32 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share, or <code>null</code> if not found
      */
     protected static ParsedShare discoverShare(List<ParsedShare> shares, int folderID, int guest) throws OXException, IOException, JSONException {
-        String folder = String.valueOf(folderID);
         for (ParsedShare share : shares) {
-            if (folder.equals(share.getTarget().getFolder()) && guest == share.getGuest()) {
+            if (null != discoverTarget(share, folderID, guest)) {
                 return share;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Discovers a specific share target amongst the supplied share, based on the folder- and guest identifiers.
+     *
+     * @param share The share to search
+     * @param folderID The folder ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The target, or <code>null</code> if not found
+     */
+    protected static ShareTarget discoverTarget(ParsedShare share, int folderID, int guest) {
+        String folder = String.valueOf(folderID);
+        if (guest == share.getGuest()) {
+            List<ShareTarget> targets = share.getTargets();
+            if (null != targets) {
+                for (ShareTarget target : targets) {
+                    if (folder.equals(target.getFolder())) {
+                        return target;
+                    }
+                }
             }
         }
         return null;

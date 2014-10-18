@@ -264,10 +264,12 @@ public class NewTest extends ShareTest {
     private List<ParsedShare> getSharesForTargets(List<ParsedShare> allShares, List<ShareTarget> targets) {
         List<ParsedShare> shares = new LinkedList<ParsedShare>();
         for (ParsedShare ps : allShares) {
-            for (ShareTarget target : targets) {
-                if (target.equals(ps.getTarget())) {
-                    shares.add(ps);
-                    break;
+            for (ShareTarget st : ps.getTargets()) {
+                for (ShareTarget target : targets) {
+                    if (target.equals(st)) {
+                        shares.add(ps);
+                        break;
+                    }
                 }
             }
         }
