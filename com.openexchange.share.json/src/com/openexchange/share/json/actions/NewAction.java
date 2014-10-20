@@ -53,11 +53,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -103,12 +105,29 @@ public class NewAction extends AbstractShareAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         NewRequest request = NewRequest.parse(requestData);
         List<Share> shares = shareTargets(request, session);
-        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
-        sendNotifications(shares, request, result, session);
+
+        AJAXRequestResult result = new AJAXRequestResult();
+        List<OXException> warnings = sendNotifications(shares, request, session);
+        result.addWarnings(warnings);
+
+        List<ShareRecipient> recipients = request.getRecipients();
+        JSONArray jTokens = new JSONArray(recipients.size());
+
+        int sharesIndex = 0;
+        for (ShareRecipient recipient : recipients) {
+            if (recipient.getType() == RecipientType.USER || recipient.getType() == RecipientType.GROUP) {
+                jTokens.put(JSONObject.NULL);
+            } else {
+                jTokens.put(shares.get(sharesIndex++).getToken());
+            }
+        }
+
+        result.setResultObject(jTokens, "json");
+        result.setTimestamp(new Date());
         return result;
     }
 
-    private void sendNotifications(List<Share> shares, NewRequest request, AJAXRequestResult result, ServerSession session) {
+    private  List<OXException> sendNotifications(List<Share> shares, NewRequest request, ServerSession session) {
         List<OXException> warnings = new LinkedList<OXException>();
         try {
             if (!shares.isEmpty()) {
@@ -139,9 +158,9 @@ public class NewAction extends AbstractShareAction {
             } else {
                 warnings.add(ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
             }
-        } finally {
-            result.addWarnings(warnings);
         }
+
+        return warnings;
     }
 
     private List<Share> shareTargets(NewRequest request, ServerSession session) throws OXException {
@@ -155,9 +174,8 @@ public class NewAction extends AbstractShareAction {
              * distinguish between internal and external recipients
              */
             List<ShareTarget> targets = request.getTargets();
-            List<ShareRecipient> recipients = request.getRecipients();
-            List<ShareRecipient> internalRecipients = filterRecipients(recipients, RecipientType.USER, RecipientType.GROUP);
-            List<ShareRecipient> externalRecipients = filterRecipients(recipients, RecipientType.ANONYMOUS, RecipientType.GUEST);
+            List<ShareRecipient> internalRecipients = request.getInternalRecipients();
+            List<ShareRecipient> externalRecipients = request.getExternalRecipients();
             List<Integer> guestIDs = Collections.emptyList();
             List<Share> shares;
             if (externalRecipients.isEmpty()) {
@@ -276,25 +294,6 @@ public class NewAction extends AbstractShareAction {
         return finalRecipients;
     }
 
-    /**
-     * Gets a filtered list only containing the share recipients of the spcieid type.
-     *
-     * @param recipients The recipients to filter
-     * @param types The allowed type
-     * @return The filtered recipients
-     */
-    private static List<ShareRecipient> filterRecipients(List<ShareRecipient> recipients, RecipientType...types) {
-        List<ShareRecipient> filteredRecipients = new ArrayList<ShareRecipient>();
-        for (ShareRecipient recipient : recipients) {
-            RecipientType type = RecipientType.of(recipient);
-            for (RecipientType allowedType : types) {
-                if (allowedType == type) {
-                    filteredRecipients.add(recipient);
-                    break;
-                }
-            }
-        }
-        return filteredRecipients;
-    }
+
 
 }

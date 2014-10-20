@@ -78,9 +78,13 @@ public class NewRequest {
 
     private final AJAXRequestData requestData;
 
+    private final List<ShareTarget> targets;
+
     private final List<ShareRecipient> recipients;
 
-    private final List<ShareTarget> targets;
+    private final List<ShareRecipient> internalRecipients;
+
+    private final List<ShareRecipient> externalRecipients;
 
     private final String message;
 
@@ -89,6 +93,8 @@ public class NewRequest {
         super();
         this.requestData = requestData;
         this.recipients = recipients;
+        internalRecipients = filterRecipients(recipients, RecipientType.USER, RecipientType.GROUP);
+        externalRecipients = filterRecipients(recipients, RecipientType.ANONYMOUS, RecipientType.GUEST);
         this.targets = targets;
         this.message = message;
     }
@@ -113,6 +119,13 @@ public class NewRequest {
         return recipients;
     }
 
+    public List<ShareRecipient> getInternalRecipients() {
+        return internalRecipients;
+    }
+
+    public List<ShareRecipient> getExternalRecipients() {
+        return externalRecipients;
+    }
 
     public List<ShareTarget> getTargets() {
         return targets;
@@ -267,6 +280,27 @@ public class NewRequest {
             recipient.setExpiryDate(new Date(jsonRecipient.getLong("expiry_date")));
         }
         return recipient;
+    }
+
+    /**
+     * Gets a filtered list only containing the share recipients of the specified type.
+     *
+     * @param recipients The recipients to filter
+     * @param types The allowed type
+     * @return The filtered recipients
+     */
+    private static List<ShareRecipient> filterRecipients(List<ShareRecipient> recipients, RecipientType...types) {
+        List<ShareRecipient> filteredRecipients = new ArrayList<ShareRecipient>();
+        for (ShareRecipient recipient : recipients) {
+            RecipientType type = RecipientType.of(recipient);
+            for (RecipientType allowedType : types) {
+                if (allowedType == type) {
+                    filteredRecipients.add(recipient);
+                    break;
+                }
+            }
+        }
+        return filteredRecipients;
     }
 
 }

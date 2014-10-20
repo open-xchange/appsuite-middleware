@@ -96,6 +96,7 @@ public class UpdateAction extends AbstractShareAction {
 //        }
         /*
          * update share
+         * TODO: pin-code change and change of auth type requires user update
          */
         getShareService().updateShare(session, share, clientTimestamp);
         /*
