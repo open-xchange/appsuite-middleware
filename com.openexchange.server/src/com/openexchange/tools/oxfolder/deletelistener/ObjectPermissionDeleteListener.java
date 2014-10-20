@@ -85,7 +85,7 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
         try {
             final int userId = event.getId();
             /*
-             * Delete account data
+             * Delete permissions created by this user
              */
             stmt = writeCon.prepareStatement("DELETE FROM object_permission WHERE cid = ? AND (created_by = ? OR shared_by = ?)");
             int pos = 1;
@@ -100,6 +100,21 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
+            stmt.setInt(pos, userId);
+            stmt.executeUpdate();
+
+            /*
+             * Delete permissions for this user
+             */
+            stmt = writeCon.prepareStatement("DELETE FROM object_permission WHERE cid = ? AND permission_id = ? AND group_flag = 0");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos, userId);
+            stmt.executeUpdate();
+
+            stmt = writeCon.prepareStatement("DELETE FROM del_object_permission WHERE cid = ? AND permission_id = ? AND group_flag = 0");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
