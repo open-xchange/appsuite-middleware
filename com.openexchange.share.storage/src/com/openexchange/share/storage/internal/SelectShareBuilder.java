@@ -161,7 +161,7 @@ public class SelectShareBuilder {
          */
         String prefixShare = ALIAS_SHARE + '.';
         String prefixTarget = ALIAS_SHARE_TARGET + '.';
-        StringBuilder stringBuilder = new StringBuilder()
+        StringBuilder statementBuilder = new StringBuilder(256)
             .append("SELECT ").append(SHARE_MAPPER.getColumns(shareFields, prefixShare)).append(',')
             .append(TARGET_MAPPER.getColumns(targetFields, prefixTarget))
             .append(" FROM share AS ").append(ALIAS_SHARE).append(" LEFT JOIN share_target AS ").append(ALIAS_SHARE_TARGET)
@@ -172,34 +172,34 @@ public class SelectShareBuilder {
             .append(" WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel(prefixShare)).append("=?")
         ;
         if (null != tokens && 0 < tokens.length) {
-            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel(prefixShare));
+            statementBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel(prefixShare));
             if (1 == tokens.length) {
-                stringBuilder.append("=?");
+                statementBuilder.append("=?");
             } else {
-                stringBuilder.append(" IN (?");
+                statementBuilder.append(" IN (?");
                 for (int i = 1; i < tokens.length; i++) {
-                    stringBuilder.append(",?");
+                    statementBuilder.append(",?");
                 }
-                stringBuilder.append(')');
+                statementBuilder.append(')');
             }
         }
         if (0 < createdBy) {
-            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel(prefixShare)).append("=?");
+            statementBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel(prefixShare)).append("=?");
         }
         if (null != guests && 0 < guests.length) {
-            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel(prefixShare));
+            statementBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.GUEST_ID).getColumnLabel(prefixShare));
             if (1 == guests.length) {
-                stringBuilder.append("=?");
+                statementBuilder.append("=?");
             } else {
-                stringBuilder.append(" IN (?");
+                statementBuilder.append(" IN (?");
                 for (int i = 1; i < guests.length; i++) {
-                    stringBuilder.append(",?");
+                    statementBuilder.append(",?");
                 }
-                stringBuilder.append(')');
+                statementBuilder.append(')');
             }
         }
         if (null != expiredAfter) {
-            stringBuilder.append(" AND EXISTS (SELECT 1 FROM share_target WHERE ")
+            statementBuilder.append(" AND EXISTS (SELECT 1 FROM share_target WHERE ")
                 .append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel()).append("=?")
                 .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel()).append('=')
                 .append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel(prefixShare))
@@ -208,7 +208,7 @@ public class SelectShareBuilder {
             ;
         }
         if (null != target) {
-            stringBuilder.append(" AND EXISTS (SELECT 1 FROM share_target WHERE ")
+            statementBuilder.append(" AND EXISTS (SELECT 1 FROM share_target WHERE ")
                 .append(TARGET_MAPPER.get(ShareTargetField.CONTEXT_ID).getColumnLabel()).append("=?")
                 .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.TOKEN).getColumnLabel()).append('=')
                 .append(SHARE_MAPPER.get(ShareField.TOKEN).getColumnLabel(prefixShare))
@@ -216,14 +216,14 @@ public class SelectShareBuilder {
                 .append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.FOLDER).getColumnLabel()).append("=?")
             ;
             if (null != target.getItem()) {
-                stringBuilder.append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.ITEM).getColumnLabel()).append("=?");
+                statementBuilder.append(" AND ").append(TARGET_MAPPER.get(ShareTargetField.ITEM).getColumnLabel()).append("=?");
             }
-            stringBuilder.append(')');
+            statementBuilder.append(')');
         }
         /*
          * prepare statement
          */
-        PreparedStatement stmt = connection.prepareStatement(stringBuilder.append(';').toString());
+        PreparedStatement stmt = connection.prepareStatement(statementBuilder.toString());
         int parameterIndex = 1;
         stmt.setInt(parameterIndex++, contextID);
         if (null != tokens) {
