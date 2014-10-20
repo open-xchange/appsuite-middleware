@@ -49,6 +49,8 @@
 
 package com.openexchange.share.servlet.internal;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
@@ -165,6 +167,11 @@ public class ResetPasswordSession implements Session {
                 parameters.put(name, value);
             }
         }
+    }
+
+    @Override
+    public Set<String> getParameterNames() {
+        return Collections.unmodifiableSet(parameters.keySet());
     }
 
     @Override

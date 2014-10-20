@@ -64,6 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.sessiond.SessionModifyCallback;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -198,6 +199,11 @@ public class DefaultShareServiceTest extends TestCase {
             @Override
             public String getAuthId() {
                 return UUID.randomUUID().toString();
+            }
+
+            @Override
+            public SessionModifyCallback getCallback() {
+                return null;
             }
         });
     }

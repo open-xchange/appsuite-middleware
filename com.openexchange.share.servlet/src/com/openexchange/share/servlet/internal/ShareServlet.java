@@ -61,7 +61,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
-import com.openexchange.tools.servlet.RateLimitedException;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
  * {@link ShareServlet}
