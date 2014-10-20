@@ -1,3 +1,7 @@
+* 2014-10-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34928: Try to lookup existing stored session if http-auth.autologin is enabled
+
 * 2014-10-17 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34987: Added properties 'com.openexchange.oauth.google.redirectUrl' and 'com.openexchange.oauth.google.productName'
