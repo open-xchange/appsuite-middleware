@@ -1,3 +1,7 @@
+* 2014-10-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34928: Try to lookup existing stored session if http-auth.autologin is enabled
+
 * 2014-10-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger

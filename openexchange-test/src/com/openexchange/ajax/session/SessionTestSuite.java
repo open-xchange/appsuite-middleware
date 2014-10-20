@@ -74,6 +74,7 @@ public final class SessionTestSuite {
         tests.addTestSuite(ChangeIPTest.class);
         tests.addTestSuite(FormLoginTest.class);
         tests.addTestSuite(TokenLoginTest.class);
+        tests.addTestSuite(Bug34928Test.class);
         return tests;
     }
 }
