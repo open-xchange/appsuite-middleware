@@ -111,8 +111,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
         final S service = context.getService(reference);
         final int ranking = getRanking(reference, defaultRanking);
         final RankedService<S> rankedService = new RankedService<S>(service, ranking);
-        if (services.add(rankedService)) { // Append to the end of the list
-            services.sort();
+        if (services.addAndSort(rankedService)) { // Append
             return service;
         }
         context.ungetService(reference);
