@@ -57,7 +57,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
-import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -349,13 +348,8 @@ public final class SessionImpl implements PutIfAbsent {
     public void setLocalIp(final String localIp) {
         try {
             setLocalIp(localIp, true);
-        } catch (final Exception e) {
-            if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                // No such session held in session storage
-                LOG.debug("Session {} not available in session storage.", sessionId, e);
-            } else {
-                LOG.warn("Failed to distribute change of IP address among remote nodes.", e);
-            }
+        } catch (Exception e) {
+            LOG.warn("Failed to distribute change of IP address among remote nodes.", e);
         }
     }
 
@@ -558,6 +552,7 @@ public final class SessionImpl implements PutIfAbsent {
         return builder.toString();
     }
 
+    @Override
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }
