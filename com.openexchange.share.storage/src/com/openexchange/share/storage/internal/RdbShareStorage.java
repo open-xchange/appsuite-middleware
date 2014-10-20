@@ -363,7 +363,7 @@ public class RdbShareStorage implements ShareStorage {
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             for (DefaultShare share : shares) {
-                SHARE_MAPPER.setParameters(stmt, share, ShareField.values());
+                SHARE_MAPPER.setParameters(stmt, share, fields);
                 stmt.setInt(1 + fields.length, share.getContextID());
                 stmt.setBytes(2 + fields.length, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
                 stmt.addBatch();
