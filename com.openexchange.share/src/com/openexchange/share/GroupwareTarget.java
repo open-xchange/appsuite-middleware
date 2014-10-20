@@ -49,6 +49,8 @@
 
 package com.openexchange.share;
 
+import java.io.Serializable;
+
 
 /**
  * {@link GroupwareTarget}
@@ -56,7 +58,7 @@ package com.openexchange.share;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class GroupwareTarget {
+public class GroupwareTarget implements Serializable {
 
     protected int module;
     protected String folder;
