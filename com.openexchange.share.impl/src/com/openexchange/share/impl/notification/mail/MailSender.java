@@ -237,13 +237,15 @@ public class MailSender {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
-        try {
-            transport.sendMailMessage(new ContentAwareComposedMailMessage(mail, session, session.getContext()), ComposeType.NEW);
-        } finally {
+        if (null != transport) {
             try {
-                transport.close();
-            } catch (OXException e) {
-                // ignore
+                transport.sendMailMessage(new ContentAwareComposedMailMessage(mail, session, session.getContext()), ComposeType.NEW);
+            } finally {
+                try {
+                    transport.close();
+                } catch (OXException e) {
+                    // ignore
+                }
             }
         }
     }
