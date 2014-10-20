@@ -121,7 +121,6 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     @Override
     public void removedService(final ServiceReference<S> reference, final S service) {
         services.remove(new RankedService<S>(service, getRanking(reference)));
-        services.sort();
         context.ungetService(reference);
     }
 
