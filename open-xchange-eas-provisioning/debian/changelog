@@ -1,3 +1,9 @@
+open-xchange-eas-provisioning (7.6.1-6) stable; urgency=medium
+
+  * Build for patch 2014-10-24
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 17 Oct 2014 10:07:41 +0000
+
 open-xchange-eas-provisioning (7.6.1-5) stable; urgency=low
 
   * Fifth candidate for 7.6.1 release
