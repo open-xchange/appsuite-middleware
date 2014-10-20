@@ -105,15 +105,17 @@ public final class ConfigurationImpl implements ConfigurationService {
     private static final class PropertyFileFilter implements FileFilter {
 
         private final String ext;
+        private final String mpasswd;
 
         PropertyFileFilter() {
             super();
             ext = ".properties";
+            mpasswd = "mpasswd";
         }
 
         @Override
         public boolean accept(final File pathname) {
-            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext) || !pathname.getName().contains(".");
+            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext) || mpasswd.equals(pathname.getName());
         }
 
     }
@@ -324,8 +326,12 @@ public final class ConfigurationImpl implements ConfigurationService {
                 properties.put(propName, e.getValue().toString().trim());
                 propertiesFiles.put(propName, propFilePath);
             }
-        } catch (final IOException e) {
-            LOG.warn("An error occurred while processing property file \"{}\".", propFile, e);
+        } catch (IOException e) {
+            LOG.warn("An I/O error occurred while processing .properties file \"{}\".", propFile, e);
+        } catch (IllegalArgumentException encodingError) {
+            LOG.warn("A malformed Unicode escape sequence in .properties file \"{}\".", propFile, encodingError);
+        } catch (RuntimeException e) {
+            LOG.warn("An error occurred while processing .properties file \"{}\".", propFile, e);
         }
     }
 
@@ -778,18 +784,22 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Continue to reload
         LOG.info("Detected changes in the following configuration files: {}", changes);
 
-        // Drop cache in config-cascade
+        // Re-initialize config-cascade
         {
-            final ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
+            ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
             if (configProvider != null) {
-                configProvider.invalidate();
+                try {
+                    configProvider.reinit();
+                } catch (Exception e) {
+                    LOG.warn("Failed to re-initialize configuration provider for scope \"server\"", e);
+                }
             }
         }
 
         // Propagate reloaded configuration among Reloadables
-        for (final Reloadable reloadable : reloadableServices.values()) {
+        for (Reloadable reloadable : reloadableServices.values()) {
             try {
-                final Set<String> configFileNames = reloadable.getConfigFileNames().keySet();
+                Set<String> configFileNames = reloadable.getConfigFileNames().keySet();
                 if (null == configFileNames || configFileNames.isEmpty()) {
                     // Reloadable does not indicate the files of interest
 
@@ -798,9 +808,9 @@ public final class ConfigurationImpl implements ConfigurationService {
                     // Reloadable does indicate the files of interest; thus check against changed ones
 
                     boolean doReload = false;
-                    for (final Iterator<String> it = configFileNames.iterator(); !doReload && it.hasNext();) {
-                        final String fileName = it.next();
-                        for (final String changedFilePath : changes) {
+                    for (Iterator<String> it = configFileNames.iterator(); !doReload && it.hasNext();) {
+                        String fileName = it.next();
+                        for (String changedFilePath : changes) {
                             if (changedFilePath.endsWith(fileName)) {
                                 doReload = true;
                                 break;
@@ -811,7 +821,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                         reloadable.reloadConfiguration(this);
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
             }
         }
