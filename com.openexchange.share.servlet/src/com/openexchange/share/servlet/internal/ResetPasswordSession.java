@@ -162,7 +162,7 @@ public class ResetPasswordSession implements Session {
     public void setParameter(String name, Object value) {
         if (null != name) {
             if (null == value) {
-                parameters.remove(value);
+                parameters.remove(name);
             } else {
                 parameters.put(name, value);
             }
