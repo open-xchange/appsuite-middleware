@@ -72,10 +72,35 @@ public class SortableConcurrentList<E extends Comparable<E>> extends ConcurrentL
     /**
      * Initializes a new {@link SortableConcurrentList}.
      *
-     * @param c The collection of intial elements
+     * @param c The collection of initial elements
      */
     protected SortableConcurrentList(Collection<? extends E> c) {
         super(c);
+    }
+
+    /**
+     * Appends the specified element to the end of this list and sorts its elements afterwards.
+     * <p>
+     * Thus it is basically the chained invocation of {@link #add(Object)} followed by {@link #sort()}; except that it is performed atomically.
+     *
+     * @param e The element to be appended to this list
+     * @return <tt>true</tt> if this collection changed; otherwise <code>false</code>
+     * @see Comparable
+     */
+    public boolean addAndSort(E e) {
+        boolean added;
+        List<E> expected;
+        List<E> list;
+        do {
+            expected = ref.get();
+            list = new ArrayList<E>(expected);
+            added = list.add(e);
+            if (added) {
+                Collections.sort(list);
+            }
+        } while (!ref.compareAndSet(expected, list));
+
+        return added;
     }
 
     /**

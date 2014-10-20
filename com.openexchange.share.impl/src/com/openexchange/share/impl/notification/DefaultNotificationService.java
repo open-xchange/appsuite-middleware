@@ -129,9 +129,7 @@ public class DefaultNotificationService implements ShareNotificationService {
      * @param handler The handler to add
      */
     public void add(ShareNotificationHandler handler) {
-        if (handlers.add(new Wrapper(handler))) {
-            handlers.sort();
-        }
+        handlers.addAndSort(new Wrapper(handler));
     }
 
     /**
