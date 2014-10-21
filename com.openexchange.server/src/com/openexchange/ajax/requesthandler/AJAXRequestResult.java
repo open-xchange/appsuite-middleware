@@ -180,13 +180,11 @@ public class AJAXRequestResult {
         /**
          * The special result directly responded to client.
          */
-        @NonNull DIRECT,
+        DIRECT,
         /**
          * Signals a HTTP error
          */
-        @NonNull HTTP_ERROR,
-
-        ;
+        @NonNull HTTP_ERROR,;
     }
 
     /**

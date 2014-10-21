@@ -417,7 +417,7 @@ public class DispatcherServlet extends SessionServlet {
              * ... and send response
              */
             sendResponse(requestData, result, httpRequest, httpResponse);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
                 sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
                 logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
@@ -461,7 +461,7 @@ public class DispatcherServlet extends SessionServlet {
             } else {
                 handleOXException(e, httpRequest, httpResponse);
             }
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             logException(e);
             handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
         } finally {
