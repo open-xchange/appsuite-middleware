@@ -1205,7 +1205,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 long start = System.currentTimeMillis();
                 msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
-                imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
+                // Force to pre-load envelope data through touching "Message-ID" header
+                msg.getMessageID();
                 long duration = System.currentTimeMillis() - start;
 
                 if (duration > 1000L) {
