@@ -45,6 +45,7 @@
 
  - Fix for bug 34776: Drop passed Message-ID header on draft-edit action
  - Fix for bug 34867: Added missing import to 'com.openexchange.mailfilter.json' bundle
+ - Fix for bug 34510: Respond with common JavaScript call-back snippet for USM user agent
 
 * 2014-10-09 - steffen.templin@open-xchange.com
 

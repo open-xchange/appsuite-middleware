@@ -229,6 +229,18 @@ public class DefaultDispatcher implements Dispatcher {
                     }
                 }
             }
+            /*-
+             * Validate request headers for resume
+             */
+            {
+                // If-Match header should contain "*" or ETag. If not, then return 412.
+                String ifMatch = modifiedRequestData.getHeader("If-Match");
+                if (ifMatch != null && (action instanceof ETagAwareAJAXActionService) && (("*".equals(ifMatch)) || ((ETagAwareAJAXActionService) action).checkETag(ifMatch, modifiedRequestData, session))) {
+                    final AJAXRequestResult failedResult = new AJAXRequestResult();
+                    failedResult.setHttpStatusCode(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return failedResult;
+                }
+            }
             /*
              * Check for action annotation
              */
