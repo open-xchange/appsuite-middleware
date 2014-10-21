@@ -81,6 +81,14 @@ public interface Dispatcher {
     AJAXRequestResult perform(AJAXRequestData requestData, AJAXState state, ServerSession session) throws OXException;
 
     /**
+     * Looks-up denoted factory
+     *
+     * @param module The module to look-up by
+     * @return The factory or <code>null</code>
+     */
+    AJAXActionServiceFactory lookupFactory(String module);
+
+    /**
      * Begins a dispatcher cycle.
      * <pre>
      *  dispatcher.begin();

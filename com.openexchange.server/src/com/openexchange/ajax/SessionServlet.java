@@ -74,11 +74,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.HttpStatus;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.login.HashCalculator;
-import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajax.requesthandler.Dispatchers;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
@@ -322,6 +324,8 @@ public abstract class SessionServlet extends AJAXServlet {
         String sessionId = null;
         ServerSession session = null;
         try {
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             initializeSession(req, resp);
             session = getSessionObject(req, true);
             if (null != session) {
@@ -347,37 +351,7 @@ public abstract class SessionServlet extends AJAXServlet {
             resp.setContentType("text/plain; charset=UTF-8");
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final OXException e) {
-            if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
-                LOG.debug("", e);
-                handleSessiondException(e, req, resp);
-                /*
-                 * Return JSON response
-                 */
-                final Response response = new Response();
-                response.setException(e);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final PrintWriter writer = resp.getWriter();
-                try {
-                    ResponseWriter.write(response, writer, localeFrom(session));
-                    writer.flush();
-                } catch (final JSONException e1) {
-                    log(RESPONSE_ERROR, e1);
-                    sendError(resp);
-                }
-            } else {
-                e.log(LOG);
-                final Response response = new Response(getSessionObject(req));
-                response.setException(e);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final PrintWriter writer = resp.getWriter();
-                try {
-                    ResponseWriter.write(response, writer, localeFrom(session));
-                    writer.flush();
-                } catch (final JSONException e1) {
-                    log(RESPONSE_ERROR, e1);
-                    sendError(resp);
-                }
-            }
+            handleOXException(e, req, resp);
         } finally {
             if (null != sessionId && null != threadCounter) {
                 threadCounter.decrement(sessionId);
@@ -464,6 +438,161 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
     }
+
+    /**
+     * Writes common JavaScript call-back for given error.
+     *
+     * @param e The error
+     * @param httpRequest The HTTP request
+     * @param httpResponse The HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    protected void writeErrorAsJsCallback(final OXException e, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws IOException {
+        try {
+            // As API response
+            APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);
+        } catch (JSONException je) {
+            LOG.error("", e);
+            try {
+                httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
+            } catch (final IOException ioe) {
+                LOG.error("", ioe);
+            }
+        }
+    }
+
+    /**
+     * Handles passed {@link OXException} instance.
+     *
+     * @param e The {@code OXException} instance
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        handleOXException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred inside the server which prevented it from fulfilling the request.", req, resp);
+    }
+
+    private static final String USM_USER_AGENT = "Open-Xchange USM HTTP Client";
+
+    /**
+     * Handles passed {@link OXException} instance.
+     *
+     * @param e The {@code OXException} instance
+     * @param statusCode The HTTP status code
+     * @param reasonPhrase The HTTP reason phrase
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
+            LOG.debug("", e);
+            handleSessiondException(e, req, resp);
+
+            // Check expected output format
+            if (Dispatchers.isApiOutputExpectedFor(req)) {
+                // API response
+                APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
+            } else {
+                // No JSON response; either JavaScript call-back or regular HTML error (page)
+                if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
+                    writeErrorAsJsCallback(e, req, resp);
+                } else {
+                    String desc = e.getMessage();
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    writeErrorPage(HttpServletResponse.SC_FORBIDDEN, desc, resp);
+                }
+            }
+        } else {
+            e.log(LOG);
+
+            // Check expected output format
+            if (Dispatchers.isApiOutputExpectedFor(req)) {
+                // API response
+                APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
+            } else {
+                // No JSON response; either JavaScript call-back or regular HTML error (page)
+                if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
+                    writeErrorAsJsCallback(e, req, resp);
+                } else {
+                    String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
+                    resp.setStatus(statusCode);
+                    writeErrorPage(statusCode, desc, resp);
+                }
+            }
+        }
+    }
+
+    /**
+     * Attempts to write an error page to HTTP response.
+     *
+     * @param statusCode The HTTP status code
+     * @param desc The error description
+     * @param resp The HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    protected void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
+        resp.setContentType("text/html; charset=UTF-8");
+        resp.setHeader("Content-Disposition", "inline");
+        PrintWriter writer = resp.getWriter();
+        writer.write(getErrorPage(statusCode, null, desc));
+        writer.flush();
+    }
+
+    /**
+     * Generates a simple error page for given status code.
+     *
+     * @param sc The status code; e.g. <code>404</code>
+     * @return A simple error page
+     */
+    protected String getErrorPage(int sc) {
+        return getErrorPage(sc, null, null);
+    }
+
+    /**
+     * Generates a simple error page for given arguments.
+     *
+     * @param sc The status code; e.g. <code>404</code>
+     * @param msg The optional status message; e.g. <code>"Not Found"</code>
+     * @param desc The optional status description; e.g. <code>"The requested URL was not found on this server."</code>
+     * @return A simple error page
+     */
+    protected String getErrorPage(int sc, String msg, String desc) {
+        String msg0 = null == msg ? HttpStatus.getStatusText(sc) : msg;
+
+        StringBuilder sb = new StringBuilder(512);
+        String lineSep = System.getProperty("line.separator");
+        sb.append("<!DOCTYPE html>").append(lineSep);
+        sb.append("<html><head>").append(lineSep);
+        {
+            sb.append("<title>").append(sc);
+            if (null != msg0) {
+                sb.append(' ').append(msg0);
+            }
+            sb.append("</title>").append(lineSep);
+        }
+
+        sb.append("</head><body>").append(lineSep);
+
+        sb.append("<h1>");
+        if (null == msg0) {
+            sb.append(sc);
+        } else {
+            sb.append(msg0);
+        }
+        sb.append("</h1>").append(lineSep);
+
+        String desc0 = null == desc ? msg0 : desc;
+        if (null != desc0) {
+            sb.append("<p>").append(desc0).append("</p>").append(lineSep);
+        }
+
+        sb.append("</body></html>").append(lineSep);
+        return sb.toString();
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Checks whether passed exception indicates an IP check error.
