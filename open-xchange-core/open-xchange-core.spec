@@ -1092,6 +1092,9 @@ for I in "${NAMES[@]}"; do
     ox_set_property $I "$VALUE" /opt/open-xchange/etc/quota.properties
 done
 
+# SoftwareChange_Request-2224
+ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do

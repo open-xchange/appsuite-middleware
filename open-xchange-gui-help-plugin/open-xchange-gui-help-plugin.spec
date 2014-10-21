@@ -4,9 +4,15 @@ BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
 BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
+<<<<<<< HEAD
 Version:        @OXVERSION@
 %define         ox_release 6
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
+=======
+Version:	@OXVERSION@
+%define		ox_release 25
+Release:	%{ox_release}_<CI_CNT>.<B_CNT>
+>>>>>>> hotfix-2210
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build

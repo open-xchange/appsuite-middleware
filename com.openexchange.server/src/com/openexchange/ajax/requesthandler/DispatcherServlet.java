@@ -433,12 +433,7 @@ public class DispatcherServlet extends SessionServlet {
                 Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 int sc = ((Integer) logArgs[0]).intValue();
                 sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
-                Throwable cause = e.getNonOXExceptionCause();
-                if (null == cause) {
-                    logException(e, LogLevel.DEBUG, sc);
-                } else {
-                    logException(e);
-                }
+                logException(e, LogLevel.DEBUG, sc);
                 return;
             }
 
@@ -461,7 +456,7 @@ public class DispatcherServlet extends SessionServlet {
             } else {
                 handleOXException(e, httpRequest, httpResponse);
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             logException(e);
             handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
         } finally {
