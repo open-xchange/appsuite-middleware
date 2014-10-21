@@ -86,8 +86,8 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     }
 
     @Override
-    public UserPermissionBits getUserPermissionBits(final int userId, final int contextId) throws OXException {
-        final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+    public UserPermissionBits getUserPermissionBits(int userId, int contextId) throws OXException {
+        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
         if (null == contextService) {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
@@ -95,10 +95,10 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     }
 
     @Override
-    public UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException {
+    public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
         try {
             return loadUserPermissionBits(userId, ctx);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -113,23 +113,24 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     }
 
     @Override
-    public UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException {
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
         try {
-            final int[] userIds = new int[users.length];
+            int[] userIds = new int[users.length];
             for(int i = 0; i < users.length; i++) {
-                userIds[i] = users[i].getId();
+                User user = users[i];
+                userIds[i] = null == user ? 0 : user.getId();
             }
             return loadUserPermissionBits(ctx, null, userIds);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public UserPermissionBits[] getUserPermissionBits(final Context ctx, final int[] userIds) throws OXException {
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
         try {
             return loadUserPermissionBits(ctx, null, userIds);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -137,22 +138,23 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
 
     @Override
     public void clearStorage() {
+        // Nothing to do
     }
 
 
     @Override
-    public void removeUserPermissionBits(final int userId, final Context ctx) {
-
+    public void removeUserPermissionBits(int userId, Context ctx) {
+        // Nothing to do
     }
 
 
     @Override
-    public void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException {
+    public void saveUserPermissionBits(int permissionBits, int userId, Context ctx) throws OXException {
         saveUserPermissionBits0(null, permissionBits, userId, ctx);
     }
 
     @Override
-    public void saveUserPermissionBits(final Connection con, final int permissionBits, final int userId, final Context ctx) throws OXException {
+    public void saveUserPermissionBits(Connection con, int permissionBits, int userId, Context ctx) throws OXException {
         saveUserPermissionBits0(con, permissionBits, userId, ctx);
     }
 
@@ -170,11 +172,11 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws SQLException - if saving fails due to a SQL error
      * @throws OXException - if a writable connection could not be obtained from database
      */
-    public static void saveUserPermissionBits(final UserPermissionBits perms, final boolean insert, final Connection writeCon) throws SQLException, OXException {
+    public static void saveUserPermissionBits(UserPermissionBits perms, boolean insert, Connection writeCon) throws SQLException, OXException {
         saveUserPermissionBits(perms.getPermissionBits(), perms.getUserId(), insert, perms.getContextId(), writeCon);
     }
 
-    private static Context getContext(final UserPermissionBits perms) throws OXException {
+    private static Context getContext(UserPermissionBits perms) throws OXException {
         return ContextStorage.getInstance().getContext(perms.getContextId());
     }
 
@@ -188,7 +190,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @param ctx The context the user belongs to.
      * @throws OXException - if saving fails
      */
-    private static void saveUserPermissionBits0(final Connection con, final int permissionBits, final int userId, final Context ctx) throws OXException {
+    private static void saveUserPermissionBits0(Connection con, int permissionBits, int userId, Context ctx) throws OXException {
         boolean closeCon = con == null;
         boolean insert = false;
         try {
@@ -233,11 +235,11 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws SQLException If saving fails due to a SQL error
      * @throws OXException If a writable connection could not be obtained from database
      */
-    public static void saveUserPermissionBits(final int permissionBits, final int userId, final boolean insert, final int ctxId, final Connection writeConArg) throws SQLException, OXException {
+    public static void saveUserPermissionBits(int permissionBits, int userId, boolean insert, int ctxId, Connection writeConArg) throws SQLException, OXException {
         Connection writeCon = writeConArg;
         boolean closeConnection = false;
         PreparedStatement stmt = null;
-        final ContextImpl ctx = new ContextImpl(ctxId);
+        ContextImpl ctx = new ContextImpl(ctxId);
         try {
             if (writeCon == null) {
                 writeCon = DBPool.pickupWriteable(ctx);
@@ -258,7 +260,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             if (!insert) {
                 try {
                     UserConfigurationStorage.getInstance().invalidateCache(userId, ctx);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.warn("User Configuration could not be removed from cache", e);
                 }
             }
@@ -281,7 +283,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
      *             implementation
      */
-    public static UserPermissionBits loadUserPermissionBits(final int userId, final Context ctx) throws SQLException, OXException {
+    public static UserPermissionBits loadUserPermissionBits(int userId, Context ctx) throws SQLException, OXException {
         return loadUserPermissionBits(userId, ctx, null);
     }
 
@@ -297,8 +299,8 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws SQLException - if user configuration could not be loaded from database
      * @throws OXException - if a readable connection could not be obtained from connection pool
      */
-    public static UserPermissionBits adminLoadUserPermissionBits(final int userId, final int[] groups, final int cid, final Connection readConArg) throws SQLException, OXException {
-        final Context ctx = new ContextImpl(cid);
+    public static UserPermissionBits adminLoadUserPermissionBits(int userId, int[] groups, int cid, Connection readConArg) throws SQLException, OXException {
+        Context ctx = new ContextImpl(cid);
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -328,8 +330,8 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws SQLException
      * @throws OXException
      */
-    public static int adminCountUsersByPermission(final int cid, final UserPermissionBits permissions, final Connection readConArg) throws SQLException, OXException {
-        final Context ctx = new ContextImpl(cid);
+    public static int adminCountUsersByPermission(int cid, UserPermissionBits permissions, Connection readConArg) throws SQLException, OXException {
+        Context ctx = new ContextImpl(cid);
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -373,7 +375,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws OXException - if a readable connection could not be obtained from connection pool
      * @throws OXException - if no matching user configuration is kept in database
      */
-    public static UserPermissionBits loadUserPermissionBits(final int userId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
+    public static UserPermissionBits loadUserPermissionBits(int userId, Context ctx, Connection readConArg) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -399,27 +401,47 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
 
     private static final int LIMIT = 1000;
 
-    public static UserPermissionBits[] loadUserPermissionBits(final Context ctx, final Connection conArg, final int[] userIds) throws OXException, SQLException {
-        final int length = userIds.length;
+    /**
+     * Loads specified users' permission bits from database
+     *
+     * @param ctx The associated context
+     * @param con The connection to use
+     * @param userIds The identifiers of the users
+     * @return The permission bits
+     * @throws OXException If operation fails
+     * @throws SQLException If an SQL error occurred
+     */
+    public static UserPermissionBits[] loadUserPermissionBits(Context ctx, Connection con, int[] userIds) throws OXException, SQLException {
+        int length = userIds.length;
         if (0 == length) {
             return new UserPermissionBits[0];
         }
-        final Connection con;
-        final boolean closeCon;
-        if (null == conArg) {
-            con = DBPool.pickup(ctx);
+
+        Connection connection;
+        boolean closeCon;
+        if (null == con) {
+            connection = DBPool.pickup(ctx);
             closeCon = true;
         } else {
-            con = conArg;
+            connection = con;
             closeCon = false;
         }
+
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final UserPermissionBits[] retval = new UserPermissionBits[length];
         try {
-            final TIntIntMap userMap;
-            if (length <= LIMIT) {
-                final StringBuilder sb = new StringBuilder(512);
+            TIntIntMap userIdToIndex;
+            if (length > LIMIT) {
+                // Load them all
+                stmt = connection.prepareStatement("SELECT u.user, u.permissions FROM user_configuration AS u WHERE u.cid = ?");
+                userIdToIndex = new TIntIntHashMap(length, 1, -1, -1);
+                for (int index = 0; index < length; index++) {
+                    userIdToIndex.put(userIds[index], index);
+                }
+                stmt.setInt(1, ctx.getContextId());
+            } else {
+                // Load by identifiers
+                StringBuilder sb = new StringBuilder(512);
                 sb.append("SELECT u.user, u.permissions FROM user_configuration AS u");
                 if (1 == length) {
                     sb.append(" WHERE u.user = ? AND u.cid = ?");
@@ -431,36 +453,30 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                     }
                     sb.append(") AS x ON u.user = x.user WHERE u.cid = ?");
                 }
-                stmt = con.prepareStatement(sb.toString());
+                stmt = connection.prepareStatement(sb.toString());
                 int pos = 1;
-                userMap = new TIntIntHashMap(length, 1);
+                userIdToIndex = new TIntIntHashMap(length, 1, -1, -1);
                 for (int index = 0; index < length; index++) {
-                    final int userId = userIds[index];
-                    stmt.setInt(pos++,userId);
-                    userMap.put(userId, index);
+                    int userId = userIds[index];
+                    stmt.setInt(pos++, userId);
+                    userIdToIndex.put(userId, index);
                 }
                 stmt.setInt(pos++, ctx.getContextId());
-            } else {
-                stmt = con.prepareStatement("SELECT u.user, u.permissions FROM user_configuration AS u WHERE u.cid = ?");
-                userMap = new TIntIntHashMap(length, 1);
-                for (int index = 0; index < length; index++) {
-                    userMap.put(userIds[index], index);
-                }
-                stmt.setInt(1, ctx.getContextId());
             }
             result = stmt.executeQuery();
 
+            UserPermissionBits[] retval = new UserPermissionBits[length];
             while (result.next()) {
-                final int userId = result.getInt(1);
-                if (userMap.containsKey(userId)) {
-                    final int index = userMap.get(userId);
+                int userId = result.getInt(1);
+                int index = userIdToIndex.get(userId);
+                if (index >= 0) {
                     retval[index] = new UserPermissionBits(result.getInt(2), userId, ctx.getContextId());
                 }
             }
+            return retval;
         } finally {
-            closeResources(result, stmt, closeCon ? con : null, true, ctx);
+            closeResources(result, stmt, closeCon ? connection : null, true, ctx);
         }
-        return retval;
     }
 
     /*-
@@ -477,7 +493,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws SQLException - if user configuration cannot be removed from database
      * @throws OXException If no writeable connection could be obtained
      */
-    public static void deleteUserPermissionBits(final int userId, final Context ctx) throws SQLException, OXException {
+    public static void deleteUserPermissionBits(int userId, Context ctx) throws SQLException, OXException {
         RdbUserPermissionBitsStorage.deleteUserPermissionBits(userId, null, ctx);
     }
 
@@ -492,7 +508,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws SQLException - if user configuration cannot be removed from database
      * @throws OXException - if no writeable connection could be obtained
      */
-    public static void deleteUserPermissionBits(final int userId, final Connection writeConArg, final Context ctx) throws SQLException, OXException {
+    public static void deleteUserPermissionBits(int userId, Connection writeConArg, Context ctx) throws SQLException, OXException {
         Connection writeCon = writeConArg;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
@@ -507,7 +523,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             stmt.executeUpdate();
             try {
                 UserConfigurationStorage.getInstance().invalidateCache(userId, ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("User Configuration could not be removed from cache", e);
             }
         } finally {
