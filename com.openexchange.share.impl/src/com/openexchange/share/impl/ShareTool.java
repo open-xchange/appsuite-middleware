@@ -51,6 +51,7 @@ package com.openexchange.share.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -167,6 +168,29 @@ public class ShareTool {
             for (ShareTarget target : share.getTargets()) {
                 addModulePermissions(perms, target.getModule());
             }
+        }
+        return Permission.toBits(perms);
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access all targets in a share.. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param share The share to build the permissions bits for
+     * @return The permission bits
+     * @throws OXException
+     */
+    public static int getUserPermissionBits(Share share) throws OXException {
+        Set<Permission> perms = new HashSet<Permission>(8);
+        perms.add(Permission.DENIED_PORTAL);
+        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
+        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        if (AuthenticationMode.GUEST_PASSWORD == share.getAuthentication()) {
+            perms.add(Permission.EDIT_PASSWORD);
+        }
+        for (ShareTarget target : share.getTargets()) {
+            addModulePermissions(perms, target.getModule());
         }
         return Permission.toBits(perms);
     }
@@ -348,6 +372,24 @@ public class ShareTool {
             }
         }
         return null;
+    }
+
+    /**
+     * Extracts all tokens from the supplied shares.
+     *
+     * @param shares The shares to get the tokens for
+     * @return The tokens
+     */
+    public static List<String> extractTokens(List<Share> shares) {
+        if (null == shares) {
+            return null;
+        }
+        List<String> tokens = new ArrayList<String>(shares.size());
+        for (Share share : shares) {
+            tokens.add(share.getToken());
+
+        }
+        return tokens;
     }
 
 }
