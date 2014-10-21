@@ -608,6 +608,7 @@ public class DefaultShareService implements ShareService {
         contact.setDisplayName(guestUser.getDisplayName());
         contact.setEmail1(guestUser.getMail());
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
+        guestUser.setContactId(contactId);
         int guestID = userService.createUser(connection, context, guestUser);
         guestUser.setId(guestID);
         contact.setInternalUserId(guestID);

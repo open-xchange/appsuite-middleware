@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.NewRequest;
@@ -90,6 +91,7 @@ public class TestGuestContact extends ShareTest {
     private final long now = System.currentTimeMillis();
     private final String GUEST_DISPLAYNAME = "Test Guest Contact " + now;
     private final String GUEST_MAIL = "testGuestContact@" + now + ".invalid";
+    private final String GUEST_PASSWORD = String.valueOf(now);
 
 
     /**
@@ -119,7 +121,7 @@ public class TestGuestContact extends ShareTest {
         guest.setDisplayName(GUEST_DISPLAYNAME);
         guest.setEmailAddress(GUEST_MAIL);
         guest.setExpiryDate(new Date(Long.MAX_VALUE));
-        guest.setPassword(String.valueOf(now));
+        guest.setPassword(GUEST_PASSWORD);
         guest.setBits(FOLDER_READ_PERMISSION);
 
         client.execute(new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest)));
@@ -128,18 +130,25 @@ public class TestGuestContact extends ShareTest {
     public void testGuestContact() throws Exception {
         List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
         int guestId = -1;
-        for (ParsedShare share : allShares) {
-            for (ShareTarget shareTarget : share.getTargets()) {
+        ParsedShare share = null;
+        for (ParsedShare parsedShare : allShares) {
+            for (ShareTarget shareTarget : parsedShare.getTargets()) {
                 if (shareTarget.equals(target)) {
-                    guestId = share.getGuest();
+                    guestId = parsedShare.getGuest();
+                    share = parsedShare;
                     break;
                 }
             }
         }
         assertTrue("Guest id must not be -1", guestId > -1);
+        GuestClient guestClient = new GuestClient(share, GUEST_PASSWORD);
+        GetRequest guestGetRequest = new GetRequest(guestId, guestClient.getValues().getTimeZone());
+        GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
+        Contact guestContact = guestGetResponse.getContact();
         GetRequest getRequest = new GetRequest(guestId, client.getValues().getTimeZone());
         GetResponse getResponse = client.execute(getRequest);
         Contact contact = getResponse.getContact();
+        assertEquals("Contacts does not match", contact, guestContact);
         assertNotNull("Contact is null.", contact);
         assertEquals("Wrong display name.", GUEST_DISPLAYNAME, contact.getDisplayName());
         assertEquals("Wrong email address.", GUEST_MAIL, contact.getEmail1());
