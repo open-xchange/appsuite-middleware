@@ -71,7 +71,7 @@ public class Inbox implements PreferencesItemService {
     /**
      * Logger.
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Inbox.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Inbox.class);
 
     /**
      * Default constructor.
@@ -108,8 +108,12 @@ public class Inbox implements PreferencesItemService {
                     setting.setSingleValue(mail.getInboxFolder(MailAccount.DEFAULT_ID));
                     addWarnings(mail.getWarnings());
                 } catch (final OXException e) {
-                    if (e.isPrefix("ACC") && MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
+                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                         // Admin has no mail access
+                        setting.setSingleValue(null);
+                    } else if (MailExceptionCode.containsSocketError(e)) {
+                        // A socket error we cannot recover from
+                        LOG.warn("Could not connect to mail system due to a socket error", e);
                         setting.setSingleValue(null);
                     } else {
                         throw e;
