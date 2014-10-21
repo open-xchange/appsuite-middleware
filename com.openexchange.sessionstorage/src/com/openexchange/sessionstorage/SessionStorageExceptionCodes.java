@@ -111,6 +111,10 @@ public enum SessionStorageExceptionCodes implements DisplayableOXExceptionCode {
      * The session storage service %1$s is down.
      */
     SESSION_STORAGE_DOWN("The session storage service %1$s is down.", 12, Category.CATEGORY_ERROR),
+    /**
+     * The operation for session storage service has been interrupted.
+     */
+    INTERRUPTED("The operation for session storage service has been interrupted.", 13, Category.CATEGORY_ERROR),
 
     ;
 
