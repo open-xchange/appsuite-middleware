@@ -946,16 +946,41 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     // Ignore
                 }
             }
-            imapStore.connect(server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         } catch (final AuthenticationFailedException e) {
             /*
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
             imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-            imapStore.connect(server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         }
         return imapStore;
+    }
+
+    /**
+     * This method triggers the connect to the IMAP server on the given {@link IMAPStore} object.
+     * Furthermore this method contains a thread synchronization if Kerberos is used. If the Kerberos subject is found in the properties of
+     * the IMAP session, this Kerberos subject object is used to only allow a single IMAP login per Kerberos subject. The service ticket for
+     * the IMAP server is stored in the Kerberos subject once the IMAP login was successful. If multiple threads can execute this in
+     * parallel, multiple IMAP service tickets are requested, which is discouraged for performance reasons.
+     * @param imapSession The IMAP session
+     * @param imapStore The IMAP store
+     * @param server The host name
+     * @param port The port
+     * @param login The login
+     * @param pw The password
+     * @throws MessagingException If operation fails
+     */
+    public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw) throws MessagingException {
+        Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
+        if (null == kerberosSubject) {
+            imapStore.connect(server, port, login, pw);
+        } else {
+            synchronized (kerberosSubject) {
+                imapStore.connect(server, port, login, pw);
+            }
+        }
     }
 
     private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp) throws MessagingException, OXException {
