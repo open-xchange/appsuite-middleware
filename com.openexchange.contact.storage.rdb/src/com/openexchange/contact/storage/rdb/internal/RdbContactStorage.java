@@ -189,14 +189,10 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(parse(folderId), false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(),
-                serverSession.getUserPermissionBits(),
-                connection);
+                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canCreateObjects()) {
                 throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(
-                    Integer.valueOf(parse(folderId)),
-                    Integer.valueOf(contextID),
-                    Integer.valueOf(serverSession.getUserId()));
+                    Integer.valueOf(parse(folderId)), Integer.valueOf(contextID), Integer.valueOf(serverSession.getUserId()));
             }
             /*
              * check quota restrictions
@@ -205,7 +201,26 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (null != quota && 0 < quota.getLimit() && 1 + quota.getUsage() > quota.getLimit()) {
                 throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(quota.getUsage(), quota.getLimit());
             }
-            create(contextID, contact, connection);
+            /*
+             * prepare insert
+             */
+            contact.setObjectID(IDGenerator.getId(contextID, com.openexchange.groupware.Types.CONTACT, connection));
+            Date now = new Date();
+            contact.setLastModified(now);
+            contact.setCreationDate(now);
+            contact.setParentFolderID(parse(folderId));
+            contact.setContextId(contextID);
+            /*
+             * insert image data if needed
+             */
+            if (contact.containsImage1() && null != contact.getImage1()) {
+                contact.setImageLastModified(now);
+                this.executor.insert(connection, Table.IMAGES, contact, Fields.IMAGE_DATABASE_ARRAY);
+            }
+            /*
+             * insert contact
+             */
+            this.executor.insert(connection, Table.CONTACTS, contact, Fields.CONTACT_DATABASE_ARRAY);
             /*
              * insert distribution list data if needed
              */
@@ -1164,7 +1179,6 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             Date now = new Date();
             contact.setLastModified(now);
             contact.setCreationDate(now);
-            contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
             contact.setContextId(contextId);
             /*
              * insert image data if needed
