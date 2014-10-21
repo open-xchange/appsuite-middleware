@@ -185,4 +185,10 @@ public class SimShareStorage implements ShareStorage {
         return output;
     }
 
+    @Override
+    public List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

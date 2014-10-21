@@ -160,6 +160,17 @@ public interface ShareStorage {
     List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, StorageParameters parameters) throws OXException;
 
     /**
+     * Loads all shares to guest users that were created for a specific groupware target.
+     *
+     * @param contextID The context ID
+     * @param target The groupware target to load the shares for
+     * @param guestIDs The IDs of the guest users to whom the shares are for
+     * @param parameters The storage parameters
+     * @return All shares holding a reference to the supplied groupware target
+     */
+    List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException;
+
+    /**
      * Loads all shares that are expired after the given date.
      *
      * @param contextID The context ID

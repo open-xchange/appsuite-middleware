@@ -237,6 +237,16 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
+    public List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ArrayList<Share>(new ShareSelector(contextID).target(target).guests(guestIDs).select(provider.get()));
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
     public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
