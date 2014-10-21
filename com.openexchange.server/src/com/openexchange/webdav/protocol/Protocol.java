@@ -53,6 +53,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.jdom2.Namespace;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
@@ -225,6 +227,18 @@ public class Protocol {
 
     public List<Namespace> getAdditionalNamespaces() {
         return Collections.emptyList();
+    }
+
+    /**
+     * Gets a value indicating which limits apply when marshalling elements in WebDAV responses recursively.
+     *
+     * @return The recursive marshalling limit, or <code>-1</code> for no limitations
+     */
+    public int getRecursiveMarshallingLimit() {
+        int defaultValue = 250000;
+        ConfigurationService configService = ServerServiceRegistry.getServize(ConfigurationService.class);
+        return null != configService ?
+            configService.getIntProperty("com.openexchange.webdav.recursiveMarshallingLimit", defaultValue) : defaultValue;
     }
 
     public WebdavAction getReportAction(final String ns, final String name) {

@@ -49,51 +49,66 @@
 
 package com.openexchange.webdav.xml.resources;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.jdom2.Element;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.collections.Injector;
-import com.openexchange.tools.collections.OXCollections;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class RecursiveMarshaller implements ResourceMarshaller {
 
-	private final ResourceMarshaller delegate;
+	private final PropertiesMarshaller delegate;
 	private final int depth;
+	private final int limit;
 
-	public RecursiveMarshaller(final ResourceMarshaller delegate, final int depth) {
-		this.delegate = delegate;
-		this.depth = depth;
-	}
+    /**
+     * Initializes a new {@link RecursiveMarshaller}.
+     *
+     * @param delegate The underlying properties marshaller
+     * @param depth The depth as requested by the client
+     * @param limit The maximum number of elements to marshall
+     */
+    public RecursiveMarshaller(PropertiesMarshaller delegate, int depth, int limit) {
+        super();
+        this.delegate = delegate;
+        this.depth = depth;
+        this.limit = limit;
+    }
 
 	@Override
-    public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException  {
-		final List<Element> list = new ArrayList<Element>();
-		final ResourceMarshaller delegate = this.delegate;
-        final List<Element> delegateMarshal = delegate.marshal(resource);
-		list.addAll(delegateMarshal);
-		if(resource.isCollection()) {
-			try {
-				OXCollections.inject(list, resource.toCollection().toIterable(depth), new Injector<List<Element>, WebdavResource>(){
-
-					@Override
-                    public List<Element> inject(final List<Element> list, final WebdavResource element) {
-						try {
-                            list.addAll(delegate.marshal(element));
-                        } catch (OXException e) {
-                            // IGNORE
-                        }
-						return list;
-					}
-
-				});
-			} catch (final OXException e) {
-				return list;
-			}
+    public List<Element> marshal(WebdavResource resource) throws WebdavProtocolException  {
+		List<Element> elements = new LinkedList<Element>();
+		elements.addAll(delegate.marshal(resource));
+		if (resource.isCollection()) {
+		    for (WebdavResource childResource : resource.toCollection().toIterable(depth)) {
+		        elements.addAll(delegate.marshal(childResource));
+		        if (elements.size() > limit) {
+		            elements.add(getInsufficientStorageResponse(resource));
+                    break;
+		        }
+            }
 		}
-		return list;
+		return elements;
+	}
+
+	/**
+	 * Constructs a response element indicating a <code>HTTP/1.1 507 Insufficient Storage</code> error due to too many child resources
+	 * of the parent resource.
+	 *
+	 * @param resource The parent resource whose children count exceeded the limit
+	 * @return The respons element
+	 */
+	private Element getInsufficientStorageResponse(WebdavResource resource) {
+        Element response = new Element("response", Protocol.DAV_NS);
+        response.addContent(delegate.marshalHREF(resource.getUrl(), resource.isCollection()));
+        Element status = delegate.marshalStatus(507);
+        status.setText("HTTP/1.1 507 Insufficient Storage");
+        response.addContent(status);
+        Element error = new Element("error", Protocol.DAV_NS);
+        error.addContent(new Element("number-of-matches-within-limits", Protocol.DAV_NS));
+        response.addContent(error);
+	    return response;
 	}
 
 }

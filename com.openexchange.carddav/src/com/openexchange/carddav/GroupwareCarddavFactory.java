@@ -52,6 +52,7 @@ package com.openexchange.carddav;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +65,7 @@ import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -85,8 +87,14 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -262,8 +270,8 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	public static final class State {
 
 		private static final ContactField[] BASIC_FIELDS = {
-			ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MARK_AS_DISTRIBUTIONLIST,
-			ContactField.DISTRIBUTIONLIST, ContactField.UID, ContactField.FILENAME
+			ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.UID,
+			ContactField.FILENAME, ContactField.FOLDER_ID
 		};
 
 		private final GroupwareCarddavFactory factory;
@@ -648,6 +656,22 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	    	return this.treeID;
 	    }
 
+	    /**
+	     * Gets the maximum number of contacts to fetch from the storage, based on the configuration value for
+	     * <code>com.openexchange.webdav.recursiveMarshallingLimit</code>.
+	     *
+	     * @return The contact limit, or <code>0</code> for no limitations
+	     */
+	    private int getContactLimit() {
+	        int limit = 25000;
+            try {
+                limit = Integer.valueOf(factory.getConfigValue("com.openexchange.webdav.recursiveMarshallingLimit", String.valueOf(limit)));
+            } catch (OXException e) {
+                LOG.warn("error getting \"com.openexchange.webdav.recursiveMarshallingLimit\", falling back to \"{}\".", limit, e);
+            }
+            return 0 >= limit ? 0 : 1 + limit;
+	    }
+
 		/**
 		 * Gets a contact object containing the basic information.
 		 *
@@ -701,32 +725,61 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 			}
 			return this.filenameCache;
 		}
-
 		private Map<String, Contact> generateUidCache() throws OXException {
-			HashMap<String, Contact> cache = new HashMap<String, Contact>();
-			for (UserizedFolder folder : this.getFolders()) {
-				int folderID = Integer.parseInt(folder.getID());
-				SearchIterator<Contact> iterator = null;
-				try {
-					iterator = factory.getContactService().getAllContacts(factory.getSession(), folder.getID(), BASIC_FIELDS);
-					while (iterator.hasNext()) {
-						Contact contact = iterator.next();
-						if (contact.getMarkAsDistribtuionlist()) {
-						    continue;
-						}
-						if (false == contact.containsUid() && false == this.tryAddUID(contact, folder)) {
-							LOG.warn("No UID found in contact '{}', skipping.", contact);
-							continue;
-						}
-						contact.setParentFolderID(folderID);
-						cache.put(contact.getUid(), contact);
-					}
-				} finally {
-					close(iterator);
-				}
-			}
-			return cache;
-		}
+            /*
+             * prepare search term
+             */
+            List<UserizedFolder> folders = getFolders();
+            if (0 == folders.size()) {
+                return Collections.emptyMap();
+            }
+            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+            if (1 == folders.size()) {
+                SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                term.addOperand(new ConstantOperand<String>(folders.get(0).getID()));
+                searchTerm.addSearchTerm(term);
+            } else {
+                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                for (UserizedFolder folder : getFolders()) {
+                    SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                    term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                    term.addOperand(new ConstantOperand<String>(folder.getID()));
+                    orTerm.addSearchTerm(term);
+                }
+                searchTerm.addSearchTerm(orTerm);
+            }
+            CompositeSearchTerm noDistListTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            SingleSearchTerm term1 = new SingleSearchTerm(SingleOperation.EQUALS);
+            term1.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
+            term1.addOperand(new ConstantOperand<Integer>(Integer.valueOf(0)));
+            noDistListTerm.addSearchTerm(term1);
+            SingleSearchTerm term2 = new SingleSearchTerm(SingleOperation.ISNULL);
+            term2.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
+            noDistListTerm.addSearchTerm(term2);
+            searchTerm.addSearchTerm(noDistListTerm);
+            /*
+             * get contacts
+             */
+            HashMap<String, Contact> cache = new HashMap<String, Contact>();
+            SortOptions sortOptions = new SortOptions(ContactField.OBJECT_ID, Order.ASCENDING);
+            sortOptions.setLimit(getContactLimit());
+            SearchIterator<Contact> iterator = null;
+            try {
+                iterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm, BASIC_FIELDS, sortOptions);
+                while (iterator.hasNext()) {
+                    Contact contact = iterator.next();
+                    if (false == contact.containsUid()) {
+                        LOG.warn("No UID found in contact '{}', skipping.", contact);
+                        continue;
+                    }
+                    cache.put(contact.getUid(), contact);
+                }
+            } finally {
+                SearchIterators.close(iterator);
+            }
+            return cache;
+        }
 
 		private Map<String, Contact> generateFilenameCache() throws OXException {
 			HashMap<String, Contact> cache = new HashMap<String, Contact>();
@@ -736,21 +789,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				}
 			}
 			return cache;
-		}
-
-		private boolean tryAddUID(Contact contact, UserizedFolder folder) {
-            if (Permission.WRITE_OWN_OBJECTS < folder.getOwnPermission().getWritePermission()) {
-            	LOG.debug("Adding uid for contact '{}'.", contact);
-				try {
-					contact.setUid(UUID.randomUUID().toString());
-					factory.getContactService().updateContact(factory.getSession(), folder.getID(),
-							Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
-					return true;
-				} catch (OXException e) {
-					LOG.error("", e);
-				}
-            }
-			return false;
 		}
 
 		private static void close(final SearchIterator<Contact> iterator) {

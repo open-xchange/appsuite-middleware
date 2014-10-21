@@ -101,7 +101,7 @@ public final class UnifiedInboxUtility {
      * @return A map grouping referenced accounts and referenced full names and IDs.
      * @throws OXException If parsing mail IDs fails
      */
-    public static TIntObjectMap<Map<String, List<String>>> parseMailIDs(final String[] mailIDs) throws OXException {
+    public static TIntObjectMap<Map<String, List<String>>> parseMailIDs(String[] mailIDs) throws OXException {
         final TIntObjectMap<Map<String, List<String>>> map = new TIntObjectHashMap<Map<String,List<String>>>(mailIDs.length);
         // Start parsing
         final UnifiedInboxUID uidl = new UnifiedInboxUID();
@@ -132,12 +132,11 @@ public final class UnifiedInboxUtility {
      * @param nestedFullName The nested folder's full name or <code>null</code>
      * @return The generated nested folder's full name.
      */
-    public static String generateNestedFullName(final int uiAccountId, final String uiFullName, final int nestedAccountId, final String nestedFullName) {
+    public static String generateNestedFullName(int uiAccountId, String uiFullName, int nestedAccountId, String nestedFullName) {
         if (null == nestedFullName) {
-            return new StringBuilder(16).append(prepareFullname(uiAccountId, uiFullName)).toString();
+            return new StringBuilder(16).append(/*prepareFullname(uiAccountId, uiFullName)*/ uiFullName).toString();
         }
-        return new StringBuilder(32).append(prepareFullname(uiAccountId, uiFullName)).append(SEPERATOR).append(
-            prepareFullname(nestedAccountId, nestedFullName)).toString();
+        return new StringBuilder(32).append(/*prepareFullname(uiAccountId, uiFullName)*/ uiFullName).append(SEPERATOR).append(prepareFullname(nestedAccountId, nestedFullName)).toString();
     }
 
     /**
@@ -149,7 +148,7 @@ public final class UnifiedInboxUtility {
      * @return The parsed nested full name argument
      * @throws OXException If specified nested full name is invalid
      */
-    public static FullnameArgument parseNestedFullName(final String nestedFullName) throws OXException {
+    public static FullnameArgument parseNestedFullName(String nestedFullName) throws OXException {
         // INBOX/default0/INBOX
         if (!startsWithKnownFullname(nestedFullName)) {
             throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullName).getFullname());
@@ -159,7 +158,7 @@ public final class UnifiedInboxUtility {
         return prepareMailFolderParam(fn);
     }
 
-    private static boolean startsWithKnownFullname(final String fullName) {
+    private static boolean startsWithKnownFullname(String fullName) {
         for (final String knownFullname : UnifiedInboxAccess.KNOWN_FOLDERS) {
             if (fullName.startsWith(knownFullname)) {
                 return true;
@@ -176,7 +175,7 @@ public final class UnifiedInboxUtility {
      * @return The account's full name
      * @throws OXException If full name look-up fails
      */
-    public static String determineAccountFullName(final MailAccess<?, ?> mailAccess, final String fullName) throws OXException {
+    public static String determineAccountFullName(MailAccess<?, ?> mailAccess, String fullName) throws OXException {
         if (UnifiedInboxAccess.INBOX.equals(fullName)) {
             return UnifiedInboxAccess.INBOX;
         }
@@ -201,7 +200,7 @@ public final class UnifiedInboxUtility {
      * @param t The {@link Throwable} instance
      * @param builder The string builder to append to
      */
-    public static void appendStackTrace2StringBuilder(final Throwable t, final StringBuilder builder) {
+    public static void appendStackTrace2StringBuilder(Throwable t, StringBuilder builder) {
         t.printStackTrace(new java.io.PrintWriter(new UnsynchronizedStringWriter(builder)));
     }
 

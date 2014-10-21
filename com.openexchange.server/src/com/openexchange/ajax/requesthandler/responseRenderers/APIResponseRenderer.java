@@ -90,6 +90,8 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static final String INCLUDE_STACK_TRACE_ON_ERROR = com.openexchange.ajax.AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR;
 
+    private static final String CONTENTTYPE_HTML = com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
+
     /**
      * Initializes a new {@link APIResponseRenderer}.
      */
@@ -194,7 +196,7 @@ public class APIResponseRenderer implements ResponseRenderer {
         try {
             if (plainJson) {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
-            } else if (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
+            } else if (expectsJsCallback(req)) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter(CALLBACK);
                 if (callback == null) {
@@ -245,6 +247,51 @@ public class APIResponseRenderer implements ResponseRenderer {
         } catch (final IllegalStateException e) {
             LOG.error("", e);
         }
+    }
+
+    /**
+     * Checks if a JavaScript call-back is expected for given HTTP request
+     *
+     * @param req The HTTP request to check
+     * @return <code>true</code> if a JavaScript call-back is expected; otherwise <code>false</code>
+     */
+    public static boolean expectsJsCallback(HttpServletRequest req) {
+        return (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null);
+    }
+
+    /**
+     * Writes common JavaScript call-back for given response.
+     *
+     * @param response The response to output JavaScript call-back for
+     * @param action The associated action
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @throws IOException If an I/O error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    public static void writeJsCallback(Response response, String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(CONTENTTYPE_HTML);
+        resp.setHeader("Content-Disposition", "inline");
+
+        String callback = req.getParameter(CALLBACK);
+        if (callback == null) {
+            callback = action;
+        } else {
+            if (callback.indexOf('"') >= 0) {
+                callback = PATTERN_QUOTE.matcher(callback).replaceAll("$1\\\\\"");
+            }
+        }
+        callback = AJAXUtility.sanitizeParam(callback);
+
+        final PrintWriter writer = resp.getWriter();
+        writer.write(JS_FRAGMENT_PART1);
+        writer.write(callback);
+        writer.write(JS_FRAGMENT_PART2);
+        writer.write(callback);
+        writer.write("\"])(");
+        ResponseWriter.write(response, new EscapingWriter(writer), localeFrom(req));
+        writer.write(JS_FRAGMENT_PART3);
     }
 
     /**
