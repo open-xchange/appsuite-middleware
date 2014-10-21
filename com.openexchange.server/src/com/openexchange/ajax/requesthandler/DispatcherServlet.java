@@ -82,7 +82,6 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
@@ -603,19 +602,6 @@ public class DispatcherServlet extends SessionServlet {
             }
         } catch (Exception e) {
             // Ignore
-        }
-    }
-
-    /** ASCII-wise to upper-case */
-    private String toUpperCase(CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
         }
     }
 
