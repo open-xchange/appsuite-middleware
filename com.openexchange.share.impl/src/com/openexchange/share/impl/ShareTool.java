@@ -375,6 +375,24 @@ public class ShareTool {
     }
 
     /**
+     * Finds a share by its guest ID in the supplied list of shares.
+     *
+     * @param shares The shares to search
+     * @param guestID The guest ID
+     * @return The share, or <code>null</code> if not found
+     */
+    public static Share findShareByGuest(List<Share> shares, int guestID) {
+        if (null != shares && 0 < shares.size()) {
+            for (Share share : shares) {
+                if (guestID == share.getGuest()) {
+                    return share;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Extracts all tokens from the supplied shares.
      *
      * @param shares The shares to get the tokens for

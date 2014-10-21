@@ -184,7 +184,7 @@ public class NewAction extends AbstractShareAction {
                 /*
                  * create shares & corresponding guest user entities for external recipients first
                  */
-                shares = getShareService().createShares(session, targets, externalRecipients);
+                shares = getShareService().addTargets(session, targets, externalRecipients);
                 guestIDs = new ArrayList<Integer>(externalRecipients.size());
                 for (Share share : shares) {
                     guestIDs.add(share.getGuest());

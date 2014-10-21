@@ -174,8 +174,8 @@ public class DefaultFileStorageGuestObjectPermission extends DefaultFileStorageO
         }
 
         r.setBits(getPermissions());
-        r.setActivationDate(new Date()); // FIXME
-        r.setExpiryDate(expires);
+//        r.setActivationDate(new Date()); // FIXME
+//        r.setExpiryDate(expires);
 
 
         return r;

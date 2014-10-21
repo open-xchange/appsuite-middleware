@@ -456,14 +456,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *         the same order as the supplied guest permissions list
      */
     protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
-        List<ShareRecipient> guests = new ArrayList<ShareRecipient>(addedPermissions.size());
+        List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(addedPermissions.size());
         for (GuestPermission permission : addedPermissions) {
-            guests.add(permission.getRecipient());
+            recipients.add(permission.getRecipient());
         }
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
-            List<Share> shares = shareService.createShares(session, new ShareTarget(contentType.getModule(), folderID), guests);
+            List<Share> shares = shareService.addTarget(session, new ShareTarget(contentType.getModule(), folderID), recipients);
             if (null == shares || shares.size() != addedPermissions.size()) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
             }

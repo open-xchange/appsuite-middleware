@@ -128,6 +128,72 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public List<Share> addTarget(Session session, ShareTarget shareTarget, List<ShareRecipient> recipients) throws OXException {
+        return addTargets(session, Collections.singletonList(shareTarget), recipients);
+    }
+
+    @Override
+    public List<Share> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
+        if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
+            return Collections.emptyList();
+        }
+        int contextID = session.getContextId();
+        LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        List<Share> shares = new ArrayList<Share>(recipients.size());
+        Context context = services.getService(ContextService.class).getContext(session.getContextId());
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            /*
+             * prepare guest users and resulting shares
+             */
+            User sharingUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), session.getUserId(), context);
+            List<Integer> guestIDs = new ArrayList<Integer>(recipients.size());
+            for (ShareRecipient recipient : recipients) {
+                int permissionBits = ShareTool.getUserPermissionBitsForTargets(recipient, targets);
+                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient);
+                guestIDs.add(I(guestUser.getId()));
+                shares.add(ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), targets, recipient));
+            }
+            /*
+             * merge targets with existing shares as needed
+             */
+            List<Share> existingShares = shareStorage.loadSharesForGuests(contextID, I2i(guestIDs), connectionHelper.getParameters());
+            List<Share> sharesToCreate = new ArrayList<Share>(shares.size() - existingShares.size());
+            List<Share> sharesToUpdate = new ArrayList<Share>(existingShares.size());
+            for (int i = 0; i < shares.size(); i++) {
+                Share share = shares.get(i);
+                Share existingShare = ShareTool.findShareByGuest(existingShares, share.getGuest());
+                if (null == existingShare) {
+                    sharesToCreate.add(share);
+                } else {
+                    DefaultShare updatedShare = new DefaultShare(existingShare);
+                    updatedShare.setModifiedBy(session.getUserId());
+                    updatedShare.setLastModified(new Date());
+                    updatedShare.getTargets().addAll(targets);
+                    sharesToUpdate.add(updatedShare);
+                    shares.set(i, updatedShare);
+                }
+            }
+            /*
+             * update existing shares & create new ones
+             */
+            if (0 < sharesToUpdate.size()) {
+                shareStorage.updateShares(contextID, sharesToUpdate, connectionHelper.getParameters());
+            }
+            if (0 < sharesToCreate.size()) {
+                shareStorage.storeShares(contextID, sharesToCreate, connectionHelper.getParameters());
+            }
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
+        return shares;
+    }
+
+    @Override
     public void deleteTarget(Session session, GroupwareTarget shareTarget, List<Integer> guestIDs) throws OXException {
         deleteTargets(session, Collections.singletonList(shareTarget), guestIDs);
     }
@@ -158,7 +224,7 @@ public class DefaultShareService implements ShareService {
             List<Share> sharesToDelete = new ArrayList<Share>(affectedShares.size());
             for (Share affectedShare : affectedShares) {
                 List<ShareTarget> updatedTargets = new ArrayList<ShareTarget>(affectedShare.getTargets());
-                if (updatedTargets.removeAll(affectedShare.getTargets())) {
+                if (updatedTargets.removeAll(targets)) {
                     if (0 == updatedTargets.size()) {
                         sharesToDelete.add(affectedShare);
                     } else {
@@ -220,6 +286,7 @@ public class DefaultShareService implements ShareService {
         }
     }
 
+
     @Override
     public Share updateShare(Session session, Share share, Date clientTimestamp) throws OXException {
         String token = share.getToken();
@@ -260,41 +327,6 @@ public class DefaultShareService implements ShareService {
         }
     }
 
-    @Override
-    public List<Share> createShares(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
-        return createShares(session, Collections.singletonList(target), recipients);
-    }
-
-    @Override
-    public List<Share> createShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
-        LOG.info("Adding shares to recipient(s) {} for {} in context {}...", recipients, targets, session.getContextId());
-        List<Share> shares = new ArrayList<Share>(recipients.size());
-        Context context = services.getService(ContextService.class).getContext(session.getContextId());
-        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        try {
-            connectionHelper.start();
-            /*
-             * prepare guest users and resulting shares
-             */
-            User sharingUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), session.getUserId(), context);
-            List<User> guestUsers = new ArrayList<User>(recipients.size());
-            for (ShareRecipient recipient : recipients) {
-                int permissionBits = ShareTool.getUserPermissionBitsForTargets(recipient, targets);
-                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, session);
-                guestUsers.add(guestUser);
-                shares.add(ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), targets, recipient));
-            }
-            /*
-             * store shares
-             */
-            services.getService(ShareStorage.class).storeShares(session.getContextId(), shares, connectionHelper.getParameters());
-            connectionHelper.commit();
-        } finally {
-            connectionHelper.finish();
-        }
-        LOG.info("Shares added successfully for {} in context {}: {}", targets, session.getContextId(), shares);
-        return shares;
-    }
 
     @Override
     public List<String> generateShareURLs(List<Share> shares, String protocol, String fallbackHostname) throws OXException {
@@ -585,7 +617,7 @@ public class DefaultShareService implements ShareService {
      * @return The guest user
      * @throws OXException
      */
-    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, Session session) throws OXException {
+    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
         UserService userService = services.getService(UserService.class);
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
         if (GuestRecipient.class.isInstance(recipient) && services.getService(ConfigurationService.class).getBoolProperty(
