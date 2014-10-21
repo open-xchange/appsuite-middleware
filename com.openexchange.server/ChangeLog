@@ -1,6 +1,7 @@
 * 2014-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 34947: Check for a possible unrecoverable socket error when attempting to load mail settings (esp. standard folders); signal an empty value instead of throwing an error
+ - Fix for bug 35023: Orderly deal with absent user permission bits
 
 * 2014-10-17 - jan.bauerdick@open-xchange.com
 
