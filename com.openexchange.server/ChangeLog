@@ -2,6 +2,8 @@
 
  - Fix for bug 34947: Check for a possible unrecoverable socket error when attempting to load mail settings (esp. standard folders); signal an empty value instead of throwing an error
  - Fix for bug 35023: Orderly deal with absent user permission bits
+ - Fix for bug 34706: Do not consult session storage in case session look-up is performed by alternative identifier and
+                      ensure a timed-out (but still pending) session storage query get orderly interrupted to relieve pressure on Hazelcast
 
 * 2014-10-17 - jan.bauerdick@open-xchange.com
 

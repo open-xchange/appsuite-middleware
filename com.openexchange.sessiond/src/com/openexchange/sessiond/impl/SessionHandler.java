@@ -1033,26 +1033,26 @@ public final class SessionHandler {
      * @param alternative identifier The alternative identifier
      * @return The session associated with given alternative identifier; otherwise <code>null</code> if expired or none found
      */
-    protected static SessionControl getSessionByAlternativeId(final String altId) {
+    protected static SessionControl getSessionByAlternativeId(final String altId, boolean lookupSessionStorage) {
         LOG.debug("getSessionByAlternativeId <{}>", altId);
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
         }
-        final SessionControl sessionControl = sessionData.getSessionByAlternativeId(altId);
-        if (null == sessionControl) {
+        SessionControl sessionControl = sessionData.getSessionByAlternativeId(altId);
+        if (null == sessionControl && lookupSessionStorage) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Task<Session> c = new AbstractTask<Session>() {
+                    Task<Session> c = new AbstractTask<Session>() {
 
                         @Override
                         public Session call() throws Exception {
                             return storageService.getSessionByAlternativeId(altId);
                         }
                     };
-                    final Session session = obfuscator.unwrap(getFrom(c, null));
+                    Session session = obfuscator.unwrap(getFrom(c, null));
                     if (null != session) {
                         return sessionToSessionControl(session);
                     }
@@ -1530,7 +1530,15 @@ public final class SessionHandler {
 
         @Override
         public Session call() throws Exception {
-            return obfuscator.unwrap(storageService.lookupSession(sessionId));
+            try {
+                return obfuscator.unwrap(storageService.lookupSession(sessionId));
+            } catch (OXException e) {
+                if (SessionStorageExceptionCodes.INTERRUPTED.equals(e)) {
+                    // Expected...
+                    return null;
+                }
+                throw e;
+            }
         }
     }
 
@@ -1558,10 +1566,16 @@ public final class SessionHandler {
     }
 
     private static Session getSessionFrom(final String sessionId, final SessionStorageService storageService) throws OXException {
-        final int tout = timeout();
+        Future<Session> f;
         try {
-            final GetStoredSessionTask task = new GetStoredSessionTask(sessionId, storageService);
-            return ThreadPools.getThreadPool().submit(task).get(tout, TimeUnit.MILLISECONDS);
+            f = ThreadPools.getThreadPool().submit(new GetStoredSessionTask(sessionId, storageService));
+        } catch (Exception e) {
+            return null;
+        }
+
+        int tout = timeout();
+        try {
+            return f.get(tout, TimeUnit.MILLISECONDS);
         } catch (final RejectedExecutionException e) {
             return storageService.lookupSession(sessionId);
         } catch (final InterruptedException e) {
@@ -1581,6 +1595,7 @@ public final class SessionHandler {
             throw new IllegalStateException("Not unchecked", t);
         } catch (final TimeoutException e) {
             LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, tout);
+            f.cancel(true);
             return null;
         } catch (final CancellationException e) {
             return null;
@@ -1600,18 +1615,28 @@ public final class SessionHandler {
         }
     }
 
-    private static <V> V getFrom(final Task<V> c, final V defaultValue) {
+    private static <V> V getFrom(Task<V> c, V defaultValue) {
+        Future<V> f;
         try {
-            return ThreadPools.getThreadPool().submit(c).get(timeout(), TimeUnit.MILLISECONDS);
-        } catch (final InterruptedException e) {
+            f = ThreadPools.getThreadPool().submit(c);
+        } catch (Exception e) {
+            // Failed to submit to thread pool
+            return defaultValue;
+        }
+
+        // Await task completion
+        try {
+            return f.get(timeout(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return defaultValue;
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             ThreadPools.launderThrowable(e, OXException.class);
             return defaultValue;
-        } catch (final TimeoutException e) {
+        } catch (TimeoutException e) {
+            f.cancel(true);
             return defaultValue;
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             return defaultValue;
         }
     }
