@@ -90,10 +90,7 @@ public final class DelegationTicketLifecycle implements LoginHandlerService, Eve
 
     @Override
     public void handleLogout(LoginResult logout) {
-        TicketRenewalTimer kt = timers.remove(logout.getSession().getSessionID());
-        if (null != kt) {
-            kt.cancel();
-        }
+        removeTicketRenewalTimer(logout.getSession().getSessionID());
     }
 
     public void stopAll() {
@@ -106,13 +103,7 @@ public final class DelegationTicketLifecycle implements LoginHandlerService, Eve
     @Override
     public void handleEvent(Event event) {
         final String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-            @SuppressWarnings("unchecked")
-            final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-            for (final Session session : container.values()) {
-                handleRemovedSession(session);
-            }
-        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+        if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
             handleRemovedSession(session);
         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
@@ -124,14 +115,18 @@ public final class DelegationTicketLifecycle implements LoginHandlerService, Eve
         }
     }
 
-    private void handleRemovedSession(Session session) {
-        final TicketRenewalTimer timer = timers.remove(session.getSessionID());
-        if (null != timer) {
-            timer.cancel();
-        }
+    private static void handleRemovedSession(Session session) {
+//        removeTicketRenewalTimer(session.getSessionID());
         final ClientPrincipal principal = (ClientPrincipal) session.getParameter(SESSION_PRINCIPAL);
         if (null != principal) {
             principal.dispose();
+        }
+    }
+
+    private void removeTicketRenewalTimer(String sessionId) {
+        final TicketRenewalTimer timer = timers.remove(sessionId);
+        if (null != timer) {
+            timer.cancel();
         }
     }
 }
