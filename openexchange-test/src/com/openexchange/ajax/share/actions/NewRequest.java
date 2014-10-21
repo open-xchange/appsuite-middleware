@@ -140,8 +140,6 @@ public class NewRequest implements AJAXRequest<NewResponse> {
         RecipientType type = recipient.getType();
         jRecipient.put("type", type.name().toLowerCase());
         jRecipient.put("bits", recipient.getBits());
-        jRecipient.put("activation_date", recipient.getActivationDate() == null ? null : recipient.getActivationDate().getTime());
-        jRecipient.put("expiry_date", recipient.getExpiryDate() == null ? null : recipient.getExpiryDate().getTime());
         switch (type) {
             case USER:
             case GROUP:
@@ -179,6 +177,8 @@ public class NewRequest implements AJAXRequest<NewResponse> {
         jTarget.put("module", Module.getModuleString(target.getModule(), -1));
         jTarget.put("folder", target.getFolder());
         jTarget.put("item", target.getItem());
+        jTarget.put("activation_date", target.getActivationDate() == null ? null : target.getActivationDate().getTime());
+        jTarget.put("expiry_date", target.getExpiryDate() == null ? null : target.getExpiryDate().getTime());
         return jTarget;
     }
 

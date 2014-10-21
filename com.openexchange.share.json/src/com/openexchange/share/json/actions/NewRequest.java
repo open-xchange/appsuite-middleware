@@ -50,7 +50,6 @@
 package com.openexchange.share.json.actions;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -273,12 +272,13 @@ public class NewRequest {
         }
         int bits = jsonRecipient.getInt("bits");
         recipient.setBits(bits);
-        if (jsonRecipient.hasAndNotNull("activation_date")) {
-            recipient.setActivationDate(new Date(jsonRecipient.getLong("activation_date")));
-        }
-        if (jsonRecipient.hasAndNotNull("expiry_date")) {
-            recipient.setExpiryDate(new Date(jsonRecipient.getLong("expiry_date")));
-        }
+//TODO: moved to target
+//        if (jsonRecipient.hasAndNotNull("activation_date")) {
+//            recipient.setActivationDate(new Date(jsonRecipient.getLong("activation_date")));
+//        }
+//        if (jsonRecipient.hasAndNotNull("expiry_date")) {
+//            recipient.setExpiryDate(new Date(jsonRecipient.getLong("expiry_date")));
+//        }
         return recipient;
     }
 

@@ -85,7 +85,7 @@ public class ShareStorageDeleteListener implements DeleteListener {
             } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             }
-        } else if (DeleteEvent.TYPE_USER == event.getType() && event.getContext().getMailadmin() == event.getId()) {
+        } else if (DeleteEvent.TYPE_USER == event.getType() && event.getContext().getMailadmin() != event.getId()) {
             try {
                 deleteSharesForGuest(writeCon, event.getContext().getContextId(), event.getId());
                 reassignShares(writeCon, event.getContext().getContextId(), event.getId(), event.getContext().getMailadmin());

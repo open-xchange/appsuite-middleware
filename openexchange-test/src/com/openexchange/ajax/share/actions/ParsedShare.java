@@ -119,10 +119,10 @@ public class ParsedShare {
                 ShareTarget target = new ShareTarget(
                     Module.getModuleInteger(jsonTarget.optString("module")), jsonTarget.optString("folder"), jsonTarget.optString("item", null));
                 if (jsonTarget.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
-                    recipient.setExpiryDate(new Date(jsonTarget.getLong(FolderField.EXPIRY_DATE.getName())));
+                    target.setExpiryDate(new Date(jsonTarget.getLong(FolderField.EXPIRY_DATE.getName())));
                 }
                 if (jsonTarget.hasAndNotNull(FolderField.ACTIVATION_DATE.getName())) {
-                    recipient.setActivationDate(new Date(jsonTarget.getLong(FolderField.ACTIVATION_DATE.getName())));
+                    target.setActivationDate(new Date(jsonTarget.getLong(FolderField.ACTIVATION_DATE.getName())));
                 }
                 if (jsonTarget.hasAndNotNull("meta")) {
                     //TODO

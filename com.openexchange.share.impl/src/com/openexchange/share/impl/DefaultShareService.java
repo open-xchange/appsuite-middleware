@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
@@ -137,7 +138,6 @@ public class DefaultShareService implements ShareService {
             return;
         }
         LOG.info("Deleting share target(s) {} for guest users {} in context {}...", targets, guestIDs, session.getContextId());
-        Context context = services.getService(ContextService.class).getContext(session.getContextId());
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
@@ -170,11 +170,7 @@ public class DefaultShareService implements ShareService {
              * perform updates & adjust user permission bits
              */
             if (0 < sharesToUpdate.size()) {
-                shareStorage.updateShares(session.getContextId(), sharesToUpdate, connectionHelper.getParameters());
-                for (Share share : sharesToUpdate) {
-                    int requiredPermissionBits = ShareTool.getUserPermissionBits(share);
-                    setPermissionBits(connectionHelper.getConnection(), context, share.getGuest(), requiredPermissionBits, false);
-                }
+                updateShares(connectionHelper, sharesToUpdate);
             }
             /*
              * perform deletes & delete guest users
@@ -479,19 +475,32 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private Share removeExpired(Share share) throws OXException {
-        //TODO : remove expired targets, remove parent share if all targets expired
-//        if (null != share && share.isExpired()) {
-//            LOG.info("Detected expired share ({}): {}", share.getExpiryDate(), share);
-//            ConnectionHelper connectionHelper = new ConnectionHelper(share.getContextID(), services, true);
-//            try {
-//                connectionHelper.start();
-//                removeShares(connectionHelper, Collections.singletonList(share));
-//                connectionHelper.commit();
-//            } finally {
-//                connectionHelper.finish();
-//            }
-//            return null;
-//        }
+        if (null != share && null != share.getTargets()) {
+            boolean updateNeeded = false;
+            Iterator<ShareTarget> iterator = share.getTargets().iterator();
+            while (iterator.hasNext()) {
+                ShareTarget target = iterator.next();
+                if (target.isExpired()) {
+                    iterator.remove();
+                    updateNeeded = true;
+                }
+            }
+            if (updateNeeded) {
+                ConnectionHelper connectionHelper = new ConnectionHelper(share.getContextID(), services, true);
+                try {
+                    connectionHelper.start();
+                    if (0 == share.getTargets().size()) {
+                        removeShares(connectionHelper, Collections.singletonList(share));
+                        share = null;
+                    } else {
+                        updateShares(connectionHelper, Collections.singletonList(share));
+                    }
+                    connectionHelper.commit();
+                } finally {
+                    connectionHelper.finish();
+                }
+            }
+        }
         return share;
     }
 
@@ -542,6 +551,27 @@ public class DefaultShareService implements ShareService {
         }
         LOG.info("Deleted {} guest user(s) in context {}: {}", deletedGuestIDs.size(), context.getContextId(), deletedGuestIDs);
         return I2i(deletedGuestIDs);
+    }
+
+    /**
+     * Updates the supplied shares, i.e. updates the share entries from the underlying storage along with updating associated guest
+     * permissions as needed.
+     *
+     * @param connectionHelper A (started) connection helper
+     * @param shares The shares to update
+     * @throws OXException
+     */
+    private void updateShares(ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
+        if (null == shares || 0 == shares.size()) {
+            return;
+        }
+        Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        shareStorage.updateShares(context.getContextId(), shares, connectionHelper.getParameters());
+        for (Share share : shares) {
+            int requiredPermissionBits = ShareTool.getUserPermissionBits(share);
+            setPermissionBits(connectionHelper.getConnection(), context, share.getGuest(), requiredPermissionBits, false);
+        }
     }
 
     /**

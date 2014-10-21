@@ -218,6 +218,9 @@ public final class FolderParser {
              */
             ParsedGuestPermission parsedGuestPermission = new ParsedGuestPermission();
             parsedGuestPermission.setRecipient(parseRecipient(type, jsonObject));
+            if (jsonObject.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
+                parsedGuestPermission.setExpiryDate(new Date(jsonObject.getLong(FolderField.EXPIRY_DATE.getName())));
+            }
             permission = parsedGuestPermission;
         } else {
             /*
@@ -280,12 +283,6 @@ public final class FolderParser {
             break;
         default:
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
-        }
-        if (jsonObject.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
-            recipient.setExpiryDate(new Date(jsonObject.getLong(FolderField.EXPIRY_DATE.getName())));
-        }
-        if (jsonObject.hasAndNotNull(FolderField.ACTIVATION_DATE.getName())) {
-            recipient.setActivationDate(new Date(jsonObject.getLong(FolderField.ACTIVATION_DATE.getName())));
         }
         if (false == jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.BITS.getName());

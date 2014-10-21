@@ -49,7 +49,6 @@
 
 package com.openexchange.share.recipient;
 
-import java.util.Date;
 
 /**
  * Describes a guest user to which a item or folder shall be shared.
@@ -60,8 +59,6 @@ import java.util.Date;
 public abstract class ShareRecipient {
 
     private int bits;
-    private Date activationDate;
-    private Date expiryDate;
 
     /**
      * Initializes a new {@link ShareRecipient}.
@@ -95,49 +92,11 @@ public abstract class ShareRecipient {
         this.bits = bits;
     }
 
-    /**
-     * Gets the activationDate
-     *
-     * @return The activationDate
-     */
-    public Date getActivationDate() {
-        return activationDate;
-    }
-
-    /**
-     * Sets the activationDate
-     *
-     * @param activationDate The activationDate to set
-     */
-    public void setActivationDate(Date activationDate) {
-        this.activationDate = activationDate;
-    }
-
-    /**
-     * Gets the expiryDate
-     *
-     * @return The expiryDate
-     */
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
-    /**
-     * Sets the expiryDate
-     *
-     * @param expiryDate The expiryDate to set
-     */
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((activationDate == null) ? 0 : activationDate.hashCode());
         result = prime * result + bits;
-        result = prime * result + ((expiryDate == null) ? 0 : expiryDate.hashCode());
         return result;
     }
 
@@ -153,21 +112,7 @@ public abstract class ShareRecipient {
             return false;
         }
         ShareRecipient other = (ShareRecipient) obj;
-        if (activationDate == null) {
-            if (other.activationDate != null) {
-                return false;
-            }
-        } else if (!activationDate.equals(other.activationDate)) {
-            return false;
-        }
         if (bits != other.bits) {
-            return false;
-        }
-        if (expiryDate == null) {
-            if (other.expiryDate != null) {
-                return false;
-            }
-        } else if (!expiryDate.equals(other.expiryDate)) {
             return false;
         }
         return true;

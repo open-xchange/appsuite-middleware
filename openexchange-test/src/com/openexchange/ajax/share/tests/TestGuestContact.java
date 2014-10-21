@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
@@ -117,10 +116,8 @@ public class TestGuestContact extends ShareTest {
 
         target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
         GuestRecipient guest = new GuestRecipient();
-        guest.setActivationDate(new Date());
         guest.setDisplayName(GUEST_DISPLAYNAME);
         guest.setEmailAddress(GUEST_MAIL);
-        guest.setExpiryDate(new Date(Long.MAX_VALUE));
         guest.setPassword(GUEST_PASSWORD);
         guest.setBits(FOLDER_READ_PERMISSION);
 
