@@ -1,6 +1,7 @@
 * 2014-10-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 35109: Do not dispose kerberos tickets when sessions are moved over to long term session container.
+ - Fix for bug 35103: Synchronized multiple threads on IMAP login if a Kerberos subject is used to authenticate the user.
 
 * 2014-10-21 - thorben.betten@open-xchange.com
 
