@@ -51,7 +51,6 @@ package com.openexchange.share;
 
 import java.io.Serializable;
 
-
 /**
  * {@link GroupwareTarget}
  *
@@ -59,6 +58,8 @@ import java.io.Serializable;
  * @since v7.8.0
  */
 public class GroupwareTarget implements Serializable {
+
+    private static final long serialVersionUID = 6115119543318239607L;
 
     protected int module;
     protected String folder;

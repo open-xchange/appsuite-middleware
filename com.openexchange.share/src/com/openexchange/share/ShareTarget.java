@@ -60,6 +60,8 @@ import java.util.Map;
  */
 public class ShareTarget extends GroupwareTarget {
 
+    private static final long serialVersionUID = -8680039849393740702L;
+
     protected Date expiryDate;
     protected Date activationDate;
     protected Map<String, Object> meta;
