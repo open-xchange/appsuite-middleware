@@ -50,28 +50,17 @@
 package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.AbstractWarningAwareReadOnlyValue;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.session.Session;
 
 /**
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Spam implements PreferencesItemService {
-
-    /**
-     * Logger.
-     */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Spam.class);
 
     /**
      * Default constructor.
@@ -93,40 +82,11 @@ public class Spam implements PreferencesItemService {
      */
     @Override
     public IValueHandler getSharedValue() {
-        return new AbstractWarningAwareReadOnlyValue() {
+        return new AbstractStandardFolderItemValue() {
+
             @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            @Override
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws OXException {
-                MailServletInterface mail = null;
-                try {
-                    mail = MailServletInterface.getInstance(session);
-                    setting.setSingleValue(mail.getSpamFolder(MailAccount.DEFAULT_ID));
-                    addWarnings(mail.getWarnings());
-                } catch (final OXException e) {
-                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                        // Admin has no mail access
-                        setting.setSingleValue(null);
-                    } else if (MailExceptionCode.containsSocketError(e)) {
-                        // A socket error we cannot recover from
-                        LOG.warn("Could not connect to mail system due to a socket error", e);
-                        setting.setSingleValue(null);
-                    } else {
-                        throw e;
-                    }
-                } finally {
-                    if (mail != null) {
-                        try {
-                            mail.close(true);
-                        } catch (final OXException e) {
-                            LOG.error("", e);
-                        }
-                    }
-                }
+            protected void getValue(Setting setting, MailServletInterface mailInterface) throws OXException {
+                setting.setSingleValue(mailInterface.getSpamFolder(MailAccount.DEFAULT_ID));
             }
         };
     }
