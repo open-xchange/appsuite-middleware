@@ -916,6 +916,9 @@ if ! grep "jcs.region.UserPermissionBits=LTCP" > /dev/null $pfile; then
     echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile 
 fi
 
+# SoftwareChange_Request-2224
+ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
