@@ -54,10 +54,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
@@ -445,7 +447,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /**
-     * Adds shares as a consequence of added guest permission entities. This also includes creating the corresponding guest user.
+     * Adds share targets as a consequence of added guest permission entities. This also includes creating or resolving the corresponding
+     * guest user. The supplied guest permissions are enriched by the matching guest user entities automatically.
      *
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
@@ -455,25 +458,51 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares, in
      *         the same order as the supplied guest permissions list
      */
-    protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
-        List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(addedPermissions.size());
-        for (GuestPermission permission : addedPermissions) {
-            recipients.add(permission.getRecipient());
-        }
+    protected void processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
+        Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(folderID, contentType, addedPermissions);
+        ShareService shareService = ShareServiceHolder.requireShareService();
         try {
-            ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
-            List<Share> shares = shareService.addTarget(session, new ShareTarget(contentType.getModule(), folderID), recipients);
-            if (null == shares || shares.size() != addedPermissions.size()) {
-                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
+            for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
+                List<GuestPermission> permissions = entry.getValue();
+                List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(permissions.size());
+                for (GuestPermission permission : permissions) {
+                    recipients.add(permission.getRecipient());
+                }
+                List<Share> shares = shareService.addTarget(session, entry.getKey(), recipients);
+                if (null == shares || shares.size() != permissions.size()) {
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
+                }
+                for (int i = 0; i < shares.size(); i++) {
+                    permissions.get(i).setEntity(shares.get(i).getGuest());
+                }
             }
-            for (int i = 0; i < shares.size(); i++) {
-                addedPermissions.get(i).setEntity(shares.get(i).getGuest());
-            }
-            return shares;
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
+    }
+
+    /**
+     * Gets the resulting share targets based on the supplied guest permissions.
+     *
+     * @param folderID The folder ID to get the share targets for
+     * @param contentType The content type of the folder
+     * @param permissions The guest permissions
+     * @return The share targets, each one mapped to the corresponding list of guest permissions
+     */
+    private static Map<ShareTarget, List<GuestPermission>> getPermissionsPerTarget(String folderID, ContentType contentType, List<GuestPermission> permissions) {
+        Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = new HashMap<ShareTarget, List<GuestPermission>>();
+        for (GuestPermission permission : permissions) {
+            ShareTarget target = new ShareTarget(contentType.getModule(), String.valueOf(folderID));
+            target.setExpiryDate(permission.getExpiryDate());
+            List<GuestPermission> exitingPermissions = permissionsPerTarget.get(target);
+            if (null == exitingPermissions) {
+                exitingPermissions = new ArrayList<GuestPermission>();
+                permissionsPerTarget.put(target, exitingPermissions);
+            }
+            exitingPermissions.add(permission);
+        }
+        return permissionsPerTarget;
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
