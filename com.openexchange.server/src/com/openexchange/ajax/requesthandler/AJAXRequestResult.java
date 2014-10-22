@@ -172,19 +172,21 @@ public class AJAXRequestResult {
         /**
          * A common request result which should be further processed.
          */
-        COMMON,
+        @NonNull COMMON,
         /**
          * An <i>ETag</i> request result.
          */
-        ETAG,
+        @NonNull ETAG,
         /**
          * The special result directly responded to client.
          */
-        DIRECT,
+        @NonNull DIRECT,
         /**
-         * The request went to a resource that could not be found
+         * Signals a HTTP error
          */
-        NOT_FOUND;
+        @NonNull HTTP_ERROR,
+
+        ;
     }
 
     /**
@@ -221,6 +223,8 @@ public class AJAXRequestResult {
      * client is supposed to request again to get full results.
      */
     private @Nullable UUID continuationUuid;
+
+    private int httpStatusCode;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -269,6 +273,7 @@ public class AJAXRequestResult {
      */
     public AJAXRequestResult(final @Nullable Object resultObject, final @Nullable Date timestamp, final @Nullable String format) {
         super();
+        httpStatusCode = 200;
         duration = -1L;
         headers = new LinkedHashMap<String, String>(8);
         parameters = new HashMap<String, Object>(8);
@@ -384,6 +389,39 @@ public class AJAXRequestResult {
      */
     public @NonNull AJAXRequestResult setType(final @NonNull ResultType resultType) {
         this.resultType = resultType;
+        return this;
+    }
+
+    /**
+     * Gets the HTTP status code.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>NOTE</b>:<br>
+     * The value is only considered if type is set to {@link ResultType#HTTP_ERROR}.
+     * </div>
+     *
+     * @return The HTTP status code; 200 by default
+     */
+    public int getHttpStatusCode() {
+        return httpStatusCode;
+    }
+
+    /**
+     * Sets the HTTP status code.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>NOTE</b>:<br>
+     * The value is only considered if type is set to {@link ResultType#HTTP_ERROR}, thus type is automatically changed to
+     * {@link ResultType#HTTP_ERROR}!
+     * </div>
+     *
+     * @param httpStatusCode The httpStatusCode to set
+     * @return This result with status code and appropriate type applied
+     * @see #setType(ResultType)
+     */
+    public @NonNull AJAXRequestResult setHttpStatusCode(int httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+        this.resultType = ResultType.HTTP_ERROR;
         return this;
     }
 

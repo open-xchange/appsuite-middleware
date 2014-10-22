@@ -50,6 +50,7 @@
 package com.openexchange.unifiedinbox;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.unifiedinbox.utility.UnifiedInboxUtility.generateNestedFullName;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -640,16 +641,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 final String nestedFullname = fa.getFullname();
                 final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(nestedFullname);
                 final String startingKnownFullname = getStartingKnownFullname(fullname);
-                mailFolder.setFullname(UnifiedInboxUtility.generateNestedFullName(
-                    unifiedInboxId,
-                    startingKnownFullname,
-                    nestedAccountId,
-                    nestedFullname));
-                mailFolder.setParentFullname(UnifiedInboxUtility.generateNestedFullName(
-                    unifiedInboxId,
-                    startingKnownFullname,
-                    nestedAccountId,
-                    null));
+                mailFolder.setFullname(generateNestedFullName(unifiedInboxId, startingKnownFullname, nestedAccountId, nestedFullname));
+                mailFolder.setParentFullname(generateNestedFullName(unifiedInboxId, startingKnownFullname, nestedAccountId, null));
                 mailFolder.setName(getMailAccountName(nestedAccountId));
                 mailFolder.setSubfolders(false);
                 mailFolder.setSubscribedSubfolders(false);
@@ -840,16 +833,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         }
                         // Get mail folder
                         final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
-                        mailFolder.setFullname(UnifiedInboxUtility.generateNestedFullName(
-                            unifiedInboxAccountId,
-                            parentFullName,
-                            mailAccount.getId(),
-                            mailFolder.getFullname()));
-                        mailFolder.setParentFullname(UnifiedInboxUtility.generateNestedFullName(
-                            unifiedInboxAccountId,
-                            parentFullName,
-                            mailAccount.getId(),
-                            null));
+                        mailFolder.setFullname(generateNestedFullName(unifiedInboxAccountId, parentFullName, mailAccount.getId(), mailFolder.getFullname()));
+                        mailFolder.setParentFullname(generateNestedFullName(unifiedInboxAccountId, parentFullName, mailAccount.getId(), null));
                         UnifiedInboxFolderConverter.setPermissions(mailFolder, s.getUserId());
                         mailFolder.setSubfolders(false);
                         mailFolder.setSubscribedSubfolders(false);

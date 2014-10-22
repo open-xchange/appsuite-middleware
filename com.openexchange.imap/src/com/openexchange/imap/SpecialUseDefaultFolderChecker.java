@@ -94,6 +94,11 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
         SPECIAL_USES = sa;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------- //
+
+    private final boolean hasCreateSpecialUse;
+    private final boolean hasMetadata;
+
     /**
      * Initializes a new {@link SpecialUseDefaultFolderChecker}.
      *
@@ -101,10 +106,14 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
      * @param session The session
      * @param ctx The context
      * @param imapStore The (connected) IMAP store
-     * @param imapConfig The IMAP configuration
+     * @param imapAccess The IMAP access
+     * @param hasCreateSpecialUse Whether the IMAP server advertises "CREATE-SPECIAL-USE" capability string
+     * @param hasMetadata Whether the IMAP server advertises "METADATA" capability string
      */
-    public SpecialUseDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final IMAPStore imapStore, final IMAPAccess imapAccess) {
+    public SpecialUseDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final IMAPStore imapStore, final IMAPAccess imapAccess, boolean hasCreateSpecialUse, boolean hasMetadata) {
         super(accountId, session, ctx, imapStore, imapAccess);
+        this.hasCreateSpecialUse = hasCreateSpecialUse;
+        this.hasMetadata = hasMetadata;
     }
 
     @Override
@@ -242,8 +251,19 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
     protected void createIfNonExisting(final IMAPFolder f, final int type, final char sep, final String detectedPrefix, final int index) throws MessagingException {
         if (!f.exists()) {
             try {
-                final List<String> specialUses = index < StorageUtility.INDEX_CONFIRMED_SPAM ? Collections.singletonList(SPECIAL_USES[index]) : null;
-                IMAPCommandsCollection.createFolder(f, sep, type, false, specialUses);
+                if (hasCreateSpecialUse) {
+                    // E.g. CREATE MyDrafts (USE (\Drafts))
+                    final List<String> specialUses = index < StorageUtility.INDEX_CONFIRMED_SPAM ? Collections.singletonList(SPECIAL_USES[index]) : null;
+                    IMAPCommandsCollection.createFolder(f, sep, type, false, specialUses);
+                } else {
+                    IMAPCommandsCollection.createFolder(f, sep, type, false);
+                    if (index < StorageUtility.INDEX_CONFIRMED_SPAM) {
+                        if (hasMetadata) {
+                            // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
+                            IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(SPECIAL_USES[index]));
+                        }
+                    }
+                }
                 LOG.info("Created new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), detectedPrefix, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             } catch (final MessagingException e) {
                 LOG.warn("Failed to create new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), detectedPrefix, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
@@ -251,7 +271,10 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
             }
         } else {
             if (index < StorageUtility.INDEX_CONFIRMED_SPAM) {
-                IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(SPECIAL_USES[index]));
+                if (hasMetadata) {
+                    // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
+                    IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(SPECIAL_USES[index]));
+                }
             }
         }
     }

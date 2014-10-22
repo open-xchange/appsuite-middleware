@@ -15,11 +15,20 @@
 
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger
 
+* 2014-10-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug #34835: Honor "CREATE-SPECIAL-USE" capability string when using the "USE" IMAP CREATE command extension
+ - Fix for bug 34727: Set proper full-name to Unified Mail subfolders
+
 * 2014-10-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 34706: Use timeout-aware operations to distribute either change of local IP address, client identifier or hash string through
                       cluster to prevent the system from increasing number of stalled threads
  - Fix for bug 34765: Use secure value insertion through PreparedStatement
+
+* 2014-10-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34283: Introduced a hard limit when marshalling the XML elements of a WebDAV response with a depth >= 1 recursively
 
 * 2014-09-29 - thorben.betten@open-xchange.com
 
@@ -28,6 +37,10 @@
 * 2014-09-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 34465: Fixed update for POP3 mail accounts
+
+* 2014-09-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34499: Don't fail on invalid e-mail addresses, instead add a warning to the import result
 
 * 2014-09-18 - thorben.betten@open-xchange.com
 
