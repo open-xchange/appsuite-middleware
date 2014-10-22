@@ -87,6 +87,13 @@ public final class ThreadableCache {
     }
 
     /**
+     * Drops the cache associated with specified user.
+     */
+    public static void dropFor(int userId, int contextId) {
+        INSTANCE.userMap.remove(new UserKey(userId, contextId));
+    }
+
+    /**
      * Indicates whether <tt>Threadable</tt> cache is enabled.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>

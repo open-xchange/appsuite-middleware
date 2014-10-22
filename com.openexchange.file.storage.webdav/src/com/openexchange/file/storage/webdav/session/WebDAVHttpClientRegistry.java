@@ -54,8 +54,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import com.openexchange.file.storage.webdav.WebDAVServices;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link WebDAVHttpClientRegistry}
@@ -143,18 +141,14 @@ public final class WebDAVHttpClientRegistry {
      * @return <code>true</code> if a HttpClient for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeClientIfLast(final int contextId, final int userId) {
-        final SessiondService sessiondService = WebDAVServices.getService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            final ConcurrentMap<String, HttpClient> inner = map.remove(SimpleKey.valueOf(contextId, userId));
-            if (null == inner || inner.isEmpty()) {
-                return false;
-            }
-            for (final HttpClient client : inner.values()) {
-                ((MultiThreadedHttpConnectionManager) client.getHttpConnectionManager()).shutdown();
-            }
-            return true;
+        final ConcurrentMap<String, HttpClient> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+        if (null == inner || inner.isEmpty()) {
+            return false;
         }
-        return false;
+        for (final HttpClient client : inner.values()) {
+            ((MultiThreadedHttpConnectionManager) client.getHttpConnectionManager()).shutdown();
+        }
+        return true;
     }
 
     /**

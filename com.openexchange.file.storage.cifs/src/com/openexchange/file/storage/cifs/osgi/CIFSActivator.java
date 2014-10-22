@@ -51,7 +51,6 @@ package com.openexchange.file.storage.cifs.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -63,7 +62,6 @@ import com.openexchange.file.storage.cifs.CIFSServices;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
@@ -110,23 +108,14 @@ public final class CIFSActivator extends HousekeepingActivator {
                     @Override
                     public void handleEvent(final Event event) {
                         final String topic = event.getTopic();
-                        if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                            handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
-                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                            @SuppressWarnings("unchecked")
-                            final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            for (final Session session : map.values()) {
-                                handleDroppedSession(session);
+                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                            if (null != contextId) {
+                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                                if (null != userId) {
+                                    SmbFileMapManagement.getInstance().dropFor(userId.intValue(), contextId.intValue());
+                                }
                             }
-                        }
-                    }
-
-                    private void handleDroppedSession(final Session session) {
-                        if (session.isTransient()) {
-                            return;
-                        }
-                        if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
-                            SmbFileMapManagement.getInstance().dropFor(session);
                         }
                     }
                 };
