@@ -50,7 +50,6 @@
 package com.openexchange.session;
 
 import java.util.Date;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -344,8 +343,4 @@ public interface Session {
      */
     boolean isTransient();
 
-    /**
-     * @return the names of all parameters in this session.
-     */
-    Set<String> getParameterNames();
 }

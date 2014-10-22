@@ -52,7 +52,6 @@ package com.openexchange.events.remote.internal;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -263,11 +262,6 @@ public class RemoteSession implements PutIfAbsent {
     @Override
     public Object setParameterIfAbsent(String name, Object value) {
         return parameters.putIfAbsent(name, value);
-    }
-
-    @Override
-    public Set<String> getParameterNames() {
-        return parameters.keySet();
     }
 
     private static String obfuscate(String string) {

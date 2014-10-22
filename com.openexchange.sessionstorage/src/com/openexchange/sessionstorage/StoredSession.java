@@ -50,11 +50,7 @@
 package com.openexchange.sessionstorage;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.PutIfAbsent;
@@ -69,9 +65,6 @@ import com.openexchange.session.Session;
 public class StoredSession implements PutIfAbsent, Serializable {
 
     private static final long serialVersionUID = -3414389910481034283L;
-
-    // must not contain a colon in every name!
-    private static final String[] PORTABLE_PARAMETERS = new String[] { "kerberosSubject", "kerberosPrincipal" };
 
     /**
      * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
@@ -136,14 +129,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
             }
-            List<String> remoteParameterNames = new ArrayList<String>();
-            remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
-            for (String parameterName : remoteParameterNames) {
-                Object value = parameters.get(parameterName);
-                if (null != value) {
-                    this.parameters.put(parameterName, value);
-                }
-            }
         }
     }
 
@@ -174,14 +159,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
             parameter = session.getParameter(Session.PARAM_ALTERNATIVE_ID);
             if (null != parameter) {
                 this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
-            }
-            List<String> remoteParameterNames = new ArrayList<String>();
-            remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
-            for (String parameterName : remoteParameterNames) {
-                Object value = session.getParameter(parameterName);
-                if (null != value) {
-                    this.parameters.put(parameterName, value);
-                }
             }
         }
         this.password = session.getPassword();
@@ -444,8 +421,4 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return builder.toString();
     }
 
-    @Override
-    public Set<String> getParameterNames() {
-        return parameters.keySet();
-    }
 }

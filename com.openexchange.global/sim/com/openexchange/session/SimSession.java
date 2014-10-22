@@ -51,7 +51,6 @@ package com.openexchange.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * {@link SimSession}
@@ -225,11 +224,6 @@ public class SimSession implements Session {
     @Override
     public boolean isTransient() {
         return false;
-    }
-
-    @Override
-    public Set<String> getParameterNames() {
-        return parameters.keySet();
     }
 
 }

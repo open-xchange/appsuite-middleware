@@ -49,10 +49,8 @@
 
 package com.openexchange.authentication.kerberos.impl;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
 import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
-import static com.openexchange.kerberos.KerberosUtils.disposeSubject;
 import static com.openexchange.kerberos.KerberosUtils.getName;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -103,7 +101,7 @@ class TicketRenewalTimer implements Runnable {
         if (LOG.isDebugEnabled()) {
             Calendar cal = new GregorianCalendar(TimeZones.UTC, Locale.ENGLISH);
             cal.add(Calendar.SECOND, ticketExpiresInSeconds);
-            LOG.debug("Ticket for {} expires in {}. Running timer in {} seconds.", getName(subject), cal.toString(), I(ticketExpiresInSeconds));
+            LOG.debug("Ticket for {} expires in {}. Running timer in {} seconds.", getName(subject), cal.toString(), ticketExpiresInSeconds);
         }
         scheduled = timerService.schedule(this, ticketExpiresInSeconds, TimeUnit.SECONDS);
     }
@@ -120,8 +118,7 @@ class TicketRenewalTimer implements Runnable {
             final Subject subject = newPrincipal.getDelegateSubject();
             session.setParameter(SESSION_SUBJECT, subject);
             schedule(subject);
-            disposeSubject(principal.getClientSubject());
-            disposeSubject(principal.getDelegateSubject());
+            principal.dispose();
         } catch (OXException e) {
             LOG.error("", e);
         }

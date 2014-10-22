@@ -50,9 +50,7 @@
 package com.openexchange.subscribe;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -240,13 +238,4 @@ public class TargetFolderSession implements Session {
         return false;
     }
 
-    @Override
-    public Set<String> getParameterNames() {
-        Set<String> retval = new HashSet<String>();
-        if (null != params) {
-            retval.addAll(params.keySet());
-        }
-        retval.addAll(session.getParameterNames());
-        return retval;
-    }
 }

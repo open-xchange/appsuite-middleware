@@ -49,8 +49,6 @@
 
 package com.openexchange.publish.tools;
 
-import java.util.HashSet;
-import java.util.Set;
 import com.openexchange.publish.Publication;
 import com.openexchange.session.Session;
 
@@ -184,10 +182,4 @@ public class PublicationSession implements Session {
         return false;
     }
 
-    @Override
-    public Set<String> getParameterNames() {
-        Set<String> retval = new HashSet<String>();
-        retval.add(PARAM_PUBLICATION);
-        return retval;
-    }
 }

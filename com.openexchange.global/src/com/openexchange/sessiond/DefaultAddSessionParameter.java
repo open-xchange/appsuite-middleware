@@ -69,7 +69,6 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     private String client;
     private String clientToken;
     private boolean tranzient;
-    private SessionModifyCallback callback;
 
     /**
      * Initializes a new {@link DefaultAddSessionParameter}.
@@ -254,12 +253,4 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
         return this;
     }
 
-    @Override
-    public SessionModifyCallback getCallback() {
-        return callback;
-    }
-
-    public void setCallback(SessionModifyCallback callback) {
-        this.callback = callback;
-    }
 }

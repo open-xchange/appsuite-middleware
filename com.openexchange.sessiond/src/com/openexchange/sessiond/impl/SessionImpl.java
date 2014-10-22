@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -555,7 +554,4 @@ public final class SessionImpl implements PutIfAbsent {
         return builder.toString();
     }
 
-    public Set<String> getParameterNames() {
-        return parameters.keySet();
-    }
 }

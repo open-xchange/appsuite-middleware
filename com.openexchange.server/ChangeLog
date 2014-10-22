@@ -15,10 +15,6 @@
 
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger
 
-* 2014-10-14 - marcus.klein@open-xchange.com
-
- - Fix for bug 34517: Put Kerberos tickets of session parameters into distributed session storage.
-
 * 2014-10-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 34706: Use timeout-aware operations to distribute either change of local IP address, client identifier or hash string through

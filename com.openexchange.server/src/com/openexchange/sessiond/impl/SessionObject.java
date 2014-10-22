@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -323,8 +322,4 @@ public class SessionObject implements PutIfAbsent {
         return false;
     }
 
-    @Override
-    public Set<String> getParameterNames() {
-        return parameters.keySet();
-    }
 }

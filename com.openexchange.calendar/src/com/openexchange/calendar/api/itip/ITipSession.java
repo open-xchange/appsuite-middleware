@@ -49,8 +49,6 @@
 
 package com.openexchange.calendar.api.itip;
 
-import java.util.Collections;
-import java.util.Set;
 import com.openexchange.session.Session;
 
 public class ITipSession implements Session {
@@ -178,8 +176,4 @@ public class ITipSession implements Session {
         return false;
     }
 
-    @Override
-    public Set<String> getParameterNames() {
-        return Collections.emptySet();
-    }
 }

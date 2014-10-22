@@ -151,18 +151,6 @@ public final class KerberosUtils {
         LOG.info(sb.toString());
     }
 
-    public static void disposeSubject(Subject subject) {
-        if (null != subject) {
-            for (final GSSCredential credential : subject.getPrivateCredentials(GSSCredential.class)) {
-                try {
-                    credential.dispose();
-                } catch (GSSException e) {
-                    LOG.error("", e);
-                }
-            }
-        }
-    }
-
     public static Oid getKerberosName() throws GSSException {
         return new Oid("1.2.840.113554.1.2.2.1");
     }

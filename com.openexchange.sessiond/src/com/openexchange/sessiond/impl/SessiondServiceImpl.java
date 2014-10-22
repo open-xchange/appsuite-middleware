@@ -97,8 +97,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getHash(),
             param.getClient(),
             param.getClientToken(),
-            param.isTransient(),
-            param.getCallback());
+            param.isTransient());
     }
 
     @Override

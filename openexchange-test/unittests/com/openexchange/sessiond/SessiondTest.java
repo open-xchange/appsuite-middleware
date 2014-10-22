@@ -192,10 +192,6 @@ public class SessiondTest extends TestCase {
             public boolean isTransient() {
                 return false;
             }
-            @Override
-            public SessionModifyCallback getCallback() {
-                return null;
-            }
         });
     }
 
@@ -249,10 +245,6 @@ public class SessiondTest extends TestCase {
             @Override
             public boolean isTransient() {
                 return false;
-            }
-            @Override
-            public SessionModifyCallback getCallback() {
-                return null;
             }
         });
         sessiondCon.getSession(session.getSessionID());
@@ -309,10 +301,6 @@ public class SessiondTest extends TestCase {
             public boolean isTransient() {
                 return false;
             }
-            @Override
-            public SessionModifyCallback getCallback() {
-                return null;
-            }
         });
         sessiondCon.removeSession(session.getSessionID());
     }
@@ -367,10 +355,6 @@ public class SessiondTest extends TestCase {
             @Override
             public boolean isTransient() {
                 return false;
-            }
-            @Override
-            public SessionModifyCallback getCallback() {
-                return null;
             }
         });
         sessiondCon.getSession(session.getSessionID());

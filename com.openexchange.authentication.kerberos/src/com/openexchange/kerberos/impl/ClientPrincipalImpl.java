@@ -50,6 +50,10 @@
 package com.openexchange.kerberos.impl;
 
 import javax.security.auth.Subject;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.kerberos.ClientPrincipal;
 import com.openexchange.kerberos.KerberosUtils;
 
@@ -60,7 +64,7 @@ import com.openexchange.kerberos.KerberosUtils;
  */
 public final class ClientPrincipalImpl implements ClientPrincipal {
 
-    private static final long serialVersionUID = 4408781422388672382L;
+    private static final Logger LOG = LoggerFactory.getLogger(ClientPrincipalImpl.class);
 
     private Subject clientSubject;
     private Subject delegateSubject;
@@ -102,7 +106,6 @@ public final class ClientPrincipalImpl implements ClientPrincipal {
         return responseTicket;
     }
 
-    @Override
     public Subject getClientSubject() {
         return clientSubject;
     }
@@ -110,5 +113,27 @@ public final class ClientPrincipalImpl implements ClientPrincipal {
     @Override
     public byte[] getClientTicket() {
         return clientTicket;
+    }
+
+    @Override
+    public void dispose() {
+        if (null != clientSubject) {
+            for (final GSSCredential credential : clientSubject.getPrivateCredentials(GSSCredential.class)) {
+                try {
+                    credential.dispose();
+                } catch (GSSException e) {
+                    LOG.error("", e);
+                }
+            }
+        }
+        if (null != delegateSubject) {
+            for (final GSSCredential credential : delegateSubject.getPrivateCredentials(GSSCredential.class)) {
+                try {
+                    credential.dispose();
+                } catch (GSSException e) {
+                    LOG.error("", e);
+                }
+            }
+        }
     }
 }

@@ -53,7 +53,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.SessionModifyCallback;
 
 /**
  * Implements {@link AddSessionParameter}.
@@ -64,7 +63,6 @@ final class AddSessionParameterImpl implements AddSessionParameter {
     private final LoginRequest request;
     private final User user;
     private final Context ctx;
-    private SessionModifyCallback callback;
 
     AddSessionParameterImpl(final String username, final LoginRequest request, final User user, final Context ctx) {
         super();
@@ -128,13 +126,5 @@ final class AddSessionParameterImpl implements AddSessionParameter {
     public boolean isTransient() {
         return request.isTransient();
     }
-
-    @Override
-    public SessionModifyCallback getCallback() {
-        return callback;
-    }
-
-    public void setCallback(SessionModifyCallback callback) {
-        this.callback = callback;
-    }
+    
 }

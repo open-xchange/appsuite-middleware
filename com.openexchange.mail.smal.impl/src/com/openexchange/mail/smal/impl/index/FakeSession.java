@@ -50,7 +50,6 @@
 package com.openexchange.mail.smal.impl.index;
 
 import java.io.Serializable;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.Session;
@@ -185,11 +184,6 @@ public final class FakeSession implements Session, Serializable {
     @Override
     public boolean isTransient() {
         return false;
-    }
-
-    @Override
-    public Set<String> getParameterNames() {
-        return parameters.keySet();
     }
 
 }
