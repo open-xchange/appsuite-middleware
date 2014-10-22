@@ -69,12 +69,22 @@ public interface UserPermissionService {
      * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
      *
      * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The instance of <code>UserPermissionBits</code>
+     * @throws OXException If user's configuration could not be determined
+     */
+    UserPermissionBits getUserPermissionBits(int userId, int contextId) throws OXException;
+
+    /**
+     * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
+     *
+     * @param userId The user identifier
      * @param ctx The context
      * @return The instance of <code>UserPermissionBits</code>
      * @throws OXException If user's configuration could not be determined
      * @see #getUserPermissionBits(int, int[], Context)
      */
-    UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException;
+    UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException;
 
     /**
      * This method reads several user module access permissions. This method is faster than reading separately the {@link UserPermissionBits}
