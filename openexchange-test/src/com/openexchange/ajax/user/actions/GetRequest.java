@@ -61,11 +61,17 @@ public class GetRequest extends AbstractUserRequest<GetResponse> {
 
     private final int userId;
     private final TimeZone timeZone;
+    private final boolean failOnError;
 
-    public GetRequest(int userId, TimeZone timeZone) {
+    public GetRequest(int userId, TimeZone timeZone, boolean failOnError) {
         super();
         this.userId = userId;
         this.timeZone = timeZone;
+        this.failOnError = failOnError;
+    }
+
+    public GetRequest(int userId, TimeZone timeZone) {
+        this(userId, timeZone, true);
     }
 
     @Override
@@ -85,6 +91,6 @@ public class GetRequest extends AbstractUserRequest<GetResponse> {
 
     @Override
     public GetParser getParser() {
-        return new GetParser(true, userId, timeZone);
+        return new GetParser(failOnError, userId, timeZone);
     }
 }

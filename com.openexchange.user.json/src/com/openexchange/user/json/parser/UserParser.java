@@ -115,59 +115,49 @@ public final class UserParser {
     public static Contact parseUserContact(final JSONObject userJSONObject, final TimeZone timeZone) throws OXException {
         try {
             final Contact contact = new Contact();
-            for (final JSONAttributeMapper element : mapping) {
-                if (element.jsonObjectContains(userJSONObject)) {
-                    element.setObject(contact, userJSONObject);
+            if (null != userJSONObject) {
+                for (final JSONAttributeMapper element : mapping) {
+                    if (element.jsonObjectContains(userJSONObject)) {
+                        element.setObject(contact, userJSONObject);
+                    }
+                }
+                if (userJSONObject.has(UserField.DISTRIBUTIONLIST.getName())) {
+                    parseDistributionList(contact, userJSONObject);
+                }
+                if (userJSONObject.has(UserField.CATEGORIES.getName())) {
+                    contact.setCategories(parseString(userJSONObject, UserField.CATEGORIES.getName()));
+                }
+                if (userJSONObject.has(UserField.COLOR_LABEL.getName())) {
+                    contact.setLabel(parseInt(userJSONObject, UserField.COLOR_LABEL.getName()));
+                }
+                if (userJSONObject.has(UserField.PRIVATE_FLAG.getName())) {
+                    contact.setPrivateFlag(parseBoolean(userJSONObject, UserField.PRIVATE_FLAG.getName()));
+                }
+                if (userJSONObject.has(UserField.NUMBER_OF_ATTACHMENTS.getName())) {
+                    contact.setNumberOfAttachments(parseInt(userJSONObject, UserField.NUMBER_OF_ATTACHMENTS.getName()));
+                }
+                if (userJSONObject.has(UserField.FOLDER_ID.getName())) {
+                    contact.setParentFolderID(parseInt(userJSONObject, UserField.FOLDER_ID.getName()));
+                }
+                if (userJSONObject.has(UserField.CONTACT_ID.getName())) {
+                    contact.setObjectID(parseInt(userJSONObject, UserField.CONTACT_ID.getName()));
+                }
+                if (userJSONObject.has(UserField.INTERNAL_USERID.getName())) {
+                    contact.setInternalUserId(parseInt(userJSONObject, UserField.INTERNAL_USERID.getName()));
+                }
+                if (userJSONObject.has(UserField.CREATED_BY.getName())) {
+                    contact.setCreatedBy(parseInt(userJSONObject, UserField.CREATED_BY.getName()));
+                }
+                if (userJSONObject.has(UserField.CREATION_DATE.getName())) {
+                    contact.setCreationDate(parseTime(userJSONObject, UserField.CREATION_DATE.getName(), timeZone));
+                }
+                if (userJSONObject.has(UserField.MODIFIED_BY.getName())) {
+                    contact.setModifiedBy(parseInt(userJSONObject, UserField.MODIFIED_BY.getName()));
+                }
+                if (userJSONObject.has(UserField.LAST_MODIFIED.getName())) {
+                    contact.setLastModified(parseTime(userJSONObject, UserField.LAST_MODIFIED.getName(), timeZone));
                 }
             }
-            if (userJSONObject.has(UserField.DISTRIBUTIONLIST.getName())) {
-                parseDistributionList(contact, userJSONObject);
-            }
-
-            if (userJSONObject.has(UserField.CATEGORIES.getName())) {
-                contact.setCategories(parseString(userJSONObject, UserField.CATEGORIES.getName()));
-            }
-
-            if (userJSONObject.has(UserField.COLOR_LABEL.getName())) {
-                contact.setLabel(parseInt(userJSONObject, UserField.COLOR_LABEL.getName()));
-            }
-
-            if (userJSONObject.has(UserField.PRIVATE_FLAG.getName())) {
-                contact.setPrivateFlag(parseBoolean(userJSONObject, UserField.PRIVATE_FLAG.getName()));
-            }
-
-            if (userJSONObject.has(UserField.NUMBER_OF_ATTACHMENTS.getName())) {
-                contact.setNumberOfAttachments(parseInt(userJSONObject, UserField.NUMBER_OF_ATTACHMENTS.getName()));
-            }
-
-            if (userJSONObject.has(UserField.FOLDER_ID.getName())) {
-                contact.setParentFolderID(parseInt(userJSONObject, UserField.FOLDER_ID.getName()));
-            }
-
-            if (userJSONObject.has(UserField.CONTACT_ID.getName())) {
-                contact.setObjectID(parseInt(userJSONObject, UserField.CONTACT_ID.getName()));
-            }
-
-            if (userJSONObject.has(UserField.INTERNAL_USERID.getName())) {
-                contact.setInternalUserId(parseInt(userJSONObject, UserField.INTERNAL_USERID.getName()));
-            }
-
-            if (userJSONObject.has(UserField.CREATED_BY.getName())) {
-                contact.setCreatedBy(parseInt(userJSONObject, UserField.CREATED_BY.getName()));
-            }
-
-            if (userJSONObject.has(UserField.CREATION_DATE.getName())) {
-                contact.setCreationDate(parseTime(userJSONObject, UserField.CREATION_DATE.getName(), timeZone));
-            }
-
-            if (userJSONObject.has(UserField.MODIFIED_BY.getName())) {
-                contact.setModifiedBy(parseInt(userJSONObject, UserField.MODIFIED_BY.getName()));
-            }
-
-            if (userJSONObject.has(UserField.LAST_MODIFIED.getName())) {
-                contact.setLastModified(parseTime(userJSONObject, UserField.LAST_MODIFIED.getName(), timeZone));
-            }
-
             return contact;
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
