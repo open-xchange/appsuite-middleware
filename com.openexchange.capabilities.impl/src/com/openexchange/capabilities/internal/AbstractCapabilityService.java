@@ -56,11 +56,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -305,8 +304,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * @return The capabilities tree
      * @throws OXException If capabilities tree cannot be returned
      */
-    public List<List<Set<String>>> getCapabilitiesTree(int userId, int contextId) throws OXException {
-        List<List<Set<String>>> sets = new LinkedList<List<Set<String>>>();
+    public Map<String, Map<String, Set<String>>> getCapabilitiesTree(int userId, int contextId) throws OXException {
+        Map<String, Map<String, Set<String>>> sets = new LinkedHashMap<String, Map<String, Set<String>>>(6);
 
         {
             Set<String> capabilities = new TreeSet<String>();
@@ -316,10 +315,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 capabilities.add(p.getCapabilityName());
             }
 
-            List<Set<String>> arr = new ArrayList<Set<String>>(2);
-            arr.add(capabilities);
-            arr.add(new HashSet<String>(0));
-            sets.add(arr);
+            Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
+            arr.put("granted", capabilities);
+            arr.put("denied", new HashSet<String>(0));
+            sets.put("permissions", arr);
         }
 
         {
@@ -372,21 +371,22 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     }
                 }
 
-                List<Set<String>> arr = new ArrayList<Set<String>>(2);
-
-                Set<String> set = new TreeSet<String>();
-                for (Capability cap : grantedCapabilities) {
-                    set.add(cap.getId());
+                Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
+                {
+                    Set<String> set = new TreeSet<String>();
+                    for (Capability cap : grantedCapabilities) {
+                        set.add(cap.getId());
+                    }
+                    arr.put("granted", set);
                 }
-                arr.add(set);
-
-                set = new TreeSet<String>();
-                for (Capability cap : deniedCapabilities) {
-                    set.add(cap.getId());
+                {
+                    Set<String> set = new TreeSet<String>();
+                    for (Capability cap : deniedCapabilities) {
+                        set.add(cap.getId());
+                    }
+                    arr.put("denied", set);
                 }
-                arr.add(set);
-
-                sets.add(arr);
+                sets.put("configuration", arr);
             }
         }
 
@@ -436,10 +436,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
 
                 // Merge them into result set
-                List<Set<String>> arr = new ArrayList<Set<String>>(2);
-                arr.add(set);
-                arr.add(removees);
-                sets.add(arr);
+                Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
+                arr.put("granted", set);
+                arr.put("denied", removees);
+                sets.put("provisioning", arr);
             }
         }
 
@@ -453,17 +453,16 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
             }
 
-            List<Set<String>> arr = new ArrayList<Set<String>>(2);
-
-            Set<String> set = new TreeSet<String>();
-            for (Capability cap : grantedCapabilities) {
-                set.add(cap.getId());
+            Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
+            {
+                Set<String> set = new TreeSet<String>();
+                for (Capability cap : grantedCapabilities) {
+                    set.add(cap.getId());
+                }
+                arr.put("granted", set);
             }
-            arr.add(set);
-
-            arr.add(new HashSet<String>(0));
-
-            sets.add(arr);
+            arr.put("denied", new HashSet<String>(0));
+            sets.put("programmatic", arr);
         }
 
         return sets;
