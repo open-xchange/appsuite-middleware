@@ -70,6 +70,16 @@ public interface UserPermissionService {
      * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
      *
      * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The instance of <code>UserPermissionBits</code>
+     * @throws OXException If user's configuration could not be determined
+     */
+    UserPermissionBits getUserPermissionBits(int userId, int contextId) throws OXException;
+
+    /**
+     * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
+     *
+     * @param userId The user identifier
      * @param ctx The context
      * @return The instance of <code>UserPermissionBits</code>
      * @throws OXException If user's configuration could not be determined
