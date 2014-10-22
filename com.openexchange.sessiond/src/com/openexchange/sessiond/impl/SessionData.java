@@ -159,23 +159,41 @@ final class SessionData {
         // A write access to lists
         wlock.lock();
         try {
+            List<SessionControl> removedSessions = new LinkedList<SessionControl>(sessionList.removeLast().getSessionControls());
             sessionList.addFirst(new SessionContainer());
-            final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);
-            retval.addAll(sessionList.removeLast().getSessionControls());
-            if (autoLogin) {
+
+            if (autoLogin && false == removedSessions.isEmpty()) {
+                List<SessionControl> transientSessions = null;
+
                 wlongTermLock.lock();
                 try {
-                    final SessionMap first = longTermList.getFirst();
-                    for (final SessionControl control : retval) {
+                    SessionMap first = longTermList.getFirst();
+                    for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
+                        final SessionControl control = it.next();
                         final SessionImpl session = control.getSession();
-                        first.putBySessionId(session.getSessionID(), control);
-                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                        if (false == session.isTransient()) {
+                            // A regular, non-transient session
+                            first.putBySessionId(session.getSessionID(), control);
+                            longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                        } else {
+                            // A transient session -- do not move to long-term container
+                            it.remove();
+                            if (null == transientSessions) {
+                                transientSessions = new LinkedList<SessionControl>();
+                            }
+                            transientSessions.add(control);
+                        }
                     }
                 } finally {
                     wlongTermLock.unlock();
                 }
+
+                if (null != transientSessions) {
+                    SessionHandler.postContainerRemoval(transientSessions, true);
+                }
             }
-            return retval;
+
+            return removedSessions;
         } finally {
             wlock.unlock();
         }
