@@ -51,6 +51,9 @@ package com.openexchange.mailfilter.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
@@ -65,6 +68,7 @@ import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 
 public class Activator extends HousekeepingActivator {
 
@@ -91,33 +95,28 @@ public class Activator extends HousekeepingActivator {
 
             checkConfigfile();
 
-/*            {
-                final EventHandler eventHandler = new EventHandler() {
+            {
+                EventHandler eventHandler = new EventHandler() {
 
                     @Override
                     public void handleEvent(final Event event) {
                         final String topic = event.getTopic();
-                        if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                            handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
-                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                            @SuppressWarnings("unchecked")
-                            final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            for (final Session session : map.values()) {
-                                handleDroppedSession(session);
+                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                            if (null != contextId) {
+                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                                if (null != userId) {
+                                    MailFilterServiceImpl.removeFor(userId.intValue(), contextId.intValue());
+                                }
                             }
                         }
                     }
-
-                    private void handleDroppedSession(final Session session) {
-                        if (!session.isTransient() && null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
-                            MailFilterAction.removeFor(session);
-                        }
-                    }
                 };
-                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+
+                Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
                 registerService(EventHandler.class, eventHandler, dict);
-            }*/
+            }
 
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
             getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
@@ -127,7 +126,7 @@ public class Activator extends HousekeepingActivator {
             registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
 
             registerService(Reloadable.class, new MailFilterReloadable(), null);
-            
+
             registerService(MailFilterService.class, new MailFilterServiceImpl());
 
         } catch (final Exception e) {

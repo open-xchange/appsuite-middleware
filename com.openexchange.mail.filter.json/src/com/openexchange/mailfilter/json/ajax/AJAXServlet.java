@@ -64,10 +64,10 @@ import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.json.osgi.Services;
-import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -173,7 +173,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
             final AbstractRequest request = createRequest();
             request.setSession(session);
-            
+
 
             request.setParameters(new AbstractRequest.Parameters() {
                 @Override
@@ -188,7 +188,7 @@ public abstract class AJAXServlet extends HttpServlet {
             /*
              * A non-download action
              */
-            final AbstractAction action = createAction(session);
+            final AbstractAction action = getAction();
             response.setData(action.action(request));
         } catch (final OXException e) {
             LOG.error("", e);
@@ -239,7 +239,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
             final AbstractRequest request = createRequest();
             request.setSession(session);
-            
+
             request.setParameters(new AbstractRequest.Parameters() {
                 @Override
                 public String getParameter(final Parameter param) throws OXException {
@@ -251,7 +251,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 }
             });
             request.setBody(com.openexchange.ajax.AJAXServlet.getBody(req));
-            final AbstractAction action = createAction(session);
+            final AbstractAction action = getAction();
             response.setData(action.action(request));
         } catch (final OXException e) {
             LOG.error("", e);
@@ -276,5 +276,5 @@ public abstract class AJAXServlet extends HttpServlet {
 
     protected abstract AbstractRequest createRequest();
 
-    protected abstract AbstractAction<?, ? extends AbstractRequest> createAction(Session session);
+    protected abstract AbstractAction<?, ? extends AbstractRequest> getAction();
 }
