@@ -50,12 +50,20 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
+import java.util.List;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -85,18 +93,42 @@ public class UpdateAction extends AbstractShareAction {
         Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
         DefaultShare share = new DefaultShare();
         share.setToken(token);
-//        try {
-            JSONObject jsonObject = (JSONObject) requestData.requireData();
-            //TODO
-//            if (jsonObject.has("expiry_date")) {
-//                share.setExpiryDate(new Date(jsonObject.getLong("expiry_date")));
-//            }
-//        } catch (JSONException e) {
-//            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-//        }
+
+        JSONObject jsonObject = (JSONObject) requestData.requireData();
+        ShareRecipient recipient = null;
+        List<ShareTarget> targets = null;
+        try {
+            if (jsonObject.hasAndNotNull("recipient")) {
+                recipient = ShareJSONParser.parseRecipient(jsonObject.getJSONObject("recipient"));
+            }
+
+            if (jsonObject.hasAndNotNull("targets")) {
+                targets = ShareJSONParser.parseTargets(jsonObject.getJSONArray("targets"));
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+
+        share.setTargets(targets);
+        if (recipient != null) {
+            RecipientType type = recipient.getType();
+            if (type == RecipientType.ANONYMOUS) {
+                AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
+                String password = anonymousRecipient.getPassword();
+                if (password == null) {
+                    share.setAuthentication(AuthenticationMode.ANONYMOUS);
+                } else {
+                    share.setAuthentication(AuthenticationMode.ANONYMOUS_PASSWORD); // TODO: set password?
+                }
+            } else if (type == RecipientType.GUEST) {
+
+            } else {
+                // TODO exception
+            }
+        }
+
         /*
-         * update share
-         * TODO: pin-code change and change of auth type requires user update
+         * update share TODO: pin-code change and change of auth type requires user update
          */
         getShareService().updateShare(session, share, clientTimestamp);
         /*
@@ -104,5 +136,4 @@ public class UpdateAction extends AbstractShareAction {
          */
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
-
 }
