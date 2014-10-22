@@ -111,6 +111,17 @@ public final class TreeLockManagement {
     }
 
     /**
+     * Drops locks for given user.
+     */
+    public void dropFor(final Integer userId, final Integer contextId) {
+        final ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> userMap = map.get(contextId);
+        if (null != userMap) {
+            userMap.remove(userId);
+            LOG.debug("Cleaned folder locks for user {} in context {}", userId, contextId);
+        }
+    }
+
+    /**
      * Drops locks for given context.
      *
      * @param contextId The context identifier

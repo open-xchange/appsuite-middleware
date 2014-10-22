@@ -51,7 +51,6 @@ package com.openexchange.imap.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 import javax.activation.MailcapCommandMap;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
@@ -200,49 +199,20 @@ public final class IMAPActivator extends HousekeepingActivator {
                      */
                     protected void doHandleEvent(final Event event) {
                         final String topic = event.getTopic();
-                        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                            @SuppressWarnings("unchecked") final Map<String, Session> container =
-                                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            final IMAPNotifierRegistryService notifierRegistry = IMAPNotifierRegistry.getInstance();
-                            for (final Session session : container.values()) {
-                                if (!session.isTransient()) {
-                                    handleSession(session);
-                                    notifierRegistry.handleRemovedSession(session);
-                                }
-                            }
-                        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                            if (!session.isTransient()) {
-                                handleSession(session);
-                                IMAPNotifierRegistry.getInstance().handleRemovedSession(session);
-                            }
-                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                            @SuppressWarnings("unchecked") final Map<String, Session> container =
-                                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            final IMAPNotifierRegistryService notifierRegistry = IMAPNotifierRegistry.getInstance();
-                            for (final Session session : container.values()) {
-                                if (!session.isTransient()) {
-                                    handleSession(session);
-                                    notifierRegistry.handleRemovedSession(session);
+                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                            if (null != contextId) {
+                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                                if (null != userId) {
+                                    ListLsubCache.dropFor(userId, contextId);
+                                    IMAPStoreCache.getInstance().dropFor(userId, contextId);
+                                    ThreadableCache.dropFor(userId, contextId);
+
+                                    IMAPNotifierRegistry.getInstance().handleRemovedSession(userId, contextId);
                                 }
                             }
                         }
                     }
-
-                    private void handleSession(final Session session) {
-                        try {
-                            final SessiondService service = Services.getService(SessiondService.class);
-                            if (null != service && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
-                                ListLsubCache.dropFor(session);
-                                IMAPStoreCache.getInstance().dropFor(session.getUserId(), session.getContextId());
-                                ThreadableCache.dropFor(session);
-                            }
-                        } catch (final Exception e) {
-                            // Failed handling session
-                            LOG.warn("Failed handling tracked removed session for LIST/LSUB cache.", e);
-                        }
-                    }
-
                 };
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }

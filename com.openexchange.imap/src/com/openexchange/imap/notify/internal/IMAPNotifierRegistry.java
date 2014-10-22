@@ -55,9 +55,7 @@ import java.util.regex.Pattern;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
-import com.openexchange.imap.services.Services;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link IMAPNotifierRegistry} - The registry for {@link IMAPNotifierTask notifier tasks}.
@@ -157,8 +155,8 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
     }
 
     @Override
-    public void removeTaskFor(final Session session) {
-        final ConcurrentMap<Integer, IMAPNotifierTask> tasks = map.remove(keyFor(session));
+    public void removeTaskFor(int userId, int contextId) {
+        final ConcurrentMap<Integer, IMAPNotifierTask> tasks = map.remove(keyFor(userId, contextId));
         if (null == tasks) {
             return;
         }
@@ -172,19 +170,20 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
      */
 
     @Override
-    public void handleRemovedSession(final Session session) {
-        final SessiondService service = Services.getService(SessiondService.class);
-        if (null == service || service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
-            removeTaskFor(session);
-        }
+    public void handleRemovedSession(int userId, int contextId) {
+        removeTaskFor(userId, contextId);
     }
 
     /*-
      * ------------------------- Key class -----------------------
      */
 
-    private static Key keyFor(final Session session) {
+    private static Key keyFor(Session session) {
         return new Key(session.getUserId(), session.getContextId());
+    }
+
+    private static Key keyFor(int userId, int contextId) {
+        return new Key(userId, contextId);
     }
 
     private static final class Key {

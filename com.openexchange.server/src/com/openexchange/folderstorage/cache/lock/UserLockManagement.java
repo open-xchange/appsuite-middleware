@@ -106,6 +106,17 @@ public final class UserLockManagement {
     }
 
     /**
+     * Drops locks for given user.
+     */
+    public void dropFor(Integer userId, Integer contextId) {
+        final ConcurrentMap<Integer, ReadWriteLock> userMap = map.remove(contextId);
+        if (null != userMap) {
+            userMap.remove(userId);
+            LOG.debug("Cleaned folder locks for user {} in context {}", userId, contextId);
+        }
+    }
+
+    /**
      * Drops locks for given context.
      *
      * @param contextId The context identifier
