@@ -1312,7 +1312,7 @@ public final class SessionHandler {
         }
     }
 
-    private static void postContainerRemoval(List<SessionControl> sessionControls, boolean removeFromSessionStorage) {
+    protected static void postContainerRemoval(List<SessionControl> sessionControls, boolean removeFromSessionStorage) {
         if (removeFromSessionStorage) {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
