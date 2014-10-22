@@ -55,8 +55,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,7 +73,6 @@ import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest.Parameters;
 import com.openexchange.mailfilter.json.ajax.json.AbstractObject2JSON2Object;
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule;
 import com.openexchange.mailfilter.json.osgi.Services;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -83,37 +80,20 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
 
-    private static final ConcurrentMap<Key, MailFilterAction> INSTANCES = new ConcurrentHashMap<Key, MailFilterAction>();
+    private static final MailFilterAction INSTANCE = new MailFilterAction();
 
     /**
-     * Gets the {@link MailFilterAction} instance for specified session.
+     * Gets the instance
      *
-     * @param session The session
-     * @return The appropriate {@link MailFilterAction} instance
+     * @return The instance
      */
-    public static MailFilterAction valueFor(final Session session) {
-        final Key key = new Key(session.getUserId(), session.getContextId());
-        MailFilterAction action = INSTANCES.get(key);
-        if (null == action) {
-            final MailFilterAction newAction = new MailFilterAction();
-            action = INSTANCES.putIfAbsent(key, newAction);
-            if (null == action) {
-                action = newAction;
-            }
-        }
-        return action;
-    }
-
-    /**
-     * Removes the {@link MailFilterAction} instance associated with specified session.
-     *
-     * @param session The session
-     */
-    public static void removeFor(final Session session) {
-        INSTANCES.remove(new Key(session.getUserId(), session.getContextId()));
+    public static MailFilterAction getInstance() {
+        return INSTANCE;
     }
 
     private static final AbstractObject2JSON2Object<Rule> CONVERTER = new Rule2JSON2Rule();
+
+    // -------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Default constructor.
@@ -363,49 +343,5 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         }
         throw MailFilterExceptionCode.MISSING_PARAMETER.create("id");
     }
-
-    private static final class Key {
-
-        private final int cid;
-
-        private final int user;
-
-        private final int hash;
-
-        public Key(final int user, final int cid) {
-            super();
-            this.user = user;
-            this.cid = cid;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + user;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
-    } // End of class Key
 
 }
