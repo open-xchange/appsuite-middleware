@@ -564,7 +564,7 @@ public class DefaultShareService implements ShareService {
         Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-        //ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+        ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
         UserService userService = services.getService(UserService.class);
         /*
          * delete shares
@@ -577,7 +577,7 @@ public class DefaultShareService implements ShareService {
         for (Share share : shares) {
             userPermissionService.deleteUserPermissionBits(connectionHelper.getConnection(), context, share.getGuest());
             //TODO: delete by user ID
-            // contactUserStorage.deleteGuestContact(session.getContextId(), share.getGuest(), null, connectionHelper.getConnection());
+            contactUserStorage.deleteGuestContact(context.getContextId(), share.getGuest(), new Date(), connectionHelper.getConnection());
             userService.deleteUser(connectionHelper.getConnection(), context, share.getGuest());
             deletedGuestIDs.add(I(share.getGuest()));
         }
@@ -674,7 +674,9 @@ public class DefaultShareService implements ShareService {
         int guestID = userService.createUser(connection, context, guestUser);
         guestUser.setId(guestID);
         contact.setInternalUserId(guestID);
-        contactUserStorage.updateGuestContact(context.getContextId(), contactId, contact, new Date(), connection);
+        contact.setCreatedBy(guestID);
+        contact.setModifiedBy(guestID);
+        contactUserStorage.updateGuestContact(context.getContextId(), sharingUser.getId(), contactId, contact, new Date(), connection);
         services.getService(UserPermissionService.class).saveUserPermissionBits(
             connection,
             new UserPermissionBits(permissionBits, guestID, context.getContextId()));

@@ -62,7 +62,7 @@ import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderTransactionTest;
 import com.openexchange.ajax.share.tests.NewTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
-import com.openexchange.ajax.share.tests.TestGuestContact;
+import com.openexchange.ajax.share.tests.GuestContactTest;
 
 /**
  * {@link ShareAJAXSuite}
@@ -89,7 +89,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(AggregateSharesTest.class);
         tests.addTestSuite(NewTest.class);
         tests.addTestSuite(FileStorageTransactionTest.class);
-        tests.addTestSuite(TestGuestContact.class);
+        tests.addTestSuite(GuestContactTest.class);
         return tests;
     }
 

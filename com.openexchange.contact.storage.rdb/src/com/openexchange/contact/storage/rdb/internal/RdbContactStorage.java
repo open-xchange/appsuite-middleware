@@ -1142,7 +1142,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
     }
 
     @Override
-    public void deleteGuestContact(int contextId, int contactId, Date lastRead, Connection con) throws OXException {
+    public void deleteGuestContact(int contextId, int userId, Date lastRead, Connection con) throws OXException {
         boolean newCon = false;
         DatabaseService dbService = null;
         if (null == con) {
@@ -1153,11 +1153,10 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             con = dbService.getWritable(contextId);
         }
-        int[] contactIds = new int[] { contactId };
         try {
-            executor.delete(con, Table.CONTACTS, contextId, FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID, contactIds, lastRead.getTime());
-            executor.delete(con, Table.IMAGES, contextId, Integer.MIN_VALUE, contactIds, lastRead.getTime());
-            executor.delete(con, Table.DISTLIST, contextId, Integer.MIN_VALUE, contactIds);
+            Contact toDelete = executor.selectSingleGuestContact(con, Table.CONTACTS, contextId, userId,
+                new ContactField[] {ContactField.OBJECT_ID});
+            executor.deleteSingle(con, Table.CONTACTS, contextId, toDelete.getObjectID(), lastRead.getTime());
         } catch (SQLException e) {
             DBUtils.rollback(con);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1202,7 +1201,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
     }
 
     @Override
-    public void updateGuestContact(int contextId, int contactId, Contact contact, Date lastRead, Connection con) throws OXException {
+    public void updateGuestContact(int contextId, int userId, int contactId, Contact contact, Date lastRead, Connection con) throws OXException {
         boolean newCon = false;
         DatabaseService dbService = null;
         if (null == con) {
@@ -1215,7 +1214,14 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
         QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
         try {
-        executor.update(con, Table.CONTACTS, contextId, contactId, lastRead.getTime(), contact, Fields.sort(queryFields.getContactDataFields()));
+            Contact toUpdate = executor.selectSingle(con, Table.CONTACTS, contextId, contactId, new ContactField[] {ContactField.CREATED_BY});
+            if (null == toUpdate) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
+            }
+            if (toUpdate.getCreatedBy() != userId) {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+            }
+            executor.update(con, Table.CONTACTS, contextId, contactId, lastRead.getTime(), contact, Fields.sort(queryFields.getContactDataFields()));
         } catch (SQLException e) {
             DBUtils.rollback(con);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -1237,6 +1243,9 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         try {
             QueryFields queryFields = new QueryFields(contactFields, ContactField.CONTEXTID, ContactField.OBJECT_ID);
             contact = executor.selectSingleGuestContact(con, Table.CONTACTS, contextId, guestId, queryFields.getContactDataFields());
+            if (null == contact) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(0, contextId);
+            }
             if (queryFields.hasImageData() && 0 < contact.getNumberOfImages()) {
                 Contact imageData = executor.selectSingle(con, Table.IMAGES, contextId, contact.getObjectID(), queryFields.getImageDataFields());
                 if (null != imageData) {

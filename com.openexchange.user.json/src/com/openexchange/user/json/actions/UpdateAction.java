@@ -64,6 +64,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -155,22 +156,29 @@ public final class UpdateAction extends AbstractUserAction {
             /*
              * Update contact
              */
-            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-            if (parsedUserContact.containsDisplayName()) {
-                final String displayName = parsedUserContact.getDisplayName();
-                if (null != displayName) {
-                    if (com.openexchange.java.Strings.isEmpty(displayName)) {
-                        parsedUserContact.removeDisplayName();
-                    } else {
-                        // Remove display name if equal to storage version to avoid update conflict
-                        Contact storageContact = contactService.getUser(session, id, new ContactField[] { ContactField.DISPLAY_NAME });
-                        if (displayName.equals(storageContact.getDisplayName())) {
+            final ContactService contactService;
+            if (!storageUser.isGuest()) {
+                contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+                if (parsedUserContact.containsDisplayName()) {
+                    final String displayName = parsedUserContact.getDisplayName();
+                    if (null != displayName) {
+                        if (com.openexchange.java.Strings.isEmpty(displayName)) {
                             parsedUserContact.removeDisplayName();
+                        } else {
+                            // Remove display name if equal to storage version to avoid update conflict
+                            Contact storageContact = contactService.getUser(session, id, new ContactField[] { ContactField.DISPLAY_NAME });
+                            if (displayName.equals(storageContact.getDisplayName())) {
+                                parsedUserContact.removeDisplayName();
+                            }
                         }
                     }
                 }
+                contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), parsedUserContact, clientLastModified);
+            } else {
+                ContactUserStorage contactUserStorage = ServiceRegistry.getInstance().getService(ContactUserStorage.class);
+                contactUserStorage.updateGuestContact(session.getContextId(), session.getUserId(), contactId, parsedUserContact,
+                    parsedUserContact.getLastModified(), null);
             }
-            contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), parsedUserContact, clientLastModified);
             /*
              * Update user, too, if necessary
              */

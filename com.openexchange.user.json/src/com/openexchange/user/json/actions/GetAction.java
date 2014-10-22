@@ -126,6 +126,9 @@ public final class GetAction extends AbstractUserAction {
             ContactUserStorage contactUserStorage = ServiceRegistry.getInstance().getService(ContactUserStorage.class, true);
             contact = contactUserStorage.getGuestContact(session.getContextId(), userId, contactFields);
         }
+        if (contact.getInternalUserId() != user.getId() || user.getContactId() != contact.getObjectID()) {
+//            throw UserC
+        }
         /*
          * Return appropriate result
          */

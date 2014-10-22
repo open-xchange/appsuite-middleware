@@ -79,12 +79,12 @@ public interface ContactUserStorage extends ContactStorage {
      * Deletes a contact for a guest user
      *
      * @param contextId The context id
-     * @param contactId The contact id
+     * @param userId The internal user id
      * @param lastRead Time when the contact was last read from storage
      * @param con Database connection
      * @throws OXException On error
      */
-    void deleteGuestContact(int contextId, int contactId, Date lastRead, Connection con) throws OXException;
+    void deleteGuestContact(int contextId, int userId, Date lastRead, Connection con) throws OXException;
 
     /**
      * Updates a contact for a guest user
@@ -96,7 +96,7 @@ public interface ContactUserStorage extends ContactStorage {
      * @param con Database connection
      * @throws OXException On error
      */
-    void updateGuestContact(int contextId, int contactId, Contact contact, Date lastRead, Connection con) throws OXException;
+    void updateGuestContact(int contextId, int userId, int contactId, Contact contact, Date lastRead, Connection con) throws OXException;
 
     /**
      * Gets the guest's contact
