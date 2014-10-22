@@ -6,7 +6,6 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
-BuildRequires: open-xchange-sessionstorage-hazelcast
 Version:       @OXVERSION@
 %define        ox_release 24
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
