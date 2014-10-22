@@ -60,6 +60,7 @@ import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.AllResponse;
 import com.openexchange.ajax.share.actions.DeleteRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -120,12 +121,13 @@ public class DeleteTest extends ShareTest {
          */
         AllResponse allResponse = client.execute(new AllRequest());
         List<ParsedShare> allShares = allResponse.getParsedShares();
-        ParsedShare share = discoverShare(allShares, folder.getObjectID(), matchingPermission.getEntity());
+        ParsedShare share = discoverShare(allShares, matchingPermission.getEntity());
         checkShare(guestPermission, share);
+        ParsedShareTarget target = discoverTarget(share, folder.getObjectID());
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(target.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -141,7 +143,7 @@ public class DeleteTest extends ShareTest {
         /*
          * check if share link still accessible
          */
-        GuestClient revokedGuestClient = new GuestClient(share, guestPermission.getPassword(), false);
+        GuestClient revokedGuestClient = new GuestClient(target.getTargetURL(),guestPermission.getEmailAddress(), guestPermission.getPassword(), false);
         ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
         assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
         /*
@@ -149,7 +151,8 @@ public class DeleteTest extends ShareTest {
          */
         allResponse = client.execute(new AllRequest());
         allShares = allResponse.getParsedShares();
-        assertNull("share still found", discoverShare(allShares, folder.getObjectID(), matchingPermission.getEntity()));
+        ParsedShare discoveredShare = discoverShare(allShares, matchingPermission.getEntity());
+        assertTrue("share still found", null == discoveredShare || null == discoverTarget(discoveredShare, folder.getObjectID()));
         /*
          * check folder permissions
          */

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.session.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
 
@@ -72,34 +74,42 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
      * Creates a new guest login request used to access a share.
      *
      * @param share The share's token
+     * @param target The share target path, or <code>null</code> if not specified
      * @param login The login name
      * @param password The password
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      * @return The login request
      */
-    public static LoginRequest createGuestLoginRequest(String share, String login, String password, boolean failOnError) {
-        return new LoginRequest(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, "guest"),
-            new URLParameter("share", share),
-            new FieldParameter(PARAM_NAME, login),
-            new FieldParameter(PARAM_PASSWORD, password)
-        }, failOnError);
+    public static LoginRequest createGuestLoginRequest(String share, String target, String login, String password, boolean failOnError) {
+        List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "guest"));
+        parameters.add(new URLParameter("share", share));
+        if (null != target) {
+            parameters.add(new URLParameter("target", target));
+        }
+        parameters.add(new FieldParameter(PARAM_NAME, login));
+        parameters.add(new FieldParameter(PARAM_PASSWORD, password));
+        return new LoginRequest(parameters.toArray(new Parameter[parameters.size()]), failOnError);
     }
 
     /**
      * Creates a new anonymous login request used to access a share.
      *
      * @param share The share's token
+     * @param target The share target path, or <code>null</code> if not specified
      * @param password The password
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      * @return The login request
      */
-    public static LoginRequest createAnonymousLoginRequest(String share, String password, boolean failOnError) {
-        return new LoginRequest(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, "anonymous"),
-            new URLParameter("share", share),
-            new FieldParameter(PARAM_PASSWORD, password)
-        }, failOnError);
+    public static LoginRequest createAnonymousLoginRequest(String share, String target, String password, boolean failOnError) {
+        List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "anonymous"));
+        parameters.add(new URLParameter("share", share));
+        if (null != target) {
+            parameters.add(new URLParameter("target", target));
+        }
+        parameters.add(new FieldParameter(PARAM_PASSWORD, password));
+        return new LoginRequest(parameters.toArray(new Parameter[parameters.size()]), failOnError);
     }
 
     /**

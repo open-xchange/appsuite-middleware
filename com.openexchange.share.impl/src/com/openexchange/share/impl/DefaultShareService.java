@@ -112,6 +112,7 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public Share resolveToken(String token) throws OXException {
+        ShareTool.validateToken(token);
         int contextID = ShareTool.extractContextId(token);
         Share share = services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
         return filterInactive(removeExpired(share));

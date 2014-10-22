@@ -57,7 +57,6 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -85,7 +84,6 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
@@ -101,10 +99,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.GuestRecipient;
-import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link GuestClient}
@@ -114,49 +108,72 @@ import com.openexchange.share.recipient.RecipientType;
 public class GuestClient extends AJAXClient {
 
     private final ResolveShareResponse shareResponse;
-    private ShareTarget target;
+    private final LoginResponse loginResponse;
+    private final String module;
+    private final String item;
+    private final String folder;
 
     /**
-     * Initializes a new {@link GuestClient}, trying to login via resolving the supplied share automatically.
+     * Initializes a new {@link GuestClient}.
      *
-     * @param share The share to access as guest
-     * @param password The password, or <code>null</code> if not required
-     * @throws Exception
+     * @param url
+     * @param username
+     * @param password
      */
-    public GuestClient(ParsedShare share, String password) throws Exception {
-        this(share, password, true);
+    public GuestClient(String url, String username, String password) throws Exception {
+        this(url, username, password, false);
     }
 
     /**
-     * Initializes a new {@link GuestClient}, trying to login via resolving the supplied share automatically.
+     * Initializes a new {@link GuestClient}.
      *
-     * @param share The share to access as guest
-     * @param password The password, or <code>null</code> if not required
-     * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
+     * @param url
+     * @param username
+     * @param password
+     * @param failOnNonRedirect
      * @throws Exception
      */
-    public GuestClient(ParsedShare share, String password, boolean failOnNonRedirect) throws Exception {
+    public GuestClient(String url, String username, String password, boolean failOnNonRedirect) throws Exception {
         super(new AJAXSession(), true);
-        getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-        this.shareResponse = resolve(share, password, failOnNonRedirect);
+        prepareClient(getHttpClient(), username, password);
+        shareResponse = Executor.execute(this, new ResolveShareRequest(url, failOnNonRedirect));
         if (null != shareResponse.getLoginType()) {
-            LoginResponse loginResponse = login(shareResponse, password);
-            target = extractShareTarget(loginResponse);
+            loginResponse = login(shareResponse, password);
+            getSession().setId(loginResponse.getSessionId());
+            JSONObject data = (JSONObject) loginResponse.getData();
+            module = data.has("module") ? data.getString("module") : null;
+            folder = data.has("folder") ? data.getString("folder") : null;
+            item = data.has("item") ? data.getString("item") : null;
         } else {
-            target = extractShareTarget(shareResponse);
+            loginResponse = null;
+            getSession().setId(shareResponse.getSessionID());
+            module = shareResponse.getModule();
+            folder = shareResponse.getFolder();
+            item = shareResponse.getItem();
+            shareResponse.getSessionID();
         }
     }
 
-    private static ShareTarget extractShareTarget(ResolveShareResponse shareResponse) {
-        return new ShareTarget(Module.getModuleInteger(shareResponse.getModule()), shareResponse.getFolder(), shareResponse.getItem());
+    private LoginResponse login(ResolveShareResponse shareResponse, String password) throws Exception {
+        LoginRequest loginRequest = null;
+        if ("guest".equals(shareResponse.getLoginType())) {
+            loginRequest = LoginRequest.createGuestLoginRequest(
+                shareResponse.getShare(), shareResponse.getTarget(), shareResponse.getLoginName(), password, false);
+        } else if ("anonymous".equals(shareResponse.getLoginType())) {
+            loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), password, false);
+        } else {
+            Assert.fail("unknown login type: " + shareResponse.getLoginType());
+        }
+        return Executor.execute(this, loginRequest);
     }
 
-    private static ShareTarget extractShareTarget(LoginResponse loginResponse) throws JSONException {
-        JSONObject data = (JSONObject) loginResponse.getData();
-        if (data.has("item")) {
-            return new ShareTarget(Module.getModuleInteger(data.getString("module")), data.getString("folder"), data.getString("item"));
-        } else {
-            return new ShareTarget(Module.getModuleInteger(data.getString("module")), data.getString("folder"));
+    private static void prepareClient(DefaultHttpClient httpClient, String username, String password) {
+        httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        if (null != password) {
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(null != username ? username : "guest", password);
+            credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, credentials);
+            httpClient.setCredentialsProvider(credentialsProvider);
         }
     }
 
@@ -165,15 +182,15 @@ public class GuestClient extends AJAXClient {
     }
 
     public String getModule() {
-        return Module.getForFolderConstant(target.getModule()).getName();
+        return module;
     }
 
     public int getModuleID() {
-        return target.getModule();
+        return Module.getModuleInteger(getModule());
     }
 
     public String getFolder() {
-        return target.getFolder();
+        return folder;
     }
 
     public int getIntFolder() {
@@ -181,7 +198,7 @@ public class GuestClient extends AJAXClient {
     }
 
     public String getItem() {
-        return target.getItem();
+        return item;
     }
 
     /**
@@ -479,60 +496,8 @@ public class GuestClient extends AJAXClient {
         }
     }
 
-    /**
-     * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
-     *
-     * @param share The share
-     * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
-     * @return The share response
-     */
-    private ResolveShareResponse resolve(ParsedShare share, String password, boolean failOnNonRedirect) throws Exception {
-        if (RecipientType.ANONYMOUS == share.getRecipient().getType()) {
-            if (AuthenticationMode.ANONYMOUS == share.getAuthentication()) {
-                setCredentials(null);
-            } else {
-                setCredentials("guest", password);
-            }
-        } else if (RecipientType.GUEST == share.getRecipient().getType()) {
-            setCredentials(((GuestRecipient)share.getRecipient()).getEmailAddress(), password);
-        }
-        ResolveShareResponse response = Executor.execute(this, new ResolveShareRequest(share, failOnNonRedirect));
-        getSession().setId(response.getSessionID());
-        return response;
-    }
-
-    private LoginResponse login(ResolveShareResponse shareResponse, String password) throws Exception {
-        String loginType = shareResponse.getLoginType();
-        if (null != loginType) {
-            LoginRequest loginRequest = null;
-            if ("guest".equals(loginType)) {
-                loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getLoginName(), password, false);
-            } else if ("anonymous".equals(loginType)) {
-                loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), password, false);
-            } else {
-                Assert.fail("unknown login type: " + loginType);
-            }
-            LoginResponse response = Executor.execute(this, loginRequest);
-            getSession().setId(response.getSessionId());
-            return response;
-        }
-        return null;
-    }
-
     private DefaultHttpClient getHttpClient() {
         return getSession().getHttpClient();
-    }
-
-    private void setCredentials(org.apache.http.auth.Credentials credentials) {
-        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        if (null != credentials) {
-            credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, credentials);
-        }
-        getHttpClient().setCredentialsProvider(credentialsProvider);
-    }
-
-    private void setCredentials(String username, String password) {
-        setCredentials(new UsernamePasswordCredentials(username, password));
     }
 
     private static Date getFutureTimestamp() {

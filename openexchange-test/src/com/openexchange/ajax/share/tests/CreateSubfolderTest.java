@@ -59,6 +59,7 @@ import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -142,13 +143,15 @@ public class CreateSubfolderTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare share = discoverShare(folder.getObjectID(), matchingPermission.getEntity());
+        ParsedShare share = discoverShare(matchingPermission.getEntity());
         checkShare(guestPermission, share);
+        ParsedShareTarget target = discoverTarget(share, folder.getObjectID());
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(target.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
         /*
          * create subfolder as guest
          */
@@ -222,13 +225,15 @@ public class CreateSubfolderTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare share = discoverShare(folder.getObjectID(), matchingPermission.getEntity());
+        ParsedShare share = discoverShare(matchingPermission.getEntity());
         checkShare(guestPermission, share);
+        ParsedShareTarget target = discoverTarget(share, folder.getObjectID());
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(target.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
         /*
          * create subfolder as guest
          */

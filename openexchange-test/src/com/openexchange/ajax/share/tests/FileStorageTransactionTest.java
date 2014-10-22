@@ -63,6 +63,7 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
 import com.openexchange.file.storage.File;
@@ -157,8 +158,8 @@ public class FileStorageTransactionTest extends ShareTest {
         assertEquals("Wrong number of shares", sharedFiles.size(), fileShares.size());
 
         for (ParsedShare share : fileShares) {
-            for (ShareTarget target : share.getTargets()) {
-                GuestClient guestClient = new GuestClient(share, null);
+            for (ParsedShareTarget target : share.getTargets()) {
+                GuestClient guestClient = new GuestClient(target.getTargetURL(), null, null);
                 File file = guestClient.execute(new GetInfostoreRequest(target.getItem())).getDocumentMetadata();
                 assertEquals(target.getItem(), new FileID(file.getId()).getFileId());
                 AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(

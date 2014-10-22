@@ -85,6 +85,10 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
         return parameters.get("share");
     }
 
+    public String getTarget() {
+        return parameters.get("target");
+    }
+
     public String getLoginType() {
         return parameters.get("login_type");
     }

@@ -58,6 +58,7 @@ import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.NewRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.file.storage.DefaultFile;
@@ -127,18 +128,18 @@ public class TestGuestContact extends ShareTest {
     public void testGuestContact() throws Exception {
         List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
         int guestId = -1;
-        ParsedShare share = null;
+        ParsedShareTarget parsedShareTarget = null;
         for (ParsedShare parsedShare : allShares) {
-            for (ShareTarget shareTarget : parsedShare.getTargets()) {
+            for (ParsedShareTarget shareTarget : parsedShare.getTargets()) {
                 if (shareTarget.equals(target)) {
                     guestId = parsedShare.getGuest();
-                    share = parsedShare;
+                    parsedShareTarget = shareTarget;
                     break;
                 }
             }
         }
         assertTrue("Guest id must not be -1", guestId > -1);
-        GuestClient guestClient = new GuestClient(share, GUEST_PASSWORD);
+        GuestClient guestClient = new GuestClient(parsedShareTarget.getTargetURL(), GUEST_MAIL, GUEST_PASSWORD);
         GetRequest guestGetRequest = new GetRequest(guestId, guestClient.getValues().getTimeZone());
         GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
         Contact guestContact = guestGetResponse.getContact();

@@ -49,69 +49,58 @@
 
 package com.openexchange.ajax.share.actions;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.Date;
 import org.json.JSONException;
-import org.junit.Assert;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.Header;
+import org.json.JSONObject;
+import com.openexchange.folder.json.FolderField;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.share.ShareTarget;
 
 /**
- * {@link ResolveShareRequest}
+ * {@link ParsedShareTarget}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ResolveShareRequest implements AJAXRequest<ResolveShareResponse> {
+public class ParsedShareTarget extends ShareTarget {
 
-    private final String url;
-    private final boolean failOnNonRedirect;
+    private static final long serialVersionUID = 6028997475388990342L;
+
+    private String targetURL;
 
     /**
-     * Initializes a new {@link ResolveShareRequest}.
-     *
-     * @param url The share url to resolve
-     * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
+     * Initializes a new {@link ParsedShareTarget}.
      */
-    public ResolveShareRequest(String url, boolean failOnNonRedirect) {
+    public ParsedShareTarget() {
         super();
-        this.url = url;
-        this.failOnNonRedirect = failOnNonRedirect;
     }
 
-    @Override
-    public ResolveShareParser getParser() {
-        return new ResolveShareParser(failOnNonRedirect);
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    @Override
-    public String getServletPath() {
-        try {
-            return new URL(url).getPath();
-        } catch (MalformedURLException e) {
-            Assert.fail("Malformed share URL: " + url);
-            return null;
+    /**
+     * Initializes a new {@link ParsedShareTarget}.
+     *
+     * @param json The JSON object to parse
+     */
+    public ParsedShareTarget(JSONObject json) throws JSONException {
+        super();
+        if (json.hasAndNotNull("module")) {
+            module = Module.getModuleInteger(json.getString("module"));
         }
+        if (json.hasAndNotNull("folder")) {
+            folder = json.getString("folder");
+        }
+        if (json.hasAndNotNull("item")) {
+            item = json.getString("item");
+        }
+        if (json.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
+            expiryDate = new Date(json.getLong(FolderField.EXPIRY_DATE.getName()));
+        }
+        if (json.hasAndNotNull("meta")) {
+            //TODO
+        }
+        targetURL = json.optString("target_url");
     }
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[0];
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return new Header[0];
+    public String getTargetURL() {
+        return targetURL;
     }
 
 }

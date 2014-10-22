@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -93,8 +94,8 @@ public class ShareTool {
     public static final String SHARE_SERVLET = "share";
 
     private static final long LOW_BITS = 0x00000000FFFFFFFFL;
-
     private static final long HIGH_BITS = 0xFFFFFFFF00000000L;
+    private static Pattern TOKEN_PATTERN = Pattern.compile("[a-f0-9]{32}", Pattern.CASE_INSENSITIVE);
 
     public static int extractContextId(String token) {
         UUID uuid = UUIDs.fromUnformattedString(token);
@@ -408,6 +409,18 @@ public class ShareTool {
 
         }
         return tokens;
+    }
+
+    /**
+     * Checks a token for validity, throwing an exception if validation fails.
+     *
+     * @param token The token to validate
+     * @throws OXException
+     */
+    public static void validateToken(String token) throws OXException {
+        if (false == TOKEN_PATTERN.matcher(token).matches()) {
+            throw ShareExceptionCodes.INVALID_LINK.create(token);
+        }
     }
 
 }

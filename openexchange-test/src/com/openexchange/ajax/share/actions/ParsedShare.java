@@ -57,10 +57,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.folder.json.FolderField;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Enums;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -80,7 +78,7 @@ public class ParsedShare {
     private int createdBy;
     private Date lastModified;
     private int modifiedBy;
-    private List<ShareTarget> targets;
+    private List<ParsedShareTarget> targets;
     private ShareRecipient recipient;
     private int guest;
 
@@ -112,19 +110,10 @@ public class ParsedShare {
         }
         modifiedBy = json.optInt("modified_by");
         if (json.has("targets")) {
-            targets = new ArrayList<ShareTarget>();
+            targets = new ArrayList<ParsedShareTarget>();
             JSONArray jsonTargets = json.getJSONArray("targets");
             for (int i = 0; i < jsonTargets.length(); i++) {
-                JSONObject jsonTarget = jsonTargets.getJSONObject(i);
-                ShareTarget target = new ShareTarget(
-                    Module.getModuleInteger(jsonTarget.optString("module")), jsonTarget.optString("folder"), jsonTarget.optString("item", null));
-                if (jsonTarget.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
-                    target.setExpiryDate(new Date(jsonTarget.getLong(FolderField.EXPIRY_DATE.getName())));
-                }
-                if (jsonTarget.hasAndNotNull("meta")) {
-                    //TODO
-                }
-                targets.add(target);
+                targets.add(new ParsedShareTarget(jsonTargets.getJSONObject(i)));
             }
         }
         if (json.has("recipient")) {
@@ -220,7 +209,7 @@ public class ParsedShare {
      *
      * @return The targets
      */
-    public List<ShareTarget> getTargets() {
+    public List<ParsedShareTarget> getTargets() {
         return targets;
     }
 
@@ -242,7 +231,7 @@ public class ParsedShare {
      *
      * @param targets The targets to set
      */
-    public void setTargets(List<ShareTarget> targets) {
+    public void setTargets(List<ParsedShareTarget> targets) {
         this.targets = targets;
     }
 

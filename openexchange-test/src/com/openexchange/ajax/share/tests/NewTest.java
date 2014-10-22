@@ -208,7 +208,7 @@ public class NewTest extends ShareTest {
         List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
         List<ParsedShare> shares = getSharesForTargets(allShares, targets);
         assertEquals(targets.size(), shares.size());
-        GuestClient guestClient = new GuestClient(shares.get(0), anonymousRecipient.getPassword());
+        GuestClient guestClient = new GuestClient(shares.get(0).getShareURL(), null, anonymousRecipient.getPassword());
 
         /*
          * Check folder permissions for internal recipient

@@ -72,12 +72,12 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -232,39 +232,35 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
+     * Discovers a specific share amongst all available shares of the current user, based on the guest identifier.
      *
-     * @param folderID The folder ID to discover the share for
      * @param guest The ID of the guest associated to the share
      * @return The share, or <code>null</code> if not found
      */
-    protected ParsedShare discoverShare(int folderID, int guest) throws OXException, IOException, JSONException {
-        return discoverShare(client, folderID, guest);
+    protected ParsedShare discoverShare(int guest) throws OXException, IOException, JSONException {
+        return discoverShare(client, guest);
     }
 
     /**
-     * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
+     * Discovers a specific share amongst all available shares of the current user, based on the guest identifier.
      *
      * @param client The ajax client to use
-     * @param folderID The folder ID to discover the share for
      * @param guest The ID of the guest associated to the share
      * @return The share, or <code>null</code> if not found
      */
-    protected static ParsedShare discoverShare(AJAXClient client, int folderID, int guest) throws OXException, IOException, JSONException {
-        return discoverShare(client.execute(new AllRequest()).getParsedShares(), folderID, guest);
+    protected static ParsedShare discoverShare(AJAXClient client, int guest) throws OXException, IOException, JSONException {
+        return discoverShare(client.execute(new AllRequest()).getParsedShares(), guest);
     }
 
     /**
-     * Discovers a specific share amongst the supplied shares, based on the folder- and guest identifiers.
+     * Discovers a specific share amongst the supplied shares, based on the guest identifier.
      *
      * @param shares The shares to search
-     * @param folderID The folder ID to discover the share for
-     * @param guest The ID of the guest associated to the share
      * @return The share, or <code>null</code> if not found
      */
-    protected static ParsedShare discoverShare(List<ParsedShare> shares, int folderID, int guest) throws OXException, IOException, JSONException {
+    protected static ParsedShare discoverShare(List<ParsedShare> shares, int guest) throws OXException, IOException, JSONException {
         for (ParsedShare share : shares) {
-            if (null != discoverTarget(share, folderID, guest)) {
+            if (guest == share.getGuest()) {
                 return share;
             }
         }
@@ -272,22 +268,19 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Discovers a specific share target amongst the supplied share, based on the folder- and guest identifiers.
+     * Discovers a specific share target amongst the supplied share, based on the folder identifier.
      *
      * @param share The share to search
      * @param folderID The folder ID to discover the share for
-     * @param guest The ID of the guest associated to the share
      * @return The target, or <code>null</code> if not found
      */
-    protected static ShareTarget discoverTarget(ParsedShare share, int folderID, int guest) {
+    protected static ParsedShareTarget discoverTarget(ParsedShare share, int folderID) {
         String folder = String.valueOf(folderID);
-        if (guest == share.getGuest()) {
-            List<ShareTarget> targets = share.getTargets();
-            if (null != targets) {
-                for (ShareTarget target : targets) {
-                    if (folder.equals(target.getFolder())) {
-                        return target;
-                    }
+        List<ParsedShareTarget> targets = share.getTargets();
+        if (null != targets) {
+            for (ParsedShareTarget target : targets) {
+                if (folder.equals(target.getFolder())) {
+                    return target;
                 }
             }
         }
@@ -315,10 +308,36 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
      *
      * @param share The share
-     * @return An authenticate guest client being able to access the share
+     * @param username The username, or <code>null</code> if not needed
+     * @param password The password, or <code>null</code> if not needed
+     * @return An authenticated guest client being able to access the share
      */
-    protected GuestClient resolveShare(ParsedShare share, String password) throws Exception {
-        return new GuestClient(share, password);
+    protected GuestClient resolveShare(ParsedShare share, String username, String password) throws Exception {
+        return resolveShare(share.getShareURL(), username, password);
+    }
+
+    /**
+     * Resolves the supplied share url, i.e. accesses the share link and authenticates using the share's credentials.
+     *
+     * @param url The share URL
+     * @param username The username, or <code>null</code> if not needed
+     * @param password The password, or <code>null</code> if not needed
+     * @return An authenticated guest client being able to access the share
+     */
+    protected GuestClient resolveShare(String url, String username, String password) throws Exception {
+        return new GuestClient(url, username, password);
+    }
+
+    /**
+     * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
+     *
+     * @param target The share target
+     * @param username The username, or <code>null</code> if not needed
+     * @param password The password, or <code>null</code> if not needed
+     * @return An authenticated guest client being able to access the share
+     */
+    protected GuestClient resolveShare(ParsedShareTarget target, String username, String password) throws Exception {
+        return resolveShare(target.getTargetURL(), username, password);
     }
 
     /**

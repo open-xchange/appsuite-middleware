@@ -67,10 +67,10 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.ShareTarget;
 
 /**
  * {@link AggregateSharesTest}
@@ -184,9 +184,9 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare shareA = discoverShare(client1, folderA.getObjectID(), matchingPermissionA.getEntity());
+        ParsedShare shareA = discoverShare(client1, matchingPermissionA.getEntity());
         checkShare(guestPermission, shareA);
-        ShareTarget targetA = discoverTarget(shareA, folderA.getObjectID(), matchingPermissionA.getEntity());
+        ParsedShareTarget targetA = discoverTarget(shareA, folderA.getObjectID());
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -213,9 +213,9 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare shareB = discoverShare(client2, folderB.getObjectID(), matchingPermissionB.getEntity());
+        ParsedShare shareB = discoverShare(client2, matchingPermissionB.getEntity());
         checkShare(guestPermission, shareB);
-        ShareTarget targetB = discoverTarget(shareB, folderB.getObjectID(), matchingPermissionB.getEntity());
+        ParsedShareTarget targetB = discoverTarget(shareB, folderB.getObjectID());
         /*
          * check permission entities
          */
@@ -223,7 +223,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder A
          */
-        GuestClient guestClientA = resolveShare(shareA, guestPermission.getPassword());
+        GuestClient guestClientA = resolveShare(targetA.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClientA.checkModuleAvailable(targetA.getModule());
         guestClientA.checkModuleAvailable(targetB.getModule());
         guestClientA.checkFolderAccessible(targetA.getFolder(), guestPermission);
@@ -231,7 +231,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder B
          */
-        GuestClient guestClientB = resolveShare(shareB, guestPermission.getPassword());
+        GuestClient guestClientB = resolveShare(targetB.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClientB.checkModuleAvailable(targetA.getModule());
         guestClientB.checkModuleAvailable(targetB.getModule());
         guestClientB.checkFolderAccessible(targetA.getFolder(), guestPermission);
@@ -270,8 +270,8 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * discover share
          */
-        ParsedShare shareA = discoverShare(client1, folderA.getObjectID(), matchingPermissionA.getEntity());
-        ShareTarget targetA = discoverTarget(shareA, folderA.getObjectID(), matchingPermissionA.getEntity());
+        ParsedShare shareA = discoverShare(client1, matchingPermissionA.getEntity());
+        ParsedShareTarget targetA = discoverTarget(shareA, folderA.getObjectID());
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -298,8 +298,8 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * discover share
          */
-        ParsedShare shareB = discoverShare(client2, folderB.getObjectID(), matchingPermissionB.getEntity());
-        ShareTarget targetB = discoverTarget(shareB, folderB.getObjectID(), matchingPermissionB.getEntity());
+        ParsedShare shareB = discoverShare(client2, matchingPermissionB.getEntity());
+        ParsedShareTarget targetB = discoverTarget(shareB, folderB.getObjectID());
         /*
          * check permission entities
          */
@@ -307,7 +307,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder A
          */
-        GuestClient guestClientA = resolveShare(shareA, guestPermission.getPassword());
+        GuestClient guestClientA = resolveShare(targetA.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClientA.checkModuleAvailable(targetA.getModule());
         guestClientA.checkModuleAvailable(targetB.getModule());
         guestClientA.checkFolderAccessible(targetA.getFolder(), guestPermission);
@@ -315,7 +315,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder B
          */
-        GuestClient guestClientB = resolveShare(shareB, guestPermission.getPassword());
+        GuestClient guestClientB = resolveShare(targetB.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClientB.checkModuleAvailable(targetA.getModule());
         guestClientB.checkModuleAvailable(targetB.getModule());
         guestClientB.checkFolderAccessible(targetA.getFolder(), guestPermission);
@@ -354,12 +354,12 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check if share link to folder A still accessible
          */
-        ResolveShareResponse shareResolveResponse = new GuestClient(shareA, guestPermission.getPassword(), false).getShareResolveResponse();
+        ResolveShareResponse shareResolveResponse = new GuestClient(targetA.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword(), false).getShareResolveResponse();
         assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
         /*
          * check if share link to folder A still accessible
          */
-        shareResolveResponse = new GuestClient(shareB, guestPermission.getPassword()).getShareResolveResponse();
+        shareResolveResponse = new GuestClient(targetB.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword()).getShareResolveResponse();
         assertEquals("Status code wrong", HttpServletResponse.SC_MOVED_TEMPORARILY, shareResolveResponse.getStatusCode());
     }
 
