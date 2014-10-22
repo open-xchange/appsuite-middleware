@@ -51,7 +51,6 @@ package com.openexchange.mailfilter.json.ajax;
 
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterRequest;
-import com.openexchange.session.Session;
 
 /**
  *
@@ -72,8 +71,8 @@ public class MailFilterServlet extends AJAXServlet {
     }
 
     @Override
-    protected MailFilterAction createAction(final Session session) {
-        return MailFilterAction.valueFor(session);
+    protected MailFilterAction getAction() {
+        return MailFilterAction.getInstance();
     }
 
     @Override
