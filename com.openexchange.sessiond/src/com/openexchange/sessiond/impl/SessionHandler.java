@@ -1244,7 +1244,7 @@ public final class SessionHandler {
         }
     }
 
-    static void postSessionRemoval(final SessionImpl session) {
+    private static void postSessionRemoval(final SessionImpl session) {
         if (useSessionStorage(session)) {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
@@ -1275,8 +1275,10 @@ public final class SessionHandler {
             LOG.debug("Posted event for removed session");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
-                if (sessionData.isUserActive(session.getUserId(), session.getContextId())) {
-                    postLastSessionGone(session.getUserId(), session.getContextId(), eventAdmin);
+                int contextId = session.getContextId();
+                int userId = session.getUserId();
+                if (sessionData.isUserActive(userId, contextId, false)) {
+                    postLastSessionGone(userId, contextId, eventAdmin);
                 }
             }
         }
@@ -1284,7 +1286,7 @@ public final class SessionHandler {
 
     private static void postLastSessionGone(final int userId, final int contextId, final EventAdmin eventAdmin) {
         if (eventAdmin != null) {
-            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_USER_ID, Integer.valueOf(userId));
             dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic));
@@ -1341,7 +1343,7 @@ public final class SessionHandler {
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
                 for (final UserKey userKey : users) {
-                    if (sessionData.isUserActive(userKey.userId, userKey.contextId)) {
+                    if (sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
                         postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
                     }
                 }
@@ -1368,7 +1370,7 @@ public final class SessionHandler {
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
                 for (final UserKey userKey : users) {
-                    if (sessionData.isUserActive(userKey.userId, userKey.contextId)) {
+                    if (sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
                         postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
                     }
                 }
@@ -1648,7 +1650,7 @@ public final class SessionHandler {
      * @param session The session to check
      * @return <code>true</code> if session should be put to storage, <code>false</code>, otherwise
      */
-    private static boolean useSessionStorage(SessionImpl session) {
+    static boolean useSessionStorage(SessionImpl session) {
         return null != session && false == session.isTransient() && false == isUsmEas(session.getClient());
     }
 
