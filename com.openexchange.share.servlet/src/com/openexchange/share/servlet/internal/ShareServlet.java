@@ -55,13 +55,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.ShareHandler;
+import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
@@ -103,7 +103,7 @@ public class ShareServlet extends HttpServlet {
             ShareTarget target;
             {
                 String pathInfo = request.getPathInfo();
-                String[] paths = Strings.isEmpty(pathInfo) ? null : pathInfo.split("/");
+                String[] paths = ShareServletUtils.splitPath(pathInfo);
                 share = null == paths || 0 == paths.length ? null :
                     ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
                 if (null == share) {

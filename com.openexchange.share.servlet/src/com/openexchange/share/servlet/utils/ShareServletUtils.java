@@ -51,6 +51,8 @@ package com.openexchange.share.servlet.utils;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -150,6 +152,23 @@ public final class ShareServletUtils {
         }
         Matcher matcher = PATH_PATTERN.matcher(pathInfo);
         return matcher.matches() ? matcher.group(1) : null;
+    }
+
+    /**
+     * Splits the supplied path by the separator char <code>/</code> into their components. Empty components are removed implicitly.
+     *
+     * @param pathInfo the path info to split
+     * @return The splitted path
+     */
+    public static String[] splitPath(String pathInfo) {
+        List<String> paths = Strings.splitAndTrim(pathInfo, "/");
+        Iterator<String> iterator = paths.iterator();
+        while (iterator.hasNext()) {
+            if (Strings.isEmpty(iterator.next())) {
+                iterator.remove();
+            }
+        }
+        return paths.toArray(new String[paths.size()]);
     }
 
 }
