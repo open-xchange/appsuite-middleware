@@ -59,6 +59,8 @@ import com.openexchange.share.ShareTarget;
  */
 public class RdbShareTarget extends ShareTarget {
 
+    private static final long serialVersionUID = 6291061207433984824L;
+
     private int contextID;
     private byte[] uuid;
     private String token;
@@ -70,7 +72,6 @@ public class RdbShareTarget extends ShareTarget {
      */
     public RdbShareTarget(ShareTarget target) {
         super(target.getModule(), target.getFolder(), target.getItem());
-        this.activationDate = target.getActivationDate();
         this.expiryDate = target.getExpiryDate();
     }
 
@@ -116,16 +117,6 @@ public class RdbShareTarget extends ShareTarget {
     @Override
     public void setExpiryDate(Date expiryDate) {
         this.expiryDate = expiryDate;
-    }
-
-    /**
-     * Sets the activationDate
-     *
-     * @param activationDate The activationDate to set
-     */
-    @Override
-    public void setActivationDate(Date activationDate) {
-        this.activationDate = activationDate;
     }
 
     /**

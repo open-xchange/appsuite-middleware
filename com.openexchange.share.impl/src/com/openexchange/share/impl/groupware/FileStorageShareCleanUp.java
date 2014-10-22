@@ -57,8 +57,8 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link FileStorageShareCleanUp}
@@ -84,7 +84,7 @@ public class FileStorageShareCleanUp implements EventHandler {
     public void handleEvent(Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
             try {
-                GroupwareTarget target = new GroupwareTarget(
+                ShareTarget target = new ShareTarget(
                     Module.INFOSTORE.getFolderConstant(),
                     FileStorageEventHelper.extractFolderId(event),
                     FileStorageEventHelper.extractObjectId(event));

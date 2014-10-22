@@ -67,7 +67,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -227,7 +226,7 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, StorageParameters parameters) throws OXException {
+    public List<Share> loadSharesForTarget(int contextID, ShareTarget target, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
             return new ArrayList<Share>(new ShareSelector(contextID).target(target).select(provider.get()));
@@ -237,7 +236,7 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException {
+    public List<Share> loadSharesForTarget(int contextID, ShareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
             return new ArrayList<Share>(new ShareSelector(contextID).target(target).guests(guestIDs).select(provider.get()));

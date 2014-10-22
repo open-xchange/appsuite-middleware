@@ -189,7 +189,9 @@ public class GuestShareResultConverter implements ResultConverter {
         }
         JSONArray jsonArray = new JSONArray(targets.size());
         for (ShareTarget target : targets) {
-            jsonArray.put(serializeShareTarget(target, timeZone));
+            JSONObject jsonTarget = serializeShareTarget(target, timeZone);
+            jsonTarget.put("target_url", guestShare.getShareURL() + '/' + Integer.toHexString(target.hashCode()));
+            jsonArray.put(jsonTarget);
         }
         return jsonArray;
     }
@@ -208,10 +210,6 @@ public class GuestShareResultConverter implements ResultConverter {
         jsonTarget.put("module", null == module ? String.valueOf(target.getModule()) : module.getName());
         jsonTarget.putOpt("folder", target.getFolder());
         jsonTarget.putOpt("item", target.getItem());
-        Date activationDate = target.getActivationDate();
-        if (null != activationDate) {
-            jsonTarget.put("activation_date", addTimeZoneOffset(activationDate.getTime(), timeZone));
-        }
         Date expiryDate = target.getExpiryDate();
         if (null != expiryDate) {
             jsonTarget.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));

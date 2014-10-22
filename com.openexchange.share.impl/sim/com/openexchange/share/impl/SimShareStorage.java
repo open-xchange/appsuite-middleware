@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.ShareStorage;
@@ -127,7 +126,7 @@ public class SimShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesForTarget(final int contextID, final GroupwareTarget target, StorageParameters parameters) throws OXException {
+    public List<Share> loadSharesForTarget(final int contextID, final ShareTarget target, StorageParameters parameters) throws OXException {
         return filter(new Filter<Share>() {
             @Override
             public boolean accept(Share share) {
@@ -186,7 +185,7 @@ public class SimShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesForTarget(int contextID, GroupwareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException {
+    public List<Share> loadSharesForTarget(int contextID, ShareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -236,28 +236,6 @@ public class ShareTargetMapper extends DefaultDbMapper<RdbShareTarget, ShareTarg
                 target.setItem(null);
             }
         });
-        mappings.put(ShareTargetField.ACTIVATION_DATE, new BigIntMapping<RdbShareTarget>("activationDate", "Activation date") {
-
-            @Override
-            public void set(RdbShareTarget target, Long value) {
-                target.setActivationDate(new Date(value));
-            }
-
-            @Override
-            public boolean isSet(RdbShareTarget target) {
-                return null != target.getActivationDate();
-            }
-
-            @Override
-            public Long get(RdbShareTarget target) {
-                return target.getActivationDate().getTime();
-            }
-
-            @Override
-            public void remove(RdbShareTarget target) {
-                target.setActivationDate(null);
-            }
-        });
         mappings.put(ShareTargetField.EXPIRY_DATE, new BigIntMapping<RdbShareTarget>("expiryDate", "Expiry date") {
 
             @Override

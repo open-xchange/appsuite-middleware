@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
@@ -58,12 +59,14 @@ import java.util.Map;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareTarget extends GroupwareTarget {
+public class ShareTarget implements Serializable {
 
     private static final long serialVersionUID = -8680039849393740702L;
 
+    protected int module;
+    protected String folder;
+    protected String item;
     protected Date expiryDate;
-    protected Date activationDate;
     protected Map<String, Object> meta;
 
     /**
@@ -80,7 +83,7 @@ public class ShareTarget extends GroupwareTarget {
      * @param folder The identifier of the share's folder
      */
     public ShareTarget(int module, String folder) {
-        super(module, folder);
+        this(module, folder, null);
     }
 
     /**
@@ -91,29 +94,46 @@ public class ShareTarget extends GroupwareTarget {
      * @param item The identifier of the share's item
      */
     public ShareTarget(int module, String folder, String item) {
-        super(module, folder, item);
+        super();
+        this.module = module;
+        this.folder = folder;
+        this.item = item;
     }
 
     /**
-     * If defined, gets the date when this share target becomes active, i.e. it should be accessible.
+     * Gets the groupware module of the share's target folder.
      *
-     * @return The activation date of the target, or <code>null</code> if not defined
+     * @return The module
      */
-    public Date getActivationDate() {
-        return activationDate;
+    public int getModule() {
+        return module;
     }
 
     /**
-     * Sets the date when this share target becomes active, i.e. it should be accessible.
+     * Gets the identifier of the share's folder.
      *
-     * @param activationDate The activation date of the target
+     * @return The folder ID
      */
-    public void setActivationDate(Date activationDate) {
-        this.activationDate = activationDate;
+    public String getFolder() {
+        return folder;
     }
 
-    public boolean isActive() {
-        return null == activationDate || activationDate.before(new Date());
+    /**
+     * Gets the identifier of the share's item in case the share is not a folder share.
+     *
+     * @return The item ID, or <code>null</code> if the share references a folder
+     */
+    public String getItem() {
+        return item;
+    }
+
+    /**
+     * Gets a value indicating whether the share points to a folder or a single item.
+     *
+     * @return <code>true</code> if the share points to a folder, <code>false</code>, otherwise
+     */
+    public boolean isFolder() {
+        return null == item;
     }
 
     /**
@@ -134,6 +154,11 @@ public class ShareTarget extends GroupwareTarget {
         this.expiryDate = expiryDate;
     }
 
+    /**
+     * Gets a value indicating whether the target is considered as expired, i.e. an expiry date is set and is passed in the meantime.
+     *
+     * @return <code>true</code> if the share is expired, <code>false</code>, otherwise
+     */
     public boolean isExpired() {
         return expiryDate != null && new Date().after(expiryDate);
     }
@@ -159,37 +184,42 @@ public class ShareTarget extends GroupwareTarget {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((activationDate == null) ? 0 : activationDate.hashCode());
-        result = prime * result + ((expiryDate == null) ? 0 : expiryDate.hashCode());
-        result = prime * result + ((meta == null) ? 0 : meta.hashCode());
+        int result = 1;
+        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+        result = prime * result + ((item == null) ? 0 : item.hashCode());
+        result = prime * result + module;
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (!(obj instanceof ShareTarget)) {
             return false;
+        }
         ShareTarget other = (ShareTarget) obj;
-        if (activationDate == null) {
-            if (other.activationDate != null)
+        if (folder == null) {
+            if (other.folder != null) {
                 return false;
-        } else if (!activationDate.equals(other.activationDate))
+            }
+        } else if (!folder.equals(other.folder)) {
             return false;
-        if (expiryDate == null) {
-            if (other.expiryDate != null)
+        }
+        if (item == null) {
+            if (other.item != null) {
                 return false;
-        } else if (!expiryDate.equals(other.expiryDate))
+            }
+        } else if (!item.equals(other.item)) {
             return false;
-        if (meta == null) {
-            if (other.meta != null)
-                return false;
-        } else if (!meta.equals(other.meta))
+        }
+        if (module != other.module) {
             return false;
+        }
         return true;
     }
 

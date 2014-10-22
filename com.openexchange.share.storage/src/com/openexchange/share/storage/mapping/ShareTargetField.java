@@ -62,7 +62,6 @@ public enum ShareTargetField {
     MODULE,
     FOLDER,
     ITEM,
-    ACTIVATION_DATE,
     EXPIRY_DATE,
     META,
     ;

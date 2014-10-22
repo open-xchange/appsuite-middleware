@@ -72,7 +72,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.ShareStorage;
@@ -143,9 +142,9 @@ public class DefaultShareServiceTest implements ServiceLookup {
 
     @Test
     public void testTargetsAreRemovedFromShares() throws Exception {
-        List<GroupwareTarget> toDelete = new ArrayList<GroupwareTarget>(2);
-        toDelete.add(new GroupwareTarget(t1.getModule(), t1.getFolder()));
-        toDelete.add(new GroupwareTarget(t2.getModule(), t2.getFolder()));
+        List<ShareTarget> toDelete = new ArrayList<ShareTarget>(2);
+        toDelete.add(new ShareTarget(t1.getModule(), t1.getFolder()));
+        toDelete.add(new ShareTarget(t2.getModule(), t2.getFolder()));
         shareService.deleteTargets(session, toDelete, Collections.singletonList(2));
         Share reloaded = shareStorage.loadShare(CONTEXT_ID, s1.getToken(), null);
         assertEquals(1, reloaded.getTargets().size());
@@ -155,10 +154,10 @@ public class DefaultShareServiceTest implements ServiceLookup {
 
     @Test
     public void testShareAndGuestAreRemovedWhenTargetsAreEmpty() throws Exception {
-        List<GroupwareTarget> toDelete = new ArrayList<GroupwareTarget>(2);
-        toDelete.add(new GroupwareTarget(t1.getModule(), t1.getFolder()));
-        toDelete.add(new GroupwareTarget(t2.getModule(), t2.getFolder()));
-        toDelete.add(new GroupwareTarget(t3.getModule(), t3.getFolder()));
+        List<ShareTarget> toDelete = new ArrayList<ShareTarget>(2);
+        toDelete.add(new ShareTarget(t1.getModule(), t1.getFolder()));
+        toDelete.add(new ShareTarget(t2.getModule(), t2.getFolder()));
+        toDelete.add(new ShareTarget(t3.getModule(), t3.getFolder()));
         shareService.deleteTargets(session, toDelete, Collections.singletonList(2));
         assertNull(shareStorage.loadShare(CONTEXT_ID, s1.getToken(), null));
         Mockito.verify(getService(UserService.class)).deleteUser(Mockito.any(Connection.class), Mockito.any(Context.class), Mockito.eq(s1.getGuest()));
@@ -168,9 +167,9 @@ public class DefaultShareServiceTest implements ServiceLookup {
 
     @Test
     public void testTargetDeletionForAllSharesIfNoGuestsAreSpecified() throws Exception {
-        List<GroupwareTarget> toDelete = new ArrayList<GroupwareTarget>(2);
-        toDelete.add(new GroupwareTarget(t1.getModule(), t1.getFolder()));
-        toDelete.add(new GroupwareTarget(t2.getModule(), t2.getFolder()));
+        List<ShareTarget> toDelete = new ArrayList<ShareTarget>(2);
+        toDelete.add(new ShareTarget(t1.getModule(), t1.getFolder()));
+        toDelete.add(new ShareTarget(t2.getModule(), t2.getFolder()));
         shareService.deleteTargets(session, toDelete, Collections.<Integer>emptyList());
         List<Share> shares = shareStorage.loadSharesForContext(CONTEXT_ID, null);
         assertEquals(2, shares.size());

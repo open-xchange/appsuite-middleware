@@ -96,21 +96,21 @@ public interface ShareService {
      * Deletes a share target for all shares that belong to a certain list of guests.
      *
      * @param session The session
-     * @param shareTarget The share target to delete
+     * @param target The share target to delete
      * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the target is deleted for all shares that reference it
      * @throws OXException
      */
-    void deleteTarget(Session session, GroupwareTarget shareTarget, List<Integer> guestIDs) throws OXException;
+    void deleteTarget(Session session, ShareTarget target, List<Integer> guestIDs) throws OXException;
 
     /**
      * Deletes a list of share targets for all shares that belong to a certain list of guests.
      *
      * @param session The session
-     * @param shareTarget The share target to delete
+     * @param targets The share targets to delete
      * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the targets are deleted for all shares that reference it
      * @throws OXException
      */
-    void deleteTargets(Session session, List<GroupwareTarget> targets, List<Integer> guestIDs) throws OXException;
+    void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
 
     /**
      * Updates an existing share.
@@ -132,7 +132,7 @@ public interface ShareService {
      * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
      * @throws OXException
      */
-    List<Share> addTarget(Session session, ShareTarget shareTarget, List<ShareRecipient> recipients) throws OXException;
+    List<Share> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Adds multiple targets to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.

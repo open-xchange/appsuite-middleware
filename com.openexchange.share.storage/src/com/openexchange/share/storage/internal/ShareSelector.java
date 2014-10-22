@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.mapping.ShareField;
@@ -83,8 +82,7 @@ public class ShareSelector {
     };
 
     private static final ShareTargetField[] DEFAULT_TARGET_FIELDS = {
-        ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM, ShareTargetField.ACTIVATION_DATE,
-        ShareTargetField.EXPIRY_DATE, ShareTargetField.META
+        ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM, ShareTargetField.EXPIRY_DATE, ShareTargetField.META
     };
 
     private final SelectShareBuilder builder;
@@ -166,7 +164,7 @@ public class ShareSelector {
      * @param target The target
      * @return The builder
      */
-    public ShareSelector target(GroupwareTarget target) {
+    public ShareSelector target(ShareTarget target) {
         builder.target(target);
         return this;
     }

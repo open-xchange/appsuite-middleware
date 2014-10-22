@@ -75,7 +75,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.GroupwareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
@@ -194,12 +193,12 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public void deleteTarget(Session session, GroupwareTarget shareTarget, List<Integer> guestIDs) throws OXException {
-        deleteTargets(session, Collections.singletonList(shareTarget), guestIDs);
+    public void deleteTarget(Session session, ShareTarget target, List<Integer> guestIDs) throws OXException {
+        deleteTargets(session, Collections.singletonList(target), guestIDs);
     }
 
     @Override
-    public void deleteTargets(Session session, List<GroupwareTarget> targets, List<Integer> guestIDs) throws OXException {
+    public void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
         if (null == targets || 0 == targets.size() || null == guestIDs || 0 == guestIDs.size()) {
             return;
         }
@@ -213,7 +212,7 @@ public class DefaultShareService implements ShareService {
              */
             List<Share> affectedShares = new ArrayList<Share>();
             int[] guests = I2i(guestIDs);
-            for (GroupwareTarget target : targets) {
+            for (ShareTarget target : targets) {
                 affectedShares.addAll(shareStorage.loadSharesForTarget(
                     session.getContextId(), target, guests, connectionHelper.getParameters()));
             }

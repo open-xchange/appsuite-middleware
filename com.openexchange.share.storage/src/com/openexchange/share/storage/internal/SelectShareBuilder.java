@@ -57,7 +57,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.share.GroupwareTarget;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.mapping.ShareField;
 import com.openexchange.share.storage.mapping.ShareTargetField;
 
@@ -77,7 +77,7 @@ public class SelectShareBuilder {
     private String[] tokens;
     private int createdBy;
     private int[] guests;
-    private GroupwareTarget target;
+    private ShareTarget target;
     private Date expiredAfter;
 
     /**
@@ -139,12 +139,12 @@ public class SelectShareBuilder {
     }
 
     /**
-     * Adds a groupware target definition to restrict the results to.
+     * Adds a share target definition to restrict the results to.
      *
-     * @param targte The targte
+     * @param targte The target
      * @return The builder
      */
-    public SelectShareBuilder target(GroupwareTarget target) {
+    public SelectShareBuilder target(ShareTarget target) {
         this.target = target;
         return this;
     }
