@@ -68,6 +68,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
@@ -217,6 +218,7 @@ public class ShareActivator extends HousekeepingActivator {
         trackService(ModuleHandlerProvider.class);
         track(ManagementService.class, new ManagementServiceTracker(context, shareService));
         trackService(IDBasedFileAccessFactory.class);
+        trackService(FolderService.class);
         trackService(TranslatorFactory.class);
         openTrackers();
     }
