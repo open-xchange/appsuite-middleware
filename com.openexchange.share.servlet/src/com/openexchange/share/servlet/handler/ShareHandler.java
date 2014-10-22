@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link ShareHandler}
@@ -79,11 +80,12 @@ public interface ShareHandler {
      * If this handle feels responsible for the given share <code>true</code> is returned; otherwise <code>false</code>
      *
      * @param share The share
+     * @param target The share target within the share, or <code>null</code> if not addressed
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return <code>true</code> if this handler successfully handled the share; otherwise <code>false</code>
      * @throws OXException If the attempt to resolve given share fails
      */
-    boolean handle(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    boolean handle(Share share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
 }

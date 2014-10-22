@@ -62,6 +62,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -126,17 +127,18 @@ public class LoginShareHandler extends AbstractShareHandler {
      * Checks if this redirecting share handler fees responsible for passed share
      *
      * @param share The associated share
+     * @param target The share target within the share, or <code>null</code> if not addressed
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      */
-    protected boolean handles(Share share){
+    protected boolean handles(Share share, ShareTarget target) {
         AuthenticationMode authentication = share.getAuthentication();
         return null != authentication &&
             (AuthenticationMode.ANONYMOUS_PASSWORD == authentication || AuthenticationMode.GUEST_PASSWORD == authentication);
     }
 
     @Override
-    public boolean handle(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (false == handles(share)) {
+    public boolean handle(Share share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        if (false == handles(share, target)) {
             // no password prompt required
             return false;
         }
@@ -151,6 +153,9 @@ public class LoginShareHandler extends AbstractShareHandler {
 
             // Start fragment portion
             url.append('#').append("share=").append(urlEncode(share.getToken()));
+            if (null != target) {
+                url.append('&').append("target=").append(urlEncode(target.getPath()));
+            }
             if (AuthenticationMode.ANONYMOUS_PASSWORD == share.getAuthentication()) {
                 url.append('&').append("login_type=anonymous");
             } else {

@@ -190,7 +190,7 @@ public class GuestShareResultConverter implements ResultConverter {
         JSONArray jsonArray = new JSONArray(targets.size());
         for (ShareTarget target : targets) {
             JSONObject jsonTarget = serializeShareTarget(target, timeZone);
-            jsonTarget.put("target_url", guestShare.getShareURL() + '/' + Integer.toHexString(target.hashCode()));
+            jsonTarget.put("target_url", guestShare.getShareURL() + '/' + target.getPath());
             jsonArray.put(jsonTarget);
         }
         return jsonArray;

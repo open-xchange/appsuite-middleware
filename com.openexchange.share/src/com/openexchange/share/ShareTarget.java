@@ -181,6 +181,15 @@ public class ShareTarget implements Serializable {
         this.meta = meta;
     }
 
+    /**
+     * Gets the relative path of this target to address it uniquely within an underlying share.
+     *
+     * @return The share-relative path to the target
+     */
+    public String getPath() {
+        return String.format("%08x", hashCode());
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

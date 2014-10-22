@@ -57,6 +57,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link ResolvedShare}
@@ -68,6 +69,7 @@ import com.openexchange.share.Share;
 public class ResolvedShare {
 
     private final Share share;
+    private final ShareTarget target;
     private final Session session;
     private final User user;
     private final Context context;
@@ -80,6 +82,7 @@ public class ResolvedShare {
      * Initializes a new {@link ResolvedShare}.
      *
      * @param share The share
+     * @param target The share target within the share, or <code>null</code> if not addressed
      * @param session The session
      * @param user The user
      * @param context The context
@@ -88,9 +91,10 @@ public class ResolvedShare {
      * @param request The request
      * @param response The response
      */
-    public ResolvedShare(Share share, LoginResult loginResult, LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) {
+    public ResolvedShare(Share share, ShareTarget target, LoginResult loginResult, LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) {
         super();
         this.share = share;
+        this.target = target;
         this.session = loginResult.getSession();
         this.user = loginResult.getUser();
         this.context = loginResult.getContext();
@@ -170,6 +174,15 @@ public class ResolvedShare {
      */
     public HttpServletResponse getResponse() {
         return response;
+    }
+
+    /**
+     * Gets the share target.
+     *
+     * @return The share target within the share, or <code>null</code> if not addressed
+     */
+    public ShareTarget getTarget() {
+        return target;
     }
 
 }

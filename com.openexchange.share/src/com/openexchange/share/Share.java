@@ -138,4 +138,12 @@ public interface Share {
      */
     String getCommonFolder();
 
+    /**
+     * Resolves a contained share target based on the supplied relative path info.
+     *
+     * @param path The share-relative path to the target
+     * @return The target, or <code>null</code> if not found
+     */
+    ShareTarget resolveTarget(String path);
+
 }

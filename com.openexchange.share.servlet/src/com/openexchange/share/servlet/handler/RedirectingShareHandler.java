@@ -63,6 +63,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
@@ -113,13 +114,13 @@ public class RedirectingShareHandler extends AbstractShareHandler {
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
      */
-    protected boolean handles(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    protected boolean handles(Share share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handle(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (false == handles(share, request, response)) {
+    public boolean handle(Share share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        if (false == handles(share, target, request, response)) {
             return false;
         }
         Session session = null;
@@ -134,7 +135,7 @@ public class RedirectingShareHandler extends AbstractShareHandler {
                 return false;
             }
             session = loginResult.getSession();
-            handleResolvedShare(new ResolvedShare(share, loginResult, loginConfig, request, response));
+            handleResolvedShare(new ResolvedShare(share, target, loginResult, loginConfig, request, response));
             return true;
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -167,7 +168,7 @@ public class RedirectingShareHandler extends AbstractShareHandler {
             /*
              * construct & send redirect
              */
-            String url = getRedirectURL(resolvedShare.getSession(), resolvedShare.getUser(), resolvedShare.getShare(), resolvedShare.getLoginConfig());
+            String url = getRedirectURL(resolvedShare.getSession(), resolvedShare.getUser(), resolvedShare.getShare(), resolvedShare.getTarget(), resolvedShare.getLoginConfig());
             LOG.info("Redirecting share {} to {}...", resolvedShare.getShare().getToken(), url);
             response.sendRedirect(url);
         } catch (RuntimeException e) {
@@ -193,10 +194,11 @@ public class RedirectingShareHandler extends AbstractShareHandler {
      * @param session The session
      * @param user The user
      * @param share The share
+     * @param target The share target within the share, or <code>null</code> if not addressed
      * @param loginConfig The login configuration to use
      * @return The redirect URL
      */
-    protected static String getRedirectURL(Session session, User user, Share share, LoginConfiguration loginConfig) {
+    protected static String getRedirectURL(Session session, User user, Share share, ShareTarget target, LoginConfiguration loginConfig) {
         /*
          * prepare url
          */

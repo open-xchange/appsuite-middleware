@@ -135,16 +135,15 @@ public class ICalHandler extends RedirectingShareHandler {
     }
 
     @Override
-    protected boolean handles(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        //TODO: single target only
-        int module = share.getTargets().get(0).getModule();
-        return (Module.CALENDAR.getFolderConstant() == module || Module.TASK.getFolderConstant() == module) && (acceptsICal(request) || indicatesICalClient(request));
+    protected boolean handles(Share share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return null != target &&
+            (Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule()) &&
+            (acceptsICal(request) || indicatesICalClient(request));
     }
 
     @Override
     protected void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException {
-        //TODO: single target only
-        ShareTarget target = resolvedShare.getShare().getTargets().get(0);
+        ShareTarget target = resolvedShare.getTarget();
         /*
          * prepare iCal export
          */

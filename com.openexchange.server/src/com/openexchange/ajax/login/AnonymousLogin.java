@@ -96,6 +96,7 @@ import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.user.UserService;
@@ -136,8 +137,9 @@ public class AnonymousLogin extends AbstractLoginRequestHandler {
             @Override
             public LoginResult doLogin(final HttpServletRequest req) throws OXException {
                 try {
-                    // Get the share's token
+                    // Get the share's token & target
                     String token = req.getParameter("share");
+                    String targetPath = req.getParameter("target");
                     if (null == token) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create("share");
                     }
@@ -153,6 +155,7 @@ public class AnonymousLogin extends AbstractLoginRequestHandler {
                     if (null == share) {
                         throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
                     }
+                    final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
 
                     // Check for matching authentication mode
                     if (AuthenticationMode.ANONYMOUS_PASSWORD != share.getAuthentication()) {
@@ -280,15 +283,16 @@ public class AnonymousLogin extends AbstractLoginRequestHandler {
 
                         @Override
                         protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
-                            int module = share.getCommonModule();
+                            int module = null != target ? target.getModule() : share.getCommonModule();
                             if (0 != module) {
                                 Module folderModule = Module.getForFolderConstant(module);
                                 jLoginResult.put("module", null != folderModule ? folderModule.getName() : String.valueOf(module));
                             }
-                            jLoginResult.putOpt("folder", share.getCommonFolder());
-                            if (null != share.getTargets() && 1 == share.getTargets().size()) {
-                                jLoginResult.putOpt("item", share.getTargets().get(0).getItem());
-                            }
+                            String folder = null != target ? target.getFolder() : share.getCommonFolder();
+                            jLoginResult.putOpt("folder", folder);
+                            String item = null != target ? target.getItem() :
+                                null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
+                            jLoginResult.putOpt("item", item);
                         }
                     };
                     retval.setContext(context);

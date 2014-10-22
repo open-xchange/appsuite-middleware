@@ -176,6 +176,18 @@ public class DefaultShare implements Share, Serializable {
         }
     }
 
+    @Override
+    public ShareTarget resolveTarget(String path) {
+        if (null != targets && 0 < targets.size() && null != path) {
+            for (ShareTarget target : targets) {
+                if (path.equals(target.getPath())) {
+                    return target;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Sets the token
      *

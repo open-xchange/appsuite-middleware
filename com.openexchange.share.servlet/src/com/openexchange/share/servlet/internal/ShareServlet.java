@@ -55,12 +55,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.ShareHandler;
-import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
@@ -99,21 +100,24 @@ public class ShareServlet extends HttpServlet {
 
             // Extract share from path info
             Share share;
+            ShareTarget target;
             {
                 String pathInfo = request.getPathInfo();
-                String token = ShareServletUtils.extractToken(pathInfo);
-                share = null == token ? null : ShareServiceLookup.getService(ShareService.class, true).resolveToken(token);
+                String[] paths = Strings.isEmpty(pathInfo) ? null : pathInfo.split("/");
+                share = null == paths || 0 == paths.length ? null :
+                    ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
                 if (null == share) {
                     LOG.debug("No share found at '{}'", pathInfo);
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
+                target = 1 < paths.length ? share.resolveTarget(paths[1]) : null;
             }
 
             // Determine appropriate ShareHandler and handle the share
             for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
-                if (handler.handle(share, request, response)) {
+                if (handler.handle(share, target, request, response)) {
                     return;
                 }
             }
