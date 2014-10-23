@@ -364,7 +364,8 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * setup shares and guest users, enrich previously skipped guest permissions with real entities
              */
-            processAddedGuestPermissions(folderID, plainFolder.getContentType(), addedGuests, transactionManager.getConnection());
+            processAddedGuestPermissions(
+                session.getUserId(), folderID, plainFolder.getContentType(), addedGuests, transactionManager.getConnection());
             /*
              * update with re-added guest permissions
              */

@@ -57,11 +57,12 @@ package com.openexchange.share.storage.mapping;
 public enum ShareTargetField {
 
     CONTEXT_ID,
-    UUID,
     TOKEN,
     MODULE,
     FOLDER,
     ITEM,
+    OWNED_BY,
+    SHARED_BY,
     EXPIRY_DATE,
     META,
     ;

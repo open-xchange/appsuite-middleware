@@ -52,6 +52,7 @@ package com.openexchange.share.impl;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -420,6 +421,33 @@ public class ShareTool {
     public static void validateToken(String token) throws OXException {
         if (false == TOKEN_PATTERN.matcher(token).matches()) {
             throw ShareExceptionCodes.INVALID_LINK.create(token);
+        }
+    }
+
+    /**
+     * Checks a share target for validity before saving or updating it, throwing an exception if validation fails.
+     *
+     * @param target The target to validate
+     * @throws OXException
+     */
+    public static void validateTarget(ShareTarget target) throws OXException {
+        if (0 == target.getOwnedBy()) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No owned by information specified in share target");
+        }
+        if (null == target.getItem() && null == target.getFolder()) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No folder or item specified in share target");
+        }
+    }
+
+    /**
+     * Checks a share target for validity before saving or updating it, throwing an exception if validation fails.
+     *
+     * @param targets The targets to validate
+     * @throws OXException
+     */
+    public static void validateTargets(Collection<ShareTarget> targets) throws OXException {
+        for (ShareTarget target : targets) {
+            validateTarget(target);
         }
     }
 

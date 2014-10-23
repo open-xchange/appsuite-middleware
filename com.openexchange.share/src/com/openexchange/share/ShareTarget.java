@@ -66,6 +66,8 @@ public class ShareTarget implements Serializable {
     protected int module;
     protected String folder;
     protected String item;
+    protected int ownedBy;
+    protected int sharedBy;
     protected Date expiryDate;
     protected Map<String, Object> meta;
 
@@ -134,6 +136,44 @@ public class ShareTarget implements Serializable {
      */
     public boolean isFolder() {
         return null == item;
+    }
+
+    /**
+     * Gets the identifier of the user that is considered as the owner of the share target, which is usually the user who created the
+     * shared folder or item, but not necessarily the user who shared the target itself.
+     *
+     * @return The identifier of the user considered as the owner of the share target
+     */
+    public int getOwnedBy() {
+        return ownedBy;
+    }
+
+    /**
+     * Sets the identifier of the user that is considered as the owner of the share target, which is usually the user who created the
+     * shared folder or item, but not necessarily the user who shared the target itself.
+     *
+     * @param ownedBy The identifier of the user considered as the owner of the share target
+     */
+    public void setOwnedBy(int ownedBy) {
+        this.ownedBy = ownedBy;
+    }
+
+    /**
+     * Gets the identifier of the user that shared the target.
+     *
+     * @return The identifier of the user that shared the target
+     */
+    public int getSharedBy() {
+        return sharedBy;
+    }
+
+    /**
+     * Sets the identifier of the user that shared the target.
+     *
+     * @param sharedBy The identifier of the user that shared the target
+     */
+    public void setSharedBy(int sharedBy) {
+        this.sharedBy = sharedBy;
     }
 
     /**
@@ -236,4 +276,5 @@ public class ShareTarget implements Serializable {
     public String toString() {
         return "ShareTarget [module=" + module + ", folder=" + folder + (null != item ? (", item=" + item) : "") + "]";
     }
+
 }

@@ -82,7 +82,8 @@ public class ShareSelector {
     };
 
     private static final ShareTargetField[] DEFAULT_TARGET_FIELDS = {
-        ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM, ShareTargetField.EXPIRY_DATE, ShareTargetField.META
+        ShareTargetField.MODULE, ShareTargetField.FOLDER, ShareTargetField.ITEM, ShareTargetField.EXPIRY_DATE,
+        ShareTargetField.OWNED_BY, ShareTargetField.SHARED_BY, ShareTargetField.META
     };
 
     private final SelectShareBuilder builder;

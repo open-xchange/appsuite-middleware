@@ -450,6 +450,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * Adds share targets as a consequence of added guest permission entities. This also includes creating or resolving the corresponding
      * guest user. The supplied guest permissions are enriched by the matching guest user entities automatically.
      *
+     * @param ownedBy The identifier of the user considered as the owner of the folder
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
      * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
@@ -458,8 +459,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares, in
      *         the same order as the supplied guest permissions list
      */
-    protected void processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
-        Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(folderID, contentType, addedPermissions);
+    protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
+        Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
         ShareService shareService = ShareServiceHolder.requireShareService();
         try {
             session.setParameter(Connection.class.getName(), connection);
@@ -485,16 +486,18 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     /**
      * Gets the resulting share targets based on the supplied guest permissions.
      *
+     * @param ownedBy The identifier of the user considered as the owner of the share targets
      * @param folderID The folder ID to get the share targets for
      * @param contentType The content type of the folder
      * @param permissions The guest permissions
      * @return The share targets, each one mapped to the corresponding list of guest permissions
      */
-    private static Map<ShareTarget, List<GuestPermission>> getPermissionsPerTarget(String folderID, ContentType contentType, List<GuestPermission> permissions) {
+    private static Map<ShareTarget, List<GuestPermission>> getPermissionsPerTarget(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> permissions) {
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = new HashMap<ShareTarget, List<GuestPermission>>();
         for (GuestPermission permission : permissions) {
             ShareTarget target = new ShareTarget(contentType.getModule(), String.valueOf(folderID));
             target.setExpiryDate(permission.getExpiryDate());
+            target.setOwnedBy(ownedBy);
             List<GuestPermission> exitingPermissions = permissionsPerTarget.get(target);
             if (null == exitingPermissions) {
                 exitingPermissions = new ArrayList<GuestPermission>();

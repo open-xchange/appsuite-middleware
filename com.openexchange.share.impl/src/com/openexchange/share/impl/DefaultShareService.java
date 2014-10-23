@@ -137,6 +137,10 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
             return Collections.emptyList();
         }
+        for (ShareTarget target : targets) {
+            ShareTool.validateTarget(target);
+            target.setSharedBy(session.getUserId());
+        }
         int contextID = session.getContextId();
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
         ShareStorage shareStorage = services.getService(ShareStorage.class);

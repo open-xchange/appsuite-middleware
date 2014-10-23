@@ -71,6 +71,7 @@ import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.storage.internal.RdbShareTarget;
 
@@ -104,26 +105,26 @@ public class ShareTargetMapper extends DefaultDbMapper<RdbShareTarget, ShareTarg
         EnumMap<ShareTargetField, DbMapping<? extends Object, RdbShareTarget>> mappings = new
             EnumMap<ShareTargetField, DbMapping<? extends Object, RdbShareTarget>>(ShareTargetField.class);
 
-        mappings.put(ShareTargetField.UUID, new BinaryMapping<RdbShareTarget>("uuid", "UUID") {
+        mappings.put(ShareTargetField.CONTEXT_ID, new IntegerMapping<RdbShareTarget>("cid", "Context ID") {
 
             @Override
-            public void set(RdbShareTarget target, byte[] value) {
-                target.setUuid(value);
+            public void set(RdbShareTarget target, Integer value) {
+                target.setContextID(value.intValue());
             }
 
             @Override
             public boolean isSet(RdbShareTarget target) {
-                return null != target.getUuid();
+                return 0 < target.getContextID();
             }
 
             @Override
-            public byte[] get(RdbShareTarget target) {
-                return target.getUuid();
+            public Integer get(RdbShareTarget target) {
+                return Integer.valueOf(target.getContextID());
             }
 
             @Override
             public void remove(RdbShareTarget target) {
-                target.setUuid(null);
+                target.setContextID(0);
             }
         });
         mappings.put(ShareTargetField.TOKEN, new BinaryMapping<RdbShareTarget>("token", "Token") {
@@ -148,28 +149,6 @@ public class ShareTargetMapper extends DefaultDbMapper<RdbShareTarget, ShareTarg
                 target.setToken(null);
             }
         });
-        mappings.put(ShareTargetField.CONTEXT_ID, new IntegerMapping<RdbShareTarget>("cid", "Context ID") {
-
-            @Override
-            public void set(RdbShareTarget target, Integer value) {
-                target.setContextID(value.intValue());
-            }
-
-            @Override
-            public boolean isSet(RdbShareTarget target) {
-                return 0 < target.getContextID();
-            }
-
-            @Override
-            public Integer get(RdbShareTarget target) {
-                return Integer.valueOf(target.getContextID());
-            }
-
-            @Override
-            public void remove(RdbShareTarget target) {
-                target.setContextID(0);
-            }
-        });
         mappings.put(ShareTargetField.MODULE, new IntegerMapping<RdbShareTarget>("module", "Module ID") {
 
             @Override
@@ -192,7 +171,7 @@ public class ShareTargetMapper extends DefaultDbMapper<RdbShareTarget, ShareTarg
                 target.setModule(0);
             }
         });
-        mappings.put(ShareTargetField.FOLDER, new VarCharMapping<RdbShareTarget>("folder", "Folder ID") {
+        mappings.put(ShareTargetField.FOLDER, new EmptyVarCharMapping<RdbShareTarget>("folder", "Folder ID") {
 
             @Override
             public void set(RdbShareTarget target, String value) {
@@ -214,7 +193,7 @@ public class ShareTargetMapper extends DefaultDbMapper<RdbShareTarget, ShareTarg
                 target.setFolder(null);
             }
         });
-        mappings.put(ShareTargetField.ITEM, new VarCharMapping<RdbShareTarget>("item", "Item") {
+        mappings.put(ShareTargetField.ITEM, new EmptyVarCharMapping<RdbShareTarget>("item", "Item") {
 
             @Override
             public void set(RdbShareTarget target, String value) {
@@ -234,6 +213,50 @@ public class ShareTargetMapper extends DefaultDbMapper<RdbShareTarget, ShareTarg
             @Override
             public void remove(RdbShareTarget target) {
                 target.setItem(null);
+            }
+        });
+        mappings.put(ShareTargetField.OWNED_BY, new IntegerMapping<RdbShareTarget>("ownedBy", "Owned by") {
+
+            @Override
+            public void set(RdbShareTarget target, Integer value) {
+                target.setOwnedBy(value.intValue());
+            }
+
+            @Override
+            public boolean isSet(RdbShareTarget target) {
+                return 0 < target.getOwnedBy();
+            }
+
+            @Override
+            public Integer get(RdbShareTarget target) {
+                return Integer.valueOf(target.getOwnedBy());
+            }
+
+            @Override
+            public void remove(RdbShareTarget target) {
+                target.setOwnedBy(0);
+            }
+        });
+        mappings.put(ShareTargetField.SHARED_BY, new IntegerMapping<RdbShareTarget>("sharedBy", "Shared by") {
+
+            @Override
+            public void set(RdbShareTarget target, Integer value) {
+                target.setSharedBy(value.intValue());
+            }
+
+            @Override
+            public boolean isSet(RdbShareTarget target) {
+                return 0 < target.getSharedBy();
+            }
+
+            @Override
+            public Integer get(RdbShareTarget target) {
+                return Integer.valueOf(target.getSharedBy());
+            }
+
+            @Override
+            public void remove(RdbShareTarget target) {
+                target.setSharedBy(0);
             }
         });
         mappings.put(ShareTargetField.EXPIRY_DATE, new BigIntMapping<RdbShareTarget>("expiryDate", "Expiry date") {
@@ -318,6 +341,29 @@ public class ShareTargetMapper extends DefaultDbMapper<RdbShareTarget, ShareTarg
         });
 
         return mappings;
+    }
+
+    private abstract class EmptyVarCharMapping<O> extends VarCharMapping<O> {
+
+        public EmptyVarCharMapping(String columnName, String readableName) {
+            super(columnName, readableName);
+        }
+
+        @Override
+        public String get(ResultSet resultSet, String columnLabel) throws SQLException {
+            String value = resultSet.getString(columnLabel);
+            return Strings.isEmpty(value) ? null : value;
+        }
+
+        @Override
+        public void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException {
+            if (isSet(object)) {
+                String value = get(object);
+                statement.setObject(parameterIndex, Strings.isEmpty(value) ? "" : value, getSqlType());
+            } else {
+                statement.setObject(parameterIndex, "", getSqlType());
+            }
+        }
     }
 
 }

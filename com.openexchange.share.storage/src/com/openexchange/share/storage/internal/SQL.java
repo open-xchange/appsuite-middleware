@@ -96,16 +96,15 @@ public class SQL {
     public static String getCreateShareTargetTableStmt() {
         return "CREATE TABLE share_target (" +
             "cid int(10) unsigned NOT NULL," +
-            "uuid binary(16) NOT NULL," +
             "token binary(16) NOT NULL," +
             "module tinyint(3) unsigned NOT NULL," +
-            "folder varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL," +
-            "item varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL," +
+            "folder varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
+            "item varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
+            "ownedBy int(10) unsigned NOT NULL," +
+            "sharedBy int(10) unsigned NOT NULL," +
             "expiryDate bigint(64) DEFAULT NULL," +
             "meta BLOB DEFAULT NULL," +
-            "PRIMARY KEY (cid,uuid)," +
-            "KEY tokenIndex (cid,token)," +
-            "KEY folderIndex (cid,folder)" +
+            "PRIMARY KEY (cid,token,module,folder,item)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 

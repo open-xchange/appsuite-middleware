@@ -62,7 +62,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -115,7 +114,6 @@ public class RdbShareStorage implements ShareStorage {
                 RdbShareTarget rdbShareTarget = new RdbShareTarget(target);
                 rdbShareTarget.setContextID(contextID);
                 rdbShareTarget.setToken(share.getToken());
-                rdbShareTarget.setUuid(UUIDs.toByteArray(UUID.randomUUID()));
                 targetsToInsert.add(rdbShareTarget);
             }
         }
@@ -185,7 +183,6 @@ public class RdbShareStorage implements ShareStorage {
                 RdbShareTarget rdbShareTarget = new RdbShareTarget(target);
                 rdbShareTarget.setContextID(contextID);
                 rdbShareTarget.setToken(share.getToken());
-                rdbShareTarget.setUuid(UUIDs.toByteArray(UUID.randomUUID()));
                 targetsToInsert.add(rdbShareTarget);
             }
         }

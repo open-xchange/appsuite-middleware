@@ -62,7 +62,6 @@ public class RdbShareTarget extends ShareTarget {
     private static final long serialVersionUID = 6291061207433984824L;
 
     private int contextID;
-    private byte[] uuid;
     private String token;
 
     /**
@@ -73,6 +72,9 @@ public class RdbShareTarget extends ShareTarget {
     public RdbShareTarget(ShareTarget target) {
         super(target.getModule(), target.getFolder(), target.getItem());
         this.expiryDate = target.getExpiryDate();
+        this.meta = target.getMeta();
+        this.ownedBy = target.getOwnedBy();
+        this.sharedBy = target.getSharedBy();
     }
 
     /**
@@ -135,24 +137,6 @@ public class RdbShareTarget extends ShareTarget {
      */
     public void setContextID(int contextID) {
         this.contextID = contextID;
-    }
-
-    /**
-     * Gets the uuid
-     *
-     * @return The uuid
-     */
-    public byte[] getUuid() {
-        return uuid;
-    }
-
-    /**
-     * Sets the uuid
-     *
-     * @param uuid The uuid to set
-     */
-    public void setUuid(byte[] uuid) {
-        this.uuid = uuid;
     }
 
     /**
