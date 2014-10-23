@@ -1,3 +1,7 @@
+* 2014-10-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35129: Do not throw any misleading log messages if client comes to HTTP auth URL without Authorization header.
+
 * 2014-10-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 35109: Do not dispose kerberos tickets when sessions are moved over to long term session container.
