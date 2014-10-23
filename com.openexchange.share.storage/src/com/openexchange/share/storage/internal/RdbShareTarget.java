@@ -50,14 +50,14 @@
 package com.openexchange.share.storage.internal;
 
 import java.util.Date;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 
 /**
  * {@link RdbShareTarget}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbShareTarget extends ShareTarget {
+public class RdbShareTarget extends Share {
 
     private static final long serialVersionUID = 6291061207433984824L;
 
@@ -69,7 +69,7 @@ public class RdbShareTarget extends ShareTarget {
      *
      * @param target The target to copy the values from
      */
-    public RdbShareTarget(ShareTarget target) {
+    public RdbShareTarget(Share target) {
         super(target.getModule(), target.getFolder(), target.getItem());
         this.expiryDate = target.getExpiryDate();
         this.meta = target.getMeta();

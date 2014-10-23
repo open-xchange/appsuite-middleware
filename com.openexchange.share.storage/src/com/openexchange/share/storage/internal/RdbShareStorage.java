@@ -66,9 +66,9 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.share.storage.internal.ConnectionProvider.ConnectionMode;
@@ -97,20 +97,20 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public void storeShare(Share share, StorageParameters parameters) throws OXException {
+    public void storeShare(ShareList share, StorageParameters parameters) throws OXException {
         storeShares(share.getContextID(), Collections.singletonList(share), parameters);
     }
 
     @Override
-    public void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
+    public void storeShares(int contextID, List<ShareList> shares, StorageParameters parameters) throws OXException {
         /*
          * prepare shares and share-targets
          */
         List<RdbShareTarget> targetsToInsert = new ArrayList<RdbShareTarget>();
         List<DefaultShare> sharesToInsert = new ArrayList<DefaultShare>();
-        for (Share share : shares) {
+        for (ShareList share : shares) {
             sharesToInsert.add(new DefaultShare(share));
-            for (ShareTarget target : share.getTargets()) {
+            for (Share target : share.getTargets()) {
                 RdbShareTarget rdbShareTarget = new RdbShareTarget(target);
                 rdbShareTarget.setContextID(contextID);
                 rdbShareTarget.setToken(share.getToken());
@@ -150,7 +150,7 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
+    public ShareList loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
             Collection<DefaultShare> shares = new ShareSelector(contextID).tokens(new String[] { token }).select(provider.get());
@@ -161,12 +161,12 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public void updateShare(Share share, StorageParameters parameters) throws OXException {
+    public void updateShare(ShareList share, StorageParameters parameters) throws OXException {
         updateShares(share.getContextID(), Collections.singletonList(share), parameters);
     }
 
     @Override
-    public void updateShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
+    public void updateShares(int contextID, List<ShareList> shares, StorageParameters parameters) throws OXException {
         EnumSet<ShareField> updatableFields = EnumSet.allOf(ShareField.class);
         updatableFields.remove(ShareField.CONTEXT_ID);
         updatableFields.remove(ShareField.TOKEN);
@@ -176,10 +176,10 @@ public class RdbShareStorage implements ShareStorage {
         List<String> affectedTokens = new ArrayList<String>(shares.size());
         List<RdbShareTarget> targetsToInsert = new ArrayList<RdbShareTarget>();
         List<DefaultShare> sharesToUpdate = new ArrayList<DefaultShare>();
-        for (Share share : shares) {
+        for (ShareList share : shares) {
             affectedTokens.add(share.getToken());
             sharesToUpdate.add(new DefaultShare(share));
-            for (ShareTarget target : share.getTargets()) {
+            for (Share target : share.getTargets()) {
                 RdbShareTarget rdbShareTarget = new RdbShareTarget(target);
                 rdbShareTarget.setContextID(contextID);
                 rdbShareTarget.setToken(share.getToken());
@@ -202,20 +202,20 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(new ShareSelector(contextID).createdBy(createdBy).select(provider.get()));
+            return new ArrayList<ShareList>(new ShareSelector(contextID).createdBy(createdBy).select(provider.get()));
         } finally {
             provider.close();
         }
     }
 
     @Override
-    public List<Share> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(
+            return new ArrayList<ShareList>(
                 new ShareSelector(contextID).tokens(tokens.toArray(new String[tokens.size()])).select(provider.get()));
         } finally {
             provider.close();
@@ -223,55 +223,55 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesForTarget(int contextID, ShareTarget target, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesForTarget(int contextID, Share target, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(new ShareSelector(contextID).target(target).select(provider.get()));
+            return new ArrayList<ShareList>(new ShareSelector(contextID).target(target).select(provider.get()));
         } finally {
             provider.close();
         }
     }
 
     @Override
-    public List<Share> loadSharesForTarget(int contextID, ShareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesForTarget(int contextID, Share target, int[] guestIDs, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(new ShareSelector(contextID).target(target).guests(guestIDs).select(provider.get()));
+            return new ArrayList<ShareList>(new ShareSelector(contextID).target(target).guests(guestIDs).select(provider.get()));
         } finally {
             provider.close();
         }
     }
 
     @Override
-    public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(new ShareSelector(contextID).select(provider.get()));
+            return new ArrayList<ShareList>(new ShareSelector(contextID).select(provider.get()));
         } finally {
             provider.close();
         }
     }
 
     @Override
-    public List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(new ShareSelector(contextID).expiredAfter(expires).select(provider.get()));
+            return new ArrayList<ShareList>(new ShareSelector(contextID).expiredAfter(expires).select(provider.get()));
         } finally {
             provider.close();
         }
     }
 
     @Override
-    public List<Share> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException {
         return loadSharesForGuests(contextID, new int[] { guestID }, parameters);
     }
 
     @Override
-    public List<Share> loadSharesForGuests(int contextID, int[] guestIDs, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesForGuests(int contextID, int[] guestIDs, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ArrayList<Share>(new ShareSelector(contextID).guests(guestIDs).select(provider.get()));
+            return new ArrayList<ShareList>(new ShareSelector(contextID).guests(guestIDs).select(provider.get()));
         } finally {
             provider.close();
         }

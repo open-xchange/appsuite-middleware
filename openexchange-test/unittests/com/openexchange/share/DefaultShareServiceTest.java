@@ -218,7 +218,7 @@ public class DefaultShareServiceTest extends TestCase {
             for (int i = 1; i <= count; i++) {
                 guests.add(new AnonymousRecipient());
             }
-            service.addTarget(session, new ShareTarget(share1.getModule(), String.valueOf(share1.getObjectID())), guests);
+            service.addTarget(session, new Share(share1.getModule(), String.valueOf(share1.getObjectID())), guests);
 
             FolderObject share2 = access.getDefaultFolder(user.getId(), FolderObject.CALENDAR);
             count = new Random().nextInt(5);
@@ -226,52 +226,52 @@ public class DefaultShareServiceTest extends TestCase {
             for (int i = 1; i <= count; i++) {
                 guests.add(new AnonymousRecipient());
             }
-            service.addTarget(session, new ShareTarget(share2.getModule(), String.valueOf(share2.getObjectID())), guests);
+            service.addTarget(session, new Share(share2.getModule(), String.valueOf(share2.getObjectID())), guests);
         }
     }
 
     public void testRemoveByUserAndContext() throws Exception {
         int user = users.get(new Random().nextInt(users.size())).getId();
-        List<Share> before = service.getAllShares(ctx.getContextId(), user);
-        List<Share> all = service.getAllShares(ctx.getContextId());
+        List<ShareList> before = service.getAllShares(ctx.getContextId(), user);
+        List<ShareList> all = service.getAllShares(ctx.getContextId());
         if (before.size() > 0) {
             service.removeShares(ctx.getContextId(), user);
-            List<Share> after = service.getAllShares(ctx.getContextId(), user);
+            List<ShareList> after = service.getAllShares(ctx.getContextId(), user);
             assertEquals("Not all shares got deleted.", all.size() - before.size(), after.size());
         }
     }
 
     public void testRemoveByToken() throws Exception {
-        List<Share> before = service.getAllShares(ctx.getContextId());
+        List<ShareList> before = service.getAllShares(ctx.getContextId());
         List<String> toDelete = new ArrayList<String>(before.size());
-        for (Share share : before) {
+        for (ShareList share : before) {
             boolean delete = new Random().nextBoolean();
             if (delete) {
                 toDelete.add(share.getToken());
             }
         }
         service.removeShares(toDelete);
-        List<Share> after = service.getAllShares(ctx.getContextId());
+        List<ShareList> after = service.getAllShares(ctx.getContextId());
         assertEquals("Other shares deleted.", before.size() - toDelete.size(), after.size());
-        for (Share share : after) {
+        for (ShareList share : after) {
             String token = share.getToken();
             assertFalse("Token " + token + " should have been deleted.", toDelete.contains(token));
         }
     }
 
     public void testRemoveByTokenAndContext() throws Exception {
-        List<Share> before = service.getAllShares(ctx.getContextId());
+        List<ShareList> before = service.getAllShares(ctx.getContextId());
         List<String> toDelete = new ArrayList<String>(before.size());
-        for (Share share : before) {
+        for (ShareList share : before) {
             boolean delete = new Random().nextBoolean();
             if (delete) {
                 toDelete.add(share.getToken());
             }
         }
         service.removeShares(toDelete);
-        List<Share> after = service.getAllShares(ctx.getContextId());
+        List<ShareList> after = service.getAllShares(ctx.getContextId());
         assertEquals("Other shares deleted.", before.size() - toDelete.size(), after.size());
-        for (Share share : after) {
+        for (ShareList share : after) {
             String token = share.getToken();
             assertFalse("Token " + token + " should have been deleted.", toDelete.contains(token));
         }
@@ -279,23 +279,23 @@ public class DefaultShareServiceTest extends TestCase {
 
     public void testRemoveByContext() throws Exception {
         service.removeShares(ctx.getContextId());
-        List<Share> shares = service.getAllShares(ctx.getContextId());
+        List<ShareList> shares = service.getAllShares(ctx.getContextId());
         assertTrue("Not all shares in context have been deleted.", shares.isEmpty());
     }
 
     public void testListByContext() throws Exception {
-        List<Share> shares = service.getAllShares(ctx.getContextId());
+        List<ShareList> shares = service.getAllShares(ctx.getContextId());
         assertFalse("No shares found.", shares.isEmpty());
-        for (Share share : shares) {
+        for (ShareList share : shares) {
             assertEquals("Share does not belong to context.", ctx.getContextId(), share.getContextID());
         }
     }
 
     public void testListByContextAndUser() throws Exception {
         int user = users.get(new Random().nextInt(users.size())).getId();
-        List<Share> shares = service.getAllShares(ctx.getContextId(), user);
+        List<ShareList> shares = service.getAllShares(ctx.getContextId(), user);
         assertFalse("No shares found.", shares.isEmpty());
-        for (Share share : shares) {
+        for (ShareList share : shares) {
             assertEquals("Share does not belong to context.", ctx.getContextId(), share.getContextID());
             assertEquals("Share was not created by user.", user, share.getCreatedBy());
         }

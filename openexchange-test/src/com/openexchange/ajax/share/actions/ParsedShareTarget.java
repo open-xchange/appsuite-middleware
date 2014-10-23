@@ -54,14 +54,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 
 /**
  * {@link ParsedShareTarget}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ParsedShareTarget extends ShareTarget {
+public class ParsedShareTarget extends Share {
 
     private static final long serialVersionUID = 6028997475388990342L;
 

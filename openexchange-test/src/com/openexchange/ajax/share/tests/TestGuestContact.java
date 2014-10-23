@@ -67,7 +67,7 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -87,7 +87,7 @@ public class TestGuestContact extends ShareTest {
         Permission.NO_PERMISSIONS,
         false);
 
-    private ShareTarget target;
+    private Share target;
     private final long now = System.currentTimeMillis();
     private final String GUEST_DISPLAYNAME = "Test Guest Contact " + now;
     private final String GUEST_MAIL = "testGuestContact@" + now + ".invalid";
@@ -115,14 +115,14 @@ public class TestGuestContact extends ShareTest {
         file.setDescription(file.getTitle());
         itm.newAction(file);
 
-        target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
+        target = new Share(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
         GuestRecipient guest = new GuestRecipient();
         guest.setDisplayName(GUEST_DISPLAYNAME);
         guest.setEmailAddress(GUEST_MAIL);
         guest.setPassword(GUEST_PASSWORD);
         guest.setBits(FOLDER_READ_PERMISSION);
 
-        client.execute(new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest)));
+        client.execute(new NewRequest(Collections.<Share>singletonList(target), Collections.<ShareRecipient>singletonList(guest)));
     }
 
     public void testGuestContact() throws Exception {

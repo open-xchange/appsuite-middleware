@@ -60,7 +60,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -77,15 +77,15 @@ public class NewRequest implements AJAXRequest<NewResponse> {
 
     private final boolean failOnError;
 
-    private final List<ShareTarget> targets;
+    private final List<Share> targets;
 
     private final List<ShareRecipient> recipients;
 
-    public NewRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
+    public NewRequest(List<Share> targets, List<ShareRecipient> recipients) {
         this(targets, recipients, true);
     }
 
-    public NewRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
+    public NewRequest(List<Share> targets, List<ShareRecipient> recipients, boolean failOnError) {
         super();
         this.targets = targets;
         this.recipients = recipients;
@@ -120,7 +120,7 @@ public class NewRequest implements AJAXRequest<NewResponse> {
     @Override
     public Object getBody() throws IOException, JSONException {
         JSONArray jTargets = new JSONArray();
-        for (ShareTarget target : targets) {
+        for (Share target : targets) {
             jTargets.put(writeTarget(target));
         }
 
@@ -172,7 +172,7 @@ public class NewRequest implements AJAXRequest<NewResponse> {
         jRecipient.put("id", recipient.getEntity());
     }
 
-    private JSONObject writeTarget(ShareTarget target) throws JSONException {
+    private JSONObject writeTarget(Share target) throws JSONException {
         JSONObject jTarget = new JSONObject(3);
         jTarget.put("module", Module.getModuleString(target.getModule(), -1));
         jTarget.put("folder", target.getFolder());

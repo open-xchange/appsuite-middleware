@@ -76,7 +76,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 
 
 /**
@@ -142,7 +142,7 @@ public class FileStorageTransactionTest extends ShareTest {
         List<ParsedShare> fileShares = new ArrayList<ParsedShare>(sharedFiles.size());
         for (DefaultFile file : sharedFiles) {
             for (ParsedShare share : allShares) {
-                for (ShareTarget target : share.getTargets()) {
+                for (Share target : share.getTargets()) {
                     if (target.getItem() == null) {
                         continue;
                     }

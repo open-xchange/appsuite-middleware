@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 
 /**
  * {@link ShareTargetDiff}
@@ -63,25 +63,25 @@ import com.openexchange.share.ShareTarget;
  */
 public class ShareTargetDiff {
 
-    private final List<ShareTarget> added;
+    private final List<Share> added;
 
-    private final List<ShareTarget> removed;
+    private final List<Share> removed;
 
-    private final List<ShareTarget> modified;
+    private final List<Share> modified;
 
-    public ShareTargetDiff(List<ShareTarget> oldTargets, List<ShareTarget> newTargets) {
+    public ShareTargetDiff(List<Share> oldTargets, List<Share> newTargets) {
         super();
-        added = new ArrayList<ShareTarget>(newTargets);
+        added = new ArrayList<Share>(newTargets);
         added.removeAll(oldTargets);
-        removed = new ArrayList<ShareTarget>(oldTargets);
+        removed = new ArrayList<Share>(oldTargets);
         removed.removeAll(newTargets);
-        modified = new ArrayList<ShareTarget>(newTargets.size());
-        for (ShareTarget target : newTargets) {
+        modified = new ArrayList<Share>(newTargets.size());
+        for (Share target : newTargets) {
             int index = oldTargets.indexOf(target);
             if (index >= 0) {
-                ShareTarget oldTarget = oldTargets.remove(index);
+                Share oldTarget = oldTargets.remove(index);
                 if (expiryDateChanged(target, oldTarget) || metaChanged(target, oldTarget)) {
-                    ShareTarget updatedTarget = new ShareTarget(oldTarget.getModule(), oldTarget.getFolder(), oldTarget.getItem());
+                    Share updatedTarget = new Share(oldTarget.getModule(), oldTarget.getFolder(), oldTarget.getItem());
                     updatedTarget.setExpiryDate(target.getExpiryDate());
                     updatedTarget.setMeta(target.getMeta());
                     modified.add(updatedTarget);
@@ -96,7 +96,7 @@ public class ShareTargetDiff {
      *
      * @return The added
      */
-    public List<ShareTarget> getAdded() {
+    public List<Share> getAdded() {
         return added;
     }
 
@@ -106,7 +106,7 @@ public class ShareTargetDiff {
      *
      * @return The removed
      */
-    public List<ShareTarget> getRemoved() {
+    public List<Share> getRemoved() {
         return removed;
     }
 
@@ -116,11 +116,11 @@ public class ShareTargetDiff {
      *
      * @return The modified
      */
-    public List<ShareTarget> getModified() {
+    public List<Share> getModified() {
         return modified;
     }
 
-    private static boolean metaChanged(ShareTarget t1, ShareTarget t2) {
+    private static boolean metaChanged(Share t1, Share t2) {
         Map<String, Object> m1 = t1.getMeta();
         Map<String, Object> m2 = t2.getMeta();
         if (m1 == null) {
@@ -138,7 +138,7 @@ public class ShareTargetDiff {
         return !m1.equals(m2);
     }
 
-    private static boolean expiryDateChanged(ShareTarget t1, ShareTarget t2) {
+    private static boolean expiryDateChanged(Share t1, Share t2) {
         Date d1 = t1.getExpiryDate();
         Date d2 = t2.getExpiryDate();
         if (d1 == null) {

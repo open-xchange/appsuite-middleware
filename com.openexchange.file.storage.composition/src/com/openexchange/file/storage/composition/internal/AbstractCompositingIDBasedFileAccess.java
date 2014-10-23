@@ -117,9 +117,9 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -821,11 +821,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             try {
                 session.setParameter(Connection.class.getName(), con);
                 ShareService shareService = Services.getService(ShareService.class);
-                ShareTarget shareTarget = new ShareTarget(8, document.getFolderId(), document.getId()); // TODO: no module constant accessible
-                List<Share> shares = shareService.addTarget(session, shareTarget, shareRecipients);
+                Share shareTarget = new Share(8, document.getFolderId(), document.getId()); // TODO: no module constant accessible
+                List<ShareList> shares = shareService.addTarget(session, shareTarget, shareRecipients);
                 for (int i = 0; i < guestPermissions.size(); i++) {
                     FileStorageGuestObjectPermission guestPermission = guestPermissions.get(0);
-                    Share share = shares.get(i);
+                    ShareList share = shares.get(i);
                     allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuest(), false, guestPermission.getPermissions()));
                 }
 

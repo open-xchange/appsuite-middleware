@@ -70,7 +70,7 @@ public interface ShareService {
      * @return The share, or <code>null</code> if no valid share could be looked up
      * @throws OXException
      */
-    Share resolveToken(String token) throws OXException;
+    ShareList resolveToken(String token) throws OXException;
 
     /**
      * Gets all shares created by the supplied session's user.
@@ -79,7 +79,7 @@ public interface ShareService {
      * @return The shares
      * @throws OXException
      */
-    List<Share> getAllShares(Session session) throws OXException;
+    List<ShareList> getAllShares(Session session) throws OXException;
 
     /**
      * Deletes multiple shares of a user identified by their tokens.
@@ -100,7 +100,7 @@ public interface ShareService {
      * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the target is deleted for all shares that reference it
      * @throws OXException
      */
-    void deleteTarget(Session session, ShareTarget target, List<Integer> guestIDs) throws OXException;
+    void deleteTarget(Session session, Share target, List<Integer> guestIDs) throws OXException;
 
     /**
      * Deletes a list of share targets for all shares that belong to a certain list of guests.
@@ -110,7 +110,7 @@ public interface ShareService {
      * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the targets are deleted for all shares that reference it
      * @throws OXException
      */
-    void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
+    void deleteTargets(Session session, List<Share> targets, List<Integer> guestIDs) throws OXException;
 
     /**
      * Updates an existing share.
@@ -121,7 +121,7 @@ public interface ShareService {
      * @return The update share
      * @throws OXException
      */
-    Share updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
+    ShareList updateShare(Session session, ShareList share, Date clientTimestamp) throws OXException;
 
     /**
      * Adds a single target to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
@@ -132,7 +132,7 @@ public interface ShareService {
      * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
      * @throws OXException
      */
-    List<Share> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
+    List<ShareList> addTarget(Session session, Share target, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Adds multiple targets to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
@@ -143,7 +143,7 @@ public interface ShareService {
      * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
      * @throws OXException
      */
-    List<Share> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
+    List<ShareList> addTargets(Session session, List<Share> targets, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Generates a URL for every share that is passed.
@@ -155,6 +155,6 @@ public interface ShareService {
      *                 You probably want to pass HttpServletRequest.getServerName() here.
      * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
      */
-    List<String> generateShareURLs(List<Share> shares, String protocol, String fallbackHostname) throws OXException;
+    List<String> generateShareURLs(List<ShareList> shares, String protocol, String fallbackHostname) throws OXException;
 
 }

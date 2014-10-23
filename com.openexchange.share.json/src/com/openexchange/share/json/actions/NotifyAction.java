@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
@@ -101,7 +101,7 @@ public class NotifyAction extends AbstractShareAction {
         }
 
         ShareService shareService = getShareService();
-        Share share = shareService.resolveToken(token);
+        ShareList share = shareService.resolveToken(token);
         if (share == null) {
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }

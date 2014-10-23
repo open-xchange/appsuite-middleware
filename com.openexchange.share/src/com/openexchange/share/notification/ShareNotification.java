@@ -49,7 +49,7 @@
 
 package com.openexchange.share.notification;
 
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 
 /**
  * A {@link ShareNotification} encapsulates all information necessary to notify
@@ -87,7 +87,7 @@ public interface ShareNotification<T> {
      *
      * @return The share, never <code>null</code>
      */
-    Share getShare();
+    ShareList getShare();
 
     /**
      * Gets the URL needed for accessing the share.

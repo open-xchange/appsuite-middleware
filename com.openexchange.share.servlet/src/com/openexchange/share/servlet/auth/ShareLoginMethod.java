@@ -63,7 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
@@ -77,7 +77,7 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
  */
 public class ShareLoginMethod implements LoginMethodClosure {
 
-    private final Share share;
+    private final ShareList share;
     private final Context context;
     private final User user;
 
@@ -88,7 +88,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
      * @param context The context
      * @param user The user
      */
-    public ShareLoginMethod(Share share, Context context, User user) {
+    public ShareLoginMethod(ShareList share, Context context, User user) {
         super();
         this.share = share;
         this.context = context;

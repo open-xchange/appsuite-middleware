@@ -56,8 +56,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.Share;
-import com.openexchange.share.ShareTarget;
 
 /**
  * {@link ResolvedShare}
@@ -68,8 +68,8 @@ import com.openexchange.share.ShareTarget;
  */
 public class ResolvedShare {
 
-    private final Share share;
-    private final ShareTarget target;
+    private final ShareList share;
+    private final Share target;
     private final Session session;
     private final User user;
     private final Context context;
@@ -91,7 +91,7 @@ public class ResolvedShare {
      * @param request The request
      * @param response The response
      */
-    public ResolvedShare(Share share, ShareTarget target, LoginResult loginResult, LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) {
+    public ResolvedShare(ShareList share, Share target, LoginResult loginResult, LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) {
         super();
         this.share = share;
         this.target = target;
@@ -109,7 +109,7 @@ public class ResolvedShare {
      *
      * @return The share
      */
-    public Share getShare() {
+    public ShareList getShare() {
         return share;
     }
 
@@ -181,7 +181,7 @@ public class ResolvedShare {
      *
      * @return The share target within the share, or <code>null</code> if not addressed
      */
-    public ShareTarget getTarget() {
+    public Share getTarget() {
         return target;
     }
 

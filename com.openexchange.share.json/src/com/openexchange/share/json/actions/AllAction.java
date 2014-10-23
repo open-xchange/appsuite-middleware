@@ -64,7 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.json.GuestShare;
@@ -91,14 +91,14 @@ public class AllAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ShareService shareService = getShareService();
-        List<Share> shares = shareService.getAllShares(session);
+        List<ShareList> shares = shareService.getAllShares(session);
         if (null == shares || 0 == shares.size()) {
             return new AJAXRequestResult(new JSONArray());
         }
         List<String> shareURLs = generateShareURLs(shares, requestData);
         Date lastModified = null;
         Set<Integer> guestIDs = new HashSet<Integer>();
-        for (Share share : shares) {
+        for (ShareList share : shares) {
             Date shareLastModified = share.getLastModified();
             if (null == lastModified || null != shareLastModified && shareLastModified.after(lastModified)) {
                 lastModified = shareLastModified;
@@ -113,7 +113,7 @@ public class AllAction extends AbstractShareAction {
         ShareCryptoService cryptoService = services.getService(ShareCryptoService.class);
         List<GuestShare> guestShares = new ArrayList<GuestShare>(shares.size());
         for (int i = 0; i < shares.size(); i++) {
-            Share share = shares.get(i);
+            ShareList share = shares.get(i);
             String shareURL = shareURLs.get(i);
             User guestUser = guestUsersByID.get(Integer.valueOf(share.getGuest()));
             String guestPassword = AuthenticationMode.ANONYMOUS_PASSWORD == share.getAuthentication() ?

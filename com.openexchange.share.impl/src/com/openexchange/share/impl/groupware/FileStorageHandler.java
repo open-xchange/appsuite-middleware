@@ -69,7 +69,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.recipient.InternalRecipient;
 
@@ -114,7 +114,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
         IDBasedFileAccess fileAccess = getFileAccess(session);
         try {
             fileAccess.startTransaction();
-            for (ShareTarget target : targetDiff.getAdded()) {
+            for (Share target : targetDiff.getAdded()) {
                 FileID fileID = new FileID(target.getItem());
                 if (fileID.getFolderId() == null) {
                     fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
@@ -125,7 +125,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
 
-            for (ShareTarget target : targetDiff.getModified()) {
+            for (Share target : targetDiff.getModified()) {
                 FileID fileID = new FileID(target.getItem());
                 if (fileID.getFolderId() == null) {
                     fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
@@ -136,7 +136,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
 
-            for (ShareTarget target : targetDiff.getRemoved()) {
+            for (Share target : targetDiff.getRemoved()) {
                 FileID fileID = new FileID(target.getItem());
                 if (fileID.getFolderId() == null) {
                     fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());

@@ -52,8 +52,8 @@ package com.openexchange.share.storage;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.Share;
-import com.openexchange.share.ShareTarget;
 
 
 /**
@@ -73,7 +73,7 @@ public interface ShareStorage {
      * @return The share, or <code>null</code> if not found
      * @throws OXException
      */
-    Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException;
+    ShareList loadShare(int contextID, String token, StorageParameters parameters) throws OXException;
 
     /**
      * Saves a new share in the storage.
@@ -81,7 +81,7 @@ public interface ShareStorage {
      * @param share The share to store
      * @param parameters The storage parameters
      */
-    void storeShare(Share share, StorageParameters parameters) throws OXException;
+    void storeShare(ShareList share, StorageParameters parameters) throws OXException;
 
     /**
      * Saves new shares in the storage.
@@ -90,7 +90,7 @@ public interface ShareStorage {
      * @param shares The shares to store
      * @param parameters The storage parameters
      */
-    void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
+    void storeShares(int contextID, List<ShareList> shares, StorageParameters parameters) throws OXException;
 
     /**
      * Updates an already existing share in the storage.
@@ -98,7 +98,7 @@ public interface ShareStorage {
      * @param share The share to update
      * @param parameters The storage parameters
      */
-    void updateShare(Share share, StorageParameters parameters) throws OXException;
+    void updateShare(ShareList share, StorageParameters parameters) throws OXException;
 
     /**
      * Updates already existing shares in the storage.
@@ -107,7 +107,7 @@ public interface ShareStorage {
      * @param shares The shares to update
      * @param parameters The storage parameters
      */
-    void updateShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
+    void updateShares(int contextID, List<ShareList> shares, StorageParameters parameters) throws OXException;
 
     /**
      * Deletes a share identified by its unique token.
@@ -137,7 +137,7 @@ public interface ShareStorage {
      * @param parameters The storage parameters
      * @return The shares
      */
-    List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
+    List<ShareList> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
 
     /**
      * Loads all shares identified by their tokens.
@@ -147,7 +147,7 @@ public interface ShareStorage {
      * @param parameters The storage parameters
      * @return The shares
      */
-    List<Share> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException;
+    List<ShareList> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException;
 
     /**
      * Loads all shares that were created for a specific groupware target.
@@ -157,7 +157,7 @@ public interface ShareStorage {
      * @param parameters The storage parameters
      * @return All shares holding a reference to the supplied groupware target
      */
-    List<Share> loadSharesForTarget(int contextID, ShareTarget target, StorageParameters parameters) throws OXException;
+    List<ShareList> loadSharesForTarget(int contextID, Share target, StorageParameters parameters) throws OXException;
 
     /**
      * Loads all shares to guest users that were created for a specific groupware target.
@@ -168,7 +168,7 @@ public interface ShareStorage {
      * @param parameters The storage parameters
      * @return All shares holding a reference to the supplied groupware target
      */
-    List<Share> loadSharesForTarget(int contextID, ShareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException;
+    List<ShareList> loadSharesForTarget(int contextID, Share target, int[] guestIDs, StorageParameters parameters) throws OXException;
 
     /**
      * Loads all shares that are expired after the given date.
@@ -178,7 +178,7 @@ public interface ShareStorage {
      * @param parameters The storage parameters
      * @return The shares
      */
-    List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException;
+    List<ShareList> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException;
 
     /**
      * Loads all shares that were created for a specific guest user ID.
@@ -188,7 +188,7 @@ public interface ShareStorage {
      * @param parameters The storage parameters
      * @return The shares
      */
-    List<Share> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException;
+    List<ShareList> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException;
 
     /**
      * Loads all shares that were created for a specific guest user ID.
@@ -198,7 +198,7 @@ public interface ShareStorage {
      * @param parameters The storage parameters
      * @return The shares
      */
-    List<Share> loadSharesForGuests(int contextID, int[] guestIDs, StorageParameters parameters) throws OXException;
+    List<ShareList> loadSharesForGuests(int contextID, int[] guestIDs, StorageParameters parameters) throws OXException;
 
     /**
      * Loads all shares that were created in supplied context.
@@ -208,6 +208,6 @@ public interface ShareStorage {
      * @return The shares
      * @throws OXException On error
      */
-    List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException;
+    List<ShareList> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException;
 
 }

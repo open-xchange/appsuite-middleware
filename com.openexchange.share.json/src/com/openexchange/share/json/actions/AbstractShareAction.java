@@ -58,7 +58,7 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
@@ -165,7 +165,7 @@ public abstract class AbstractShareAction implements AJAXActionService {
      * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
      * @throws OXException
      */
-    protected List<String> generateShareURLs(List<Share> shares, AJAXRequestData requestData) throws OXException {
+    protected List<String> generateShareURLs(List<ShareList> shares, AJAXRequestData requestData) throws OXException {
         return getShareService().generateShareURLs(shares, determineProtocol(requestData), determineHostname(requestData));
     }
 

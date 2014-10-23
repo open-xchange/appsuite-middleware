@@ -55,7 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -71,7 +71,7 @@ public class NewRequest {
 
     private final AJAXRequestData requestData;
 
-    private final List<ShareTarget> targets;
+    private final List<Share> targets;
 
     private final List<ShareRecipient> recipients;
 
@@ -82,7 +82,7 @@ public class NewRequest {
     private final String message;
 
 
-    private NewRequest(AJAXRequestData requestData, List<ShareRecipient> recipients, List<ShareTarget> targets, String message) {
+    private NewRequest(AJAXRequestData requestData, List<ShareRecipient> recipients, List<Share> targets, String message) {
         super();
         this.requestData = requestData;
         this.recipients = recipients;
@@ -96,7 +96,7 @@ public class NewRequest {
         try {
             JSONObject data = (JSONObject) requestData.requireData();
             List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"));
+            List<Share> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"));
             String message = data.optString("message", null);
             return new NewRequest(requestData, recipients, targets, message);
         } catch (JSONException e) {
@@ -120,7 +120,7 @@ public class NewRequest {
         return externalRecipients;
     }
 
-    public List<ShareTarget> getTargets() {
+    public List<Share> getTargets() {
         return targets;
     }
 

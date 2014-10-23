@@ -66,9 +66,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -157,7 +157,7 @@ public class GuestShareResultConverter implements ResultConverter {
             /*
              * common share properties
              */
-            Share share = guestShare.getShare();
+            ShareList share = guestShare.getShare();
             json.putOpt("token", share.getToken());
             json.putOpt("share_url", guestShare.getShareURL());
             json.putOpt("authentication", null != share.getAuthentication() ? share.getAuthentication().toString().toLowerCase() : null);
@@ -185,12 +185,12 @@ public class GuestShareResultConverter implements ResultConverter {
      * @throws JSONException
      */
     private JSONArray serializeShareTargets(GuestShare guestShare, TimeZone timeZone) throws JSONException {
-        List<ShareTarget> targets = guestShare.getShare().getTargets();
+        List<Share> targets = guestShare.getShare().getTargets();
         if (null == targets) {
             return null;
         }
         JSONArray jsonArray = new JSONArray(targets.size());
-        for (ShareTarget target : targets) {
+        for (Share target : targets) {
             JSONObject jsonTarget = serializeShareTarget(target, timeZone);
             jsonTarget.put("target_url", guestShare.getShareURL() + '/' + target.getPath());
             jsonArray.put(jsonTarget);
@@ -206,7 +206,7 @@ public class GuestShareResultConverter implements ResultConverter {
      * @return The serialized share target
      * @throws JSONException
      */
-    private JSONObject serializeShareTarget(ShareTarget target, TimeZone timeZone) throws JSONException {
+    private JSONObject serializeShareTarget(Share target, TimeZone timeZone) throws JSONException {
         JSONObject jsonTarget = new JSONObject(8);
         Module module = Module.getForFolderConstant(target.getModule());
         jsonTarget.put("module", null == module ? String.valueOf(target.getModule()) : module.getName());

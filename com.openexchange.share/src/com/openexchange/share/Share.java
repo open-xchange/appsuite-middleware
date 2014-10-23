@@ -49,101 +49,232 @@
 
 package com.openexchange.share;
 
+import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
-
+import java.util.Map;
 
 /**
  * {@link Share}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public interface Share {
+public class Share implements Serializable {
+
+    private static final long serialVersionUID = -8680039849393740702L;
+
+    protected int module;
+    protected String folder;
+    protected String item;
+    protected int ownedBy;
+    protected int sharedBy;
+    protected Date expiryDate;
+    protected Map<String, Object> meta;
 
     /**
-     * Gets the share's unique token, usually an unformatted UID string.
-     *
-     * @return The token
+     * Initializes a new, empty {@link Share}.
      */
-    String getToken();
+    public Share() {
+        super();
+    }
 
     /**
-     * Gets the identifier of the context the share resides in.
+     * Initializes a new {@link Share}, pointing to a folder of a specific groupware module.
      *
-     * @return The context ID
+     * @param module The groupware module of the share's target folder
+     * @param folder The identifier of the share's folder
      */
-    int getContextID();
+    public Share(int module, String folder) {
+        this(module, folder, null);
+    }
 
     /**
-     * Gets the share targets accessible through this share.
+     * Initializes a new {@link Share}, pointing to an item located in a parent folder of a specific groupware module.
      *
-     * @return The share targets
+     * @param module The groupware module of the share's target folder
+     * @param folder The identifier of the share's folder
+     * @param item The identifier of the share's item
      */
-    List<ShareTarget> getTargets();
+    public Share(int module, String folder, String item) {
+        super();
+        this.module = module;
+        this.folder = folder;
+        this.item = item;
+    }
 
     /**
-     * Gets the creation date of the share.
+     * Gets the groupware module of the share's target folder.
      *
-     * @return The creation date
+     * @return The module
      */
-    Date getCreated();
+    public int getModule() {
+        return module;
+    }
 
     /**
-     * Gets the identifier of the user that initially created the share.
+     * Gets the identifier of the share's folder.
      *
-     * @return The ID of the user who created the share
+     * @return The folder ID
      */
-    int getCreatedBy();
+    public String getFolder() {
+        return folder;
+    }
 
     /**
-     * Gets the date when the share was last modified.
+     * Gets the identifier of the share's item in case the share is not a folder share.
      *
-     * @return The last modification date
+     * @return The item ID, or <code>null</code> if the share references a folder
      */
-    Date getLastModified();
+    public String getItem() {
+        return item;
+    }
 
     /**
-     * Gets the identifier of the user that performed the last modification on the share.
+     * Gets a value indicating whether the share points to a folder or a single item.
      *
-     * @return The ID of the user who made the last modification on the share
+     * @return <code>true</code> if the share points to a folder, <code>false</code>, otherwise
      */
-    int getModifiedBy();
+    public boolean isFolder() {
+        return null == item;
+    }
 
     /**
-     * Gets the identifier of the guest user that is allowed to access this share.
+     * Gets the identifier of the user that is considered as the owner of the share target, which is usually the user who created the
+     * shared folder or item, but not necessarily the user who shared the target itself.
      *
-     * @return The ID of the guest user
+     * @return The identifier of the user considered as the owner of the share target
      */
-    int getGuest();
+    public int getOwnedBy() {
+        return ownedBy;
+    }
 
     /**
-     * Gets the authentication mode used to restrict access to the share.
+     * Sets the identifier of the user that is considered as the owner of the share target, which is usually the user who created the
+     * shared folder or item, but not necessarily the user who shared the target itself.
      *
-     * @return The authentication mode
+     * @param ownedBy The identifier of the user considered as the owner of the share target
      */
-    AuthenticationMode getAuthentication();
+    public void setOwnedBy(int ownedBy) {
+        this.ownedBy = ownedBy;
+    }
 
     /**
-     * Gets the common module identifier if all contained share targets are pointing to the same module.
+     * Gets the identifier of the user that shared the target.
      *
-     * @return The common module ID, or <code>0</code> if the modules are different between the share targets
+     * @return The identifier of the user that shared the target
      */
-    int getCommonModule();
+    public int getSharedBy() {
+        return sharedBy;
+    }
 
     /**
-     * Gets the common folder identifier if all contained share targets are pointing to the same folder.
+     * Sets the identifier of the user that shared the target.
      *
-     * @return The common folder ID, or <code>null</code> if the folders are different between the share targets
+     * @param sharedBy The identifier of the user that shared the target
      */
-    String getCommonFolder();
+    public void setSharedBy(int sharedBy) {
+        this.sharedBy = sharedBy;
+    }
 
     /**
-     * Resolves a contained share target based on the supplied relative path info.
+     * If defined, gets the date when this target expires, i.e. it should be no longer accessible.
      *
-     * @param path The share-relative path to the target
-     * @return The target, or <code>null</code> if not found
+     * @return The expiry date of the share, or <code>null</code> if not defined
      */
-    ShareTarget resolveTarget(String path);
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * Sets the date when this share target, i.e. it should be no longer accessible.
+     *
+     * @param expiryDate The expiry date of the target
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    /**
+     * Gets a value indicating whether the target is considered as expired, i.e. an expiry date is set and is passed in the meantime.
+     *
+     * @return <code>true</code> if the share is expired, <code>false</code>, otherwise
+     */
+    public boolean isExpired() {
+        return expiryDate != null && new Date().after(expiryDate);
+    }
+
+    /**
+     * Gets arbitrary metadata in a map.
+     *
+     * @return The metadata
+     */
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    /**
+     * Sets the metadata,
+     *
+     * @param meta The metadata to set
+     */
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
+    }
+
+    /**
+     * Gets the relative path of this target to address it uniquely within an underlying share.
+     *
+     * @return The share-relative path to the target
+     */
+    public String getPath() {
+        return String.format("%08x", hashCode());
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+        result = prime * result + ((item == null) ? 0 : item.hashCode());
+        result = prime * result + module;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof Share)) {
+            return false;
+        }
+        Share other = (Share) obj;
+        if (folder == null) {
+            if (other.folder != null) {
+                return false;
+            }
+        } else if (!folder.equals(other.folder)) {
+            return false;
+        }
+        if (item == null) {
+            if (other.item != null) {
+                return false;
+            }
+        } else if (!item.equals(other.item)) {
+            return false;
+        }
+        if (module != other.module) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "ShareTarget [module=" + module + ", folder=" + folder + (null != item ? (", item=" + item) : "") + "]";
+    }
 
 }

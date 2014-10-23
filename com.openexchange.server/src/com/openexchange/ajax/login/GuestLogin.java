@@ -68,7 +68,7 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.UserService;
 
@@ -94,7 +94,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected LoginInfo getLoginInfoFrom(Share share, HttpServletRequest httpRequest) throws OXException {
+    protected LoginInfo getLoginInfoFrom(ShareList share, HttpServletRequest httpRequest) throws OXException {
         try {
             final String login;
             final String pass;
@@ -140,7 +140,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected User authenticateUser(Share share, LoginInfo loginInfo, Context context) throws OXException {
+    protected User authenticateUser(ShareList share, LoginInfo loginInfo, Context context) throws OXException {
         // Resolve the user
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
         if (null == userService) {

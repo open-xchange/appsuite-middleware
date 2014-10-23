@@ -89,10 +89,10 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -158,11 +158,11 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     }
 
                     // Get the share
-                    final Share share = shareService.resolveToken(token);
+                    final ShareList share = shareService.resolveToken(token);
                     if (null == share) {
                         throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
                     }
-                    final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
+                    final Share target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
 
                     // Check for matching authentication mode
                     if (false == checkAuthenticationMode(share.getAuthentication())) {
@@ -342,7 +342,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @return The login information
      * @throws OXException If login information cannot be returned
      */
-    protected abstract LoginInfo getLoginInfoFrom(Share share, HttpServletRequest httpRequest) throws OXException;
+    protected abstract LoginInfo getLoginInfoFrom(ShareList share, HttpServletRequest httpRequest) throws OXException;
 
     /**
      * Authenticates the user associated with specified share using given login information.
@@ -353,6 +353,6 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @return The authenticated user
      * @throws OXException If authentication fails
      */
-    protected abstract User authenticateUser(Share share, LoginInfo loginInfo, Context context) throws OXException;
+    protected abstract User authenticateUser(ShareList share, LoginInfo loginInfo, Context context) throws OXException;
 
 }

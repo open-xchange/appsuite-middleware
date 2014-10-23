@@ -90,10 +90,10 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.impl.notification.NotificationStrings;
@@ -263,10 +263,10 @@ public class MailSender {
     }
 
     private MimeMessage buildShareCreatedMail() throws OXException, UnsupportedEncodingException, MessagingException {
-        List<ShareTarget> targets = notification.getShare().getTargets();
+        List<Share> targets = notification.getShare().getTargets();
         String title;
         if (targets.size() == 1) {
-            ShareTarget target = targets.get(0);
+            Share target = targets.get(0);
             title = getModuleHandler(target.getModule()).getTargetTitle(target, session);
         } else {
             title = translator.translate(String.format(NotificationStrings.GENERIC_TITLE, targets.size()));
@@ -340,7 +340,7 @@ public class MailSender {
     }
 
     private Map<String, Object> prepareTemplateVars(HtmlService htmlService, Set<String> fields, String title) throws OXException {
-        Share share = notification.getShare();
+        ShareList share = notification.getShare();
         String displayName;
         String message = null;
         String username = null;

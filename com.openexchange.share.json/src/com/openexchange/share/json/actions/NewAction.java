@@ -71,9 +71,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -105,7 +105,7 @@ public class NewAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         NewRequest request = NewRequest.parse(requestData);
-        List<Share> shares = shareTargets(request, session);
+        List<ShareList> shares = shareTargets(request, session);
 
         AJAXRequestResult result = new AJAXRequestResult();
         List<OXException> warnings = sendNotifications(shares, request, session);
@@ -128,7 +128,7 @@ public class NewAction extends AbstractShareAction {
         return result;
     }
 
-    private  List<OXException> sendNotifications(List<Share> shares, NewRequest request, ServerSession session) {
+    private  List<OXException> sendNotifications(List<ShareList> shares, NewRequest request, ServerSession session) {
         List<OXException> warnings = new LinkedList<OXException>();
         try {
             if (!shares.isEmpty()) {
@@ -136,7 +136,7 @@ public class NewAction extends AbstractShareAction {
                 ShareNotificationService notificationService = getNotificationService();
                 UserService userService = getUserService();
                 for (int i = 0; i < urls.size(); i++) {
-                    Share share = shares.get(i);
+                    ShareList share = shares.get(i);
                     String url = urls.get(i);
                     User guest = userService.getUser(share.getGuest(), share.getContextID());
                     String mailAddress = guest.getMail();
@@ -164,7 +164,7 @@ public class NewAction extends AbstractShareAction {
         return warnings;
     }
 
-    private List<Share> shareTargets(NewRequest request, ServerSession session) throws OXException {
+    private List<ShareList> shareTargets(NewRequest request, ServerSession session) throws OXException {
         DatabaseService dbService = services.getService(DatabaseService.class);
         Context context = session.getContext();
         Connection writeCon = dbService.getWritable(context);
@@ -174,11 +174,11 @@ public class NewAction extends AbstractShareAction {
             /*
              * distinguish between internal and external recipients
              */
-            List<ShareTarget> targets = request.getTargets();
+            List<Share> targets = request.getTargets();
             List<ShareRecipient> internalRecipients = request.getInternalRecipients();
             List<ShareRecipient> externalRecipients = request.getExternalRecipients();
             List<Integer> guestIDs = Collections.emptyList();
-            List<Share> shares;
+            List<ShareList> shares;
             if (externalRecipients.isEmpty()) {
                 shares = Collections.emptyList();
             } else {
@@ -187,7 +187,7 @@ public class NewAction extends AbstractShareAction {
                  */
                 shares = getShareService().addTargets(session, targets, externalRecipients);
                 guestIDs = new ArrayList<Integer>(externalRecipients.size());
-                for (Share share : shares) {
+                for (ShareList share : shares) {
                     guestIDs.add(share.getGuest());
                 }
             }
@@ -196,9 +196,9 @@ public class NewAction extends AbstractShareAction {
              * adjust folder & object permissions of share targets
              */
             List<InternalRecipient> finalRecipients = determineFinalRecipients(internalRecipients, externalRecipients, guestIDs);
-            Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> distinguishedTargets = distinguishTargets(targets);
-            Map<Integer, List<ShareTarget>> folders = distinguishedTargets.getFirst();
-            Map<Integer, List<ShareTarget>> objects = distinguishedTargets.getSecond();
+            Pair<Map<Integer, List<Share>>, Map<Integer, List<Share>>> distinguishedTargets = distinguishTargets(targets);
+            Map<Integer, List<Share>> folders = distinguishedTargets.getFirst();
+            Map<Integer, List<Share>> objects = distinguishedTargets.getSecond();
 
             updateFolders(folders, finalRecipients, session, writeCon);
             updateObjects(objects, finalRecipients, session, writeCon);
@@ -217,47 +217,47 @@ public class NewAction extends AbstractShareAction {
         }
     }
 
-    private void updateObjects(Map<Integer, List<ShareTarget>> objectsByModule, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
-        for (Entry<Integer, List<ShareTarget>> entry : objectsByModule.entrySet()) {
+    private void updateObjects(Map<Integer, List<Share>> objectsByModule, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
+        for (Entry<Integer, List<Share>> entry : objectsByModule.entrySet()) {
             int module = entry.getKey();
-            List<ShareTarget> objects = entry.getValue();
-            getModuleHandler(module).updateObjects(new ShareTargetDiff(Collections.<ShareTarget>emptyList(), objects), finalRecipients, session, writeCon);
+            List<Share> objects = entry.getValue();
+            getModuleHandler(module).updateObjects(new ShareTargetDiff(Collections.<Share>emptyList(), objects), finalRecipients, session, writeCon);
         }
     }
 
 
-    private void updateFolders(Map<Integer, List<ShareTarget>> foldersByModule, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
-        for (Entry<Integer, List<ShareTarget>> entry : foldersByModule.entrySet()) {
+    private void updateFolders(Map<Integer, List<Share>> foldersByModule, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
+        for (Entry<Integer, List<Share>> entry : foldersByModule.entrySet()) {
             int module = entry.getKey();
-            List<ShareTarget> folders = entry.getValue();
-            getModuleHandler(module).updateFolders(new ShareTargetDiff(Collections.<ShareTarget>emptyList(), folders), finalRecipients, session, writeCon);
+            List<Share> folders = entry.getValue();
+            getModuleHandler(module).updateFolders(new ShareTargetDiff(Collections.<Share>emptyList(), folders), finalRecipients, session, writeCon);
         }
     }
 
     /**
-     * Takes a list of {@link ShareTarget}s and splits them up into two maps. The first map
+     * Takes a list of {@link Share}s and splits them up into two maps. The first map
      * contains all folder targets mapped to their according module. The second map contains
      * all object targets, again mapped to their according module.
      *
      * @param targets The targets to share
      * @return A {@link Pair} with the folders as first and the objects as second entry.
      */
-    private Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> distinguishTargets(List<ShareTarget> targets) {
-        Map<Integer, List<ShareTarget>> folders = new HashMap<Integer, List<ShareTarget>>();
-        Map<Integer, List<ShareTarget>> objects = new HashMap<Integer, List<ShareTarget>>();
-        for (ShareTarget target : targets) {
+    private Pair<Map<Integer, List<Share>>, Map<Integer, List<Share>>> distinguishTargets(List<Share> targets) {
+        Map<Integer, List<Share>> folders = new HashMap<Integer, List<Share>>();
+        Map<Integer, List<Share>> objects = new HashMap<Integer, List<Share>>();
+        for (Share target : targets) {
             int module = target.getModule();
-            List<ShareTarget> finalTargets;
+            List<Share> finalTargets;
             if (target.isFolder()) {
                 finalTargets = folders.get(module);
                 if (finalTargets == null) {
-                    finalTargets = new LinkedList<ShareTarget>();
+                    finalTargets = new LinkedList<Share>();
                     folders.put(module, finalTargets);
                 }
             } else {
                 finalTargets = objects.get(module);
                 if (finalTargets == null) {
-                    finalTargets = new LinkedList<ShareTarget>();
+                    finalTargets = new LinkedList<Share>();
                     objects.put(module, finalTargets);
                 }
             }
@@ -265,7 +265,7 @@ public class NewAction extends AbstractShareAction {
             finalTargets.add(target);
         }
 
-        return new Pair<Map<Integer,List<ShareTarget>>, Map<Integer,List<ShareTarget>>>(folders, objects);
+        return new Pair<Map<Integer,List<Share>>, Map<Integer,List<Share>>>(folders, objects);
     }
 
     /**

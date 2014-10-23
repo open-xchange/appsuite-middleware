@@ -47,30 +47,103 @@
  *
  */
 
-package com.openexchange.share.groupware;
+package com.openexchange.share;
 
-import java.sql.Connection;
+import java.util.Date;
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.share.Share;
-import com.openexchange.share.recipient.InternalRecipient;
 
 
 /**
- * {@link ModuleHandler}
+ * {@link ShareList}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ModuleHandler {
+public interface ShareList {
 
-    int getModule();
+    /**
+     * Gets the share's unique token, usually an unformatted UID string.
+     *
+     * @return The token
+     */
+    String getToken();
 
-    String getTargetTitle(Share target, Session session) throws OXException;
+    /**
+     * Gets the identifier of the context the share resides in.
+     *
+     * @return The context ID
+     */
+    int getContextID();
 
-    void updateObjects(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException;
+    /**
+     * Gets the share targets accessible through this share.
+     *
+     * @return The share targets
+     */
+    List<Share> getTargets();
 
-    void updateFolders(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException;
+    /**
+     * Gets the creation date of the share.
+     *
+     * @return The creation date
+     */
+    Date getCreated();
+
+    /**
+     * Gets the identifier of the user that initially created the share.
+     *
+     * @return The ID of the user who created the share
+     */
+    int getCreatedBy();
+
+    /**
+     * Gets the date when the share was last modified.
+     *
+     * @return The last modification date
+     */
+    Date getLastModified();
+
+    /**
+     * Gets the identifier of the user that performed the last modification on the share.
+     *
+     * @return The ID of the user who made the last modification on the share
+     */
+    int getModifiedBy();
+
+    /**
+     * Gets the identifier of the guest user that is allowed to access this share.
+     *
+     * @return The ID of the guest user
+     */
+    int getGuest();
+
+    /**
+     * Gets the authentication mode used to restrict access to the share.
+     *
+     * @return The authentication mode
+     */
+    AuthenticationMode getAuthentication();
+
+    /**
+     * Gets the common module identifier if all contained share targets are pointing to the same module.
+     *
+     * @return The common module ID, or <code>0</code> if the modules are different between the share targets
+     */
+    int getCommonModule();
+
+    /**
+     * Gets the common folder identifier if all contained share targets are pointing to the same folder.
+     *
+     * @return The common folder ID, or <code>null</code> if the folders are different between the share targets
+     */
+    String getCommonFolder();
+
+    /**
+     * Resolves a contained share target based on the supplied relative path info.
+     *
+     * @param path The share-relative path to the target
+     * @return The target, or <code>null</code> if not found
+     */
+    Share resolveTarget(String path);
 
 }

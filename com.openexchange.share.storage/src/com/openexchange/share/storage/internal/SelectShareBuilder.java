@@ -57,7 +57,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.storage.mapping.ShareField;
 import com.openexchange.share.storage.mapping.ShareTargetField;
 
@@ -77,7 +77,7 @@ public class SelectShareBuilder {
     private String[] tokens;
     private int createdBy;
     private int[] guests;
-    private ShareTarget target;
+    private Share target;
     private Date expiredAfter;
 
     /**
@@ -144,7 +144,7 @@ public class SelectShareBuilder {
      * @param targte The target
      * @return The builder
      */
-    public SelectShareBuilder target(ShareTarget target) {
+    public SelectShareBuilder target(Share target) {
         this.target = target;
         return this;
     }

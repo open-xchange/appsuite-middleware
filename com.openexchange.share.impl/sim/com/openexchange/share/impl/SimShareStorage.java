@@ -55,8 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.Share;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.tools.Collections.Filter;
@@ -70,33 +70,33 @@ import com.openexchange.tools.Collections.Filter;
  */
 public class SimShareStorage implements ShareStorage {
 
-    private final Map<String, Share> shares = new HashMap<String, Share>();
+    private final Map<String, ShareList> shares = new HashMap<String, ShareList>();
 
     @Override
-    public Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
+    public ShareList loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
         return shares.get(token);
     }
 
     @Override
-    public void storeShare(Share share, StorageParameters parameters) throws OXException {
+    public void storeShare(ShareList share, StorageParameters parameters) throws OXException {
         shares.put(share.getToken(), share);
     }
 
     @Override
-    public void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
-        for (Share share : shares) {
+    public void storeShares(int contextID, List<ShareList> shares, StorageParameters parameters) throws OXException {
+        for (ShareList share : shares) {
             storeShare(share, parameters);
         }
     }
 
     @Override
-    public void updateShare(Share share, StorageParameters parameters) throws OXException {
+    public void updateShare(ShareList share, StorageParameters parameters) throws OXException {
         shares.put(share.getToken(), share);
     }
 
     @Override
-    public void updateShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
-        for (Share share : shares) {
+    public void updateShares(int contextID, List<ShareList> shares, StorageParameters parameters) throws OXException {
+        for (ShareList share : shares) {
             updateShare(share, parameters);
         }
     }
@@ -114,24 +114,24 @@ public class SimShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public List<Share> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public List<Share> loadSharesForTarget(final int contextID, final ShareTarget target, StorageParameters parameters) throws OXException {
-        return filter(new Filter<Share>() {
+    public List<ShareList> loadSharesForTarget(final int contextID, final Share target, StorageParameters parameters) throws OXException {
+        return filter(new Filter<ShareList>() {
             @Override
-            public boolean accept(Share share) {
+            public boolean accept(ShareList share) {
                 if (share.getContextID() == contextID) {
-                    for (ShareTarget t : share.getTargets()) {
+                    for (Share t : share.getTargets()) {
                         if (target.equals(t)) {
                             return true;
                         }
@@ -143,49 +143,49 @@ public class SimShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public List<Share> loadSharesForGuest(final int contextID, final int guestID, StorageParameters parameters) throws OXException {
-        return filter(new Filter<Share>() {
+    public List<ShareList> loadSharesForGuest(final int contextID, final int guestID, StorageParameters parameters) throws OXException {
+        return filter(new Filter<ShareList>() {
             @Override
-            public boolean accept(Share share) {
+            public boolean accept(ShareList share) {
                 return share.getContextID() == contextID && share.getGuest() == guestID;
             }
         });
     }
 
     @Override
-    public List<Share> loadSharesForGuests(final int contextID, final int[] guestIDs, StorageParameters parameters) throws OXException {
-        return filter(new Filter<Share>() {
+    public List<ShareList> loadSharesForGuests(final int contextID, final int[] guestIDs, StorageParameters parameters) throws OXException {
+        return filter(new Filter<ShareList>() {
             @Override
-            public boolean accept(Share share) {
+            public boolean accept(ShareList share) {
                 return share.getContextID() == contextID && com.openexchange.tools.arrays.Arrays.contains(guestIDs, share.getGuest());
             }
         });
     }
 
     @Override
-    public List<Share> loadSharesForContext(final int contextID, StorageParameters parameters) throws OXException {
-        return filter(new Filter<Share>() {
+    public List<ShareList> loadSharesForContext(final int contextID, StorageParameters parameters) throws OXException {
+        return filter(new Filter<ShareList>() {
             @Override
-            public boolean accept(Share share) {
+            public boolean accept(ShareList share) {
                 return share.getContextID() == contextID;
             }
         });
     }
 
-    private List<Share> filter(Filter<Share> filter) {
-        List<Share> output = new ArrayList<Share>();
+    private List<ShareList> filter(Filter<ShareList> filter) {
+        List<ShareList> output = new ArrayList<ShareList>();
         com.openexchange.tools.Collections.collect(shares.values(), filter, output);
         return output;
     }
 
     @Override
-    public List<Share> loadSharesForTarget(int contextID, ShareTarget target, int[] guestIDs, StorageParameters parameters) throws OXException {
+    public List<ShareList> loadSharesForTarget(int contextID, Share target, int[] guestIDs, StorageParameters parameters) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

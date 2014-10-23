@@ -77,7 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -97,7 +97,7 @@ public class GuestContactTest extends ShareTest {
         Permission.NO_PERMISSIONS,
         false);
 
-    private ShareTarget target;
+    private Share target;
     private int guestId;
     private ParsedShare share;
     private List<String> tokens;
@@ -128,14 +128,14 @@ public class GuestContactTest extends ShareTest {
         file.setDescription(file.getTitle());
         itm.newAction(file);
 
-        target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
+        target = new Share(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
         GuestRecipient guest = new GuestRecipient();
         guest.setDisplayName(GUEST_DISPLAYNAME);
         guest.setEmailAddress(GUEST_MAIL);
         guest.setPassword(GUEST_PASSWORD);
         guest.setBits(FOLDER_READ_PERMISSION);
 
-        NewRequest newRequest = new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest));
+        NewRequest newRequest = new NewRequest(Collections.<Share>singletonList(target), Collections.<ShareRecipient>singletonList(guest));
         NewResponse newResponse = client.execute(newRequest);
         JSONArray jsonArray = (JSONArray) newResponse.getData();
         tokens = new ArrayList<String>(jsonArray.length());
@@ -146,7 +146,7 @@ public class GuestContactTest extends ShareTest {
         guestId = -1;
         share = null;
         for (ParsedShare parsedShare : allShares) {
-            for (ShareTarget shareTarget : parsedShare.getTargets()) {
+            for (Share shareTarget : parsedShare.getTargets()) {
                 if (shareTarget.equals(target)) {
                     guestId = parsedShare.getGuest();
                     share = parsedShare;

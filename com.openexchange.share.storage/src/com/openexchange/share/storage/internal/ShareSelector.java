@@ -64,7 +64,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.DefaultShare;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.storage.mapping.ShareField;
 import com.openexchange.share.storage.mapping.ShareTargetField;
 import com.openexchange.tools.sql.DBUtils;
@@ -165,7 +165,7 @@ public class ShareSelector {
      * @param target The target
      * @return The builder
      */
-    public ShareSelector target(ShareTarget target) {
+    public ShareSelector target(Share target) {
         builder.target(target);
         return this;
     }
@@ -189,7 +189,7 @@ public class ShareSelector {
                 DefaultShare share = sharesByToken.get(currentShare.getToken());
                 if (null == share) {
                     share = currentShare;
-                    share.setTargets(new ArrayList<ShareTarget>());
+                    share.setTargets(new ArrayList<Share>());
                     share.setContextID(contextID);
                     sharesByToken.put(share.getToken(), share);
                 }

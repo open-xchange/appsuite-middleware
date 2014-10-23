@@ -59,7 +59,7 @@ import java.util.List;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class DefaultShare implements Share, Serializable {
+public class DefaultShare implements ShareList, Serializable {
 
     private static final long serialVersionUID = -5225966203133129562L;
 
@@ -71,7 +71,7 @@ public class DefaultShare implements Share, Serializable {
     private int modifiedBy;
     private int guest;
     private AuthenticationMode authentication;
-    private List<ShareTarget> targets;
+    private List<Share> targets;
 
     /**
      * Initializes a new {@link DefaultShare}.
@@ -85,7 +85,7 @@ public class DefaultShare implements Share, Serializable {
      *
      * @param share The share to take over the properties from
      */
-    public DefaultShare(Share share) {
+    public DefaultShare(ShareList share) {
         super();
         token = share.getToken();
         contextID = share.getContextID();
@@ -109,7 +109,7 @@ public class DefaultShare implements Share, Serializable {
     }
 
     @Override
-    public List<ShareTarget> getTargets() {
+    public List<Share> getTargets() {
         return targets;
     }
 
@@ -177,9 +177,9 @@ public class DefaultShare implements Share, Serializable {
     }
 
     @Override
-    public ShareTarget resolveTarget(String path) {
+    public Share resolveTarget(String path) {
         if (null != targets && 0 < targets.size() && null != path) {
-            for (ShareTarget target : targets) {
+            for (Share target : targets) {
                 if (path.equals(target.getPath())) {
                     return target;
                 }
@@ -211,7 +211,7 @@ public class DefaultShare implements Share, Serializable {
      *
      * @param targets The targets to set
      */
-    public void setTargets(List<ShareTarget> targets) {
+    public void setTargets(List<Share> targets) {
         this.targets = targets;
     }
 

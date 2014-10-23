@@ -74,10 +74,10 @@ import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.Share;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -113,7 +113,7 @@ public class ShareTool {
         return token;
     }
 
-    public static String getShareUrl(Share share, String protocol, String fallbackHostname) {
+    public static String getShareUrl(ShareList share, String protocol, String fallbackHostname) {
         String hostname = getHostname(share.getCreatedBy(), share.getContextID());
         if (hostname == null) {
             hostname = fallbackHostname;
@@ -158,16 +158,16 @@ public class ShareTool {
      * @return The permission bits
      * @throws OXException
      */
-    public static int getUserPermissionBits(List<Share> shares) throws OXException {
+    public static int getUserPermissionBits(List<ShareList> shares) throws OXException {
         Set<Permission> perms = new HashSet<Permission>(8);
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        for (Share share : shares) {
+        for (ShareList share : shares) {
             if (AuthenticationMode.GUEST_PASSWORD == share.getAuthentication()) {
                 perms.add(Permission.EDIT_PASSWORD);
             }
-            for (ShareTarget target : share.getTargets()) {
+            for (Share target : share.getTargets()) {
                 addModulePermissions(perms, target.getModule());
             }
         }
@@ -183,7 +183,7 @@ public class ShareTool {
      * @return The permission bits
      * @throws OXException
      */
-    public static int getUserPermissionBits(Share share) throws OXException {
+    public static int getUserPermissionBits(ShareList share) throws OXException {
         Set<Permission> perms = new HashSet<Permission>(8);
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
@@ -191,7 +191,7 @@ public class ShareTool {
         if (AuthenticationMode.GUEST_PASSWORD == share.getAuthentication()) {
             perms.add(Permission.EDIT_PASSWORD);
         }
-        for (ShareTarget target : share.getTargets()) {
+        for (Share target : share.getTargets()) {
             addModulePermissions(perms, target.getModule());
         }
         return Permission.toBits(perms);
@@ -207,12 +207,12 @@ public class ShareTool {
      * @return The permission bits
      * @throws OXException
      */
-    public static int getUserPermissionBitsForTargets(ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
+    public static int getUserPermissionBitsForTargets(ShareRecipient recipient, List<Share> targets) throws OXException {
         Set<Permission> perms = new HashSet<Permission>(8);
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        for (ShareTarget target : targets) {
+        for (Share target : targets) {
             addModulePermissions(perms, target.getModule());
         }
         if (RecipientType.GUEST == recipient.getType()) {
@@ -252,7 +252,7 @@ public class ShareTool {
      * @param recipient The recipient
      * @return The share
      */
-    public static Share prepareShare(int contextID, User sharingUser, int guestUserID, List<ShareTarget> targets, ShareRecipient recipient) {
+    public static ShareList prepareShare(int contextID, User sharingUser, int guestUserID, List<Share> targets, ShareRecipient recipient) {
         Date now = new Date();
         DefaultShare share = new DefaultShare();
         share.setToken(ShareTool.generateToken(contextID));
@@ -365,9 +365,9 @@ public class ShareTool {
      * @param token The token
      * @return The share, or <code>null</code> if not found
      */
-    public static Share findShare(List<Share> shares, String token) {
+    public static ShareList findShare(List<ShareList> shares, String token) {
         if (null != shares && 0 < shares.size()) {
-            for (Share share : shares) {
+            for (ShareList share : shares) {
                 if (token.equals(share.getToken())) {
                     return share;
                 }
@@ -383,9 +383,9 @@ public class ShareTool {
      * @param guestID The guest ID
      * @return The share, or <code>null</code> if not found
      */
-    public static Share findShareByGuest(List<Share> shares, int guestID) {
+    public static ShareList findShareByGuest(List<ShareList> shares, int guestID) {
         if (null != shares && 0 < shares.size()) {
-            for (Share share : shares) {
+            for (ShareList share : shares) {
                 if (guestID == share.getGuest()) {
                     return share;
                 }
@@ -400,12 +400,12 @@ public class ShareTool {
      * @param shares The shares to get the tokens for
      * @return The tokens
      */
-    public static List<String> extractTokens(List<Share> shares) {
+    public static List<String> extractTokens(List<ShareList> shares) {
         if (null == shares) {
             return null;
         }
         List<String> tokens = new ArrayList<String>(shares.size());
-        for (Share share : shares) {
+        for (ShareList share : shares) {
             tokens.add(share.getToken());
 
         }
@@ -430,7 +430,7 @@ public class ShareTool {
      * @param target The target to validate
      * @throws OXException
      */
-    public static void validateTarget(ShareTarget target) throws OXException {
+    public static void validateTarget(Share target) throws OXException {
         if (0 == target.getOwnedBy()) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No owned by information specified in share target");
         }
@@ -445,8 +445,8 @@ public class ShareTool {
      * @param targets The targets to validate
      * @throws OXException
      */
-    public static void validateTargets(Collection<ShareTarget> targets) throws OXException {
-        for (ShareTarget target : targets) {
+    public static void validateTargets(Collection<Share> targets) throws OXException {
+        for (Share target : targets) {
             validateTarget(target);
         }
     }
