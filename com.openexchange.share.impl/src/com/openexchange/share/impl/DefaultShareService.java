@@ -223,7 +223,7 @@ public class DefaultShareService implements ShareService {
             List<Share> sharesToUpdate = new ArrayList<Share>(affectedShares.size());
             List<Share> sharesToDelete = new ArrayList<Share>(affectedShares.size());
             for (Share affectedShare : affectedShares) {
-                List<ShareTarget> updatedTargets = new ArrayList<ShareTarget>(affectedShare.getTargets());
+                List<ShareTarget> updatedTargets = affectedShare.getTargets();
                 if (updatedTargets.removeAll(targets)) {
                     if (0 == updatedTargets.size()) {
                         sharesToDelete.add(affectedShare);

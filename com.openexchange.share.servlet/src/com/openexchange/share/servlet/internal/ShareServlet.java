@@ -112,7 +112,18 @@ public class ShareServlet extends HttpServlet {
                     return;
                 }
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
-                target = 1 < paths.length ? share.resolveTarget(paths[1]) : null;
+                if (1 < paths.length) {
+                    target = share.resolveTarget(paths[1]);
+                    if (null == target) {
+                        //TODO: fallback to share without target?
+                        LOG.debug("No share target found at '{}'", pathInfo);
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                        return;
+                    }
+                } else {
+                    target = null;
+                }
+//                target = 1 < paths.length ? share.resolveTarget(paths[1]) : null;
             }
 
             // Determine appropriate ShareHandler and handle the share

@@ -51,6 +51,7 @@ package com.openexchange.share.json;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
@@ -214,7 +216,10 @@ public class GuestShareResultConverter implements ResultConverter {
         if (null != expiryDate) {
             jsonTarget.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
         }
-        jsonTarget.putOpt("meta", target.getMeta());
+        Map<String, Object> meta = target.getMeta();
+        if (null != meta) {
+            jsonTarget.put("meta", JSONCoercion.coerceToJSON(meta));
+        }
         return jsonTarget;
     }
 

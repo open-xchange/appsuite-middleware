@@ -271,6 +271,7 @@ public class AggregateSharesTest extends ShareTest {
          * discover share
          */
         ParsedShare shareA = discoverShare(client1, matchingPermissionA.getEntity());
+        checkShare(guestPermission, shareA);
         ParsedShareTarget targetA = discoverTarget(shareA, folderA.getObjectID());
         /*
          * as user 2 with client 2, create folder B shared to guest user
@@ -299,6 +300,7 @@ public class AggregateSharesTest extends ShareTest {
          * discover share
          */
         ParsedShare shareB = discoverShare(client2, matchingPermissionB.getEntity());
+        checkShare(guestPermission, shareB);
         ParsedShareTarget targetB = discoverTarget(shareB, folderB.getObjectID());
         /*
          * check permission entities
