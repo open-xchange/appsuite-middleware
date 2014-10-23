@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast;
+package com.openexchange.sessionstorage.hazelcast.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
