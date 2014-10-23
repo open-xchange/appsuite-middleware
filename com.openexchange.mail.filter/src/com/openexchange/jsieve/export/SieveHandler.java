@@ -541,7 +541,9 @@ public class SieveHandler {
                 break;
             case '#': 
                 {
-                    inComment = true;
+                    if (!inQuote) {
+                        inComment = true;
+                    }
                     sb.append((char) ch);
                 }
                 break;
