@@ -53,9 +53,12 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -74,10 +77,10 @@ import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.ShareList;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareList;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -92,25 +95,45 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class ShareTool {
 
+    static final int OBFUSCATOR = 785454238;
+
     public static final String SHARE_SERVLET = "share";
 
-    private static final long LOW_BITS = 0x00000000FFFFFFFFL;
-    private static final long HIGH_BITS = 0xFFFFFFFF00000000L;
+    private static final String SHARE_BASE_TOKEN_ATTRIBUTE = "com.openexchange.shareBaseToken";
+
     private static Pattern TOKEN_PATTERN = Pattern.compile("[a-f0-9]{32}", Pattern.CASE_INSENSITIVE);
 
+
     public static int extractContextId(String token) {
-        UUID uuid = UUIDs.fromUnformattedString(token);
-        long mostSignificantBits = uuid.getMostSignificantBits();
-        return (int) ((mostSignificantBits &= HIGH_BITS) >>> 32);
+        if (token.length() != 8 + 8 + 32) {
+            return -1;
+        }
+
+        String context = token.substring(0, 8);
+        return Integer.parseInt(context, 16) ^ OBFUSCATOR;
     }
 
-    public static String generateToken(int contextId) {
-        UUID randomUUID = UUID.randomUUID();
-        long mostSignificantBits = randomUUID.getMostSignificantBits();
-        mostSignificantBits &= LOW_BITS;
-        mostSignificantBits |= (((long)contextId) << 32);
-        String token = UUIDs.getUnformattedString(new UUID(mostSignificantBits, randomUUID.getLeastSignificantBits()));
-        return token;
+    public static int extractUserId(String token) {
+        if (token.length() != 8 + 8 + 32) {
+            return -1;
+        }
+
+        String user = token.substring(8, 16);
+        return Integer.parseInt(user, 16) ^ OBFUSCATOR;
+    }
+
+    public static String extractBaseToken(String shareToken) {
+        if (shareToken.length() != 8 + 8 + 32) {
+            return null;
+        }
+
+        return shareToken.substring(16);
+    }
+
+    public static String generateShareToken(int contextId, int userId, String shareToken) {
+        String context = String.format("%08x", contextId ^ OBFUSCATOR);
+        String user = String.format("%08x", userId ^ OBFUSCATOR);
+        return context + user + shareToken;
     }
 
     public static String getShareUrl(ShareList share, String protocol, String fallbackHostname) {
@@ -147,6 +170,25 @@ public class ShareTool {
         } catch (ServiceException e) {
            return DispatcherPrefixService.DEFAULT_PREFIX;
         }
+    }
+
+    /**
+     * Gets a guests share base token from her user attributes.
+     * @param guest The guest user
+     * @return The base token or null
+     */
+    public static String getShareToken(User guest) {
+        Map<String, Set<String>> attributes = guest.getAttributes();
+        if (attributes == null) {
+            return null;
+        }
+
+        Set<String> match = attributes.get(SHARE_BASE_TOKEN_ATTRIBUTE);
+        if (match == null || match.isEmpty()) {
+            return null;
+        }
+
+        return match.iterator().next();
     }
 
     /**
@@ -255,7 +297,7 @@ public class ShareTool {
     public static ShareList prepareShare(int contextID, User sharingUser, int guestUserID, List<Share> targets, ShareRecipient recipient) {
         Date now = new Date();
         DefaultShare share = new DefaultShare();
-        share.setToken(ShareTool.generateToken(contextID));
+//        share.setToken(ShareTool.generateToken(contextID)); FIXME
         share.setAuthentication(getAuthenticationMode(recipient));
         share.setTargets(targets);
         share.setContextID(contextID);
@@ -315,6 +357,9 @@ public class ShareTool {
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
+        Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+        attributes.put(SHARE_BASE_TOKEN_ATTRIBUTE, Collections.singleton(UUIDs.getUnformattedString(UUID.randomUUID())));
+        guestUser.setAttributes(attributes);
         try {
             guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
         } catch (UnsupportedEncodingException e) {
@@ -333,6 +378,8 @@ public class ShareTool {
         guestUser.setMailEnabled(true);
         return guestUser;
     }
+
+
 
     /**
      * Filters out all expired shares from the supplied list.

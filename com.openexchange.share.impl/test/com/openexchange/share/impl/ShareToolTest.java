@@ -49,29 +49,35 @@
 
 package com.openexchange.share.impl;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import static org.junit.Assert.assertEquals;
+import java.util.UUID;
+import org.junit.Test;
+import com.openexchange.java.util.UUIDs;
 
 
 /**
- * {@link UnitTests}
+ * {@link ShareToolTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DefaultShareServiceTest.class,
-    ShareToolTest.class
-})
-public class UnitTests {
+public class ShareToolTest {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
+    @Test
+    public void testSomeCombinations() {
+        assertToken(new int[] {1, 1}, "2ed1149f2ed1149f");
+        assertToken(new int[] {424242669, 1}, "379879732ed1149f");
+        assertToken(new int[] {424242669, 84}, "379879732ed114ca");
+        assertToken(new int[] {Integer.MAX_VALUE, 16}, "512eeb612ed1148e");
+    }
+
+    private static void assertToken(int[] cidAndUid, String expectedPrefix) {
+        String baseToken = UUIDs.getUnformattedString(UUID.randomUUID());
+        String token = ShareTool.generateShareToken(cidAndUid[0], cidAndUid[1], baseToken);
+        assertEquals(expectedPrefix + baseToken, token);
+        assertEquals(cidAndUid[0], ShareTool.extractContextId(token));
+        assertEquals(cidAndUid[1], ShareTool.extractUserId(token));
+        assertEquals(baseToken, ShareTool.extractBaseToken(token));
     }
 
 }
