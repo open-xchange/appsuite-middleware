@@ -77,20 +77,48 @@ public class ActionCommand extends ControlOrActionCommand {
         DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", Collections.<String> emptyList()),
         REDIRECT("redirect", 1, new Hashtable<String, Integer>(), "redirect", Collections.<String> emptyList()),
         FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "move", Collections.singletonList("fileinto")),
-        ADDHEADER("addheader", 0, addheadertags(), "addheader", Collections.singletonList("editheader")),
         REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
         STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
         VACATION("vacation", 1, vacationtags(), "vacation", Collections.singletonList("vacation")),
         ENOTIFY("notify", 1, enotifytags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
-        PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt"));
+        PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
+        ADDHEADER("addheader", 2, addheadertags(), "addheader", Collections.singletonList("editheader")),
+        DELETEHEADER("deleteheader", 1, deleteheadertags(), "deleteheader", Collections.singletonList("editheader")),
+        SET("set", 1, new Hashtable<String, Integer>(), "set", java.util.Arrays.asList("variables"));
 
         private static Hashtable<String, Integer> addheadertags() {
             /*
+             * http://tools.ietf.org/html/rfc5293
+             *
              * "addheader" [":last"] <field-name: string> <value: string>
              */
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             retval.put(":last", Integer.valueOf(2));
+            return retval;
+        }
+
+        private static Hashtable<String, Integer> deleteheadertags() {
+            /*
+             * http://tools.ietf.org/html/rfc5293
+             *
+             * "deleteheader" [":index" <fieldno: number> [":last"]]
+             *     [COMPARATOR] [MATCH-TYPE]
+             *      <field-name: string>
+             *     [<value-patterns: string-list>]
+             */
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
+            return retval;
+        }
+
+        private static Hashtable<String, Integer> variables_tags() {
+            /*
+             * http://tools.ietf.org/html/rfc5229
+             *
+             *    Usage:  ":lower" / ":upper" / ":lowerfirst" /
+             *    ":upperfirst" / ":quotewildcard" / ":length"
+             */
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             return retval;
         }
 
@@ -266,10 +294,10 @@ public class ActionCommand extends ControlOrActionCommand {
             }
         }
         final int counttags = counttags();
+
         if (null != this.arguments && this.command.getMinNumberOfArguments() >= 0 && (this.arguments.size() - counttags) < this.command.getMinNumberOfArguments()) {
             throw new SieveException("The number of arguments for " + this.command.getCommandname() + " is not valid. ; " + this.toString());
         }
-
     }
 
     /**
