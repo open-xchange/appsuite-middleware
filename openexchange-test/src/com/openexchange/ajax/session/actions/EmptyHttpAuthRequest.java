@@ -49,35 +49,43 @@
 
 package com.openexchange.ajax.session.actions;
 
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link HttpAuthResponse}
+ * {@link EmptyHttpAuthRequest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.6.0
  */
-public class HttpAuthResponse extends AbstractAJAXResponse {
+public class EmptyHttpAuthRequest extends HttpAuthRequest {
 
-    private final int statusCode;
-    private final String reasonPhrase;
-    private final String location;
-
-    public HttpAuthResponse(int statusCode, String reasonPhrase, String location) {
-        super(null);
-        this.statusCode = statusCode;
-        this.reasonPhrase = reasonPhrase;
-        this.location = location;
+    public EmptyHttpAuthRequest() {
+        super(null, null);
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    @Override
+    public Header[] getHeaders() {
+        return new Header[0];
     }
 
-    public String getReasonPhrase() {
-        return reasonPhrase;
-    }
+    @Override
+    public HttpAuthParser getParser() {
+        return new HttpAuthParser() {
 
-    public String getLocation() {
-        return location;
+            @Override
+            public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+                setStatusCode(resp.getStatusLine().getStatusCode());
+                setReasonPhrase(resp.getStatusLine().getReasonPhrase());
+                if (HttpServletResponse.SC_MOVED_TEMPORARILY == getStatusCode()) {
+                    return EntityUtils.toString(resp.getEntity());
+                }
+                return null;
+            }
+        };
     }
 }

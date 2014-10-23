@@ -47,37 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.ajax.session;
 
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.http.client.params.ClientPNames;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.session.actions.EmptyHttpAuthRequest;
+import com.openexchange.ajax.session.actions.HttpAuthResponse;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.java.Strings;
 
 /**
- * {@link HttpAuthResponse}
+ * Test proper server response if Authentication header is not sent.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class HttpAuthResponse extends AbstractAJAXResponse {
+public class Bug35129Test extends AbstractAJAXSession {
 
-    private final int statusCode;
-    private final String reasonPhrase;
-    private final String location;
+    private AJAXClient myClient;
 
-    public HttpAuthResponse(int statusCode, String reasonPhrase, String location) {
-        super(null);
-        this.statusCode = statusCode;
-        this.reasonPhrase = reasonPhrase;
-        this.location = location;
+    public Bug35129Test(String name) {
+        super(name);
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    @Before
+    @Override
+    protected void setUp() throws Exception {
+        AJAXConfig.init();
+        myClient = new AJAXClient(new AJAXSession(), true);
+        myClient.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }
 
-    public String getReasonPhrase() {
-        return reasonPhrase;
+    @After
+    @Override
+    protected void tearDown() throws Exception {
+        if (null != myClient && false == Strings.isEmpty(myClient.getSession().getId())) {
+            myClient.logout();
+        }
+        super.tearDown();
     }
 
-    public String getLocation() {
-        return location;
+    @Test
+    public void test4UnauthorizedResponse() throws Exception {
+        HttpAuthResponse response = myClient.execute(new EmptyHttpAuthRequest());
+        Assert.assertEquals("Missing Authorization header should give according status code.", HttpServletResponse.SC_UNAUTHORIZED, response.getStatusCode());
+        Assert.assertEquals("Authorization Required!", response.getReasonPhrase());
     }
 }

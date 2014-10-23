@@ -49,21 +49,16 @@
 
 package com.openexchange.ajax.session;
 
-import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.util.EntityUtils;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.session.actions.HttpAuthParser;
+import com.openexchange.ajax.session.actions.EmptyHttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
@@ -140,7 +135,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         String correctSecret = cookie.getValue();
         cookie.setValue("wrongsecret");
         HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
-        assertEquals("Wrong response code", String.valueOf(HttpServletResponse.SC_UNAUTHORIZED), httpAuthResponse.getLocation());
+        assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
          */
@@ -161,7 +156,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         String correctSession = cookie.getValue();
         cookie.setValue("wrongsecret");
         HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
-        assertEquals("Wrong response code", String.valueOf(HttpServletResponse.SC_UNAUTHORIZED), httpAuthResponse.getLocation());
+        assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
          */
@@ -179,7 +174,7 @@ public class Bug34928Test extends AbstractAJAXSession {
          */
         client.getSession().setId(null);
         HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
-        assertEquals("Wrong response code", String.valueOf(HttpServletResponse.SC_UNAUTHORIZED), httpAuthResponse.getLocation());
+        assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
          */
@@ -214,36 +209,4 @@ public class Bug34928Test extends AbstractAJAXSession {
         assertTrue("No session ID", 0 <= sessionStart);
         return location.substring(sessionStart + 8, location.indexOf('&', sessionStart + 8));
     }
-
-    private static class EmptyHttpAuthRequest extends HttpAuthRequest {
-
-        /**
-         * Initializes a new {@link EmptyHttpAuthRequest}.
-         */
-        public EmptyHttpAuthRequest() {
-            super(null, null);
-        }
-
-        @Override
-        public Header[] getHeaders() {
-            return new Header[0];
-        }
-
-        @Override
-        public HttpAuthParser getParser() {
-            return new HttpAuthParser() {
-
-                @Override
-                public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-                    int statusCode = resp.getStatusLine().getStatusCode();
-                    if (HttpServletResponse.SC_MOVED_TEMPORARILY == statusCode) {
-                        return EntityUtils.toString(resp.getEntity());
-                    }
-                    return String.valueOf(statusCode);
-                }
-            };
-        }
-
-    }
-
 }
