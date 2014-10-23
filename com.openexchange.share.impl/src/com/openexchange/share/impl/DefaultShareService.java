@@ -228,7 +228,10 @@ public class DefaultShareService implements ShareService {
                     if (0 == updatedTargets.size()) {
                         sharesToDelete.add(affectedShare);
                     } else {
-                        sharesToUpdate.add(affectedShare);
+                        DefaultShare share = new DefaultShare(affectedShare);
+                        share.setLastModified(new Date());
+                        share.setModifiedBy(session.getUserId());
+                        sharesToUpdate.add(share);
                     }
                 }
             }
@@ -525,6 +528,9 @@ public class DefaultShareService implements ShareService {
                         removeShares(connectionHelper, Collections.singletonList(share));
                         share = null;
                     } else {
+                        DefaultShare shareToUpdate = new DefaultShare(share);
+                        shareToUpdate.setLastModified(new Date());
+                        share = shareToUpdate;
                         updateShares(connectionHelper, Collections.singletonList(share));
                     }
                     connectionHelper.commit();
