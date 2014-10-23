@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
@@ -75,6 +76,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -96,6 +98,8 @@ public class GuestContactTest extends ShareTest {
         false);
 
     private ShareTarget target;
+    private int guestId;
+    private ParsedShare share;
     private List<String> tokens;
     private final long now = System.currentTimeMillis();
     private final String GUEST_DISPLAYNAME = "Test Guest Contact " + now;
@@ -138,6 +142,18 @@ public class GuestContactTest extends ShareTest {
         for (int i = 0; i < jsonArray.length(); i++) {
             tokens.add(jsonArray.getString(i));
         }
+        List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
+        guestId = -1;
+        share = null;
+        for (ParsedShare parsedShare : allShares) {
+            for (ShareTarget shareTarget : parsedShare.getTargets()) {
+                if (shareTarget.equals(target)) {
+                    guestId = parsedShare.getGuest();
+                    share = parsedShare;
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -148,18 +164,6 @@ public class GuestContactTest extends ShareTest {
     }
 
     public void testCreateGuestContact() throws Exception {
-        List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
-        int guestId = -1;
-        ParsedShare share = null;
-        for (ParsedShare parsedShare : allShares) {
-            for (ShareTarget shareTarget : parsedShare.getTargets()) {
-                if (shareTarget.equals(target)) {
-                    guestId = parsedShare.getGuest();
-                    share = parsedShare;
-                    break;
-                }
-            }
-        }
         assertTrue("Guest id must not be -1", guestId > -1);
         GuestClient guestClient = new GuestClient(share.getShareURL(), GUEST_MAIL, GUEST_PASSWORD);
         GetRequest guestGetRequest = new GetRequest(guestId, guestClient.getValues().getTimeZone());
@@ -176,18 +180,6 @@ public class GuestContactTest extends ShareTest {
     }
 
     public void testUpdateGuestContact() throws Exception {
-        List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
-        int guestId = -1;
-        ParsedShare share = null;
-        for (ParsedShare parsedShare : allShares) {
-            for (ShareTarget shareTarget : parsedShare.getTargets()) {
-                if (shareTarget.equals(target)) {
-                    guestId = parsedShare.getGuest();
-                    share = parsedShare;
-                    break;
-                }
-            }
-        }
         assertTrue("Guest id must not be -1", guestId > -1);
         GuestClient guestClient = new GuestClient(share.getShareURL(), GUEST_MAIL, GUEST_PASSWORD);
         GetRequest guestGetRequest = new GetRequest(guestId, guestClient.getValues().getTimeZone());
@@ -207,20 +199,10 @@ public class GuestContactTest extends ShareTest {
         UpdateRequest updateRequest2 = new UpdateRequest(guestContact, guestUser, false);
         UpdateResponse updateResponse2 = client.execute(updateRequest2);
         assertTrue("Client was able to update foreign contact.", updateResponse2.hasError());
-        assertEquals(ContactExceptionCodes.NO_CHANGE_PERMISSION.getCategory(), updateResponse2.getException().getCategory());
+        assertEquals(ContactExceptionCodes.NO_CHANGE_PERMISSION.getNumber(), updateResponse2.getException().getCode());
     }
 
     public void testDeleteGuestContact() throws Exception {
-        List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
-        int guestId = -1;
-        for (ParsedShare parsedShare : allShares) {
-            for (ShareTarget shareTarget : parsedShare.getTargets()) {
-                if (shareTarget.equals(target)) {
-                    guestId = parsedShare.getGuest();
-                    break;
-                }
-            }
-        }
         assertTrue("Guest id must not be -1", guestId > -1);
         DeleteRequest deleteRequest = new DeleteRequest(tokens, System.currentTimeMillis());
         CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
@@ -228,7 +210,28 @@ public class GuestContactTest extends ShareTest {
         GetRequest getRequest = new GetRequest(guestId, client.getValues().getTimeZone(), false);
         GetResponse getResponse = client.execute(getRequest);
         assertTrue("Contact was not deleted.", getResponse.hasError());
-        assertEquals(ContactExceptionCodes.CONTACT_NOT_FOUND.getCategory(), getResponse.getException().getCategory());
+        assertEquals(ContactExceptionCodes.CONTACT_NOT_FOUND.getNumber(), getResponse.getException().getCode());
+    }
+
+    public void testOtherUser() throws Exception {
+        assertTrue("Guest id must not be -1", guestId > -1);
+        AJAXClient secondClient = new AJAXClient(AJAXClient.User.User2);
+        GetRequest getRequest = new GetRequest(guestId, secondClient.getValues().getTimeZone());
+        GetResponse getResponse = secondClient.execute(getRequest);
+        assertFalse("Contact could not be loaded.", getResponse.hasError());
+        Contact contact = getResponse.getContact();
+        User user = getResponse.getUser();
+        assertEquals("Wrong contact loaded.", GUEST_DISPLAYNAME, contact.getDisplayName());
+        assertEquals("Wrong contact loaded.", GUEST_MAIL, contact.getEmail1());
+        contact.setDisplayName("This should not work");
+        UpdateRequest updateRequest = new UpdateRequest(contact, user, false);
+        UpdateResponse updateResponse = secondClient.execute(updateRequest);
+        assertTrue("Any user can change contact data.", updateResponse.hasError());
+        assertEquals(ContactExceptionCodes.NO_CHANGE_PERMISSION.getNumber(), updateResponse.getException().getCode());
+        DeleteRequest deleteRequest = new DeleteRequest(tokens, System.currentTimeMillis(), false);
+        CommonDeleteResponse deleteResponse = secondClient.execute(deleteRequest);
+        assertTrue("Any user can delete any shares.", deleteResponse.hasError());
+        assertEquals(ShareExceptionCodes.NO_DELETE_PERMISSIONS.getNumber(), deleteResponse.getException().getCode());
     }
 
 }
