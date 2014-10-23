@@ -50,55 +50,27 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
-import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.BasicAuthenticationService;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.authentication.ResponseEnhancement;
-import com.openexchange.authentication.ResultCode;
-import com.openexchange.authentication.SessionEnhancement;
-import com.openexchange.authentication.service.Authentication;
-import com.openexchange.authorization.Authorization;
-import com.openexchange.authorization.AuthorizationService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.login.LoginResult;
-import com.openexchange.login.internal.AbstractJsonEnhancingLoginResult;
-import com.openexchange.login.internal.AddSessionParameterImpl;
-import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.user.UserService;
 
 /**
@@ -106,9 +78,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AnonymousLogin extends AbstractLoginRequestHandler {
-
-    private final LoginConfiguration conf;
+public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
 
     /**
      * Initializes a new {@link AnonymousLogin}.
@@ -116,255 +86,76 @@ public class AnonymousLogin extends AbstractLoginRequestHandler {
      * @param login
      */
     public AnonymousLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
-        super(rampUp);
-        this.conf = conf;
+        super(conf, rampUp);
     }
 
     @Override
-    public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        // Look-up necessary credentials
+    protected boolean checkAuthenticationMode(AuthenticationMode authenticationMode) throws OXException {
+        return (AuthenticationMode.ANONYMOUS_PASSWORD == authenticationMode);
+    }
+
+    @Override
+    protected LoginInfo getLoginInfoFrom(Share share, HttpServletRequest httpRequest) throws OXException {
         try {
-            doLogin(req, resp);
-        } catch (final OXException e) {
-            LoginServlet.logAndSendException(resp, e);
+            final String pass;
+
+            String body = AJAXServlet.getBody(httpRequest);
+            if (Strings.isEmpty(body)) {
+                // By parameters
+                pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
+                if (Strings.isEmpty(pass)) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
+                }
+            } else {
+                // By request body
+                JSONObject jBody = new JSONObject(body);
+                pass = jBody.getString("password");
+            }
+
+            return new LoginInfo() {
+                @Override
+                public String getPassword() {
+                    return pass;
+                }
+                @Override
+                public String getUsername() {
+                    return "anonymous";
+                }
+                @Override
+                public Map<String, Object> getProperties() {
+                    return new HashMap<String, Object>(1);
+                }
+            };
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void doLogin(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws IOException, OXException {
-        final LoginConfiguration conf = this.conf;
-        LoginClosure loginClosure = new LoginClosure() {
+    @Override
+    protected User authenticateUser(Share share, LoginInfo loginInfo, Context context) throws OXException {
+        // Get needed services
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+        if (null == userService) {
+            throw ServiceExceptionCode.absentService(UserService.class);
+        }
+        ShareCryptoService cryptoService = ServerServiceRegistry.getInstance().getService(ShareCryptoService.class);
+        if (null == cryptoService) {
+            throw ServiceExceptionCode.absentService(ShareCryptoService.class);
+        }
 
-            @Override
-            public LoginResult doLogin(final HttpServletRequest req) throws OXException {
-                try {
-                    // Get the share's token & target
-                    String token = req.getParameter("share");
-                    String targetPath = req.getParameter("target");
-                    if (null == token) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create("share");
-                    }
+        // Resolve user...
+        User user = userService.getUser(share.getGuest(), context);
+        // ... and obtain user's decrypted password
+        String decryptedPassword = cryptoService.decrypt(user.getUserPassword());
 
-                    // Get the ShareService to obtain associated share
-                    ShareService shareService = ServerServiceRegistry.getInstance().getService(ShareService.class);
-                    if (null == shareService) {
-                        throw ServiceExceptionCode.absentService(ShareService.class);
-                    }
+        // Check password
+        if (!decryptedPassword.equals(loginInfo.getPassword())) {
+            throw INVALID_CREDENTIALS.create();
+        }
 
-                    // Get the share
-                    final Share share = shareService.resolveToken(token);
-                    if (null == share) {
-                        throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-                    }
-                    final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
-
-                    // Check for matching authentication mode
-                    if (AuthenticationMode.ANONYMOUS_PASSWORD != share.getAuthentication()) {
-                        throw INVALID_CREDENTIALS.create();
-                    }
-
-                    BasicAuthenticationService basicService = Authentication.getBasicService();
-                    if (null == basicService) {
-                        throw ServiceExceptionCode.absentService(BasicAuthenticationService.class);
-                    }
-
-                    // Get the login info from JSON body
-                    LoginInfo loginInfo;
-                    {
-                        final String pass;
-
-                        String body = AJAXServlet.getBody(httpRequest);
-                        if (Strings.isEmpty(body)) {
-                            // By parameters
-                            pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
-                            if (Strings.isEmpty(pass)) {
-                                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
-                            }
-                        } else {
-                            // By request body
-                            JSONObject jBody = new JSONObject(body);
-                            pass = jBody.getString("password");
-                        }
-
-                        loginInfo = new LoginInfo() {
-                            @Override
-                            public String getPassword() {
-                                return pass;
-                            }
-                            @Override
-                            public String getUsername() {
-                                return "anonymous";
-                            }
-                            @Override
-                            public Map<String, Object> getProperties() {
-                                return new HashMap<String, Object>(1);
-                            }
-                        };
-                    }
-
-                    // Resolve context
-                    Context context;
-                    {
-                        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
-                        if (null == contextService) {
-                            throw ServiceExceptionCode.absentService(ContextService.class);
-                        }
-
-                        context = contextService.getContext(share.getContextID());
-                    }
-
-                    // Resolve & authenticate user
-                    User user;
-                    {
-                        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-                        if (null == userService) {
-                            throw ServiceExceptionCode.absentService(UserService.class);
-                        }
-
-                        ShareCryptoService cryptoService = ServerServiceRegistry.getInstance().getService(ShareCryptoService.class);
-                        if (null == cryptoService) {
-                            throw ServiceExceptionCode.absentService(ShareCryptoService.class);
-                        }
-
-                        user = userService.getUser(share.getGuest(), context);
-                        String decryptedPassword = cryptoService.decrypt(user.getUserPassword());
-
-                        if (!decryptedPassword.equals(loginInfo.getPassword())) {
-                            throw INVALID_CREDENTIALS.create();
-                        }
-                    }
-
-                    Authenticated  authenticated = basicService.handleLoginInfo(share.getGuest(), share.getContextID());
-                    if (null == authenticated) {
-                        return null;
-                    }
-
-                    // Checks if something is deactivated.
-                    AuthorizationService authService = Authorization.getService();
-                    if (null == authService) {
-                        throw ServiceExceptionCode.absentService(AuthorizationService.class);
-                    }
-                    authService.authorizeUser(context, user);
-
-                    // Parse & check the HTTP request
-                    LoginRequestImpl request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false, conf.getDefaultClient(), conf.isCookieForceHTTPS(), false);
-                    LoginPerformer.sanityChecks(request);
-                    LoginPerformer.checkClient(request, user, context);
-
-                    // Create session
-                    Session session;
-                    {
-                        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-                        if (null == sessiondService) {
-                            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                            if (null == sessiondService) {
-                                // Giving up...
-                                throw ServiceExceptionCode.absentService(SessiondService.class);
-                            }
-                        }
-                        {
-                            ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                            boolean tranzient = null == service || service.getBoolProperty("com.openexchange.share.transientSessions", true);
-                            request.setTransient(tranzient);
-                        }
-                        session = sessiondService.addSession(new AddSessionParameterImpl(loginInfo.getUsername(), request, user, context));
-                        if (null == session) {
-                            // Session could not be created
-                            throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-                        }
-                        session.setParameter(Session.PARAM_GUEST, Boolean.TRUE);
-                        if (SessionEnhancement.class.isInstance(authenticated)) {
-                            ((SessionEnhancement) authenticated).enhanceSession(session);
-                        }
-                        LogProperties.putSessionProperties(session);
-                    }
-
-                    // Generate the login result
-                    LoginResultImpl retval = new AbstractJsonEnhancingLoginResult() {
-
-                        @Override
-                        protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
-                            int module = null != target ? target.getModule() : share.getCommonModule();
-                            if (0 != module) {
-                                Module folderModule = Module.getForFolderConstant(module);
-                                jLoginResult.put("module", null != folderModule ? folderModule.getName() : String.valueOf(module));
-                            }
-                            String folder = null != target ? target.getFolder() : share.getCommonFolder();
-                            jLoginResult.putOpt("folder", folder);
-                            String item = null != target ? target.getItem() :
-                                null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
-                            jLoginResult.putOpt("item", item);
-                        }
-                    };
-                    retval.setContext(context);
-                    retval.setUser(user);
-                    retval.setRequest(request);
-                    retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
-                    retval.setSession(session);
-                    if (authenticated instanceof ResponseEnhancement) {
-                        final ResponseEnhancement responseEnhancement = (ResponseEnhancement) authenticated;
-                        retval.setHeaders(responseEnhancement.getHeaders());
-                        retval.setCookies(responseEnhancement.getCookies());
-                        retval.setRedirect(responseEnhancement.getRedirect());
-                        final ResultCode code = responseEnhancement.getCode();
-                        retval.setCode(code);
-                        if (ResultCode.REDIRECT.equals(code) || ResultCode.FAILED.equals(code)) {
-                            return retval;
-                        }
-                    }
-
-                    // Trigger registered login handlers
-                    LoginPerformer.triggerLoginHandlers(retval);
-                    return retval;
-                } catch (JSONException e) {
-                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-                } catch (IOException e) {
-                    throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                }
-            }
-        };
-
-        LoginCookiesSetter cookiesSetter = new LoginCookiesSetter() {
-
-            @Override
-            public void setLoginCookies(Session session, HttpServletRequest httpRequest, HttpServletResponse httpResponse, LoginConfiguration loginConfiguration) throws OXException {
-                Cookie cookie = new Cookie(LoginServlet.SECRET_PREFIX + session.getHash(), session.getSecret());
-                cookie.setPath("/");
-                String serverName = httpRequest.getServerName();
-                if (httpRequest.isSecure() || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
-                    cookie.setSecure(true);
-                }
-                /*
-                 * A negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits. A zero
-                 * value causes the cookie to be deleted.
-                 */
-                cookie.setMaxAge(-1);
-                final String domain = getDomainValue(serverName);
-                if (null != domain) {
-                    cookie.setDomain(domain);
-                }
-                httpResponse.addCookie(cookie);
-
-                String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-                if (null != altId) {
-                    cookie = new Cookie(LoginServlet.getPublicSessionCookieName(httpRequest), altId);
-                    cookie.setPath("/");
-                    if (httpRequest.isSecure() || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
-                        cookie.setSecure(true);
-                    }
-                    /*
-                     * A negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits. A zero
-                     * value causes the cookie to be deleted.
-                     */
-                    cookie.setMaxAge(-1);
-                    if (null != domain) {
-                        cookie.setDomain(domain);
-                    }
-                    httpResponse.addCookie(cookie);
-                }
-            }
-        };
-
-        // Do the login operation
-        loginOperation(httpRequest, httpResponse, loginClosure, cookiesSetter, conf);
+        return user;
     }
+
 }
