@@ -57,6 +57,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -102,6 +105,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     private final String sessionsMapName;
     private final Unregisterer unregisterer;
     private final AtomicBoolean inactive;
+    private final ConcurrentMap<String, CountDownLatch> synchronizer;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -114,6 +118,23 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         this.sessionsMapName = sessionsMapName;
         this.unregisterer = unregisterer;
         inactive = new AtomicBoolean(false);
+        synchronizer = new ConcurrentHashMap<String, CountDownLatch>(256);
+    }
+
+    private AcquiredLatch acquireFor(String sessionId) {
+        CountDownLatch latch = synchronizer.get(sessionId);
+        if (null == latch) {
+            CountDownLatch newLatch = new CountDownLatch(1);
+            latch = synchronizer.putIfAbsent(sessionId, newLatch);
+            if (null == latch) {
+                return new AcquiredLatch(true, newLatch);
+            }
+        }
+        return new AcquiredLatch(false, latch);
+    }
+
+    private void releaseFor(String sessionId) {
+        synchronizer.remove(sessionId);
     }
 
     private void ensureActive() throws OXException {
@@ -131,7 +152,44 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session lookupSession(final String sessionId) throws OXException {
+    public Session lookupSession(String sessionId) throws OXException {
+        if (null == sessionId) {
+            return null;
+        }
+
+        AcquiredLatch acquiredLatch = acquireFor(sessionId);
+        CountDownLatch latch = acquiredLatch.latch;
+        if (acquiredLatch.acquired) {
+            // Look-up that session in Hazelcast
+            try {
+                Session session = fetchFromHz(sessionId);
+                acquiredLatch.result.set(session);
+                return session;
+            } catch (OXException e) {
+                acquiredLatch.result.set(e);
+            } finally {
+                latch.countDown();
+                releaseFor(sessionId);
+            }
+        }
+
+        try {
+            // Need to await 'til fetched from Hazelcast by concurrent thread
+            latch.await();
+
+            // Check if already locally available...
+            Object result = acquiredLatch.result.get();
+            if (result instanceof Session) {
+                return (Session) result;
+            }
+
+            throw ((result instanceof OXException) ? (OXException) result : SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId));
+        } catch (InterruptedException e) {
+            throw SessionStorageExceptionCodes.INTERRUPTED.create(e, new Object[0]);
+        }
+    }
+
+    private Session fetchFromHz(String sessionId) throws OXException {
         ensureActive();
         try {
             PortableSession storedSession = sessions().get(sessionId);
@@ -143,6 +201,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             throw handleHazelcastException(e, SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId));
+        } catch (RuntimeException e) {
+            throw handleRuntimeException(e, SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId));
         } catch (OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId);

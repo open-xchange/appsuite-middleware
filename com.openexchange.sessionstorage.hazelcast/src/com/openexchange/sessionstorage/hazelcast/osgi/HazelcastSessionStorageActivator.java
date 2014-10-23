@@ -71,9 +71,9 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.Services;
 import com.openexchange.sessionstorage.hazelcast.Unregisterer;
 import com.openexchange.sessionstorage.hazelcast.portable.PortableSessionFactory;
 import com.openexchange.threadpool.AbstractTask;
@@ -119,7 +119,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
              */
             registerService(CustomPortableFactory.class, new PortableSessionFactory());
             /*
-             * start session storage lifecycle to hazelcast instance, in case com.openexchange.sessionstorage.hazelcast is enabled
+             * start session storage life-cycle to Hazelcast instance, in case com.openexchange.sessionstorage.hazelcast is enabled
              */
             final boolean storageEnabled;
             {
@@ -130,6 +130,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
             if (storageEnabled) {
                 final BundleContext context = this.context;
                 final Unregisterer unregisterer = this;
+                trackService(SessiondService.class);
                 ServiceTracker<HazelcastInstance, HazelcastInstance> hzSessionStorageRegistrationTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                     private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
