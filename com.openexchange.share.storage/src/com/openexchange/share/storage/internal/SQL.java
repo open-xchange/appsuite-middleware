@@ -101,7 +101,6 @@ public class SQL {
             "module tinyint(3) unsigned NOT NULL," +
             "folder varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL," +
             "item varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL," +
-            "activationDate bigint(64) DEFAULT NULL," +
             "expiryDate bigint(64) DEFAULT NULL," +
             "meta BLOB DEFAULT NULL," +
             "PRIMARY KEY (cid,uuid)," +
