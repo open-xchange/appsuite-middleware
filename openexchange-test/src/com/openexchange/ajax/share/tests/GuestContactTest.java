@@ -76,8 +76,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -98,6 +98,8 @@ public class GuestContactTest extends ShareTest {
         false);
 
     private Share target;
+    private InfostoreTestManager itm;
+    private DefaultFile file;
     private int guestId;
     private ParsedShare share;
     private List<String> tokens;
@@ -118,17 +120,18 @@ public class GuestContactTest extends ShareTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        InfostoreTestManager itm = new InfostoreTestManager(client);
+        itm = new InfostoreTestManager(client);
         FolderObject infostore = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder());
 
         FolderObject parent = infostore;
-        DefaultFile file = new DefaultFile();
+        file = new DefaultFile();
         file.setFolderId(String.valueOf(parent.getObjectID()));
         file.setTitle("Test Create Guest Contact " + now);
         file.setDescription(file.getTitle());
         itm.newAction(file);
 
         target = new Share(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
+        target.setOwnedBy(client.getValues().getUserId());
         GuestRecipient guest = new GuestRecipient();
         guest.setDisplayName(GUEST_DISPLAYNAME);
         guest.setEmailAddress(GUEST_MAIL);
@@ -160,6 +163,7 @@ public class GuestContactTest extends ShareTest {
     public void tearDown() throws Exception {
         DeleteRequest deleteRequest = new DeleteRequest(tokens, System.currentTimeMillis(), false);
         client.execute(deleteRequest);
+        itm.deleteAction(file);
         super.tearDown();
     }
 
