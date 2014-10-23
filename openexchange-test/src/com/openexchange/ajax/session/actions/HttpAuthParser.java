@@ -64,6 +64,6 @@ public class HttpAuthParser extends AbstractRedirectParser<HttpAuthResponse> {
 
     @Override
     protected HttpAuthResponse createResponse(String location) {
-        return new HttpAuthResponse(location);
+        return new HttpAuthResponse(getStatusCode(), getReasonPhrase(), location);
     }
 }

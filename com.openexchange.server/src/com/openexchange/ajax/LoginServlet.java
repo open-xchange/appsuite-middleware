@@ -861,10 +861,16 @@ public class LoginServlet extends AJAXServlet {
              */
 
             final String auth = req.getHeader(Header.AUTH_HEADER);
+            if (null == auth) {
+                resp.addHeader("WWW-Authenticate", "NEGOTIATE");
+                resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+                return;
+            }
             final String version;
             final Credentials creds;
             if (!Authorization.checkForAuthorizationHeader(auth)) {
-                throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create();
+                throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
             }
             if (Authorization.checkForBasicAuthorization(auth)) {
                 creds = Authorization.decode(auth);
