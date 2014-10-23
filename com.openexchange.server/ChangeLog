@@ -1,3 +1,7 @@
+* 2014-10-23 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35168: Consider '#' as literals and not as comments when inside of double quotes
+
 * 2014-10-23 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 35059: Sort distribution list members by (display name, e-mail address) ascending when reading them from the database
