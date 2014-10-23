@@ -69,8 +69,8 @@ public interface ModuleHandler {
 
     String getTargetTitle(ShareTarget target, Session session) throws OXException;
 
-    void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException;
+    void updateObjects(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException;
 
-    void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException;
+    void updateFolders(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException;
 
 }

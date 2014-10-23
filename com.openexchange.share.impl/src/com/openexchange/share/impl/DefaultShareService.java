@@ -112,7 +112,6 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public Share resolveToken(String token) throws OXException {
-        ShareTool.validateToken(token);
         int contextID = ShareTool.extractContextId(token);
         Share share = services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
         return filterInactive(removeExpired(share));
@@ -227,15 +226,12 @@ public class DefaultShareService implements ShareService {
             List<Share> sharesToUpdate = new ArrayList<Share>(affectedShares.size());
             List<Share> sharesToDelete = new ArrayList<Share>(affectedShares.size());
             for (Share affectedShare : affectedShares) {
-                List<ShareTarget> updatedTargets = affectedShare.getTargets();
+                List<ShareTarget> updatedTargets = new ArrayList<ShareTarget>(affectedShare.getTargets());
                 if (updatedTargets.removeAll(targets)) {
                     if (0 == updatedTargets.size()) {
                         sharesToDelete.add(affectedShare);
                     } else {
-                        DefaultShare share = new DefaultShare(affectedShare);
-                        share.setLastModified(new Date());
-                        share.setModifiedBy(session.getUserId());
-                        sharesToUpdate.add(share);
+                        sharesToUpdate.add(affectedShare);
                     }
                 }
             }
@@ -306,7 +302,8 @@ public class DefaultShareService implements ShareService {
             /*
              * load & check share
              */
-            Share storedShare = services.getService(ShareStorage.class).loadShare(session.getContextId(), token, connectionHelper.getParameters());
+            ShareStorage storage = services.getService(ShareStorage.class);
+            Share storedShare = storage.loadShare(session.getContextId(), token, connectionHelper.getParameters());
             if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
@@ -323,17 +320,23 @@ public class DefaultShareService implements ShareService {
             DefaultShare updatedShare = new DefaultShare(storedShare);
             updatedShare.setLastModified(new Date());
             updatedShare.setModifiedBy(session.getUserId());
+
+
+
+
+
+
+
             /*
              * proceed with update
              */
-            services.getService(ShareStorage.class).updateShare(updatedShare, connectionHelper.getParameters());
+            storage.updateShare(updatedShare, connectionHelper.getParameters());
             connectionHelper.commit();
             return updatedShare;
         } finally {
             connectionHelper.finish();
         }
     }
-
 
     @Override
     public List<String> generateShareURLs(List<Share> shares, String protocol, String fallbackHostname) throws OXException {
@@ -532,9 +535,6 @@ public class DefaultShareService implements ShareService {
                         removeShares(connectionHelper, Collections.singletonList(share));
                         share = null;
                     } else {
-                        DefaultShare shareToUpdate = new DefaultShare(share);
-                        shareToUpdate.setLastModified(new Date());
-                        share = shareToUpdate;
                         updateShares(connectionHelper, Collections.singletonList(share));
                     }
                     connectionHelper.commit();
@@ -574,7 +574,7 @@ public class DefaultShareService implements ShareService {
         Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-        ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+        //ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
         UserService userService = services.getService(UserService.class);
         /*
          * delete shares
@@ -587,7 +587,7 @@ public class DefaultShareService implements ShareService {
         for (Share share : shares) {
             userPermissionService.deleteUserPermissionBits(connectionHelper.getConnection(), context, share.getGuest());
             //TODO: delete by user ID
-            contactUserStorage.deleteGuestContact(context.getContextId(), share.getGuest(), new Date(), connectionHelper.getConnection());
+            // contactUserStorage.deleteGuestContact(session.getContextId(), share.getGuest(), null, connectionHelper.getConnection());
             userService.deleteUser(connectionHelper.getConnection(), context, share.getGuest());
             deletedGuestIDs.add(I(share.getGuest()));
         }
@@ -684,9 +684,7 @@ public class DefaultShareService implements ShareService {
         int guestID = userService.createUser(connection, context, guestUser);
         guestUser.setId(guestID);
         contact.setInternalUserId(guestID);
-        contact.setCreatedBy(guestID);
-        contact.setModifiedBy(guestID);
-        contactUserStorage.updateGuestContact(context.getContextId(), sharingUser.getId(), contactId, contact, new Date(), connection);
+        contactUserStorage.updateGuestContact(context.getContextId(), guestID, contactId, contact, new Date(), connection);
         services.getService(UserPermissionService.class).saveUserPermissionBits(
             connection,
             new UserPermissionBits(permissionBits, guestID, context.getContextId()));

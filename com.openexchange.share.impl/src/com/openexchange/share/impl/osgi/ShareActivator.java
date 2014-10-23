@@ -78,9 +78,9 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
+import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.groupware.AbstractModuleHandler;
@@ -248,7 +248,7 @@ public class ShareActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
+            public void updateObjects(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
                 throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
             }
         };

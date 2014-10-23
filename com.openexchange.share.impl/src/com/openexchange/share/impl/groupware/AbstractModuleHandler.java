@@ -69,6 +69,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
+import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.user.UserService;
 
@@ -123,20 +124,50 @@ public abstract class AbstractModuleHandler implements ModuleHandler {
     protected abstract String getItemTitle(String folder, String item, Session session) throws OXException;
 
     @Override
-    public void updateFolders(List<ShareTarget> folders, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
+    public void updateFolders(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
         FolderService folderService = getFolderService();
         FolderServiceDecorator decorator = new FolderServiceDecorator();
         decorator.put(Connection.class.getName(), writeCon);
-        for (ShareTarget target : folders) {
-            /*
-             * 1. Get folders
-             * 2. Merge permissions
-             * 3. Write back
-             */
+        for (ShareTarget target : targetDiff.getAdded()) {
             UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
             mergePermissions(folder, finalRecipients);
             folderService.updateFolder(folder, folder.getLastModified(), session, decorator);
         }
+
+        for (ShareTarget target : targetDiff.getModified()) {
+            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
+            mergePermissions(folder, finalRecipients);
+            folderService.updateFolder(folder, folder.getLastModified(), session, decorator);
+        }
+
+        for (ShareTarget target : targetDiff.getRemoved()) {
+            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
+            removePermissions(folder, finalRecipients);
+            folderService.updateFolder(folder, folder.getLastModified(), session, decorator);
+        }
+    }
+
+    private void removePermissions(UserizedFolder folder, List<InternalRecipient> finalRecipients) {
+        Permission[] origPermissions = folder.getPermissions();
+        List<Permission> newPermissions = new ArrayList<Permission>(origPermissions == null ? 0 : origPermissions.length);
+        if (origPermissions == null || origPermissions.length == 0) {
+            return;
+        }
+
+        Map<Integer, Permission> permissionsByEntity = new HashMap<Integer, Permission>();
+        for (Permission permission : origPermissions) {
+            permissionsByEntity.put(permission.getEntity(), permission);
+        }
+
+        for (InternalRecipient recipient : finalRecipients) {
+            permissionsByEntity.remove(recipient.getEntity());
+        }
+
+        for (Permission permission : permissionsByEntity.values()) {
+            newPermissions.add(permission);
+        }
+
+        folder.setPermissions(newPermissions.toArray(new Permission[newPermissions.size()]));
     }
 
     private void mergePermissions(UserizedFolder folder, List<InternalRecipient> finalRecipients) {

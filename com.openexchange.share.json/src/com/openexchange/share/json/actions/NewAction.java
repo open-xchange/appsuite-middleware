@@ -74,6 +74,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
@@ -220,7 +221,7 @@ public class NewAction extends AbstractShareAction {
         for (Entry<Integer, List<ShareTarget>> entry : objectsByModule.entrySet()) {
             int module = entry.getKey();
             List<ShareTarget> objects = entry.getValue();
-            getModuleHandler(module).updateObjects(objects, finalRecipients, session, writeCon);
+            getModuleHandler(module).updateObjects(new ShareTargetDiff(Collections.<ShareTarget>emptyList(), objects), finalRecipients, session, writeCon);
         }
     }
 
@@ -229,7 +230,7 @@ public class NewAction extends AbstractShareAction {
         for (Entry<Integer, List<ShareTarget>> entry : foldersByModule.entrySet()) {
             int module = entry.getKey();
             List<ShareTarget> folders = entry.getValue();
-            getModuleHandler(module).updateFolders(folders, finalRecipients, session, writeCon);
+            getModuleHandler(module).updateFolders(new ShareTargetDiff(Collections.<ShareTarget>emptyList(), folders), finalRecipients, session, writeCon);
         }
     }
 

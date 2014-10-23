@@ -70,6 +70,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.recipient.InternalRecipient;
 
 
@@ -109,16 +110,11 @@ public class FileStorageHandler extends AbstractModuleHandler {
     }
 
     @Override
-    public void updateObjects(List<ShareTarget> objects, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
+    public void updateObjects(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
         IDBasedFileAccess fileAccess = getFileAccess(session);
         try {
             fileAccess.startTransaction();
-            for (ShareTarget target : objects) {
-                /*
-                 * 1. Get document
-                 * 2. Merge permissions
-                 * 3. Write back
-                 */
+            for (ShareTarget target : targetDiff.getAdded()) {
                 FileID fileID = new FileID(target.getItem());
                 if (fileID.getFolderId() == null) {
                     fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
@@ -126,6 +122,28 @@ public class FileStorageHandler extends AbstractModuleHandler {
 
                 File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
                 mergePermissions(file, finalRecipients);
+                fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+            }
+
+            for (ShareTarget target : targetDiff.getModified()) {
+                FileID fileID = new FileID(target.getItem());
+                if (fileID.getFolderId() == null) {
+                    fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+                }
+
+                File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
+                mergePermissions(file, finalRecipients);
+                fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+            }
+
+            for (ShareTarget target : targetDiff.getRemoved()) {
+                FileID fileID = new FileID(target.getItem());
+                if (fileID.getFolderId() == null) {
+                    fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+                }
+
+                File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
+                removePermissions(file, finalRecipients);
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
 
@@ -137,6 +155,29 @@ public class FileStorageHandler extends AbstractModuleHandler {
             fileAccess.finish();
         }
 
+    }
+
+    private void removePermissions(File file, List<InternalRecipient> finalRecipients) {
+        List<FileStorageObjectPermission> origPermissions = file.getObjectPermissions();
+        if (origPermissions == null || origPermissions.isEmpty()) {
+            return;
+        }
+
+        List<FileStorageObjectPermission> newPermissions = new ArrayList<FileStorageObjectPermission>(origPermissions.size());
+        Map<Integer, FileStorageObjectPermission> permissionsByEntity = new HashMap<Integer, FileStorageObjectPermission>();
+        for (FileStorageObjectPermission permission : origPermissions) {
+            permissionsByEntity.put(permission.getEntity(), permission);
+        }
+
+        for (InternalRecipient recipient : finalRecipients) {
+            permissionsByEntity.remove(recipient.getEntity());
+        }
+
+        for (FileStorageObjectPermission permission : permissionsByEntity.values()) {
+            newPermissions.add(permission);
+        }
+
+        file.setObjectPermissions(newPermissions);
     }
 
     private void mergePermissions(File file, List<InternalRecipient> finalRecipients) {

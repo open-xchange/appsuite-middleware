@@ -50,18 +50,23 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.groupware.ModuleHandler;
+import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -91,13 +96,14 @@ public class UpdateAction extends AbstractShareAction {
          */
         String token = requestData.checkParameter("token");
         Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
-        DefaultShare share = new DefaultShare();
-        share.setToken(token);
 
-        JSONObject jsonObject = (JSONObject) requestData.requireData();
+        /*
+         * Parse recipient and targets
+         */
         ShareRecipient recipient = null;
         List<ShareTarget> targets = null;
         try {
+            JSONObject jsonObject = (JSONObject) requestData.requireData();
             if (jsonObject.hasAndNotNull("recipient")) {
                 recipient = ShareJSONParser.parseRecipient(jsonObject.getJSONObject("recipient"));
             }
@@ -109,31 +115,67 @@ public class UpdateAction extends AbstractShareAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
 
-        share.setTargets(targets);
-        if (recipient != null) {
-            RecipientType type = recipient.getType();
-            if (type == RecipientType.ANONYMOUS) {
-                AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
-                String password = anonymousRecipient.getPassword();
-                if (password == null) {
-                    share.setAuthentication(AuthenticationMode.ANONYMOUS);
-                } else {
-                    share.setAuthentication(AuthenticationMode.ANONYMOUS_PASSWORD); // TODO: set password?
-                }
-            } else if (type == RecipientType.GUEST) {
+        ShareService shareService = getShareService();
+        Share storedShare = shareService.resolveToken(token);
+//        if (storedShare.getAuthentication() != share.getAuthentication()) {
+//            if (storedShare.getAuthentication() == AuthenticationMode.ANONYMOUS && share.getAuthentication() == AuthenticationMode.ANONYMOUS_PASSWORD) {
+//
+//            } else if (storedShare.getAuthentication() == AuthenticationMode.ANONYMOUS_PASSWORD && share.getAuthentication() == AuthenticationMode.ANONYMOUS) {
+//
+//            } else {
+//                // TODO: throw "An anonymous share cannot be converted to a guest invitation"
+//            }
+//        }
 
-            } else {
-                // TODO exception
+        DefaultShare updatedShare = new DefaultShare(storedShare);
+        updatedShare.setTargets(targets);
+        if (recipient != null) {
+//            RecipientType type = recipient.getType();
+//            if (type == RecipientType.ANONYMOUS) {
+//                AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
+//                String password = anonymousRecipient.getPassword();
+//                if (password == null) {
+//                    updatedShare.setAuthentication(AuthenticationMode.ANONYMOUS);
+//                } else {
+//                    updatedShare.setAuthentication(AuthenticationMode.ANONYMOUS_PASSWORD); // TODO: set password?
+//                }
+//            } else if (type == RecipientType.GUEST) {
+//
+//            } else {
+//                // TODO exception
+//            }
+
+            Map<Integer, List<ShareTarget>> targetsByModule = new HashMap<Integer, List<ShareTarget>>();
+            for (ShareTarget target : storedShare.getTargets()) {
+                List<ShareTarget> list = targetsByModule.get(target.getModule());
+                if (list == null) {
+                    list = new LinkedList<ShareTarget>();
+                    targetsByModule.put(target.getModule(), list);
+                }
+
+                list.add(target);
+            }
+
+            InternalRecipient internalRecipient = new InternalRecipient();
+            internalRecipient.setBits(recipient.getBits());
+            internalRecipient.setEntity(storedShare.getGuest());
+            internalRecipient.setGroup(false);
+            for (Entry<Integer, List<ShareTarget>> entry : targetsByModule.entrySet()) {
+                ModuleHandler handler = getModuleHandler(entry.getKey());
+//                handler.updateObjects(Collections.emptyList(), entry.getValue(), Collections.singletonList(internalRecipient), session, writeCon);
             }
         }
 
         /*
          * update share TODO: pin-code change and change of auth type requires user update
          */
-        getShareService().updateShare(session, share, clientTimestamp);
+//        shareService.updateShare(session, updatedShare, recipient, clientTimestamp);
         /*
          * return empty result in case of success
          */
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
+
+
+
 }
