@@ -54,7 +54,6 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Collections;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -70,12 +69,8 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.mail.MailNotification;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
@@ -122,7 +117,7 @@ public class ResetPasswordServlet extends HttpServlet {
 
             // Resolve to share
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
-            ShareList share = null == token ? null : shareService.resolveToken(token);
+            com.openexchange.share.ResolvedShare share = null == token ? null : shareService.resolveToken(token);
             if (null == share) {
                 LOG.debug("No share found for '{}'", null == token ? "null" : token);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -139,7 +134,7 @@ public class ResetPasswordServlet extends HttpServlet {
             // Check #2
             UserService userService = ShareServiceLookup.getService(UserService.class, true);
             Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(share.getContextID());
-            User guest = userService.getUser(share.getGuest(), context);
+            User guest = userService.getUser(share.getGuestID(), context);
             if (false == guest.isGuest() || false == mail.equals(guest.getMail())) {
                 LOG.debug("Bad attempt to reset password for share '{}'", token);
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -155,17 +150,17 @@ public class ResetPasswordServlet extends HttpServlet {
             }
 
             // Update guest entry in database
-            update(passwordMech.encode(newPassword), share.getGuest(), share.getContextID());
+            update(passwordMech.encode(newPassword), share.getGuestID(), share.getContextID());
 
             // Invalidate
-            userService.invalidateUser(context, share.getGuest());
+            userService.invalidateUser(context, share.getGuestID());
 
             // Notify
             ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-            String url = shareService.generateShareURLs(Collections.singletonList(share), Tools.getProtocol(request), request.getServerName()).get(0);
-
-            MailNotification notification = new MailNotification(NotificationType.PASSWORD_RESET, share, url, null, mail);
-            notificationService.notify(notification, new ResetPasswordSession(share.getGuest(), share.getContextID(), newPassword, request));
+//            String url = shareService.generateShareURLs(Collections.singletonList(share), Tools.getProtocol(request), request.getServerName()).get(0);
+//
+//            MailNotification notification = new MailNotification(NotificationType.PASSWORD_RESET, share, url, null, mail);
+//            notificationService.notify(notification, new ResetPasswordSession(share.getGuestID(), share.getContextID(), newPassword, request));
         } catch (RateLimitedException e) {
             response.setContentType("text/plain; charset=UTF-8");
             if(e.getRetryAfter() > 0) {

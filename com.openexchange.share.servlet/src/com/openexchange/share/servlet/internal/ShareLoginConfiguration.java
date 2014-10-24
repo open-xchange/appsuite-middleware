@@ -56,7 +56,6 @@ import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.share.ShareList;
 
 /**
  * {@link ShareLoginConfiguration}
@@ -86,7 +85,7 @@ public class ShareLoginConfiguration {
      * @param share The share to get the login configuration for
      * @return The login configuration
      */
-    public LoginConfiguration getLoginConfig(ShareList share) {
+    public LoginConfiguration getLoginConfig(com.openexchange.share.ResolvedShare share) {
         return adjustCookieTTL(loginConfiguration, share);
     }
 
@@ -120,7 +119,7 @@ public class ShareLoginConfiguration {
      * @return The possibly adjusted login configuration
      * @throws OXException
      */
-    private static LoginConfiguration adjustCookieTTL(LoginConfiguration loginConfig, ShareList share) {
+    private static LoginConfiguration adjustCookieTTL(LoginConfiguration loginConfig, com.openexchange.share.ResolvedShare share) {
         // TODO
         Date expires = null;//share.getExpiryDate();
         if (null != expires) {

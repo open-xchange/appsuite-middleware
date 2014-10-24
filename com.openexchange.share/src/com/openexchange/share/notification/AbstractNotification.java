@@ -50,7 +50,8 @@
 package com.openexchange.share.notification;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.openexchange.share.ShareList;
+import java.util.List;
+import com.openexchange.share.Share;
 
 
 /**
@@ -64,20 +65,20 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
 
     protected final NotificationType type;
 
-    protected final ShareList share;
+    protected final List<Share> shares;
 
     protected final String url;
 
     protected final String message;
 
 
-    public AbstractNotification(NotificationType type, ShareList share, String url, String message) {
+    public AbstractNotification(NotificationType type, List<Share> shares, String url, String message) {
         super();
         checkNotNull(type);
-        checkNotNull(share);
+        checkNotNull(shares);
         checkNotNull(url);
         this.type = type;
-        this.share = share;
+        this.shares = shares;
         this.url = url;
         this.message = message;
     }
@@ -88,8 +89,8 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
     }
 
     @Override
-    public ShareList getShare() {
-        return share;
+    public List<Share> getShares() {
+        return shares;
     }
 
     @Override

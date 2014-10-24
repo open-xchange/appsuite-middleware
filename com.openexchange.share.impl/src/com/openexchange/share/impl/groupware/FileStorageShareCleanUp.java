@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link FileStorageShareCleanUp}
@@ -84,10 +84,10 @@ public class FileStorageShareCleanUp implements EventHandler {
     public void handleEvent(Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
             try {
-                Share target = new Share(
-                    Module.INFOSTORE.getFolderConstant(),
-                    FileStorageEventHelper.extractFolderId(event),
-                    FileStorageEventHelper.extractObjectId(event));
+                ShareTarget target = new ShareTarget();
+                target.setModule(Module.INFOSTORE.getFolderConstant());
+                target.setFolder(FileStorageEventHelper.extractFolderId(event));
+                target.setItem(FileStorageEventHelper.extractObjectId(event));
                 shareService.deleteTarget(FileStorageEventHelper.extractSession(event), target, Collections.<Integer>emptyList());
             } catch (OXException e) {
                 StringBuilder sb = new StringBuilder();

@@ -56,10 +56,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.share.ShareList;
+import com.openexchange.share.ResolvedShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -99,8 +99,8 @@ public class ShareServlet extends HttpServlet {
             request.getSession(true);
 
             // Extract share from path info
-            ShareList share;
-            Share target;
+            ResolvedShare share;
+            ShareTarget target;
             {
                 String pathInfo = request.getPathInfo();
                 String[] paths = ShareServletUtils.splitPath(pathInfo);

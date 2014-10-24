@@ -63,7 +63,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
@@ -77,39 +76,44 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
  */
 public class ShareLoginMethod implements LoginMethodClosure {
 
-    private final ShareList share;
     private final Context context;
     private final User user;
 
     /**
      * Initializes a new {@link ShareLoginMethod}.
      *
-     * @param share The underlying share
      * @param context The context
      * @param user The user
      */
-    public ShareLoginMethod(ShareList share, Context context, User user) {
+    public ShareLoginMethod(Context context, User user) {
         super();
-        this.share = share;
         this.context = context;
         this.user = user;
     }
 
     @Override
     public GuestAuthenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
-        final ShareAuthenticated authenticated;
-        switch (share.getAuthentication()) {
-        case ANONYMOUS:
-            authenticated = anonymous(loginResult);
-            break;
-        case ANONYMOUS_PASSWORD:
-            authenticated = basic(loginResult, true);
-            break;
-        case GUEST_PASSWORD:
+        ShareAuthenticated authenticated;
+        if (Strings.isEmpty(user.getMail())) {
+            /*
+             * anonymous
+             */
+            if (Strings.isEmpty(user.getPasswordMech())) {
+                /*
+                 * ... without password
+                 */
+                authenticated = anonymous(loginResult);
+            } else {
+                /*
+                 * ... with password
+                 */
+                authenticated = basic(loginResult, true);
+            }
+        } else {
+            /*
+             * named guest user with password
+             */
             authenticated = basic(loginResult, false);
-            break;
-        default:
-            throw new UnsupportedOperationException(String.valueOf(share.getAuthentication()));
         }
         if (null == authenticated ||
             null != authenticated.getContext() && false == authenticated.getContext().isEnabled() ||
@@ -147,19 +151,14 @@ public class ShareLoginMethod implements LoginMethodClosure {
     }
 
     public void sendUnauthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        switch (share.getAuthentication()) {
-        case ANONYMOUS_PASSWORD:
-        case GUEST_PASSWORD:
+        if (false == Strings.isEmpty(user.getMail()) || false == Strings.isEmpty(user.getPasswordMech())) {
             response.setHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\", encoding=\"UTF-8\"");
-            break;
-        default:
-            break;
         }
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
     }
 
     private String getRealm() {
-        return "Share " + share.getToken();
+        return "Share/" + context + '/' + user;
     }
 
     private static String getAuthHeader(LoginResultImpl loginResult) {

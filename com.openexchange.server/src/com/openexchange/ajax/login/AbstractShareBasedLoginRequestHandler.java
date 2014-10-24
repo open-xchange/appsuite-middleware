@@ -52,6 +52,7 @@ package com.openexchange.ajax.login;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -89,10 +90,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ShareList;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.Share;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -158,7 +158,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     }
 
                     // Get the share
-                    final ShareList share = shareService.resolveToken(token);
+                    final List<Share> share = shareService.resolveToken(token);
                     if (null == share) {
                         throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
                     }

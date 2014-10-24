@@ -66,7 +66,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -130,20 +130,20 @@ public class OXFolderDependentDeleter {
             final int module = folder.getModule();
             final int folderID = folder.getObjectID();
             if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-                final List<Share> targets = new ArrayList<Share>(subfolderIDs.size() + 1);
+                final List<ShareTarget> targets = new ArrayList<ShareTarget>(subfolderIDs.size() + 1);
 
-                targets.add(new Share(module, Integer.toString(folderID)));
+                targets.add(new ShareTarget(module, Integer.toString(folderID)));
                 subfolderIDs.forEach(new TIntProcedure() {
                     @Override
                     public boolean execute(int subfolderID) {
-                        targets.add(new Share(module, Integer.toString(subfolderID)));
+                        targets.add(new ShareTarget(module, Integer.toString(subfolderID)));
                         return true;
                     }
                 });
 
                 shareService.deleteTargets(session, targets, guestIDs);
             } else {
-                shareService.deleteTarget(session, new Share(module, Integer.toString(folderID)), guestIDs);
+                shareService.deleteTarget(session, new ShareTarget(module, Integer.toString(folderID)), guestIDs);
             }
         } finally {
             session.setParameter(Connection.class.getName(), null);

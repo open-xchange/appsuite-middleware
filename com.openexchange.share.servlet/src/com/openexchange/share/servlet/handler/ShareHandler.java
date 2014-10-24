@@ -52,8 +52,7 @@ package com.openexchange.share.servlet.handler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareList;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link ShareHandler}
@@ -86,6 +85,6 @@ public interface ShareHandler {
      * @return <code>true</code> if this handler successfully handled the share; otherwise <code>false</code>
      * @throws OXException If the attempt to resolve given share fails
      */
-    boolean handle(ShareList share, Share target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    boolean handle(com.openexchange.share.ResolvedShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
 }

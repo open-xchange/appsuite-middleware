@@ -69,7 +69,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareList;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
@@ -103,26 +102,26 @@ public final class ShareServletUtils {
      * @param tranzient <code>true</code> to mark the session as transient, <code>false</code>, otherwise
      * @return The login result, or <code>null</code> if not successful
      */
-    public static LoginResult login(ShareList share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient) throws OXException, IOException {
+    public static LoginResult login(com.openexchange.share.ResolvedShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient) throws OXException, IOException {
         /*
          * parse login request
          */
         Context context = ShareServiceLookup.getService(UserService.class, true).getContext(share.getContextID());
-        User user = ShareServiceLookup.getService(UserService.class, true).getUser(share.getGuest(), context);
+        User user = ShareServiceLookup.getService(UserService.class, true).getUser(share.getGuestID(), context);
         LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
             loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false);
         loginRequest.setTransient(tranzient);
         /*
          * login
          */
-        ShareLoginMethod loginMethod = new ShareLoginMethod(share, context, user);
+        ShareLoginMethod loginMethod = new ShareLoginMethod(context, user);
         Map<String, Object> properties = new HashMap<String, Object>();
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
         if (null == loginResult || null == loginResult.getSession()) {
             loginMethod.sendUnauthorized(request, response);
             return null;
         }
-        LOG.debug("Successful login for share {} with guest user {} in context {}.", share.getToken(), share.getGuest(), share.getContextID());
+        LOG.debug("Successful login for share {} with guest user {} in context {}.", share.getToken(), share.getGuestID(), share.getContextID());
         return loginResult;
     }
 

@@ -56,14 +56,16 @@ package com.openexchange.share.storage.mapping;
  */
 public enum ShareField {
 
-    CONTEXT_ID,
-    TOKEN,
-    CREATION_DATE,
+    GUEST,
+    MODULE,
+    FOLDER,
+    ITEM,
+    OWNER,
+    EXPIRES,
+    CREATED,
     CREATED_BY,
-    LAST_MODIFIED,
+    MODIFIED,
     MODIFIED_BY,
-    GUEST_ID,
-    AUTHENTICATION,
+    META
     ;
 }
-

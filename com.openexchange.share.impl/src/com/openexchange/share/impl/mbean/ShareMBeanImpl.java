@@ -54,7 +54,7 @@ import java.util.List;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareList;
+import com.openexchange.share.Share;
 import com.openexchange.share.impl.DefaultShareService;
 
 
@@ -74,12 +74,12 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public List<ShareList> listShares(int contextId) throws OXException {
+    public List<Share> listShares(int contextId) throws OXException {
         return shareService.getAllShares(contextId);
     }
 
     @Override
-    public List<ShareList> listShares(int contextId, int userId) throws OXException {
+    public List<Share> listShares(int contextId, int userId) throws OXException {
         return shareService.getAllShares(contextId, userId);
     }
 

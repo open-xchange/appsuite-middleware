@@ -71,7 +71,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.DefaultShare;
+import com.openexchange.share.DefaultShareList;
 import com.openexchange.share.ShareList;
 import com.openexchange.share.Share;
 import com.openexchange.share.storage.ShareStorage;
@@ -99,9 +99,9 @@ public class DefaultShareServiceTest implements ServiceLookup {
 
     private Session session;
 
-    private DefaultShare s1;
+    private DefaultShareList s1;
 
-    private DefaultShare s2;
+    private DefaultShareList s2;
 
     private Share t1;
 
@@ -193,8 +193,8 @@ public class DefaultShareServiceTest implements ServiceLookup {
         return (S) services.get(clazz);
     }
 
-    private static DefaultShare createShare(int guestID, List<Share> targets) {
-        DefaultShare share = new DefaultShare();
+    private static DefaultShareList createShare(int guestID, List<Share> targets) {
+        DefaultShareList share = new DefaultShareList();
         share.setAuthentication(AuthenticationMode.GUEST_PASSWORD);
         share.setContextID(CONTEXT_ID);
         share.setCreated(new Date());

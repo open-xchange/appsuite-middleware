@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,78 +47,85 @@
  *
  */
 
-package com.openexchange.share.storage.internal;
+package com.openexchange.share;
 
-import java.util.Date;
-import com.openexchange.share.Share;
+import java.util.List;
 
 /**
- * {@link RdbShareTarget}
+ * {@link ResolvedShare}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public class RdbShareTarget extends Share {
+public class ResolvedShare {
 
-    private static final long serialVersionUID = 6291061207433984824L;
-
+    private int guestID;
     private int contextID;
+    private List<ShareTarget> targets;
+    private AuthenticationMode authentication;
     private String token;
 
-    /**
-     * Initializes a new {@link RdbShareTarget}.
-     *
-     * @param target The target to copy the values from
-     */
-    public RdbShareTarget(Share target) {
-        super(target.getModule(), target.getFolder(), target.getItem());
-        this.expiryDate = target.getExpiryDate();
-        this.meta = target.getMeta();
-        this.ownedBy = target.getOwnedBy();
-        this.sharedBy = target.getSharedBy();
+
+
+
+    public int getCommonModule() {
+        if (null == targets || 0 == targets.size()) {
+            return 0;
+        } else {
+            int module = targets.get(0).getModule();
+            for (int i = 1; i < targets.size(); i++) {
+                if (module != targets.get(i).getModule()) {
+                    return 0;
+                }
+            }
+            return module;
+        }
+    }
+
+    public String getCommonFolder() {
+        if (null == targets || 0 == targets.size()) {
+            return null;
+        } else {
+            String folder = targets.get(0).getFolder();
+            if (null == folder) {
+                return null;
+            }
+            for (int i = 1; i < targets.size(); i++) {
+                if (false == folder.equals(targets.get(i).getFolder())) {
+                    return null;
+                }
+            }
+            return folder;
+        }
+    }
+
+    public ShareTarget resolveTarget(String path) {
+        if (null != targets && 0 < targets.size() && null != path) {
+            for (ShareTarget target : targets) {
+                if (path.equals(target.getPath())) {
+                    return target;
+                }
+            }
+        }
+        return null;
     }
 
     /**
-     * Initializes a new {@link RdbShareTarget}.
+     * Gets the guestID
+     *
+     * @return The guestID
      */
-    public RdbShareTarget() {
-        super();
+    public int getGuestID() {
+        return guestID;
     }
 
     /**
-     * Sets the module
+     * Sets the guestID
      *
-     * @param module The module to set
+     * @param guestID The guestID to set
      */
-    public void setModule(int module) {
-        this.module = module;
-    }
-
-    /**
-     * Sets the folder
-     *
-     * @param folder The folder to set
-     */
-    public void setFolder(String folder) {
-        this.folder = folder;
-    }
-
-    /**
-     * Sets the item
-     *
-     * @param item The item to set
-     */
-    public void setItem(String item) {
-        this.item = item;
-    }
-
-    /**
-     * Sets the expiryDate
-     *
-     * @param expiryDate The expiryDate to set
-     */
-    @Override
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
+    public void setGuestID(int guestID) {
+        this.guestID = guestID;
     }
 
     /**
@@ -137,6 +144,32 @@ public class RdbShareTarget extends Share {
      */
     public void setContextID(int contextID) {
         this.contextID = contextID;
+    }
+
+    public void setTargets(List<ShareTarget> targets) {
+        this.targets = targets;
+    }
+
+    public List<ShareTarget> getTargets() {
+        return targets;
+    }
+
+    /**
+     * Gets the authentication
+     *
+     * @return The authentication
+     */
+    public AuthenticationMode getAuthentication() {
+        return authentication;
+    }
+
+    /**
+     * Sets the authentication
+     *
+     * @param authentication The authentication to set
+     */
+    public void setAuthentication(AuthenticationMode authentication) {
+        this.authentication = authentication;
     }
 
     /**
@@ -158,4 +191,3 @@ public class RdbShareTarget extends Share {
     }
 
 }
-

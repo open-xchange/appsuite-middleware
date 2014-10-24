@@ -89,11 +89,9 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ShareList;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.Share;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.impl.notification.NotificationStrings;
@@ -263,13 +261,13 @@ public class MailSender {
     }
 
     private MimeMessage buildShareCreatedMail() throws OXException, UnsupportedEncodingException, MessagingException {
-        List<Share> targets = notification.getShare().getTargets();
+        List<Share> shares = notification.getShares();
         String title;
-        if (targets.size() == 1) {
-            Share target = targets.get(0);
-            title = getModuleHandler(target.getModule()).getTargetTitle(target, session);
+        if (shares.size() == 1) {
+            Share target = shares.get(0);
+            title = getModuleHandler(target.getTarget().getModule()).getTargetTitle(target.getTarget(), session);
         } else {
-            title = translator.translate(String.format(NotificationStrings.GENERIC_TITLE, targets.size()));
+            title = translator.translate(String.format(NotificationStrings.GENERIC_TITLE, shares.size()));
         }
 
         String subject = String.format(translator.translate(NotificationStrings.SUBJECT), user.getDisplayName(), title);
@@ -340,7 +338,7 @@ public class MailSender {
     }
 
     private Map<String, Object> prepareTemplateVars(HtmlService htmlService, Set<String> fields, String title) throws OXException {
-        ShareList share = notification.getShare();
+        List<Share> shares = notification.getShares();
         String displayName;
         String message = null;
         String username = null;
@@ -357,20 +355,20 @@ public class MailSender {
             }
         }
 
-        if (share.getAuthentication() != AuthenticationMode.ANONYMOUS) {
-            UserService userService = getUserService();
-            ShareCryptoService shareCryptoService = getShareCryptoService();
-            User guest = userService.getUser(share.getGuest(), share.getContextID());
-            // FIXME!!!
-            String decryptedPassword = "mumpitz!";//shareCryptoService.decrypt(guest.getUserPassword());
-            if (htmlService == null) {
-                username = guest.getMail();
-                password = decryptedPassword;
-            } else {
-                username = htmlService.htmlFormat(guest.getMail());
-                password = htmlService.htmlFormat(decryptedPassword);
-            }
-        }
+//        if (share.getAuthentication() != AuthenticationMode.ANONYMOUS) {
+//            UserService userService = getUserService();
+//            ShareCryptoService shareCryptoService = getShareCryptoService();
+//            User guest = userService.getUser(share.getGuest(), share.getContextID());
+//            // FIXME!!!
+//            String decryptedPassword = "mumpitz!";//shareCryptoService.decrypt(guest.getUserPassword());
+//            if (htmlService == null) {
+//                username = guest.getMail();
+//                password = decryptedPassword;
+//            } else {
+//                username = htmlService.htmlFormat(guest.getMail());
+//                password = htmlService.htmlFormat(decryptedPassword);
+//            }
+//        }
 
         Map<String, Object> vars = new HashMap<String, Object>();
         if (!Strings.isEmpty(message)) {

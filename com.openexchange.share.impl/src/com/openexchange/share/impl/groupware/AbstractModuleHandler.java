@@ -67,7 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -93,9 +93,9 @@ public abstract class AbstractModuleHandler implements ModuleHandler {
     }
 
     @Override
-    public String getTargetTitle(Share target, Session session) throws OXException {
+    public String getTargetTitle(ShareTarget target, Session session) throws OXException {
         UserService userService = getService(UserService.class);
-        if (target.isFolder()) {
+        if (null != target.getItem()) {
             UserizedFolder folder = getFolderService().getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
             User user = userService.getUser(session.getUserId(), session.getContextId());
             String name = folder.getLocalizedName(user.getLocale(), true);
@@ -128,19 +128,19 @@ public abstract class AbstractModuleHandler implements ModuleHandler {
         FolderService folderService = getFolderService();
         FolderServiceDecorator decorator = new FolderServiceDecorator();
         decorator.put(Connection.class.getName(), writeCon);
-        for (Share target : targetDiff.getAdded()) {
+        for (ShareTarget target : targetDiff.getAdded()) {
             UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
             mergePermissions(folder, finalRecipients);
             folderService.updateFolder(folder, folder.getLastModified(), session, decorator);
         }
 
-        for (Share target : targetDiff.getModified()) {
+        for (ShareTarget target : targetDiff.getModified()) {
             UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
             mergePermissions(folder, finalRecipients);
             folderService.updateFolder(folder, folder.getLastModified(), session, decorator);
         }
 
-        for (Share target : targetDiff.getRemoved()) {
+        for (ShareTarget target : targetDiff.getRemoved()) {
             UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
             removePermissions(folder, finalRecipients);
             folderService.updateFolder(folder, folder.getLastModified(), session, decorator);

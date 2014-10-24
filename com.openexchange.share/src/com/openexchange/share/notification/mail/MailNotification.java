@@ -49,11 +49,12 @@
 
 package com.openexchange.share.notification.mail;
 
+import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.share.ShareList;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.notification.AbstractNotification;
@@ -82,8 +83,8 @@ public class MailNotification extends AbstractNotification<InternetAddress> {
      * @param recipientAddress The mail address of the recipient
      * @throws OXException If the recipient address is not a valid mail address
      */
-    public MailNotification(NotificationType type, ShareList share, String url, String message, String recipientAddress) throws OXException {
-        super(type, share, url, message);
+    public MailNotification(NotificationType type, List<Share> shares, String url, String message, String recipientAddress) throws OXException {
+        super(type, shares, url, message);
         if (Strings.isEmpty(recipientAddress)) {
             throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create("");
         }

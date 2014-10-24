@@ -71,7 +71,7 @@ public class ShareCreateTableService extends AbstractCreateTableImpl {
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
-        return new String[] { "share", "share_target" };
+        return new String[] { "share" };
     }
 
     /**
@@ -80,7 +80,7 @@ public class ShareCreateTableService extends AbstractCreateTableImpl {
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {
-        return new String[] { SQL.getCreateShareTableStmt(), SQL.getCreateShareTargetTableStmt() };
+        return new String[] { SQL.getCreateShareTableStmt() };
     }
 
     @Override

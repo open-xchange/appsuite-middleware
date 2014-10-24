@@ -51,7 +51,6 @@ package com.openexchange.share;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * {@link Share}
@@ -63,13 +62,12 @@ public class Share implements Serializable {
 
     private static final long serialVersionUID = -8680039849393740702L;
 
-    protected int module;
-    protected String folder;
-    protected String item;
-    protected int ownedBy;
-    protected int sharedBy;
-    protected Date expiryDate;
-    protected Map<String, Object> meta;
+    private int guest;
+    private ShareTarget target;
+    private Date created;
+    private int createdBy;
+    private Date modified;
+    private int modifiedBy;
 
     /**
      * Initializes a new, empty {@link Share}.
@@ -79,83 +77,21 @@ public class Share implements Serializable {
     }
 
     /**
-     * Initializes a new {@link Share}, pointing to a folder of a specific groupware module.
+     * Gets the share target.
      *
-     * @param module The groupware module of the share's target folder
-     * @param folder The identifier of the share's folder
+     * @return The target
      */
-    public Share(int module, String folder) {
-        this(module, folder, null);
+    public ShareTarget getTarget() {
+        return target;
     }
 
     /**
-     * Initializes a new {@link Share}, pointing to an item located in a parent folder of a specific groupware module.
+     * Sets the share target
      *
-     * @param module The groupware module of the share's target folder
-     * @param folder The identifier of the share's folder
-     * @param item The identifier of the share's item
+     * @param target The target to set
      */
-    public Share(int module, String folder, String item) {
-        super();
-        this.module = module;
-        this.folder = folder;
-        this.item = item;
-    }
-
-    /**
-     * Gets the groupware module of the share's target folder.
-     *
-     * @return The module
-     */
-    public int getModule() {
-        return module;
-    }
-
-    /**
-     * Gets the identifier of the share's folder.
-     *
-     * @return The folder ID
-     */
-    public String getFolder() {
-        return folder;
-    }
-
-    /**
-     * Gets the identifier of the share's item in case the share is not a folder share.
-     *
-     * @return The item ID, or <code>null</code> if the share references a folder
-     */
-    public String getItem() {
-        return item;
-    }
-
-    /**
-     * Gets a value indicating whether the share points to a folder or a single item.
-     *
-     * @return <code>true</code> if the share points to a folder, <code>false</code>, otherwise
-     */
-    public boolean isFolder() {
-        return null == item;
-    }
-
-    /**
-     * Gets the identifier of the user that is considered as the owner of the share target, which is usually the user who created the
-     * shared folder or item, but not necessarily the user who shared the target itself.
-     *
-     * @return The identifier of the user considered as the owner of the share target
-     */
-    public int getOwnedBy() {
-        return ownedBy;
-    }
-
-    /**
-     * Sets the identifier of the user that is considered as the owner of the share target, which is usually the user who created the
-     * shared folder or item, but not necessarily the user who shared the target itself.
-     *
-     * @param ownedBy The identifier of the user considered as the owner of the share target
-     */
-    public void setOwnedBy(int ownedBy) {
-        this.ownedBy = ownedBy;
+    public void setTarget(ShareTarget target) {
+        this.target = target;
     }
 
     /**
@@ -163,8 +99,8 @@ public class Share implements Serializable {
      *
      * @return The identifier of the user that shared the target
      */
-    public int getSharedBy() {
-        return sharedBy;
+    public int getCreatedBy() {
+        return createdBy;
     }
 
     /**
@@ -172,109 +108,80 @@ public class Share implements Serializable {
      *
      * @param sharedBy The identifier of the user that shared the target
      */
-    public void setSharedBy(int sharedBy) {
-        this.sharedBy = sharedBy;
+    public void setCreatedBy(int sharedBy) {
+        this.createdBy = sharedBy;
     }
 
     /**
-     * If defined, gets the date when this target expires, i.e. it should be no longer accessible.
+     * Gets the guest
      *
-     * @return The expiry date of the share, or <code>null</code> if not defined
+     * @return The guest
      */
-    public Date getExpiryDate() {
-        return expiryDate;
+    public int getGuest() {
+        return guest;
     }
 
     /**
-     * Sets the date when this share target, i.e. it should be no longer accessible.
+     * Sets the guest
      *
-     * @param expiryDate The expiry date of the target
+     * @param guest The guest to set
      */
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
+    public void setGuest(int guest) {
+        this.guest = guest;
     }
 
     /**
-     * Gets a value indicating whether the target is considered as expired, i.e. an expiry date is set and is passed in the meantime.
+     * Gets the created
      *
-     * @return <code>true</code> if the share is expired, <code>false</code>, otherwise
+     * @return The created
      */
-    public boolean isExpired() {
-        return expiryDate != null && new Date().after(expiryDate);
+    public Date getCreated() {
+        return created;
     }
 
     /**
-     * Gets arbitrary metadata in a map.
+     * Sets the created
      *
-     * @return The metadata
+     * @param created The created to set
      */
-    public Map<String, Object> getMeta() {
-        return meta;
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
     /**
-     * Sets the metadata,
+     * Gets the modified
      *
-     * @param meta The metadata to set
+     * @return The modified
      */
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
+    public Date getModified() {
+        return modified;
     }
 
     /**
-     * Gets the relative path of this target to address it uniquely within an underlying share.
+     * Sets the modified
      *
-     * @return The share-relative path to the target
+     * @param modified The modified to set
      */
-    public String getPath() {
-        return String.format("%08x", hashCode());
+    public void setModified(Date modified) {
+        this.modified = modified;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
-        result = prime * result + ((item == null) ? 0 : item.hashCode());
-        result = prime * result + module;
-        return result;
+    /**
+     * Gets the modifiedBy
+     *
+     * @return The modifiedBy
+     */
+    public int getModifiedBy() {
+        return modifiedBy;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Share)) {
-            return false;
-        }
-        Share other = (Share) obj;
-        if (folder == null) {
-            if (other.folder != null) {
-                return false;
-            }
-        } else if (!folder.equals(other.folder)) {
-            return false;
-        }
-        if (item == null) {
-            if (other.item != null) {
-                return false;
-            }
-        } else if (!item.equals(other.item)) {
-            return false;
-        }
-        if (module != other.module) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "ShareTarget [module=" + module + ", folder=" + folder + (null != item ? (", item=" + item) : "") + "]";
+    /**
+     * Sets the modifiedBy
+     *
+     * @param modifiedBy The modifiedBy to set
+     */
+    public void setModifiedBy(int modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 
 }

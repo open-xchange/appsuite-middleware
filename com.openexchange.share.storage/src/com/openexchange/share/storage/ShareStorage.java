@@ -49,10 +49,8 @@
 
 package com.openexchange.share.storage;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareList;
 import com.openexchange.share.Share;
 
 
@@ -64,150 +62,13 @@ import com.openexchange.share.Share;
  */
 public interface ShareStorage {
 
-    /**
-     * Loads a share identified by it's unique token.
-     *
-     * @param contextID The context ID
-     * @param token The token
-     * @param parameters The storage parameters
-     * @return The share, or <code>null</code> if not found
-     * @throws OXException
-     */
-    ShareList loadShare(int contextID, String token, StorageParameters parameters) throws OXException;
+    List<Share> loadShares(int contextID, int guest, StorageParameters parameters) throws OXException;
 
-    /**
-     * Saves a new share in the storage.
-     *
-     * @param share The share to store
-     * @param parameters The storage parameters
-     */
-    void storeShare(ShareList share, StorageParameters parameters) throws OXException;
+    void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
 
-    /**
-     * Saves new shares in the storage.
-     *
-     * @param contextID The context ID
-     * @param shares The shares to store
-     * @param parameters The storage parameters
-     */
-    void storeShares(int contextID, List<ShareList> shares, StorageParameters parameters) throws OXException;
+    void deleteShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
 
-    /**
-     * Updates an already existing share in the storage.
-     *
-     * @param share The share to update
-     * @param parameters The storage parameters
-     */
-    void updateShare(ShareList share, StorageParameters parameters) throws OXException;
-
-    /**
-     * Updates already existing shares in the storage.
-     *
-     * @param contextID The context ID
-     * @param shares The shares to update
-     * @param parameters The storage parameters
-     */
-    void updateShares(int contextID, List<ShareList> shares, StorageParameters parameters) throws OXException;
-
-    /**
-     * Deletes a share identified by its unique token.
-     *
-     * @param contextID The context ID
-     * @param token The token
-     * @param parameters The storage parameters
-     * @throws OXException
-     */
-    void deleteShare(int contextID, String token, StorageParameters parameters) throws OXException;
-
-    /**
-     * Deletes multiple shares identified by their unique token.
-     *
-     * @param contextID The context ID
-     * @param tokens The tokens
-     * @param parameters The storage parameters
-     * @throws OXException
-     */
-    void deleteShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares that were created by a specific user ID.
-     *
-     * @param contextID The context ID
-     * @param createdBy The ID of the user to load the shares from
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<ShareList> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares identified by their tokens.
-     *
-     * @param contextID The context ID
-     * @param tokens The tokens of the shares to load
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<ShareList> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares that were created for a specific groupware target.
-     *
-     * @param contextID The context ID
-     * @param target The share target to load the shares for
-     * @param parameters The storage parameters
-     * @return All shares holding a reference to the supplied groupware target
-     */
-    List<ShareList> loadSharesForTarget(int contextID, Share target, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares to guest users that were created for a specific groupware target.
-     *
-     * @param contextID The context ID
-     * @param target The share target to load the shares for
-     * @param guestIDs The IDs of the guest users to whom the shares are for
-     * @param parameters The storage parameters
-     * @return All shares holding a reference to the supplied groupware target
-     */
-    List<ShareList> loadSharesForTarget(int contextID, Share target, int[] guestIDs, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares that are expired after the given date.
-     *
-     * @param contextID The context ID
-     * @param expires The date to compare the share's expires value with
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<ShareList> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares that were created for a specific guest user ID.
-     *
-     * @param contextID The context ID
-     * @param guestID The ID of the guest user to whom the share is for
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<ShareList> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares that were created for a specific guest user ID.
-     *
-     * @param contextID The context ID
-     * @param guestIDs The IDs of the guest users to whom the shares are for
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<ShareList> loadSharesForGuests(int contextID, int[] guestIDs, StorageParameters parameters) throws OXException;
-
-    /**
-     * Loads all shares that were created in supplied context.
-     *
-     * @param contextID The contextId
-     * @param parameters The storage parameters
-     * @return The shares
-     * @throws OXException On error
-     */
-    List<ShareList> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException;
+    //TODO: ownedBy and/or createdBy?
+    List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
 
 }

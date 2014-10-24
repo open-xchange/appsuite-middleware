@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.InternalRecipient;
 
 
@@ -67,7 +67,7 @@ public interface ModuleHandler {
 
     int getModule();
 
-    String getTargetTitle(Share target, Session session) throws OXException;
+    String getTargetTitle(ShareTarget target, Session session) throws OXException;
 
     void updateObjects(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException;
 

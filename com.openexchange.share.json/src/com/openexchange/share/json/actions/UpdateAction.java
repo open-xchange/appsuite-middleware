@@ -61,7 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.DefaultShare;
+import com.openexchange.share.DefaultShareList;
 import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.Share;
@@ -127,7 +127,7 @@ public class UpdateAction extends AbstractShareAction {
 //            }
 //        }
 
-        DefaultShare updatedShare = new DefaultShare(storedShare);
+        DefaultShareList updatedShare = new DefaultShareList(storedShare);
         updatedShare.setTargets(targets);
         if (recipient != null) {
 //            RecipientType type = recipient.getType();
