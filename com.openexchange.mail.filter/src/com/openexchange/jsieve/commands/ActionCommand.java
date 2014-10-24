@@ -72,6 +72,14 @@ public class ActionCommand extends ControlOrActionCommand {
      * string> keep discard
      */
 
+    /**
+     * Enum Arguments:
+     * - Command name
+     * - Minimum number of arguments
+     * - Tag arguments
+     * - JSON name
+     * - Required directive
+     */
     public enum Commands {
         KEEP("keep", 0, new Hashtable<String, Integer>(), "keep", Collections.<String> emptyList()),
         DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", Collections.<String> emptyList()),
@@ -83,9 +91,9 @@ public class ActionCommand extends ControlOrActionCommand {
         ENOTIFY("notify", 1, enotifytags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
         PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
-        ADDHEADER("addheader", 0, addheadertags(), "addheader", Collections.singletonList("editheader")),
-        DELETEHEADER("deleteheader", 0, deleteheadertags(), "deleteheader", Collections.singletonList("editheader")),
-        SET("set", 1, new Hashtable<String, Integer>(), "set", java.util.Arrays.asList("variables"));
+        ADDHEADER("addheader", 2, addheadertags(), "addheader", Collections.singletonList("editheader")),
+        DELETEHEADER("deleteheader", 1, deleteheadertags(), "deleteheader", Collections.singletonList("editheader")),
+        SET("set", 2, variables_tags(), "set", Collections.singletonList("variables"));
 
         private static Hashtable<String, Integer> addheadertags() {
             /*
@@ -94,7 +102,7 @@ public class ActionCommand extends ControlOrActionCommand {
              * "addheader" [":last"] <field-name: string> <value: string>
              */
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
-            retval.put(":last", Integer.valueOf(2));
+            retval.put(":last", Integer.valueOf(0));
             return retval;
         }
 
@@ -259,8 +267,8 @@ public class ActionCommand extends ControlOrActionCommand {
                     this.tagarguments.put(tag, new ArrayList<String>());
                 }
             } else {
-                if (i != (size - 1)) {
-                    throw new SieveException("The main argument has to stand at the last position in rule: " + this.toString());
+                if (!command.getTagargs().isEmpty() && i == 0) {
+                    throw new SieveException("The main arguments have to stand after the tag argument in the rule: " + this.toString());
                 }
             }
         }
