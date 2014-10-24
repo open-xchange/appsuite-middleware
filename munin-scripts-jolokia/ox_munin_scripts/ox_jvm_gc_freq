@@ -24,28 +24,28 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_category Open Xchange\n";
 	print "graph_vlabel number per hour\n";
 
-	my @confArray = ("label Copy","draw LINE1","type Derive","cdef a,3600,*","min 0");
+	my @confArray = ("label Copy","draw LINE1","type DERIVE","cdef a,3600,*","min 0");
 	callUrlForConfig("a",\@confArray,"/search/java.lang:name=Copy,type=GarbageCollector/CollectionTime");
 	
-	my @confArray = ("label MarkSweepCompact","draw LINE1","type Derive","cdef b,3600,*","min 0");
+	my @confArray = ("label MarkSweepCompact","draw LINE1","type DERIVE","cdef b,3600,*","min 0");
 	callUrlForConfig("b",\@confArray,"/search/java.lang:name=MarkSweepCompact,type=GarbageCollector/CollectionTime");
 	
-	my @confArray = ("label  PS MarkSweep","draw LINE1","type Derive","cdef b,3600,*","min 0");
+	my @confArray = ("label  PS MarkSweep","draw LINE1","type DERIVE","cdef b,3600,*","min 0");
 	callUrlForConfig("c",\@confArray,"/search/java.lang:name=PS MarkSweep,type=GarbageCollector/CollectionTime");
 	
-	my @confArray = ("label PS Scavenge","draw LINE1","type Derive","cdef v,3600,*","min 0");
+	my @confArray = ("label PS Scavenge","draw LINE1","type DERIVE","cdef v,3600,*","min 0");
 	callUrlForConfig("d",\@confArray,"/search/java.lang:name=PS Scavenge,type=GarbageCollector/CollectionTime");
 	
-	my @confArray = ("label ConcurrentMarkSweep","draw LINE1","type Derive","cdef e,3600,*","min 0");
+	my @confArray = ("label ConcurrentMarkSweep","draw LINE1","type DERIVE","cdef e,3600,*","min 0");
 	callUrlForConfig("e",\@confArray,"/search/java.lang:name=ConcurrentMarkSweep,type=GarbageCollector/CollectionTime");
 	
-	my @confArray = ("label ParNew","draw LINE1","type Derive","cdef f,3600,*","min 0");
+	my @confArray = ("label ParNew","draw LINE1","type DERIVE","cdef f,3600,*","min 0");
 	callUrlForConfig("f",\@confArray,"/search/java.lang:name=ParNew,type=GarbageCollector/CollectionTime");
 	
-	my @confArray = ("label G1 Young Generation","draw LINE1","type Derive","cdef g,3600,*","min 0");
+	my @confArray = ("label G1 Young Generation","draw LINE1","type DERIVE","cdef g,3600,*","min 0");
 	callUrlForConfig("g",\@confArray,"/search/java.lang:name=G1 Old Generation,type=GarbageCollector/CollectionTime");
 	
-	my @confArray = ("label Old Young Generation","draw LINE1","type Derive","cdef h,3600,*","min 0");
+	my @confArray = ("label Old Young Generation","draw LINE1","type DERIVE","cdef h,3600,*","min 0");
 	callUrlForConfig("h",\@confArray,"/search/java.lang:name=G1 Young Generation,type=GarbageCollector/CollectionTime");
 	
 	exit 0
