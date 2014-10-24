@@ -83,8 +83,8 @@ public class ActionCommand extends ControlOrActionCommand {
         ENOTIFY("notify", 1, enotifytags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
         PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
-        ADDHEADER("addheader", 2, addheadertags(), "addheader", Collections.singletonList("editheader")),
-        DELETEHEADER("deleteheader", 1, deleteheadertags(), "deleteheader", Collections.singletonList("editheader")),
+        ADDHEADER("addheader", 0, addheadertags(), "addheader", Collections.singletonList("editheader")),
+        DELETEHEADER("deleteheader", 0, deleteheadertags(), "deleteheader", Collections.singletonList("editheader")),
         SET("set", 1, new Hashtable<String, Integer>(), "set", java.util.Arrays.asList("variables"));
 
         private static Hashtable<String, Integer> addheadertags() {
