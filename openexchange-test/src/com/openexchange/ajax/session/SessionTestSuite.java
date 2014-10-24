@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.session;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -74,6 +75,8 @@ public final class SessionTestSuite {
         tests.addTestSuite(ChangeIPTest.class);
         tests.addTestSuite(FormLoginTest.class);
         tests.addTestSuite(TokenLoginTest.class);
+        tests.addTestSuite(Bug34928Test.class);
+        tests.addTest(new JUnit4TestAdapter(Bug35129Test.class));
         return tests;
     }
 }
