@@ -50,6 +50,7 @@
 package com.openexchange.share.impl;
 
 import static org.junit.Assert.assertEquals;
+import java.util.Random;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.java.util.UUIDs;
@@ -65,19 +66,29 @@ public class ShareToolTest {
 
     @Test
     public void testSomeCombinations() {
-        assertToken(new int[] {1, 1}, "2ed1149f2ed1149f");
-        assertToken(new int[] {424242669, 1}, "379879732ed1149f");
-        assertToken(new int[] {424242669, 84}, "379879732ed114ca");
-        assertToken(new int[] {Integer.MAX_VALUE, 16}, "512eeb612ed1148e");
+        Random r = new Random();
+        for (int i = 0; i < 100000; i++) {
+            int userId = r.nextInt(Integer.MAX_VALUE);
+            int contextId = r.nextInt(Integer.MAX_VALUE);
+            assertToken(new int[] {userId, contextId});
+//            System.out.println(token);
+        }
+
+        assertToken(new int[] {0, 0});
+        assertToken(new int[] {0, Integer.MAX_VALUE});
+        assertToken(new int[] {Integer.MAX_VALUE, 0});
+        assertToken(new int[] {1, 1});
+        assertToken(new int[] {1, Integer.MAX_VALUE});
+        assertToken(new int[] {Integer.MAX_VALUE, 1});
     }
 
-    private static void assertToken(int[] cidAndUid, String expectedPrefix) {
+    private static String assertToken(int[] cidAndUid) {
         String baseToken = UUIDs.getUnformattedString(UUID.randomUUID());
         String token = ShareTool.generateShareToken(cidAndUid[0], cidAndUid[1], baseToken);
-        assertEquals(expectedPrefix + baseToken, token);
         assertEquals(cidAndUid[0], ShareTool.extractContextId(token));
         assertEquals(cidAndUid[1], ShareTool.extractUserId(token));
         assertEquals(baseToken, ShareTool.extractBaseToken(token));
+        return token;
     }
 
 }

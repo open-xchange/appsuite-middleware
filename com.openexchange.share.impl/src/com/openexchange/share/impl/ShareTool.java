@@ -90,8 +90,6 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class ShareTool {
 
-    static final int OBFUSCATOR = 785454238;
-
     public static final String SHARE_SERVLET = "share";
 
     private static final String SHARE_BASE_TOKEN_ATTRIBUTE = "com.openexchange.shareBaseToken";
@@ -109,8 +107,9 @@ public class ShareTool {
             return -1;
         }
 
+        int obfuscator = getContextObfuscator(token.substring(16));
         String context = token.substring(0, 8);
-        return Integer.parseInt(context, 16) ^ OBFUSCATOR;
+        return Integer.parseInt(context, 16) ^ obfuscator;
     }
 
     /**
@@ -124,8 +123,9 @@ public class ShareTool {
             return -1;
         }
 
+        int obfuscator = getUserObfuscator(token.substring(16));
         String user = token.substring(8, 16);
-        return Integer.parseInt(user, 16) ^ OBFUSCATOR;
+        return Integer.parseInt(user, 16) ^ obfuscator;
     }
 
     /**
@@ -151,8 +151,10 @@ public class ShareTool {
      * @return The share token
      */
     public static String generateShareToken(int contextId, int userId, String baseToken) {
-        String context = String.format("%08x", contextId ^ OBFUSCATOR);
-        String user = String.format("%08x", userId ^ OBFUSCATOR);
+        int contextObfuscator = getContextObfuscator(baseToken);
+        int userObfuscator = getUserObfuscator(baseToken);
+        String context = String.format("%08x", contextId ^ contextObfuscator);
+        String user = String.format("%08x", userId ^ userObfuscator);
         return context + user + baseToken;
     }
 
@@ -189,6 +191,14 @@ public class ShareTool {
         }
 
         return match.iterator().next();
+    }
+
+    private static int getContextObfuscator(String baseToken) {
+        return Integer.parseInt(baseToken.substring(0, 7), 16);
+    }
+
+    private static int getUserObfuscator(String baseToken) {
+        return Integer.parseInt(baseToken.substring(7, 14), 16);
     }
 
     /**
