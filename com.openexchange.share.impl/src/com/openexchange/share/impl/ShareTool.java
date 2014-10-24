@@ -101,7 +101,12 @@ public class ShareTool {
 
     private static Pattern TOKEN_PATTERN = Pattern.compile("[a-f0-9]{32}", Pattern.CASE_INSENSITIVE);
 
-
+    /**
+     * Extracts the context ID from a share token
+     *
+     * @param token The share token
+     * @return The context ID or -1, if the token was invalid
+     */
     public static int extractContextId(String token) {
         if (token.length() != 8 + 8 + 32) {
             return -1;
@@ -111,6 +116,12 @@ public class ShareTool {
         return Integer.parseInt(context, 16) ^ OBFUSCATOR;
     }
 
+    /**
+     * Extracts the user ID from a share token
+     *
+     * @param token The share token
+     * @return The user ID or -1, if the token was invalid
+     */
     public static int extractUserId(String token) {
         if (token.length() != 8 + 8 + 32) {
             return -1;
@@ -120,6 +131,12 @@ public class ShareTool {
         return Integer.parseInt(user, 16) ^ OBFUSCATOR;
     }
 
+    /**
+     * Extracts the base token from a share token
+     *
+     * @param shareToken The share token
+     * @return The base token
+     */
     public static String extractBaseToken(String shareToken) {
         if (shareToken.length() != 8 + 8 + 32) {
             return null;
@@ -128,10 +145,34 @@ public class ShareTool {
         return shareToken.substring(16);
     }
 
-    public static String generateShareToken(int contextId, int userId, String shareToken) {
+    /**
+     * Generates a share token for a guest user.
+     *
+     * @param contextId The context ID
+     * @param userId The guest users ID
+     * @param baseToken The guest users base token
+     * @return The share token
+     */
+    public static String generateShareToken(int contextId, int userId, String baseToken) {
         String context = String.format("%08x", contextId ^ OBFUSCATOR);
         String user = String.format("%08x", userId ^ OBFUSCATOR);
-        return context + user + shareToken;
+        return context + user + baseToken;
+    }
+
+    /**
+     * Generates a share token for a guest user.
+     *
+     * @param contextId The context ID
+     * @param user The guest user
+     * @return The share token or <code>null</code> if the user object did not contain the base token attribute
+     */
+    public static String generateShareToken(int contextId, User user) {
+        String baseToken = getBaseToken(user);
+        if (baseToken == null) {
+            return null;
+        }
+
+        return generateShareToken(contextId, user.getId(), baseToken);
     }
 
 //    public static String getShareUrl(int contextId, Share share, String protocol, String fallbackHostname) {
@@ -175,7 +216,7 @@ public class ShareTool {
      * @param guest The guest user
      * @return The base token or null
      */
-    public static String getShareToken(User guest) {
+    public static String getBaseToken(User guest) {
         Map<String, Set<String>> attributes = guest.getAttributes();
         if (attributes == null) {
             return null;
