@@ -102,7 +102,8 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.report.osgi.ReportActivator(),
         new com.openexchange.groupware.update.tasks.quota.QuotaGWActivator(),
         new com.openexchange.server.osgi.PingActivator(),
-        new com.openexchange.passwordchange.osgi.PasswordChangeActivator()
+        new com.openexchange.passwordchange.osgi.PasswordChangeActivator(),
+        new com.openexchange.ajax.anonymizer.osgi.AnonymizerActivator(),
     };
 
     public ServerCompositeActivator() {
