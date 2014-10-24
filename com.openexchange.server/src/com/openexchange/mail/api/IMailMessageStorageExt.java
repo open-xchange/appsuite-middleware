@@ -50,8 +50,12 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.search.SearchTerm;
 
 /**
  * {@link IMailMessageStorageExt} - Extends {@link IMailMessageStorage} for mail systems which support to request single header names.
@@ -116,6 +120,6 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * @return The desired, pre-filled instances of {@link MailMessage}
      * @throws OXException If mails cannot be returned
      */
-    //public MailMessage[] searchMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException;
+    public MailMessage[] searchMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException;
 
 }
