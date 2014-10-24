@@ -56,6 +56,7 @@ package com.openexchange.share.storage.mapping;
  */
 public enum ShareField {
 
+    CONTEXT_ID,
     GUEST,
     MODULE,
     FOLDER,
