@@ -66,9 +66,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareList;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -157,45 +157,22 @@ public class GuestShareResultConverter implements ResultConverter {
             /*
              * common share properties
              */
-            ShareList share = guestShare.getShare();
-            json.putOpt("token", share.getToken());
+            Share share = guestShare.getShare();
             json.putOpt("share_url", guestShare.getShareURL());
-            json.putOpt("authentication", null != share.getAuthentication() ? share.getAuthentication().toString().toLowerCase() : null);
+            json.putOpt("authentication", null != guestShare.getAuthentication() ? guestShare.getAuthentication().toString().toLowerCase() : null);
             json.putOpt("created", null != share.getCreated() ? addTimeZoneOffset(share.getCreated().getTime(), timeZone) : null);
             json.put("created_by", share.getCreatedBy());
-            json.putOpt("last_modified", null != share.getLastModified() ? addTimeZoneOffset(share.getLastModified().getTime(), timeZone) : null);
+            json.putOpt("last_modified", null != share.getModified() ? addTimeZoneOffset(share.getModified().getTime(), timeZone) : null);
             json.put("modified_by", share.getModifiedBy());
             /*
              * share targets & recipient
              */
-            json.put("targets", serializeShareTargets(guestShare, timeZone));
+            json.putOpt("target", serializeShareTarget(guestShare.getShare().getTarget(), timeZone));
             json.put("recipient", serializeShareRecipient(guestShare, timeZone));
             return json;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
-    }
-
-    /**
-     * Extracts the share targets from a guest share and serializes it to JSON.
-     *
-     * @param guestShare The guest share to serialize the share targets for
-     * @param timeZone The client timezone
-     * @return The serialized share targets
-     * @throws JSONException
-     */
-    private JSONArray serializeShareTargets(GuestShare guestShare, TimeZone timeZone) throws JSONException {
-        List<Share> targets = guestShare.getShare().getTargets();
-        if (null == targets) {
-            return null;
-        }
-        JSONArray jsonArray = new JSONArray(targets.size());
-        for (Share target : targets) {
-            JSONObject jsonTarget = serializeShareTarget(target, timeZone);
-            jsonTarget.put("target_url", guestShare.getShareURL() + '/' + target.getPath());
-            jsonArray.put(jsonTarget);
-        }
-        return jsonArray;
     }
 
     /**
@@ -206,7 +183,7 @@ public class GuestShareResultConverter implements ResultConverter {
      * @return The serialized share target
      * @throws JSONException
      */
-    private JSONObject serializeShareTarget(Share target, TimeZone timeZone) throws JSONException {
+    private JSONObject serializeShareTarget(ShareTarget target, TimeZone timeZone) throws JSONException {
         JSONObject jsonTarget = new JSONObject(8);
         Module module = Module.getForFolderConstant(target.getModule());
         jsonTarget.put("module", null == module ? String.valueOf(target.getModule()) : module.getName());
@@ -233,7 +210,7 @@ public class GuestShareResultConverter implements ResultConverter {
      */
     private JSONObject serializeShareRecipient(GuestShare guestShare, TimeZone timeZone) throws JSONException, OXException {
         JSONObject jsonRecipient = new JSONObject(8);
-        switch (guestShare.getShare().getAuthentication()) {
+        switch (guestShare.getAuthentication()) {
         case ANONYMOUS:
             jsonRecipient.put("type", RecipientType.ANONYMOUS.toString().toLowerCase());
             break;
@@ -254,7 +231,7 @@ public class GuestShareResultConverter implements ResultConverter {
             }
             break;
         default:
-            throw new UnsupportedOperationException("Unsupported authentication: " + guestShare.getShare().getAuthentication());
+            throw new UnsupportedOperationException("Unsupported authentication: " + guestShare.getAuthentication());
         }
         jsonRecipient.put("entity", String.valueOf(guestShare.getGuest().getId()));
         return jsonRecipient;

@@ -120,7 +120,7 @@ public class AllAction extends AbstractShareAction {
             User guest = guestInfo.getGuest();
 
             String guestPassword = AuthenticationMode.ANONYMOUS_PASSWORD == guestInfo.getAuthMode() ? cryptoService.decrypt(guest.getUserPassword()) : null;
-            guestShares.add(new GuestShare(share, guest, guestPassword, shareURL));
+            guestShares.add(new GuestShare(share, guest, guestPassword, shareURL, guestInfo.getAuthMode()));
         }
         return new AJAXRequestResult(guestShares, lastModified, "guestshare");
     }

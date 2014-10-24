@@ -50,6 +50,7 @@
 package com.openexchange.share.json;
 
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 
 /**
@@ -63,6 +64,7 @@ public class GuestShare {
     private final User guest;
     private final String guestPassword;
     private final String shareURL;
+    private final AuthenticationMode authentication;
 
     /**
      * Initializes a new {@link GuestShare}.
@@ -72,12 +74,13 @@ public class GuestShare {
      * @param guestPassword The guest password
      * @param shareURL The share URL
      */
-    public GuestShare(Share share, User guest, String guestPassword, String shareURL) {
+    public GuestShare(Share share, User guest, String guestPassword, String shareURL, AuthenticationMode authentication) {
         super();
         this.share = share;
         this.guest = guest;
         this.guestPassword = guestPassword;
         this.shareURL = shareURL;
+        this.authentication = authentication;
     }
 
     /**
@@ -114,6 +117,15 @@ public class GuestShare {
      */
     public String getShareURL() {
         return shareURL;
+    }
+
+    /**
+     * Gets the authentication
+     *
+     * @return The authentication
+     */
+    public AuthenticationMode getAuthentication() {
+        return authentication;
     }
 
 }
