@@ -71,9 +71,14 @@
 //import com.openexchange.server.ServiceLookup;
 //import com.openexchange.session.Session;
 //import com.openexchange.share.AuthenticationMode;
+<<<<<<< HEAD
 //import com.openexchange.share.DefaultShareList;
 //import com.openexchange.share.ShareList;
 //import com.openexchange.share.Share;
+=======
+//import com.openexchange.share.Share;
+//import com.openexchange.share.ShareTarget;
+>>>>>>> Commented out sharing tests temporarily
 //import com.openexchange.share.storage.ShareStorage;
 //import com.openexchange.user.UserService;
 //import com.openexchange.userconf.UserPermissionService;
@@ -99,6 +104,7 @@
 //
 //    private Session session;
 //
+<<<<<<< HEAD
 //    private DefaultShareList s1;
 //
 //    private DefaultShareList s2;
@@ -108,6 +114,17 @@
 //    private Share t2;
 //
 //    private Share t3;
+=======
+//    private Share s1;
+//
+//    private Share s2;
+//
+//    private ShareTarget t1;
+//
+//    private ShareTarget t2;
+//
+//    private ShareTarget t3;
+>>>>>>> Commented out sharing tests temporarily
 //
 //    @Before
 //    public void setUp() throws Exception {
@@ -124,16 +141,27 @@
 //        services.put(UserPermissionService.class, Mockito.mock(UserPermissionService.class, Mockito.RETURNS_DEEP_STUBS));
 //        services.put(ContactUserStorage.class, Mockito.mock(ContactUserStorage.class, Mockito.RETURNS_DEEP_STUBS));
 //
+<<<<<<< HEAD
 //        List<Share> targets = new ArrayList<Share>(3);
 //        t1 = new Share(FolderObject.INFOSTORE, "1");
 //        t2 = new Share(FolderObject.INFOSTORE, "2");
 //        t3 = new Share(FolderObject.INFOSTORE, "3");
+=======
+//        List<ShareTarget> targets = new ArrayList<ShareTarget>(3);
+//        t1 = new ShareTarget(FolderObject.INFOSTORE, "1");
+//        t2 = new ShareTarget(FolderObject.INFOSTORE, "2");
+//        t3 = new ShareTarget(FolderObject.INFOSTORE, "3");
+>>>>>>> Commented out sharing tests temporarily
 //        targets.add(t1);
 //        targets.add(t2);
 //        targets.add(t3);
 //        s1 = createShare(2, targets);
 //
+<<<<<<< HEAD
 //        targets = new ArrayList<Share>(targets);
+=======
+//        targets = new ArrayList<ShareTarget>(targets);
+>>>>>>> Commented out sharing tests temporarily
 //        s2 = createShare(3, targets);
 //
 //        shareStorage.storeShare(s1, null);
@@ -193,8 +221,13 @@
 //        return (S) services.get(clazz);
 //    }
 //
+<<<<<<< HEAD
 //    private static DefaultShareList createShare(int guestID, List<Share> targets) {
 //        DefaultShareList share = new DefaultShareList();
+=======
+//    private static Share createShare(int guestID, List<ShareTarget> targets) {
+//        Share share = new Share();
+>>>>>>> Commented out sharing tests temporarily
 //        share.setAuthentication(AuthenticationMode.GUEST_PASSWORD);
 //        share.setContextID(CONTEXT_ID);
 //        share.setCreated(new Date());
