@@ -64,6 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.json.GuestShare;
@@ -90,36 +91,93 @@ public class AllAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ShareService shareService = getShareService();
-        List<ShareList> shares = shareService.getAllShares(session);
+        List<Share> shares = shareService.getAllShares(session);
         if (null == shares || 0 == shares.size()) {
             return new AJAXRequestResult(new JSONArray());
         }
         List<String> shareURLs = generateShareURLs(session.getContextId(), shares, requestData);
         Date lastModified = null;
         Set<Integer> guestIDs = new HashSet<Integer>();
-        for (ShareList share : shares) {
-            Date shareLastModified = share.getLastModified();
+        for (Share share : shares) {
+            Date shareLastModified = share.getModified();
             if (null == lastModified || null != shareLastModified && shareLastModified.after(lastModified)) {
                 lastModified = shareLastModified;
             }
             guestIDs.add(Integer.valueOf(share.getGuest()));
         }
         User[] guestUsers = getUserService().getUser(session.getContext(), Autoboxing.I2i(guestIDs));
-        Map<Integer, User> guestUsersByID = new HashMap<Integer, User>();
+        Map<Integer, GuestInfo> guestUsersByID = new HashMap<Integer, GuestInfo>();
         for (User user : guestUsers) {
-            guestUsersByID.put(Integer.valueOf(user.getId()), user);
+            AuthenticationMode authMode = shareService.getAuthenticationMode(session.getContextId(), user.getId());
+            guestUsersByID.put(Integer.valueOf(user.getId()), new GuestInfo(user, authMode));
         }
         ShareCryptoService cryptoService = services.getService(ShareCryptoService.class);
         List<GuestShare> guestShares = new ArrayList<GuestShare>(shares.size());
         for (int i = 0; i < shares.size(); i++) {
-            ShareList share = shares.get(i);
+            Share share = shares.get(i);
             String shareURL = shareURLs.get(i);
-            User guestUser = guestUsersByID.get(Integer.valueOf(share.getGuest()));
-            String guestPassword = AuthenticationMode.ANONYMOUS_PASSWORD == share.getAuthentication() ?
-                cryptoService.decrypt(guestUser.getUserPassword()) : null;
-            guestShares.add(new GuestShare(share, guestUser, guestPassword, shareURL));
+            GuestInfo guestInfo = guestUsersByID.get(Integer.valueOf(share.getGuest()));
+            User guest = guestInfo.getGuest();
+
+            String guestPassword = AuthenticationMode.ANONYMOUS_PASSWORD == guestInfo.getAuthMode() ? cryptoService.decrypt(guest.getUserPassword()) : null;
+            guestShares.add(new GuestShare(share, guest, guestPassword, shareURL));
         }
         return new AJAXRequestResult(guestShares, lastModified, "guestshare");
+    }
+
+    private static final class GuestInfo {
+
+        private final User guest;
+
+        private final AuthenticationMode authMode;
+
+        public GuestInfo(User guest, AuthenticationMode authMode) {
+            super();
+            this.guest = guest;
+            this.authMode = authMode;
+        }
+
+        public User getGuest() {
+            return guest;
+        }
+
+        public AuthenticationMode getAuthMode() {
+            return authMode;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((authMode == null) ? 0 : authMode.hashCode());
+            result = prime * result + ((guest == null) ? 0 : guest.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            GuestInfo other = (GuestInfo) obj;
+            if (authMode != other.authMode)
+                return false;
+            if (guest == null) {
+                if (other.guest != null)
+                    return false;
+            } else if (!guest.equals(other.guest))
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "GuestInfo [guest=" + guest + ", authMode=" + authMode + "]";
+        }
+
     }
 
 }

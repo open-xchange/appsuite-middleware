@@ -75,6 +75,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ResolvedShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
@@ -121,7 +122,7 @@ public class DefaultShareService implements ShareService {
         }
 
         User guest = services.getService(UserService.class).getUser(guestID, contextID);
-        if (!baseToken.equals(ShareTool.getBaseToken(guest))) {
+        if (!baseToken.equals(ShareTool.getBaseToken(guest)) || !guest.isGuest()) {
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
 
@@ -130,11 +131,38 @@ public class DefaultShareService implements ShareService {
         for (Share share : shares) {
             targets.add(share.getTarget());
         }
+
         ResolvedShare resolvedShare = new ResolvedShare();
         resolvedShare.setContextID(contextID);
         resolvedShare.setGuestID(guestID);
         resolvedShare.setTargets(targets);
+        resolvedShare.setAuthentication(getAuthenticationMode(contextID, guest));
+        resolvedShare.setToken(baseToken);
         return resolvedShare;
+    }
+
+    @Override
+    public AuthenticationMode getAuthenticationMode(int contextID, int guestID) throws OXException {
+        User guest = services.getService(UserService.class).getUser(guestID, contextID);
+        if (!guest.isGuest()) {
+            throw ShareExceptionCodes.UNKNOWN_GUEST.create(guestID);
+        }
+
+        return getAuthenticationMode(contextID, guest);
+    }
+
+    private AuthenticationMode getAuthenticationMode(int contextID, User guest) throws OXException {
+        AuthenticationMode authMode = AuthenticationMode.ANONYMOUS;
+        if (guest.getUserPassword() != null) {
+            String passwordMech = guest.getPasswordMech();
+            if ("{CRYPTO_SERVICE}".equals(passwordMech)) {
+                authMode = AuthenticationMode.ANONYMOUS_PASSWORD;
+            } else {
+                authMode = AuthenticationMode.GUEST_PASSWORD;
+            }
+        }
+
+        return authMode;
     }
 
 //    @Override

@@ -116,6 +116,11 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
      * Module %1$s does not support sharing of folders.
      */
     SHARING_FOLDERS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 13),
+
+    /**
+     * User %1$d is not a guest user.
+     */
+    UNKNOWN_GUEST("User %1$d is not a guest user.", null, CATEGORY_ERROR, 14),
     ;
 
     private static final String PREFIX = "SHR";
