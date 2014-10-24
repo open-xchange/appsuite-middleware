@@ -76,4 +76,6 @@ public interface ShareStorage {
 
     int deleteShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
 
+    boolean existShares(int contextId, int id, StorageParameters parameters) throws OXException;
+
 }

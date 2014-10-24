@@ -94,6 +94,8 @@ public class ShareTool {
 
     private static final String SHARE_BASE_TOKEN_ATTRIBUTE = "com.openexchange.shareBaseToken";
 
+    private static final String GUEST_LAST_MODIFIED_ATTRIBUTE = "com.openexchange.guestLastModified";
+
     private static Pattern TOKEN_PATTERN = Pattern.compile("[a-f0-9]{32}", Pattern.CASE_INSENSITIVE);
 
     /**
@@ -180,12 +182,16 @@ public class ShareTool {
      * @return The base token or null
      */
     public static String getBaseToken(User guest) {
-        Map<String, Set<String>> attributes = guest.getAttributes();
+        return getUserAttribute(guest, SHARE_BASE_TOKEN_ATTRIBUTE);
+    }
+
+    private static String getUserAttribute(User user, String name) {
+        Map<String, Set<String>> attributes = user.getAttributes();
         if (attributes == null) {
             return null;
         }
 
-        Set<String> match = attributes.get(SHARE_BASE_TOKEN_ATTRIBUTE);
+        Set<String> match = attributes.get(name);
         if (match == null || match.isEmpty()) {
             return null;
         }
@@ -551,6 +557,26 @@ public class ShareTool {
     public static void validateTargets(Collection<ShareTarget> targets) throws OXException {
         for (ShareTarget target : targets) {
             validateTarget(target);
+        }
+    }
+
+    /**
+     * Gets whether this guest user was not modified since a given
+     * date. The detection is based on the user attribute <code>com.openexchange.guestLastModified</code>.
+     *
+     * @param minLastModified The minimum date to check against.
+     * @return <code>true</code> if this user has not been modified since the given date.
+     */
+    public static boolean userNotModifiedSince(User guest, Date minLastModified) {
+        String attribute = getUserAttribute(guest, GUEST_LAST_MODIFIED_ATTRIBUTE);
+        if (attribute == null) {
+            return true;
+        }
+        try {
+            Date lastModified = new Date(Long.parseLong(attribute));
+            return lastModified.before(minLastModified);
+        } catch (NumberFormatException e) {
+            return true;
         }
     }
 

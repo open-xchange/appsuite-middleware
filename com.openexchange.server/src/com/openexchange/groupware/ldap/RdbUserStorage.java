@@ -63,7 +63,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -83,7 +82,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -481,6 +479,11 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
+    public User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return getUser(ctx, con, listAllUser(ctx, con, includeGuests, excludeUsers));
+    }
+
+    @Override
     public User[] getUser(final Context ctx, final int[] userIds) throws OXException {
         if (0 == userIds.length) {
             return new User[0];
@@ -784,7 +787,7 @@ public class RdbUserStorage extends UserStorage {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
-        
+
         Connection con = null;
         PreparedStatement stmt = null;
         try {
@@ -802,12 +805,12 @@ public class RdbUserStorage extends UserStorage {
         	throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
         	Databases.closeSQLStuff(stmt);
-        	if (con != null) {        		
+        	if (con != null) {
         		DBPool.closeWriterSilent(context, con);
-        	}        	
+        	}
         }
     }
-    
+
     private void insertOrUpdateAttribute(final String name, final String value, final int userId, final Context context, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -822,7 +825,7 @@ public class RdbUserStorage extends UserStorage {
 	    	while (rs.next()) {
 	    		toUpdate.add(UUIDs.toUUID(rs.getBytes(1)));
 	    	}
-	    	
+
 	    	Databases.closeSQLStuff(rs, stmt);
 			rs = null;
 	    	if (toUpdate.isEmpty()) {
@@ -853,7 +856,7 @@ public class RdbUserStorage extends UserStorage {
 	    			}
 	    		}
 	    	}
-	    	
+
 	    	con.commit();
         } catch (OXException e) {
         	Databases.rollback(con);
@@ -866,7 +869,7 @@ public class RdbUserStorage extends UserStorage {
         	Databases.autocommit(con);
         }
     }
-    
+
     @Override
     public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
         if (null == name) {
@@ -1356,17 +1359,22 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listAllUser(final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
-        Connection con = null;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final Exception e) {
-            throw UserExceptionCode.NO_CONNECTION.create(e);
+    public int[] listAllUser(Connection con, final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+        boolean closeCon = false;
+        if (con == null) {
+            try {
+                closeCon = true;
+                con = DBPool.pickup(context);
+            } catch (final Exception e) {
+                throw UserExceptionCode.NO_CONNECTION.create(e);
+            }
         }
         try {
             return listAllUser(context, con, includeGuests, excludeUsers);
         } finally {
-            DBPool.closeReaderSilent(context, con);
+            if (closeCon) {
+                DBPool.closeReaderSilent(context, con);
+            }
         }
     }
 

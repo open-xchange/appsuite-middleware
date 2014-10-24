@@ -231,6 +231,31 @@ public interface UserService {
     User[] getUser(Context ctx) throws OXException;
 
     /**
+     * Reads all user for the given context, optionally including/excluding guest- and regular users. This method
+     * is faster than getting each user information with the {@link #getUser(Context)} and filtering them afterwards.
+     *
+     * @param ctx the context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user objects from a context.
+     * @throws OXException if all user objects can not be loaded from the persistent storage.
+     */
+   User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+   /**
+    * Reads all user for the given context, optionally including/excluding guest- and regular users. This method
+    * is faster than getting each user information with the {@link #getUser(Context)} and filtering them afterwards.
+    *
+    * @param con A database connection
+    * @param ctx the context.
+    * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+    * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+    * @return an array with all user objects from a context.
+    * @throws OXException if all user objects can not be loaded from the persistent storage.
+    */
+   User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
      * change. Every attribute with value <code>null</code> will not be touched.
      * <p>

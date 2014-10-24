@@ -279,39 +279,43 @@ public class DefaultShareService implements ShareService {
         for (Share share : shares) {
             guestIDs.add(Integer.valueOf(share.getGuest()));
         }
-        int[] guests = I2i(guestIDs);
-        Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-        UserService userService = services.getService(UserService.class);
+
         /*
          * delete shares in storage
          */
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
         shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
         /*
          * check remaining shares per guest
          */
-        List<Share> remainingShares = shareStorage.loadShares(contextID, guests, connectionHelper.getParameters());
-        Map<Integer, List<Share>> sharesByGuest = ShareTool.mapSharesByGuest(remainingShares, guests);
         for (int guest : guestIDs) {
-            List<Share> sharesOfGuest = sharesByGuest.get(Integer.valueOf(guest));
-            if (null == sharesOfGuest || 0 == sharesOfGuest.size()) {
-                /*
-                 * no shares left for guest user, delete him
-                 */
-                userPermissionService.deleteUserPermissionBits(connectionHelper.getConnection(), context, guest);
-                //TODO: delete by user ID
-                // contactUserStorage.deleteGuestContact(session.getContextId(), share.getGuest(), null, connectionHelper.getConnection());
-                userService.deleteUser(connectionHelper.getConnection(), context, guest);
-            } else {
-                /*
-                 * adjust user permissions to reflect currently available shares for guest
-                 */
-                User guestUser = userService.getUser(guest, context);
-                int permissionBits = ShareTool.getRequiredPermissionBits(guestUser, sharesOfGuest);
-                setPermissionBits(connectionHelper.getConnection(), context, guest, permissionBits, false);
-            }
+            // TODO: check async
+            new AdjustGuestPermissionTask(services, contextID, guest).perform(connectionHelper);
         }
+//        int[] guests = I2i(guestIDs);
+//        Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
+//        UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
+//        UserService userService = services.getService(UserService.class);
+//        List<Share> remainingShares = shareStorage.loadShares(contextID, guests, connectionHelper.getParameters());
+//        Map<Integer, List<Share>> sharesByGuest = ShareTool.mapSharesByGuest(remainingShares, guests);
+//        for (int guest : guestIDs) {
+//            List<Share> sharesOfGuest = sharesByGuest.get(Integer.valueOf(guest));
+//            if (null == sharesOfGuest || 0 == sharesOfGuest.size()) {
+//                /*
+//                 * no shares left for guest user, delete him
+//                 */
+//                userPermissionService.deleteUserPermissionBits(connectionHelper.getConnection(), context, guest);
+//                services.getService(ContactUserStorage.class).deleteGuestContact(contextID, guest, new Date(), connectionHelper.getConnection());
+//                userService.deleteUser(connectionHelper.getConnection(), context, guest);
+//            } else {
+//                /*
+//                 * adjust user permissions to reflect currently available shares for guest
+//                 */
+//                User guestUser = userService.getUser(guest, context);
+//                int permissionBits = ShareTool.getRequiredPermissionBits(guestUser, sharesOfGuest);
+//                setPermissionBits(connectionHelper.getConnection(), context, guest, permissionBits, false);
+//            }
+//        }
     }
 
 
@@ -696,10 +700,10 @@ public class DefaultShareService implements ShareService {
         Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
         ShareStorage shareStorage = services.getService(ShareStorage.class);
 //        shareStorage.updateShares(context.getContextId(), shares, connectionHelper.getParameters());
-        for (Share share : shares) {
-            int requiredPermissionBits = ShareTool.getUserPermissionBits(share);
-            setPermissionBits(connectionHelper.getConnection(), context, share.getGuest(), requiredPermissionBits, false);
-        }
+//        for (Share share : shares) {
+//            int requiredPermissionBits = ShareTool.getUserPermissionBits(share);
+//            setPermissionBits(connectionHelper.getConnection(), context, share.getGuest(), requiredPermissionBits, false);
+//        }
     }
 
     /**
@@ -733,6 +737,7 @@ public class DefaultShareService implements ShareService {
             }
             if (null != existingGuestUser) {
                 /*
+                 * TODO: try to use new AdjustGuestPermissionTask
                  * combine permission bits with existing ones
                  */
                 UserPermissionBits userPermissionBits = setPermissionBits(connection, context, existingGuestUser.getId(), permissionBits, true);

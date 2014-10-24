@@ -120,6 +120,12 @@ public class SimUserService implements UserService {
         return null;
     }
 
+    @Override
+    public User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
+        // Nothing to do
+        return null;
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#getUserId(java.lang.String, com.openexchange.groupware.contexts.Context)
      */
@@ -253,6 +259,12 @@ public class SimUserService implements UserService {
     @Override
     public void deleteUser(Connection con, Context context, int userId) throws OXException {
         // Nothing to do
+    }
+
+    @Override
+    public User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

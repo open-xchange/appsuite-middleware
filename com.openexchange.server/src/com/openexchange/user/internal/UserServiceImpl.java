@@ -135,6 +135,16 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().getUser(con, ctx, includeGuests, excludeUsers);
+    }
+
+    @Override
+    public User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().getUser(ctx, includeGuests, excludeUsers);
+    }
+
+    @Override
     public int createUser(final Context context, final User user) throws OXException {
         checkUser(user);
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
@@ -201,7 +211,7 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public int[] listAllUser(final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return UserStorage.getInstance().listAllUser(context, includeGuests, excludeUsers);
+        return UserStorage.getInstance().listAllUser(null, context, includeGuests, excludeUsers);
     }
 
     @Override

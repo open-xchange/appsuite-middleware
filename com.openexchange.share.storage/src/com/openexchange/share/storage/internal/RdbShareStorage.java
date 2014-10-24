@@ -86,6 +86,17 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
+    // TODO: optimize
+    public boolean existShares(int contextID, int guest, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ShareSelector(contextID).guests(new int[] { guest }).select(provider.get()).size() > 0;
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
     public List<Share> loadShares(int contextID, int guest, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {

@@ -172,6 +172,20 @@ public abstract class UserStorage {
     public abstract User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
+     * Reads the data of all users from the persistent data storage, optionally including/excluding guest- and regular users. This method
+     * is faster than getting each user information with the {@link #getUser(int, Context)} method if nearly all users are needed from a
+     * context.
+     *
+     * @param con A database connection.
+     * @param ctx the context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user objects from a context.
+     * @throws OXException if all user objects can not be loaded from the persistent storage.
+     */
+    public abstract User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
      * change. Every attribute with value <code>null</code> will not be touched.
      * <p>
@@ -315,19 +329,20 @@ public abstract class UserStorage {
      * @throws OXException if generating this list fails.
      */
     public int[] listAllUser(Context context) throws OXException {
-        return listAllUser(context, false, false);
+        return listAllUser(null, context, false, false);
     }
 
     /**
      * Returns an array with all user identifier of the context.
      *
+     * @param con The database connection, <code>null</code> if a one shall be obtained from the pool
      * @param context The context.
      * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
      * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
      * @return an array with all user identifier of the context.
      * @throws OXException if generating this list fails.
      */
-    public abstract int[] listAllUser(Context context, boolean includeGuests, boolean excludeUsers) throws OXException;
+    public abstract int[] listAllUser(Connection con, Context context, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
@@ -582,4 +597,5 @@ public abstract class UserStorage {
         }
         return getStorageUser(session.getUserId(), session.getContextId());
     }
+
 }

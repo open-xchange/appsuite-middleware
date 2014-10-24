@@ -139,7 +139,12 @@ public class CachingUserStorage extends UserStorage {
 
     @Override
     public User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return getUser(ctx, listAllUser(ctx, includeGuests, excludeUsers));
+        return getUser(ctx, listAllUser(null, ctx, includeGuests, excludeUsers));
+    }
+
+    @Override
+    public User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return getUser(ctx, listAllUser(con, ctx, includeGuests, excludeUsers));
     }
 
     @Override
@@ -286,8 +291,8 @@ public class CachingUserStorage extends UserStorage {
 
 
     @Override
-    public int[] listAllUser(Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return delegate.listAllUser(context, includeGuests, excludeUsers);
+    public int[] listAllUser(Connection con, Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return delegate.listAllUser(con, context, includeGuests, excludeUsers);
     }
 
     @Override
