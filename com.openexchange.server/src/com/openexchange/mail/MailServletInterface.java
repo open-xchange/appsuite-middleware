@@ -112,7 +112,7 @@ public abstract class MailServletInterface implements Closeable {
      * @return An instance of {@link MailServletInterface}
      * @throws OXException
      */
-    public static final MailServletInterface getInstance(final Session session) throws OXException {
+    public static final MailServletInterface getInstance(Session session) throws OXException {
         return new MailServletInterfaceImpl(session);
     }
 
@@ -127,7 +127,7 @@ public abstract class MailServletInterface implements Closeable {
      * @param subject The subject
      * @return The appropriate file name
      */
-    public static String saneForFileName(final String subject) {
+    public static String saneForFileName(String subject) {
         if (isEmpty(subject)) {
             return subject;
         }
@@ -182,7 +182,7 @@ public abstract class MailServletInterface implements Closeable {
      * @return The ID of the mail corresponding to specified "Message-Id" header
      * @throws OXException If no mauil could be found
      */
-    public abstract String getMailIDByMessageID(final String folder, final String messageID) throws OXException;
+    public abstract String getMailIDByMessageID(String folder, String messageID) throws OXException;
 
     /**
      * Returns all message counts in specified folder in an <code>int</code> array as follows: <code>0</code>: Message Count, <code>1</code>
@@ -237,21 +237,46 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Returns an instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices, boolean supportsContinuation) throws OXException;
+    public SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices, boolean supportsContinuation) throws OXException {
+        return getAllMessages(folder, sortCol, order, fields, null, fromToIndices, supportsContinuation);
+    }
+
+    /**
+     * Returns an instance of <code>SearchIterator</code> containing all messages located in given folder.
+     */
+    public abstract SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, String[] headerFields, int[] fromToIndices, boolean supportsContinuation) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields, boolean supportsContinuation) throws OXException;
+    public SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields, boolean supportsContinuation) throws OXException {
+        return getMessages(folder, fromToIndices, sortCol, order, searchCols, searchPatterns, linkSearchTermsWithOR, fields, null, supportsContinuation);
+    }
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, SearchTerm<?> searchTerm, boolean linkSearchTermsWithOR, int[] fields, boolean supportsContinuation) throws OXException;
+    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields, String[] headerFields, boolean supportsContinuation) throws OXException;
+
+    /**
+     * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
+     * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
+     * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
+     */
+    public SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, SearchTerm<?> searchTerm, boolean linkSearchTermsWithOR, int[] fields, boolean supportsContinuation) throws OXException {
+        return getMessages(folder, fromToIndices, sortCol, order, searchTerm, linkSearchTermsWithOR, fields, null, supportsContinuation);
+    }
+
+    /**
+     * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
+     * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
+     * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
+     */
+    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, SearchTerm<?> searchTerm, boolean linkSearchTermsWithOR, int[] fields, String[] headerFields, boolean supportsContinuation) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
@@ -310,7 +335,7 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Returns all (file) attachments from denoted message
      */
-    public abstract List<MailPart> getAllMessageAttachments(final String folder, final String msgUID) throws OXException;
+    public abstract List<MailPart> getAllMessageAttachments(String folder, String msgUID) throws OXException;
 
     /**
      * Returns message's attachments as a ZIP file backed by returned managed file instance.
@@ -405,7 +430,7 @@ public abstract class MailServletInterface implements Closeable {
      * @return The corresponding mail IDs in destination folder
      * @throws OXException If messages cannot be appended.
      */
-    public String[] importMessages(final String destFolder, final MailMessage[] msgs, final boolean force) throws OXException {
+    public String[] importMessages(String destFolder, MailMessage[] msgs, boolean force) throws OXException {
         return appendMessages(destFolder, msgs, force);
     }
 
@@ -431,17 +456,17 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Expunges denoted folder.
      */
-    public abstract boolean expungeFolder(final String folder, final boolean hardDelete) throws OXException;
+    public abstract boolean expungeFolder(String folder, boolean hardDelete) throws OXException;
 
     /**
      * Clears all messages out of given folder.
      */
-    public abstract boolean clearFolder(final String folderArg) throws OXException;
+    public abstract boolean clearFolder(String folderArg) throws OXException;
 
     /**
      * Clears all messages out of given folder.
      */
-    public abstract boolean clearFolder(final String folderArg, boolean hardDelete) throws OXException;
+    public abstract boolean clearFolder(String folderArg, boolean hardDelete) throws OXException;
 
     /**
      * Copies or moves (if <code>move</code> is set) the defined message from source folder to destination folder.
@@ -499,11 +524,11 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Returns an instance of <code>SearchIterator</code> containing all antecessor folders on path to mailbox's default folder
      */
-    public abstract SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws OXException;
+    public abstract SearchIterator<MailFolder> getPathToDefaultFolder(String folder) throws OXException;
 
     @Override
     public void close() {
-        try { close(true); } catch (final Exception x) { /**/ }
+        try { close(true); } catch (Exception x) { /**/ }
     }
 
     /**

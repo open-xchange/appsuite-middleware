@@ -224,82 +224,182 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     @Override
-    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+    public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException {
+        return searchMessages(folder, indexRange, sortField, order, searchTerm, fields, null);
+    }
+
+    @Override
+    public MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException {
         final IndexFacadeService indexFacade = getIndexFacadeService();
         if (searchTerm == null || indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
-            return smalMailAccess.getDelegateMailAccess().getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
+            if (messageStorage instanceof IMailMessageStorageExt) {
+                IMailMessageStorageExt storageExt = (IMailMessageStorageExt) messageStorage;
+                return storageExt.searchMessages(folder, indexRange, sortField, order, searchTerm, fields, headerNames);
+            }
+
+            // Load headers manually
+            if (null == headerNames || headerNames.length <= 0) {
+                return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            }
+
+            MailField[] fieldsToUse = fields;
+            fieldsToUse = MailFields.addIfAbsent(fieldsToUse, MailField.ID);
+            MailMessage[] results = messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fieldsToUse);
+            if (null == results || results.length <= 0) {
+                return results;
+            }
+
+            int length = results.length;
+            MailMessage[] headers;
+            {
+                String[] ids = new String[length];
+                for (int i = ids.length; i-- > 0;) {
+                    MailMessage m = results[i];
+                    ids[i] = null == m ? null : m.getMailId();
+                }
+                headers = messageStorage.getMessages(folder, ids, MailFields.toArray(MailField.HEADERS));
+            }
+
+            for (int i = length; i-- > 0;) {
+                MailMessage mailMessage = results[i];
+                if (null != mailMessage) {
+                    MailMessage header = headers[i];
+                    if (null != header) {
+                        for (String headerName : headerNames) {
+                            String[] values = header.getHeader(headerName);
+                            if (null != values) {
+                                for (String value : values) {
+                                    mailMessage.addHeader(headerName, value);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return results;
         }
 
-        // Close for the time accessing the index
-        smalMailAccess.closeDelegateMailAccess();
-        // Access index
-        IndexAccess<MailMessage> indexAccess = null;
-        try {
-            final MailFields mfs = new MailFields(fields);
-            indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
-            final boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
-            if (isIndexed && MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
-                final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
-                final QueryParameters.Builder builder = new QueryParameters.Builder().setAccountFolders(Collections.singleton(accountFolders));
+        if (null == headerNames || headerNames.length <= 0) { // We cannot use index if headers are requested
+            // Close for the time accessing the index
+            smalMailAccess.closeDelegateMailAccess();
 
-                if (sortField != null) {
-                    final MailField field = MailField.getField(sortField.getField());
-                    final MailIndexField indexSortField = MailIndexField.getFor(field);
-                    if (indexSortField != null) {
-                        builder.setSortField(indexSortField);
-                    }
-
-                    if (order != null) {
-                        builder.setOrder(order == OrderDirection.ASC ? Order.ASC : Order.DESC);
-                    }
-                }
-
-                final QueryParameters parameters = builder.setHandler(SearchHandlers.CUSTOM).setSearchTerm(searchTerm).build();
-                final IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
-
-                List<IndexDocument<MailMessage>> documents = result.getResults();
-                List<MailMessage> mails;
-                if (indexRange != null) {
-                    final int fromIndex = indexRange.start;
-                    int toIndex = indexRange.end;
-                    if ((documents == null) || documents.isEmpty()) {
-                        mails = Collections.emptyList();
-                    }
-                    if ((fromIndex) > documents.size()) {
-                        /*
-                         * Return empty iterator if start is out of range
-                         */
-                        mails = Collections.emptyList();
-                    }
-                    /*
-                     * Reset end index if out of range
-                     */
-                    if (toIndex >= documents.size()) {
-                        toIndex = documents.size();
-                    }
-                    documents = documents.subList(fromIndex, toIndex);
-                }
-
-                mails = IndexDocumentHelper.messagesFrom(documents);
-                return mails.toArray(new MailMessage[mails.size()]);
-            }
-        } catch (final Throwable t) {
-            ExceptionUtils.handleThrowable(t);
-            LOG.warn("Index search failed. Falling back to message storage.", t);
-        } finally {
-            if (indexAccess != null) {
-                indexFacade.releaseIndexAccess(indexAccess);
-            }
-
+            // Access index
+            IndexAccess<MailMessage> indexAccess = null;
             try {
-                submitFolderJob(folder);
-            } catch (final OXException e) {
-                LOG.warn("Could not schedule folder job for folder {}.", folder, e);
+                final MailFields mfs = new MailFields(fields);
+                indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
+                final boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
+                if (isIndexed && MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+                    final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
+                    final QueryParameters.Builder builder = new QueryParameters.Builder().setAccountFolders(Collections.singleton(accountFolders));
+
+                    if (sortField != null) {
+                        final MailField field = MailField.getField(sortField.getField());
+                        final MailIndexField indexSortField = MailIndexField.getFor(field);
+                        if (indexSortField != null) {
+                            builder.setSortField(indexSortField);
+                        }
+
+                        if (order != null) {
+                            builder.setOrder(order == OrderDirection.ASC ? Order.ASC : Order.DESC);
+                        }
+                    }
+
+                    final QueryParameters parameters = builder.setHandler(SearchHandlers.CUSTOM).setSearchTerm(searchTerm).build();
+                    final IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
+
+                    List<IndexDocument<MailMessage>> documents = result.getResults();
+                    List<MailMessage> mails;
+                    if (indexRange != null) {
+                        final int fromIndex = indexRange.start;
+                        int toIndex = indexRange.end;
+                        if ((documents == null) || documents.isEmpty()) {
+                            mails = Collections.emptyList();
+                        }
+                        if ((fromIndex) > documents.size()) {
+                            /*
+                             * Return empty iterator if start is out of range
+                             */
+                            mails = Collections.emptyList();
+                        }
+                        /*
+                         * Reset end index if out of range
+                         */
+                        if (toIndex >= documents.size()) {
+                            toIndex = documents.size();
+                        }
+                        documents = documents.subList(fromIndex, toIndex);
+                    }
+
+                    mails = IndexDocumentHelper.messagesFrom(documents);
+                    return mails.toArray(new MailMessage[mails.size()]);
+                }
+            } catch (final Throwable t) {
+                ExceptionUtils.handleThrowable(t);
+                LOG.warn("Index search failed. Falling back to message storage.", t);
+            } finally {
+                if (indexAccess != null) {
+                    indexFacade.releaseIndexAccess(indexAccess);
+                }
+
+                try {
+                    submitFolderJob(folder);
+                } catch (final OXException e) {
+                    LOG.warn("Could not schedule folder job for folder {}.", folder, e);
+                }
             }
         }
 
         // Fallback to message storage
-        return smalMailAccess.getDelegateMailAccess().getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
+        if (messageStorage instanceof IMailMessageStorageExt) {
+            IMailMessageStorageExt storageExt = (IMailMessageStorageExt) messageStorage;
+            return storageExt.searchMessages(folder, indexRange, sortField, order, searchTerm, fields, headerNames);
+        }
+
+        // Load headers manually
+        if (null == headerNames || headerNames.length <= 0) {
+            return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        }
+
+        MailField[] fieldsToUse = fields;
+        fieldsToUse = MailFields.addIfAbsent(fieldsToUse, MailField.ID);
+        MailMessage[] results = messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fieldsToUse);
+        if (null == results || results.length <= 0) {
+            return results;
+        }
+
+        int length = results.length;
+        MailMessage[] headers;
+        {
+            String[] ids = new String[length];
+            for (int i = ids.length; i-- > 0;) {
+                MailMessage m = results[i];
+                ids[i] = null == m ? null : m.getMailId();
+            }
+            headers = messageStorage.getMessages(folder, ids, MailFields.toArray(MailField.HEADERS));
+        }
+
+        for (int i = length; i-- > 0;) {
+            MailMessage mailMessage = results[i];
+            if (null != mailMessage) {
+                MailMessage header = headers[i];
+                if (null != header) {
+                    for (String headerName : headerNames) {
+                        String[] values = header.getHeader(headerName);
+                        if (null != values) {
+                            for (String value : values) {
+                                mailMessage.addHeader(headerName, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return results;
     }
 
     @Override

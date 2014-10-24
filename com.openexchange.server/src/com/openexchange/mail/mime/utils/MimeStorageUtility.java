@@ -253,7 +253,7 @@ public final class MimeStorageUtility {
      * @param uids - the UIDs
      * @return an array of <code>com.sun.mail.imap.protocol.UIDSet</code>
      */
-    public static UIDSet[] toUIDSet(final long[] uids) {
+    public static UIDSet[] toUIDSet(long[] uids) {
         final List<UIDSet> sets = new ArrayList<UIDSet>(uids.length);
         for (int i = 0; i < uids.length; i++) {
             long current = uids[i];
@@ -294,7 +294,7 @@ public final class MimeStorageUtility {
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(final MailField[] fields, final boolean preferEnvelope) {
+    public static FetchProfile getFetchProfile(MailField[] fields, boolean preferEnvelope) {
         return getFetchProfile(fields, null, preferEnvelope);
     }
 
@@ -309,7 +309,7 @@ public final class MimeStorageUtility {
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(final MailField[] fields, final MailField sortField, final boolean preferEnvelope) {
+    public static FetchProfile getFetchProfile(MailField[] fields, MailField sortField, boolean preferEnvelope) {
         return getFetchProfile(fields, null, sortField, preferEnvelope);
     }
 
@@ -362,7 +362,7 @@ public final class MimeStorageUtility {
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(final MailField[] fields, final MailField[] searchFields, final MailField sortField, final boolean preferEnvelope) {
+    public static FetchProfile getFetchProfile(MailField[] fields, MailField[] searchFields, MailField sortField, boolean preferEnvelope) {
         return getFetchProfile(fields, null, searchFields, sortField, preferEnvelope);
     }
 
@@ -379,24 +379,24 @@ public final class MimeStorageUtility {
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(final MailField[] fields, final String[] headerNames, final MailField[] searchFields, final MailField sortField, final boolean preferEnvelope) {
-        final MailField[] arr;
+    public static FetchProfile getFetchProfile(MailField[] fields, String[] headerNames, MailField[] searchFields, MailField sortField, boolean preferEnvelope) {
+        MailField[] arr;
         {
-            final List<MailField> list = Arrays.asList(fields);
-            final EnumSet<MailField> fieldSet = list.isEmpty() ? EnumSet.noneOf(MailField.class) : EnumSet.copyOf(list);
+            List<MailField> list = Arrays.asList(fields);
+            EnumSet<MailField> fieldSet = list.isEmpty() ? EnumSet.noneOf(MailField.class) : EnumSet.copyOf(list);
             if (fieldSet.contains(MailField.FULL)) {
                 arr = ENUM_SET_FULL.toArray(new MailField[ENUM_SET_FULL.size()]);
             } else {
                 arr = fields;
             }
         }
-        final FetchProfile fetchProfile = new FetchProfile();
         /*
          * Use a set to avoid duplicate entries
          */
-        final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
+        EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
         if (arr != null) {
             set.addAll(Arrays.asList(arr));
+            arr = null;
         }
         if (searchFields != null) {
             set.addAll(Arrays.asList(searchFields));
@@ -407,7 +407,7 @@ public final class MimeStorageUtility {
         /*
          * Set of header names
          */
-        final Set<HeaderName> names;
+        Set<HeaderName> names;
         if (null == headerNames) {
             names = Collections.emptySet();
         } else {
@@ -416,6 +416,7 @@ public final class MimeStorageUtility {
         /*
          * Check which fields are contained in fetch profile item "ENVELOPE"
          */
+        FetchProfile fetchProfile = new FetchProfile();
         if (preferEnvelope && set.removeAll(ENV_FIELDS)) {
             /*
              * Add ENVELOPE since set of fields has changed
@@ -461,13 +462,13 @@ public final class MimeStorageUtility {
             /*
              * Iterate fields
              */
-            for (final MailField mailField : set) {
+            for (MailField mailField : set) {
                 addFetchItem(fetchProfile, mailField);
             }
             /*
              * Iterate header names
              */
-            for (final HeaderName headerName : names) {
+            for (HeaderName headerName : names) {
                 fetchProfile.add(headerName.toString());
             }
         }

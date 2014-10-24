@@ -204,6 +204,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
             int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+            final String[] headers = req.optStringArray(Mail.PARAMETER_HEADERS);
             final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
             final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
             if (sort != null && order == null) {
