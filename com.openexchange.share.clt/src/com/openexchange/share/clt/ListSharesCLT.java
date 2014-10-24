@@ -60,7 +60,6 @@ import org.apache.commons.cli.Options;
 import org.apache.http.ParseException;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.share.ShareList;
 import com.openexchange.share.Share;
 import com.openexchange.share.impl.mbean.ShareMBean;
 
@@ -127,7 +126,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
         if (null == contextId || contextId.isEmpty()) {
             throw new MissingOptionException("ContextId is missing.");
         }
-        List<ShareList> result;
+        List<Share> result;
         ObjectName objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {
@@ -139,22 +138,22 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
         } catch (NumberFormatException e) {
             throw new ParseException("Cannot parse value: " + e.getMessage());
         }
-        for (ShareList share : result) {
+        for (Share share : result) {
             StringBuilder sb = new StringBuilder();
-            sb.append("Token: ").append(share.getToken()).append(", ");
-            sb.append("Context: ").append(share.getContextID()).append(", ");
+//            sb.append("Token: ").append(share.getToken()).append(", ");
+//            sb.append("Context: ").append(share.getContextID()).append(", ");
             sb.append("Created by: ").append(share.getCreatedBy()).append(", ");
             sb.append("Targets: ");
-            for (Share target : share.getTargets()) {
-                sb.append("(Module: ").append(target.getModule()).append(", ");
-                sb.append("Folder: ").append(target.getFolder()).append(", ");
-                String item = target.getItem();
-                if (null != item && !"".equals(item)) {
-                    sb.append("Item: ").append(item).append("), ");
-                } else {
-                    sb.insert(sb.length() - 2, ")");
-                }
-            }
+//            for (Share target : share.getTargets()) {
+//                sb.append("(Module: ").append(target.getModule()).append(", ");
+//                sb.append("Folder: ").append(target.getFolder()).append(", ");
+//                String item = target.getItem();
+//                if (null != item && !"".equals(item)) {
+//                    sb.append("Item: ").append(item).append("), ");
+//                } else {
+//                    sb.insert(sb.length() - 2, ")");
+//                }
+//            }
             sb.append("Guest: ").append(share.getGuest());
             System.out.println(sb.toString());
         }

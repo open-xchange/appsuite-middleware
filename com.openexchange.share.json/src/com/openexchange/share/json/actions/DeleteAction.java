@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.Share;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,11 +87,13 @@ public class DeleteAction extends AbstractShareAction {
          * extract parameters
          */
         Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
-        List<String> tokens = new ArrayList<String>();
+        List<Share> shares = new ArrayList<Share>();
         try {
             JSONArray jsonArray = (JSONArray) requestData.requireData();
             for (int i = 0; i < jsonArray.length(); i++) {
-                tokens.add(jsonArray.getString(i));
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                //TODO: parse shares
+
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -98,8 +101,9 @@ public class DeleteAction extends AbstractShareAction {
         /*
          * delete shares
          */
-        if (0 < tokens.size()) {
-            getShareService().deleteShares(session, tokens, clientTimestamp);
+        if (0 < shares.size()) {
+            //TODO: client timestamp?
+            getShareService().deleteShares(session, shares);
         }
         /*
          * return empty results in case of success

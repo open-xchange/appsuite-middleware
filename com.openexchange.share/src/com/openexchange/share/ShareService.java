@@ -84,6 +84,10 @@ public interface ShareService {
      */
     List<Share> getAllShares(Session session) throws OXException;
 
+
+    void deleteShares(Session session, List<Share> shares) throws OXException;
+
+
     /**
      * Deletes a share target for all shares that belong to a certain list of guests.
      *

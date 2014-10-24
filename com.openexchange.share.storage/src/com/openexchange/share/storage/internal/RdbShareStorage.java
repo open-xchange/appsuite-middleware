@@ -58,7 +58,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.share.storage.internal.ConnectionProvider.ConnectionMode;
@@ -129,13 +128,23 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public int deleteShares(int contextID, List<ShareTarget> targets, int[] guestIDs, StorageParameters parameters) throws OXException {
+    public int deleteShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
+        int[] result;
         ConnectionProvider provider = getWriteProvider(contextID, parameters);
         try {
-            return new ShareSelector(contextID).guests(guestIDs).targets(targets).delete(provider.get());
+            result = deleteShares(provider.get(), contextID, shares);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
         }
+        int affectedRows = 0;
+        if (null != result) {
+            for (int i : result) {
+                affectedRows += i;
+            }
+        }
+        return affectedRows;
     }
 
     private static int[] insertShares(Connection connection, int contextID, List<Share> shares) throws SQLException, OXException {
@@ -148,6 +157,29 @@ public class RdbShareStorage implements ShareStorage {
             stmt = connection.prepareStatement(stringBuilder.toString());
             for (Share share : shares) {
                 SHARE_MAPPER.setParameters(stmt, new RdbShare(contextID, share), ShareField.values());
+                stmt.addBatch();
+            }
+            return SQL.logExecuteBatch(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int[] deleteShares(Connection connection, int contextID, List<Share> shares) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM share WHERE ")
+            .append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.GUEST).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;")
+        ;
+        ShareField[] fields = { ShareField.CONTEXT_ID, ShareField.GUEST, ShareField.MODULE, ShareField.FOLDER, ShareField.ITEM };
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            for (Share share : shares) {
+                SHARE_MAPPER.setParameters(stmt, new RdbShare(contextID, share), fields);
                 stmt.addBatch();
             }
             return SQL.logExecuteBatch(stmt);
