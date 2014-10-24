@@ -62,7 +62,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    DefaultShareServiceTest.class,
+//    DefaultShareServiceTest.class,
     ShareToolTest.class
 })
 public class UnitTests {
