@@ -115,7 +115,7 @@ public class AllTest extends ShareTest {
             /*
              * discover & check share
              */
-            ParsedShare share = discoverShare(allShares, matchingPermission.getEntity(), folder.getObjectID());
+            ParsedShare share = discoverShare(allShares, folder.getObjectID(), matchingPermission.getEntity());
             checkShare(guestPermission, share);
         }
     }
