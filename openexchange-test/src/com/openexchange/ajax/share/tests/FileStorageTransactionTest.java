@@ -157,7 +157,7 @@ public class FileStorageTransactionTest extends ShareTest {
 
         for (ParsedShare share : fileShares) {
             ParsedShareTarget target = share.getTarget();
-            GuestClient guestClient = new GuestClient(target.getTargetURL(), null, null);
+            GuestClient guestClient = new GuestClient(share.getShareURL(), null, null);
             File file = guestClient.execute(new GetInfostoreRequest(target.getItem())).getDocumentMetadata();
             assertEquals(target.getItem(), new FileID(file.getId()).getFileId());
             AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(

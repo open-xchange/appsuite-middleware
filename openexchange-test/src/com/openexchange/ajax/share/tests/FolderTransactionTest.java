@@ -58,7 +58,6 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -175,8 +174,7 @@ public class FolderTransactionTest extends ShareTest {
         assertNotNull("No matching permission in created folder found." + "API: " + api + ", Module: " + module, matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
 
-        ParsedShare share = discoverShare(matchingPermission.getEntity());
-        ParsedShareTarget target = discoverTarget(share, sharedFolder.getObjectID());
+        ParsedShare share = discoverShare(matchingPermission.getEntity(), sharedFolder.getObjectID());
         assertNotNull("API: " + api + ", Module: " + module, share);
 
         /*
@@ -191,7 +189,7 @@ public class FolderTransactionTest extends ShareTest {
         }
         assertTrue("API: " + api + ", Module: " + module, updateFailed);
 
-        GuestClient guestClient = new GuestClient(target.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClient = new GuestClient(share.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
         assertEquals("API: " + api + ", Module: " + module, Integer.toString(sharedFolder.getObjectID()), resolveResponse.getFolder());
     }

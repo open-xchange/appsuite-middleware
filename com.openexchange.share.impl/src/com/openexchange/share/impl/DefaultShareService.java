@@ -138,7 +138,7 @@ public class DefaultShareService implements ShareService {
         resolvedShare.setGuestID(guestID);
         resolvedShare.setTargets(targets);
         resolvedShare.setAuthentication(getAuthenticationMode(contextID, guest));
-        resolvedShare.setToken(baseToken);
+        resolvedShare.setToken(token);
         return resolvedShare;
     }
 

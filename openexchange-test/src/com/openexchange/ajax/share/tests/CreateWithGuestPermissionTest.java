@@ -54,7 +54,6 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -112,13 +111,12 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity());
+        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
         checkShare(guestPermission, share);
-        ParsedShareTarget target = discoverTarget(share, folder.getObjectID());
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(target.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }

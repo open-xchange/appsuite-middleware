@@ -56,7 +56,6 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -122,13 +121,12 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity());
+        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
         checkShare(guestPermission, share);
-        ParsedShareTarget target = discoverTarget(share, folder.getObjectID());
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(target.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -138,7 +136,7 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * check if share link still accessible
          */
-        GuestClient revokedGuestClient = new GuestClient(target.getTargetURL(), guestPermission.getEmailAddress(), guestPermission.getPassword(), false);
+        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword(), false);
         ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
         assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
         /*

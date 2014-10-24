@@ -63,10 +63,6 @@ import com.openexchange.share.ShareTarget;
  */
 public class ParsedShareTarget extends ShareTarget {
 
-    private static final long serialVersionUID = 6028997475388990342L;
-
-    private String targetURL;
-
     /**
      * Initializes a new {@link ParsedShareTarget}.
      */
@@ -96,11 +92,6 @@ public class ParsedShareTarget extends ShareTarget {
         if (json.hasAndNotNull("meta")) {
             //TODO
         }
-        targetURL = json.optString("target_url");
-    }
-
-    public String getTargetURL() {
-        return targetURL;
     }
 
 }

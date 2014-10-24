@@ -58,7 +58,6 @@ import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.AllResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -116,10 +115,8 @@ public class AllTest extends ShareTest {
             /*
              * discover & check share
              */
-            ParsedShare share = discoverShare(allShares, matchingPermission.getEntity());
+            ParsedShare share = discoverShare(allShares, matchingPermission.getEntity(), folder.getObjectID());
             checkShare(guestPermission, share);
-            ParsedShareTarget target = discoverTarget(share, folder.getObjectID());
-            assertNotNull("no target in share", target);
         }
     }
 
