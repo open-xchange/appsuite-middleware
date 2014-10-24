@@ -89,9 +89,9 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.ShareList;
-import com.openexchange.share.ShareService;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
@@ -440,7 +440,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
-            shareService.deleteTarget(session, new Share(contentType.getModule(), folderID), guestIDs);
+            shareService.deleteTarget(session, new ShareTarget(contentType.getModule(), folderID), guestIDs);
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
@@ -460,22 +460,22 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *         the same order as the supplied guest permissions list
      */
     protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
-        Map<Share, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
+        Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
         ShareService shareService = ShareServiceHolder.requireShareService();
         try {
             session.setParameter(Connection.class.getName(), connection);
-            for (Map.Entry<Share, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
+            for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
                 List<GuestPermission> permissions = entry.getValue();
                 List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(permissions.size());
                 for (GuestPermission permission : permissions) {
                     recipients.add(permission.getRecipient());
                 }
-                List<ShareList> shares = shareService.addTarget(session, entry.getKey(), recipients);
-                if (null == shares || shares.size() != permissions.size()) {
+                List<Share> targets = shareService.addTarget(session, entry.getKey(), recipients);
+                if (null == targets || targets.size() != permissions.size()) {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
                 }
-                for (int i = 0; i < shares.size(); i++) {
-                    permissions.get(i).setEntity(shares.get(i).getGuest());
+                for (int i = 0; i < targets.size(); i++) {
+                    permissions.get(i).setEntity(targets.get(i).getGuest());
                 }
             }
         } finally {
@@ -492,10 +492,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param permissions The guest permissions
      * @return The share targets, each one mapped to the corresponding list of guest permissions
      */
-    private static Map<Share, List<GuestPermission>> getPermissionsPerTarget(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> permissions) {
-        Map<Share, List<GuestPermission>> permissionsPerTarget = new HashMap<Share, List<GuestPermission>>();
+    private static Map<ShareTarget, List<GuestPermission>> getPermissionsPerTarget(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> permissions) {
+        Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = new HashMap<ShareTarget, List<GuestPermission>>();
         for (GuestPermission permission : permissions) {
-            Share target = new Share(contentType.getModule(), String.valueOf(folderID));
+            ShareTarget target = new ShareTarget(contentType.getModule(), String.valueOf(folderID));
             target.setExpiryDate(permission.getExpiryDate());
             target.setOwnedBy(ownedBy);
             List<GuestPermission> exitingPermissions = permissionsPerTarget.get(target);
