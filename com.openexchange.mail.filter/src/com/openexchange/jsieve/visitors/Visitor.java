@@ -154,7 +154,8 @@ public class Visitor implements SieveParserVisitor {
         ((List<OwnType>) data).add(new OwnType(new StringBuilder((this.inblock ? "    " : "") + node.getName() + " "), node.getCoordinate().getStartLineNumber()));
         final List<OwnType> visitChildren = (List<OwnType>) visitChildren(node, data);
         final StringBuilder output = visitChildren.get(visitChildren.size() - 1).getOutput();
-        if (output.charAt(output.length() - 3) != '}') {
+        // Consider variables in form of ${variable}
+        if ((output.charAt(output.length() - 3) == '}' && output.charAt(output.length() - 2) == '"') || output.charAt(output.length() - 3) != '}') {
             output.append(node.getLastToken());
         }
         return visitChildren;
