@@ -70,6 +70,8 @@ public interface ShareStorage {
     //TODO: ownedBy and/or createdBy?
     List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
 
-    int deleteShares(int contextID, List<ShareTarget> targets, int[] guestIDs, StorageParameters parameters) throws OXException;
+    int deleteShares(int contextID, List<ShareTarget> targets, int[] guests, StorageParameters parameters) throws OXException;
+
+    List<Share> loadShares(int contextID, int[] guests, StorageParameters parameters) throws OXException;
 
 }

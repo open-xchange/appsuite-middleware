@@ -49,8 +49,10 @@
 
 package com.openexchange.share.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -247,6 +249,46 @@ public class ShareTool {
     }
 
     /**
+     * Gets permission bits suitable for a guest user being allowed to access all supplied share. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param guest The guest user
+     * @param shares The shares
+     * @return The permission bits
+     * @throws OXException
+     */
+    public static int getRequiredPermissionBits(User guest, List<Share> shares) throws OXException {
+        Set<Permission> perms = new HashSet<Permission>(8);
+        perms.add(Permission.DENIED_PORTAL);
+        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
+        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        if (AuthenticationMode.GUEST_PASSWORD == getAuthenticationMode(guest)) {
+            perms.add(Permission.EDIT_PASSWORD);
+        }
+        for (Share share : shares) {
+            if (null != share.getTarget()) {
+                addModulePermissions(perms, share.getTarget().getModule());
+            }
+        }
+        return Permission.toBits(perms);
+    }
+
+    public static AuthenticationMode getAuthenticationMode(User guest) throws OXException {
+        AuthenticationMode authMode = AuthenticationMode.ANONYMOUS;
+        if (guest.getUserPassword() != null) {
+            String passwordMech = guest.getPasswordMech();
+            if ("{CRYPTO_SERVICE}".equals(passwordMech)) {
+                authMode = AuthenticationMode.ANONYMOUS_PASSWORD;
+            } else {
+                authMode = AuthenticationMode.GUEST_PASSWORD;
+            }
+        }
+        return authMode;
+    }
+
+
+    /**
      * Adds a module permission to the supplied permission set.
      *
      * @param perms The permission set
@@ -422,6 +464,30 @@ public class ShareTool {
             }
         }
         return null;
+    }
+
+    /**
+     * Finds a share by its guest ID in the supplied list of shares.
+     *
+     * @param shares The shares to search
+     * @param guestID The guest ID
+     * @return The share, or <code>null</code> if not found
+     */
+    public static Map<Integer, List<Share>> mapSharesByGuest(List<Share> shares, int[] guests) {
+        if (null == shares || 0 == shares.size() || null == guests || 0 == guests.length) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, List<Share>> sharesByGuest = new HashMap<Integer, List<Share>>(guests.length);
+        for (Share share : shares) {
+            Integer guest = I(share.getGuest());
+            List<Share> guestShares = sharesByGuest.get(guest);
+            if (null == guestShares) {
+                guestShares = new ArrayList<Share>();
+                sharesByGuest.put(guest, guestShares);
+            }
+            guestShares.add(share);
+        }
+        return sharesByGuest;
     }
 
     /**

@@ -237,25 +237,42 @@ public class DefaultShareService implements ShareService {
             return;
         }
         LOG.info("Deleting share target(s) {} for guest users {} in context {}...", targets, guestIDs, session.getContextId());
+        int[] guests = I2i(guestIDs);
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            shareStorage.deleteShares(session.getContextId(), targets, I2i(guestIDs), connectionHelper.getParameters());
-            // TODO: adjust user permission bits, delete user if last share deleted
-//            shareStorage.
             /*
-             * perform updates & adjust user permission bits
+             * delete existing shares of guest users to all targets
              */
-//            if (0 < sharesToUpdate.size()) {
-//                updateShares(connectionHelper, sharesToUpdate);
-//            }
-//            /*
-//             * perform deletes & delete guest users
-//             */
-//            if (0 < sharesToDelete.size()) {
-//                removeShares(connectionHelper, sharesToDelete);
-//            }
+            shareStorage.deleteShares(session.getContextId(), targets, guests, connectionHelper.getParameters());
+            /*
+             * check remaining shares per guest
+             */
+            Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
+            UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
+            UserService userService = services.getService(UserService.class);
+            List<Share> shares = shareStorage.loadShares(session.getContextId(), guests, connectionHelper.getParameters());
+            Map<Integer, List<Share>> sharesByGuest = ShareTool.mapSharesByGuest(shares, guests);
+            for (int guest : guestIDs) {
+                List<Share> sharesOfGuest = sharesByGuest.get(Integer.valueOf(guest));
+                if (null == sharesOfGuest || 0 == sharesOfGuest.size()) {
+                    /*
+                     * no shares left for guest user, delete him
+                     */
+                    userPermissionService.deleteUserPermissionBits(connectionHelper.getConnection(), context, guest);
+                    //TODO: delete by user ID
+                    // contactUserStorage.deleteGuestContact(session.getContextId(), share.getGuest(), null, connectionHelper.getConnection());
+                    userService.deleteUser(connectionHelper.getConnection(), context, guest);
+                } else {
+                    /*
+                     * adjust user permissions to reflect currently available shares for guest
+                     */
+                    User guestUser = userService.getUser(guest, context);
+                    int permissionBits = ShareTool.getRequiredPermissionBits(guestUser, sharesOfGuest);
+                    setPermissionBits(connectionHelper.getConnection(), context, guest, permissionBits, false);
+                }
+            }
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
