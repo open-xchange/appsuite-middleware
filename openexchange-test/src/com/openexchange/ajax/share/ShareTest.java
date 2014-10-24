@@ -276,12 +276,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected static ParsedShareTarget discoverTarget(ParsedShare share, int folderID) {
         String folder = String.valueOf(folderID);
-        List<ParsedShareTarget> targets = share.getTargets();
-        if (null != targets) {
-            for (ParsedShareTarget target : targets) {
-                if (folder.equals(target.getFolder())) {
-                    return target;
-                }
+        ParsedShareTarget target = share.getTarget();
+        if (null != target) {
+            if (folder.equals(target.getFolder())) {
+                return target;
             }
         }
         return null;

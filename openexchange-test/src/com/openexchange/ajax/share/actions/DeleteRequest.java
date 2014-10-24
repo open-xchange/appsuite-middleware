@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.CommonDeleteParser;
@@ -68,7 +69,7 @@ import com.openexchange.ajax.framework.Params;
 public class DeleteRequest implements AJAXRequest<CommonDeleteResponse>{
 
     private final boolean failOnError;
-    private final List<String> tokens;
+    private final List<ParsedShare> shares;
     private final long timestamp;
 
     /**
@@ -78,11 +79,11 @@ public class DeleteRequest implements AJAXRequest<CommonDeleteResponse>{
      * @param timestamp The client timestamp
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      */
-    public DeleteRequest(List<String> tokens, long timestamp, boolean failOnError) {
+    public DeleteRequest(List<ParsedShare> shares, long timestamp, boolean failOnError) {
         super();
         this.failOnError = failOnError;
         this.timestamp = timestamp;
-        this.tokens = tokens;
+        this.shares = shares;
     }
 
     /**
@@ -92,8 +93,8 @@ public class DeleteRequest implements AJAXRequest<CommonDeleteResponse>{
      * @param timestamp The client timestamp
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      */
-    public DeleteRequest(String token, long timestamp, boolean failOnError) {
-        this(java.util.Collections.singletonList(token), timestamp, failOnError);
+    public DeleteRequest(ParsedShare share, long timestamp, boolean failOnError) {
+        this(java.util.Collections.singletonList(share), timestamp, failOnError);
     }
 
     /**
@@ -102,8 +103,8 @@ public class DeleteRequest implements AJAXRequest<CommonDeleteResponse>{
      * @param tokens The tokens of the shares to delete
      * @param timestamp The client timestamp
      */
-    public DeleteRequest(List<String> tokens, long timestamp) {
-        this(tokens, timestamp, true);
+    public DeleteRequest(List<ParsedShare> shares, long timestamp) {
+        this(shares, timestamp, true);
     }
 
     /**
@@ -112,8 +113,8 @@ public class DeleteRequest implements AJAXRequest<CommonDeleteResponse>{
      * @param token The token of the share to delete
      * @param timestamp The client timestamp
      */
-    public DeleteRequest(String token, long timestamp) {
-        this(token, timestamp, true);
+    public DeleteRequest(ParsedShare share, long timestamp) {
+        this(share, timestamp, true);
     }
 
     @Override
@@ -141,7 +142,16 @@ public class DeleteRequest implements AJAXRequest<CommonDeleteResponse>{
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        return new JSONArray(tokens);
+        JSONArray jsonArray = new JSONArray();
+        for (ParsedShare share : shares) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("guest", share.getGuest());
+            jsonObject.put("module", share.getTarget().getModule());
+            jsonObject.put("folder", share.getTarget().getFolder());
+            jsonObject.put("item", share.getTarget().getItem());
+            jsonArray.put(jsonObject);
+        }
+        return jsonArray;
     }
 
     @Override

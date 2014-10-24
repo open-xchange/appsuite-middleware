@@ -77,7 +77,7 @@ import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -146,11 +146,11 @@ public class NewTest extends ShareTest {
     }
 
     public void testShareMultipleFoldersInternally() throws Exception {
-        List<Share> targets = new ArrayList<Share>(4);
-        targets.add(new Share(Module.CALENDAR.getFolderConstant(), Integer.toString(calendar.getObjectID())));
-        targets.add(new Share(Module.CONTACTS.getFolderConstant(), Integer.toString(contacts.getObjectID())));
-        targets.add(new Share(Module.TASK.getFolderConstant(), Integer.toString(tasks.getObjectID())));
-        targets.add(new Share(Module.INFOSTORE.getFolderConstant(), Integer.toString(infostore.getObjectID())));
+        List<ShareTarget> targets = new ArrayList<ShareTarget>(4);
+        targets.add(new ShareTarget(Module.CALENDAR.getFolderConstant(), Integer.toString(calendar.getObjectID())));
+        targets.add(new ShareTarget(Module.CONTACTS.getFolderConstant(), Integer.toString(contacts.getObjectID())));
+        targets.add(new ShareTarget(Module.TASK.getFolderConstant(), Integer.toString(tasks.getObjectID())));
+        targets.add(new ShareTarget(Module.INFOSTORE.getFolderConstant(), Integer.toString(infostore.getObjectID())));
 
         InternalRecipient recipient = new InternalRecipient();
         int userId2 = client2.getValues().getUserId();
@@ -170,23 +170,23 @@ public class NewTest extends ShareTest {
 
     public void testShareSingleObjectInternally() throws Exception {
         DefaultFile file = files.get(0);
-        Share target = new Share(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
+        ShareTarget target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
         InternalRecipient recipient = new InternalRecipient();
         int userId2 = client2.getValues().getUserId();
         recipient.setEntity(userId2);
         recipient.setBits(FOLDER_READ_PERMISSION);
 
-        client.execute(new NewRequest(Collections.<Share>singletonList(target), Collections.<ShareRecipient>singletonList(recipient)));
+        client.execute(new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(recipient)));
         checkFilePermission(userId2, ObjectPermission.READ, itm.getAction(file.getId()));
     }
 
     public void testShareMultipleFoldersAndFilesInAndExternally() throws Exception {
-        List<Share> targets = new ArrayList<Share>(3 + NUM_FILES);
-        targets.add(new Share(Module.CALENDAR.getFolderConstant(), Integer.toString(calendar.getObjectID())));
-        targets.add(new Share(Module.CONTACTS.getFolderConstant(), Integer.toString(contacts.getObjectID())));
-        targets.add(new Share(Module.TASK.getFolderConstant(), Integer.toString(tasks.getObjectID())));
+        List<ShareTarget> targets = new ArrayList<ShareTarget>(3 + NUM_FILES);
+        targets.add(new ShareTarget(Module.CALENDAR.getFolderConstant(), Integer.toString(calendar.getObjectID())));
+        targets.add(new ShareTarget(Module.CONTACTS.getFolderConstant(), Integer.toString(contacts.getObjectID())));
+        targets.add(new ShareTarget(Module.TASK.getFolderConstant(), Integer.toString(tasks.getObjectID())));
         for (DefaultFile file : files) {
-            targets.add(new Share(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId()));
+            targets.add(new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId()));
         }
 
         InternalRecipient internalRecipient = new InternalRecipient();
@@ -261,15 +261,13 @@ public class NewTest extends ShareTest {
         }
     }
 
-    private List<ParsedShare> getSharesForTargets(List<ParsedShare> allShares, List<Share> targets) {
+    private List<ParsedShare> getSharesForTargets(List<ParsedShare> allShares, List<ShareTarget> targets) {
         List<ParsedShare> shares = new LinkedList<ParsedShare>();
         for (ParsedShare ps : allShares) {
-            for (Share st : ps.getTargets()) {
-                for (Share target : targets) {
-                    if (target.equals(st)) {
-                        shares.add(ps);
-                        break;
-                    }
+            for (ShareTarget target : targets) {
+                if (target.equals(ps.getTarget())) {
+                    shares.add(ps);
+                    break;
                 }
             }
         }

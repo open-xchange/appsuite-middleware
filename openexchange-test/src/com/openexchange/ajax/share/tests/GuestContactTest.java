@@ -76,8 +76,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -97,12 +97,12 @@ public class GuestContactTest extends ShareTest {
         Permission.NO_PERMISSIONS,
         false);
 
-    private Share target;
+    private ShareTarget target;
     private InfostoreTestManager itm;
     private DefaultFile file;
     private int guestId;
     private ParsedShare share;
-    private List<String> tokens;
+    private List<ParsedShare> shares;
     private final long now = System.currentTimeMillis();
     private final String GUEST_DISPLAYNAME = "Test Guest Contact " + now;
     private final String GUEST_MAIL = "testGuestContact@" + now + ".invalid";
@@ -130,7 +130,7 @@ public class GuestContactTest extends ShareTest {
         file.setDescription(file.getTitle());
         itm.newAction(file);
 
-        target = new Share(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
+        target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
         target.setOwnedBy(client.getValues().getUserId());
         GuestRecipient guest = new GuestRecipient();
         guest.setDisplayName(GUEST_DISPLAYNAME);
@@ -138,30 +138,29 @@ public class GuestContactTest extends ShareTest {
         guest.setPassword(GUEST_PASSWORD);
         guest.setBits(FOLDER_READ_PERMISSION);
 
-        NewRequest newRequest = new NewRequest(Collections.<Share>singletonList(target), Collections.<ShareRecipient>singletonList(guest));
+        NewRequest newRequest = new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest));
         NewResponse newResponse = client.execute(newRequest);
         JSONArray jsonArray = (JSONArray) newResponse.getData();
-        tokens = new ArrayList<String>(jsonArray.length());
+        shares = new ArrayList<ParsedShare>(jsonArray.length());
         for (int i = 0; i < jsonArray.length(); i++) {
-            tokens.add(jsonArray.getString(i));
+            //TODO: shares from new response
+            //tokens.add(jsonArray.getString(i));
         }
         List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
         guestId = -1;
         share = null;
         for (ParsedShare parsedShare : allShares) {
-            for (Share shareTarget : parsedShare.getTargets()) {
-                if (shareTarget.equals(target)) {
-                    guestId = parsedShare.getGuest();
-                    share = parsedShare;
-                    break;
-                }
+            if (parsedShare.getTarget().equals(target)) {
+                guestId = parsedShare.getGuest();
+                share = parsedShare;
+                break;
             }
         }
     }
 
     @Override
     public void tearDown() throws Exception {
-        DeleteRequest deleteRequest = new DeleteRequest(tokens, System.currentTimeMillis(), false);
+        DeleteRequest deleteRequest = new DeleteRequest(shares, System.currentTimeMillis(), false);
         client.execute(deleteRequest);
         itm.deleteAction(file);
         super.tearDown();
@@ -208,7 +207,7 @@ public class GuestContactTest extends ShareTest {
 
     public void testDeleteGuestContact() throws Exception {
         assertTrue("Guest id must not be -1", guestId > -1);
-        DeleteRequest deleteRequest = new DeleteRequest(tokens, System.currentTimeMillis());
+        DeleteRequest deleteRequest = new DeleteRequest(shares, System.currentTimeMillis());
         CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
         assertFalse(deleteResponse.getErrorMessage(), deleteResponse.hasError());
         GetRequest getRequest = new GetRequest(guestId, client.getValues().getTimeZone(), false);
@@ -232,7 +231,7 @@ public class GuestContactTest extends ShareTest {
         UpdateResponse updateResponse = secondClient.execute(updateRequest);
         assertTrue("Any user can change contact data.", updateResponse.hasError());
         assertEquals(ContactExceptionCodes.NO_CHANGE_PERMISSION.getNumber(), updateResponse.getException().getCode());
-        DeleteRequest deleteRequest = new DeleteRequest(tokens, System.currentTimeMillis(), false);
+        DeleteRequest deleteRequest = new DeleteRequest(shares, System.currentTimeMillis(), false);
         CommonDeleteResponse deleteResponse = secondClient.execute(deleteRequest);
         assertTrue("Any user can delete any shares.", deleteResponse.hasError());
         assertEquals(ShareExceptionCodes.NO_DELETE_PERMISSIONS.getNumber(), deleteResponse.getException().getCode());

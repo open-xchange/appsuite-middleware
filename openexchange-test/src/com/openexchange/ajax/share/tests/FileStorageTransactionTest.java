@@ -76,7 +76,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
 
 
 /**
@@ -142,15 +141,14 @@ public class FileStorageTransactionTest extends ShareTest {
         List<ParsedShare> fileShares = new ArrayList<ParsedShare>(sharedFiles.size());
         for (DefaultFile file : sharedFiles) {
             for (ParsedShare share : allShares) {
-                for (Share target : share.getTargets()) {
-                    if (target.getItem() == null) {
-                        continue;
-                    }
+                ParsedShareTarget target = share.getTarget();
+                if (target.getItem() == null) {
+                    continue;
+                }
 
-                    if (target.getModule() == FolderObject.INFOSTORE && target.getFolder().equals(Integer.toString(testFolder.getObjectID())) && new FileID(file.getId()).getFileId().equals(target.getItem())) {
-                        fileShares.add(share);
-                        break;
-                    }
+                if (target.getModule() == FolderObject.INFOSTORE && target.getFolder().equals(Integer.toString(testFolder.getObjectID())) && new FileID(file.getId()).getFileId().equals(target.getItem())) {
+                    fileShares.add(share);
+                    break;
                 }
             }
         }
@@ -158,20 +156,19 @@ public class FileStorageTransactionTest extends ShareTest {
         assertEquals("Wrong number of shares", sharedFiles.size(), fileShares.size());
 
         for (ParsedShare share : fileShares) {
-            for (ParsedShareTarget target : share.getTargets()) {
-                GuestClient guestClient = new GuestClient(target.getTargetURL(), null, null);
-                File file = guestClient.execute(new GetInfostoreRequest(target.getItem())).getDocumentMetadata();
-                assertEquals(target.getItem(), new FileID(file.getId()).getFileId());
-                AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(
-                    FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
-                    Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
-                    Metadata.ID,
-                    Order.ASCENDING));
+            ParsedShareTarget target = share.getTarget();
+            GuestClient guestClient = new GuestClient(target.getTargetURL(), null, null);
+            File file = guestClient.execute(new GetInfostoreRequest(target.getItem())).getDocumentMetadata();
+            assertEquals(target.getItem(), new FileID(file.getId()).getFileId());
+            AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(
+                FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+                Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
+                Metadata.ID,
+                Order.ASCENDING));
 
-                Object[][] docs = allResp.getArray();
-                assertEquals(1, docs.length);
-                assertEquals(target.getItem(), new FileID((String) docs[0][allResp.getColumnPos(Metadata.ID)]).getFileId());
-            }
+            Object[][] docs = allResp.getArray();
+            assertEquals(1, docs.length);
+            assertEquals(target.getItem(), new FileID((String) docs[0][allResp.getColumnPos(Metadata.ID)]).getFileId());
         }
 
     }

@@ -54,14 +54,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link ParsedShareTarget}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ParsedShareTarget extends Share {
+public class ParsedShareTarget extends ShareTarget {
 
     private static final long serialVersionUID = 6028997475388990342L;
 
@@ -82,16 +82,16 @@ public class ParsedShareTarget extends Share {
     public ParsedShareTarget(JSONObject json) throws JSONException {
         super();
         if (json.hasAndNotNull("module")) {
-            module = Module.getModuleInteger(json.getString("module"));
+            setModule(Module.getModuleInteger(json.getString("module")));
         }
         if (json.hasAndNotNull("folder")) {
-            folder = json.getString("folder");
+            setFolder(json.getString("folder"));
         }
         if (json.hasAndNotNull("item")) {
-            item = json.getString("item");
+            setItem(json.getString("item"));
         }
         if (json.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
-            expiryDate = new Date(json.getLong(FolderField.EXPIRY_DATE.getName()));
+            setExpiryDate(new Date(json.getLong(FolderField.EXPIRY_DATE.getName())));
         }
         if (json.hasAndNotNull("meta")) {
             //TODO

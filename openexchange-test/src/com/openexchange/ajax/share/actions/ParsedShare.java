@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.share.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -71,14 +68,13 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class ParsedShare {
 
-    private String token;
     private String shareURL;
     private AuthenticationMode authentication;
     private Date created;
     private int createdBy;
     private Date lastModified;
     private int modifiedBy;
-    private List<ParsedShareTarget> targets;
+    private ParsedShareTarget target;
     private ShareRecipient recipient;
     private int guest;
 
@@ -96,7 +92,6 @@ public class ParsedShare {
      */
     public ParsedShare(JSONObject json) throws JSONException {
         super();
-        token = json.optString("token");
         shareURL = json.optString("share_url");
         if (json.has("authentication")) {
             authentication = Enums.parse(AuthenticationMode.class, json.getString("authentication"));
@@ -109,12 +104,8 @@ public class ParsedShare {
             lastModified = new Date(json.getLong("last_modified"));
         }
         modifiedBy = json.optInt("modified_by");
-        if (json.has("targets")) {
-            targets = new ArrayList<ParsedShareTarget>();
-            JSONArray jsonTargets = json.getJSONArray("targets");
-            for (int i = 0; i < jsonTargets.length(); i++) {
-                targets.add(new ParsedShareTarget(jsonTargets.getJSONObject(i)));
-            }
+        if (json.has("target")) {
+            target = new ParsedShareTarget(json.getJSONObject("target"));
         }
         if (json.has("recipient")) {
             JSONObject jsonObject = json.getJSONObject("recipient");
@@ -146,14 +137,6 @@ public class ParsedShare {
             }
             guest = jsonObject.getInt(FolderField.ENTITY.getName());
         }
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public Date getCreated() {
@@ -209,8 +192,8 @@ public class ParsedShare {
      *
      * @return The targets
      */
-    public List<ParsedShareTarget> getTargets() {
-        return targets;
+    public ParsedShareTarget getTarget() {
+        return target;
     }
 
     /**
@@ -231,8 +214,8 @@ public class ParsedShare {
      *
      * @param targets The targets to set
      */
-    public void setTargets(List<ParsedShareTarget> targets) {
-        this.targets = targets;
+    public void setTarget(ParsedShareTarget target) {
+        this.target = target;
     }
 
 }

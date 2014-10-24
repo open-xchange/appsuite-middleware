@@ -115,7 +115,7 @@ public class AllAction extends AbstractShareAction {
         List<GuestShare> guestShares = new ArrayList<GuestShare>(shares.size());
         for (int i = 0; i < shares.size(); i++) {
             Share share = shares.get(i);
-            String shareURL = generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), null, requestData);
+            String shareURL = generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), share.getTarget(), requestData);
             GuestInfo guestInfo = guestUsersByID.get(Integer.valueOf(share.getGuest()));
             User guest = guestInfo.getGuest();
 

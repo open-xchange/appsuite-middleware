@@ -379,9 +379,6 @@ public class ShareTool {
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
-        attributes.put(SHARE_BASE_TOKEN_ATTRIBUTE, Collections.singleton(UUIDs.getUnformattedString(UUID.randomUUID())));
-        guestUser.setAttributes(attributes);
         try {
             guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
         } catch (UnsupportedEncodingException e) {
@@ -398,6 +395,9 @@ public class ShareTool {
         guestUser.setPreferredLanguage(sharingUser.getPreferredLanguage());
         guestUser.setTimeZone(sharingUser.getTimeZone());
         guestUser.setMailEnabled(true);
+        Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+        attributes.put(SHARE_BASE_TOKEN_ATTRIBUTE, Collections.singleton(UUIDs.getUnformattedString(UUID.randomUUID())));
+        guestUser.setAttributes(attributes);
         return guestUser;
     }
 

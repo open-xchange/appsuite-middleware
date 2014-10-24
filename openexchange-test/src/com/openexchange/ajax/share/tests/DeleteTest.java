@@ -133,7 +133,7 @@ public class DeleteTest extends ShareTest {
         /*
          * delete share
          */
-        CommonDeleteResponse deleteResponse = client.execute(new DeleteRequest(share.getToken(), allResponse.getTimestamp().getTime()));
+        CommonDeleteResponse deleteResponse = client.execute(new DeleteRequest(share, allResponse.getTimestamp().getTime()));
         assertNotNull("no response", deleteResponse);
         assertFalse("errors in response", deleteResponse.hasError());
         /*
