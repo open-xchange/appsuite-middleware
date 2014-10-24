@@ -52,7 +52,6 @@ package com.openexchange.ajax.login;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -90,9 +89,10 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
+import com.openexchange.share.ResolvedShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -158,11 +158,11 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     }
 
                     // Get the share
-                    final List<Share> share = shareService.resolveToken(token);
+                    final ResolvedShare share = shareService.resolveToken(token);
                     if (null == share) {
                         throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
                     }
-                    final Share target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
+                    final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
 
                     // Check for matching authentication mode
                     if (false == checkAuthenticationMode(share.getAuthentication())) {
@@ -192,7 +192,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     User user = authenticateUser(share, loginInfo, context);
 
                     // Pass to basic authentication service in case more handling needed
-                    Authenticated  authenticated = basicService.handleLoginInfo(share.getGuest(), share.getContextID());
+                    Authenticated  authenticated = basicService.handleLoginInfo(share.getGuestID(), share.getContextID());
                     if (null == authenticated) {
                         return null;
                     }
@@ -342,7 +342,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @return The login information
      * @throws OXException If login information cannot be returned
      */
-    protected abstract LoginInfo getLoginInfoFrom(ShareList share, HttpServletRequest httpRequest) throws OXException;
+    protected abstract LoginInfo getLoginInfoFrom(ResolvedShare share, HttpServletRequest httpRequest) throws OXException;
 
     /**
      * Authenticates the user associated with specified share using given login information.
@@ -353,6 +353,6 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @return The authenticated user
      * @throws OXException If authentication fails
      */
-    protected abstract User authenticateUser(ShareList share, LoginInfo loginInfo, Context context) throws OXException;
+    protected abstract User authenticateUser(ResolvedShare share, LoginInfo loginInfo, Context context) throws OXException;
 
 }
