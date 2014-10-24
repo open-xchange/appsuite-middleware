@@ -50,6 +50,7 @@
 package com.openexchange.ajax.anonymizer;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link AnonymizerService} - Performs needed modifications for a certain entity type in order to generate an anonymized instance.
@@ -73,5 +74,15 @@ public interface AnonymizerService {
      * @throws OXException If anonymizing fails
      */
     <E> E anonymize(E entity) throws OXException;
+
+    /**
+     * Performs needed modifications in order to have an anonymized entity.
+     *
+     * @param entity The entity to anonymize
+     * @param session TODO
+     * @return The anonymized entity
+     * @throws OXException If anonymizing fails
+     */
+    <E> E anonymize(E entity, Session session) throws OXException;
 
 }
