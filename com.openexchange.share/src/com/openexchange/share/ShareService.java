@@ -150,4 +150,6 @@ public interface ShareService {
      */
     List<String> generateShareURLs(int contextId, List<Share> shares, String protocol, String fallbackHostname) throws OXException;
 
+    AuthenticationMode getAuthenticationMode(int contextId, int guestID) throws OXException;
+
 }
