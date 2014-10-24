@@ -50,7 +50,7 @@
 package com.openexchange.share.notification;
 
 import java.util.List;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 
 /**
  * A {@link ShareNotification} encapsulates all information necessary to notify
@@ -84,11 +84,11 @@ public interface ShareNotification<T> {
     NotificationType getType();
 
     /**
-     * Gets the share to notify the recipient about.
+     * Gets the share targets to notify the recipient about.
      *
-     * @return The share, never <code>null</code>
+     * @return The share targets, never <code>null</code>
      */
-    List<Share> getShares();
+    List<ShareTarget> getShareTargets();
 
     /**
      * Gets the URL needed for accessing the share.

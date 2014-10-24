@@ -89,9 +89,9 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.impl.notification.NotificationStrings;
@@ -261,13 +261,13 @@ public class MailSender {
     }
 
     private MimeMessage buildShareCreatedMail() throws OXException, UnsupportedEncodingException, MessagingException {
-        List<Share> shares = notification.getShares();
+        List<ShareTarget> targets = notification.getShareTargets();
         String title;
-        if (shares.size() == 1) {
-            Share target = shares.get(0);
-            title = getModuleHandler(target.getTarget().getModule()).getTargetTitle(target.getTarget(), session);
+        if (targets.size() == 1) {
+            ShareTarget target = targets.get(0);
+            title = getModuleHandler(target.getModule()).getTargetTitle(target, session);
         } else {
-            title = translator.translate(String.format(NotificationStrings.GENERIC_TITLE, shares.size()));
+            title = translator.translate(String.format(NotificationStrings.GENERIC_TITLE, targets.size()));
         }
 
         String subject = String.format(translator.translate(NotificationStrings.SUBJECT), user.getDisplayName(), title);
@@ -338,7 +338,7 @@ public class MailSender {
     }
 
     private Map<String, Object> prepareTemplateVars(HtmlService htmlService, Set<String> fields, String title) throws OXException {
-        List<Share> shares = notification.getShares();
+//        List<Share> shares = notification.getShares();
         String displayName;
         String message = null;
         String username = null;

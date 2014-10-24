@@ -61,7 +61,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Enums;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -84,11 +84,11 @@ public class ShareJSONParser {
      * @param jsonTargets The JSON array holding the share targets
      * @return The share targets
      */
-    public static List<Share> parseTargets(JSONArray jsonTargets) throws OXException, JSONException {
+    public static List<ShareTarget> parseTargets(JSONArray jsonTargets) throws OXException, JSONException {
         if (null == jsonTargets || 0 == jsonTargets.length()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("targets");
         }
-        List<Share> targets = new ArrayList<Share>();
+        List<ShareTarget> targets = new ArrayList<ShareTarget>();
         for (int i = 0; i < jsonTargets.length(); i++) {
             targets.add(parseTarget(jsonTargets.getJSONObject(i)));
         }
@@ -102,7 +102,7 @@ public class ShareJSONParser {
      * @return The share target
      * @throws OXException
      */
-    public static Share parseTarget(JSONObject jsonTarget) throws JSONException, OXException {
+    public static ShareTarget parseTarget(JSONObject jsonTarget) throws JSONException, OXException {
         if (false == jsonTarget.hasAndNotNull("module")) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("module");
         }
@@ -114,11 +114,11 @@ public class ShareJSONParser {
 
         String folder = jsonTarget.getString("folder");
 
-        Share target;
+        ShareTarget target;
         if (jsonTarget.hasAndNotNull("item")) {
-            target = new Share(module, folder, jsonTarget.getString("item"));
+            target = new ShareTarget(module, folder, jsonTarget.getString("item"));
         } else {
-            target = new Share(module, folder);
+            target = new ShareTarget(module, folder);
         }
 
         if (jsonTarget.hasAndNotNull("expiry_date")) {

@@ -322,10 +322,7 @@ public class ShareTool {
     public static Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target) {
         Date now = new Date();
         Share share = new Share();
-//        share.setToken(ShareTool.generateToken(contextID)); FIXME
-//        share.setAuthentication(getAuthenticationMode(recipient));
         share.setTarget(target);
-//        share.setContextID(contextID);
         share.setCreated(now);
         share.setModified(now);
         share.setCreatedBy(sharingUser.getId());

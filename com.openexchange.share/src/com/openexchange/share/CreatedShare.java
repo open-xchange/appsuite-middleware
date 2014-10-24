@@ -47,60 +47,102 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.share.ShareTarget;
+
 
 
 /**
- * Abstract convenience implementation that provides all common fields for
- * {@link ShareNotification}s.
+ * {@link CreatedShare}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public abstract class AbstractNotification<T> implements ShareNotification<T> {
+public class CreatedShare {
 
-    protected final NotificationType type;
+    private int guest;
 
-    protected final List<ShareTarget> targets;
+    private AuthenticationMode authMode;
 
-    protected final String url;
+    private String token;
 
-    protected final String message;
+    private List<Share> shares;
 
-
-    public AbstractNotification(NotificationType type, List<ShareTarget> targets, String url, String message) {
+    public CreatedShare() {
         super();
-        checkNotNull(type);
-        checkNotNull(targets);
-        checkNotNull(url);
-        this.type = type;
-        this.targets = targets;
-        this.url = url;
-        this.message = message;
     }
 
-    @Override
-    public NotificationType getType() {
-        return type;
+
+    public int getGuest() {
+        return guest;
     }
 
-    @Override
-    public List<ShareTarget> getShareTargets() {
+
+    public void setGuest(int guest) {
+        this.guest = guest;
+    }
+
+
+    public AuthenticationMode getAuthMode() {
+        return authMode;
+    }
+
+
+    public void setAuthMode(AuthenticationMode authMode) {
+        this.authMode = authMode;
+    }
+
+
+    public String getToken() {
+        return token;
+    }
+
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+
+    /**
+     * Gets the shares
+     *
+     * @return The shares
+     */
+    public List<Share> getShares() {
+        return shares;
+    }
+
+
+    /**
+     * Sets the shares
+     *
+     * @param shares The shares to set
+     */
+    public void setShares(List<Share> shares) {
+        this.shares = shares;
+    }
+
+    public boolean isMultiTarget() {
+        return shares.size() > 1;
+    }
+
+    public ShareTarget getSingleTarget() {
+        if (shares.isEmpty() || isMultiTarget()) {
+            return null;
+        }
+
+        return shares.get(0).getTarget();
+    }
+
+    public List<ShareTarget> getTargets() {
+        List<ShareTarget> targets = new ArrayList<ShareTarget>(shares.size());
+        for (Share share : shares) {
+            targets.add(share.getTarget());
+        }
+
         return targets;
-    }
-
-    @Override
-    public String getUrl() {
-        return url;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
     }
 
 }

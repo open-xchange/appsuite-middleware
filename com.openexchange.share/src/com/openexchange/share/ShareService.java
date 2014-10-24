@@ -51,7 +51,6 @@ package com.openexchange.share;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -128,7 +127,7 @@ public interface ShareService {
      * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
      * @throws OXException
      */
-    List<Share> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
+    List<CreatedShare> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Adds multiple targets to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
@@ -139,7 +138,7 @@ public interface ShareService {
      * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
      * @throws OXException
      */
-    Map<ShareTarget, List<Share>> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
+    List<CreatedShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Generates a URL for every share that is passed.
@@ -153,6 +152,8 @@ public interface ShareService {
      * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
      */
     List<String> generateShareURLs(int contextId, List<Share> shares, String protocol, String fallbackHostname) throws OXException;
+
+    String generateShareURL(int contextId, int guestId, int shareCreator, ShareTarget target, String protocol, String fallbackHostname) throws OXException;
 
     AuthenticationMode getAuthenticationMode(int contextId, int guestID) throws OXException;
 

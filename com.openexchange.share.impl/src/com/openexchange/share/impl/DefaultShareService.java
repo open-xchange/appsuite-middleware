@@ -76,6 +76,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.CreatedShare;
 import com.openexchange.share.ResolvedShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
@@ -178,19 +179,16 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<Share> addTarget(Session session, ShareTarget shareTarget, List<ShareRecipient> recipients) throws OXException {
-        return addTargets(session, Collections.singletonList(shareTarget), recipients).get(shareTarget);
+    public List<CreatedShare> addTarget(Session session, ShareTarget shareTarget, List<ShareRecipient> recipients) throws OXException {
+        return addTargets(session, Collections.singletonList(shareTarget), recipients);
     }
 
     @Override
-    public Map<ShareTarget, List<Share>> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
+    public List<CreatedShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
-            return Collections.emptyMap();
+            return Collections.emptyList();
         }
-        Map<ShareTarget, List<Share>> sharesByTarget = new HashMap<ShareTarget, List<Share>>();
-        for (ShareTarget target : targets) {
-            sharesByTarget.put(target, new ArrayList<Share>(recipients.size()));
-        }
+
         List<Share> allShares = new ArrayList<Share>(recipients.size() * targets.size());
         int contextID = session.getContextId();
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
@@ -204,26 +202,35 @@ public class DefaultShareService implements ShareService {
              */
             User sharingUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), session.getUserId(), context);
             List<Integer> guestIDs = new ArrayList<Integer>(recipients.size());
+            List<CreatedShare> createdShares = new ArrayList<CreatedShare>(recipients.size());
             for (ShareRecipient recipient : recipients) {
                 int permissionBits = ShareTool.getUserPermissionBitsForTargets(recipient, targets);
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient);
                 guestIDs.add(I(guestUser.getId()));
+                List<Share> sharesToCreate = new ArrayList<Share>(targets.size());
                 for (ShareTarget target : targets) {
                     Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
-                    sharesByTarget.get(target).add(share);
+                    sharesToCreate.add(share);
                     allShares.add(share);
                 }
+
+                CreatedShare createdShare = new CreatedShare();
+                createdShare.setGuest(guestUser.getId());
+                createdShare.setAuthMode(getAuthenticationMode(contextID, guestUser));
+                createdShare.setToken(ShareTool.generateShareToken(contextID, guestUser));
+                createdShare.setShares(sharesToCreate);
+                createdShares.add(createdShare);
             }
             /*
              * store shares
              */
             shareStorage.storeShares(contextID, allShares, connectionHelper.getParameters());
             connectionHelper.commit();
+            return createdShares;
         } finally {
             connectionHelper.finish();
+            LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
         }
-        LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
-        return sharesByTarget;
     }
 
     @Override
@@ -403,6 +410,21 @@ public class DefaultShareService implements ShareService {
             urls.add(protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + ShareTool.generateShareToken(contextId, guest));
         }
         return urls;
+    }
+
+    @Override
+    public String generateShareURL(int contextId, int guestId, int shareCreator, ShareTarget target, String protocol, String fallbackHostname) throws OXException {
+        UserService userService = services.getService(UserService.class);
+        User guest = userService.getUser(guestId, contextId);
+        String hostname = getHostname(shareCreator, contextId, fallbackHostname);
+        String prefix = getServletPrefix();
+        String shareUrl;
+        if (target == null) {
+            shareUrl = protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + ShareTool.generateShareToken(contextId, guest);
+        } else {
+            shareUrl = protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + ShareTool.generateShareToken(contextId, guest) + '/' + target.getPath();
+        }
+        return shareUrl;
     }
 
     private String getHostname(int userID, int contextID, String fallbackHostname) {
