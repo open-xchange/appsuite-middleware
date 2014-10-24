@@ -64,7 +64,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ShareList;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.json.GuestShare;
@@ -95,7 +94,7 @@ public class AllAction extends AbstractShareAction {
         if (null == shares || 0 == shares.size()) {
             return new AJAXRequestResult(new JSONArray());
         }
-        List<String> shareURLs = generateShareURLs(shares, requestData);
+        List<String> shareURLs = generateShareURLs(session.getContextId(), shares, requestData);
         Date lastModified = null;
         Set<Integer> guestIDs = new HashSet<Integer>();
         for (ShareList share : shares) {

@@ -104,8 +104,13 @@ public class ShareServlet extends HttpServlet {
             {
                 String pathInfo = request.getPathInfo();
                 String[] paths = ShareServletUtils.splitPath(pathInfo);
-                share = null == paths || 0 == paths.length ? null :
-                    ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
+                if (paths == null || paths.length == 0) {
+                    LOG.debug("No share found at '{}'", pathInfo);
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
+
+                share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
                 if (null == share) {
                     LOG.debug("No share found at '{}'", pathInfo);
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);

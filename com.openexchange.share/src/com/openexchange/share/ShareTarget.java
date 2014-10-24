@@ -124,6 +124,10 @@ public class ShareTarget {
         this.folder = folder;
     }
 
+    public boolean isFolder() {
+        return item == null;
+    }
+
     /**
      * Gets the identifier of the share's item in case the share is not a folder share.
      *

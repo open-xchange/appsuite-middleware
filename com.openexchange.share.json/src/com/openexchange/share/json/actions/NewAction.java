@@ -71,9 +71,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareList;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -128,17 +128,17 @@ public class NewAction extends AbstractShareAction {
         return result;
     }
 
-    private  List<OXException> sendNotifications(List<ShareList> shares, NewRequest request, ServerSession session) {
+    private  List<OXException> sendNotifications(List<Share> shares, NewRequest request, ServerSession session) {
         List<OXException> warnings = new LinkedList<OXException>();
         try {
             if (!shares.isEmpty()) {
-                List<String> urls = generateShareURLs(shares, request.getRequestData());
+                List<String> urls = generateShareURLs(session.getContextId(), shares, request.getRequestData());
                 ShareNotificationService notificationService = getNotificationService();
                 UserService userService = getUserService();
                 for (int i = 0; i < urls.size(); i++) {
-                    ShareList share = shares.get(i);
+                    Share share = shares.get(i);
                     String url = urls.get(i);
-                    User guest = userService.getUser(share.getGuest(), share.getContextID());
+                    User guest = userService.getUser(share.getGuest(), session.getContextId());
                     String mailAddress = guest.getMail();
                     if (!Strings.isEmpty(mailAddress)) {
                         try {
@@ -245,7 +245,8 @@ public class NewAction extends AbstractShareAction {
     private Pair<Map<Integer, List<Share>>, Map<Integer, List<Share>>> distinguishTargets(List<Share> targets) {
         Map<Integer, List<Share>> folders = new HashMap<Integer, List<Share>>();
         Map<Integer, List<Share>> objects = new HashMap<Integer, List<Share>>();
-        for (Share target : targets) {
+        for (Share share : targets) {
+            ShareTarget target = share.getTarget();
             int module = target.getModule();
             List<Share> finalTargets;
             if (target.isFolder()) {
@@ -262,7 +263,7 @@ public class NewAction extends AbstractShareAction {
                 }
             }
 
-            finalTargets.add(target);
+            finalTargets.add(share);
         }
 
         return new Pair<Map<Integer,List<Share>>, Map<Integer,List<Share>>>(folders, objects);

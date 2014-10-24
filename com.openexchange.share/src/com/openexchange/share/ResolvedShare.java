@@ -99,6 +99,19 @@ public class ResolvedShare {
         }
     }
 
+    public String getCommonItem() {
+        if (null == targets) {
+            return null;
+        }
+
+        if (targets.size() == 1) {
+            return targets.get(0).getItem();
+        }
+
+        return null;
+    }
+
+
     public ShareTarget resolveTarget(String path) {
         if (null != targets && 0 < targets.size() && null != path) {
             for (ShareTarget target : targets) {

@@ -61,6 +61,7 @@ import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -68,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
@@ -112,7 +114,17 @@ public class DefaultShareService implements ShareService {
     @Override
     public ResolvedShare resolveToken(String token) throws OXException {
         int contextID = ShareTool.extractContextId(token);
-        int guestID = 0; //TODO from token
+        int guestID = ShareTool.extractUserId(token);
+        String baseToken = ShareTool.extractBaseToken(token);
+        if (contextID < 0 || guestID < 0 || baseToken == null) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
+
+        User guest = services.getService(UserService.class).getUser(guestID, contextID);
+        if (!baseToken.equals(ShareTool.getBaseToken(guest))) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
+
         List<Share> shares = services.getService(ShareStorage.class).loadShares(contextID, guestID, StorageParameters.NO_PARAMETERS);
         List<ShareTarget> targets = new ArrayList<ShareTarget>();
         for (Share share : shares) {
@@ -339,12 +351,34 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<String> generateShareURLs(List<Share> shares, String protocol, String fallbackHostname) throws OXException {
+    public List<String> generateShareURLs(int contextId, List<Share> shares, String protocol, String fallbackHostname) throws OXException {
+        UserService userService = services.getService(UserService.class);
         List<String> urls = new ArrayList<String>(shares.size());
         for (Share share : shares) {
-//            urls.add(ShareTool.getShareUrl(share, protocol, fallbackHostname));
+            User guest = userService.getUser(share.getGuest(), contextId);
+            String hostname = getHostname(share.getCreatedBy(), contextId, fallbackHostname);
+            String prefix = getServletPrefix();
+            urls.add(protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + ShareTool.generateShareToken(contextId, guest));
         }
         return urls;
+    }
+
+    private String getHostname(int userID, int contextID, String fallbackHostname) {
+        HostnameService hostnameService = services.getService(HostnameService.class);
+        if (hostnameService == null) {
+            return fallbackHostname;
+        }
+
+        return hostnameService.getHostname(userID, contextID);
+    }
+
+    private String getServletPrefix() {
+        DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
+        if (prefixService == null) {
+            return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+
+        return prefixService.getPrefix();
     }
 
     /**
