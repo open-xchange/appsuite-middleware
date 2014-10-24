@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.mapping.ShareField;
@@ -69,7 +70,7 @@ public class SelectShareBuilder {
     private final ShareField[] shareFields;
     private int createdBy;
     private int[] guests;
-    private ShareTarget target;
+    private List<ShareTarget> targets;
     private Date expiredAfter;
 
     /**
@@ -121,11 +122,11 @@ public class SelectShareBuilder {
     /**
      * Adds a share target definition to restrict the results to.
      *
-     * @param targte The target
+     * @param targets The targets
      * @return The builder
      */
-    public SelectShareBuilder target(ShareTarget target) {
-        this.target = target;
+    public SelectShareBuilder targets(List<ShareTarget> targets) {
+        this.targets = targets;
         return this;
     }
 
@@ -135,13 +136,32 @@ public class SelectShareBuilder {
      * @param connection The connection to use
      * @return The prepared statement
      */
-    public PreparedStatement prepare(Connection connection) throws SQLException, OXException {
+    public PreparedStatement prepareSelect(Connection connection) throws SQLException, OXException {
+        return prepare(connection, "SELECT " + SHARE_MAPPER.getColumns(shareFields) + " FROM share ");
+    }
+
+    /**
+     * Prepares the statement and sets all required parameters.
+     *
+     * @param connection The connection to use
+     * @return The prepared statement
+     */
+    public PreparedStatement prepareDelete(Connection connection) throws SQLException, OXException {
+        return prepare(connection, "DELETE FROM share ");
+    }
+
+    /**
+     * Prepares the statement and sets all required parameters.
+     *
+     * @param connection The connection to use
+     * @return The prepared statement
+     */
+    private PreparedStatement prepare(Connection connection, String sqlBeforeWhere) throws SQLException, OXException {
         /*
          * build query
          */
         StringBuilder stringBuilder = new StringBuilder(256)
-            .append("SELECT ").append(SHARE_MAPPER.getColumns(shareFields)).append(" FROM share ")
-            .append("WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?")
+            .append(sqlBeforeWhere).append(" WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?")
         ;
         if (0 < createdBy) {
             stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?");
@@ -163,14 +183,23 @@ public class SelectShareBuilder {
                 .append(" AND ").append(SHARE_MAPPER.get(ShareField.EXPIRES).getColumnLabel()).append("<?)")
             ;
         }
-        if (null != target) {
-            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=?")
-                .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
-            ;
-            if (null != target.getItem()) {
-                stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?");
+        if (null != targets && 0 < targets.size()) {
+            if (1 == targets.size()) {
+                stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=?")
+                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
+                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?")
+                ;
+            } else {
+                stringBuilder.append(" AND (").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=?")
+                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
+                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?");
+                for (int i = 1; i < targets.size(); i++) {
+                    stringBuilder.append(" OR ").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=?")
+                        .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
+                        .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?");
+                }
+                stringBuilder.append(')');
             }
-            stringBuilder.append(')');
         }
         /*
          * prepare statement
@@ -190,12 +219,11 @@ public class SelectShareBuilder {
             stmt.setInt(parameterIndex++, contextID);
             stmt.setLong(parameterIndex++, expiredAfter.getTime());
         }
-        if (null != target) {
-            stmt.setInt(parameterIndex++, contextID);
-            stmt.setInt(parameterIndex++, target.getModule());
-            stmt.setString(parameterIndex++, target.getFolder());
-            if (null != target.getItem()) {
-                stmt.setString(parameterIndex++, target.getItem());
+        if (null != targets) {
+            for (ShareTarget target : targets) {
+                stmt.setInt(parameterIndex++, target.getModule());
+                stmt.setString(parameterIndex++, null != target.getFolder() ? target.getFolder() : "");
+                stmt.setString(parameterIndex++, null != target.getItem() ? target.getItem() : "");
             }
         }
         return stmt;

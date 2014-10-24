@@ -1219,7 +1219,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
             }
             if (toUpdate.getCreatedBy() != userId) {
-                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+//                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }
             executor.update(con, Table.CONTACTS, contextId, contactId, lastRead.getTime(), contact, Fields.sort(queryFields.getContactDataFields()));
         } catch (SQLException e) {

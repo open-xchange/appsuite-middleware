@@ -183,6 +183,7 @@ public class DefaultShareService implements ShareService {
                 for (ShareTarget target : targets) {
                     Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
                     sharesByTarget.get(target).add(share);
+                    allShares.add(share);
                 }
             }
             /*
@@ -208,45 +209,13 @@ public class DefaultShareService implements ShareService {
             return;
         }
         LOG.info("Deleting share target(s) {} for guest users {} in context {}...", targets, guestIDs, session.getContextId());
-
-        List<Share> sharesToDelete = new ArrayList<Share>();
-        for (ShareTarget target : targets) {
-            for (Integer guest : guestIDs) {
-                Share share = new Share();
-                share.setGuest(guest);
-                share.setTarget(target);
-                sharesToDelete.add(share);
-            }
-        }
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            shareStorage.deleteShares(session.getContextId(), sharesToDelete, connectionHelper.getParameters());
-            /*
-             * load affected shares
-             */
-//            List<ShareList> affectedShares = new ArrayList<ShareList>();
-//            int[] guests = I2i(guestIDs);
-//            for (Share target : targets) {
-//                affectedShares.addAll(shareStorage.loadSharesForTarget(
-//                    session.getContextId(), target, guests, connectionHelper.getParameters()));
-//            }
-//            /*
-//             * gather resulting share updates and deletes
-//             */
-//            List<ShareList> sharesToUpdate = new ArrayList<ShareList>(affectedShares.size());
-//            List<ShareList> sharesToDelete = new ArrayList<ShareList>(affectedShares.size());
-//            for (ShareList affectedShare : affectedShares) {
-//                List<Share> updatedTargets = new ArrayList<Share>(affectedShare.getTargets());
-//                if (updatedTargets.removeAll(targets)) {
-//                    if (0 == updatedTargets.size()) {
-//                        sharesToDelete.add(affectedShare);
-//                    } else {
-//                        sharesToUpdate.add(affectedShare);
-//                    }
-//                }
-//            }
+            shareStorage.deleteShares(session.getContextId(), targets, I2i(guestIDs), connectionHelper.getParameters());
+            // TODO: adjust user permission bits, delete user if last share deleted
+//            shareStorage.
             /*
              * perform updates & adjust user permission bits
              */

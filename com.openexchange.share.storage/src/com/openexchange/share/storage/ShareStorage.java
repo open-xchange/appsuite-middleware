@@ -52,6 +52,7 @@ package com.openexchange.share.storage;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 
 
 /**
@@ -66,9 +67,9 @@ public interface ShareStorage {
 
     void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
 
-    void deleteShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
-
     //TODO: ownedBy and/or createdBy?
     List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
+
+    int deleteShares(int contextID, List<ShareTarget> targets, int[] guestIDs, StorageParameters parameters) throws OXException;
 
 }

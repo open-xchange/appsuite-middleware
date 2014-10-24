@@ -51,6 +51,7 @@ package com.openexchange.share.storage.internal;
 
 import static com.openexchange.share.storage.internal.SQL.SHARE_MAPPER;
 import static com.openexchange.share.storage.internal.SQL.logExecuteQuery;
+import static com.openexchange.share.storage.internal.SQL.logExecuteUpdate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -142,8 +143,8 @@ public class ShareSelector {
      * @param target The target
      * @return The builder
      */
-    public ShareSelector target(ShareTarget target) {
-        builder.target(target);
+    public ShareSelector targets(List<ShareTarget> targets) {
+        builder.targets(targets);
         return this;
     }
 
@@ -159,7 +160,7 @@ public class ShareSelector {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
-            stmt = builder.prepare(connection);
+            stmt = builder.prepareSelect(connection);
             resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
                 shares.add(SHARE_MAPPER.fromResultSet(resultSet, shareFields).toShare());
@@ -170,6 +171,25 @@ public class ShareSelector {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
         return shares;
+    }
+
+    /**
+     * Performs the <code>DELETE</code> query.
+     *
+     * @param connection The database connection
+     * @return The shares
+     * @throws OXException
+     */
+    public int delete(Connection connection) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = builder.prepareDelete(connection);
+            return logExecuteUpdate(stmt);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
 }

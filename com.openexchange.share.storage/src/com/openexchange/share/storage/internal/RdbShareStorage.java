@@ -58,6 +58,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.share.storage.internal.ConnectionProvider.ConnectionMode;
@@ -96,6 +97,16 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
+    public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ShareSelector(contextID).createdBy(createdBy).select(provider.get());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
     public void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getWriteProvider(contextID, parameters);
         try {
@@ -108,15 +119,13 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public void deleteShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public int deleteShares(int contextID, List<ShareTarget> targets, int[] guestIDs, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(contextID, parameters);
+        try {
+            return new ShareSelector(contextID).guests(guestIDs).targets(targets).delete(provider.get());
+        } finally {
+            provider.close();
+        }
     }
 
     private static int[] insertShares(Connection connection, int contextID, List<Share> shares) throws SQLException, OXException {
