@@ -73,12 +73,16 @@ public class ActionCommand extends ControlOrActionCommand {
      */
 
     /**
+     * <p>
      * Enum Arguments:
-     * - Command name
-     * - Minimum number of arguments
-     * - Tag arguments
-     * - JSON name
-     * - Required directive
+     * </p>
+     * <ul>
+     * <li>Command name</li>
+     * <li>Minimum number of arguments</li>
+     * <li>Tag arguments</li>
+     * <li>JSON name</li>
+     * <li>Required directive</li>
+     * </ul>
      */
     public enum Commands {
         KEEP("keep", 0, new Hashtable<String, Integer>(), "keep", Collections.<String> emptyList()),
@@ -267,8 +271,10 @@ public class ActionCommand extends ControlOrActionCommand {
                     this.tagarguments.put(tag, new ArrayList<String>());
                 }
             } else {
-                if (!command.getTagargs().isEmpty() && i == 0) {
-                    throw new SieveException("The main arguments have to stand after the tag argument in the rule: " + this.toString());
+                for (String tag : command.getTagargs().keySet()) {
+                    if (command.getTagargs().get(tag) > 0 && i == 0) {
+                        throw new SieveException("The main arguments have to stand after the tag argument in the rule: " + this.toString());
+                    }
                 }
             }
         }
