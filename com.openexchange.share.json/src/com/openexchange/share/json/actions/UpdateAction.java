@@ -61,10 +61,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.DefaultShareList;
-import com.openexchange.share.ShareList;
+import com.openexchange.share.ResolvedShare;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -101,7 +100,7 @@ public class UpdateAction extends AbstractShareAction {
          * Parse recipient and targets
          */
         ShareRecipient recipient = null;
-        List<Share> targets = null;
+        List<ShareTarget> targets = null;
         try {
             JSONObject jsonObject = (JSONObject) requestData.requireData();
             if (jsonObject.hasAndNotNull("recipient")) {
@@ -116,7 +115,7 @@ public class UpdateAction extends AbstractShareAction {
         }
 
         ShareService shareService = getShareService();
-        ShareList storedShare = shareService.resolveToken(token);
+        ResolvedShare storedShare = shareService.resolveToken(token);
 //        if (storedShare.getAuthentication() != share.getAuthentication()) {
 //            if (storedShare.getAuthentication() == AuthenticationMode.ANONYMOUS && share.getAuthentication() == AuthenticationMode.ANONYMOUS_PASSWORD) {
 //
@@ -127,8 +126,8 @@ public class UpdateAction extends AbstractShareAction {
 //            }
 //        }
 
-        DefaultShareList updatedShare = new DefaultShareList(storedShare);
-        updatedShare.setTargets(targets);
+//        Share updatedShare = new Share(storedShare);
+//        updatedShare.setTargets(targets);
         if (recipient != null) {
 //            RecipientType type = recipient.getType();
 //            if (type == RecipientType.ANONYMOUS) {
@@ -145,11 +144,11 @@ public class UpdateAction extends AbstractShareAction {
 //                // TODO exception
 //            }
 
-            Map<Integer, List<Share>> targetsByModule = new HashMap<Integer, List<Share>>();
-            for (Share target : storedShare.getTargets()) {
-                List<Share> list = targetsByModule.get(target.getModule());
+            Map<Integer, List<ShareTarget>> targetsByModule = new HashMap<Integer, List<ShareTarget>>();
+            for (ShareTarget target : storedShare.getTargets()) {
+                List<ShareTarget> list = targetsByModule.get(target.getModule());
                 if (list == null) {
-                    list = new LinkedList<Share>();
+                    list = new LinkedList<ShareTarget>();
                     targetsByModule.put(target.getModule(), list);
                 }
 
@@ -158,9 +157,9 @@ public class UpdateAction extends AbstractShareAction {
 
             InternalRecipient internalRecipient = new InternalRecipient();
             internalRecipient.setBits(recipient.getBits());
-            internalRecipient.setEntity(storedShare.getGuest());
+            internalRecipient.setEntity(storedShare.getGuestID());
             internalRecipient.setGroup(false);
-            for (Entry<Integer, List<Share>> entry : targetsByModule.entrySet()) {
+            for (Entry<Integer, List<ShareTarget>> entry : targetsByModule.entrySet()) {
                 ModuleHandler handler = getModuleHandler(entry.getKey());
 //                handler.updateObjects(Collections.emptyList(), entry.getValue(), Collections.singletonList(internalRecipient), session, writeCon);
             }

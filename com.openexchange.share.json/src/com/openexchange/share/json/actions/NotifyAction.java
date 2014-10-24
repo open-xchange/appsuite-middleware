@@ -49,8 +49,6 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Collections;
-import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -58,8 +56,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ResolvedShare;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
@@ -90,10 +88,14 @@ public class NotifyAction extends AbstractShareAction {
         String token = null;
         String recipient = null;
         String message = null;
+        ShareTarget target = null;
 
         try {
             JSONObject request = (JSONObject) requestData.requireData();
             token = request.getString("token");
+            if (request.hasAndNotNull("target")) {
+                target = ShareJSONParser.parseTarget(request.getJSONObject("target"));
+            }
             recipient = request.getString("recipient");
             message = request.optString("message");
         } catch (JSONException e) {
@@ -102,24 +104,9 @@ public class NotifyAction extends AbstractShareAction {
 
         ShareService shareService = getShareService();
         ResolvedShare share = shareService.resolveToken(token);
-        if (share == null) {
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-        }
-
-        String url;
-        if (share.getCommonModule() > 0) {
-            if (share.getCommonFolder() != null) {
-                if (share.getCommonItem() != null) {
-
-                }
-            }
-        } else {
-
-        }
-
-        List<String> urls = generateShareURLs(session.getContextId(), Collections.singletonList(share), requestData);
+        String url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), target, requestData);
         ShareNotificationService notificationService = getNotificationService();
-        notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share, urls.get(0), message, recipient), session);
+        notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share.getTargets(), url, message, recipient), session);
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
 

@@ -138,9 +138,10 @@ public class NewAction extends AbstractShareAction {
                 for (CreatedShare share : shares) {
                     String url;
                     if (share.isMultiTarget()) {
-                        url = getShareService().generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), null, determineProtocol(request.getRequestData()), determineHostname(request.getRequestData()));
+                        generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), null, request.getRequestData());
+                        url = generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), null, request.getRequestData());
                     } else {
-                        url = getShareService().generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), share.getSingleTarget(), determineProtocol(request.getRequestData()), determineHostname(request.getRequestData()));
+                        url = generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), share.getSingleTarget(), request.getRequestData());
                     }
 
                     User guest = userService.getUser(share.getGuest(), session.getContextId());

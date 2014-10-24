@@ -95,7 +95,7 @@ public class AllAction extends AbstractShareAction {
         if (null == shares || 0 == shares.size()) {
             return new AJAXRequestResult(new JSONArray());
         }
-        List<String> shareURLs = generateShareURLs(session.getContextId(), shares, requestData);
+
         Date lastModified = null;
         Set<Integer> guestIDs = new HashSet<Integer>();
         for (Share share : shares) {
@@ -115,7 +115,7 @@ public class AllAction extends AbstractShareAction {
         List<GuestShare> guestShares = new ArrayList<GuestShare>(shares.size());
         for (int i = 0; i < shares.size(); i++) {
             Share share = shares.get(i);
-            String shareURL = shareURLs.get(i);
+            String shareURL = generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), null, requestData);
             GuestInfo guestInfo = guestUsersByID.get(Integer.valueOf(share.getGuest()));
             User guest = guestInfo.getGuest();
 

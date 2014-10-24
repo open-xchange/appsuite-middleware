@@ -49,7 +49,6 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -58,8 +57,8 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -157,17 +156,8 @@ public abstract class AbstractShareAction implements AJAXActionService {
         return provider.getHandler(module);
     }
 
-    /**
-     * Generates a URL for every share that is passed.
-     *
-     * @param contextId The context ID
-     * @param shares A list of shares
-     * @param requestData The request data
-     * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
-     * @throws OXException
-     */
-    protected List<String> generateShareURLs(int contextId, List<Share> shares, AJAXRequestData requestData) throws OXException {
-        return getShareService().generateShareURLs(contextId, shares, determineProtocol(requestData), determineHostname(requestData));
+    protected String generateShareURL(int contextId, int guestId, int userId, ShareTarget target, AJAXRequestData requestData) throws OXException {
+        return getShareService().generateShareURL(contextId, guestId, userId, target, determineProtocol(requestData), determineHostname(requestData));
     }
 
     protected static String determineProtocol(AJAXRequestData requestData) {
