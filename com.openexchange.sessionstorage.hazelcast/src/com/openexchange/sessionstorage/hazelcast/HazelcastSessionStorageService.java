@@ -76,7 +76,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.portable.PortableSession;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.threadpool.ThreadPools;
 
 /**

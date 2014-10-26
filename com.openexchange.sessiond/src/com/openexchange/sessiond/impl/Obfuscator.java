@@ -54,7 +54,7 @@ import java.util.Map;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
+import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessionstorage.StoredSession;
 
 /**
@@ -128,7 +128,7 @@ public class Obfuscator {
             return string;
         }
         try {
-            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, obfuscationKey);
+            return Services.getService(CryptoService.class).encrypt(string, obfuscationKey);
         } catch (final OXException e) {
             LOG.error("Could not obfuscate string", e);
             return string;
@@ -140,7 +140,7 @@ public class Obfuscator {
             return string;
         }
         try {
-            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).decrypt(string, obfuscationKey);
+            return Services.getService(CryptoService.class).decrypt(string, obfuscationKey);
         } catch (final OXException e) {
             LOG.error("Could not unobfuscate string", e);
             return string;

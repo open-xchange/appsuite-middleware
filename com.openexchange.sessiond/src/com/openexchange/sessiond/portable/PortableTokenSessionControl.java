@@ -47,39 +47,85 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.portable;
+
+import java.io.IOException;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 
 /**
- * Stores the additional values necessary for a session created using the token login mechanism.
+ * {@link PortableTokenSessionControl}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TokenSessionControl {
+public class PortableTokenSessionControl implements CustomPortable {
 
-    private final SessionImpl session;
-    private final String clientToken;
-    private final String serverToken;
+    /** The unique portable class ID of the {@link PortableTokenSessionControl} */
+    public static final int CLASS_ID = 18;
+
+    public static final String PARAMETER_SESSION = "session";
+    public static final String PARAMETER_CLIENT_TOKEN = "clientToken";
+    public static final String PARAMETER_SERVER_TOKEN = "serverToken";
+
+    // --------------------------------------------------------------------------------------------------------------------
+
+    private PortableSession session;
+    private String clientToken;
+    private String serverToken;
 
     /**
-     * Initializes a new {@link TokenSessionControl}.
+     * Initializes a new {@link PortableTokenSessionControl}.
+     */
+    public PortableTokenSessionControl() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link PortableTokenSessionControl}.
      *
-     * @param session The associated session
+     * @param session The portable session
      * @param clientToken The client token
      * @param serverToken The server token
      */
-    public TokenSessionControl(SessionImpl session, String clientToken, String serverToken) {
+    public PortableTokenSessionControl(PortableSession session, String clientToken, String serverToken) {
         super();
         this.session = session;
         this.clientToken = clientToken;
         this.serverToken = serverToken;
     }
 
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writePortable(PARAMETER_SESSION, session);
+        writer.writeUTF(PARAMETER_CLIENT_TOKEN, clientToken);
+        writer.writeUTF(PARAMETER_SERVER_TOKEN, serverToken);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        session = reader.readPortable(PARAMETER_SESSION);
+        clientToken = reader.readUTF(PARAMETER_CLIENT_TOKEN);
+        serverToken = reader.readUTF(PARAMETER_SERVER_TOKEN);
+    }
+
     /**
-     * Gets the associated session
+     * Gets the portable session
      *
-     * @return The session
+     * @return The portable session
      */
-    public SessionImpl getSession() {
+    public PortableSession getSession() {
         return session;
     }
 
@@ -100,4 +146,5 @@ public final class TokenSessionControl {
     public String getServerToken() {
         return serverToken;
     }
+
 }
