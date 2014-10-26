@@ -106,7 +106,8 @@ public interface CustomPortable extends Portable {
      * <li><code>  14</code>: com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher</li>
      * <li><code>  15</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher</li>
      * <li><code>  16</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatus</li>
-     * <li><code> 17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
+     * <li><code>  17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
+     * <li><code>  18</code>: com.openexchange.sessiond.portable.PortableTokenSessionControl</li>
      * </ul>
      *
      * @return The class ID

@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,6 +56,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.osgi.Services;
+import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -362,7 +363,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setLocalIp(final String localIp, final boolean propagate) {
         this.localIp = localIp;
         if (propagate) {
-            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 final String sessionId = this.sessionId;
                 Task<Void> c = new AbstractTask<Void>() {
@@ -444,7 +445,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setHash(final String hash, final boolean propagate) {
         this.hash = hash;
         if (propagate) {
-            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 final String sessionId = this.sessionId;
                 Task<Void> c = new AbstractTask<Void>() {
@@ -501,7 +502,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setClient(final String client, final boolean propagate) {
         this.client = client;
         if (propagate) {
-            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 final String sessionId = this.sessionId;
                 Task<Void> c = new AbstractTask<Void>() {

@@ -49,11 +49,11 @@
 
 package com.openexchange.sessiond.osgi;
 
-import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -62,25 +62,34 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.event.SessiondEventHandler;
+import com.openexchange.sessiond.impl.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
+import com.openexchange.sessiond.impl.TokenSessionContainer;
+import com.openexchange.sessiond.portable.PortableTokenSessionControlFactory;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -90,9 +99,10 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessiondActivator extends HousekeepingActivator {
+public final class SessiondActivator extends HousekeepingActivator implements HazelcastInstanceNotActiveExceptionHandler {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondActivator.class);
+    /** The logger instance */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondActivator.class);
 
     private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
@@ -104,41 +114,96 @@ public final class SessiondActivator extends HousekeepingActivator {
     }
 
     @Override
+    public void propagateNotActive(HazelcastInstanceNotActiveException notActiveException) {
+        BundleContext context = this.context;
+        if (null != context) {
+            context.registerService(HazelcastInstanceNotActiveException.class, notActiveException, null);
+        }
+    }
+
+    String discoverHzMapName(final Config config, String mapPrefix) throws IllegalStateException {
+        final Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+        if (null != mapConfigs && !mapConfigs.isEmpty()) {
+            for (final String mapName : mapConfigs.keySet()) {
+                if (mapName.startsWith(mapPrefix)) {
+                    LOG.info("Using distributed token-session map '{}'.", mapName);
+                    return mapName;
+                }
+            }
+        }
+        LOG.info("No distributed token-session map with mapPrefix {} in hazelcast configuration", mapPrefix);
+        return null;
+    }
+
+    @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class };
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Don't stop the sessiond
-        LOG.warn("Absent service: {}", clazz.getName());
-        getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
-            // (Re-)Initialize service registry with available services
+            LOG.info("starting bundle: com.openexchange.sessiond");
+            Services.setServiceLookup(this);
+            final BundleContext context = this.context;
+            SessiondInit.getInstance().start();
+
+            // Create & register portable factory
+            registerService(CustomPortableFactory.class, new PortableTokenSessionControlFactory());
+
+            // Initialize token session container
+            TokenSessionContainer.getInstance().setNotActiveExceptionHandler(this);
+
+            // Track Hazelcast
             {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
+                // Check if distributed token-sessions are enabled
+                ConfigurationService configService = getService(ConfigurationService.class);
+                if (configService.getBoolProperty("com.openexchange.sessiond.useDistributedTokenSessions", false)) {
+                    // Check if enabled per configuration
+                    final HazelcastConfigurationService hzConfig = getService(HazelcastConfigurationService.class);
+                    if (hzConfig.isEnabled()) {
+                        // Track HazelcastInstance service
+                        ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> customizer = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+
+                            @Override
+                            public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                                removeService(HazelcastInstance.class);
+                                TokenSessionContainer.getInstance().changeBackingMapToLocalMap();
+                                context.ungetService(reference);
+                            }
+
+                            @Override
+                            public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                                // Ignore
+                            }
+
+                            @Override
+                            public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+                                HazelcastInstance hazelcastInstance = context.getService(reference);
+                                try {
+                                    String hzMapName = discoverHzMapName(hzConfig.getConfig(), TokenSessionContainer.getInstance().getServerTokenMapName());
+                                    if (null == hzMapName) {
+                                        context.ungetService(reference);
+                                        return null;
+                                    }
+                                    addService(HazelcastInstance.class, hazelcastInstance);
+                                    TokenSessionContainer.getInstance().changeBackingMapToHz();
+                                    return hazelcastInstance;
+                                } catch (OXException e) {
+                                    LOG.warn("Couldn't initialize distributed token-session map.", e);
+                                } catch (RuntimeException e) {
+                                    LOG.warn("Couldn't initialize distributed token-session map.", e);
+                                }
+                                context.ungetService(reference);
+                                return null;
+                            }
+                        };
+                        track(HazelcastInstance.class, customizer);
                     }
                 }
             }
-            LOG.info("starting bundle: com.openexchange.sessiond");
-            final BundleContext context = this.context;
-            SessiondInit.getInstance().start();
+
+            // Initialize service instance
             final SessiondService serviceImpl = /*new InvalidatedAwareSessiondService*/(new SessiondServiceImpl());
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
@@ -147,29 +212,8 @@ public final class SessiondActivator extends HousekeepingActivator {
             track(ManagementService.class, new ManagementRegisterer(context));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
             track(TimerService.class, new TimerServiceTracker(context));
-            track(SessionStorageService.class, new SessionStorageServiceTracker(context));
-            track(ContextService.class, new ServiceTrackerCustomizer<ContextService, ContextService>() {
-
-                @Override
-                public ContextService addingService(final ServiceReference<ContextService> reference) {
-                    final ContextService service = context.getService(reference);
-                    addService(ContextService.class, service);
-                    getServiceRegistry().addService(ContextService.class, service);
-                    return service;
-                }
-
-                @Override
-                public void modifiedService(final ServiceReference<ContextService> reference, final ContextService service) {
-                    // Nothing to do
-                }
-
-                @Override
-                public void removedService(final ServiceReference<ContextService> reference, final ContextService service) {
-                    removeService(ContextService.class);
-                    getServiceRegistry().removeService(ContextService.class);
-                    context.ungetService(reference);
-                }
-            });
+            track(SessionStorageService.class, new SessionStorageServiceTracker(this, context));
+            trackService(ContextService.class);
             openTrackers();
 
             final SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
@@ -178,31 +222,32 @@ public final class SessiondActivator extends HousekeepingActivator {
             eventHandlerRegistration = eventHandler.registerSessiondEventHandler(context);
 
             registerService(SessionSpecificContainerRetrievalService.class, retrievalService);
-            /*
-             * clear other sessions of user on (remote) password change event
-             */
-            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
-            EventHandler passwordChangeEventHandler = new EventHandler() {
 
-                @Override
-                public void handleEvent(Event event) {
-                    if (event.containsProperty(CommonEvent.REMOTE_MARKER)) {
-                        int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
-                        int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
-                        Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
-                        if (null != session && false == Strings.isEmpty(session.getSessionID())) {
-                            Collection<Session> sessions = serviceImpl.getSessions(userId, contextId);
-                            for (Session userSession : sessions) {
-                                if (false == session.getSessionID().equals(userSession.getSessionID())) {
-                                    serviceImpl.removeSession(userSession.getSessionID());
+            // Clear other sessions for a user on (remote) password change event
+            {
+                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
+                EventHandler passwordChangeEventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(Event event) {
+                        if (event.containsProperty(CommonEvent.REMOTE_MARKER)) {
+                            int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
+                            int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
+                            Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+                            if (null != session && false == Strings.isEmpty(session.getSessionID())) {
+                                Collection<Session> sessions = serviceImpl.getSessions(userId, contextId);
+                                for (Session userSession : sessions) {
+                                    if (false == session.getSessionID().equals(userSession.getSessionID())) {
+                                        serviceImpl.removeSession(userSession.getSessionID());
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            };
-            registerService(EventHandler.class, passwordChangeEventHandler, serviceProperties);
+                };
+                registerService(EventHandler.class, passwordChangeEventHandler, serviceProperties);
+            }
         } catch (final Exception e) {
             LOG.error("SessiondActivator: start: ", e);
             // Try to stop what already has been started.
@@ -215,7 +260,7 @@ public final class SessiondActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.sessiond");
         try {
-            final SessionStorageService storageService = getServiceRegistry().getOptionalService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             final ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
             if (null != eventHandlerRegistration) {
                 eventHandlerRegistration.unregister();
@@ -227,7 +272,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             final List<SessionControl> sessions = SessionHandler.getSessions();
             if (null != storageService) {
                 try {
-                    final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+                    final EventAdmin eventAdmin = Services.getService(EventAdmin.class);
                     for (final SessionControl sessionControl : sessions) {
                         if (null != sessionControl) {
                             final SessionImpl session = sessionControl.getSession();
@@ -245,10 +290,11 @@ public final class SessiondActivator extends HousekeepingActivator {
                     LOG.warn("Remaining active sessions could not be put into central session storage.", e);
                 }
             }
+            TokenSessionContainer.getInstance().setNotActiveExceptionHandler(null);
             // Stop sessiond
             SessiondInit.getInstance().stop();
             // Clear service registry
-            getServiceRegistry().clearRegistry();
+            Services.setServiceLookup(null);
         } catch (final Exception e) {
             LOG.error("SessiondActivator: stop", e);
             throw e;

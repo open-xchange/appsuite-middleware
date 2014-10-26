@@ -50,13 +50,22 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.osgi.Services;
+import com.openexchange.sessiond.portable.PortableTokenSessionControl;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -66,100 +75,277 @@ import com.openexchange.timer.TimerService;
  * already existing session.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added support for distributed Hazelcast map
  */
 public final class TokenSessionContainer {
 
-    private static final TokenSessionContainer SINGLETON = new TokenSessionContainer();
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TokenSessionContainer.class);
 
-    private final Map<String, TokenSessionControl> serverTokenMap = new HashMap<String, TokenSessionControl>();
-    private final Map<String, ScheduledTimerTask> removerMap = new ConcurrentHashMap<String, ScheduledTimerTask>();
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private static volatile TokenSessionContainer INSTANCE = new TokenSessionContainer();
 
-    private TimerService timerService;
+    /**
+     * Gets the {@link TokenSessionContainer} instance.
+     *
+     * @return The {@link TokenSessionContainer} instance
+     */
+    public static TokenSessionContainer getInstance() {
+        return INSTANCE;
+    }
 
+    // ------------------------------------------------------------------------------------------------------------------------------- //
+
+    private final String serverTokenMapName;
+    private final Map<String, TokenSessionControl> localServerTokenMap;
+    private final Map<String, ScheduledTimerTask> removerMap;
+    private final Lock lock;
+    private final AtomicBoolean useHazelcast;
+    private volatile HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler;
+    private volatile TimerService timerService;
+
+    /**
+     * Initializes a new {@link TokenSessionContainer}.
+     */
     private TokenSessionContainer() {
         super();
+        serverTokenMapName = "serverTokenMap";
+        this.useHazelcast = new AtomicBoolean(false);
+        localServerTokenMap = new HashMap<String, TokenSessionControl>();
+        removerMap = new ConcurrentHashMap<String, ScheduledTimerTask>();
+        lock = new ReentrantLock();
     }
 
-    public static TokenSessionContainer getInstance() {
-        return SINGLETON;
+    private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
+        LOG.warn("Encountered a {} error.", HazelcastInstanceNotActiveException.class.getSimpleName());
+        changeBackingMapToLocalMap();
+
+        HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler = this.notActiveExceptionHandler;
+        if (null != notActiveExceptionHandler) {
+            notActiveExceptionHandler.propagateNotActive(e);
+        }
     }
 
+    /**
+     * Gets the name for the token-session map
+     *
+     * @return The name
+     */
+    public String getServerTokenMapName() {
+        return serverTokenMapName;
+    }
+
+    /**
+     * Sets the not-active exception handler
+     *
+     * @param notActiveExceptionHandler The handler to set
+     */
+    public void setNotActiveExceptionHandler(HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler) {
+        this.notActiveExceptionHandler = notActiveExceptionHandler;
+    }
+
+    /**
+     * Gets the Hazelcast map or <code>null</code> if unavailable.
+     */
+    private IMap<String, PortableTokenSessionControl> hzMap(String mapIdentifier) {
+        if (null == mapIdentifier) {
+            LOG.trace("Name of Hazelcast map is missing for token-session service.");
+            return null;
+        }
+        final HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
+        if (hazelcastInstance == null) {
+            LOG.trace("Hazelcast instance is not available.");
+            return null;
+        }
+        try {
+            return hazelcastInstance.getMap(mapIdentifier);
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleNotActiveException(e);
+            return null;
+        }
+    }
+
+    /**
+     * Changes the backing maps from distributed Hazelcast ones to local ones.
+     */
+    public void changeBackingMapToLocalMap() {
+        Lock lock = getLock();
+        lock.lock();
+        try {
+            // This happens if Hazelcast is removed in the meantime. We cannot copy any information back to the local map.
+            useHazelcast.set(false);
+            LOG.info("Token-session backing map changed to local");
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Changes the backing maps from local ones to distributed Hazelcast ones.
+     */
+    public void changeBackingMapToHz() {
+        Lock lock = getLock();
+        lock.lock();
+        try {
+            if (useHazelcast.get()) {
+                return;
+            }
+
+            IMap<String, PortableTokenSessionControl> serverTokenHzMap = hzMap(serverTokenMapName);
+            if (null == serverTokenHzMap) {
+                LOG.trace("Hazelcast map for remote token-session is not available.");
+            } else {
+                // This MUST be synchronous!
+                for (Map.Entry<String, TokenSessionControl> entry : localServerTokenMap.entrySet()) {
+                    TokenSessionControl tsc = entry.getValue();
+                    serverTokenHzMap.put(
+                        entry.getKey(),
+                        new PortableTokenSessionControl(new PortableSession(tsc.getSession()), tsc.getClientToken(), tsc.getServerToken()));
+                }
+                localServerTokenMap.clear();
+
+                for (Iterator<ScheduledTimerTask> iter = removerMap.values().iterator(); iter.hasNext();) {
+                    ScheduledTimerTask timerTask = iter.next();
+                    timerTask.cancel();
+                    iter.remove();
+                }
+            }
+
+            useHazelcast.set(true);
+            LOG.info("Token-session backing map changed to hazelcast");
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void putIntoMap(String serverToken, TokenSessionControl control) {
+        if (useHazelcast.get()) {
+            IMap<String, PortableTokenSessionControl> serverTokenHzMap = hzMap(serverTokenMapName);
+
+            // Generate a portable session from token's session...
+            PortableSession portableSession = new PortableSession(SessionHandler.getObfuscator().wrap(control.getSession()));
+
+            // ... and put into HZ map
+            serverTokenHzMap.put(serverToken, new PortableTokenSessionControl(portableSession, control.getClientToken(), control.getServerToken()));
+        } else {
+            localServerTokenMap.put(serverToken, control);
+        }
+    }
+
+    private TokenSessionControl removeFromMap(String serverToken) {
+        if (false == useHazelcast.get()) {
+            return localServerTokenMap.remove(serverToken);
+        }
+
+        IMap<String, PortableTokenSessionControl> serverTokenHzMap = hzMap(serverTokenMapName);
+        PortableTokenSessionControl removed = serverTokenHzMap.remove(serverToken);
+        if (null == removed) {
+            return null;
+        }
+
+        // Create the session instance from its portable representation
+        SessionImpl newSession = (SessionImpl) SessionHandler.getObfuscator().unwrap(removed.getSession());
+
+        // Return appropriate TokenSessionControl
+        return new TokenSessionControl(newSession, removed.getClientToken(), removed.getServerToken());
+    }
+
+    private Map<String, ScheduledTimerTask> getRemoverMap() {
+        return useHazelcast.get() ? null : removerMap;
+    }
+
+    private Lock getLock() {
+        return useHazelcast.get() ? Session.EMPTY_LOCK : lock;
+    }
+
+    /**
+     * Applies the given timer service to this {@link TokenSessionContainer} instance.
+     *
+     * @param service The time service
+     */
     public void addTimerService(TimerService service) {
         timerService = service;
     }
 
+    /**
+     * Removes the timer service from this {@link TokenSessionContainer} instance.
+     */
     public void removeTimerService() {
         timerService = null;
     }
 
     TokenSessionControl addSession(SessionImpl session, String clientToken, String serverToken) {
-        Lock wLock = lock.writeLock();
-        final TokenSessionControl control;
-        wLock.lock();
+        TokenSessionControl control;
+
+        Lock lock = getLock();
+        lock.lock();
         try {
             control = new TokenSessionControl(session, clientToken, serverToken);
-            serverTokenMap.put(serverToken, control);
+            putIntoMap(serverToken, control);
         } finally {
-            wLock.unlock();
+            lock.unlock();
         }
+
         scheduleRemover(control);
         return control;
     }
 
     TokenSessionControl getSession(String clientToken, String serverToken) throws OXException {
-        Lock rLock = lock.readLock();
-        final TokenSessionControl control;
-        rLock.lock();
+        TokenSessionControl control;
+
+        Lock lock = getLock();
+        lock.lock();
         try {
-            control = serverTokenMap.get(serverToken);
+            control = removeFromMap(serverToken);
+            if (null == control) {
+                throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN.create(serverToken, clientToken);
+            }
+            if (!control.getServerToken().equals(serverToken)) {
+                throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN.create(serverToken, clientToken);
+            }
+            if (!control.getClientToken().equals(clientToken)) {
+                throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_CLIENT_TOKEN.create(serverToken, clientToken);
+            }
         } finally {
-            rLock.unlock();
+            lock.unlock();
         }
-        if (null == control) {
-            throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN.create(serverToken, clientToken);
-        }
-        if (!control.getServerToken().equals(serverToken)) {
-            throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN.create(serverToken, clientToken);
-        }
-        if (!control.getClientToken().equals(clientToken)) {
-            throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_CLIENT_TOKEN.create(serverToken, clientToken);
-        }
-        Lock wLock = lock.writeLock();
-        wLock.lock();
-        try {
-            serverTokenMap.remove(control.getServerToken());
-        } finally {
-            wLock.unlock();
-        }
+
         unscheduleRemover(control);
         return control;
     }
 
     TokenSessionControl removeSession(TokenSessionControl control) {
-        Lock wLock = lock.writeLock();
-        final TokenSessionControl removed;
-        wLock.lock();
+        TokenSessionControl removed;
+
+        Lock lock = getLock();
+        lock.lock();
         try {
-            removed = serverTokenMap.remove(control.getServerToken());
+            removed = removeFromMap(control.getServerToken());
         } finally {
-            wLock.unlock();
+            lock.unlock();
         }
+
         return removed;
     }
 
     private void scheduleRemover(TokenSessionControl control) {
-        if (null == timerService) {
-            return;
+        Map<String, ScheduledTimerTask> removerMap = getRemoverMap();
+        if (null != removerMap) {
+            TimerService timerService = this.timerService;
+            if (null == timerService) {
+                return;
+            }
+            ScheduledTimerTask task = timerService.schedule(new TokenSessionTimerRemover(control), 60, TimeUnit.SECONDS);
+            removerMap.put(control.getSession().getSessionID(), task);
         }
-        ScheduledTimerTask task = timerService.schedule(new TokenSessionTimerRemover(control), 60, TimeUnit.SECONDS);
-        removerMap.put(control.getSession().getSessionID(), task);
     }
 
     private void unscheduleRemover(TokenSessionControl control) {
-        ScheduledTimerTask task = removerMap.get(control.getSession().getSessionID());
-        if (null != task) {
-            task.cancel();
+        Map<String, ScheduledTimerTask> removerMap = getRemoverMap();
+        if (null != removerMap) {
+            ScheduledTimerTask task = removerMap.get(control.getSession().getSessionID());
+            if (null != task) {
+                task.cancel();
+            }
         }
     }
+
 }

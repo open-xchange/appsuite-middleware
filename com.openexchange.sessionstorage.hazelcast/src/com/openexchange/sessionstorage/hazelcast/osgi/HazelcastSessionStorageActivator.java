@@ -75,7 +75,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Unregisterer;
-import com.openexchange.sessionstorage.hazelcast.portable.PortableSessionFactory;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -114,10 +113,6 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
         if (false == enabled) {
             LOG.warn("com.openexchange.sessionstorage.hazelcast will be disabled due to disabled Hazelcast services");
         } else {
-            /*
-             * create & register portable session factory
-             */
-            registerService(CustomPortableFactory.class, new PortableSessionFactory());
             /*
              * start session storage life-cycle to Hazelcast instance, in case com.openexchange.sessionstorage.hazelcast is enabled
              */
