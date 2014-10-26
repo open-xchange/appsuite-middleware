@@ -49,6 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import org.slf4j.Logger;
+
 /**
  * {@link TokenSessionTimerRemover}
  *
@@ -58,6 +60,11 @@ public class TokenSessionTimerRemover implements Runnable {
 
     private final TokenSessionControl control;
 
+    /**
+     * Initializes a new {@link TokenSessionTimerRemover}.
+     *
+     * @param control The token session control to track
+     */
     public TokenSessionTimerRemover(TokenSessionControl control) {
         super();
         this.control = control;
@@ -65,6 +72,12 @@ public class TokenSessionTimerRemover implements Runnable {
 
     @Override
     public void run() {
-        TokenSessionContainer.getInstance().removeSession(control);
+        try {
+            TokenSessionContainer.getInstance().removeSession(control);
+        } catch (Exception e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(TokenSessionTimerRemover.class);
+            logger.error("Failed to remove elapsed token session", e);
+        }
     }
+
 }

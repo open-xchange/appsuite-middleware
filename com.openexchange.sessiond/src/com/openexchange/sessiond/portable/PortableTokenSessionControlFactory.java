@@ -47,26 +47,26 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast.portable;
+package com.openexchange.sessiond.portable;
 
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link PortableSessionFactory}
+ * {@link PortableTokenSessionControlFactory} - The portable factory for {@link PortableTokenSessionControl} type.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PortableSessionFactory extends AbstractCustomPortableFactory {
+public class PortableTokenSessionControlFactory extends AbstractCustomPortableFactory {
 
     @Override
     public CustomPortable create() {
-        return new PortableSession();
+        return new PortableTokenSessionControl();
     }
 
     @Override
     public int getClassId() {
-        return PortableSession.CLASS_ID;
+        return PortableTokenSessionControl.CLASS_ID;
     }
 
 }

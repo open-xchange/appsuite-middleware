@@ -163,7 +163,6 @@ import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -833,8 +832,10 @@ public final class Init {
 
     private static void startAndInjectSessiondBundle() {
         if (null == TestServiceRegistry.getInstance().getService(SessiondService.class)) {
-            SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
-            SessiondServiceRegistry.getServiceRegistry().addService(TimerService.class, services.get(TimerService.class));
+            SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+            serviceLookup.add(ConfigurationService.class, services.get(ConfigurationService.class));
+            serviceLookup.add(TimerService.class, services.get(TimerService.class));
+            com.openexchange.sessiond.osgi.Services.setServiceLookup(serviceLookup);
             final SessiondServiceImpl serviceImpl = new SessiondServiceImpl();
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             TestServiceRegistry.getInstance().addService(SessiondService.class, serviceImpl);

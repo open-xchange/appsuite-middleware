@@ -259,6 +259,11 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
         return callback;
     }
 
+    /**
+     * Sets the optional call-back
+     *
+     * @param callback The call-back to set
+     */
     public void setCallback(SessionModifyCallback callback) {
         this.callback = callback;
     }

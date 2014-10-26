@@ -128,6 +128,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.sessionstorage"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.sessionstorage.hazelcast.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.snippet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.snippet.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.snippet.mime"/>

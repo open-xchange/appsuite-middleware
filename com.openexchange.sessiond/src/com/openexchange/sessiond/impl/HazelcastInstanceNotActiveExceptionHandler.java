@@ -47,61 +47,21 @@
  *
  */
 
-package com.openexchange.sessiond.osgi;
+package com.openexchange.sessiond.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.sessiond.impl.SessionControl;
-import com.openexchange.sessiond.impl.SessionHandler;
-import com.openexchange.sessiond.impl.SessionImpl;
-import com.openexchange.sessionstorage.SessionStorageService;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
+
 
 /**
- * {@link SessionStorageServiceTracker}
+ * {@link HazelcastInstanceNotActiveExceptionHandler}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {
-
-    private final BundleContext context;
-    private final SessiondActivator activator;
+public interface HazelcastInstanceNotActiveExceptionHandler {
 
     /**
-     * Initializes a new {@link SessionStorageServiceTracker}.
+     * Propagates not-active exception
      */
-    public SessionStorageServiceTracker(SessiondActivator activator, BundleContext context) {
-        super();
-        this.activator = activator;
-        this.context = context;
-    }
-
-    @Override
-    public SessionStorageService addingService(final ServiceReference<SessionStorageService> reference) {
-        final SessionStorageService service = context.getService(reference);
-        activator.addService(SessionStorageService.class, service);
-        final List<SessionControl> sessionControls = SessionHandler.getSessions();
-        if (!sessionControls.isEmpty()) {
-            final List<SessionImpl> sessions = new ArrayList<SessionImpl>(sessionControls.size());
-            for (final SessionControl sessionControl : sessionControls) {
-                sessions.add(sessionControl.getSession());
-            }
-            SessionHandler.storeSessions(sessions, service);
-        }
-        return service;
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
-        activator.removeService(SessionStorageService.class);
-        context.ungetService(reference);
-    }
+    void propagateNotActive(HazelcastInstanceNotActiveException notActiveException);
 
 }
