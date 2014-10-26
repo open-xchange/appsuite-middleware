@@ -67,12 +67,19 @@ import com.openexchange.share.ShareTarget;
  */
 public class ResolvedGuestShare implements GuestShare {
 
-    private final String token;
     private final int contextID;
     private final User guestUser;
     private final List<ShareTarget> targets;
 
-    public ResolvedGuestShare(String token, int contextID, User guestUser, List<Share> shares) throws OXException {
+    /**
+     * Initializes a new {@link ResolvedGuestShare}.
+     *
+     * @param contextID The context ID
+     * @param guestUser The guest user
+     * @param shares The shares
+     * @throws OXException
+     */
+    public ResolvedGuestShare(int contextID, User guestUser, List<Share> shares) throws OXException {
         super();
         this.contextID = contextID;
         this.guestUser = guestUser;
@@ -83,7 +90,6 @@ public class ResolvedGuestShare implements GuestShare {
             }
             targets.add(share.getTarget());
         }
-        this.token = token;
     }
 
     @Override
@@ -108,14 +114,9 @@ public class ResolvedGuestShare implements GuestShare {
 
     @Override
     public String getToken() {
-        return token;
+        return ShareTool.generateShareToken(contextID, guestUser);
     }
 
-    /**
-     * Gets the common module identifier if all contained share targets are pointing to the same module.
-     *
-     *   @return The common module ID, or <code>0</code> if the modules are different between the share targets
-     */
     @Override
     public int getCommonModule() {
         if (null == targets || 0 == targets.size()) {
@@ -131,11 +132,6 @@ public class ResolvedGuestShare implements GuestShare {
         }
     }
 
-    /**
-     * Gets the common folder identifier if all contained share targets are pointing to the same folder.
-     *
-     * @return The common folder ID, or <code>null</code> if the folders are different between the share targets
-     */
     @Override
     public String getCommonFolder() {
         if (null == targets || 0 == targets.size()) {
@@ -154,12 +150,6 @@ public class ResolvedGuestShare implements GuestShare {
         }
     }
 
-    /**
-     * Resolves a contained share target based on the supplied relative path info.
-     *
-     * @param path The share-relative path to the target
-     * @return The target, or <code>null</code> if not found
-     */
     @Override
     public ShareTarget resolveTarget(String path) {
         if (null != targets && 0 < targets.size() && null != path) {
@@ -170,6 +160,11 @@ public class ResolvedGuestShare implements GuestShare {
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "ResolvedGuestShare [contextID=" + contextID + ", guestUser=" + guestUser + ", targets=" + targets + "]";
     }
 
 }

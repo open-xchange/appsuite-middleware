@@ -67,18 +67,11 @@ public interface GuestShare {
     int getGuestID();
 
     /**
-     * Gets the identifier of the context of the guest
+     * Gets the identifier of the context of the guest.
      *
      * @return The context ID
      */
     int getContextID();
-
-    /**
-     * Gets a list of all share targets the guest has access to.
-     *
-     * @return The share targets
-     */
-    List<ShareTarget> getTargets();
 
     /**
      * Gets the authentication mode used for the guest user.
@@ -95,9 +88,16 @@ public interface GuestShare {
     String getToken();
 
     /**
+     * Gets a list of all share targets the guest has access to.
+     *
+     * @return The share targets
+     */
+    List<ShareTarget> getTargets();
+
+    /**
      * Gets the common module identifier if all contained share targets are pointing to the same module.
      *
-     *   @return The common module ID, or <code>0</code> if the modules are different between the share targets
+     * @return The common module ID, or <code>0</code> if the modules are different between the share targets
      */
     int getCommonModule();
 

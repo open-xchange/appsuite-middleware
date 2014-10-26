@@ -128,7 +128,7 @@ public class DefaultShareService implements ShareService {
         }
 
         List<Share> shares = services.getService(ShareStorage.class).loadShares(contextID, guestID, StorageParameters.NO_PARAMETERS);
-        return new ResolvedGuestShare(token, contextID, guest, shares);
+        return new ResolvedGuestShare(contextID, guest, shares);
     }
 
     @Override
