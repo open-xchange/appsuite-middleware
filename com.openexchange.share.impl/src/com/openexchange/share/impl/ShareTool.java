@@ -290,7 +290,7 @@ public class ShareTool {
         return Permission.toBits(perms);
     }
 
-    public static AuthenticationMode getAuthenticationMode(User guest) throws OXException {
+    public static AuthenticationMode getAuthenticationMode(User guest) {
         AuthenticationMode authMode = AuthenticationMode.ANONYMOUS;
         if (guest.getUserPassword() != null) {
             String passwordMech = guest.getPasswordMech();

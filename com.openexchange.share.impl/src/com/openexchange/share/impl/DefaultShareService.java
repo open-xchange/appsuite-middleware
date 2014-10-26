@@ -77,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.CreatedShare;
-import com.openexchange.share.ResolvedShare;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
@@ -114,7 +114,7 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public ResolvedShare resolveToken(String token) throws OXException {
+    public GuestShare resolveToken(String token) throws OXException {
         int contextID = ShareTool.extractContextId(token);
         int guestID = ShareTool.extractUserId(token);
         String baseToken = ShareTool.extractBaseToken(token);
@@ -128,18 +128,7 @@ public class DefaultShareService implements ShareService {
         }
 
         List<Share> shares = services.getService(ShareStorage.class).loadShares(contextID, guestID, StorageParameters.NO_PARAMETERS);
-        List<ShareTarget> targets = new ArrayList<ShareTarget>();
-        for (Share share : shares) {
-            targets.add(share.getTarget());
-        }
-
-        ResolvedShare resolvedShare = new ResolvedShare();
-        resolvedShare.setContextID(contextID);
-        resolvedShare.setGuestID(guestID);
-        resolvedShare.setTargets(targets);
-        resolvedShare.setAuthentication(getAuthenticationMode(contextID, guest));
-        resolvedShare.setToken(token);
-        return resolvedShare;
+        return new ResolvedGuestShare(token, contextID, guest, shares);
     }
 
     @Override
@@ -149,27 +138,8 @@ public class DefaultShareService implements ShareService {
             throw ShareExceptionCodes.UNKNOWN_GUEST.create(guestID);
         }
 
-        return getAuthenticationMode(contextID, guest);
+        return ShareTool.getAuthenticationMode(guest);
     }
-
-    private AuthenticationMode getAuthenticationMode(int contextID, User guest) throws OXException {
-        AuthenticationMode authMode = AuthenticationMode.ANONYMOUS;
-        if (guest.getUserPassword() != null) {
-            String passwordMech = guest.getPasswordMech();
-            if ("{CRYPTO_SERVICE}".equals(passwordMech)) {
-                authMode = AuthenticationMode.ANONYMOUS_PASSWORD;
-            } else {
-                authMode = AuthenticationMode.GUEST_PASSWORD;
-            }
-        }
-
-        return authMode;
-    }
-
-//    @Override
-//    public Share resolveToken(String token, String path) throws OXException {
-//        return null; //TODO
-//    }
 
     @Override
     public List<Share> getAllShares(Session session) throws OXException {
@@ -216,7 +186,7 @@ public class DefaultShareService implements ShareService {
 
                 CreatedShare createdShare = new CreatedShare();
                 createdShare.setGuest(guestUser.getId());
-                createdShare.setAuthMode(getAuthenticationMode(contextID, guestUser));
+                createdShare.setAuthMode(ShareTool.getAuthenticationMode(guestUser));
                 createdShare.setToken(ShareTool.generateShareToken(contextID, guestUser));
                 createdShare.setShares(sharesToCreate);
                 createdShares.add(createdShare);

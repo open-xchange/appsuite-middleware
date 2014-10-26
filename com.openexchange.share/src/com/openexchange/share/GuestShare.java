@@ -47,45 +47,73 @@
  *
  */
 
-package com.openexchange.share.servlet.handler;
+package com.openexchange.share;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.ShareTarget;
+import java.util.List;
 
 /**
- * {@link ShareHandler}
+ * {@link GuestShare}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface ShareHandler {
+public interface GuestShare {
 
     /**
-     * Gets the ranking for this handler.
-     * <p>
-     * The default ranking is zero (<tt>0</tt>). A handler with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned as the
-     * appropriate handler, whereas a handler with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
+     * Gets the identifier of the guest user.
      *
-     * @return The ranking
+     * @return The guest user ID
      */
-    int getRanking();
+    int getGuestID();
 
     /**
-     * Handles the given share.
-     * <p>
-     * If this handle feels responsible for the given share <code>true</code> is returned; otherwise <code>false</code>
+     * Gets the identifier of the context of the guest
      *
-     * @param share The share
-     * @param target The share target within the share, or <code>null</code> if not addressed
-     * @param request The associated HTTP request
-     * @param response The associated HTTP response
-     * @return <code>true</code> if this handler successfully handled the share; otherwise <code>false</code>
-     * @throws OXException If the attempt to resolve given share fails
+     * @return The context ID
      */
-    boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    int getContextID();
+
+    /**
+     * Gets a list of all share targets the guest has access to.
+     *
+     * @return The share targets
+     */
+    List<ShareTarget> getTargets();
+
+    /**
+     * Gets the authentication mode used for the guest user.
+     *
+     * @return The authentication mode
+     */
+    AuthenticationMode getAuthentication();
+
+    /**
+     * Gets the token associated with the guest user.
+     *
+     * @return The token
+     */
+    String getToken();
+
+    /**
+     * Gets the common module identifier if all contained share targets are pointing to the same module.
+     *
+     *   @return The common module ID, or <code>0</code> if the modules are different between the share targets
+     */
+    int getCommonModule();
+
+    /**
+     * Gets the common folder identifier if all contained share targets are pointing to the same folder.
+     *
+     * @return The common folder ID, or <code>null</code> if the folders are different between the share targets
+     */
+    String getCommonFolder();
+
+    /**
+     * Resolves a contained share target based on the supplied relative path info.
+     *
+     * @param path The share-relative path to the target
+     * @return The target, or <code>null</code> if not found
+     */
+    ShareTarget resolveTarget(String path);
 
 }

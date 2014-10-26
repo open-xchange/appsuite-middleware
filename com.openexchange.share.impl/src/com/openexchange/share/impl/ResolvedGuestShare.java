@@ -47,27 +47,76 @@
  *
  */
 
-package com.openexchange.share;
+package com.openexchange.share.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestShare;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 
 /**
- * {@link ResolvedShare}
+ * {@link ResolvedGuestShare}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ResolvedShare {
+public class ResolvedGuestShare implements GuestShare {
 
-    private int guestID;
-    private int contextID;
-    private List<ShareTarget> targets;
-    private AuthenticationMode authentication;
-    private String token;
+    private final String token;
+    private final int contextID;
+    private final User guestUser;
+    private final List<ShareTarget> targets;
 
+    public ResolvedGuestShare(String token, int contextID, User guestUser, List<Share> shares) throws OXException {
+        super();
+        this.contextID = contextID;
+        this.guestUser = guestUser;
+        this.targets = new ArrayList<ShareTarget>(shares.size());
+        for (Share share : shares) {
+            if (share.getGuest() != guestUser.getId()) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Share " + share + " does not belong to guest " + guestUser);
+            }
+            targets.add(share.getTarget());
+        }
+        this.token = token;
+    }
 
+    @Override
+    public int getGuestID() {
+        return guestUser.getId();
+    }
 
+    @Override
+    public int getContextID() {
+        return contextID;
+    }
 
+    @Override
+    public List<ShareTarget> getTargets() {
+        return targets;
+    }
+
+    @Override
+    public AuthenticationMode getAuthentication() {
+        return ShareTool.getAuthenticationMode(guestUser);
+    }
+
+    @Override
+    public String getToken() {
+        return token;
+    }
+
+    /**
+     * Gets the common module identifier if all contained share targets are pointing to the same module.
+     *
+     *   @return The common module ID, or <code>0</code> if the modules are different between the share targets
+     */
+    @Override
     public int getCommonModule() {
         if (null == targets || 0 == targets.size()) {
             return 0;
@@ -82,6 +131,12 @@ public class ResolvedShare {
         }
     }
 
+    /**
+     * Gets the common folder identifier if all contained share targets are pointing to the same folder.
+     *
+     * @return The common folder ID, or <code>null</code> if the folders are different between the share targets
+     */
+    @Override
     public String getCommonFolder() {
         if (null == targets || 0 == targets.size()) {
             return null;
@@ -99,19 +154,13 @@ public class ResolvedShare {
         }
     }
 
-    public String getCommonItem() {
-        if (null == targets) {
-            return null;
-        }
-
-        if (targets.size() == 1) {
-            return targets.get(0).getItem();
-        }
-
-        return null;
-    }
-
-
+    /**
+     * Resolves a contained share target based on the supplied relative path info.
+     *
+     * @param path The share-relative path to the target
+     * @return The target, or <code>null</code> if not found
+     */
+    @Override
     public ShareTarget resolveTarget(String path) {
         if (null != targets && 0 < targets.size() && null != path) {
             for (ShareTarget target : targets) {
@@ -121,86 +170,6 @@ public class ResolvedShare {
             }
         }
         return null;
-    }
-
-    /**
-     * Gets the guestID
-     *
-     * @return The guestID
-     */
-    public int getGuestID() {
-        return guestID;
-    }
-
-    /**
-     * Sets the guestID
-     *
-     * @param guestID The guestID to set
-     */
-    public void setGuestID(int guestID) {
-        this.guestID = guestID;
-    }
-
-    /**
-     * Gets the contextID
-     *
-     * @return The contextID
-     */
-    public int getContextID() {
-        return contextID;
-    }
-
-    /**
-     * Sets the contextID
-     *
-     * @param contextID The contextID to set
-     */
-    public void setContextID(int contextID) {
-        this.contextID = contextID;
-    }
-
-    public void setTargets(List<ShareTarget> targets) {
-        this.targets = targets;
-    }
-
-    public List<ShareTarget> getTargets() {
-        return targets;
-    }
-
-    /**
-     * Gets the authentication
-     *
-     * @return The authentication
-     */
-    public AuthenticationMode getAuthentication() {
-        return authentication;
-    }
-
-    /**
-     * Sets the authentication
-     *
-     * @param authentication The authentication to set
-     */
-    public void setAuthentication(AuthenticationMode authentication) {
-        this.authentication = authentication;
-    }
-
-    /**
-     * Gets the token
-     *
-     * @return The token
-     */
-    public String getToken() {
-        return token;
-    }
-
-    /**
-     * Sets the token
-     *
-     * @param token The token to set
-     */
-    public void setToken(String token) {
-        this.token = token;
     }
 
 }

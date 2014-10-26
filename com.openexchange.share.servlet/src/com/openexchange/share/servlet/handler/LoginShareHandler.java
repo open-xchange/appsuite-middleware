@@ -60,6 +60,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
@@ -129,14 +130,14 @@ public class LoginShareHandler extends AbstractShareHandler {
      * @param target The share target within the share, or <code>null</code> if not addressed
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      */
-    protected boolean handles(com.openexchange.share.ResolvedShare share, ShareTarget target) {
+    protected boolean handles(GuestShare share, ShareTarget target) {
         AuthenticationMode authentication = share.getAuthentication();
         return null != authentication &&
             (AuthenticationMode.ANONYMOUS_PASSWORD == authentication || AuthenticationMode.GUEST_PASSWORD == authentication);
     }
 
     @Override
-    public boolean handle(com.openexchange.share.ResolvedShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         if (false == handles(share, target)) {
             // no password prompt required
             return false;

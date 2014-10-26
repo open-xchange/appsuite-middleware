@@ -64,13 +64,13 @@ import com.openexchange.share.recipient.ShareRecipient;
 public interface ShareService {
 
     /**
-     * Resolves the supplied token to a list of shares.
+     * Resolves the supplied token to shares from a guest user's point of view.
      *
      * @param token The token to resolve
-     * @return The share list, or <code>null</code> if no valid share could be looked up
+     * @return The guest share, containing all shares the user has access to, or <code>null</code> if no valid share could be looked up
      * @throws OXException
      */
-    ResolvedShare resolveToken(String token) throws OXException;
+    GuestShare resolveToken(String token) throws OXException;
 
 //    Share resolveToken(String token, String path) throws OXException;
 

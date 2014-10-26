@@ -56,7 +56,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.share.ResolvedShare;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -99,7 +99,7 @@ public class ShareServlet extends HttpServlet {
             request.getSession(true);
 
             // Extract share from path info
-            ResolvedShare share;
+            GuestShare share;
             ShareTarget target;
             {
                 String pathInfo = request.getPathInfo();

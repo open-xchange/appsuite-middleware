@@ -55,7 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ResolvedShare;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
@@ -103,7 +103,7 @@ public class NotifyAction extends AbstractShareAction {
         }
 
         ShareService shareService = getShareService();
-        ResolvedShare share = shareService.resolveToken(token);
+        GuestShare share = shareService.resolveToken(token);
         String url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), target, requestData);
         ShareNotificationService notificationService = getNotificationService();
         notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share.getTargets(), url, message, recipient), session);

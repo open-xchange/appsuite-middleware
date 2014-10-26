@@ -61,7 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ResolvedShare;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
@@ -115,7 +115,7 @@ public class UpdateAction extends AbstractShareAction {
         }
 
         ShareService shareService = getShareService();
-        ResolvedShare storedShare = shareService.resolveToken(token);
+        GuestShare storedShare = shareService.resolveToken(token);
 //        if (storedShare.getAuthentication() != share.getAuthentication()) {
 //            if (storedShare.getAuthentication() == AuthenticationMode.ANONYMOUS && share.getAuthentication() == AuthenticationMode.ANONYMOUS_PASSWORD) {
 //

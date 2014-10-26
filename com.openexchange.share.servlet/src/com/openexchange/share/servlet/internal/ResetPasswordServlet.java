@@ -69,6 +69,7 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -117,7 +118,7 @@ public class ResetPasswordServlet extends HttpServlet {
 
             // Resolve to share
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
-            com.openexchange.share.ResolvedShare share = null == token ? null : shareService.resolveToken(token);
+            GuestShare share = null == token ? null : shareService.resolveToken(token);
             if (null == share) {
                 LOG.debug("No share found for '{}'", null == token ? "null" : token);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);

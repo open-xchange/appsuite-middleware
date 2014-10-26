@@ -89,7 +89,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ResolvedShare;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -158,7 +158,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     }
 
                     // Get the share
-                    final ResolvedShare share = shareService.resolveToken(token);
+                    final GuestShare share = shareService.resolveToken(token);
                     if (null == share) {
                         throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
                     }
@@ -342,7 +342,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @return The login information
      * @throws OXException If login information cannot be returned
      */
-    protected abstract LoginInfo getLoginInfoFrom(ResolvedShare share, HttpServletRequest httpRequest) throws OXException;
+    protected abstract LoginInfo getLoginInfoFrom(GuestShare share, HttpServletRequest httpRequest) throws OXException;
 
     /**
      * Authenticates the user associated with specified share using given login information.
@@ -353,6 +353,6 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @return The authenticated user
      * @throws OXException If authentication fails
      */
-    protected abstract User authenticateUser(ResolvedShare share, LoginInfo loginInfo, Context context) throws OXException;
+    protected abstract User authenticateUser(GuestShare share, LoginInfo loginInfo, Context context) throws OXException;
 
 }

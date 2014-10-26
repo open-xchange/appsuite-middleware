@@ -69,6 +69,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
@@ -102,7 +103,7 @@ public final class ShareServletUtils {
      * @param tranzient <code>true</code> to mark the session as transient, <code>false</code>, otherwise
      * @return The login result, or <code>null</code> if not successful
      */
-    public static LoginResult login(com.openexchange.share.ResolvedShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient) throws OXException, IOException {
+    public static LoginResult login(GuestShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient) throws OXException, IOException {
         /*
          * parse login request
          */

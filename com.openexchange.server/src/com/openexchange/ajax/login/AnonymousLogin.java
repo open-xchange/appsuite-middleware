@@ -68,7 +68,7 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ResolvedShare;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.UserService;
@@ -95,7 +95,7 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected LoginInfo getLoginInfoFrom(ResolvedShare share, HttpServletRequest httpRequest) throws OXException {
+    protected LoginInfo getLoginInfoFrom(GuestShare share, HttpServletRequest httpRequest) throws OXException {
         try {
             final String pass;
 
@@ -134,7 +134,7 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected User authenticateUser(ResolvedShare share, LoginInfo loginInfo, Context context) throws OXException {
+    protected User authenticateUser(GuestShare share, LoginInfo loginInfo, Context context) throws OXException {
         // Get needed services
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
         if (null == userService) {

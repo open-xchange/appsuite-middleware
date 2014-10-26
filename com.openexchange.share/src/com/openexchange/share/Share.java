@@ -77,6 +77,18 @@ public class Share implements Serializable {
     }
 
     /**
+     * Initializes a new {@link Share}.
+     *
+     * @param guest The guest user for the share
+     * @param target The referenced share target
+     */
+    public Share(int guest, ShareTarget target) {
+        super();
+        this.guest = guest;
+        this.target = target;
+    }
+
+    /**
      * Gets the share target.
      *
      * @return The target
@@ -182,6 +194,11 @@ public class Share implements Serializable {
      */
     public void setModifiedBy(int modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    @Override
+    public String toString() {
+        return "Share [guest=" + guest + ", target=" + target + "]";
     }
 
 }

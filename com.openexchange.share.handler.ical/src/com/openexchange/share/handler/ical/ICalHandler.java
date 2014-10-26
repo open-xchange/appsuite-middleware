@@ -82,6 +82,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.RedirectingShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
@@ -134,7 +135,7 @@ public class ICalHandler extends RedirectingShareHandler {
     }
 
     @Override
-    protected boolean handles(com.openexchange.share.ResolvedShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    protected boolean handles(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         return null != target &&
             (Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule()) &&
             (acceptsICal(request) || indicatesICalClient(request));
