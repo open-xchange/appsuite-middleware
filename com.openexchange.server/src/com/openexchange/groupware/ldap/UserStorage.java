@@ -427,6 +427,13 @@ public abstract class UserStorage {
      */
     public abstract void deleteUser(Connection con, Context context, int userId) throws OXException;
 
+    /**
+     * Removes specified user from cache
+     *
+     * @param ctx The associated context
+     * @param userIds The user identifiers
+     * @throws OXException If cache invalidation fails
+     */
     public final void invalidateUser(final Context ctx, final int[] userIds) throws OXException {
         for (final int member : userIds) {
             invalidateUser(ctx, member);
