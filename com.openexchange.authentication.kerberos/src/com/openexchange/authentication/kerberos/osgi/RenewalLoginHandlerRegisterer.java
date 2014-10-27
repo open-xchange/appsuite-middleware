@@ -49,16 +49,19 @@
 
 package com.openexchange.authentication.kerberos.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.authentication.kerberos.impl.DelegationTicketLifecycle;
 import com.openexchange.kerberos.KerberosService;
-import com.openexchange.login.LoginHandlerService;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -101,8 +104,11 @@ public final class RenewalLoginHandlerRegisterer implements ServiceTrackerCustom
         }
         if (needsRegistration) {
             LOG.info("Registering delegation ticket renewal service.");
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER });
             starter = new DelegationTicketLifecycle(kerberosService, timerService);
-            registration = context.registerService(new String[] { LoginHandlerService.class.getName() , EventHandler.class.getName() }, starter, null);
+//            registration = context.registerService(new String[] { LoginHandlerService.class.getName() , EventHandler.class.getName() }, starter, null);
+            registration = context.registerService(EventHandler.class, starter, properties);
         }
         return obj;
     }

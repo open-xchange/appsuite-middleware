@@ -69,9 +69,11 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
 
-    private String location;
     private final boolean cookiesNeeded;
     private final boolean failOnNonRedirect;
+    private String location;
+    private int statusCode;
+    private String reasonPhrase;
 
     protected AbstractRedirectParser() {
         this(true);
@@ -87,6 +89,22 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
         this.failOnNonRedirect = failOnNonRedirect;
     }
 
+    protected int getStatusCode() {
+        return statusCode;
+    }
+
+    protected void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    protected String getReasonPhrase() {
+        return reasonPhrase;
+    }
+
+    protected void setReasonPhrase(String reasonPhrase) {
+        this.reasonPhrase = reasonPhrase;
+    }
+
     @Override
     protected Response getResponse(String body) throws JSONException {
         throw new JSONException("Method not supported when parsing redirect responses.");
@@ -94,12 +112,12 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
 
     @Override
     public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+        statusCode = resp.getStatusLine().getStatusCode();
+        reasonPhrase = resp.getStatusLine().getReasonPhrase();
         if (failOnNonRedirect) {
-            assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, resp.getStatusLine().getStatusCode());            
+            assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
         } else {
-            final int statusCode = resp.getStatusLine().getStatusCode();
             if (statusCode >= HttpServletResponse.SC_BAD_REQUEST) {
-                final String reasonPhrase = resp.getStatusLine().getReasonPhrase();
                 return Integer.toString(statusCode) + (null == reasonPhrase ? "" : reasonPhrase);
             }
         }
