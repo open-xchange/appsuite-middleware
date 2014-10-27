@@ -223,6 +223,13 @@ public abstract class UserStorage {
      * <li>IMAP login</li>
      * <li>Attributes (if present, not <code>null</code>)</li>
      * </ul>
+     * For guest users, additionally the following properties may be changed:
+     * <ul>
+     * <li>User password</li>
+     * <li>Password mechanism</li>
+     * <li>Shadow last change</li>
+     * </ul>
+     *
      * @param user user object with the updated values.
      * @param context The context.
      * @throws OXException  if an error occurs.

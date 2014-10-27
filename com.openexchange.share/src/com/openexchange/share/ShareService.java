@@ -101,10 +101,10 @@ public interface ShareService {
      * @param session The session
      * @param targets The share targets to update
      * @param guestID The identifier of the guest user to update the share targets for
-     * @param clientLastModified The time the associated shares were last read from the client or catch concurrent modifications
-     * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
+     * @param clientLastModified The time the associated shares were last read from the client to catch concurrent modifications
+     * @return A guest share reflecting the updated shares for the guest user
      */
-    List<GuestShare> updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientLastModified) throws OXException;
+    GuestShare updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientLastModified) throws OXException;
 
     /**
      * Updates an anonymous share recipient. This currently only includes updating/setting the password for the guest user.

@@ -70,11 +70,13 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -180,17 +182,67 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<GuestShare> updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientLastModified) throws OXException {
-
-
-        // TODO Auto-generated method stub
-        return null;
+    public GuestShare updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientLastModified) throws OXException {
+        if (null == targets || 0 == targets.size()) {
+            return null;
+        }
+        /*
+         * prepare shares to update
+         */
+        Date now = new Date();
+        List<Share> shares = new ArrayList<Share>(targets.size());
+        for (ShareTarget target : targets) {
+            Share share = new Share(guestID, target);
+            share.setModified(now);
+            share.setModifiedBy(session.getUserId());
+            shares.add(share);
+        }
+        /*
+         * perform update
+         */
+        Context context = services.getService(ContextService.class).getContext(session.getContextId());
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            User guestUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), guestID, context);
+            services.getService(ShareStorage.class).updateShares(
+                session.getContextId(), shares, clientLastModified, connectionHelper.getParameters());
+            connectionHelper.commit();
+            return new ResolvedGuestShare(session.getContextId(), guestUser, shares);
+        } finally {
+            connectionHelper.finish();
+        }
     }
 
     @Override
     public void updateRecipient(Session session, int guestID, AnonymousRecipient recipient) throws OXException {
-        // TODO Auto-generated method stub
-
+        String updatedPassword = recipient.getPassword();
+        if (false == Strings.isEmpty(updatedPassword)) {
+            updatedPassword = services.getService(ShareCryptoService.class).encrypt(updatedPassword);
+        }
+        Context context = services.getService(ContextService.class).getContext(session.getContextId());
+        UserService userService = services.getService(UserService.class);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            User guestUser = userService.getUser(connectionHelper.getConnection(), guestID, context);
+            String previousPassword = guestUser.getUserPassword();
+            if (null == updatedPassword && null != previousPassword || false == updatedPassword.equals(previousPassword)) {
+                UserImpl updatedUser = new UserImpl();
+                updatedUser.setId(guestID);
+                if (Strings.isEmpty(updatedPassword)) {
+                    updatedUser.setPasswordMech("");
+                    updatedUser.setUserPassword(null);
+                } else {
+                    updatedUser.setUserPassword(updatedPassword);
+                    updatedUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
+                }
+                userService.updateUser(updatedUser, context); //TODO: allow passing db connection as argument
+            }
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
     }
 
     @Override

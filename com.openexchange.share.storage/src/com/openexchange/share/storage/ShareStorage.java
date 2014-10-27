@@ -49,6 +49,7 @@
 
 package com.openexchange.share.storage;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -104,6 +105,17 @@ public interface ShareStorage {
      * @throws OXException
      */
     void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
+
+    /**
+     * Updates multiple shares in the storage.
+     *
+     * @param contextID The context ID
+     * @param shares The shares to update
+     * @param clientLastModified The time the shares were last read from the client to catch concurrent modifications
+     * @param parameters The storage parameters
+     * @throws OXException
+     */
+    void updateShares(int contextID, List<Share> shares, Date clientLastModified, StorageParameters parameters) throws OXException;
 
     /**
      * Deletes multiple shares from the storage, based on guest- and target-information present in the supplied shares.

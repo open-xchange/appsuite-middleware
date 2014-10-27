@@ -129,6 +129,8 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SQL_UPDATE_PASSWORD = "UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
 
+    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
+
     private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " +
         "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " +
         "homeDirectory, loginShell, guestCreatedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -740,14 +742,17 @@ public class RdbUserStorage extends UserStorage {
                     if (null != user.getAttributes()) {
                         updateAttributes(context, user, con);
                     }
-                    if (null != password && null != mech) {
-                        String encodedPassword = null;
+                    if (false == user.isGuest() && null != password && null != mech ||
+                        user.isGuest() && (null != password || null != mech)) {
                         PreparedStatement stmt = null;
                         try {
-                            encodedPassword = PasswordMechanism.getEncodedPassword(mech, password);
-                            stmt = con.prepareStatement(SQL_UPDATE_PASSWORD);
+                            String encodedPassword = user.isGuest() ? password : PasswordMechanism.getEncodedPassword(mech, password);
+                            stmt = con.prepareStatement(user.isGuest() ? SQL_UPDATE_PASSWORD_AND_MECH : SQL_UPDATE_PASSWORD);
                             int pos = 1;
                             stmt.setString(pos++, encodedPassword);
+                            if (user.isGuest()) {
+                                stmt.setString(pos++, mech);
+                            }
                             stmt.setInt(pos++, shadowLastChanged);
                             stmt.setInt(pos++, contextId);
                             stmt.setInt(pos++, userId);
