@@ -49,19 +49,16 @@
 
 package com.openexchange.tools.oxfolder;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -70,7 +67,6 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.user.UserService;
 
 
 /**
@@ -95,9 +91,9 @@ public class OXFolderDependentDeleter {
     public static void folderDeleted(Connection con, Session session, FolderObject folder, boolean handDown) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         Context context = serverSession.getContext();
-        TIntList subfolderIDs;
+        List<Integer> subfolderIDs;
         try {
-            subfolderIDs = handDown ? OXFolderSQL.getSubfolderIDs(folder.getObjectID(), con, context) : null;
+            subfolderIDs = handDown ? OXFolderSQL.getSubfolderIDs(folder.getObjectID(), con, context, true) : null;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -106,8 +102,7 @@ public class OXFolderDependentDeleter {
         deleteShares(con, serverSession, folder, subfolderIDs);
     }
 
-    private static void deleteShares(Connection con, ServerSession session, FolderObject folder, TIntList subfolderIDs) throws OXException {
-        UserService userService = ServerServiceRegistry.getServize(UserService.class, true);
+    private static void deleteShares(Connection con, ServerSession session, FolderObject folder, List<Integer> subfolderIDs) throws OXException {
         ShareService shareService = ServerServiceRegistry.getServize(ShareService.class, true);
         session.setParameter(Connection.class.getName(), con);
         try {
@@ -119,38 +114,24 @@ public class OXFolderDependentDeleter {
                 }
             }
 
-            User[] users = userService.getUser(session.getContext(), Autoboxing.I2i(userIDs));
-            List<Integer> guestIDs = new ArrayList<Integer>(permissions.size());
-            for (User user : users) {
-                if (user.isGuest()) {
-                    guestIDs.add(user.getId());
-                }
-            }
-
             final int module = folder.getModule();
             final int folderID = folder.getObjectID();
             if (null != subfolderIDs && 0 < subfolderIDs.size()) {
                 final List<ShareTarget> targets = new ArrayList<ShareTarget>(subfolderIDs.size() + 1);
-
                 targets.add(new ShareTarget(module, Integer.toString(folderID)));
-                subfolderIDs.forEach(new TIntProcedure() {
-                    @Override
-                    public boolean execute(int subfolderID) {
-                        targets.add(new ShareTarget(module, Integer.toString(subfolderID)));
-                        return true;
-                    }
-                });
-
-                shareService.deleteTargets(session, targets, guestIDs);
+                for (Integer subfolderID : subfolderIDs) {
+                    targets.add(new ShareTarget(module, Integer.toString(subfolderID)));
+                }
+                shareService.deleteTargets(session, targets, null);
             } else {
-                shareService.deleteTarget(session, new ShareTarget(module, Integer.toString(folderID)), guestIDs);
+                shareService.deleteTargets(session, Collections.singletonList(new ShareTarget(module, Integer.toString(folderID))), null);
             }
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
     }
 
-    private static void deletePublicationsAndSubscriptions(Connection con, Context context, FolderObject folder, TIntList subfolderIDs) throws OXException {
+    private static void deletePublicationsAndSubscriptions(Connection con, Context context, FolderObject folder, List<Integer> subfolderIDs) throws OXException {
         PreparedStatement stmt1 = null;
         PreparedStatement stmt2 = null;
         try {

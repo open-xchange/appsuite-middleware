@@ -84,11 +84,10 @@ public class FileStorageShareCleanUp implements EventHandler {
     public void handleEvent(Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
             try {
-                ShareTarget target = new ShareTarget();
-                target.setModule(Module.INFOSTORE.getFolderConstant());
-                target.setFolder(FileStorageEventHelper.extractFolderId(event));
-                target.setItem(FileStorageEventHelper.extractObjectId(event));
-                shareService.deleteTarget(FileStorageEventHelper.extractSession(event), target, Collections.<Integer>emptyList());
+                ShareTarget target = new ShareTarget(Module.INFOSTORE.getFolderConstant(),
+                    FileStorageEventHelper.extractFolderId(event), FileStorageEventHelper.extractObjectId(event));
+                shareService.deleteTargets(
+                    FileStorageEventHelper.extractSession(event), Collections.singletonList(target), null);
             } catch (OXException e) {
                 StringBuilder sb = new StringBuilder();
                 for (String name : event.getPropertyNames()) {

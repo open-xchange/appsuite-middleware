@@ -139,11 +139,6 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<GuestShare> addTarget(Session session, ShareTarget shareTarget, List<ShareRecipient> recipients) throws OXException {
-        return addTargets(session, Collections.singletonList(shareTarget), recipients);
-    }
-
-    @Override
     public List<GuestShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
             return Collections.emptyList();
@@ -185,22 +180,21 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public void deleteTarget(Session session, ShareTarget target, List<Integer> guestIDs) throws OXException {
-        deleteTargets(session, Collections.singletonList(target), guestIDs);
-    }
-
-    @Override
     public void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
-        if (null == targets || 0 == targets.size() || null == guestIDs || 0 == guestIDs.size()) {
+        if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
             return;
         }
-        List<Share> shares = new ArrayList<Share>(targets.size() * guestIDs.size());
-        for (ShareTarget target : targets) {
-            for (Integer guestID : guestIDs) {
-                shares.add(new Share(guestID.intValue(), target));
+        if (null == guestIDs) {
+            services.getService(ShareStorage.class).deleteTargets(session.getContextId(), targets, StorageParameters.NO_PARAMETERS);
+        } else {
+            List<Share> shares = new ArrayList<Share>(targets.size() * guestIDs.size());
+            for (ShareTarget target : targets) {
+                for (Integer guestID : guestIDs) {
+                    shares.add(new Share(guestID.intValue(), target));
+                }
             }
+            deleteShares(session, shares);
         }
-        deleteShares(session, shares);
     }
 
     @Override

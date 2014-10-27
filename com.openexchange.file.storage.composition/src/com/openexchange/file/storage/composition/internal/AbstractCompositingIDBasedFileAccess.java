@@ -822,7 +822,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 session.setParameter(Connection.class.getName(), con);
                 ShareService shareService = Services.getService(ShareService.class);
                 ShareTarget shareTarget = new ShareTarget(8, document.getFolderId(), document.getId()); // TODO: no module constant accessible
-                List<GuestShare> shares = shareService.addTarget(session, shareTarget, shareRecipients);
+                List<GuestShare> shares = shareService.addTargets(session, Collections.singletonList(shareTarget), shareRecipients);
                 for (int i = 0; i < guestPermissions.size(); i++) {
                     FileStorageGuestObjectPermission guestPermission = guestPermissions.get(0);
                     GuestShare share = shares.get(i);

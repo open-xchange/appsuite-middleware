@@ -73,17 +73,6 @@ public interface ShareService {
     GuestShare resolveToken(String token) throws OXException;
 
     /**
-     * Adds a single target to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
-     *
-     * @param session The session
-     * @param target The share target to add
-     * @param recipients The recipients for the shares
-     * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
-     * @throws OXException
-     */
-    List<GuestShare> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
-
-    /**
      * Adds multiple targets to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
      *
      * @param session The session
@@ -93,6 +82,16 @@ public interface ShareService {
      * @throws OXException
      */
     List<GuestShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
+
+    /**
+     * Deletes a list of share targets for all shares that belong to a certain list of guests.
+     *
+     * @param session The session
+     * @param targets The share targets to delete
+     * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
+     * @throws OXException
+     */
+    void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
 
 
     /**
@@ -107,26 +106,6 @@ public interface ShareService {
 
     void deleteShares(Session session, List<Share> shares) throws OXException;
 
-
-    /**
-     * Deletes a share target for all shares that belong to a certain list of guests.
-     *
-     * @param session The session
-     * @param target The share target to delete
-     * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the target is deleted for all shares that reference it
-     * @throws OXException
-     */
-    void deleteTarget(Session session, ShareTarget target, List<Integer> guestIDs) throws OXException;
-
-    /**
-     * Deletes a list of share targets for all shares that belong to a certain list of guests.
-     *
-     * @param session The session
-     * @param targets The share targets to delete
-     * @param guestIDs The guest IDs to consider; if empty or <code>null</code> the targets are deleted for all shares that reference it
-     * @throws OXException
-     */
-    void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
 
     /**
      * Updates an existing share.

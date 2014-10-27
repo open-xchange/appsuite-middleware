@@ -440,7 +440,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
-            shareService.deleteTarget(session, new ShareTarget(contentType.getModule(), folderID), guestIDs);
+            shareService.deleteTargets(session, Collections.singletonList(new ShareTarget(contentType.getModule(), folderID)), guestIDs);
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
@@ -470,7 +470,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 for (GuestPermission permission : permissions) {
                     recipients.add(permission.getRecipient());
                 }
-                List<GuestShare> shares = shareService.addTarget(session, entry.getKey(), recipients);
+                List<GuestShare> shares = shareService.addTargets(session, Collections.singletonList(entry.getKey()), recipients);
                 if (null == shares || shares.size() != permissions.size()) {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
                 }

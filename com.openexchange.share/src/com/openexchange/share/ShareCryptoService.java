@@ -59,6 +59,11 @@ import com.openexchange.exception.OXException;
 public interface ShareCryptoService {
 
     /**
+     * The password mechanism identifier used for the share crypto service.
+     */
+    static final String PASSWORD_MECH_ID = "{CRYPTO_SERVICE}";
+
+    /**
      * Encrypts the supplied string using the configured share encryption key.
      *
      * @param value The value to encrypt

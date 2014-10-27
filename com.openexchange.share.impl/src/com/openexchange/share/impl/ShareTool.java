@@ -109,6 +109,25 @@ public class ShareTool {
     }
 
     /**
+     * Gets the authentication mode applicable for the supplied guest user.
+     *
+     * @param guest The guest user
+     * @return The authentication mode
+     */
+    public static AuthenticationMode getAuthenticationMode(User guest) {
+        AuthenticationMode authMode = AuthenticationMode.ANONYMOUS;
+        if (guest.getUserPassword() != null) {
+            String passwordMech = guest.getPasswordMech();
+            if (ShareCryptoService.PASSWORD_MECH_ID.equals(passwordMech)) {
+                authMode = AuthenticationMode.ANONYMOUS_PASSWORD;
+            } else {
+                authMode = AuthenticationMode.GUEST_PASSWORD;
+            }
+        }
+        return authMode;
+    }
+
+    /**
      * Gets permission bits suitable for a guest user being allowed to access all supplied share targets. Besides the concrete module
      * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
      * access.
@@ -157,20 +176,6 @@ public class ShareTool {
         }
         return Permission.toBits(perms);
     }
-
-    public static AuthenticationMode getAuthenticationMode(User guest) {
-        AuthenticationMode authMode = AuthenticationMode.ANONYMOUS;
-        if (guest.getUserPassword() != null) {
-            String passwordMech = guest.getPasswordMech();
-            if ("{CRYPTO_SERVICE}".equals(passwordMech)) {
-                authMode = AuthenticationMode.ANONYMOUS_PASSWORD;
-            } else {
-                authMode = AuthenticationMode.GUEST_PASSWORD;
-            }
-        }
-        return authMode;
-    }
-
 
     /**
      * Adds a module permission to the supplied permission set.
@@ -275,7 +280,7 @@ public class ShareTool {
         guestUser.setMail("");
         if (null != recipient.getPassword()) {
             guestUser.setUserPassword(services.getService(ShareCryptoService.class).encrypt(recipient.getPassword()));
-            guestUser.setPasswordMech("{CRYPTO_SERVICE}");
+            guestUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
         } else {
             guestUser.setPasswordMech("");
         }
