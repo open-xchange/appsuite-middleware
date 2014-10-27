@@ -59,6 +59,7 @@ public final class TokenSessionControl {
     private final SessionImpl session;
     private final String clientToken;
     private final String serverToken;
+    private final long creationStamp;
 
     /**
      * Initializes a new {@link TokenSessionControl}.
@@ -67,11 +68,21 @@ public final class TokenSessionControl {
      * @param clientToken The client token
      * @param serverToken The server token
      */
-    public TokenSessionControl(SessionImpl session, String clientToken, String serverToken) {
+    public TokenSessionControl(SessionImpl session, String clientToken, String serverToken, long creationStamp) {
         super();
         this.session = session;
         this.clientToken = clientToken;
         this.serverToken = serverToken;
+        this.creationStamp = creationStamp;
+    }
+
+    /**
+     * Gets the creation time in milliseconds
+     *
+     * @return The creation time in milliseconds
+     */
+    public long getCreationStamp() {
+        return creationStamp;
     }
 
     /**
