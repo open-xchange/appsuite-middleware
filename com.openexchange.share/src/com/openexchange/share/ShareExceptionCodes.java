@@ -121,6 +121,10 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
      * User %1$d is not a guest user.
      */
     UNKNOWN_GUEST("User %1$d is not a guest user.", null, CATEGORY_ERROR, 14),
+
+    /** The token \"%1$s\" is invalid. */
+    INVALID_TOKEN("The token \"%1$s\" is invalid.", ShareExceptionMessages.INVALID_TOKEN_MSG, Category.CATEGORY_USER_INPUT, 15),
+
     ;
 
     private static final String PREFIX = "SHR";

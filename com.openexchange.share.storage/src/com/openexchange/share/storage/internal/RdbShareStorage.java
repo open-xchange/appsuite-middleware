@@ -52,6 +52,7 @@ package com.openexchange.share.storage.internal;
 import static com.openexchange.share.storage.internal.SQL.SHARE_MAPPER;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
@@ -98,11 +99,12 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    // TODO: optimize
-    public boolean existShares(int contextID, int guest, StorageParameters parameters) throws OXException {
+    public boolean hasShares(int contextID, int guest, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ShareSelector(contextID).guests(new int[] { guest }).select(provider.get()).size() > 0;
+            return hasShares(provider.get(), contextID, guest);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
         }
@@ -219,6 +221,25 @@ public class RdbShareStorage implements ShareStorage {
             return SQL.logExecuteBatch(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static boolean hasShares(Connection connection, int contextID, int guest) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT DISTINCT 1 FROM share WHERE ")
+            .append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.GUEST).getColumnLabel()).append("=?;")
+        ;
+        ResultSet result = null;
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, guest);
+            result = SQL.logExecuteQuery(stmt);
+            return null != result && result.next();
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
         }
     }
 

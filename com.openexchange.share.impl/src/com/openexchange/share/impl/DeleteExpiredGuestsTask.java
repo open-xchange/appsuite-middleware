@@ -122,7 +122,7 @@ public class DeleteExpiredGuestsTask implements Callable<Void> {
         User[] guests = userService.getUser(connectionHelper.getConnection(), context, true, true);
         for (User guest : guests) {
             try {
-                if (!shareStorage.existShares(context.getContextId(), guest.getId(), connectionHelper.getParameters())) {
+                if (!shareStorage.hasShares(context.getContextId(), guest.getId(), connectionHelper.getParameters())) {
                     if (ShareTool.userNotModifiedSince(guest, new Date(System.currentTimeMillis() - GUEST_EXPIRY))) {
                         /*
                          * No shares exist for this guest user and he has not been modified since two weeks. Therefore we can delete him.

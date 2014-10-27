@@ -58,13 +58,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
@@ -72,7 +70,6 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
@@ -114,19 +111,13 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public GuestShare resolveToken(String token) throws OXException {
-        int contextID = ShareTool.extractContextId(token);
-        int guestID = ShareTool.extractUserId(token);
-        String baseToken = ShareTool.extractBaseToken(token);
-        if (contextID < 0 || guestID < 0 || baseToken == null) {
+        ShareToken shareToken = new ShareToken(token);
+        int contextID = shareToken.getContextID();
+        User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+        if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
-
-        User guest = services.getService(UserService.class).getUser(guestID, contextID);
-        if (!baseToken.equals(ShareTool.getBaseToken(guest)) || !guest.isGuest()) {
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-        }
-
-        List<Share> shares = services.getService(ShareStorage.class).loadShares(contextID, guestID, StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadShares(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         return new ResolvedGuestShare(contextID, guest, shares);
     }
 
@@ -368,7 +359,10 @@ public class DefaultShareService implements ShareService {
             User guest = userService.getUser(share.getGuest(), contextId);
             String hostname = getHostname(share.getCreatedBy(), contextId, fallbackHostname);
             String prefix = getServletPrefix();
-            urls.add(protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + ShareTool.generateShareToken(contextId, guest));
+
+
+
+            urls.add(protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + new ShareToken(contextId, guest).getToken());
         }
         return urls;
     }
@@ -381,9 +375,9 @@ public class DefaultShareService implements ShareService {
         String prefix = getServletPrefix();
         String shareUrl;
         if (target == null) {
-            shareUrl = protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + ShareTool.generateShareToken(contextId, guest);
+            shareUrl = protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + new ShareToken(contextId, guest).getToken();
         } else {
-            shareUrl = protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + ShareTool.generateShareToken(contextId, guest) + '/' + target.getPath();
+            shareUrl = protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + new ShareToken(contextId, guest).getToken() + '/' + target.getPath();
         }
         return shareUrl;
     }
@@ -460,7 +454,7 @@ public class DefaultShareService implements ShareService {
          */
         Map<Integer, List<String>> tokensByContextID = new HashMap<Integer, List<String>>();
         for (String token : tokens) {
-            Integer contextId = I(ShareTool.extractContextId(token));
+            Integer contextId = I(new ShareToken(token).getContextID());
             List<String> tokensInContext = tokensByContextID.get(contextId);
             if (null == tokensInContext) {
                 tokensInContext = new ArrayList<String>();
@@ -485,7 +479,7 @@ public class DefaultShareService implements ShareService {
      */
     public void removeShares(int contextId, List<String> tokens) throws OXException {
         for (String token : tokens) {
-            if (ShareTool.extractContextId(token) != contextId) {
+            if (new ShareToken(token).getContextID() != contextId) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
         }
@@ -677,9 +671,7 @@ public class DefaultShareService implements ShareService {
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
         UserService userService = services.getService(UserService.class);
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
-        if (GuestRecipient.class.isInstance(recipient) && services.getService(ConfigurationService.class).getBoolProperty(
-            "com.openexchange.share.aggregateShares",
-            true)) {
+        if (GuestRecipient.class.isInstance(recipient)) {
             /*
              * re-use existing, non-anonymous guest user if possible
              */
@@ -698,44 +690,27 @@ public class DefaultShareService implements ShareService {
                  * combine permission bits with existing ones
                  */
                 UserPermissionBits userPermissionBits = setPermissionBits(connection, context, existingGuestUser.getId(), permissionBits, true);
-                LOG.info(
-                    "Using existing guest user {} with permissions {} in context {}: {}",
-                    existingGuestUser.getMail(),
-                    userPermissionBits.getPermissionBits(),
-                    context.getContextId(),
-                    existingGuestUser.getId());
+                LOG.debug("Using existing guest user {} with permissions {} in context {}: {}",
+                    existingGuestUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
                 return existingGuestUser;
             }
         }
         /*
-         * create new guest user
+         * create new guest user & contact
          */
-        UserImpl guestUser;
-        if (AnonymousRecipient.class.isInstance(recipient)) {
-            guestUser = ShareTool.prepareGuestUser(services, sharingUser, (AnonymousRecipient) recipient);
-        } else if (GuestRecipient.class.isInstance(recipient)) {
-            GuestRecipient guestRecipient = (GuestRecipient) recipient;
-            if (Strings.isEmpty(guestRecipient.getPassword())) {
-                guestRecipient.setPassword(PasswordUtility.generate());
-            }
-            guestUser = ShareTool.prepareGuestUser(services, sharingUser, guestRecipient);
-        } else {
-            throw new UnsupportedOperationException("unsupported share recipient: " + recipient);
-        }
-        Contact contact = new Contact();
-        contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
-        contact.setCreatedBy(sharingUser.getId());
-        contact.setDisplayName(guestUser.getDisplayName());
-        contact.setEmail1(guestUser.getMail());
+        UserImpl guestUser = ShareTool.prepareGuestUser(services, sharingUser, recipient);
+        Contact contact = ShareTool.prepareGuestContact(sharingUser, guestUser);
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
         guestUser.setContactId(contactId);
         int guestID = userService.createUser(connection, context, guestUser);
         guestUser.setId(guestID);
         contact.setInternalUserId(guestID);
         contactUserStorage.updateGuestContact(context.getContextId(), guestID, contactId, contact, new Date(), connection);
+        /*
+         * store permission bits
+         */
         services.getService(UserPermissionService.class).saveUserPermissionBits(
-            connection,
-            new UserPermissionBits(permissionBits, guestID, context.getContextId()));
+            connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
         if (AnonymousRecipient.class.isInstance(recipient)) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {

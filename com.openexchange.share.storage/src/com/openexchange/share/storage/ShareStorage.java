@@ -74,6 +74,16 @@ public interface ShareStorage {
     List<Share> loadShares(int contextID, int guest, StorageParameters parameters) throws OXException;
 
     /**
+     * Gets a value indicating whether there are any stored shares for a specific guest user or not.
+     *
+     * @param contextID The context ID
+     * @param guest The identifier of the guest user to check the shares for
+     * @param parameters The storage parameters
+     * @return <code>true</code> if there is at least one share stored, <code>false</code>, otherwise
+     */
+    boolean hasShares(int contextID, int guest, StorageParameters parameters) throws OXException;
+
+    /**
      * Saves multiple shares in the storage. Existing shares for a guest pointing to the same target are updated implicitly.
      *
      * @param contextID The context ID
@@ -112,7 +122,5 @@ public interface ShareStorage {
 
 //    int deleteShares(int contextID, List<ShareTarget> targets, int[] guests, StorageParameters parameters) throws OXException;
 
-
-    boolean existShares(int contextId, int id, StorageParameters parameters) throws OXException;
 
 }

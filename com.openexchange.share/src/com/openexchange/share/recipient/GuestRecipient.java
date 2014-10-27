@@ -224,4 +224,9 @@ public class GuestRecipient extends ShareRecipient {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "ShareRecipient [type=" + getType() + ", bits=" + getBits() + ", emailAddress=" + emailAddress + "]";
+    }
+
 }

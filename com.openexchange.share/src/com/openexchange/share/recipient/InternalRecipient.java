@@ -107,4 +107,9 @@ public class InternalRecipient extends ShareRecipient {
         this.entity = entity;
     }
 
+    @Override
+    public String toString() {
+        return "ShareRecipient [type=" + getType() + ", bits=" + getBits() + ", entity=" + entity + ", group=" + group + "]";
+    }
+
 }

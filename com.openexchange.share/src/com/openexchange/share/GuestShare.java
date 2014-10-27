@@ -50,6 +50,7 @@
 package com.openexchange.share;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link GuestShare}
@@ -85,7 +86,7 @@ public interface GuestShare {
      *
      * @return The token
      */
-    String getToken();
+    String getToken() throws OXException;
 
     /**
      * Gets a list of all share targets the guest has access to.

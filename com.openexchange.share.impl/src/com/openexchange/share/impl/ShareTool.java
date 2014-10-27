@@ -61,14 +61,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.java.util.UUIDs;
+import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
@@ -92,100 +92,9 @@ public class ShareTool {
 
     public static final String SHARE_SERVLET = "share";
 
-    private static final String SHARE_BASE_TOKEN_ATTRIBUTE = "com.openexchange.shareBaseToken";
-
     private static final String GUEST_LAST_MODIFIED_ATTRIBUTE = "com.openexchange.guestLastModified";
 
-    private static Pattern TOKEN_PATTERN = Pattern.compile("[a-f0-9]{32}", Pattern.CASE_INSENSITIVE);
-
-    /**
-     * Extracts the context ID from a share token
-     *
-     * @param token The share token
-     * @return The context ID or -1, if the token was invalid
-     */
-    public static int extractContextId(String token) {
-        if (token.length() != 8 + 8 + 32) {
-            return -1;
-        }
-
-        int obfuscator = getContextObfuscator(token.substring(16));
-        String context = token.substring(0, 8);
-        return Integer.parseInt(context, 16) ^ obfuscator;
-    }
-
-    /**
-     * Extracts the user ID from a share token
-     *
-     * @param token The share token
-     * @return The user ID or -1, if the token was invalid
-     */
-    public static int extractUserId(String token) {
-        if (token.length() != 8 + 8 + 32) {
-            return -1;
-        }
-
-        int obfuscator = getUserObfuscator(token.substring(16));
-        String user = token.substring(8, 16);
-        return Integer.parseInt(user, 16) ^ obfuscator;
-    }
-
-    /**
-     * Extracts the base token from a share token
-     *
-     * @param shareToken The share token
-     * @return The base token or <code>null</code>, if the token was invalid
-     */
-    public static String extractBaseToken(String shareToken) {
-        if (shareToken.length() != 8 + 8 + 32) {
-            return null;
-        }
-
-        return shareToken.substring(16);
-    }
-
-    /**
-     * Generates a share token for a guest user.
-     *
-     * @param contextId The context ID
-     * @param userId The guest users ID
-     * @param baseToken The guest users base token
-     * @return The share token
-     */
-    public static String generateShareToken(int contextId, int userId, String baseToken) {
-        int contextObfuscator = getContextObfuscator(baseToken);
-        int userObfuscator = getUserObfuscator(baseToken);
-        String context = String.format("%08x", contextId ^ contextObfuscator);
-        String user = String.format("%08x", userId ^ userObfuscator);
-        return context + user + baseToken;
-    }
-
-    /**
-     * Generates a share token for a guest user.
-     *
-     * @param contextId The context ID
-     * @param user The guest user
-     * @return The share token or <code>null</code> if the user object did not contain the base token attribute
-     */
-    public static String generateShareToken(int contextId, User user) {
-        String baseToken = getBaseToken(user);
-        if (baseToken == null) {
-            return null;
-        }
-
-        return generateShareToken(contextId, user.getId(), baseToken);
-    }
-
-    /**
-     * Gets a guests share base token from her user attributes.
-     * @param guest The guest user
-     * @return The base token or null
-     */
-    public static String getBaseToken(User guest) {
-        return getUserAttribute(guest, SHARE_BASE_TOKEN_ATTRIBUTE);
-    }
-
-    private static String getUserAttribute(User user, String name) {
+    public static String getUserAttribute(User user, String name) {
         Map<String, Set<String>> attributes = user.getAttributes();
         if (attributes == null) {
             return null;
@@ -197,47 +106,6 @@ public class ShareTool {
         }
 
         return match.iterator().next();
-    }
-
-    private static int getContextObfuscator(String baseToken) {
-        return Integer.parseInt(baseToken.substring(0, 7), 16);
-    }
-
-    private static int getUserObfuscator(String baseToken) {
-        return Integer.parseInt(baseToken.substring(7, 14), 16);
-    }
-
-    /**
-     * Gets permission bits suitable for a guest user being allowed to access all supplied shares. Besides the concrete module
-     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
-     * access.
-     *
-     * @param module The identifier of the module that should be added to the permissions
-     * @return The permission bits
-     * @throws OXException
-     */
-
-    /**
-     * Gets permission bits suitable for a guest user being allowed to access all targets in a share.. Besides the concrete module
-     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
-     * access.
-     *
-     * @param share The share to build the permissions bits for
-     * @return The permission bits
-     * @throws OXException
-     */
-    public static int getUserPermissionBits(Share share) throws OXException {
-        Set<Permission> perms = new HashSet<Permission>(8);
-        perms.add(Permission.DENIED_PORTAL);
-        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
-        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-//        if (AuthenticationMode.GUEST_PASSWORD == share.getAuthentication()) {
-//            perms.add(Permission.EDIT_PASSWORD);
-//        }
-//        for (ShareTarget target : share.getTargets()) {
-//            addModulePermissions(perms, target.getModule());
-//        }
-        return Permission.toBits(perms);
     }
 
     /**
@@ -347,15 +215,49 @@ public class ShareTool {
         return share;
     }
 
-    private static AuthenticationMode getAuthenticationMode(ShareRecipient recipient) {
+    /**
+     * Prepares a guest user instance based on the supplied share recipient.
+     *
+     * @param services The service lookup reference
+     * @param sharingUser The sharing user
+     * @param recipient The recipient description
+     * @return The guest user
+     * @throws OXException
+     */
+    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, ShareRecipient recipient) throws OXException {
         if (AnonymousRecipient.class.isInstance(recipient)) {
-            return null == ((AnonymousRecipient) recipient).getPassword() ?
-                AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
+            return prepareGuestUser(services, sharingUser, (AnonymousRecipient) recipient);
+        } else if (GuestRecipient.class.isInstance(recipient)) {
+            return prepareGuestUser(services, sharingUser, (GuestRecipient) recipient);
+        } else {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("unsupported share recipient: " + recipient);
         }
-        if (GuestRecipient.class.isInstance(recipient)) {
-            return AuthenticationMode.GUEST_PASSWORD;
+    }
+
+    /**
+     * Prepares a (named) guest user instance. If no password is defined in the supplied guest recipient, an auto-generated one is used.
+     *
+     * @param services The service lookup reference
+     * @param sharingUser The sharing user
+     * @param recipient The recipient description
+     * @return The guest user
+     * @throws OXException
+     */
+    private static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, GuestRecipient recipient) throws OXException {
+        UserImpl guestUser = prepareGuestUser(sharingUser);
+        guestUser.setDisplayName(recipient.getDisplayName());
+        guestUser.setMail(recipient.getEmailAddress());
+        guestUser.setLoginInfo(recipient.getEmailAddress());
+        guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
+        guestUser.setUserPassword(Strings.isEmpty(recipient.getPassword()) ? PasswordUtility.generate() : recipient.getPassword());
+        try {
+            guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
+        } catch (UnsupportedEncodingException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        throw new IllegalArgumentException("recipient");
+        return guestUser;
     }
 
     /**
@@ -367,7 +269,7 @@ public class ShareTool {
      * @return The guest user
      * @throws OXException
      */
-    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, AnonymousRecipient recipient) throws OXException {
+    private static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, AnonymousRecipient recipient) throws OXException {
         UserImpl guestUser = prepareGuestUser(sharingUser);
         guestUser.setDisplayName("Guest");
         guestUser.setMail("");
@@ -381,43 +283,36 @@ public class ShareTool {
     }
 
     /**
-     * Prepares a (named) guest user instance.
+     * Prepares a guest user instance based on a "parent" sharing user.
      *
-     * @param services The service lookup reference
      * @param sharingUser The sharing user
-     * @param recipient The recipient description
      * @return The guest user
-     * @throws OXException
      */
-    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, GuestRecipient recipient) throws OXException {
-        UserImpl guestUser = prepareGuestUser(sharingUser);
-        guestUser.setDisplayName(recipient.getDisplayName());
-        guestUser.setMail(recipient.getEmailAddress());
-        guestUser.setLoginInfo(recipient.getEmailAddress());
-        guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        try {
-            guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
-        } catch (UnsupportedEncodingException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        return guestUser;
-    }
-
-    private static UserImpl prepareGuestUser(User sharingUser) throws OXException {
+    private static UserImpl prepareGuestUser(User sharingUser) {
         UserImpl guestUser = new UserImpl();
         guestUser.setCreatedBy(sharingUser.getId());
         guestUser.setPreferredLanguage(sharingUser.getPreferredLanguage());
         guestUser.setTimeZone(sharingUser.getTimeZone());
         guestUser.setMailEnabled(true);
-        Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
-        attributes.put(SHARE_BASE_TOKEN_ATTRIBUTE, Collections.singleton(UUIDs.getUnformattedString(UUID.randomUUID())));
-        guestUser.setAttributes(attributes);
+        ShareToken.assignBaseToken(guestUser);
         return guestUser;
     }
 
-
+    /**
+     * Prepares a user contact for a guest user.
+     *
+     * @param sharingUser The sharing user
+     * @param guestUser The guest user
+     * @return
+     */
+    public static Contact prepareGuestContact(User sharingUser, User guestUser) {
+        Contact contact = new Contact();
+        contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        contact.setCreatedBy(sharingUser.getId());
+        contact.setDisplayName(guestUser.getDisplayName());
+        contact.setEmail1(guestUser.getMail());
+        return contact;
+    }
 
     /**
      * Filters out all expired shares from the supplied list.
@@ -521,17 +416,6 @@ public class ShareTool {
 //        return tokens;
 //    }
 
-    /**
-     * Checks a token for validity, throwing an exception if validation fails.
-     *
-     * @param token The token to validate
-     * @throws OXException
-     */
-    public static void validateToken(String token) throws OXException {
-        if (false == TOKEN_PATTERN.matcher(token).matches()) {
-            throw ShareExceptionCodes.INVALID_LINK.create(token);
-        }
-    }
 
     /**
      * Checks a share target for validity before saving or updating it, throwing an exception if validation fails.

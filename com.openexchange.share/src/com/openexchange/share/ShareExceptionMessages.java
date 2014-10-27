@@ -63,6 +63,8 @@ public final class ShareExceptionMessages implements LocalizableStrings {
 
     public static final String UNKNOWN_SHARE_MSG = "The requested share does not exist.";
 
+    public static final String INVALID_TOKEN_MSG = "The token \"%1$s\" is invalid.";
+
     public static final String INVALID_LINK_MSG = "The link \"%1$s\" is invalid.";
 
     public static final String INVALID_MAIL_ADDRESS_MSG = "\"%1$s\" is not a valid email address.";

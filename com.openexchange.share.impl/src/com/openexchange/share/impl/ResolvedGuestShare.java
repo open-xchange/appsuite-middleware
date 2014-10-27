@@ -113,8 +113,8 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
-    public String getToken() {
-        return ShareTool.generateShareToken(contextID, guestUser);
+    public String getToken() throws OXException {
+        return new ShareToken(contextID, guestUser).getToken();
     }
 
     @Override

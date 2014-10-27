@@ -51,21 +51,20 @@ package com.openexchange.share.impl;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Random;
-import java.util.UUID;
 import org.junit.Test;
-import com.openexchange.java.util.UUIDs;
+import com.openexchange.groupware.ldap.UserImpl;
 
 
 /**
- * {@link ShareToolTest}
+ * {@link ShareTokenTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareToolTest {
+public class ShareTokenTest {
 
     @Test
-    public void testSomeCombinations() {
+    public void testSomeCombinations() throws Exception {
         Random r = new Random();
         for (int i = 0; i < 100000; i++) {
             int userId = r.nextInt(Integer.MAX_VALUE);
@@ -82,13 +81,14 @@ public class ShareToolTest {
         assertToken(new int[] {Integer.MAX_VALUE, 1});
     }
 
-    private static String assertToken(int[] cidAndUid) {
-        String baseToken = UUIDs.getUnformattedString(UUID.randomUUID());
-        String token = ShareTool.generateShareToken(cidAndUid[0], cidAndUid[1], baseToken);
-        assertEquals(cidAndUid[0], ShareTool.extractContextId(token));
-        assertEquals(cidAndUid[1], ShareTool.extractUserId(token));
-        assertEquals(baseToken, ShareTool.extractBaseToken(token));
-        return token;
+    private static String assertToken(int[] cidAndUid) throws Exception {
+        UserImpl testGuest = new UserImpl();
+        testGuest.setId(cidAndUid[1]);
+        ShareToken.assignBaseToken(testGuest);
+        ShareToken token = new ShareToken(cidAndUid[0], testGuest);
+        assertEquals(cidAndUid[0], token.getContextID());
+        assertEquals(cidAndUid[1], token.getUserID());
+        return token.getToken();
     }
 
 }
