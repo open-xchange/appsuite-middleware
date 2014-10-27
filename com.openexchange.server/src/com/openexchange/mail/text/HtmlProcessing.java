@@ -259,7 +259,7 @@ public final class HtmlProcessing {
                         /*
                          * Replace <body> with <div>
                          */
-                        retval.setContent(replaceBody(retval.getContent(), cssPrefix));
+                        retval.setContent(replaceBodyWithJericho(retval.getContent(), cssPrefix));
                     }
                 }
             }
@@ -383,8 +383,6 @@ public final class HtmlProcessing {
      * @return The HTML content with replaced body tag
      */
     private static String replaceBodyWithJericho(String htmlContent, String cssPrefix) {
-        long start = System.currentTimeMillis();
-
         Source source = new Source(htmlContent);
         source.fullSequentialParse();
         OutputDocument outputDocument = new OutputDocument(source);
@@ -393,24 +391,18 @@ public final class HtmlProcessing {
         if (null == htmlElement) {
             // No <html> element
             replaceBodyWithJericho0(source, outputDocument, null, cssPrefix);
-
-            long dur = System.currentTimeMillis() -start;
-            System.out.println("HtmlProcessing.replaceBodyWithJericho() took " + dur);
-
             return outputDocument.toString();
         }
 
         List<Element> styleElements = null;
         {
             Element headElement = source.getFirstElement(HTMLElementName.HEAD);
-            styleElements = headElement.getAllElements(HTMLElementName.STYLE);
+            if (null != headElement) {
+                styleElements = headElement.getAllElements(HTMLElementName.STYLE);
+            }
         }
 
         replaceBodyWithJericho0(source, outputDocument, styleElements, cssPrefix);
-
-        long dur = System.currentTimeMillis() -start;
-        System.out.println("HtmlProcessing.replaceBodyWithJericho() took " + dur);
-
         return outputDocument.toString();
     }
 
@@ -445,8 +437,6 @@ public final class HtmlProcessing {
      * @return The HTML content with replaced body tag
      */
     private static String replaceBody(String htmlContent, String cssPrefix) {
-        long start = System.currentTimeMillis();
-
         if (isEmpty(htmlContent) || isEmpty(cssPrefix)) {
             return htmlContent;
         }
@@ -454,10 +444,6 @@ public final class HtmlProcessing {
         Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
         if (!htmlMatcher.find()) {
             String retval = replaceBodyPlain(htmlContent, cssPrefix);
-
-            long dur = System.currentTimeMillis() -start;
-            System.out.println("HtmlProcessing.replaceBody() took " + dur);
-
             return retval;
         }
 
@@ -465,10 +451,6 @@ public final class HtmlProcessing {
         htmlMatcher = null;
         if (!headMatcher.find()) {
             String retval = replaceBodyPlain(htmlContent, cssPrefix);
-
-            long dur = System.currentTimeMillis() -start;
-            System.out.println("HtmlProcessing.replaceBody() took " + dur);
-
             return retval;
         }
 
@@ -480,10 +462,6 @@ public final class HtmlProcessing {
             sb.append("<div id=\"").append(cssPrefix).append("\">");
             sb.append(htmlContent);
             sb.append("</div>");
-
-            long dur = System.currentTimeMillis() -start;
-            System.out.println("HtmlProcessing.replaceBody() took " + dur);
-
             return sb.toString();
         }
 
@@ -513,10 +491,6 @@ public final class HtmlProcessing {
         if (end < htmlContent.length()) {
             sb.append(htmlContent.substring(end));
         }
-
-        long dur = System.currentTimeMillis() -start;
-        System.out.println("HtmlProcessing.replaceBody() took " + dur);
-
         return sb.toString();
     }
 
