@@ -82,25 +82,22 @@ public class CopyAction extends TaskAction {
         super(services);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
-     */
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
-        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
-        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        final JSONObject jData = (JSONObject) req.getRequest().requireData();
-        final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+        int id = req.checkInt(AJAXServlet.PARAMETER_ID);
+        int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        JSONObject jData = (JSONObject) req.getRequest().requireData();
+        int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
 
-        final TasksSQLInterface taskInterface = new TasksSQLImpl(req.getSession());
-        final Task taskObj = taskInterface.getTaskById(id, inFolder);
+        TasksSQLInterface taskInterface = new TasksSQLImpl(req.getSession());
+        Task taskObj = taskInterface.getTaskById(id, inFolder);
         taskObj.removeObjectID();
         taskObj.setParentFolderID(folderId);
         taskInterface.insertTaskObject(taskObj);
 
-        final Date timestamp = new Date(0);
+        Date timestamp = new Date(0);
 
-        final JSONObject jsonResponseObject = new JSONObject();
+        JSONObject jsonResponseObject = new JSONObject(2);
         jsonResponseObject.put(DataFields.ID, taskObj.getObjectID());
 
         return new AJAXRequestResult(jsonResponseObject, timestamp, "json");

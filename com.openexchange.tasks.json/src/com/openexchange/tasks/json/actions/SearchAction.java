@@ -49,9 +49,9 @@
 
 package com.openexchange.tasks.json.actions;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,6 +78,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -98,17 +99,14 @@ public class SearchAction extends TaskAction {
      * Initializes a new {@link SearchAction}.
      * @param services
      */
-    public SearchAction(final ServiceLookup services) {
+    public SearchAction(ServiceLookup services) {
         super(services);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
-     */
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-        final int[] columnsToLoad = removeVirtualColumns(columns);
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+        int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        int[] columnsToLoad = removeVirtualColumns(columns);
         Date timestamp = new Date(0);
         Date lastModified = null;
 
@@ -118,15 +116,15 @@ public class SearchAction extends TaskAction {
             searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
         }
 
-        final int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
-        final Order order = OrderFields.parse(req.getParameter(AJAXServlet.PARAMETER_ORDER));
+        int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
+        Order order = OrderFields.parse(req.getParameter(AJAXServlet.PARAMETER_ORDER));
 
         //if (jsonObj.has("limit")) {
         //    DataParser.checkInt(jsonObj, "limit");
         //}
 
-        final Date start = req.getDate(AJAXServlet.PARAMETER_START);
-        final Date end = req.getDate(AJAXServlet.PARAMETER_END);
+        Date start = req.getDate(AJAXServlet.PARAMETER_START);
+        Date end = req.getDate(AJAXServlet.PARAMETER_END);
 
         if (start != null) {
             final Date[] dateRange;
@@ -155,16 +153,16 @@ public class SearchAction extends TaskAction {
             searchObj.setParticipants(CalendarParser.parseParticipants(jData, participants));
         }
 
-        final int[] internalColumns = new int[columnsToLoad.length+1];
+        int[] internalColumns = new int[columnsToLoad.length+1];
         System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
         internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
-        List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
             it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, order, internalColumns);
 
+            List<Task> taskList = new LinkedList<Task>();
             while (it.hasNext()) {
                 final Task taskObj = it.next();
                 taskList.add(taskObj);
@@ -176,8 +174,8 @@ public class SearchAction extends TaskAction {
                 }
             }
 
-            final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
-            final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
+            int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+            int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
 
             if (leftHandLimit >= 0 || rightHandLimit > 0) {
                 final int size = taskList.size();
@@ -201,9 +199,7 @@ public class SearchAction extends TaskAction {
 
             return new AJAXRequestResult(taskList, timestamp, "task");
         } finally {
-            if (it != null) {
-                it.close();
-            }
+            SearchIterators.close(it);
         }
     }
 

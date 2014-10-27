@@ -59,6 +59,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.anonymizer.Anonymizers;
+import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -76,7 +78,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-
 public class TaskResultConverter extends AbstractTaskJSONResultConverter {
 
     private static final String INPUT_FORMAT = "task";
@@ -93,43 +94,52 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
         return INPUT_FORMAT;
     }
 
-    protected void convertTask(final String action, final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
-        if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
+    protected void convertTask(String action, Collection<Task> tasks, AJAXRequestData request, AJAXRequestResult result, TimeZone timeZone) throws OXException {
+        if (AJAXServlet.ACTION_UPDATES.equalsIgnoreCase(action)) {
             convertTasks4Updates(tasks, request, result, timeZone);
         } else {
             convertTasks(tasks, request, result, timeZone);
         }
     }
 
-    protected void convertTasks(final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
-        final int[] columns = RequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
-        /*
-         * Create JSON array
-         */
-        final JSONArray jsonResponseArray = new JSONArray();
+    protected void convertTasks(Collection<Task> tasks, AJAXRequestData request, AJAXRequestResult result, TimeZone timeZone) throws OXException {
+        int[] columns = RequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
+        JSONArray jArray = new JSONArray(tasks.size());
 
-        final TaskWriter taskwriter = new TaskWriter(timeZone).setSession(request.getSession());
-        for (final Task task : tasks) {
-            try {
-                taskwriter.writeArray(task, columns, jsonResponseArray);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        TaskWriter taskwriter = new TaskWriter(timeZone).setSession(request.getSession());
+
+        // Optional anonymization
+        ServerSession session = request.getSession();
+        if (Anonymizers.isGuest(session)) {
+            for (Task task : tasks) {
+                try {
+                    Task anonymized = Anonymizers.optAnonymize(task, Module.TASK, session);
+                    taskwriter.writeArray(anonymized, columns, jArray);
+                } catch (JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+                }
+            }
+        } else {
+            for (Task task : tasks) {
+                try {
+                    taskwriter.writeArray(task, columns, jArray);
+                } catch (JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+                }
             }
         }
 
-        result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+        result.setResultObject(jArray, OUTPUT_FORMAT);
     }
 
-    protected void convertTasks4Updates(final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
-        final int[] columns = RequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
-        /*
-         * Create list with support for Iterator.remove()
-         */
-        final List<Task> taskList = new ArrayList<Task>(tasks);
-        /*
-         * Any deleted tasks?
-         */
-        final List<Task> deletedTasks = new LinkedList<Task>();
+    protected void convertTasks4Updates(Collection<Task> tasks, AJAXRequestData request, AJAXRequestResult result, TimeZone timeZone) throws OXException {
+        int[] columns = RequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
+
+        // Create list with support for Iterator.remove()
+        List<Task> taskList = iterSupportingList(tasks);
+
+        // Any deleted tasks?
+        List<Task> deletedTasks = new LinkedList<Task>();
         for (final Iterator<Task> iter = taskList.iterator(); iter.hasNext();) {
             final Task task = iter.next();
             if (hasOnlyId(task, columns)) {
@@ -137,15 +147,25 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
                 iter.remove();
             }
         }
-        /*
-         * Create JSON array
-         */
-        final JSONArray jsonResponseArray = new JSONArray();
 
-        final TaskWriter taskwriter = new TaskWriter(timeZone).setSession(request.getSession());
-        for (final Task task : taskList) {
+        // Optional anonymization
+        ServerSession session = request.getSession();
+        if (Anonymizers.isGuest(session)) {
+            List<Task> anonymizedList = new LinkedList<Task>();
+
+            for (Task task : taskList) {
+                anonymizedList.add(Anonymizers.optAnonymize(task, Module.TASK, session));
+            }
+
+            taskList = anonymizedList;
+        }
+
+        // Create JSON array
+        TaskWriter taskwriter = new TaskWriter(timeZone).setSession(session);
+        JSONArray jArray = new JSONArray(taskList.size());
+        for (Task task : taskList) {
             try {
-                taskwriter.writeArray(task, columns, jsonResponseArray);
+                taskwriter.writeArray(task, columns, jArray);
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
@@ -153,21 +173,33 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
 
         if (!deletedTasks.isEmpty()) {
             for (final Task task : deletedTasks) {
-                jsonResponseArray.put(task.getObjectID());
+                jArray.put(task.getObjectID());
             }
         }
 
-        result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
+        result.setResultObject(jArray, OUTPUT_FORMAT);
     }
 
-    private static boolean hasOnlyId(final Task task, final int[] columns) {
+    private List<Task> iterSupportingList(Collection<Task> tasks) {
+        if (tasks instanceof LinkedList) {
+            return (LinkedList<Task>) tasks;
+        }
+
+        if (tasks instanceof ArrayList) {
+            return (ArrayList<Task>) tasks;
+        }
+
+        return new ArrayList<Task>(tasks);
+    }
+
+    private static boolean hasOnlyId(Task task, int[] columns) {
         if (!task.containsObjectID()) {
             return false;
         }
         if (CommonObject.Marker.ID_ONLY.equals(task.getMarker())) {
             return true;
         }
-        for (final int column : columns) {
+        for (int column : columns) {
             if (DataObject.OBJECT_ID != column && task.contains(column)) {
                 return false;
             }
@@ -176,28 +208,31 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
     }
 
     @Override
-    public void convertTask(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter, final TimeZone timeZone) throws OXException {
+    public void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone timeZone) throws OXException {
         final Object resultObject = result.getResultObject();
-        final String action = request.getParameter(AJAXServlet.PARAMETER_ACTION);
         if (resultObject instanceof Task) {
             convertTask((Task) resultObject, request, result, timeZone);
         } else {
-            @SuppressWarnings("unchecked") final Collection<Task> tasks = (Collection<Task>) resultObject;
+            @SuppressWarnings("unchecked") Collection<Task> tasks = (Collection<Task>) resultObject;
+            String action = request.getParameter(AJAXServlet.PARAMETER_ACTION);
             convertTask(action, tasks, request, result, timeZone);
         }
     }
 
-    private void convertTask(final Task task, final AJAXRequestData request, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
-        final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(request.getSession());
-
-        final JSONObject jsonResponseObject = new JSONObject();
+    private void convertTask(Task task, AJAXRequestData request, AJAXRequestResult result, TimeZone timeZone) throws OXException {
         try {
-            taskWriter.writeTask(task, jsonResponseObject);
-        } catch (final JSONException e) {
+            ServerSession session = request.getSession();
+            TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
+            JSONObject jTask = new JSONObject(16);
+
+            // Optional anonymization
+            Task toOutput = Anonymizers.optAnonymizeIfGuest(task, Module.TASK, session);
+
+            taskWriter.writeTask(toOutput, jTask);
+            result.setResultObject(jTask, OUTPUT_FORMAT);
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
-
-        result.setResultObject(jsonResponseObject, OUTPUT_FORMAT);
     }
 
 }

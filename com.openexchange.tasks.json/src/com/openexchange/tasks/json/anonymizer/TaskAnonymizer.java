@@ -47,37 +47,37 @@
  *
  */
 
-package com.openexchange.contacts.json.anonymizer;
+package com.openexchange.tasks.json.anonymizer;
 
 import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link ContactAnonymizer} - The anonymizer for contacts.
+ * {@link TaskAnonymizer} - The anonymizer for tasks.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class ContactAnonymizer implements AnonymizerService<Contact> {
+public class TaskAnonymizer implements AnonymizerService<Task> {
 
     /**
-     * Initializes a new {@link ContactAnonymizer}.
+     * Initializes a new {@link TaskAnonymizer}.
      */
-    public ContactAnonymizer() {
+    public TaskAnonymizer() {
         super();
     }
 
     @Override
     public Module getModule() {
-        return Module.CONTACTS;
+        return Module.TASK;
     }
 
     @Override
-    public Contact anonymize(Contact entity, Session session) throws OXException {
+    public Task anonymize(Task entity, Session session) throws OXException {
         // TODO:
         return entity;
     }

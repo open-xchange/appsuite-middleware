@@ -49,8 +49,8 @@
 
 package com.openexchange.tasks.json.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
@@ -67,6 +67,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -92,24 +93,22 @@ public class AllAction extends TaskAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-        final int[] columnsToLoad = removeVirtualColumns(columns);
-        final int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        final int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
-        final Order order = OrderFields.parse(req.getParameter(AJAXServlet.PARAMETER_ORDER));
-        final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
-        final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException {
+        int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        int[] columnsToLoad = removeVirtualColumns(columns);
+        int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
+        Order order = OrderFields.parse(req.getParameter(AJAXServlet.PARAMETER_ORDER));
+        int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+        int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
 
-        final int[] internalColumns = new int[columnsToLoad.length+1];
+        int[] internalColumns = new int[columnsToLoad.length+1];
         System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
         internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
         Date timestamp = new Date(0);
-
         Date lastModified = null;
 
-        final List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
@@ -119,8 +118,9 @@ public class AllAction extends TaskAction {
                 it = taskssql.getTaskList(folderId, leftHandLimit, rightHandLimit, orderBy, order, internalColumns);
             }
 
+            List<Task> taskList = new LinkedList<Task>();
             while (it.hasNext()) {
-                final Task taskobject = it.next();
+                Task taskobject = it.next();
                 taskList.add(taskobject);
 
                 lastModified = taskobject.getLastModified();
@@ -132,9 +132,7 @@ public class AllAction extends TaskAction {
 
             return new AJAXRequestResult(taskList, timestamp, "task");
         } finally {
-            if(it!=null) {
-                it.close();
-            }
+            SearchIterators.close(it);
         }
     }
 
