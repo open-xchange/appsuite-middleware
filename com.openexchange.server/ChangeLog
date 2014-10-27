@@ -1,3 +1,7 @@
+* 2014-10-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35198: Use Jericho HTML parser to perform necessary modifications
+
 * 2014-10-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 34998: Restored previous default value for "com.openexchange.servlet.maxRate" property
