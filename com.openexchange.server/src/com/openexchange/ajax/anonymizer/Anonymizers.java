@@ -150,7 +150,7 @@ public final class Anonymizers {
      * @param entity The entity to anonymize
      * @param module The module
      * @param session The associated session
-     * @return The anonymized entity
+     * @return The anonymized entity or the entity as-is if specified session does not denote a guest user
      * @throws OXException If entity cannot be anonymized
      */
     public static <E> E anonymizeIfGuest(E entity, Module module, Session session) throws OXException {
