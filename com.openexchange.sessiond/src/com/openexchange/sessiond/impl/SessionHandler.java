@@ -448,7 +448,7 @@ public final class SessionHandler {
         checkAuthId(login, authId);
 
         // Create new session instance
-        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, clientToken, tranzient, callback);
+        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, callback);
 
         // Either add session or yield short-time token for it
         SessionImpl addedSession;
