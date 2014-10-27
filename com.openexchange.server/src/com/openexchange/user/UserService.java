@@ -108,6 +108,26 @@ public interface UserService {
     void setAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
+     * Checks if specified user is a guest.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if user is a guest; otherwise <code>false</code>
+     * @throws OXException If check for a guest user fails
+     */
+    boolean isGuest(int userId, int contextId) throws OXException;
+
+    /**
+     * Checks if specified user is a guest.
+     *
+     * @param userId The user identifier
+     * @param context The associated context
+     * @return <code>true</code> if user is a guest; otherwise <code>false</code>
+     * @throws OXException If check for a guest user fails
+     */
+    boolean isGuest(int userId, Context context) throws OXException;
+
+    /**
      * Searches for a user whose login matches the given <code>loginInfo</code>.
      *
      * @param loginInfo The login name of the user.

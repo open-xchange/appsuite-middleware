@@ -60,11 +60,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
@@ -88,25 +91,78 @@ public class CachingUserStorage extends UserStorage {
     private final UserStorage delegate;
 
     /**
+     * The cache for guest users.
+     */
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, Boolean>> guestCache;
+
+    /**
      * Default constructor.
      */
     public CachingUserStorage(final UserStorage delegate) {
         super();
         this.delegate = delegate;
+        guestCache = new ConcurrentHashMap<Integer, ConcurrentMap<Integer,Boolean>>(256);
+    }
+
+    /**
+     * Invalidates the guest cache for given context identifier
+     *
+     * @param contextId The context identifier
+     */
+    public void invalidateGuestCacheFor(int contextId) {
+        guestCache.remove(Integer.valueOf(contextId));
+    }
+
+    @Override
+    public boolean isGuest(int userId, int contextId) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.isGuest(userId, ContextStorage.getInstance().getContext(contextId));
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        Object object = cache.get(cacheService.newCacheKey(contextId, userId));
+        if (object instanceof User) {
+            return ((User) object).isGuest();
+        }
+
+        User user = delegate.getUser(userId, ContextStorage.getInstance().getContext(contextId));
+        cache.put(cacheService.newCacheKey(contextId, userId), user, false);
+        return user.isGuest();
+    }
+
+    @Override
+    public boolean isGuest(int userId, Context context) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.isGuest(userId, context);
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        Object object = cache.get(cacheService.newCacheKey(context.getContextId(), userId));
+        if (object instanceof User) {
+            return ((User) object).isGuest();
+        }
+
+        User user = delegate.getUser(userId, context);
+        cache.put(cacheService.newCacheKey(context.getContextId(), userId), user, false);
+        return user.isGuest();
     }
 
     @Override
     public User getUser(final int uid, final Context context) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUser(uid, context);
         }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object object = cache.get(cacheService.newCacheKey(context.getContextId(), uid));
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        Object object = cache.get(cacheService.newCacheKey(context.getContextId(), uid));
         if (object instanceof User) {
             return (User) object;
         }
-        final User user = delegate.getUser(uid, context);
+
+        User user = delegate.getUser(uid, context);
         cache.put(cacheService.newCacheKey(context.getContextId(), uid), user, false);
         return user;
     }

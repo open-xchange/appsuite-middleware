@@ -90,6 +90,16 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean isGuest(int userId, Context context) throws OXException {
+        return UserStorage.getInstance().isGuest(userId, context);
+    }
+
+    @Override
+    public boolean isGuest(int userId, int contextId) throws OXException {
+        return UserStorage.getInstance().isGuest(userId, contextId);
+    }
+
+    @Override
     public Context getContext(int contextId) throws OXException {
         return ContextStorage.getStorageContext(contextId);
     }

@@ -146,6 +146,30 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
+    public boolean isGuest(int userId, Context context) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickup(context);
+        } catch (final OXException e) {
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM user WHERE cid=? AND id=? AND guestCreatedBy > 0");
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, userId);
+            result = stmt.executeQuery();
+            return result.next();
+        } catch (SQLException e) {
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+
+    @Override
     public int getUserId(final String uid, final Context context) throws OXException {
         Connection con = null;
         try {
@@ -166,7 +190,7 @@ public class RdbUserStorage extends UserStorage {
             } else {
                 throw LdapExceptionCode.USER_NOT_FOUND.create(uid, I(context.getContextId())).setPrefix("USR");
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             closeSQLStuff(result, stmt);

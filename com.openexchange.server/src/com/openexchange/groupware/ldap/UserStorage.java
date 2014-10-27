@@ -88,6 +88,28 @@ public abstract class UserStorage {
     }
 
     /**
+     * Checks if specified user is a guest.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if user is a guest; otherwise <code>false</code>
+     * @throws OXException If check for a guest user fails
+     */
+    public boolean isGuest(int userId, int contextId) throws OXException {
+        return isGuest(userId, ContextStorage.getInstance().getContext(contextId));
+    }
+
+    /**
+     * Checks if specified user is a guest.
+     *
+     * @param userId The user identifier
+     * @param context The associated context
+     * @return <code>true</code> if user is a guest; otherwise <code>false</code>
+     * @throws OXException If check for a guest user fails
+     */
+    public abstract boolean isGuest(int userId, Context context) throws OXException;
+
+    /**
      * Searches for a user whose login matches the given uid.
      * @param loginInfo Login name of the user.
      * @param context The context.

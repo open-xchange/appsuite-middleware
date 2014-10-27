@@ -267,4 +267,16 @@ public class SimUserService implements UserService {
         return null;
     }
 
+    @Override
+    public boolean isGuest(int userId, Context context) throws OXException {
+        User user = getUser(userId, context);
+        return null == user ? false : user.isGuest();
+    }
+
+    @Override
+    public boolean isGuest(int userId, int contextId) throws OXException {
+        User user = getUser(userId, contextId);
+        return null == user ? false : user.isGuest();
+    }
+
 }
