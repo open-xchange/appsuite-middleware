@@ -338,6 +338,7 @@ Import-Package: com.davekoelle,
  org.xmlpull.v1,
  sun.misc
 Export-Package: com.openexchange.ajax,
+ com.openexchange.ajax.anonymizer,
  com.openexchange.ajax.container,
  com.openexchange.ajax.customizer.folder,
  com.openexchange.ajax.fields,
