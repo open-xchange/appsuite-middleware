@@ -1,3 +1,24 @@
+* 2014-10-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35129: Do not throw any misleading log messages if client comes to HTTP auth URL without Authorization header.
+
+* 2014-10-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35109: Do not dispose kerberos tickets when sessions are moved over to long term session container.
+ - Fix for bug 35103: Synchronized multiple threads on IMAP login if a Kerberos subject is used to authenticate the user.
+
+* 2014-10-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34947: Check for a possible unrecoverable socket error when attempting to load mail settings (esp. standard folders); signal an empty value instead of throwing an error
+
+* 2014-10-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34928: Try to lookup existing stored session if http-auth.autologin is enabled
+
+* 2014-10-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger
+
 * 2014-10-08 - thorben.betten@open-xchange.com
 
  - Fix for bug #34835: Honor "CREATE-SPECIAL-USE" capability string when using the "USE" IMAP CREATE command extension
@@ -23,7 +44,7 @@
 
 * 2014-09-19 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 34499: Don't fail on invalid e-mail addresses, instead add a warning to the import result 
+ - Fix for bug 34499: Don't fail on invalid e-mail addresses, instead add a warning to the import result
 
 * 2014-09-18 - thorben.betten@open-xchange.com
 
@@ -52,7 +73,7 @@
 
 * 2014-08-25 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 33748: Don't attempt to read more bytes from the buffer than available 
+ - Fix for bug 33748: Don't attempt to read more bytes from the buffer than available
 
 * 2014-08-14 - thorben.betten@open-xchange.com
 
@@ -102,8 +123,8 @@
 
 * 2014-07-29 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 33652: Also accept "updateToken" requests without service identifier 
- - Fix for bug 30654: Try fallback based on the file extension in case there's no preview service for mime type 
+ - Fix for bug 33652: Also accept "updateToken" requests without service identifier
+ - Fix for bug 30654: Try fallback based on the file extension in case there's no preview service for mime type
 
 * 2014-07-22 - thorben.betten@open-xchange.com
 

@@ -117,6 +117,7 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -695,20 +696,13 @@ public class LoginServlet extends AJAXServlet {
     }
 
     private void doHttpAuth(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        if (req.getHeader(Header.AUTH_HEADER) != null) {
-            try {
-                doAuthHeaderLogin(req, resp);
-
-            } catch (final OXException e) {
-                LOG.error("", e);
-                resp.addHeader("WWW-Authenticate", "NEGOTIATE");
-                resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-            }
-        } else {
+        try {
+            doAuthHeaderLogin(req, resp);
+        } catch (final OXException e) {
+            LOG.error("", e);
             resp.addHeader("WWW-Authenticate", "NEGOTIATE");
             resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
     }
 
@@ -848,57 +842,135 @@ public class LoginServlet extends AJAXServlet {
     }
 
     private void doAuthHeaderLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
-        final String auth = req.getHeader(Header.AUTH_HEADER);
-        final String version;
-        final Credentials creds;
-        if (!Authorization.checkForAuthorizationHeader(auth)) {
-            throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create();
-        }
-        final LoginConfiguration conf = confReference.get();
-        if (Authorization.checkForBasicAuthorization(auth)) {
-            creds = Authorization.decode(auth);
-            version = conf.getClientVersion();
-        } else if (Authorization.checkForKerberosAuthorization(auth)) {
-            creds = new Credentials("kerberos", "");
-            version = "Kerberos";
-        } else {
-            throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
-        }
-        final String client = parseClient(req);
-        final String clientIP = LoginTools.parseClientIP(req);
-        final String userAgent = LoginTools.parseUserAgent(req);
-        final Map<String, List<String>> headers = copyHeaders(req);
-        final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
-        final String httpSessionId = req.getSession(true).getId();
-        final LoginRequest request = new LoginRequestImpl(
-            creds.getLogin(),
-            creds.getPassword(),
-            clientIP,
-            userAgent,
-            UUIDs.getUnformattedString(UUID.randomUUID()),
-            client,
-            version,
-            HashCalculator.getInstance().getHash(req, userAgent, client),
-            Interface.HTTP_JSON,
-            headers,
-            cookies,
-            Tools.considerSecure(req, conf.isCookieForceHTTPS()),
-            req.getServerName(),
-            req.getServerPort(),
-            httpSessionId);
-        final Map<String, Object> properties = new HashMap<String, Object>(1);
-        {
-            final String capabilities = req.getParameter("capabilities");
-            if (null != capabilities) {
-                properties.put("client.capabilities", capabilities);
+        LoginConfiguration conf = confReference.get();
+        /*
+         * Try to lookup session by auto-login
+         */
+        LoginResult loginResult = tryAutologin(req);
+        if (null == loginResult) {
+            /*
+             * continue with auth header login
+             */
+
+            final String auth = req.getHeader(Header.AUTH_HEADER);
+            if (null == auth) {
+                resp.addHeader("WWW-Authenticate", "NEGOTIATE");
+                resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+                return;
             }
+            final String version;
+            final Credentials creds;
+            if (!Authorization.checkForAuthorizationHeader(auth)) {
+                throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
+            }
+            if (Authorization.checkForBasicAuthorization(auth)) {
+                creds = Authorization.decode(auth);
+                version = conf.getClientVersion();
+            } else if (Authorization.checkForKerberosAuthorization(auth)) {
+                creds = new Credentials("kerberos", "");
+                version = "Kerberos";
+            } else {
+                throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
+            }
+            final String client = parseClient(req);
+            final String clientIP = LoginTools.parseClientIP(req);
+            final String userAgent = LoginTools.parseUserAgent(req);
+            final Map<String, List<String>> headers = copyHeaders(req);
+            final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+            final String httpSessionId = req.getSession(true).getId();
+            final LoginRequest request = new LoginRequestImpl(
+                creds.getLogin(),
+                creds.getPassword(),
+                clientIP,
+                userAgent,
+                UUIDs.getUnformattedString(UUID.randomUUID()),
+                client,
+                version,
+                HashCalculator.getInstance().getHash(req, userAgent, client),
+                Interface.HTTP_JSON,
+                headers,
+                cookies,
+                Tools.considerSecure(req, conf.isCookieForceHTTPS()),
+                req.getServerName(),
+                req.getServerPort(),
+                httpSessionId);
+            final Map<String, Object> properties = new HashMap<String, Object>(1);
+            {
+                final String capabilities = req.getParameter("capabilities");
+                if (null != capabilities) {
+                    properties.put("client.capabilities", capabilities);
+                }
+            }
+            loginResult = LoginPerformer.getInstance().doLogin(request, properties);
         }
-        final LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
-        final Session session = result.getSession();
+        /*
+         * render redirect response
+         */
+        Session session = loginResult.getSession();
         Tools.disableCaching(resp);
         writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
-        addHeadersAndCookies(result, resp);
+        addHeadersAndCookies(loginResult, resp);
         resp.sendRedirect(LoginTools.generateRedirectURL(null, conf.getHttpAuthAutoLogin(), session.getSessionID(), conf.getUiWebPath()));
+    }
+
+    /**
+     * Tries to lookup an exiting session by the cookies supplied with the request.
+     *
+     * @param request The request to try and perform the auto-login for
+     * @return The login result if a valid session was found, or <code>null</code>, otherwise
+     * @throws OXException
+     */
+    private LoginResult tryAutologin(HttpServletRequest request) throws OXException {
+        LoginConfiguration conf = confReference.get();
+        Cookie[] cookies = request.getCookies();
+        if (Boolean.valueOf(conf.getHttpAuthAutoLogin()).booleanValue() && null != cookies && 0 < cookies.length) {
+            /*
+             * extract session & secret from supplied cookies
+             */
+            String sessionID = null;
+            String secret = null;
+            String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), parseClient(request));
+            String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
+            String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
+            for (int i = 0; i < cookies.length && (null == sessionID || null == secret); i++) {
+                String name = cookies[i].getName();
+                if (name.startsWith(sessionCookieName)) {
+                    sessionID = cookies[i].getValue();
+                } else if (name.startsWith(secretCookieName)) {
+                    secret = cookies[i].getValue();
+                }
+            }
+            if (null != sessionID && null != secret) {
+                /*
+                 * lookup matching session
+                 */
+                Session session = ServerServiceRegistry.getInstance().getService(SessiondService.class).getSession(sessionID);
+                if (null != session && session.getSecret().equals(secret)) {
+                    /*
+                     * check & take over remote IP
+                     */
+                    String remoteAddress = request.getRemoteAddr();
+                    if (conf.isIpCheck()) {
+                        SessionUtility.checkIP(true, conf.getRanges(), session, remoteAddress, conf.getIpCheckWhitelist());
+                    }
+                    LoginTools.updateIPAddress(conf, remoteAddress, session);
+                    /*
+                     * ensure user & context are enabled
+                     */
+                    Context context = ContextStorage.getInstance().getContext(session.getContextId());
+                    User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+                    if (false == context.isEnabled() || false == user.isMailEnabled()) {
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    }
+                    /*
+                     * wrap valid session into login result
+                     */
+                    return new LoginResultImpl(session, context, user);
+                }
+            }
+        }
+        return null;
     }
 
     /**
