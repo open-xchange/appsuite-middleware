@@ -52,15 +52,18 @@ package com.openexchange.mail.text;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.isWhitespace;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -69,10 +72,12 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -96,6 +101,14 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.regex.MatcherReplacer;
+
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.CharacterReference;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 
 /**
  * {@link HtmlProcessing} - Various methods for HTML processing for mail module.
@@ -251,7 +264,7 @@ public final class HtmlProcessing {
                         /*
                          * Replace <body> with <div>
                          */
-                        retval.setContent(replaceBody(retval.getContent(), cssPrefix));
+                        retval.setContent(replaceBodyWithJericho(retval.getContent(), cssPrefix));
                     }
                 }
             }
@@ -345,89 +358,76 @@ public final class HtmlProcessing {
         return str.substring(length - (maxWidth));
     }
 
-    private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_HEAD = Pattern.compile("<head.*?>(.*?)</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static void replaceBodyWithJericho0(Source source, OutputDocument outputDocument, List<Element> styleElements, String cssPrefix) {
+        List<Element> bodyElements = source.getAllElements(HTMLElementName.BODY);
+        if (null == bodyElements || bodyElements.isEmpty()) {
+            // No body
+            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
+            outputDocument.insert(source.length() - 1, "</div>");
+        } else {
+            StringBuilder sb = new StringBuilder(source.length());
+            for (Element bodyElement : bodyElements) {
+                sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
+                if (null != styleElements) {
+                    for (Element element : styleElements) {
+                        sb.append(element);
+                    }
+                }
+                sb.append(bodyElement.getContent());
+                sb.append("</div>");
+                outputDocument.replace(bodyElement, sb);
+            }
+        }
+    }
 
     /**
-     * Replaces body tag with an appropriate &lt;div&gt; tag.
+     * Replaces &lt;body&gt; tag with an appropriate &lt;div&gt; tag.
      *
      * @param htmlContent The HTML content
      * @param cssPrefix The CSS prefix
      * @return The HTML content with replaced body tag
      */
-    private static String replaceBody(final String htmlContent, final String cssPrefix) {
-        if (isEmpty(htmlContent) || isEmpty(cssPrefix)) {
-            return htmlContent;
+    private static String replaceBodyWithJericho(String htmlContent, String cssPrefix) {
+        Source source = new Source(htmlContent);
+        source.fullSequentialParse();
+        OutputDocument outputDocument = new OutputDocument(source);
+
+        Element htmlElement = source.getFirstElement(HTMLElementName.HTML);
+        if (null == htmlElement) {
+            // No <html> element
+            replaceBodyWithJericho0(source, outputDocument, null, cssPrefix);
+            return outputDocument.toString();
         }
-        final Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
-        if (!htmlMatcher.find()) {
-            return replaceBodyPlain(htmlContent, cssPrefix);
-        }
-        final Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
-        if (!headMatcher.find()) {
-            return replaceBodyPlain(htmlContent, cssPrefix);
-        }
-        final Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
-        if (!bodyMatcher.find()) {
-            return replaceBodyPlain(htmlContent, cssPrefix);
-        }
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
-        sb.append("<div id=\"").append(cssPrefix).append('"');
+
+        List<Element> styleElements = null;
         {
-            final String rest = bodyMatcher.group(1);
-            if (!isEmpty(rest)) {
-                sb.append(' ').append(cleanUpRest(rest));
+            Element headElement = source.getFirstElement(HTMLElementName.HEAD);
+            if (null != headElement) {
+                styleElements = headElement.getAllElements(HTMLElementName.STYLE);
             }
         }
+
+        replaceBodyWithJericho0(source, outputDocument, styleElements, cssPrefix);
+        return outputDocument.toString();
+    }
+
+    private static CharSequence getDivStartTagHTML(StartTag startTag, String cssPrefix) {
+        // tidies and filters out non-approved attributes
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("<div");
+        sb.append(' ').append("id=\"").append(cssPrefix).append('"');
+
+        for (Attribute attribute : startTag.getAttributes()) {
+            if (!"id".equals(attribute.getKey())) {
+                sb.append(' ').append(attribute.getName());
+                if (attribute.getValue() != null) {
+                    sb.append("=\"").append(CharacterReference.encode(attribute.getValue())).append('"');
+                }
+            }
+        }
+
         sb.append('>');
-        final Matcher styleMatcher = PATTERN_STYLE.matcher(headMatcher.group(1));
-        while (styleMatcher.find()) {
-            sb.append(styleMatcher.group());
-        }
-        sb.append(bodyMatcher.group(2));
-        sb.append("</div>");
-        // Is there more behind closing <body> tag?
-        final int end = bodyMatcher.end();
-        if (end < htmlContent.length()) {
-            sb.append(htmlContent.substring(end));
-        }
-        return sb.toString();
-    }
-
-    private static final Pattern PAT_ATTR_BGCOLOR = Pattern.compile("bgcolor=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
-    private static final Pattern PAT_ATTR_STYLE = Pattern.compile("style=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
-
-    private static String cleanUpRest(final String rest) {
-        Matcher m = PAT_ATTR_BGCOLOR.matcher(rest);
-        if (!m.find()) {
-            return rest;
-        }
-        final String color = m.group(1);
-        final String ret = rest;
-        final StringBuffer sbuf = new StringBuffer(ret.length());
-        m.appendReplacement(sbuf, "");
-        m.appendTail(sbuf);
-        // Check for script attribute
-        m = PAT_ATTR_STYLE.matcher(sbuf.toString());
-        if (!m.find()) {
-            return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
-        }
-        sbuf.setLength(0);
-        m.appendReplacement(sbuf, "style=\"" + com.openexchange.java.Strings.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
-        m.appendTail(sbuf);
-        return sbuf.toString();
-    }
-
-    private static String replaceBodyPlain(final String htmlContent, final String cssPrefix) {
-        final Matcher m = PATTERN_BODY.matcher(htmlContent);
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
-        if (m.find()) {
-            mr.appendLiteralReplacement(sb, "<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>");
-        }
-        mr.appendTail(sb);
-        return sb.toString();
+        return sb;
     }
 
     private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
