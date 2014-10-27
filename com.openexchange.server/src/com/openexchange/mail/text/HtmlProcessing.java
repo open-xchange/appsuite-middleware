@@ -354,27 +354,29 @@ public final class HtmlProcessing {
     }
 
     private static void replaceBodyWithJericho0(Source source, OutputDocument outputDocument, List<Element> styleElements, String cssPrefix) {
-        Element bodyElement = source.getFirstElement(HTMLElementName.BODY);
-        if (null == bodyElement) {
+        List<Element> bodyElements = source.getAllElements(HTMLElementName.BODY);
+        if (null == bodyElements || bodyElements.isEmpty()) {
             // No body
             outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
             outputDocument.insert(source.length() - 1, "</div>");
         } else {
             StringBuilder sb = new StringBuilder(source.length());
-            sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
-            if (null != styleElements) {
-                for (Element element : styleElements) {
-                    sb.append(element);
+            for (Element bodyElement : bodyElements) {
+                sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
+                if (null != styleElements) {
+                    for (Element element : styleElements) {
+                        sb.append(element);
+                    }
                 }
+                sb.append(bodyElement.getContent());
+                sb.append("</div>");
+                outputDocument.replace(bodyElement, sb);
             }
-            sb.append(bodyElement.getContent());
-            sb.append("</div>");
-            outputDocument.replace(bodyElement, sb);
         }
     }
 
     /**
-     * Replaces body tag with an appropriate &lt;div&gt; tag.
+     * Replaces &lt;body&gt; tag with an appropriate &lt;div&gt; tag.
      *
      * @param htmlContent The HTML content
      * @param cssPrefix The CSS prefix
