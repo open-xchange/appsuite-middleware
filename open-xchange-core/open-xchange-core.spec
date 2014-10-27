@@ -1126,6 +1126,8 @@ exit 0
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
+%dir /opt/open-xchange/etc/hazelcast/
+%config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
