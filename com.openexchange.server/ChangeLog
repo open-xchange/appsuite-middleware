@@ -1,3 +1,8 @@
+* 2014-10-27 - marc.arens@open-xchange.com
+
+ - Fix for bug 34973: Allow minimal caching to prevent superfluous browser requests.
+ - Fix for bug 35154: Shut down StateManager and interrupt already running CleanupTimer
+
 * 2014-10-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 35198: Use Jericho HTML parser to perform necessary modifications
