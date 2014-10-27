@@ -49,11 +49,14 @@
 
 package com.openexchange.contacts.json.converters;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.anonymizer.Anonymizers;
+import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -150,9 +153,13 @@ public class ContactJSONResultConverter implements ResultConverter {
 
     private JSONObject convertSingleContact(Contact contact, String timeZoneID, Session session) throws OXException {
     	try {
-    		// always add NUMBER_OF_IMAGES to contact result (bug #13960)
+    		// Always add NUMBER_OF_IMAGES to contact result (bug #13960)
     		ContactField[] fields = ContactMapper.getInstance().getAssignedFields(contact, ContactField.NUMBER_OF_IMAGES);
-			return ContactMapper.getInstance().serialize(contact, fields, timeZoneID, session);
+
+    		// Optional anonymization
+    		Contact toSerialize = Anonymizers.optAnonymizeIfGuest(contact, Module.CONTACTS, session);
+
+			return ContactMapper.getInstance().serialize(toSerialize, fields, timeZoneID, session);
 		} catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 		}
@@ -160,7 +167,15 @@ public class ContactJSONResultConverter implements ResultConverter {
 
     private JSONArray convertListOfContacts(List<Contact> contacts, ContactField[] fields, String timeZoneID, Session session) throws OXException {
     	try {
-			return ContactMapper.getInstance().serialize(contacts, fields, timeZoneID, session);
+    	    if (false == Anonymizers.isGuest(session)) {
+    	        return ContactMapper.getInstance().serialize(contacts, fields, timeZoneID, session);
+            }
+
+    	    List<Contact> toSerialize = new LinkedList<Contact>();
+    	    for (Contact contact : contacts) {
+                toSerialize.add(Anonymizers.optAnonymize(contact, Module.CONTACTS, session));
+            }
+			return ContactMapper.getInstance().serialize(toSerialize, fields, timeZoneID, session);
 		} catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 		}

@@ -65,21 +65,21 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerService, AnonymizerService> implements AnonymizerRegistryService {
+public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerService<?>, AnonymizerService<?>> implements AnonymizerRegistryService {
 
-    private final ConcurrentMap<Module, AnonymizerService> anonymizers;
+    private final ConcurrentMap<Module, AnonymizerService<?>> anonymizers;
 
     /**
      * Initializes a new {@link OSGiAnonymizerRegistry}.
      */
     public OSGiAnonymizerRegistry(BundleContext context) {
-        super(context, AnonymizerService.class, null);
-        anonymizers = new ConcurrentHashMap<Module, AnonymizerService>(8);
+        super(context, AnonymizerService.class.getName(), null);
+        anonymizers = new ConcurrentHashMap<Module, AnonymizerService<?>>(8);
     }
 
     @Override
-    public AnonymizerService addingService(ServiceReference<AnonymizerService> reference) {
-        AnonymizerService service = context.getService(reference);
+    public AnonymizerService<?> addingService(ServiceReference<AnonymizerService<?>> reference) {
+        AnonymizerService<?> service = context.getService(reference);
         if (null == anonymizers.putIfAbsent(service.getModule(), service)) {
             return service;
         }
@@ -89,18 +89,18 @@ public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerServi
     }
 
     @Override
-    public void removedService(ServiceReference<AnonymizerService> reference, AnonymizerService service) {
+    public void removedService(ServiceReference<AnonymizerService<?>> reference, AnonymizerService<?> service) {
         anonymizers.remove(service.getModule());
         context.ungetService(reference);
     }
 
     @Override
-    public AnonymizerService getAnonymizerFor(String name) throws OXException {
+    public AnonymizerService<?> getAnonymizerFor(String name) throws OXException {
         return getAnonymizerFor(Module.moduleFor(name));
     }
 
     @Override
-    public AnonymizerService getAnonymizerFor(Module module) throws OXException {
+    public AnonymizerService<?> getAnonymizerFor(Module module) throws OXException {
         return null == module ? null : anonymizers.get(module);
     }
 

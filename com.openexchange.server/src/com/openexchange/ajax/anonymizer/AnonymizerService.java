@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface AnonymizerService {
+public interface AnonymizerService<E> {
 
     /**
      * Gets the module this anonymizer is responsible for.
@@ -70,19 +70,10 @@ public interface AnonymizerService {
      * Performs needed modifications in order to have an anonymized entity.
      *
      * @param entity The entity to anonymize
+     * @param session The associated session
      * @return The anonymized entity
      * @throws OXException If anonymizing fails
      */
-    <E> E anonymize(E entity) throws OXException;
-
-    /**
-     * Performs needed modifications in order to have an anonymized entity.
-     *
-     * @param entity The entity to anonymize
-     * @param session TODO
-     * @return The anonymized entity
-     * @throws OXException If anonymizing fails
-     */
-    <E> E anonymize(E entity, Session session) throws OXException;
+    E anonymize(E entity, Session session) throws OXException;
 
 }

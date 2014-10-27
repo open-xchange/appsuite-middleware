@@ -49,10 +49,12 @@
 
 package com.openexchange.contacts.json.osgi;
 
+import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.contacts.json.anonymizer.ContactAnonymizer;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 
 /**
@@ -71,6 +73,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new ContactActionFactory(this), "contacts");
         registerService(ResultConverter.class, new ContactJSONResultConverter());
+        registerService(AnonymizerService.class, new ContactAnonymizer());
     }
 
 }

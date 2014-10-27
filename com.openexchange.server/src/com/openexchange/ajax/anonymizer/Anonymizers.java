@@ -86,7 +86,7 @@ public final class Anonymizers {
             return entity;
         }
 
-        AnonymizerService anonymizer = registry.getAnonymizerFor(module);
+        AnonymizerService<E> anonymizer = registry.getAnonymizerFor(module);
         if (null == anonymizer) {
             return entity;
         }
@@ -113,7 +113,7 @@ public final class Anonymizers {
             return entity;
         }
 
-        AnonymizerService anonymizer = registry.getAnonymizerFor(module);
+        AnonymizerService<E> anonymizer = registry.getAnonymizerFor(module);
         if (null == anonymizer) {
             return entity;
         }
@@ -136,7 +136,7 @@ public final class Anonymizers {
             throw ServiceExceptionCode.absentService(AnonymizerRegistryService.class);
         }
 
-        AnonymizerService anonymizer = registry.getAnonymizerFor(module);
+        AnonymizerService<E> anonymizer = registry.getAnonymizerFor(module);
         if (null == anonymizer) {
             throw AnonymizeExceptionCodes.NO_SUCH_ANONYMIZER.create(module.getName());
         }
@@ -163,12 +163,23 @@ public final class Anonymizers {
             throw ServiceExceptionCode.absentService(AnonymizerRegistryService.class);
         }
 
-        AnonymizerService anonymizer = registry.getAnonymizerFor(module);
+        AnonymizerService<E> anonymizer = registry.getAnonymizerFor(module);
         if (null == anonymizer) {
             throw AnonymizeExceptionCodes.NO_SUCH_ANONYMIZER.create(module.getName());
         }
 
         return anonymizer.anonymize(entity, session);
+    }
+
+    /**
+     * Checks if specified session denotes a guest user.
+     *
+     * @param session The  session
+     * @return <code>true</code> if specified session denotes a guest user; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public static boolean isGuest(Session session) throws OXException {
+        return UserStorage.getInstance().isGuest(session.getUserId(), session.getContextId());
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.anonymizer;
+package com.openexchange.contacts.json.anonymizer;
 
+import com.openexchange.ajax.anonymizer.AnonymizerService;
+import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link AnonymizerRegistryService} - The registry for anonymizer.
+ * {@link ContactAnonymizer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-@SingletonService
-public interface AnonymizerRegistryService {
+public class ContactAnonymizer implements AnonymizerService<Contact> {
 
     /**
-     * Gets the anonymizer for given module name
-     *
-     * @param name The module name
-     * @return The anonymizer or <code>null</code> if there is no such anonymizer
-     * @throws OXException If anonymizer cannot be returned
+     * Initializes a new {@link ContactAnonymizer}.
      */
-    <E> AnonymizerService<E> getAnonymizerFor(String name) throws OXException;
+    public ContactAnonymizer() {
+        super();
+    }
 
-    /**
-     * Gets the anonymizer for given module
-     *
-     * @param name The module
-     * @return The anonymizer or <code>null</code> if there is no such anonymizer
-     * @throws OXException If anonymizer cannot be returned
-     */
-    <E> AnonymizerService<E> getAnonymizerFor(Module module) throws OXException;
+    @Override
+    public Module getModule() {
+        return Module.CONTACTS;
+    }
+
+    @Override
+    public Contact anonymize(Contact entity, Session session) throws OXException {
+        // TODO:
+        return entity;
+    }
 
 }
