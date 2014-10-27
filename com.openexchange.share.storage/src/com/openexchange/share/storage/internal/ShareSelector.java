@@ -80,7 +80,6 @@ public class ShareSelector {
 
     private final SelectShareBuilder builder;
     private final ShareField[] shareFields;
-    private final int contextID;
 
     /**
      * Initializes a new {@link ShareSelector}, selecting a set of default fields.
@@ -99,7 +98,6 @@ public class ShareSelector {
      */
     public ShareSelector(int contextID, ShareField[] shareFields) {
         super();
-        this.contextID = contextID;
         this.shareFields = shareFields;
         this.builder = new SelectShareBuilder(contextID, shareFields);
     }

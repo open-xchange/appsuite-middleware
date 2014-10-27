@@ -133,6 +133,16 @@ public class SQL {
         }
     }
 
+    public static int sumUpdateCount(int[] result) {
+        int sum = 0;
+        if (null != result) {
+            for (int i : result) {
+                sum += i;
+            }
+        }
+        return sum;
+    }
+
     private SQL() {
         super();
     }

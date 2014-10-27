@@ -74,8 +74,56 @@ public class RdbShare {
     private int modifiedBy;
     private Map<String, Object> meta;
 
+    /**
+     * Initializes a new {@link RdbShare}.
+     */
     public RdbShare() {
         super();
+    }
+
+    /**
+     * Initializes a new {@link RdbShare}, inheriting the properties from the supplied share.
+     *
+     * @param contextID The context ID
+     * @param share The share to inherit the properties from
+     */
+    public RdbShare(int contextID, Share share) {
+        this();
+        cid = contextID;
+        guest = share.getGuest();
+        if (null != share.getTarget()) {
+            ShareTarget target = share.getTarget();
+            module = target.getModule();
+            folder = target.getFolder();
+            item = target.getItem();
+            owner = target.getOwnedBy();
+            expires = target.getExpiryDate();
+            meta = target.getMeta();
+        }
+        created = share.getCreated();
+        createdBy = share.getCreatedBy();
+        modified = share.getModified();
+        modifiedBy = share.getModifiedBy();
+    }
+
+    /**
+     * Converts this database share to a plain share object, taking over all properties.
+     *
+     * @return The share
+     */
+    public Share toShare() {
+        Share share = new Share();
+        share.setCreated(created);
+        share.setCreatedBy(createdBy);
+        share.setGuest(guest);
+        share.setModified(modified);
+        share.setModifiedBy(modifiedBy);
+        ShareTarget target = new ShareTarget(module, folder, item);
+        target.setExpiryDate(expires);
+        target.setOwnedBy(owner);
+        target.setMeta(meta);
+        share.setTarget(target);
+        return share;
     }
 
     /**
@@ -292,40 +340,6 @@ public class RdbShare {
      */
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
-    }
-
-    public RdbShare(int contextID, Share share) {
-        this();
-        cid = contextID;
-        guest = share.getGuest();
-        if (null != share.getTarget()) {
-            ShareTarget target = share.getTarget();
-            module = target.getModule();
-            folder = target.getFolder();
-            item = target.getItem();
-            owner = target.getOwnedBy();
-            expires = target.getExpiryDate();
-            meta = target.getMeta();
-        }
-        created = share.getCreated();
-        createdBy = share.getCreatedBy();
-        modified = share.getModified();
-        modifiedBy = share.getModifiedBy();
-    }
-
-    public Share toShare() {
-        Share share = new Share();
-        share.setCreated(created);
-        share.setCreatedBy(createdBy);
-        share.setGuest(guest);
-        share.setModified(modified);
-        share.setModifiedBy(modifiedBy);
-        ShareTarget target = new ShareTarget(module, folder, item);
-        target.setExpiryDate(expires);
-        target.setOwnedBy(owner);
-        target.setMeta(meta);
-        share.setTarget(target);
-        return share;
     }
 
 }

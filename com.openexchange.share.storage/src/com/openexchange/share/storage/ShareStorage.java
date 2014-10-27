@@ -52,6 +52,7 @@ package com.openexchange.share.storage;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 
 
 /**
@@ -62,19 +63,55 @@ import com.openexchange.share.Share;
  */
 public interface ShareStorage {
 
+    /**
+     * Loads all shares stored for a specific guest user.
+     *
+     * @param contextID The context ID
+     * @param guest The identifier of the guest user to load the shares for
+     * @param parameters The storage parameters
+     * @return The shares, or an empty list if none were found
+     */
     List<Share> loadShares(int contextID, int guest, StorageParameters parameters) throws OXException;
 
+    /**
+     * Saves multiple shares in the storage. Existing shares for a guest pointing to the same target are updated implicitly.
+     *
+     * @param contextID The context ID
+     * @param shares The shares to insert or update
+     * @param parameters The storage parameters
+     * @throws OXException
+     */
     void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
+
+    /**
+     * Deletes multiple shares from the storage, based on guest- and target-information present in the supplied shares.
+     *
+     * @param contextID The context ID
+     * @param shares The shares to delete
+     * @param parameters The storage parameters
+     * @return The number of affected entries
+     * @throws OXException
+     */
+    int deleteShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
+
+    /**
+     * Deletes multiple shares targets associated to any guest user from the storage.
+     *
+     * @param contextID The context ID
+     * @param shares The share targets to delete
+     * @param parameters The storage parameters
+     * @return The number of affected entries
+     * @throws OXException
+     */
+    int deleteTargets(int contextID, List<ShareTarget> targets, StorageParameters parameters) throws OXException;
+
+
 
     //TODO: ownedBy and/or createdBy?
     List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
 
 //    int deleteShares(int contextID, List<ShareTarget> targets, int[] guests, StorageParameters parameters) throws OXException;
 
-    List<Share> loadShares(int contextID, int[] guests, StorageParameters parameters) throws OXException;
-
-
-    int deleteShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
 
     boolean existShares(int contextId, int id, StorageParameters parameters) throws OXException;
 

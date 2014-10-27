@@ -206,10 +206,7 @@ public class DefaultShareService implements ShareService {
         List<Share> shares = new ArrayList<Share>(targets.size() * guestIDs.size());
         for (ShareTarget target : targets) {
             for (Integer guestID : guestIDs) {
-                Share share = new Share();
-                share.setGuest(guestID.intValue());
-                share.setTarget(target);
-                shares.add(share);
+                shares.add(new Share(guestID.intValue(), target));
             }
         }
         deleteShares(session, shares);
