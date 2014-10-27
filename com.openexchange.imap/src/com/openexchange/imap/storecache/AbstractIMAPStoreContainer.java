@@ -51,12 +51,12 @@ package com.openexchange.imap.storecache;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 import com.sun.mail.imap.IMAPStore;
-
 
 /**
  * {@link AbstractIMAPStoreContainer}
@@ -111,14 +111,14 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
          * ... and connect it
          */
         try {
-            imapStore.connect(server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         } catch (final AuthenticationFailedException e) {
             /*
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
             imapStore = (IMAPStore) imapSession.getStore(name);
-            imapStore.connect(server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         }
         return imapStore;
     }
