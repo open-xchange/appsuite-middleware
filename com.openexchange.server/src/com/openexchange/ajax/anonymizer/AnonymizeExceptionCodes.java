@@ -73,7 +73,7 @@ public enum AnonymizeExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No such anonymizer for module %1$s.
      */
-    NO_SUCH_ANONYMIZER("No such anonymizer for module %1$s.", AnonymizeExceptionMessages.NO_SUCH_ANONYMIZER_MSG, CATEGORY_USER_INPUT, 3),
+    NO_SUCH_ANONYMIZER("No such anonymizer for module %1$s.", AnonymizeExceptionMessages.NO_SUCH_ANONYMIZER_MSG, CATEGORY_ERROR, 3),
     ;
 
     /**
