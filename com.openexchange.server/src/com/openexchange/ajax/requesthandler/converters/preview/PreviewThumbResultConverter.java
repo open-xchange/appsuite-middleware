@@ -51,14 +51,12 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.ETAG;
-import static com.google.common.net.HttpHeaders.EXPIRES;
 import static com.google.common.net.HttpHeaders.PRAGMA;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +109,12 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
     /** Maximum time we are willing to wait for preview generation */
     private static final long THRESHOLD = 10000;
 
+    /**
+     * Browser might re-request an already delivered image due to aggressive cache prevention otherwise e.g. when mounting a received
+     * placeholder image to the dom
+     */
+    private static final long LENIENT_EXPIRY = 3000;
+    
     private static final String WIDTH = "width";
 
     private static final int DEFAULT_THUMB_WIDTH = 160;
@@ -129,8 +133,6 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
     private static final String CACHE_VALUE = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
 
     private static final String PRAGMA_VALUE = "no-cache";
-
-    private static final String EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
 
     private final boolean isBlockingWorkerAllowed;
 
@@ -314,7 +316,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
     private void preventCaching(AJAXRequestData requestData, AJAXRequestResult result) {
         requestData.putParameter("keepCachingHeaders", Boolean.toString(Boolean.TRUE));
         result.removeHeader(ETAG);
-        result.setHeader(EXPIRES, EXPIRES_DATE);
+        result.setExpires(LENIENT_EXPIRY);
         result.setHeader(CACHE_CONTROL, CACHE_VALUE);
         result.setHeader(PRAGMA, PRAGMA_VALUE);
     }
