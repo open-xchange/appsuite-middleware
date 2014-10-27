@@ -249,9 +249,9 @@ public class ShareTool {
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        guestUser.setUserPassword(Strings.isEmpty(recipient.getPassword()) ? PasswordUtility.generate() : recipient.getPassword());
+        String password = Strings.isEmpty(recipient.getPassword()) ? PasswordUtility.generate() : recipient.getPassword();
         try {
-            guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
+            guestUser.setUserPassword(PasswordMech.BCRYPT.encode(password));
         } catch (UnsupportedEncodingException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (NoSuchAlgorithmException e) {
