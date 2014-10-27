@@ -183,7 +183,7 @@ public final class JerichoParser {
         if (big) {
             throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
         }
-        if (BODY_START.matcher(html).find()) {
+        if ((html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0)) {
             return new StreamedSource(html);
         }
         // <body> tag missing
