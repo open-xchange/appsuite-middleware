@@ -196,9 +196,7 @@ public final class TokenSessionContainer {
                 // This MUST be synchronous!
                 for (Map.Entry<String, TokenSessionControl> entry : localServerTokenMap.entrySet()) {
                     TokenSessionControl tsc = entry.getValue();
-                    serverTokenHzMap.put(
-                        entry.getKey(),
-                        new PortableTokenSessionControl(new PortableSession(tsc.getSession()), tsc.getClientToken(), tsc.getServerToken()));
+                    serverTokenHzMap.put(entry.getKey(), new PortableTokenSessionControl(new PortableSession(tsc.getSession()), tsc.getClientToken(), tsc.getServerToken(), tsc.getCreationStamp()));
                 }
                 localServerTokenMap.clear();
 
@@ -224,7 +222,7 @@ public final class TokenSessionContainer {
             PortableSession portableSession = new PortableSession(SessionHandler.getObfuscator().wrap(control.getSession()));
 
             // ... and put into HZ map
-            serverTokenHzMap.put(serverToken, new PortableTokenSessionControl(portableSession, control.getClientToken(), control.getServerToken()));
+            serverTokenHzMap.put(serverToken, new PortableTokenSessionControl(portableSession, control.getClientToken(), control.getServerToken(), control.getCreationStamp()));
         } else {
             localServerTokenMap.put(serverToken, control);
         }
@@ -245,7 +243,7 @@ public final class TokenSessionContainer {
         SessionImpl newSession = (SessionImpl) SessionHandler.getObfuscator().unwrap(removed.getSession());
 
         // Return appropriate TokenSessionControl
-        return new TokenSessionControl(newSession, removed.getClientToken(), removed.getServerToken());
+        return new TokenSessionControl(newSession, removed.getClientToken(), removed.getServerToken(), removed.getCreationStamp());
     }
 
     private Map<String, ScheduledTimerTask> getRemoverMap() {
@@ -278,7 +276,7 @@ public final class TokenSessionContainer {
         Lock lock = getLock();
         lock.lock();
         try {
-            control = new TokenSessionControl(session, clientToken, serverToken);
+            control = new TokenSessionControl(session, clientToken, serverToken, System.currentTimeMillis());
             putIntoMap(serverToken, control);
         } finally {
             lock.unlock();
@@ -295,7 +293,8 @@ public final class TokenSessionContainer {
         lock.lock();
         try {
             control = removeFromMap(serverToken);
-            if (null == control) {
+            if ((null == control) || (System.currentTimeMillis() - control.getCreationStamp() > 60000)) {
+                // No such token-session or token-session already elapsed
                 throw com.openexchange.sessiond.SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN.create(serverToken, clientToken);
             }
             if (!control.getServerToken().equals(serverToken)) {

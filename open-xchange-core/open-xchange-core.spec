@@ -1050,20 +1050,20 @@ pfile=/opt/open-xchange/etc/cache.ccf
 if ! grep "jcs.region.UserPermissionBits=LTCP" > /dev/null $pfile; then
     echo -e "\n# # Pre-defined cache for user configuration\n" >> $pfile
     echo "jcs.region.UserPermissionBits=LTCP\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile
 fi
 
 # SoftwareChange_Request-2224
@@ -1100,6 +1100,8 @@ exit 0
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
+%dir /opt/open-xchange/etc/hazelcast/
+%config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
