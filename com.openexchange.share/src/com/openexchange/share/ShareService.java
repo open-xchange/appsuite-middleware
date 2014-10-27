@@ -73,6 +73,29 @@ public interface ShareService {
     GuestShare resolveToken(String token) throws OXException;
 
     /**
+     * Adds a single target to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
+     *
+     * @param session The session
+     * @param target The share target to add
+     * @param recipients The recipients for the shares
+     * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
+     * @throws OXException
+     */
+    List<GuestShare> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
+
+    /**
+     * Adds multiple targets to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
+     *
+     * @param session The session
+     * @param targets The share targets to add
+     * @param recipients The recipients for the shares
+     * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
+     * @throws OXException
+     */
+    List<GuestShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
+
+
+    /**
      * Gets all shares created by the supplied session's user.
      *
      * @param session The session
@@ -115,28 +138,6 @@ public interface ShareService {
      * @throws OXException
      */
     void updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
-
-    /**
-     * Adds a single target to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
-     *
-     * @param session The session
-     * @param target The share target to add
-     * @param recipients The recipients for the shares
-     * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
-     * @throws OXException
-     */
-    List<CreatedShare> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
-
-    /**
-     * Adds multiple targets to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
-     *
-     * @param session The session
-     * @param targets The share targets to add
-     * @param recipients The recipients for the shares
-     * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
-     * @throws OXException
-     */
-    List<CreatedShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Generates a URL for every share that is passed.

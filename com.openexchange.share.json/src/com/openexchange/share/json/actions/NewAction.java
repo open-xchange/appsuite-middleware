@@ -71,7 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.CreatedShare;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -106,7 +106,7 @@ public class NewAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         NewRequest request = NewRequest.parse(requestData);
-        List<CreatedShare> shares = shareTargets(request, session);
+        List<GuestShare> shares = shareTargets(request, session);
 
         AJAXRequestResult result = new AJAXRequestResult();
         List<OXException> warnings = sendNotifications(shares, request, session);
@@ -129,22 +129,22 @@ public class NewAction extends AbstractShareAction {
         return result;
     }
 
-    private  List<OXException> sendNotifications(List<CreatedShare> shares, NewRequest request, ServerSession session) {
+    private  List<OXException> sendNotifications(List<GuestShare> shares, NewRequest request, ServerSession session) {
         List<OXException> warnings = new LinkedList<OXException>();
         try {
             if (!shares.isEmpty()) {
                 ShareNotificationService notificationService = getNotificationService();
                 UserService userService = getUserService();
-                for (CreatedShare share : shares) {
+                for (GuestShare share : shares) {
                     String url;
                     if (share.isMultiTarget()) {
-                        generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), null, request.getRequestData());
-                        url = generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), null, request.getRequestData());
+                        generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, request.getRequestData());
+                        url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, request.getRequestData());
                     } else {
-                        url = generateShareURL(session.getContextId(), share.getGuest(), session.getUserId(), share.getSingleTarget(), request.getRequestData());
+                        url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), share.getSingleTarget(), request.getRequestData());
                     }
 
-                    User guest = userService.getUser(share.getGuest(), session.getContextId());
+                    User guest = userService.getUser(share.getGuestID(), session.getContextId());
                     String mailAddress = guest.getMail();
                     if (!Strings.isEmpty(mailAddress)) {
                         try {
@@ -170,7 +170,7 @@ public class NewAction extends AbstractShareAction {
         return warnings;
     }
 
-    private List<CreatedShare> shareTargets(NewRequest request, ServerSession session) throws OXException {
+    private List<GuestShare> shareTargets(NewRequest request, ServerSession session) throws OXException {
         DatabaseService dbService = services.getService(DatabaseService.class);
         Context context = session.getContext();
         Connection writeCon = dbService.getWritable(context);
@@ -184,7 +184,7 @@ public class NewAction extends AbstractShareAction {
             List<ShareRecipient> internalRecipients = request.getInternalRecipients();
             List<ShareRecipient> externalRecipients = request.getExternalRecipients();
             List<Integer> guestIDs = Collections.emptyList();
-            List<CreatedShare> createdShares;
+            List<GuestShare> createdShares;
             if (externalRecipients.isEmpty()) {
                 createdShares = Collections.emptyList();
             } else {
@@ -193,8 +193,8 @@ public class NewAction extends AbstractShareAction {
                  */
                 createdShares = getShareService().addTargets(session, targets, externalRecipients);
                 guestIDs = new ArrayList<Integer>(externalRecipients.size());
-                for (CreatedShare share : createdShares) {
-                    guestIDs.add(share.getGuest());
+                for (GuestShare share : createdShares) {
+                    guestIDs.add(share.getGuestID());
                 }
             }
 

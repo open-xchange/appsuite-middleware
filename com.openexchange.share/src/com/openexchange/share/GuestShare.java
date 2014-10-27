@@ -116,4 +116,18 @@ public interface GuestShare {
      */
     ShareTarget resolveTarget(String path);
 
+    /**
+     * Gets a value indicating whether this guest share holds more than one share target or not.
+     *
+     * @return <code>true</code> if there are at least 2 contained share targets, <code>false</code>, otherwise
+     */
+    boolean isMultiTarget();
+
+    /**
+     * Gets the single share target in case this guest share represents no "multi" target.
+     *
+     * @return The single share target in case there is exactly one contained target in this guest share, <code>null</code>, otherwise
+     */
+    ShareTarget getSingleTarget();
+
 }

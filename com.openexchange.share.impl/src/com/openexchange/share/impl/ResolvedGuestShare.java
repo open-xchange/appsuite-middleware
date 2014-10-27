@@ -163,6 +163,16 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
+    public boolean isMultiTarget() {
+        return null != targets && 1 < targets.size();
+    }
+
+    @Override
+    public ShareTarget getSingleTarget() {
+        return null != targets && 1 == targets.size() ? targets.get(0) : null;
+    }
+
+    @Override
     public String toString() {
         return "ResolvedGuestShare [contextID=" + contextID + ", guestUser=" + guestUser + ", targets=" + targets + "]";
     }
