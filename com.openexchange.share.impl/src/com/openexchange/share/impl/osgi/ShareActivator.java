@@ -81,6 +81,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.groupware.ShareTargetDiff;
+import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.groupware.AbstractModuleHandler;
@@ -91,7 +92,6 @@ import com.openexchange.share.impl.notification.DefaultNotificationService;
 import com.openexchange.share.impl.notification.mail.MailNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
@@ -248,7 +248,7 @@ public class ShareActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void updateObjects(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
+            public void updateObjects(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException {
                 throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
             }
         };

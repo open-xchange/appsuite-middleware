@@ -49,39 +49,26 @@
 
 package com.openexchange.share.json.actions;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ShareTargetDiff;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
-import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -105,31 +92,37 @@ public class NewAction extends AbstractShareAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        NewRequest request = NewRequest.parse(requestData);
-        List<GuestShare> shares = shareTargets(request, session);
+        try {
+            JSONObject data = (JSONObject) requestData.requireData();
+            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
+            List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"));
+            String message = data.optString("message", null);
 
-        AJAXRequestResult result = new AJAXRequestResult();
-        List<OXException> warnings = sendNotifications(shares, request, session);
-        result.addWarnings(warnings);
+            CreatePerformer createPerformer = new CreatePerformer(recipients, targets, session, services);
+            List<GuestShare> shares = createPerformer.perform();
+            AJAXRequestResult result = new AJAXRequestResult();
+            List<OXException> warnings = sendNotifications(shares, message, requestData, session);
+            result.addWarnings(warnings);
 
-        List<ShareRecipient> recipients = request.getRecipients();
-        JSONArray jTokens = new JSONArray(recipients.size());
-
-        int sharesIndex = 0;
-        for (ShareRecipient recipient : recipients) {
-            if (recipient.getType() == RecipientType.USER || recipient.getType() == RecipientType.GROUP) {
-                jTokens.put(JSONObject.NULL);
-            } else {
-                jTokens.put(shares.get(sharesIndex++).getToken());
+            JSONArray jTokens = new JSONArray(recipients.size());
+            for (GuestShare share : shares) {
+                if (share == null) {
+                    jTokens.put(JSONObject.NULL);
+                } else {
+                    jTokens.put(share.getToken());
+                }
             }
+
+            result.setResultObject(jTokens, "json");
+            result.setTimestamp(new Date());
+            return result;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        result.setResultObject(jTokens, "json");
-        result.setTimestamp(new Date());
-        return result;
     }
 
-    private  List<OXException> sendNotifications(List<GuestShare> shares, NewRequest request, ServerSession session) {
+    private List<OXException> sendNotifications(List<GuestShare> shares, String message, AJAXRequestData requestData, ServerSession session) {
         List<OXException> warnings = new LinkedList<OXException>();
         try {
             if (!shares.isEmpty()) {
@@ -138,17 +131,17 @@ public class NewAction extends AbstractShareAction {
                 for (GuestShare share : shares) {
                     String url;
                     if (share.isMultiTarget()) {
-                        generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, request.getRequestData());
-                        url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, request.getRequestData());
+                        generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, requestData);
+                        url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, requestData);
                     } else {
-                        url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), share.getSingleTarget(), request.getRequestData());
+                        url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), share.getSingleTarget(), requestData);
                     }
 
                     User guest = userService.getUser(share.getGuestID(), session.getContextId());
                     String mailAddress = guest.getMail();
                     if (!Strings.isEmpty(mailAddress)) {
                         try {
-                            notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share.getTargets(), url, request.getMessage(), mailAddress), session);
+                            notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share.getTargets(), url, message, mailAddress), session);
                         } catch (Exception e) {
                             if (e instanceof OXException) {
                                 warnings.add((OXException) e);
@@ -168,136 +161,6 @@ public class NewAction extends AbstractShareAction {
         }
 
         return warnings;
-    }
-
-    private List<GuestShare> shareTargets(NewRequest request, ServerSession session) throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        Context context = session.getContext();
-        Connection writeCon = dbService.getWritable(context);
-        session.setParameter(Connection.class.getName(), writeCon);
-        try {
-            Databases.startTransaction(writeCon);
-            /*
-             * distinguish between internal and external recipients
-             */
-            List<ShareTarget> targets = request.getTargets();
-            List<ShareRecipient> internalRecipients = request.getInternalRecipients();
-            List<ShareRecipient> externalRecipients = request.getExternalRecipients();
-            List<Integer> guestIDs = Collections.emptyList();
-            List<GuestShare> createdShares;
-            if (externalRecipients.isEmpty()) {
-                createdShares = Collections.emptyList();
-            } else {
-                /*
-                 * create shares & corresponding guest user entities for external recipients first
-                 */
-                createdShares = getShareService().addTargets(session, targets, externalRecipients);
-                guestIDs = new ArrayList<Integer>(externalRecipients.size());
-                for (GuestShare share : createdShares) {
-                    guestIDs.add(share.getGuestID());
-                }
-            }
-
-            /*
-             * adjust folder & object permissions of share targets
-             */
-            List<InternalRecipient> finalRecipients = determineFinalRecipients(internalRecipients, externalRecipients, guestIDs);
-            Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> distinguishedTargets = distinguishTargets(targets);
-            Map<Integer, List<ShareTarget>> folders = distinguishedTargets.getFirst();
-            Map<Integer, List<ShareTarget>> objects = distinguishedTargets.getSecond();
-
-            updateFolders(folders, finalRecipients, session, writeCon);
-            updateObjects(objects, finalRecipients, session, writeCon);
-            writeCon.commit();
-            return createdShares;
-        } catch (OXException e) {
-            Databases.rollback(writeCon);
-            throw e;
-        } catch (SQLException e) {
-            Databases.rollback(writeCon);
-            throw ShareExceptionCodes.SQL_ERROR.create(e.getMessage());
-        } finally {
-            session.setParameter(Connection.class.getName(), null);
-            Databases.autocommit(writeCon);
-            dbService.backWritable(context, writeCon);
-        }
-    }
-
-    private void updateObjects(Map<Integer, List<ShareTarget>> objectsByModule, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
-        for (Entry<Integer, List<ShareTarget>> entry : objectsByModule.entrySet()) {
-            int module = entry.getKey();
-            List<ShareTarget> objects = entry.getValue();
-            getModuleHandler(module).updateObjects(new ShareTargetDiff(Collections.<ShareTarget>emptyList(), objects), finalRecipients, session, writeCon);
-        }
-    }
-
-    private void updateFolders(Map<Integer, List<ShareTarget>> foldersByModule, List<InternalRecipient> finalRecipients, ServerSession session, Connection writeCon) throws OXException {
-        for (Entry<Integer, List<ShareTarget>> entry : foldersByModule.entrySet()) {
-            int module = entry.getKey();
-            List<ShareTarget> folders = entry.getValue();
-            getModuleHandler(module).updateFolders(new ShareTargetDiff(Collections.<ShareTarget>emptyList(), folders), finalRecipients, session, writeCon);
-        }
-    }
-
-    /**
-     * Takes a list of {@link Share}s and splits them up into two maps. The first map
-     * contains all folder targets mapped to their according module. The second map contains
-     * all object targets, again mapped to their according module.
-     *
-     * @param targets The targets to share
-     * @return A {@link Pair} with the folders as first and the objects as second entry.
-     */
-    private Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> distinguishTargets(List<ShareTarget> targets) {
-        Map<Integer, List<ShareTarget>> folders = new HashMap<Integer, List<ShareTarget>>();
-        Map<Integer, List<ShareTarget>> objects = new HashMap<Integer, List<ShareTarget>>();
-        for (ShareTarget target : targets) {
-            int module = target.getModule();
-            List<ShareTarget> finalTargets;
-            if (target.isFolder()) {
-                finalTargets = folders.get(module);
-                if (finalTargets == null) {
-                    finalTargets = new LinkedList<ShareTarget>();
-                    folders.put(module, finalTargets);
-                }
-            } else {
-                finalTargets = objects.get(module);
-                if (finalTargets == null) {
-                    finalTargets = new LinkedList<ShareTarget>();
-                    objects.put(module, finalTargets);
-                }
-            }
-
-            finalTargets.add(target);
-        }
-
-        return new Pair<Map<Integer,List<ShareTarget>>, Map<Integer,List<ShareTarget>>>(folders, objects);
-    }
-
-    /**
-     * Gets some internal recipients as well as external ones and their according guest IDs and
-     * combines them into a single list of internal recipients.
-     *
-     * @param internalRecipients
-     * @param externalRecipients
-     * @param guestIDs
-     * @return
-     */
-    private List<InternalRecipient> determineFinalRecipients(List<ShareRecipient> internalRecipients, List<ShareRecipient> externalRecipients, List<Integer> guestIDs) {
-        List<InternalRecipient> finalRecipients = new ArrayList<InternalRecipient>(internalRecipients.size() + externalRecipients.size());
-        for (ShareRecipient internal : internalRecipients) {
-            finalRecipients.add((InternalRecipient) internal);
-        }
-
-        for (int i = 0; i < externalRecipients.size(); i++) {
-            ShareRecipient external = externalRecipients.get(i);
-            InternalRecipient internal = new InternalRecipient();
-            internal.setEntity(guestIDs.get(i).intValue());
-            internal.setGroup(false);
-            internal.setBits(external.getBits());
-            finalRecipients.add(internal);
-        }
-
-        return finalRecipients;
     }
 
 }

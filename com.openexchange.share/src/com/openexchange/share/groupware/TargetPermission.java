@@ -49,27 +49,71 @@
 
 package com.openexchange.share.groupware;
 
-import java.sql.Connection;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.share.ShareTarget;
-
 
 /**
- * {@link ModuleHandler}
+ * {@link TargetPermission}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ModuleHandler {
+public class TargetPermission {
 
-    int getModule();
+    private final int guestId;
 
-    String getTargetTitle(ShareTarget target, Session session) throws OXException;
+    private final boolean isGroup;
 
-    void updateObjects(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException;
+    private final int permissionBits;
 
-    void updateFolders(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException;
+    public TargetPermission(int guestId, boolean isGroup, int permissionBits) {
+        super();
+        this.guestId = guestId;
+        this.permissionBits = permissionBits;
+        this.isGroup = isGroup;
+    }
+
+    public int getEntity() {
+        return guestId;
+    }
+
+    public int getBits() {
+        return permissionBits;
+    }
+
+    public boolean isGroup() {
+        return isGroup;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + guestId;
+        result = prime * result + (isGroup ? 1231 : 1237);
+        result = prime * result + permissionBits;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TargetPermission other = (TargetPermission) obj;
+        if (guestId != other.guestId)
+            return false;
+        if (isGroup != other.isGroup)
+            return false;
+        if (permissionBits != other.permissionBits)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "TargetPermission [guestId=" + guestId + ", isGroup=" + isGroup + ", permissionBits=" + permissionBits + "]";
+    }
 
 }

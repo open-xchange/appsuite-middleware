@@ -93,6 +93,9 @@ public class ShareTargetDiff {
         }
     }
 
+    public boolean hasDifferences() {
+        return !added.isEmpty() || !removed.isEmpty() || !modified.isEmpty();
+    }
 
     /**
      * Gets the added

@@ -47,56 +47,78 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.json.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
-
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ShareActionFactory}
+ * {@link UpdateLinkAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public class UpdateLinkAction extends AbstractShareAction {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
+     * Initializes a new {@link UpdateLinkAction}.
+     *
+     * @param services The service lookup
      * @param translatorFactory
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
+    public UpdateLinkAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        /*
+         * extract parameters
+         */
+        Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
+        String token = requestData.requireParameter("token");
 
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+        /*
+         * Parse recipient and targets
+         */
+        try {
+            JSONObject jsonObject = (JSONObject) requestData.requireData();
+            Date expiry = null;
+            String expires = jsonObject.optString("expires");
+            if (expires != null) {
+                expiry = new Date(Long.parseLong(expires));
+            }
+
+            AnonymousRecipient recipient = null;
+            if (jsonObject.hasAndNotNull("recipient")) {
+                ShareRecipient tmp = ShareJSONParser.parseRecipient(jsonObject.getJSONObject("recipient"));
+                if (tmp.getType() != RecipientType.ANONYMOUS) {
+                    // TODO: throw exception
+                }
+
+                recipient = (AnonymousRecipient) tmp;
+            }
+
+            UpdatePerformer updatePerformer = new UpdatePerformer(token, recipient, expiry, clientTimestamp, session, services);
+            updatePerformer.perform();
+
+            /*
+             * return empty result in case of success
+             */
+            return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
     }
 
 }

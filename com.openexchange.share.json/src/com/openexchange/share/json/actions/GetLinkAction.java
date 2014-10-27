@@ -47,29 +47,67 @@
  *
  */
 
-package com.openexchange.share.groupware;
+package com.openexchange.share.json.actions;
 
-import java.sql.Connection;
+import java.util.Collections;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ModuleHandler}
+ * {@link GetLinkAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ModuleHandler {
+public class GetLinkAction extends AbstractShareAction {
 
-    int getModule();
+    /**
+     * Initializes a new {@link GetLinkAction}.
+     * @param services
+     */
+    public GetLinkAction(ServiceLookup services) {
+        super(services);
+    }
 
-    String getTargetTitle(ShareTarget target, Session session) throws OXException;
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        try {
+            List<ShareTarget> targets = ShareJSONParser.parseTargets((JSONArray) requestData.requireData());
+            int permissionBits = Permissions.createPermissionBits(
+                Permission.READ_FOLDER,
+                Permission.READ_ALL_OBJECTS,
+                Permission.NO_PERMISSIONS,
+                Permission.NO_PERMISSIONS,
+                false);
+            AnonymousRecipient recipient = new AnonymousRecipient();
+            recipient.setBits(permissionBits);
+            CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient>singletonList(recipient), targets, session, services);
+            GuestShare share = createPerformer.perform().get(0);
 
-    void updateObjects(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException;
-
-    void updateFolders(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException;
+            JSONObject jResult = new JSONObject();
+            jResult.put("url", generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, requestData));
+            jResult.put("token", share.getToken());
+            return new AJAXRequestResult(jResult, "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        } catch (ClassCastException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
 
 }

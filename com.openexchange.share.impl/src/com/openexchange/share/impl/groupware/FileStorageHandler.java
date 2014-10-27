@@ -50,11 +50,8 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
@@ -71,7 +68,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ShareTargetDiff;
-import com.openexchange.share.recipient.InternalRecipient;
+import com.openexchange.share.groupware.TargetPermission;
 
 
 /**
@@ -110,7 +107,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
     }
 
     @Override
-    public void updateObjects(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
+    public void updateObjects(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException {
         IDBasedFileAccess fileAccess = getFileAccess(session);
         try {
             fileAccess.startTransaction();
@@ -121,7 +118,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
                 }
 
                 File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
-                mergePermissions(file, finalRecipients);
+                file.setObjectPermissions(mergePermissions(file.getObjectPermissions(), permissions, CONVERTER));
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
 
@@ -132,7 +129,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
                 }
 
                 File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
-                mergePermissions(file, finalRecipients);
+                file.setObjectPermissions(mergePermissions(file.getObjectPermissions(), permissions, CONVERTER));
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
 
@@ -143,7 +140,7 @@ public class FileStorageHandler extends AbstractModuleHandler {
                 }
 
                 File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
-                removePermissions(file, finalRecipients);
+                file.setObjectPermissions(removePermissions(file.getObjectPermissions(), permissions, CONVERTER));
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
 
@@ -157,62 +154,32 @@ public class FileStorageHandler extends AbstractModuleHandler {
 
     }
 
-    private void removePermissions(File file, List<InternalRecipient> finalRecipients) {
-        List<FileStorageObjectPermission> origPermissions = file.getObjectPermissions();
-        if (origPermissions == null || origPermissions.isEmpty()) {
-            return;
-        }
-
-        List<FileStorageObjectPermission> newPermissions = new ArrayList<FileStorageObjectPermission>(origPermissions.size());
-        Map<Integer, FileStorageObjectPermission> permissionsByEntity = new HashMap<Integer, FileStorageObjectPermission>();
-        for (FileStorageObjectPermission permission : origPermissions) {
-            permissionsByEntity.put(permission.getEntity(), permission);
-        }
-
-        for (InternalRecipient recipient : finalRecipients) {
-            permissionsByEntity.remove(recipient.getEntity());
-        }
-
-        for (FileStorageObjectPermission permission : permissionsByEntity.values()) {
-            newPermissions.add(permission);
-        }
-
-        file.setObjectPermissions(newPermissions);
-    }
-
-    private void mergePermissions(File file, List<InternalRecipient> finalRecipients) {
-        List<FileStorageObjectPermission> origPermissions = file.getObjectPermissions();
-        if (origPermissions == null) {
-            origPermissions = Collections.emptyList();
-        }
-
-        List<FileStorageObjectPermission> newPermissions = new ArrayList<FileStorageObjectPermission>(origPermissions.size() + finalRecipients.size());
-        if (origPermissions.isEmpty()) {
-            for (InternalRecipient recipient : finalRecipients) {
-                newPermissions.add(new DefaultFileStorageObjectPermission(recipient.getEntity(), recipient.isGroup(), getObjectPermissionBits(recipient.getBits())));
-            }
-        } else {
-            Map<Integer, FileStorageObjectPermission> permissionsByEntity = new HashMap<Integer, FileStorageObjectPermission>();
-            for (FileStorageObjectPermission permission : origPermissions) {
-                permissionsByEntity.put(permission.getEntity(), permission);
-            }
-
-            for (InternalRecipient recipient : finalRecipients) {
-                permissionsByEntity.remove(recipient.getEntity());
-                newPermissions.add(new DefaultFileStorageObjectPermission(recipient.getEntity(), recipient.isGroup(), recipient.getBits()));
-            }
-
-            for (FileStorageObjectPermission permission : permissionsByEntity.values()) {
-                newPermissions.add(permission);
-            }
-        }
-
-        file.setObjectPermissions(newPermissions);
-    }
-
     private IDBasedFileAccess getFileAccess(Session session) throws OXException {
         IDBasedFileAccessFactory factory = getService(IDBasedFileAccessFactory.class);
         return factory.createAccess(session);
     }
+
+    private static final PermissionConverter<FileStorageObjectPermission> CONVERTER = new PermissionConverter<FileStorageObjectPermission>() {
+
+        @Override
+        public int getEntity(FileStorageObjectPermission permission) {
+            return permission.getEntity();
+        }
+
+        @Override
+        public boolean isGroup(FileStorageObjectPermission permission) {
+            return permission.isGroup();
+        }
+
+        @Override
+        public int getBits(FileStorageObjectPermission permission) {
+            return permission.getPermissions();
+        }
+
+        @Override
+        public FileStorageObjectPermission convert(TargetPermission permission) {
+            return new DefaultFileStorageObjectPermission(permission.getEntity(), permission.isGroup(), getObjectPermissionBits(permission.getBits()));
+        }
+    };
 
 }

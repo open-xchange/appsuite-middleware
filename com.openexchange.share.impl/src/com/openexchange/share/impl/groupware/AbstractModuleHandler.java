@@ -51,6 +51,7 @@ package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ShareTargetDiff;
-import com.openexchange.share.recipient.InternalRecipient;
+import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.user.UserService;
 
 
@@ -124,76 +125,50 @@ public abstract class AbstractModuleHandler implements ModuleHandler {
     protected abstract String getItemTitle(String folder, String item, Session session) throws OXException;
 
     @Override
-    public void updateFolders(ShareTargetDiff targetDiff, List<InternalRecipient> finalRecipients, Session session, Connection writeCon) throws OXException {
+    public void updateFolders(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException {
         FolderService folderService = getFolderService();
         FolderServiceDecorator decorator = new FolderServiceDecorator();
         decorator.put(Connection.class.getName(), writeCon);
         for (ShareTarget target : targetDiff.getAdded()) {
             UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
-            mergePermissions(folder, finalRecipients);
+            mergePermissions(folder, permissions);
             folderService.updateFolder(folder, folder.getLastModified(), session, decorator);
         }
 
         for (ShareTarget target : targetDiff.getModified()) {
             UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
-            mergePermissions(folder, finalRecipients);
+            mergePermissions(folder, permissions);
             folderService.updateFolder(folder, folder.getLastModified(), session, decorator);
         }
 
         for (ShareTarget target : targetDiff.getRemoved()) {
             UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, decorator);
-            removePermissions(folder, finalRecipients);
+            removePermissions(folder, permissions);
             folderService.updateFolder(folder, folder.getLastModified(), session, decorator);
         }
     }
 
-    private void removePermissions(UserizedFolder folder, List<InternalRecipient> finalRecipients) {
-        Permission[] origPermissions = folder.getPermissions();
-        List<Permission> newPermissions = new ArrayList<Permission>(origPermissions == null ? 0 : origPermissions.length);
-        if (origPermissions == null || origPermissions.length == 0) {
+    private void removePermissions(UserizedFolder folder, List<TargetPermission> permissions) {
+        Permission[] origPermissionArray = folder.getPermissions();
+        if (origPermissionArray == null || origPermissionArray.length == 0) {
             return;
         }
 
-        Map<Integer, Permission> permissionsByEntity = new HashMap<Integer, Permission>();
-        for (Permission permission : origPermissions) {
-            permissionsByEntity.put(permission.getEntity(), permission);
-        }
-
-        for (InternalRecipient recipient : finalRecipients) {
-            permissionsByEntity.remove(recipient.getEntity());
-        }
-
-        for (Permission permission : permissionsByEntity.values()) {
-            newPermissions.add(permission);
-        }
-
+        List<Permission> origPermissions = new ArrayList<Permission>(origPermissionArray.length);
+        Collections.addAll(origPermissions, origPermissionArray);
+        List<Permission> newPermissions = removePermissions(origPermissions, permissions, CONVERTER);
         folder.setPermissions(newPermissions.toArray(new Permission[newPermissions.size()]));
     }
 
-    private void mergePermissions(UserizedFolder folder, List<InternalRecipient> finalRecipients) {
-        Permission[] origPermissions = folder.getPermissions();
-        List<Permission> newPermissions = new ArrayList<Permission>(origPermissions == null ? 0 : origPermissions.length + finalRecipients.size());
-
-        if (origPermissions == null || origPermissions.length == 0) {
-            for (InternalRecipient recipient : finalRecipients) {
-                newPermissions.add(new DefaultPermission(recipient.getEntity(), recipient.isGroup(), recipient.getBits()));
-            }
-        } else {
-            Map<Integer, Permission> permissionsByEntity = new HashMap<Integer, Permission>();
-            for (Permission permission : origPermissions) {
-                permissionsByEntity.put(permission.getEntity(), permission);
-            }
-
-            for (InternalRecipient recipient : finalRecipients) {
-                permissionsByEntity.remove(recipient.getEntity());
-                newPermissions.add(new DefaultPermission(recipient.getEntity(), recipient.isGroup(), recipient.getBits()));
-            }
-
-            for (Permission permission : permissionsByEntity.values()) {
-                newPermissions.add(permission);
-            }
+    private void mergePermissions(UserizedFolder folder, List<TargetPermission> permissions) {
+        Permission[] origPermissionArray = folder.getPermissions();
+        if (origPermissionArray == null) {
+            origPermissionArray = new Permission[0];
         }
 
+        List<Permission> origPermissions = new ArrayList<Permission>(origPermissionArray.length);
+        Collections.addAll(origPermissions, origPermissionArray);
+        List<Permission> newPermissions = mergePermissions(origPermissions, permissions, CONVERTER);
         folder.setPermissions(newPermissions.toArray(new Permission[newPermissions.size()]));
     }
 
@@ -203,7 +178,7 @@ public abstract class AbstractModuleHandler implements ModuleHandler {
      * @param folderPermissionBits The folder permission bit mask
      * @return The object permission bits
      */
-    protected int getObjectPermissionBits(int folderPermissionBits) {
+    protected static int getObjectPermissionBits(int folderPermissionBits) {
         int objectBits = ObjectPermission.NONE;
         int[] permissionBits = Permissions.parsePermissionBits(folderPermissionBits);
         int rp = permissionBits[1];
@@ -232,5 +207,118 @@ public abstract class AbstractModuleHandler implements ModuleHandler {
 
         return service;
     }
+
+    protected static interface PermissionConverter<T> {
+
+        int getEntity(T permission);
+
+        boolean isGroup(T permission);
+
+        int getBits(T permission);
+
+        T convert(TargetPermission permission);
+
+    }
+
+    protected static <T> List<T> removePermissions(List<T> origPermissions, List<TargetPermission> permissions, PermissionConverter<T> converter) {
+        if (origPermissions == null || origPermissions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<T> newPermissions = new ArrayList<T>(origPermissions.size());
+        Map<Integer, T> permissionsByUser = new HashMap<Integer, T>();
+        Map<Integer, T> permissionsByGroup = new HashMap<Integer, T>();
+        for (T permission : origPermissions) {
+            if (converter.isGroup(permission)) {
+                permissionsByGroup.put(converter.getEntity(permission), permission);
+            } else {
+                permissionsByUser.put(converter.getEntity(permission), permission);
+            }
+        }
+
+        for (TargetPermission permission : permissions) {
+            if (permission.isGroup()) {
+                permissionsByGroup.remove(permission.getEntity());
+            } else {
+                permissionsByUser.remove(permission.getEntity());
+            }
+        }
+
+        for (T permission : permissionsByUser.values()) {
+            newPermissions.add(permission);
+        }
+
+        for (T permission : permissionsByGroup.values()) {
+            newPermissions.add(permission);
+        }
+
+        return newPermissions;
+    }
+
+    protected static <T> List<T> mergePermissions(List<T> origPermissions, List<TargetPermission> permissions, PermissionConverter<T> converter) {
+        if (origPermissions == null) {
+            origPermissions = Collections.emptyList();
+        }
+
+        List<T> newPermissions = new ArrayList<T>(origPermissions.size() + permissions.size());
+        if (origPermissions.isEmpty()) {
+            for (TargetPermission permission : permissions) {
+                newPermissions.add(converter.convert(permission));
+            }
+        } else {
+            Map<Integer, T> permissionsByUser = new HashMap<Integer, T>();
+            Map<Integer, T> permissionsByGroup = new HashMap<Integer, T>();
+            for (T permission : origPermissions) {
+                if (converter.isGroup(permission)) {
+                    permissionsByGroup.put(converter.getEntity(permission), permission);
+                } else {
+                    permissionsByUser.put(converter.getEntity(permission), permission);
+                }
+            }
+
+            for (TargetPermission permission : permissions) {
+                if (permission.isGroup()) {
+                    permissionsByGroup.remove(permission.getEntity());
+                } else {
+                    permissionsByUser.remove(permission.getEntity());
+                }
+
+                newPermissions.add(converter.convert(permission));
+            }
+
+            for (T permission : permissionsByUser.values()) {
+                newPermissions.add(permission);
+            }
+
+            for (T permission : permissionsByGroup.values()) {
+                newPermissions.add(permission);
+            }
+        }
+
+        return newPermissions;
+    }
+
+
+    private static PermissionConverter<Permission> CONVERTER = new PermissionConverter<Permission>() {
+        @Override
+        public int getEntity(Permission permission) {
+            return permission.getEntity();
+        }
+
+        @Override
+        public boolean isGroup(Permission permission) {
+            return permission.isGroup();
+        }
+
+        @Override
+        public int getBits(Permission permission) {
+            return Permissions.createPermissionBits(permission);
+        }
+
+        @Override
+        public Permission convert(TargetPermission permission) {
+            return new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
+        }
+    };
 
 }
