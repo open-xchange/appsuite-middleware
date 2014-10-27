@@ -68,12 +68,14 @@ public class PortableTokenSessionControl implements CustomPortable {
     public static final String PARAMETER_SESSION = "session";
     public static final String PARAMETER_CLIENT_TOKEN = "clientToken";
     public static final String PARAMETER_SERVER_TOKEN = "serverToken";
+    public static final String PARAMETER_CREATION_STAMP = "creationStamp";
 
     // --------------------------------------------------------------------------------------------------------------------
 
     private PortableSession session;
     private String clientToken;
     private String serverToken;
+    private long creationStamp;
 
     /**
      * Initializes a new {@link PortableTokenSessionControl}.
@@ -88,12 +90,14 @@ public class PortableTokenSessionControl implements CustomPortable {
      * @param session The portable session
      * @param clientToken The client token
      * @param serverToken The server token
+     * @param creationStamp
      */
-    public PortableTokenSessionControl(PortableSession session, String clientToken, String serverToken) {
+    public PortableTokenSessionControl(PortableSession session, String clientToken, String serverToken, long creationStamp) {
         super();
         this.session = session;
         this.clientToken = clientToken;
         this.serverToken = serverToken;
+        this.creationStamp = creationStamp;
     }
 
     @Override
@@ -111,6 +115,7 @@ public class PortableTokenSessionControl implements CustomPortable {
         writer.writePortable(PARAMETER_SESSION, session);
         writer.writeUTF(PARAMETER_CLIENT_TOKEN, clientToken);
         writer.writeUTF(PARAMETER_SERVER_TOKEN, serverToken);
+        writer.writeLong(PARAMETER_CREATION_STAMP, creationStamp);
     }
 
     @Override
@@ -118,6 +123,16 @@ public class PortableTokenSessionControl implements CustomPortable {
         session = reader.readPortable(PARAMETER_SESSION);
         clientToken = reader.readUTF(PARAMETER_CLIENT_TOKEN);
         serverToken = reader.readUTF(PARAMETER_SERVER_TOKEN);
+        creationStamp = reader.readLong(PARAMETER_CREATION_STAMP);
+    }
+
+    /**
+     * Gets the creation time in milliseconds
+     *
+     * @return The creation time in milliseconds
+     */
+    public long getCreationStamp() {
+        return creationStamp;
     }
 
     /**

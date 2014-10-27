@@ -1092,12 +1092,6 @@ for I in "${NAMES[@]}"; do
     ox_set_property $I "$VALUE" /opt/open-xchange/etc/quota.properties
 done
 
-# SoftwareChange_Request-2219
-VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
-if [ "1500" = "${VALUE}" ]; then
-    ox_set_property com.openexchange.servlet.maxRate 500 /opt/open-xchange/etc/server.properties
-fi
-
 # SoftwareChange_Request-2224
 ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
 
@@ -1132,6 +1126,8 @@ exit 0
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
+%dir /opt/open-xchange/etc/hazelcast/
+%config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
