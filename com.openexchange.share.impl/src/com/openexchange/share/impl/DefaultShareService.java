@@ -180,6 +180,20 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public List<GuestShare> updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientLastModified) throws OXException {
+
+
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void updateRecipient(Session session, int guestID, AnonymousRecipient recipient) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
     public void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
         if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
             return;

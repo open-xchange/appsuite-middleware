@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -93,6 +94,26 @@ public interface ShareService {
      */
     void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
 
+    /**
+     * Updates multiple targets shared to a specific guest user. This currently includes updating the "meta" information or adjusting the
+     * expiry date.
+     *
+     * @param session The session
+     * @param targets The share targets to update
+     * @param guestID The identifier of the guest user to update the share targets for
+     * @param clientLastModified The time the associated shares were last read from the client or catch concurrent modifications
+     * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
+     */
+    List<GuestShare> updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientLastModified) throws OXException;
+
+    /**
+     * Updates an anonymous share recipient. This currently only includes updating/setting the password for the guest user.
+     *
+     * @param session The session
+     * @param guestID The identifier of the guest user to update the share target for
+     * @param recipient The recipient definition to use for the update
+     */
+    void updateRecipient(Session session, int guestID, AnonymousRecipient recipient) throws OXException;
 
     /**
      * Gets all shares created by the supplied session's user.
