@@ -50,6 +50,7 @@
 package com.openexchange.share.storage;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareTarget;
@@ -82,6 +83,17 @@ public interface ShareStorage {
      * @return <code>true</code> if there is at least one share stored, <code>false</code>, otherwise
      */
     boolean hasShares(int contextID, int guest, StorageParameters parameters) throws OXException;
+
+    /**
+     * Gets a set of all module identifiers a specific guest user has share targets for.
+     *
+     * @param contextID The context ID
+     * @param guest The identifier of the guest user to get the shared modules for
+     * @param parameters The storage parameters
+     * @return The shared modules, or an empty set if there are none
+     * @throws OXException
+     */
+    Set<Integer> getSharedModules(int contextID, int guest, StorageParameters parameters) throws OXException;
 
     /**
      * Saves multiple shares in the storage. Existing shares for a guest pointing to the same target are updated implicitly.

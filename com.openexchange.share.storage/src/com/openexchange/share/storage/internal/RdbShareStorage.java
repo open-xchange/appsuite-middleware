@@ -54,7 +54,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
@@ -103,6 +105,18 @@ public class RdbShareStorage implements ShareStorage {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
             return hasShares(provider.get(), contextID, guest);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public Set<Integer> getSharedModules(int contextID, int guest, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return getModules(provider.get(), contextID, guest);
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -241,6 +255,29 @@ public class RdbShareStorage implements ShareStorage {
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
         }
+    }
+
+    private static Set<Integer> getModules(Connection connection, int contextID, int guest) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT DISTINCT ").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append(" FROM share WHERE ")
+            .append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.GUEST).getColumnLabel()).append("=?;")
+        ;
+        Set<Integer> modules = new HashSet<Integer>();
+        ResultSet result = null;
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, guest);
+            result = SQL.logExecuteQuery(stmt);
+            while (result.next()) {
+                modules.add(Integer.valueOf(result.getInt(1)));
+            }
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+        }
+        return modules;
     }
 
     private ConnectionProvider getReadProvider(int contextId, StorageParameters parameters) throws OXException {

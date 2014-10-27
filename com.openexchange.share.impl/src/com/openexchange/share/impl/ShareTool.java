@@ -78,7 +78,6 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
@@ -128,6 +127,25 @@ public class ShareTool {
     }
 
     /**
+     * Gets the authentication mode applicable for the supplied share recipient.
+     *
+     * @param guest The guest user
+     * @return The authentication mode, or <code>null</code> if the recipient does not denote guest authentication
+     */
+    public static AuthenticationMode getAuthenticationMode(ShareRecipient recipient) {
+
+        switch (recipient.getType()) {
+        case ANONYMOUS:
+            return Strings.isEmpty(((AnonymousRecipient)recipient).getPassword()) ?
+                AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
+        case GUEST:
+            return AuthenticationMode.GUEST_PASSWORD;
+        default:
+            return null;
+        }
+    }
+
+    /**
      * Gets permission bits suitable for a guest user being allowed to access all supplied share targets. Besides the concrete module
      * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
      * access.
@@ -137,18 +155,12 @@ public class ShareTool {
      * @return The permission bits
      * @throws OXException
      */
-    public static int getUserPermissionBitsForTargets(ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
-        Set<Permission> perms = new HashSet<Permission>(8);
-        perms.add(Permission.DENIED_PORTAL);
-        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
-        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+    public static int getRequiredPermissionBits(ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
+        Set<Integer> modules = new HashSet<Integer>(targets.size());
         for (ShareTarget target : targets) {
-            addModulePermissions(perms, target.getModule());
+            modules.add(target.getModule());
         }
-        if (RecipientType.GUEST == recipient.getType()) {
-            perms.add(Permission.EDIT_PASSWORD);
-        }
-        return Permission.toBits(perms);
+        return getRequiredPermissionBits(getAuthenticationMode(recipient), modules);
     }
 
     /**
@@ -162,17 +174,49 @@ public class ShareTool {
      * @throws OXException
      */
     public static int getRequiredPermissionBits(User guest, List<Share> shares) throws OXException {
+        Set<Integer> modules = new HashSet<Integer>(shares.size());
+        for (Share share : shares) {
+            if (null != share.getTarget()) {
+                modules.add(share.getTarget().getModule());
+            }
+        }
+        return getRequiredPermissionBits(guest, modules);
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access all supplied modules. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param guest The guest user
+     * @param modules The module identifiers
+     * @return The permission bits
+     * @throws OXException
+     */
+    public static int getRequiredPermissionBits(User guest, Collection<Integer> modules) throws OXException {
+        return getRequiredPermissionBits(getAuthenticationMode(guest), modules);
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access all supplied modules. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param guest The guest user
+     * @param modules The module identifiers
+     * @return The permission bits
+     * @throws OXException
+     */
+    private static int getRequiredPermissionBits(AuthenticationMode authentication, Collection<Integer> modules) throws OXException {
         Set<Permission> perms = new HashSet<Permission>(8);
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        if (AuthenticationMode.GUEST_PASSWORD == getAuthenticationMode(guest)) {
+        if (AuthenticationMode.GUEST_PASSWORD == authentication) {
             perms.add(Permission.EDIT_PASSWORD);
         }
-        for (Share share : shares) {
-            if (null != share.getTarget()) {
-                addModulePermissions(perms, share.getTarget().getModule());
-            }
+        for (Integer module : modules) {
+            addModulePermissions(perms, module.intValue());
         }
         return Permission.toBits(perms);
     }

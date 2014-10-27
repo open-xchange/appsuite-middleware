@@ -157,7 +157,7 @@ public class DefaultShareService implements ShareService {
             List<Share> sharesToStore = new ArrayList<Share>(targets.size() * recipients.size());
             User sharingUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), session.getUserId(), context);
             for (ShareRecipient recipient : recipients) {
-                int permissionBits = ShareTool.getUserPermissionBitsForTargets(recipient, targets);
+                int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient);
                 List<Share> sharesForGuest = new ArrayList<Share>(targets.size());
                 for (ShareTarget target : targets) {

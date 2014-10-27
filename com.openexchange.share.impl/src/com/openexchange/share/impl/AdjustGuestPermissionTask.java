@@ -50,7 +50,7 @@
 package com.openexchange.share.impl;
 
 import static com.openexchange.osgi.Tools.requireService;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,6 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -127,8 +126,9 @@ public class AdjustGuestPermissionTask implements Callable<Void> {
         Context context = contextService.getContext(contextId);
         User guest = userService.getUser(connectionHelper.getConnection(), guestId, context);
         UserPermissionBits userPermissionBits = userPermissionService.getUserPermissionBits(connectionHelper.getConnection(), guestId, context);
-        List<Share> shares = shareStorage.loadShares(contextId, guestId, connectionHelper.getParameters());
-        int permissionBits = ShareTool.getRequiredPermissionBits(guest, shares);
+        shareStorage.loadShares(contextId, guestId, connectionHelper.getParameters());
+        Set<Integer> modules = shareStorage.getSharedModules(contextId, guestId, connectionHelper.getParameters());
+        int permissionBits = ShareTool.getRequiredPermissionBits(guest, modules);
         if (userPermissionBits.getPermissionBits() != permissionBits) {
             /*
              * update permission bits
