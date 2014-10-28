@@ -77,6 +77,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -87,7 +88,6 @@ import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.filter.UserCensorship;
 import com.openexchange.user.json.mapping.UserMapper;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link SearchAction} - Maps the action to a <tt>search</tt> action.
@@ -112,8 +112,8 @@ public final class SearchAction extends AbstractUserAction {
     /**
      * Initializes a new {@link SearchAction}.
      */
-    public SearchAction() {
-        super();
+    public SearchAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -185,10 +185,10 @@ public final class SearchAction extends AbstractUserAction {
     	 */
     	Date lastModified = new Date(0);
     	final List<UserContact> userContacts = new ArrayList<UserContact>();
-        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class);
+        final ContactService contactService = services.getService(ContactService.class);
         final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns,
         		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);
-        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        final UserService userService = services.getService(UserService.class);
         UserField[] userFields = UserMapper.getInstance().getFields(columns);
         boolean needsUserData = null != userFields && 0 < userFields.length;
         UserCensorship censorship = needsUserData ? getUserCensorship(session) : null;

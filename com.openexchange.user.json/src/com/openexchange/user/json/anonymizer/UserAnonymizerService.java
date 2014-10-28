@@ -93,6 +93,8 @@ public class UserAnonymizerService implements AnonymizerService<User> {
 
     private static final class AnonymizingUser implements User {
 
+        private static final long serialVersionUID = -3389011471434047151L;
+
         private final User delegate;
         private final String displayName;
 

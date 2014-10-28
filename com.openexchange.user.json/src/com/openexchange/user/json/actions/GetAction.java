@@ -62,10 +62,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.UserContact;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link GetAction} - Maps the action to a <tt>get</tt> action.
@@ -87,8 +87,8 @@ public final class GetAction extends AbstractUserAction {
     /**
      * Initializes a new {@link GetAction}.
      */
-    public GetAction() {
-        super();
+    public GetAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -113,17 +113,17 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Obtain user from user service
          */
-        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        final UserService userService = services.getService(UserService.class);
         final User user = userService.getUser(userId, session.getContext());
         /*
          * Obtain user's contact
          */
         Contact contact = null;
         if (false == user.isGuest()) {
-            ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+            ContactService contactService = services.getService(ContactService.class);
             contact = contactService.getUser(session, userId, contactFields);
         } else {
-            ContactUserStorage contactUserStorage = ServiceRegistry.getInstance().getService(ContactUserStorage.class, true);
+            ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
             contact = contactUserStorage.getGuestContact(session.getContextId(), userId, contactFields);
         }
         if (contact.getInternalUserId() != user.getId() || user.getContactId() != contact.getObjectID()) {

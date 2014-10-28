@@ -72,12 +72,12 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.UserContact;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link ListAction} - Maps the action to a <tt>list</tt> action.
@@ -100,8 +100,8 @@ public final class ListAction extends AbstractUserAction {
     /**
      * Initializes a new {@link ListAction}.
      */
-    public ListAction() {
-        super();
+    public ListAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -119,7 +119,7 @@ public final class ListAction extends AbstractUserAction {
          */
         final TIntObjectMap<Contact> contacts;
         {
-            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+            final ContactService contactService = services.getService(ContactService.class);
             SearchIterator<Contact> searchIterator = null;
             try {
                 searchIterator = contactService.getUsers(session, userIDs, ContactMapper.getInstance().getFields(columnIDs, ContactField.LAST_MODIFIED, ContactField.INTERNAL_USERID, ContactField.EMAIL1, ContactField.DISPLAY_NAME));
@@ -130,7 +130,7 @@ public final class ListAction extends AbstractUserAction {
                     int internalUserId = contact.getInternalUserId();
                     if (internalUserId <= 0) {
                         if (null == userService) {
-                            userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+                            userService = services.getService(UserService.class);
                         }
                         final User user = getUserByContact(session, userService, contact);
                         if (null != user) {
@@ -201,7 +201,7 @@ public final class ListAction extends AbstractUserAction {
     }
 
     private User[] getUsers(final ServerSession session, final int[] userIDs, final List<OXException> warnings) throws OXException {
-        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        final UserService userService = services.getService(UserService.class);
         try {
             return userService.getUser(session.getContext(), userIDs);
         } catch (final OXException e) {

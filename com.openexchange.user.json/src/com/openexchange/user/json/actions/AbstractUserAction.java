@@ -68,6 +68,7 @@ import com.openexchange.groupware.i18n.Users;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -84,11 +85,16 @@ import com.openexchange.user.json.filter.UserCensorship;
 public abstract class AbstractUserAction implements AJAXActionService {
 
     private static final String ALL = "*";
+
+    /** The service look-up */
+    protected final ServiceLookup services;
+
     /**
      * Initializes a new {@link AbstractUserAction}.
      */
-    protected AbstractUserAction() {
+    protected AbstractUserAction(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /**

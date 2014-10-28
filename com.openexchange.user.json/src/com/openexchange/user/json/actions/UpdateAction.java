@@ -79,6 +79,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -87,7 +88,6 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.mapping.UserMapper;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link UpdateAction} - Maps the action to an <tt>update</tt> action.
@@ -111,8 +111,8 @@ public final class UpdateAction extends AbstractUserAction {
     /**
      * Initializes a new {@link UpdateAction}.
      */
-    public UpdateAction() {
-        super();
+    public UpdateAction(ServiceLookup services) {
+        super(services);
     }
 
     private static UserField[] USER_FIELDS = { UserField.ID, UserField.LOCALE, UserField.TIME_ZONE };
@@ -130,7 +130,7 @@ public final class UpdateAction extends AbstractUserAction {
             /*
              * Get user service to get contact ID
              */
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+            final UserService userService = services.getService(UserService.class);
             final User storageUser = userService.getUser(id, session.getContext());
             final int contactId = storageUser.getContactId();
             /*
@@ -158,7 +158,7 @@ public final class UpdateAction extends AbstractUserAction {
              */
             final ContactService contactService;
             if (!storageUser.isGuest()) {
-                contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+                contactService = services.getService(ContactService.class);
                 if (parsedUserContact.containsDisplayName()) {
                     final String displayName = parsedUserContact.getDisplayName();
                     if (null != displayName) {
@@ -175,7 +175,7 @@ public final class UpdateAction extends AbstractUserAction {
                 }
                 contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), parsedUserContact, clientLastModified);
             } else {
-                ContactUserStorage contactUserStorage = ServiceRegistry.getInstance().getService(ContactUserStorage.class);
+                ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
                 contactUserStorage.updateGuestContact(session.getContextId(), session.getUserId(), contactId, parsedUserContact,
                     parsedUserContact.getLastModified(), null);
             }
@@ -198,7 +198,7 @@ public final class UpdateAction extends AbstractUserAction {
              */
             if (parsedUserContact.containsDisplayName() && null != parsedUserContact.getDisplayName()) {
                 // Update folder name if display-name was changed
-                final DatabaseService service = com.openexchange.user.json.services.ServiceRegistry.getInstance().getService(DatabaseService.class);
+                final DatabaseService service = services.getService(DatabaseService.class);
                 if (null != service) {
                     final int contextId = session.getContextId();
                     Connection con = null;

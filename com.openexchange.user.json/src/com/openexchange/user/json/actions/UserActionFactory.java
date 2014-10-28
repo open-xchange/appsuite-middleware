@@ -53,11 +53,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -68,34 +68,18 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @Module(name = "user", description = "Provides access to user information.")
 public final class UserActionFactory implements AJAXActionServiceFactory {
 
-    /**
-     * The singleton instance.
-     */
-    private static final UserActionFactory SINGLETON = new UserActionFactory();
-
-    /**
-     * Gets the {@link UserActionFactory factory} instance.
-     *
-     * @return The {@link UserActionFactory factory} instance.
-     */
-    public static final UserActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    /*-
-     * Member section
-     */
-
-    /**
-     * The map to store actions.
-     */
+    /** The map to store actions. */
     private final Map<String, AJAXActionService> actions;
+
+    /** The service look-up */
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link UserActionFactory}.
      */
-    private UserActionFactory() {
+    public UserActionFactory(ServiceLookup services) {
         super();
+        this.services = services;
         actions = initActions();
     }
 
@@ -123,13 +107,13 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
      */
     private Map<String, AJAXActionService> initActions() {
         final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(12);
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(AllAction.ACTION, new AllAction());
-        tmp.put(SearchAction.ACTION, new SearchAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        tmp.put(GetAttributeAction.ACTION, new GetAttributeAction());
-        tmp.put(SetAttributeAction.ACTION, new SetAttributeAction());
+        tmp.put(GetAction.ACTION, new GetAction(services));
+        tmp.put(ListAction.ACTION, new ListAction(services));
+        tmp.put(AllAction.ACTION, new AllAction(services));
+        tmp.put(SearchAction.ACTION, new SearchAction(services));
+        tmp.put(UpdateAction.ACTION, new UpdateAction(services));
+        tmp.put(GetAttributeAction.ACTION, new GetAttributeAction(services));
+        tmp.put(SetAttributeAction.ACTION, new SetAttributeAction(services));
         return Collections.unmodifiableMap(tmp);
     }
 

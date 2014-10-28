@@ -83,9 +83,36 @@ public class ContactAnonymizerService implements AnonymizerService<Contact> {
         }
 
         // A user contact
+        int userId = entity.getInternalUserId();
+        entity.setDisplayName(new StringBuilder("User ").append(userId).toString());
+        entity.setGivenName(Integer.toString(userId));
+        entity.setSurName("User");
 
+        entity.setEmail1("");
+        entity.setEmail2("");
+        entity.setEmail3("");
 
-        return null;
+        entity.setStateBusiness(null);
+        entity.setStateHome(null);
+        entity.setStateOther(null);
+
+        entity.setStreetBusiness(null);
+        entity.setStreetHome(null);
+        entity.setStreetOther(null);
+
+        entity.setAddressBusiness(null);
+        entity.setAddressHome(null);
+        entity.setAddressOther(null);
+
+        entity.setCityBusiness(null);
+        entity.setCityHome(null);
+        entity.setCityOther(null);
+
+        entity.setPostalCodeBusiness(null);
+        entity.setPostalCodeHome(null);
+        entity.setPostalCodeOther(null);
+
+        return entity;
     }
 
 }
