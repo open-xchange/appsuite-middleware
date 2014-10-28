@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contacts.json.anonymizer;
+package com.openexchange.user.json.anonymizer;
 
 import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.anonymizer.Module;
@@ -57,32 +57,35 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link ContactAnonymizer} - The anonymizer for contacts.
+ * {@link ContactAnonymizerService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class ContactAnonymizer implements AnonymizerService<Contact> {
+public class ContactAnonymizerService implements AnonymizerService<Contact> {
 
     /**
-     * Initializes a new {@link ContactAnonymizer}.
+     * Initializes a new {@link ContactAnonymizerService}.
      */
-    public ContactAnonymizer() {
+    public ContactAnonymizerService() {
         super();
     }
 
     @Override
     public Module getModule() {
-        return Module.CONTACTS;
+        return Module.CONTACT;
     }
 
     @Override
     public Contact anonymize(Contact entity, Session session) throws OXException {
         if (null == entity) {
-            return entity;
+            return null;
         }
-        // TODO:
-        return entity;
+
+        // A user contact
+
+
+        return null;
     }
 
 }

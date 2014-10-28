@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.osgi;
 
+import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.contact.ContactService;
@@ -60,6 +61,8 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContactResultConverter;
 import com.openexchange.user.json.actions.UserActionFactory;
+import com.openexchange.user.json.anonymizer.ContactAnonymizerService;
+import com.openexchange.user.json.anonymizer.UserAnonymizerService;
 import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
@@ -90,14 +93,12 @@ public class UserJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         try {
             PREFIX.set(getService(DispatcherPrefixService.class));
-            /*
-             * Register user multiple service
-             */
+
             registerModule(UserActionFactory.getInstance(), Constants.MODULE);
-            /*
-             * Register result converter
-             */
             registerService(ResultConverter.class, new UserContactResultConverter());
+            registerService(AnonymizerService.class.getName(), new UserAnonymizerService());
+            registerService(AnonymizerService.class.getName(), new ContactAnonymizerService());
+
             /*
              * User service tracker
              */

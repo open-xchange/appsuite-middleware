@@ -59,8 +59,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.anonymizer.Anonymizers;
-import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -109,23 +107,11 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
         TaskWriter taskwriter = new TaskWriter(timeZone).setSession(request.getSession());
 
         // Optional anonymization
-        ServerSession session = request.getSession();
-        if (Anonymizers.isGuest(session)) {
-            for (Task task : tasks) {
-                try {
-                    Task anonymized = Anonymizers.optAnonymize(task, Module.TASK, session);
-                    taskwriter.writeArray(anonymized, columns, jArray);
-                } catch (JSONException e) {
-                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-                }
-            }
-        } else {
-            for (Task task : tasks) {
-                try {
-                    taskwriter.writeArray(task, columns, jArray);
-                } catch (JSONException e) {
-                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-                }
+        for (Task task : tasks) {
+            try {
+                taskwriter.writeArray(task, columns, jArray);
+            } catch (JSONException e) {
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
 
@@ -148,20 +134,8 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
             }
         }
 
-        // Optional anonymization
-        ServerSession session = request.getSession();
-        if (Anonymizers.isGuest(session)) {
-            List<Task> anonymizedList = new LinkedList<Task>();
-
-            for (Task task : taskList) {
-                anonymizedList.add(Anonymizers.optAnonymize(task, Module.TASK, session));
-            }
-
-            taskList = anonymizedList;
-        }
-
         // Create JSON array
-        TaskWriter taskwriter = new TaskWriter(timeZone).setSession(session);
+        TaskWriter taskwriter = new TaskWriter(timeZone).setSession(request.getSession());
         JSONArray jArray = new JSONArray(taskList.size());
         for (Task task : taskList) {
             try {
@@ -221,14 +195,9 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
 
     private void convertTask(Task task, AJAXRequestData request, AJAXRequestResult result, TimeZone timeZone) throws OXException {
         try {
-            ServerSession session = request.getSession();
-            TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
+            TaskWriter taskWriter = new TaskWriter(timeZone).setSession(request.getSession());
             JSONObject jTask = new JSONObject(16);
-
-            // Optional anonymization
-            Task toOutput = Anonymizers.optAnonymizeIfGuest(task, Module.TASK, session);
-
-            taskWriter.writeTask(toOutput, jTask);
+            taskWriter.writeTask(task, jTask);
             result.setResultObject(jTask, OUTPUT_FORMAT);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);

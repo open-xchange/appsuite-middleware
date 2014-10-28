@@ -59,25 +59,21 @@ import com.openexchange.java.Strings;
 public enum Module {
 
     /**
-     * The tasks module
+     * The user contact module
      */
-    TASK("tasks"),
+    CONTACT("contact"),
     /**
-     * The calendar module
+     * The user module
      */
-    CALENDAR("calendar"),
+    USER("user"),
     /**
-     * The contacts module
+     * The group module
      */
-    CONTACTS("contacts"),
+    GROUP("group"),
     /**
-     * The mail module
+     * The resource module
      */
-    MAIL("mail"),
-    /**
-     * The drive/files module
-     */
-    DRIVE("drive"),
+    RESOURCE("resource"),
     ;
 
     private static final Module[] VALUES = Module.values();

@@ -52,6 +52,7 @@ package com.openexchange.ajax.anonymizer.osgi;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.anonymizer.AnonymizerRegistryService;
@@ -67,20 +68,30 @@ import com.openexchange.exception.OXException;
  */
 public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerService<?>, AnonymizerService<?>> implements AnonymizerRegistryService {
 
-    private final ConcurrentMap<Module, AnonymizerService<?>> anonymizers;
+    private final ConcurrentMap<Module, AnonymizerChain<?>> anonymizers;
 
     /**
      * Initializes a new {@link OSGiAnonymizerRegistry}.
      */
     public OSGiAnonymizerRegistry(BundleContext context) {
         super(context, AnonymizerService.class.getName(), null);
-        anonymizers = new ConcurrentHashMap<Module, AnonymizerService<?>>(8);
+        anonymizers = new ConcurrentHashMap<Module, AnonymizerChain<?>>(8);
     }
 
     @Override
     public AnonymizerService<?> addingService(ServiceReference<AnonymizerService<?>> reference) {
-        AnonymizerService<?> service = context.getService(reference);
-        if (null == anonymizers.putIfAbsent(service.getModule(), service)) {
+        AnonymizerService<Object> service = (AnonymizerService<Object>) context.getService(reference);
+
+        AnonymizerChain<Object> chain = (AnonymizerChain<Object>) anonymizers.get(service.getModule());
+        if (null == chain) {
+            AnonymizerChain<Object> newChain = new AnonymizerChain<Object>(service.getModule());
+            chain = (AnonymizerChain<Object>) anonymizers.putIfAbsent(service.getModule(), newChain);
+            if (null == chain) {
+                chain = newChain;
+            }
+        }
+
+        if (chain.addAnonymizer(service, getRanking(reference, 0))) {
             return service;
         }
 
@@ -90,18 +101,47 @@ public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerServi
 
     @Override
     public void removedService(ServiceReference<AnonymizerService<?>> reference, AnonymizerService<?> service) {
-        anonymizers.remove(service.getModule());
+        AnonymizerChain<Object> chain = (AnonymizerChain<Object>) anonymizers.get(service.getModule());
+        if (null != chain) {
+            chain.removeAnonymizer((AnonymizerService<Object>) service, getRanking(reference, 0));
+        }
         context.ungetService(reference);
     }
 
     @Override
-    public AnonymizerService<?> getAnonymizerFor(String name) throws OXException {
+    public <E> AnonymizerService<E> getAnonymizerFor(String name) throws OXException {
         return getAnonymizerFor(Module.moduleFor(name));
     }
 
     @Override
-    public AnonymizerService<?> getAnonymizerFor(Module module) throws OXException {
-        return null == module ? null : anonymizers.get(module);
+    public <E> AnonymizerService<E> getAnonymizerFor(Module module) throws OXException {
+        return (null == module ? null : (AnonymizerService<E>) anonymizers.get(module));
+    }
+
+    // -------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the service ranking by look-up of <code>"service.ranking"</code> property.
+     * <p>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param reference The service reference providing properties Dictionary object of the service
+     * @param defaultRanking The default ranking if {@link Constants#SERVICE_RANKING} property is absent
+     * @return The ranking or <code>0</code> (zero) if absent
+     */
+    private static <S> int getRanking(ServiceReference<S> reference, int defaultRanking) {
+        int ranking = defaultRanking;
+        {
+            Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
+            if (null != oRanking) {
+                try {
+                    ranking = Integer.parseInt(oRanking.toString().trim());
+                } catch (NumberFormatException e) {
+                    ranking = defaultRanking;
+                }
+            }
+        }
+        return ranking;
     }
 
 }

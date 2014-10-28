@@ -7,7 +7,6 @@ Bundle-Activator: com.openexchange.tasks.json.osgi.TaskJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
- com.openexchange.ajax.anonymizer,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.parser,
  com.openexchange.ajax.requesthandler,
