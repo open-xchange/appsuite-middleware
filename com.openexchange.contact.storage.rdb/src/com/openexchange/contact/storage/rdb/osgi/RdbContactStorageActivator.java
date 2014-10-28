@@ -49,12 +49,9 @@
 
 package com.openexchange.contact.storage.rdb.osgi;
 
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.contact.storage.rdb.internal.Translator;
 import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
 import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
 import com.openexchange.context.ContextService;
@@ -62,6 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaService;
 
@@ -98,27 +96,8 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
                 new AddFilenameColumnTask(dbService),
                 new CorrectNumberOfImagesTask(dbService)
             ));
-            track(I18nService.class, new ServiceTrackerCustomizer<I18nService, I18nService>() {
-
-                @Override
-                public I18nService addingService(ServiceReference<I18nService> arg0) {
-                    I18nService service = context.getService(arg0);
-                    Translator.getInstance().addService(service);
-                    return service;
-                }
-
-                @Override
-                public void modifiedService(ServiceReference<I18nService> arg0, I18nService arg1) {
-                    // no
-                }
-
-                @Override
-                public void removedService(ServiceReference<I18nService> arg0, I18nService arg1) {
-                    I18nService i18nService = arg1;
-                    Translator.getInstance().removeService(i18nService);
-                    context.ungetService(arg0);
-                }
-            });
+            track(I18nService.class, new I18nTracker(context));
+            track(ManagementService.class, new ManagementRegisterer(context));
             openTrackers();
         } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage.rdb\"", e);

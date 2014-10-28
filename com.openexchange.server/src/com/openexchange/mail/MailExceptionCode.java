@@ -654,4 +654,28 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
         return UploadUtility.getSize(size, precision, longName, realSize);
     }
 
+    /**
+     * Checks if given {@link OXException} instance contains a <tt>java.net.SocketException</tt> in its cause chain.
+     *
+     * @param e The <tt>OXException</tt> instance to check
+     * @return <code>true</code> if <tt>OXException</tt> instance contains a <tt>java.net.SocketException</tt> in its cause chain; otherwise <code>false</code>
+     */
+    public static boolean containsSocketError(OXException e) {
+        if (null == e) {
+            return false;
+        }
+        return containsSocketError0(e.getCause());
+    }
+
+    private static boolean containsSocketError0(Throwable t) {
+        if (null == t) {
+            return false;
+        }
+        if ((t instanceof com.sun.mail.util.MailConnectException) || (t instanceof java.net.SocketException)) {
+            // Whatever... Bind error, no route to host, connect error, connection reset, ...
+            return true;
+        }
+        return containsSocketError0(t.getCause());
+    }
+
 }
