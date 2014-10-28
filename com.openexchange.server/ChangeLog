@@ -1,3 +1,7 @@
+* 2014-10-23 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35168: Consider '#' as literals and not as comments when inside of double quotes
+
 * 2014-10-23 - marcus.klein@open-xchange.com
 
  - Fix for bug 35129: Do not throw any misleading log messages if client comes to HTTP auth URL without Authorization header.
@@ -26,6 +30,7 @@
 
 * 2014-10-06 - thorben.betten@open-xchange.com
 
+ - Fix for bug 34704: Parse the escaped double quotes correctly and convert all octet string literals to their ASCII/Unicode representations
  - Fix for bug 34706: Use timeout-aware operations to distribute either change of local IP address, client identifier or hash string through
                       cluster to prevent the system from increasing number of stalled threads
  - Fix for bug 34765: Use secure value insertion through PreparedStatement
@@ -62,6 +67,10 @@
 * 2014-09-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request
+
+* 2014-09-09 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 34322: Consider the 'OK' keyword in Sieve comments
 
 * 2014-09-02 - thorben.betten@open-xchange.com
 

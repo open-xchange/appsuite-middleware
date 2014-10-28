@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define        ox_release 26
+%define        ox_release 27
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/bundles/*
 
 %changelog
+* Fri Oct 24 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-11-04
 * Fri Oct 24 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-10-22
 * Fri Oct 10 2014 Carsten Hoeger <choeger@open-xchange.com>
