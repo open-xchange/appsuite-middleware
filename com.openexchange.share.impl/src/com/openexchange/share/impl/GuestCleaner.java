@@ -53,10 +53,12 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -180,10 +182,18 @@ public class GuestCleaner {
 
     private void deleteGuest(ConnectionHelper connectionHelper, Context context, int guestID) throws OXException {
         /*
-         * no shares remaining, delete user permission bits & user
+         * delete user permission bits
          */
         services.getService(UserPermissionService.class).deleteUserPermissionBits(
             connectionHelper.getConnection(), context, guestID);
+        /*
+         * delete user contact
+         */
+        services.getService(ContactUserStorage.class).deleteGuestContact(
+            context.getContextId(), guestID, new Date(), connectionHelper.getConnection());
+        /*
+         * delete user
+         */
         try {
             services.getService(UserService.class).deleteUser(connectionHelper.getConnection(), context, guestID);
         } catch (OXException e) {
