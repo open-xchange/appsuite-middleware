@@ -67,6 +67,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleHandler;
 import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.groupware.ShareTargetDiff;
+import com.openexchange.share.groupware.TargetHandler;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -105,6 +106,15 @@ public abstract class AbstractPerformer<T> {
         }
 
         return provider.getHandler(module);
+    }
+
+    protected TargetHandler createTargetHandler() throws OXException {
+        ModuleHandlerProvider provider = services.getService(ModuleHandlerProvider.class);
+        if (provider == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+        }
+
+        return provider.createHandler();
     }
 
     /**

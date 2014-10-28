@@ -52,7 +52,6 @@ package com.openexchange.share.json.actions;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,12 +60,13 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.TargetHandler;
 import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -98,9 +98,9 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
     @Override
     protected List<GuestShare> perform() throws OXException {
         Map<Integer, ShareRecipient> recipientsByIndex = new HashMap<Integer, ShareRecipient>();
-        int i = 0;
+        int c = 0;
         for (ShareRecipient recipient : recipients) {
-            recipientsByIndex.put(i++, recipient);
+            recipientsByIndex.put(c++, recipient);
         }
 
         Map<Integer, ShareRecipient> internalRecipients = filterRecipients(recipientsByIndex, RecipientType.USER, RecipientType.GROUP);
@@ -120,9 +120,20 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
                 permissions.add(new TargetPermission(internal.getEntity(), internal.isGroup(), internal.getBits()));
             }
 
+            TargetHandler targetHandler = createTargetHandler();
+            targetHandler.start(session, writeCon);
+            targetHandler.prefetch(targets);
+            for (ShareTarget target : targets) {
+                TargetProxy proxy = targetHandler.get(target);
+                target.setOwnedBy(proxy.getOwner());
+            }
+
             List<GuestShare> createdShares;
             if (externalRecipients.isEmpty()) {
                 createdShares = new ArrayList<GuestShare>(recipients.size());
+                for (int i = 0; i < recipients.size(); i++) {
+                    createdShares.add(null);
+                }
             } else {
                 createdShares = addTargets(externalRecipients, permissions);
             }
@@ -130,11 +141,14 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
             /*
              * adjust folder & object permissions of share targets
              */
-            Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> distinguishedTargets = distinguishTargets(targets);
-            Map<Integer, List<ShareTarget>> folders = distinguishedTargets.getFirst();
-            Map<Integer, List<ShareTarget>> objects = distinguishedTargets.getSecond();
-            updateFolders(Collections.<Integer, List<ShareTarget>>emptyMap(), folders, permissions, session, writeCon);
-            updateObjects(Collections.<Integer, List<ShareTarget>>emptyMap(), objects, permissions, session, writeCon);
+            for (ShareTarget target : targets) {
+                TargetProxy proxy = targetHandler.get(target);
+                proxy.applyPermissions(permissions);
+            }
+
+            targetHandler.update();
+            targetHandler.close();
+
             writeCon.commit();
 
             return createdShares;
@@ -156,18 +170,21 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
          * create shares & corresponding guest user entities for external recipients first
          */
         List<Integer> indices = new ArrayList<Integer>(externalRecipients.size());
-        List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(externalRecipients.size());
+        List<ShareRecipient> shareRecipients = new ArrayList<ShareRecipient>(externalRecipients.size());
         for (Entry<Integer, ShareRecipient> entry : externalRecipients.entrySet()) {
             indices.add(entry.getKey());
-            recipients.add(entry.getValue());
+            shareRecipients.add(entry.getValue());
         }
 
-        List<GuestShare> shares = getShareService().addTargets(session, targets, recipients);
+        List<GuestShare> shares = getShareService().addTargets(session, targets, shareRecipients);
         List<GuestShare> resultList = new ArrayList<GuestShare>(recipients.size());
+        for (int i = 0; i < recipients.size(); i++) {
+            resultList.add(null);
+        }
         for (int j = 0; j < shares.size(); j++) {
             GuestShare share = shares.get(j);
             Integer index = indices.get(j);
-            permissions.add(new TargetPermission(share.getGuestID(), false, recipients.get(index).getBits()));
+            permissions.add(new TargetPermission(share.getGuestID(), false, shareRecipients.get(j).getBits()));
             resultList.set(index, share);
         }
         return resultList;

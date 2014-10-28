@@ -207,7 +207,7 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-        ModuleHandlerProviderImpl moduleHandlerProvider = new ModuleHandlerProviderImpl();
+        ModuleHandlerProviderImpl moduleHandlerProvider = new ModuleHandlerProviderImpl(this);
         moduleHandlerProvider.put(new FileStorageHandler(this));
         moduleHandlerProvider.put(newFolderUpdater(Module.CALENDAR));
         moduleHandlerProvider.put(newFolderUpdater(Module.CONTACTS));

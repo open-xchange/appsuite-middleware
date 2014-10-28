@@ -49,53 +49,24 @@
 
 package com.openexchange.share.impl.groupware;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.groupware.ModuleHandler;
-import com.openexchange.share.groupware.ModuleHandlerProvider;
-import com.openexchange.share.groupware.TargetHandler;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.TargetProxy;
 
 
 /**
- * {@link ModuleHandlerProviderImpl}
+ * {@link ModuleTargetHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ModuleHandlerProviderImpl implements ModuleHandlerProvider {
+public interface ModuleTargetHandler {
 
-    private final Map<Integer, ModuleHandler> updaters = new HashMap<Integer, ModuleHandler>();
+    List<TargetProxy> loadTargets(List<ShareTarget> list, HandlerParameters parameters) throws OXException;
 
-    private final ServiceLookup services;
+    boolean canShare(boolean canShareInFolder, TargetProxy proxy, HandlerParameters parameters);
 
-
-
-    public ModuleHandlerProviderImpl(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    @Override
-    public ModuleHandler getHandler(int module) throws OXException {
-        ModuleHandler handler = updaters.get(module);
-        if (handler == null) {
-            Module m = Module.getForFolderConstant(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
-        }
-        return handler;
-    }
-
-    public void put(ModuleHandler updater) {
-        updaters.put(updater.getModule(), updater);
-    }
-
-    @Override
-    public TargetHandler createHandler() throws OXException {
-        return new UniversalTargetHandler(services);
-    }
+    void updateObjects(List<TargetProxy> modified, HandlerParameters parameters) throws OXException;
 
 }

@@ -94,36 +94,40 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     NO_EDIT_PERMISSIONS("User %1$d has no delete permissions for share \"%2$s\" in context %3$d.",
         ShareExceptionMessages.NO_EDIT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 8),
 
+    /** You don't have sufficient permissions to share folder or item \"%2$s\". || User %1$d has no share permissions for folder or item \"%2$s\" in context %3$d. */
+    NO_SHARE_PERMISSIONS(" User %1$d has no share permissions for folder or item \"%2$s\" in context %3$d.",
+        ShareExceptionMessages.NO_SHARE_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 9),
+
     /** An I/O error occurred: %1$s */
-    IO_ERROR("An I/O error occurred: %1$s", null, Category.CATEGORY_ERROR, 9),
+    IO_ERROR("An I/O error occurred: %1$s", null, Category.CATEGORY_ERROR, 10),
 
     /**
      * An SQL error occurred: %1$s
      */
-    SQL_ERROR("An SQL error occurred: %1$s", null, Category.CATEGORY_ERROR, 10),
+    SQL_ERROR("An SQL error occurred: %1$s", null, Category.CATEGORY_ERROR, 11),
 
     /**
      * Module %1$s does not support sharing.
      */
-    SHARING_NOT_SUPPORTED(ShareExceptionMessages.SHARING_NOT_SUPPORTED, ShareExceptionMessages.SHARING_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 11),
+    SHARING_NOT_SUPPORTED(ShareExceptionMessages.SHARING_NOT_SUPPORTED, ShareExceptionMessages.SHARING_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 12),
 
     /**
      * Module %1$s does not support sharing of items.
      */
-    SHARING_ITEMS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 12),
+    SHARING_ITEMS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_ITEMS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 13),
 
     /**
      * Module %1$s does not support sharing of folders.
      */
-    SHARING_FOLDERS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 13),
+    SHARING_FOLDERS_NOT_SUPPORTED(ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, ShareExceptionMessages.SHARING_FOLDERS_NOT_SUPPORTED, Category.CATEGORY_USER_INPUT, 14),
 
     /**
      * User %1$d is not a guest user.
      */
-    UNKNOWN_GUEST("User %1$d is not a guest user.", null, CATEGORY_ERROR, 14),
+    UNKNOWN_GUEST("User %1$d is not a guest user.", null, CATEGORY_ERROR, 15),
 
     /** The token \"%1$s\" is invalid. */
-    INVALID_TOKEN("The token \"%1$s\" is invalid.", ShareExceptionMessages.INVALID_TOKEN_MSG, Category.CATEGORY_USER_INPUT, 15),
+    INVALID_TOKEN("The token \"%1$s\" is invalid.", ShareExceptionMessages.INVALID_TOKEN_MSG, Category.CATEGORY_USER_INPUT, 16),
 
     ;
 

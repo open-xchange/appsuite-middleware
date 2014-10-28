@@ -49,53 +49,81 @@
 
 package com.openexchange.share.impl.groupware;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.groupware.ModuleHandler;
-import com.openexchange.share.groupware.ModuleHandlerProvider;
-import com.openexchange.share.groupware.TargetHandler;
+import java.sql.Connection;
+import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link ModuleHandlerProviderImpl}
+ * {@link HandlerParameters}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @since v7.x.x
  */
-public class ModuleHandlerProviderImpl implements ModuleHandlerProvider {
+public class HandlerParameters {
 
-    private final Map<Integer, ModuleHandler> updaters = new HashMap<Integer, ModuleHandler>();
+    private Session session;
 
-    private final ServiceLookup services;
+    private Connection writeCon;
+
+    private FolderServiceDecorator folderServiceDecorator;
+
+    private Context context;
+
+    private User user;
 
 
-
-    public ModuleHandlerProviderImpl(ServiceLookup services) {
-        super();
-        this.services = services;
+    public Session getSession() {
+        return session;
     }
 
-    @Override
-    public ModuleHandler getHandler(int module) throws OXException {
-        ModuleHandler handler = updaters.get(module);
-        if (handler == null) {
-            Module m = Module.getForFolderConstant(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
-        }
-        return handler;
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 
-    public void put(ModuleHandler updater) {
-        updaters.put(updater.getModule(), updater);
+
+    public Connection getWriteCon() {
+        return writeCon;
     }
 
-    @Override
-    public TargetHandler createHandler() throws OXException {
-        return new UniversalTargetHandler(services);
+
+    public void setWriteCon(Connection writeCon) {
+        this.writeCon = writeCon;
     }
+
+
+    public FolderServiceDecorator getFolderServiceDecorator() {
+        return folderServiceDecorator;
+    }
+
+
+    public void setFolderServiceDecorator(FolderServiceDecorator folderServiceDecorator) {
+        this.folderServiceDecorator = folderServiceDecorator;
+    }
+
+
+    public Context getContext() {
+        return context;
+    }
+
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+
+    public User getUser() {
+        return user;
+    }
+
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+
 
 }

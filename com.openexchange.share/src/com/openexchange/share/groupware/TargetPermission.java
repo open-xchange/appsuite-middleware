@@ -58,21 +58,21 @@ package com.openexchange.share.groupware;
  */
 public class TargetPermission {
 
-    private final int guestId;
+    private final int entityId;
 
     private final boolean isGroup;
 
     private final int permissionBits;
 
-    public TargetPermission(int guestId, boolean isGroup, int permissionBits) {
+    public TargetPermission(int entityId, boolean isGroup, int permissionBits) {
         super();
-        this.guestId = guestId;
+        this.entityId = entityId;
         this.permissionBits = permissionBits;
         this.isGroup = isGroup;
     }
 
     public int getEntity() {
-        return guestId;
+        return entityId;
     }
 
     public int getBits() {
@@ -87,7 +87,7 @@ public class TargetPermission {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + guestId;
+        result = prime * result + entityId;
         result = prime * result + (isGroup ? 1231 : 1237);
         result = prime * result + permissionBits;
         return result;
@@ -102,7 +102,7 @@ public class TargetPermission {
         if (getClass() != obj.getClass())
             return false;
         TargetPermission other = (TargetPermission) obj;
-        if (guestId != other.guestId)
+        if (entityId != other.entityId)
             return false;
         if (isGroup != other.isGroup)
             return false;
@@ -113,7 +113,7 @@ public class TargetPermission {
 
     @Override
     public String toString() {
-        return "TargetPermission [guestId=" + guestId + ", isGroup=" + isGroup + ", permissionBits=" + permissionBits + "]";
+        return "TargetPermission [entityId=" + entityId + ", isGroup=" + isGroup + ", permissionBits=" + permissionBits + "]";
     }
 
 }

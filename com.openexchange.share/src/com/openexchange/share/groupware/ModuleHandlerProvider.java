@@ -62,4 +62,6 @@ public interface ModuleHandlerProvider {
 
     ModuleHandler getHandler(int module) throws OXException;
 
+    TargetHandler createHandler() throws OXException;
+
 }
