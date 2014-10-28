@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -92,8 +93,9 @@ public class DeleteAction extends AbstractShareAction {
             JSONArray jsonArray = (JSONArray) requestData.requireData();
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                //TODO: parse shares
-
+                int guest = jsonObject.getInt("guest");
+                ShareTarget target = ShareJSONParser.parseTarget(jsonObject);
+                shares.add(new Share(guest, target));
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

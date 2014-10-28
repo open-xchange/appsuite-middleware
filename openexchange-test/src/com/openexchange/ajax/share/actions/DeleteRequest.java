@@ -60,6 +60,7 @@ import com.openexchange.ajax.framework.CommonDeleteParser;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
+import com.openexchange.groupware.modules.Module;
 
 /**
  * {@link DeleteRequest}
@@ -146,7 +147,7 @@ public class DeleteRequest implements AJAXRequest<CommonDeleteResponse>{
         for (ParsedShare share : shares) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("guest", share.getGuest());
-            jsonObject.put("module", share.getTarget().getModule());
+            jsonObject.put("module", Module.getForFolderConstant(share.getTarget().getModule()).getName());
             jsonObject.put("folder", share.getTarget().getFolder());
             jsonObject.put("item", share.getTarget().getItem());
             jsonArray.put(jsonObject);
