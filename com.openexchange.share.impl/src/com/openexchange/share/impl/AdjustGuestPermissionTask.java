@@ -126,7 +126,6 @@ public class AdjustGuestPermissionTask implements Callable<Void> {
         Context context = contextService.getContext(contextId);
         User guest = userService.getUser(connectionHelper.getConnection(), guestId, context);
         UserPermissionBits userPermissionBits = userPermissionService.getUserPermissionBits(connectionHelper.getConnection(), guestId, context);
-        shareStorage.loadShares(contextId, guestId, connectionHelper.getParameters());
         Set<Integer> modules = shareStorage.getSharedModules(contextId, guestId, connectionHelper.getParameters());
         int permissionBits = ShareTool.getRequiredPermissionBits(guest, modules);
         if (userPermissionBits.getPermissionBits() != permissionBits) {
