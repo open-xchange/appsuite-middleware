@@ -78,6 +78,9 @@ public class TaskAnonymizer implements AnonymizerService<Task> {
 
     @Override
     public Task anonymize(Task entity, Session session) throws OXException {
+        if (null == entity) {
+            return entity;
+        }
         // TODO:
         return entity;
     }

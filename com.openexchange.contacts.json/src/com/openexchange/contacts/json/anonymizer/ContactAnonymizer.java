@@ -78,6 +78,9 @@ public class ContactAnonymizer implements AnonymizerService<Contact> {
 
     @Override
     public Contact anonymize(Contact entity, Session session) throws OXException {
+        if (null == entity) {
+            return entity;
+        }
         // TODO:
         return entity;
     }
