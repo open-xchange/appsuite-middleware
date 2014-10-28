@@ -49,10 +49,12 @@
 
 package com.openexchange.tasks.json.osgi;
 
+import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.tasks.json.TaskActionFactory;
+import com.openexchange.tasks.json.anonymizer.TaskAnonymizer;
 import com.openexchange.tasks.json.converters.TaskIcalResultConverter;
 import com.openexchange.tasks.json.converters.TaskResultConverter;
 import com.openexchange.user.UserService;
@@ -74,6 +76,7 @@ public class TaskJSONActivator extends AJAXModuleActivator {
         registerModule(new TaskActionFactory(this), "tasks");
         registerService(ResultConverter.class, new TaskResultConverter());
         registerService(ResultConverter.class, new TaskIcalResultConverter(this));
+        registerService(AnonymizerService.class.getName(), new TaskAnonymizer());
     }
 
 }
