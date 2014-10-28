@@ -278,13 +278,33 @@ public final class HTMLDetector {
      * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
      * @throws IOException If reading from stream fails
      */
-    public static boolean containsHTMLTags(final InputStream in, final boolean strict) throws IOException {
+    public static boolean containsHTMLTags(InputStream in, boolean strict) throws IOException {
+        return containsHTMLTags(in, strict, false);
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
+     * @param in The byte stream to check
+     * @param strict <code>true</code> for strict checking; otherwise <code>false</code>
+     * @param oneShot <code>true</code> to only examine the first 8K chunk read from stream; otherwise <code>false</code> for full examination
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     * @throws IOException If reading from stream fails
+     */
+    public static boolean containsHTMLTags(InputStream in, boolean strict, boolean oneShot) throws IOException {
+        if (null == in) {
+            return false;
+        }
         try {
-            final int buflen = 8192;
-            final byte[] buf = new byte[buflen];
+            int buflen = 8192;
+            byte[] buf = new byte[buflen];
+
             boolean found = false;
             for (int read; !found && (read = in.read(buf, 0, buflen)) > 0;) {
                 found = strict ? containsHTMLTags(buf, 0, read, "<br", "<p>") : containsHTMLTags(buf, 0, read);
+                if (oneShot) {
+                    return found;
+                }
             }
             return found;
         } finally {
