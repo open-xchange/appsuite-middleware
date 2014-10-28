@@ -51,6 +51,8 @@ GLOBIGNORE='*'
 
 %changelog
 * Fri Oct 24 2014 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2014-11-04
+* Fri Oct 24 2014 Karsten Will <karsten.will@open-xchange.com>
 Build for patch 2014-10-22
 * Fri Oct 17 2014 Karsten Will <karsten.will@open-xchange.com>
 Build for patch 2014-10-24
