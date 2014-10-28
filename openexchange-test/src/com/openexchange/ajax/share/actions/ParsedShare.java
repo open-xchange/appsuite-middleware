@@ -112,7 +112,7 @@ public class ParsedShare {
             switch (Enums.parse(RecipientType.class, jsonObject.getString("type"))) {
             case ANONYMOUS:
                 AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
-                anonymousRecipient.setPassword(jsonObject.optString("password"));
+                anonymousRecipient.setPassword(jsonObject.optString("password", null));
                 recipient = anonymousRecipient;
                 break;
             case GUEST:

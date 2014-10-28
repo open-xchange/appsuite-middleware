@@ -334,6 +334,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected static void checkShare(OCLGuestPermission expected, ParsedShare actual) {
         assertNotNull("No share", actual);
+
 //        assertEquals("Authentication mode wrong", expected.getAuthenticationMode(), actual.getAuthentication());
 //        assertEquals("Expiry date wrong", expected.getExpires(), actual.getExpires());
 //        if (AuthenticationMode.ANONYMOUS != expected.getAuthenticationMode()) {
