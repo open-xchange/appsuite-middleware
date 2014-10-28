@@ -140,10 +140,16 @@ public class GuestClient extends AJAXClient {
         if (null != shareResponse.getLoginType()) {
             loginResponse = login(shareResponse, password);
             getSession().setId(loginResponse.getSessionId());
-            JSONObject data = (JSONObject) loginResponse.getData();
-            module = data.has("module") ? data.getString("module") : null;
-            folder = data.has("folder") ? data.getString("folder") : null;
-            item = data.has("item") ? data.getString("item") : null;
+            if (false == loginResponse.hasError()) {
+                JSONObject data = (JSONObject) loginResponse.getData();
+                module = data.has("module") ? data.getString("module") : null;
+                folder = data.has("folder") ? data.getString("folder") : null;
+                item = data.has("item") ? data.getString("item") : null;
+            } else {
+                module = null;
+                folder = null;
+                item = null;
+            }
         } else {
             loginResponse = null;
             getSession().setId(shareResponse.getSessionID());
@@ -179,6 +185,10 @@ public class GuestClient extends AJAXClient {
 
     public ResolveShareResponse getShareResolveResponse() {
         return shareResponse;
+    }
+
+    public LoginResponse getLoginResponse() {
+        return loginResponse;
     }
 
     public String getModule() {

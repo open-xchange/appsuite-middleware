@@ -49,53 +49,38 @@
 
 package com.openexchange.ajax.share.tests;
 
-import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.UpdateRecipientRequest;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.AnonymousRecipient;
 
 /**
- * {@link CreateWithGuestPermissionTest}
+ * {@link AnonymousGuestPasswordTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CreateWithGuestPermissionTest extends ShareTest {
+public class AnonymousGuestPasswordTest extends ShareTest {
 
     /**
-     * Initializes a new {@link CreateWithGuestPermissionTest}.
+     * Initializes a new {@link AnonymousGuestPasswordTest}.
      *
      * @param name The test name
      */
-    public CreateWithGuestPermissionTest(String name) {
+    public AnonymousGuestPasswordTest(String name) {
         super(name);
     }
 
-    public void notestCreateSharedFolderRandomly() throws Exception {
-        testCreateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
-    }
-
-    public void testCreateSharedFolderExtensively() throws Exception {
-        for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
-                for (int module : TESTED_MODULES) {
-                    testCreateSharedFolder(api, module, guestPermission);
-                }
-            }
-        }
-    }
-
-    private void testCreateSharedFolder(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
-        testCreateSharedFolder(api, module, getDefaultFolder(module), guestPermission);
-    }
-
-    private void testCreateSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
+    public void testUpdatePasswordForAnonymousGuest() throws Exception {
+        OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         /*
          * create folder shared to guest user
          */
-        FolderObject folder = insertSharedFolder(api, module, parent, guestPermission);
+        int module = randomModule();
+        FolderObject folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), guestPermission);
         /*
          * check permissions
          */
@@ -113,12 +98,49 @@ public class CreateWithGuestPermissionTest extends ShareTest {
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
         checkShare(guestPermission, share);
+        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
+        assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
         /*
-         * check access to share
+         * update recipient, set a password for the anonymous guest
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
-        guestClient.checkShareModuleAvailable();
-        guestClient.checkShareAccessible(guestPermission);
+        AnonymousRecipient recipient = new AnonymousRecipient();
+        recipient.setPassword("secret");
+        recipient.setBits(Permissions.createPermissionBits(guestPermission.getFolderPermission(), guestPermission.getReadPermission(),
+            guestPermission.getWritePermission(), guestPermission.getDeletePermission(), guestPermission.isFolderAdmin()));
+        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
+        /*
+         * discover & check share
+         */
+        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        checkShare(guestPermission, share);
+        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
+        assertNotNull("Password not set", ((AnonymousRecipient) share.getRecipient()).getPassword());
+        assertEquals("Password wrong", recipient.getPassword(), ((AnonymousRecipient) share.getRecipient()).getPassword());
+        /*
+         * update recipient, change password for the anonymous guest
+         */
+        recipient.setPassword("geheim");
+        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
+        /*
+         * discover & check share
+         */
+        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        checkShare(guestPermission, share);
+        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
+        assertNotNull("Password not set", ((AnonymousRecipient) share.getRecipient()).getPassword());
+        assertEquals("Password wrong", recipient.getPassword(), ((AnonymousRecipient) share.getRecipient()).getPassword());
+        /*
+         * update recipient remove password for the anonymous guest
+         */
+        recipient.setPassword(null);
+        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
+        /*
+         * discover & check share
+         */
+        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        checkShare(guestPermission, share);
+        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
+        assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
     }
 
 }

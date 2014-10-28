@@ -69,6 +69,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -80,6 +81,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link PasswordChangeService} - Performs changing a user's password
@@ -157,13 +159,19 @@ public abstract class PasswordChangeService {
         if (authenticationService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());
         }
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+        if (null == userService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+        }
         try {
             /*
              * Loading user also verifies its existence
              */
             final Session session = event.getSession();
-            UserStorage.getStorageUser(session);
-            authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword()));
+            User user = userService.getUser(session.getUserId(), session.getContextId());
+            if (false == user.isGuest()) {
+                authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword()));
+            }
         } catch (final OXException e) {
             if ("LGI-0006".equals(e.getErrorCode())) {
                 /*

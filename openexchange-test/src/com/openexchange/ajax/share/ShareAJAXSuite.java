@@ -54,15 +54,14 @@ import junit.framework.TestSuite;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
 import com.openexchange.ajax.share.tests.AllTest;
+import com.openexchange.ajax.share.tests.AnonymousGuestPasswordTest;
 import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
 import com.openexchange.ajax.share.tests.DeleteTest;
 import com.openexchange.ajax.share.tests.ExpiredSharesTest;
-import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderTransactionTest;
-import com.openexchange.ajax.share.tests.NewTest;
+import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
-import com.openexchange.ajax.share.tests.GuestContactTest;
 
 /**
  * {@link ShareAJAXSuite}
@@ -87,9 +86,11 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(DeleteTest.class);
         tests.addTestSuite(FolderTransactionTest.class);
         tests.addTestSuite(AggregateSharesTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(FileStorageTransactionTest.class);
-        tests.addTestSuite(GuestContactTest.class);
+//        tests.addTestSuite(NewTest.class);
+//        tests.addTestSuite(FileStorageTransactionTest.class);
+//        tests.addTestSuite(GuestContactTest.class);
+        tests.addTestSuite(AnonymousGuestPasswordTest.class);
+        tests.addTestSuite(GuestPasswordTest.class);
         return tests;
     }
 

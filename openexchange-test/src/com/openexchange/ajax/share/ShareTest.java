@@ -96,7 +96,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
 
     protected static final int[] TESTED_MODULES = new int[] {
-        FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
+        FolderObject.CONTACT//, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
     };
 
     protected static final Random random = new Random();

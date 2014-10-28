@@ -50,32 +50,31 @@
 package com.openexchange.ajax.share.tests;
 
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
+import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.UpdateRecipientRequest;
-import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.recipient.AnonymousRecipient;
 
 /**
- * {@link UpdateAnonymousGuestPasswordTest}
+ * {@link GuestPasswordTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UpdateAnonymousGuestPasswordTest extends ShareTest {
+public class GuestPasswordTest extends ShareTest {
 
     /**
-     * Initializes a new {@link UpdateAnonymousGuestPasswordTest}.
+     * Initializes a new {@link GuestPasswordTest}.
      *
      * @param name The test name
      */
-    public UpdateAnonymousGuestPasswordTest(String name) {
+    public GuestPasswordTest(String name) {
         super(name);
     }
 
-    public void testUpdateAddPasswordForAnonymousGuest() throws Exception {
-        OCLGuestPermission guestPermission = createAnonymousGuestPermission();
+    public void testUpdatePasswordForAnonymousGuest() throws Exception {
+        OCLGuestPermission guestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
          * create folder shared to guest user
          */
@@ -98,49 +97,28 @@ public class UpdateAnonymousGuestPasswordTest extends ShareTest {
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
         checkShare(guestPermission, share);
-        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
-        assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
         /*
-         * update recipient, set a password for the anonymous guest
+         * check access to share
          */
-        AnonymousRecipient recipient = new AnonymousRecipient();
-        recipient.setPassword("secret");
-        recipient.setBits(Permissions.createPermissionBits(guestPermission.getFolderPermission(), guestPermission.getReadPermission(),
-            guestPermission.getWritePermission(), guestPermission.getDeletePermission(), guestPermission.isFolderAdmin()));
-        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
+        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        guestClient.checkShareModuleAvailable();
         /*
-         * discover & check share
+         * update password
          */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
-        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
-        assertNotNull("Password not set", ((AnonymousRecipient) share.getRecipient()).getPassword());
-        assertEquals("Password wrong", recipient.getPassword(), ((AnonymousRecipient) share.getRecipient()).getPassword());
+        String newPassword = "secret2";
+        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(newPassword, guestPermission.getPassword(), true);
+        guestClient.execute(updateRequest);
         /*
-         * update recipient, change password for the anonymous guest
+         * check if share link still accessible with old password
          */
-        recipient.setPassword("geheim");
-        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
+        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword(), false);
+        assertTrue("No errors during login with old password", revokedGuestClient.getLoginResponse().hasError());
+        assertNull("Got session ID from login with old password", revokedGuestClient.getLoginResponse().getSessionId());
         /*
-         * discover & check share
+         * check access to share with new password
          */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
-        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
-        assertNotNull("Password not set", ((AnonymousRecipient) share.getRecipient()).getPassword());
-        assertEquals("Password wrong", recipient.getPassword(), ((AnonymousRecipient) share.getRecipient()).getPassword());
-        /*
-         * update recipient remove password for the anonymous guest
-         */
-        recipient.setPassword(null);
-        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
-        /*
-         * discover & check share
-         */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
-        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
-        assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
+        guestClient = resolveShare(share, guestPermission.getEmailAddress(), newPassword);
+        guestClient.checkShareModuleAvailable();
     }
 
 }
