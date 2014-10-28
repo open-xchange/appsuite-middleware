@@ -363,7 +363,7 @@ public class DefaultShareService implements ShareService {
 //    }
 
 
-    @Override
+//    @Override
     public void updateShare(Session session, Share share, Date clientTimestamp) throws OXException {
 //        String token = share.getToken();
 //        if (Strings.isEmpty(token)) {

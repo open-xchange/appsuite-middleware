@@ -129,17 +129,6 @@ public interface ShareService {
 
 
     /**
-     * Updates an existing share.
-     *
-     * @param session The session
-     * @param share The share to update
-     * @param clientTimestamp The time the tokens were fetched to catch concurrent modifications
-     * @return The update share
-     * @throws OXException
-     */
-    void updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
-
-    /**
      * Generates a URL for every share that is passed.
      *
      * @param contextId The context ID
