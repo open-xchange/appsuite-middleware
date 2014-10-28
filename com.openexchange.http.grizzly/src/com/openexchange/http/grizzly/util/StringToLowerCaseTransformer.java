@@ -47,30 +47,22 @@
  *
  */
 
-package com.openexchange.http.grizzly;
+package com.openexchange.http.grizzly.util;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.http.grizzly.service.http.ServletFilterRegistrationTest;
-import com.openexchange.http.grizzly.servletfilter.RemoteIPFinderTest;
-import com.openexchange.http.grizzly.util.RequestToolsTest;
+import org.apache.commons.collections.Transformer;
 
 /**
- * Unit tests for bundle com.openexchange.http.grizzly
+ * {@link StringToLowerCaseTransformer}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * @since 7.8.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    RemoteIPFinderTest.class,
-    ServletFilterRegistrationTest.class,
-    RequestToolsTest.class
-})
-public class UnitTests {
+public class StringToLowerCaseTransformer implements Transformer {
 
-    public UnitTests() {
-        super();
+    @Override
+    public Object transform(Object input) {
+        String s = (String) input;
+        return s.toLowerCase();
     }
+
 }
