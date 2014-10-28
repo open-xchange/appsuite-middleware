@@ -81,18 +81,54 @@ public class UserContact {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserContact.class);
 
-	private final User user;
-	private final Contact contact;
+	private User user;
+    private Contact contact;
 
-	/**
-	 * Initializes a new {@link UserContact}.
-	 *
-	 * @param contact the contact
-	 * @param user the user
-	 */
+    /**
+     * Initializes a new {@link UserContact}.
+     *
+     * @param contact the contact
+     * @param user the user
+     */
     public UserContact(final Contact contact, final User user) {
         super();
         this.contact = contact;
+        this.user = user;
+    }
+
+    /**
+     * Gets the contact
+     *
+     * @return The contact
+     */
+    public Contact getContact() {
+        return contact;
+    }
+
+    /**
+     * Gets the user
+     *
+     * @return The user
+     */
+    public User getUser() {
+        return user;
+    }
+
+    /**
+     * Sets the user contact
+     *
+     * @param contact The contact to set
+     */
+    public void setContact(Contact contact) {
+        this.contact = contact;
+    }
+
+    /**
+     * Sets the user
+     *
+     * @param user The user to set
+     */
+    public void setUser(User user) {
         this.user = user;
     }
 

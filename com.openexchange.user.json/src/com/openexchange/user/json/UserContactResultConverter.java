@@ -58,11 +58,16 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.anonymizer.AnonymizerService;
+import com.openexchange.ajax.anonymizer.Anonymizers;
+import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.json.actions.GetAction;
 
@@ -117,18 +122,37 @@ public class UserContactResultConverter implements ResultConverter {
 			 * convert single user contact
 			 */
 			UserContact userContact = (UserContact)resultObject;
+
+			if (Anonymizers.isGuest(session)) {
+                userContact.setContact(Anonymizers.optAnonymize(userContact.getContact(), Module.CONTACT, session));
+                userContact.setUser(Anonymizers.optAnonymize(userContact.getUser(), Module.USER, session));
+            }
+
 			resultObject = userContact.serialize(timeZoneID, session);
-		} else {
-			/*
-			 * convert multiple user contacts into array
-			 */
-			List<UserContact> userContacts = (List<UserContact>)resultObject;
-            JSONArray jsonArray = new JSONArray();
-            for (final UserContact userContact :  userContacts) {
-            	jsonArray.put(userContact.serialize(session, columnIDs, timeZoneID, attributeParameters));
-			}
-			resultObject = jsonArray;
-		}
+        } else {
+            /*
+             * convert multiple user contacts into array
+             */
+            List<UserContact> userContacts = (List<UserContact>) resultObject;
+            JSONArray jArray = new JSONArray(userContacts.size());
+
+            if (Anonymizers.isGuest(session)) {
+                AnonymizerService<Contact> contactAnonymizer = Anonymizers.optAnonymizerFor(Module.CONTACT);
+                AnonymizerService<User> userAnonymizer = Anonymizers.optAnonymizerFor(Module.USER);
+
+                for (UserContact userContact : userContacts) {
+                    userContact.setContact(contactAnonymizer.anonymize(userContact.getContact(), session));
+                    userContact.setUser(userAnonymizer.anonymize(userContact.getUser(), session));
+                    jArray.put(userContact.serialize(session, columnIDs, timeZoneID, attributeParameters));
+                }
+            } else {
+                for (UserContact userContact : userContacts) {
+                    jArray.put(userContact.serialize(session, columnIDs, timeZoneID, attributeParameters));
+                }
+            }
+
+            resultObject = jArray;
+        }
         result.setResultObject(resultObject, "json");
 	}
 

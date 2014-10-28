@@ -64,6 +64,28 @@ import com.openexchange.session.Session;
  */
 public final class Anonymizers {
 
+    private static class EmptyAnonymizer<E> implements AnonymizerService<E> {
+
+        EmptyAnonymizer() {
+            super();
+        }
+
+        @Override
+        public Module getModule() {
+            return null;
+        }
+
+        @Override
+        public E anonymize(E entity, Session session) throws OXException {
+            return entity;
+        }
+
+    }
+
+    private static final EmptyAnonymizer<?> EMPTY_ANONYMIZER = new EmptyAnonymizer<Object>();
+
+    // -------------------------------------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link Anonymizers}.
      */
@@ -80,6 +102,31 @@ public final class Anonymizers {
      */
     public static boolean isGuest(Session session) throws OXException {
         return null != session && UserStorage.getInstance().isGuest(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the empty anonymizer
+     *
+     * @return The empty anonymizer
+     */
+    public static <E> AnonymizerService<E> emptyAnonymizerFor() {
+        return (AnonymizerService<E>) EMPTY_ANONYMIZER;
+    }
+
+    /**
+     * Gets the anonymizer for given module.
+     *
+     * @param module The module
+     * @return The appropriate anonymizer or {@link #emptyAnonymizerFor()} instance
+     * @throws OXException If an anonymizer cannot be returned
+     */
+    public static <E> AnonymizerService<E> optAnonymizerFor(Module module) throws OXException {
+        AnonymizerRegistryService registry = ServerServiceRegistry.getInstance().getService(AnonymizerRegistryService.class);
+        if (null == registry) {
+            return null;
+        }
+
+        return registry.getAnonymizerFor(module);
     }
 
     /**
