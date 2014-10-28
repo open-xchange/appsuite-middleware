@@ -1156,7 +1156,9 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         try {
             Contact toDelete = executor.selectSingleGuestContact(con, Table.CONTACTS, contextId, userId,
                 new ContactField[] {ContactField.OBJECT_ID});
-            executor.deleteSingle(con, Table.CONTACTS, contextId, toDelete.getObjectID(), lastRead.getTime());
+            if (null != toDelete) {
+                executor.deleteSingle(con, Table.CONTACTS, contextId, toDelete.getObjectID(), lastRead.getTime());
+            }
         } catch (SQLException e) {
             DBUtils.rollback(con);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);

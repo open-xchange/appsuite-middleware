@@ -101,10 +101,10 @@ public interface ShareService {
      * @param session The session
      * @param targets The share targets to update
      * @param guestID The identifier of the guest user to update the share targets for
-     * @param clientLastModified The time the associated shares were last read from the client to catch concurrent modifications
+     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
      * @return A guest share reflecting the updated shares for the guest user
      */
-    GuestShare updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientLastModified) throws OXException;
+    GuestShare updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientTimestamp) throws OXException;
 
     /**
      * Updates an anonymous share recipient. This currently only includes updating/setting the password for the guest user.
@@ -124,8 +124,15 @@ public interface ShareService {
      */
     List<Share> getAllShares(Session session) throws OXException;
 
-
-    void deleteShares(Session session, List<Share> shares) throws OXException;
+    /**
+     * Deletes multiple shares.
+     *
+     * @param session The session
+     * @param shares The shares to delete, where each one must provide at least guest- and target-information
+     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
+     * @throws OXException
+     */
+    void deleteShares(Session session, List<Share> shares, Date clientTimestamp) throws OXException;
 
 
     /**

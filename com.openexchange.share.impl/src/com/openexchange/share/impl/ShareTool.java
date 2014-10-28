@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -369,23 +370,34 @@ public class ShareTool {
      * @param shares The shares to filter
      * @return The expired shares that were removed from the supplied list, or <code>null</code> if no shares were expired
      */
-//    public static List<Share> filterExpiredShares(List<Share> shares) {
-//        List<Share> expiredShares = null;
-//        if (null != shares && 0 < shares.size()) {
-//            Iterator<Share> iterator = shares.iterator();
-//            while (iterator.hasNext()) {
-//                Share share = iterator.next();
-//                if (share.isExpired()) {
-//                    if (null == expiredShares) {
-//                        expiredShares = new ArrayList<Share>();
-//                    }
-//                    iterator.remove();
-//                    expiredShares.add(share);
-//                }
-//            }
-//        }
-//        return expiredShares;
-//    }
+    public static List<Share> filterExpiredShares(List<Share> shares) {
+        List<Share> expiredShares = null;
+        if (null != shares && 0 < shares.size()) {
+            Iterator<Share> iterator = shares.iterator();
+            while (iterator.hasNext()) {
+                Share share = iterator.next();
+                if (null != share.getTarget() && share.getTarget().isExpired()) {
+                    if (null == expiredShares) {
+                        expiredShares = new ArrayList<Share>();
+                    }
+                    iterator.remove();
+                    expiredShares.add(share);
+                }
+            }
+        }
+        return expiredShares;
+    }
+
+    public static Set<Integer> getGuestIDs(List<Share> shares) {
+        if (null == shares || 0 == shares.size()) {
+            return Collections.emptySet();
+        }
+        Set<Integer> guestIDs = new HashSet<Integer>();
+        for (Share share : shares) {
+            guestIDs.add(Integer.valueOf(share.getGuest()));
+        }
+        return guestIDs;
+    }
 
     /**
      * Finds a share by its token in the supplied list of shares.

@@ -104,8 +104,7 @@ public class DeleteAction extends AbstractShareAction {
          * delete shares
          */
         if (0 < shares.size()) {
-            //TODO: client timestamp?
-            getShareService().deleteShares(session, shares);
+            getShareService().deleteShares(session, shares, clientTimestamp);
         }
         /*
          * return empty results in case of success
