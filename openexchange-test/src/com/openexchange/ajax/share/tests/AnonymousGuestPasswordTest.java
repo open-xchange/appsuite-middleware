@@ -50,6 +50,9 @@
 package com.openexchange.ajax.share.tests;
 
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
+import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
+import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.UpdateRecipientRequest;
@@ -141,6 +144,55 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         checkShare(guestPermission, share);
         assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
         assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
+    }
+
+    public void testDontAllowAnonymousGuestPasswordUpdate() throws Exception {
+        OCLGuestPermission guestPermission = createAnonymousGuestPermission("secret");
+        /*
+         * create folder shared to guest user
+         */
+        int module = randomModule();
+        FolderObject folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), guestPermission);
+        /*
+         * check permissions
+         */
+        OCLPermission matchingPermission = null;
+        for (OCLPermission permission : folder.getPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created folder found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
+        /*
+         * discover & check share
+         */
+        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        checkShare(guestPermission, share);
+        /*
+         * check access to share
+         */
+        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        guestClient.checkShareModuleAvailable();
+        /*
+         * try to update password
+         */
+        String newPassword = "secret2";
+        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(newPassword, guestPermission.getPassword(), false);
+        PasswordChangeUpdateResponse response = guestClient.execute(updateRequest);
+        assertTrue("No errors in response", response.hasError());
+        /*
+         * check if share link still accessible with old password
+         */
+        guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        guestClient.checkShareModuleAvailable();
+        /*
+         * check access to share with new password
+         */
+        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getEmailAddress(), newPassword, false);
+        assertTrue("No errors during login with new password", revokedGuestClient.getLoginResponse().hasError());
+        assertNull("Got session ID from login with new password", revokedGuestClient.getLoginResponse().getSessionId());
     }
 
 }
