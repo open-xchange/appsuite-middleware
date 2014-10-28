@@ -130,4 +130,40 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong content type", "image/jpeg", ((IFileHolder) object).getContentType());
     }
 
+    @Test
+    public void testProperlyDetectedInvalidHtmlContent() throws Exception {
+        String folder = "default0/INBOX";
+        String uid = "1";
+        String attachmentId = "2";
+
+        ServiceLookup serviceLookup = mock(ServiceLookup.class);
+        ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
+        AJAXRequestData ajaxRequestData = new AJAXRequestData();
+        MailRequest mailRequest = mock(MailRequest.class);
+        doReturn(folder).when(mailRequest).checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        doReturn(uid).when(mailRequest).checkParameter(AJAXServlet.PARAMETER_ID);
+        doReturn(attachmentId).when(mailRequest).getParameter(Mail.PARAMETER_MAILATTCHMENT);
+        doReturn(null).when(mailRequest).getParameter(Mail.PARAMETER_MAILCID);
+        doReturn("0").when(mailRequest).getParameter(Mail.PARAMETER_SAVE);
+        doReturn("1").when(mailRequest).getParameter(Mail.PARAMETER_FILTER);
+        doReturn(ajaxRequestData).when(mailRequest).getRequest();
+
+        String filename = "I_am_a_filename_for_a_pdf.pdf";
+        MailPart mailPart = mock(MailPart.class);
+        when(mailPart.getFileName()).thenReturn(filename);
+        ContentType ct = new ContentType("text/html; charset=ISO-8859-1; name=" + filename);
+        when(mailPart.getContentType()).thenReturn(ct);
+        MailServletInterface mailServletInterface = mock(MailServletInterface.class);
+        doReturn(mailPart).when(mailServletInterface).getMessageAttachment(folder, uid, attachmentId, true);
+        GetAttachmentAction action = spy(new GetAttachmentAction(serviceLookup));
+        doReturn(mailServletInterface).when(action).getMailInterface(mailRequest);
+
+        AJAXRequestResult result = action.perform(mailRequest);
+        Object object = result.getResultObject();
+        assertEquals("Wrong format", "file", ajaxRequestData.getFormat());
+        assertEquals("Wrong caching value", false, ajaxRequestData.getParameter("cache", boolean.class));
+        assertTrue("Wrong class", IFileHolder.class.isInstance(object));
+        assertEquals("Wrong content type", "text/html", ((IFileHolder) object).getContentType());
+    }
+
 }
