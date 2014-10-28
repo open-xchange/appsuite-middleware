@@ -283,7 +283,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static void deleteFoldersSilently(AJAXClient client, Collection<Integer> foldersIDs) throws Exception {
         if (null != client && null != foldersIDs && 0 < foldersIDs.size()) {
             Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, Autoboxing.I2i(foldersIDs), futureTimestamp));
+            DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, Autoboxing.I2i(foldersIDs), futureTimestamp);
+            deleteRequest.setHardDelete(Boolean.TRUE);
+            client.execute(deleteRequest);
         }
     }
 
