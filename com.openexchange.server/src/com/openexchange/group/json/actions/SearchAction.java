@@ -50,6 +50,8 @@
 package com.openexchange.group.json.actions;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,7 +59,6 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -96,38 +97,37 @@ public final class SearchAction extends AbstractGroupAction {
             return new AJAXRequestResult(new JSONArray(0), "json");
         }
 
-        // Appropriate permission is granted
-        // Continue processing search request
-
-        final JSONObject jData = req.getData();
-
-        if (!jData.hasAndNotNull(SearchFields.PATTERN)) {
-            LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
-            return new com.openexchange.group.json.actions.AllAction(services).perform(req);
-        }
-
-        final String searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
-
-        Date timestamp = new Date(0);
-        final ServerSession session = req.getSession();
-        final JSONArray jsonResponseArray = new JSONArray();
-        final GroupStorage groupStorage = GroupStorage.getInstance();
-        Group[] groups = null;
-        if ("*".equals(searchpattern)) {
-            groups = groupStorage.getGroups(true, session.getContext());
-        } else {
-            groups = groupStorage.searchGroups(searchpattern, true, session.getContext());
-        }
-        final GroupWriter groupWriter = new GroupWriter();
-        for (int a = 0; a < groups.length; a++) {
-            final JSONObject jsonGroupObj = new JSONObject();
-            groupWriter.writeGroup(groups[a], jsonGroupObj);
-            if (groups[a].getLastModified().after(timestamp)) {
-                timestamp = groups[a].getLastModified();
+        Group[] groups;
+        {
+            JSONObject jData = req.getData();
+            if (!jData.hasAndNotNull(SearchFields.PATTERN)) {
+                LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
+                return new com.openexchange.group.json.actions.AllAction(services).perform(req);
             }
-            jsonResponseArray.put(jsonGroupObj);
+
+            String searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
+            ServerSession session = req.getSession();
+            GroupStorage groupStorage = GroupStorage.getInstance();
+            if ("*".equals(searchpattern)) {
+                groups = groupStorage.getGroups(true, session.getContext());
+            } else {
+                groups = groupStorage.searchGroups(searchpattern, true, session.getContext());
+            }
         }
-        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+
+        List<Group> groupList = new LinkedList<Group>();
+        Date timestamp = new Date(0);
+        for (int a = 0; a < groups.length; a++) {
+            Group group = groups[a];
+            groupList.add(group);
+
+            Date lastModified = group.getLastModified();
+            if (null != lastModified && lastModified.after(timestamp)) {
+                timestamp = group.getLastModified();
+            }
+        }
+
+        return new AJAXRequestResult(groupList, timestamp, "group");
     }
 
 }

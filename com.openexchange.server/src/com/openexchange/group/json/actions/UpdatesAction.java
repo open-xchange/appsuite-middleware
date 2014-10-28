@@ -50,12 +50,11 @@
 package com.openexchange.group.json.actions;
 
 import java.util.Date;
-import org.json.JSONArray;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -63,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.json.GroupAJAXRequest;
+import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -87,37 +87,25 @@ public final class UpdatesAction extends AbstractGroupAction {
 
     @Override
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        Date timestamp = new Date(0);
-        final GroupStorage groupStorage = GroupStorage.getInstance();
-        final Date modifiedSince = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        GroupStorage groupStorage = GroupStorage.getInstance();
+        Date modifiedSince = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        Group[] modifiedGroups = groupStorage.listModifiedGroups(modifiedSince, req.getSession().getContext());
+        Group[] deletedGroups = groupStorage.listDeletedGroups(modifiedSince, req.getSession().getContext());
 
-        final Group[] modifiedGroups = groupStorage.listModifiedGroups(modifiedSince, req.getSession().getContext());
-        final Group[] deletedGroups = groupStorage.listDeletedGroups(modifiedSince, req.getSession().getContext());
-        final GroupWriter groupWriter = new GroupWriter();
-        final JSONArray modified = new JSONArray();
-        final JSONArray deleted= new JSONArray();
+        List<Group> modified = new LinkedList<Group>();
+        List<Group> deleted= new LinkedList<Group>();
 
         long lm = 0;
-        for(final Group group: modifiedGroups){
-            final JSONObject temp = new JSONObject();
-            groupWriter.writeGroup(group, temp);
-            modified.put(temp);
+        for (Group group: modifiedGroups) {
+            modified.add(group);
             lm = group.getLastModified().getTime() > lm ? group.getLastModified().getTime() : lm;
         }
-        for(final Group group: deletedGroups){
-            final JSONObject temp = new JSONObject();
-            groupWriter.writeGroup(group, temp);
-            deleted.put(temp);
+        for (Group group: deletedGroups){
+            deleted.add(group);
             lm = group.getLastModified().getTime() > lm ? group.getLastModified().getTime() : lm;
         }
-        timestamp = new Date(lm);
-        final JSONObject retVal = new JSONObject();
 
-        retVal.put("new", modified);
-        retVal.put("modified", modified);
-        retVal.put("deleted", deleted);
-
-        return new AJAXRequestResult(retVal, timestamp, "json");
+        return new AJAXRequestResult(new CollectionDelta<Group>(modified, deleted), new Date(lm), "group");
     }
 
 }

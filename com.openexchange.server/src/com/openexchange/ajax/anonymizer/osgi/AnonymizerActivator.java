@@ -52,6 +52,7 @@ package com.openexchange.ajax.anonymizer.osgi;
 import com.openexchange.ajax.anonymizer.AnonymizerRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -70,7 +71,8 @@ public final class AnonymizerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        // Await at least one service registered by ServerActivator to avoid clearing ServerServiceRegistry instance too early
+        return new Class<?>[] { UserService.class };
     }
 
     @Override

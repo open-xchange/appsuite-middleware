@@ -117,16 +117,17 @@ public final class Anonymizers {
      * Gets the anonymizer for given module.
      *
      * @param module The module
-     * @return The appropriate anonymizer or {@link #emptyAnonymizerFor()} instance
+     * @return The appropriate anonymizer or {@link #emptyAnonymizerFor() the empty anonymizer instance}
      * @throws OXException If an anonymizer cannot be returned
      */
     public static <E> AnonymizerService<E> optAnonymizerFor(Module module) throws OXException {
         AnonymizerRegistryService registry = ServerServiceRegistry.getInstance().getService(AnonymizerRegistryService.class);
         if (null == registry) {
-            return null;
+            return emptyAnonymizerFor();
         }
 
-        return registry.getAnonymizerFor(module);
+        AnonymizerService<E> anonymizer = registry.getAnonymizerFor(module);
+        return null == anonymizer ? Anonymizers.<E> emptyAnonymizerFor() : anonymizer;
     }
 
     /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,45 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.group.json.anonymizer;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.ajax.anonymizer.AnonymizerService;
+import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
-import com.openexchange.group.json.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link ListAction}
+ * {@link GroupAnonymizer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-@Action(method = RequestMethod.PUT, name = "list", description = "List groups", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "An array with group identifiers.",
-responseDescription = "An array of group objects as described in Group data.")
-public final class ListAction extends AbstractGroupAction {
+public class GroupAnonymizer implements AnonymizerService<Group> {
 
     /**
-     * Initializes a new {@link ListAction}.
-     * @param services
+     * Initializes a new {@link GroupAnonymizer}.
      */
-    public ListAction(final ServiceLookup services) {
-        super(services);
+    public GroupAnonymizer() {
+        super();
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        JSONArray jBody = req.getData();
-        Date timestamp = new Date(0);
-        Date lastModified = null;
+    public Module getModule() {
+        return Module.GROUP;
+    }
 
-        List<Group> groupList = new LinkedList<Group>();
-        GroupStorage groupStorage = GroupStorage.getInstance();
-
-        int length = jBody.length();
-        for (int a = 0; a < length; a++) {
-            JSONObject jData = jBody.getJSONObject(a);
-
-            Group group = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID), req.getSession().getContext());
-            groupList.add(group);
-
-            lastModified = group.getLastModified();
-            if (null != lastModified && timestamp.getTime() < lastModified.getTime()) {
-                timestamp = lastModified;
-            }
+    @Override
+    public Group anonymize(Group entity, Session session) throws OXException {
+        if (null == entity) {
+            return entity;
         }
-        return new AJAXRequestResult(groupList, timestamp, "group");
+
+        String name = new StringBuilder("Group ").append(entity.getIdentifier()).toString();
+        entity.setDisplayName(name);
+        entity.setSimpleName(name);
+        return entity;
     }
 
 }

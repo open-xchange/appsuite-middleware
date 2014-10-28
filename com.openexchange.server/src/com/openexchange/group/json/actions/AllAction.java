@@ -52,11 +52,9 @@ package com.openexchange.group.json.actions;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -91,31 +89,34 @@ public final class AllAction extends AbstractGroupAction {
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
         Date timestamp = new Date(0);
 
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        List<Field> fields = new LinkedList<Field>();
         boolean loadMembers = false;
-        final List<Field> fields = new LinkedList<Field>();
-        for (final int column : columns) {
-            final Field field = Group.Field.getByColumnNumber(column);
-            if (field == Group.Field.MEMBERS) {
-                loadMembers = true;
+        {
+            int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+            for (final int column : columns) {
+                final Field field = Group.Field.getByColumnNumber(column);
+                if (field == Group.Field.MEMBERS) {
+                    loadMembers = true;
+                }
+                fields.add(field);
             }
-            fields.add(field);
         }
 
-        final JSONArray jsonResponseArray = new JSONArray();
-        final GroupStorage groupStorage = GroupStorage.getInstance();
-        Group[] groups = null;
-        groups = groupStorage.getGroups(loadMembers, req.getSession().getContext());
-        final GroupWriter groupWriter = new GroupWriter();
+        GroupStorage groupStorage = GroupStorage.getInstance();
+        Group[] groups = groupStorage.getGroups(loadMembers, req.getSession().getContext());
+
+        List<Group> groupList = new LinkedList<Group>();
         for (int a = 0; a < groups.length; a++) {
-            final JSONArray row = new JSONArray();
-            groupWriter.writeArray(groups[a], row, fields);
-            if (groups[a].getLastModified().after(timestamp)) {
-                timestamp = groups[a].getLastModified();
+            Group group = groups[a];
+            groupList.add(group);
+
+            Date lastModified = group.getLastModified();
+            if (null != lastModified && lastModified.after(timestamp)) {
+                timestamp = lastModified;
             }
-            jsonResponseArray.put(row);
         }
-        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+
+        return new AJAXRequestResult(groupList, timestamp, "group");
     }
 
 }
