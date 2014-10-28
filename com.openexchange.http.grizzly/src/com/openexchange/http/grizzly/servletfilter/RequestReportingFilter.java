@@ -50,6 +50,9 @@
 package com.openexchange.http.grizzly.servletfilter;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -79,6 +82,10 @@ public class RequestReportingFilter implements Filter {
     private final boolean isFilterEnabled;
     private final String serviceName;
 
+    private final Set<String> ignoredEasCommands;
+
+    private final Set<String> ignoredUsmCommands;
+
     /**
      * Initializes a new {@link RequestReportingFilter}.
      *
@@ -90,6 +97,13 @@ public class RequestReportingFilter implements Filter {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
         this.isFilterEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
+
+        List<String> ignoreEas = configService.getProperty("com.openexchange.requestwatcher.eas.ignore.cmd", "ping,sync", ",");
+        this.ignoredEasCommands = new HashSet<String>(ignoreEas);
+
+        List<String> ignoreUsm = configService.getProperty("com.openexchange.requestwatcher.usm.ignore.path", "/syncupdate", ",");
+        this.ignoredUsmCommands = new HashSet<String>(ignoreUsm);
+
         serviceName = RequestWatcherService.class.getSimpleName();
     }
 
@@ -109,7 +123,7 @@ public class RequestReportingFilter implements Filter {
                 chain.doFilter(request, response);
             } else {
                 HttpServletRequest httpRequest = (HttpServletRequest) request;
-                if (isLongRunning(httpRequest)) {
+                if (isLongRunning(httpRequest) || isIgnored(httpRequest)) {
                     // Do not track long running requests
                     chain.doFilter(request, response);
                 } else {
@@ -130,13 +144,18 @@ public class RequestReportingFilter implements Filter {
         }
     }
 
+
+    private boolean isIgnored(HttpServletRequest httpRequest) {
+        return RequestTools.isIgnoredEasRequest(httpRequest, ignoredEasCommands) || RequestTools.isIgnoredUsmRequest(httpRequest, ignoredUsmCommands);
+    }
+
     @Override
     public void destroy() {
         // nothing to do here
     }
 
     private boolean isLongRunning(HttpServletRequest request) {
-        return RequestTools.isDriveRequest(request) || RequestTools.isEasPingOrSyncRequest(request);
+        return RequestTools.isDriveRequest(request);
     }
 
 }

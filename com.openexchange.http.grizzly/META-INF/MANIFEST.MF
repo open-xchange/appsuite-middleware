@@ -6,7 +6,8 @@ Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.net,
+Import-Package: com.google.common.cache,
+ com.google.common.net,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.dispatcher,
@@ -41,6 +42,7 @@ Import-Package: com.google.common.net,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.net,
+ org.apache.commons.collections,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.http,
