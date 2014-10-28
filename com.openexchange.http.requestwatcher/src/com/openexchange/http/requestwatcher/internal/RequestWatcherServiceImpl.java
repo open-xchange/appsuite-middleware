@@ -177,14 +177,6 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         }
                     }
 
-                    // Make sure not to log any client specific parameters as security consideration
-                    // String requestParameters = entry.getRequestParameters();
-                    // if(!requestParameters.isEmpty()) {
-                    // logBuilder
-                    // .append("with parameters:").append(lineSeparator)
-                    // .append(requestParameters).append(lineSeparator);
-                    // }
-
                     LOG.info(logBuilder.append("with age: ").append(entry.getAge()).append("ms exceeds max. age of: ").append(requestMaxAge).append("ms.").toString(), trace);
                 }
 
