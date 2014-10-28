@@ -231,8 +231,7 @@ public class DefaultShareService implements ShareService {
             User guestUser = userService.getUser(connectionHelper.getConnection(), guestID, context);
             String previousPassword = guestUser.getUserPassword();
             if (null == updatedPassword && null != previousPassword || false == updatedPassword.equals(previousPassword)) {
-                UserImpl updatedUser = new UserImpl();
-                updatedUser.setId(guestID);
+                UserImpl updatedUser = new UserImpl(guestUser);
                 if (Strings.isEmpty(updatedPassword)) {
                     updatedUser.setPasswordMech("");
                     updatedUser.setUserPassword(null);
@@ -297,145 +296,11 @@ public class DefaultShareService implements ShareService {
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            deleteShares(connectionHelper, shares);
-            new GuestCleaner(services).triggerForGuests(connectionHelper, session.getContextId(), I2i(guestIDs));
+            removeShares(connectionHelper, shares);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
         }
-    }
-
-    private void deleteShares(ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
-        if (null == shares || 0 == shares.size()) {
-            return;
-        }
-        int contextID = connectionHelper.getContextID();
-        List<Integer> guestIDs = new ArrayList<Integer>();
-        for (Share share : shares) {
-            guestIDs.add(Integer.valueOf(share.getGuest()));
-        }
-
-        /*
-         * delete shares in storage
-         */
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-        /*
-         * check remaining shares per guest
-         */
-        for (int guest : guestIDs) {
-            // TODO: check async
-            new AdjustGuestPermissionTask(services, contextID, guest).perform(connectionHelper);
-        }
-//        int[] guests = I2i(guestIDs);
-//        Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
-//        UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-//        UserService userService = services.getService(UserService.class);
-//        List<Share> remainingShares = shareStorage.loadShares(contextID, guests, connectionHelper.getParameters());
-//        Map<Integer, List<Share>> sharesByGuest = ShareTool.mapSharesByGuest(remainingShares, guests);
-//        for (int guest : guestIDs) {
-//            List<Share> sharesOfGuest = sharesByGuest.get(Integer.valueOf(guest));
-//            if (null == sharesOfGuest || 0 == sharesOfGuest.size()) {
-//                /*
-//                 * no shares left for guest user, delete him
-//                 */
-//                userPermissionService.deleteUserPermissionBits(connectionHelper.getConnection(), context, guest);
-//                services.getService(ContactUserStorage.class).deleteGuestContact(contextID, guest, new Date(), connectionHelper.getConnection());
-//                userService.deleteUser(connectionHelper.getConnection(), context, guest);
-//            } else {
-//                /*
-//                 * adjust user permissions to reflect currently available shares for guest
-//                 */
-//                User guestUser = userService.getUser(guest, context);
-//                int permissionBits = ShareTool.getRequiredPermissionBits(guestUser, sharesOfGuest);
-//                setPermissionBits(connectionHelper.getConnection(), context, guest, permissionBits, false);
-//            }
-//        }
-    }
-
-
-//    @Override
-//    public int[] deleteShares(Session session, List<String> tokens, Date clientTimestamp) throws OXException {
-//        if (null == tokens || 0 == tokens.size()) {
-//            return new int[0];
-//        }
-//        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-//        try {
-//            connectionHelper.start();
-//            /*
-//             * load & check shares, gather associated guest user IDs
-//             */
-//            List<ShareList> shares = services.getService(ShareStorage.class).loadShares(session.getContextId(), tokens, connectionHelper.getParameters());
-//            for (String token : tokens) {
-//                ShareList share = ShareTool.findShare(shares, token);
-//                if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
-//                    throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-//                }
-//                if (session.getUserId() != share.getCreatedBy()) {
-//                    throw ShareExceptionCodes.NO_DELETE_PERMISSIONS.create(I(session.getUserId()), token, I(session.getContextId()));
-//                }
-//                if (share.getLastModified().after(clientTimestamp)) {
-//                    throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(token);
-//                }
-//            }
-//            /*
-//             * proceed with deletion
-//             */
-//            int[] guestIDs = removeShares(connectionHelper, shares);
-//            connectionHelper.commit();
-//            return guestIDs;
-//        } finally {
-//            connectionHelper.finish();
-//        }
-//    }
-
-
-//    @Override
-    public void updateShare(Session session, Share share, Date clientTimestamp) throws OXException {
-//        String token = share.getToken();
-//        if (Strings.isEmpty(token)) {
-//            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-//        }
-//        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-//        try {
-//            connectionHelper.start();
-//            /*
-//             * load & check share
-//             */
-//            ShareStorage storage = services.getService(ShareStorage.class);
-//            ShareList storedShare = storage.loadShare(session.getContextId(), token, connectionHelper.getParameters());
-//            if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
-//                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-//            }
-//            if (session.getUserId() != share.getCreatedBy()) {
-//                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), token, I(session.getContextId()));
-//            }
-//            if (share.getLastModified().after(clientTimestamp)) {
-//                throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(token);
-//            }
-//            /*
-//             * prepare update
-//             */
-//            //TODO
-//            DefaultShareList updatedShare = new DefaultShareList(storedShare);
-//            updatedShare.setLastModified(new Date());
-//            updatedShare.setModifiedBy(session.getUserId());
-//
-//
-//
-//
-//
-//
-//
-//            /*
-//             * proceed with update
-//             */
-//            storage.updateShare(updatedShare, connectionHelper.getParameters());
-//            connectionHelper.commit();
-//            return updatedShare;
-//        } finally {
-//            connectionHelper.finish();
-//        }
     }
 
     @Override
