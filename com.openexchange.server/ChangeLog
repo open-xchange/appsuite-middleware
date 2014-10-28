@@ -1,3 +1,7 @@
+* 2014-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35255: Also consider file extension if mail part claims to be HTML by Content-Type
+
 * 2014-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 34706: Do not consult session storage in case session look-up is performed by alternative identifier and
