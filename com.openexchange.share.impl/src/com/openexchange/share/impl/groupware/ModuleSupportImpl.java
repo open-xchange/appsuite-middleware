@@ -47,21 +47,60 @@
  *
  */
 
-package com.openexchange.share.groupware;
+package com.openexchange.share.impl.groupware;
 
+import static com.openexchange.osgi.Tools.requireService;
+import java.sql.Connection;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.groupware.TargetUpdate;
+import com.openexchange.user.UserService;
 
 
 /**
- * {@link ModuleHandlerProvider}
+ * {@link ModuleSupportImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ModuleHandlerProvider {
+public class ModuleSupportImpl implements ModuleSupport {
 
-    ModuleHandler getHandler(int module) throws OXException;
+    private final ServiceLookup services;
 
-    TargetHandler createHandler() throws OXException;
+    private final ModuleHandlerRegistry handlers;
+
+    public ModuleSupportImpl(ServiceLookup services) {
+        super();
+        this.services = services;
+        handlers = new ModuleHandlerRegistry(services);
+    }
+
+    @Override
+    public TargetUpdate prepareUpdate(Session session, Connection writeCon) throws OXException {
+        return new TargetUpdateImpl(session, writeCon, services, handlers);
+    }
+
+    @Override
+    public TargetProxy load(ShareTarget target, Session session) throws OXException {
+        if (target == null) {
+            return null;
+        }
+
+        if (target.isFolder()) {
+            User user = requireService(UserService.class, services).getUser(session.getUserId(), session.getContextId());
+            UserizedFolder userizedFolder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
+            return new FolderTargetProxy(userizedFolder, user);
+        } else {
+            return handlers.get(target.getModule()).loadTarget(target, session);
+        }
+    }
 
 }

@@ -49,10 +49,8 @@
 
 package com.openexchange.share.impl.osgi;
 
-import java.sql.Connection;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -65,29 +63,20 @@ import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
 import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.groupware.ModuleHandler;
-import com.openexchange.share.groupware.ModuleHandlerProvider;
-import com.openexchange.share.groupware.ShareTargetDiff;
-import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
-import com.openexchange.share.impl.groupware.AbstractModuleHandler;
-import com.openexchange.share.impl.groupware.FileStorageHandler;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
-import com.openexchange.share.impl.groupware.ModuleHandlerProviderImpl;
+import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.notification.DefaultNotificationService;
 import com.openexchange.share.impl.notification.mail.MailNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationHandler;
@@ -207,15 +196,10 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-        ModuleHandlerProviderImpl moduleHandlerProvider = new ModuleHandlerProviderImpl(this);
-        moduleHandlerProvider.put(new FileStorageHandler(this));
-        moduleHandlerProvider.put(newFolderUpdater(Module.CALENDAR));
-        moduleHandlerProvider.put(newFolderUpdater(Module.CONTACTS));
-        moduleHandlerProvider.put(newFolderUpdater(Module.TASK));
-        registerService(ModuleHandlerProvider.class, moduleHandlerProvider);
+        registerService(ModuleSupport.class, new ModuleSupportImpl(this));
         registerService(ShareNotificationService.class, defaultNotificationService);
 
-        trackService(ModuleHandlerProvider.class);
+        trackService(ModuleSupport.class);
         track(ManagementService.class, new ManagementServiceTracker(context, shareService));
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
@@ -233,25 +217,6 @@ public class ShareActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
         logger.info("stopping bundle: \"com.openexchange.share.impl\"");
         super.stopBundle();
-    }
-
-    private ModuleHandler newFolderUpdater(final Module module) {
-        return new AbstractModuleHandler(this) {
-            @Override
-            public int getModule() {
-                return module.getFolderConstant();
-            }
-
-            @Override
-            protected String getItemTitle(String folder, String item, Session session) throws OXException {
-                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
-            }
-
-            @Override
-            public void updateObjects(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException {
-                throw ShareExceptionCodes.SHARING_ITEMS_NOT_SUPPORTED.create(module.getName());
-            }
-        };
     }
 
 }

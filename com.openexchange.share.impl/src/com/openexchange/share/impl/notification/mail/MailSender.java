@@ -92,8 +92,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ModuleHandler;
-import com.openexchange.share.groupware.ModuleHandlerProvider;
+import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.impl.notification.NotificationStrings;
 import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.templating.OXTemplate;
@@ -265,7 +265,8 @@ public class MailSender {
         String title;
         if (targets.size() == 1) {
             ShareTarget target = targets.get(0);
-            title = getModuleHandler(target.getModule()).getTargetTitle(target, session);
+            TargetProxy proxy = getModuleSupport().load(target, session);
+            title = proxy.getTitle();
         } else {
             title = translator.translate(String.format(NotificationStrings.GENERIC_TITLE, targets.size()));
         }
@@ -443,9 +444,8 @@ public class MailSender {
         return requireService(ConfigurationService.class, services);
     }
 
-    private ModuleHandler getModuleHandler(int module) throws OXException {
-        ModuleHandlerProvider service = requireService(ModuleHandlerProvider.class, services);
-        return service.getHandler(module);
+    private ModuleSupport getModuleSupport() throws OXException {
+        return requireService(ModuleSupport.class, services);
     }
 
     private Translator getTranslator() throws OXException {

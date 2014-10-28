@@ -64,9 +64,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.TargetHandler;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -120,11 +120,10 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
                 permissions.add(new TargetPermission(internal.getEntity(), internal.isGroup(), internal.getBits()));
             }
 
-            TargetHandler targetHandler = createTargetHandler();
-            targetHandler.start(session, writeCon);
-            targetHandler.prefetch(targets);
+            TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
+            update.prepare(targets);
             for (ShareTarget target : targets) {
-                TargetProxy proxy = targetHandler.get(target);
+                TargetProxy proxy = update.get(target);
                 target.setOwnedBy(proxy.getOwner());
             }
 
@@ -142,12 +141,12 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
              * adjust folder & object permissions of share targets
              */
             for (ShareTarget target : targets) {
-                TargetProxy proxy = targetHandler.get(target);
+                TargetProxy proxy = update.get(target);
                 proxy.applyPermissions(permissions);
             }
 
-            targetHandler.update();
-            targetHandler.close();
+            update.run();
+            update.close();
 
             writeCon.commit();
 

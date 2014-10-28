@@ -63,47 +63,41 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.TargetHandler;
 import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.user.UserService;
 
 
 /**
- * {@link UniversalTargetHandler}
+ * {@link TargetUpdateImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class UniversalTargetHandler implements TargetHandler {
-
-    private final Map<Integer, ModuleTargetHandler> handlers = new HashMap<Integer, ModuleTargetHandler>();
+public class TargetUpdateImpl implements TargetUpdate {
 
     private final Map<ShareTarget, TargetProxy> proxies = new HashMap<ShareTarget, TargetProxy>();
 
     private final ServiceLookup services;
 
-    private HandlerParameters parameters;
+    private final ModuleHandlerRegistry handlers;
 
-    private boolean started = false;
+    private final HandlerParameters parameters;
 
     private Map<Integer, List<ShareTarget>> objectsByModule;
 
     private List<ShareTarget> folderTargets;
 
-    public UniversalTargetHandler(ServiceLookup services) {
+
+    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleHandlerRegistry handlers) throws OXException {
         super();
         this.services = services;
-        handlers.put(Module.INFOSTORE.getFolderConstant(), new FSHandler(services));
-    }
-
-    @Override
-    public void start(Session session, Connection writeCon) throws OXException {
+        this.handlers = handlers;
         parameters = new HandlerParameters();
         parameters.setSession(session);
         Context context = getContextService().getContext(session.getContextId());
@@ -113,19 +107,10 @@ public class UniversalTargetHandler implements TargetHandler {
         FolderServiceDecorator folderServiceDecorator = new FolderServiceDecorator();
         folderServiceDecorator.put(Connection.class.getName(), writeCon);
         parameters.setFolderServiceDecorator(folderServiceDecorator);
-
-        started = true;
     }
 
     @Override
-    public void close() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void prefetch(List<ShareTarget> targets) throws OXException {
-        checkStarted();
+    public void prepare(List<ShareTarget> targets) throws OXException {
         objectsByModule = new HashMap<Integer, List<ShareTarget>>();
         folderTargets = new LinkedList<ShareTarget>();
         for (ShareTarget target : targets) {
@@ -157,8 +142,7 @@ public class UniversalTargetHandler implements TargetHandler {
     }
 
     @Override
-    public void update() throws OXException {
-        checkStarted();
+    public void run() throws OXException {
         if (objectsByModule == null || folderTargets == null) {
             throw new IllegalStateException("prefetch() must be called on TargetHandler before update!");
         }
@@ -181,17 +165,22 @@ public class UniversalTargetHandler implements TargetHandler {
             }
 
             if (!modified.isEmpty()) {
-                ModuleTargetHandler handler = getHandler(module);
+                ModuleHandler handler = handlers.get(module);
                 handler.updateObjects(modified, parameters);
             }
         }
 
     }
 
+    @Override
+    public void close() {
+
+    }
+
     private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, UserizedFolder> foldersById, boolean checkPermissions) throws OXException {
         FolderService folderService = getFolderService();
         for (int module : objectsByModule.keySet()) {
-            ModuleTargetHandler handler = getHandler(module);
+            ModuleHandler handler = handlers.get(module);
             List<ShareTarget> targetList = objectsByModule.get(module);
             for (ShareTarget target : targetList) {
                 if (!foldersById.containsKey(target.getFolder())) {
@@ -219,7 +208,7 @@ public class UniversalTargetHandler implements TargetHandler {
         FolderService folderService = getFolderService();
         for (ShareTarget folderTarget : folderTargets) {
             UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderTarget.getFolder(), parameters.getSession(), parameters.getFolderServiceDecorator());
-            FolderTargetProxy proxy = new FolderTargetProxy(folderTarget, folder, parameters.getUser());
+            FolderTargetProxy proxy = new FolderTargetProxy(folder, parameters.getUser());
             if (checkPermissions && !canShareFolder(folder)) {
                 throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(parameters.getUser().getId(), proxy.getTitle(), parameters.getContext().getContextId());
             }
@@ -235,14 +224,8 @@ public class UniversalTargetHandler implements TargetHandler {
         return folder.getOwnPermission().isAdmin();
     }
 
-    private boolean canShareObject(UserizedFolder folder, TargetProxy proxy, ModuleTargetHandler handler) {
+    private boolean canShareObject(UserizedFolder folder, TargetProxy proxy, ModuleHandler handler) {
         return handler.canShare(canShareFolder(folder), proxy, parameters);
-    }
-
-    private void checkStarted() throws OXException {
-        if (!started) {
-            throw new IllegalStateException("TargetHandler must be started before any other methods are called!");
-        }
     }
 
     private UserService getUserService() throws OXException {
@@ -259,16 +242,6 @@ public class UniversalTargetHandler implements TargetHandler {
 
     private <T> T getService(Class<T> clazz) throws OXException {
         return Tools.requireService(clazz, services);
-    }
-
-    private ModuleTargetHandler getHandler(int module) throws OXException {
-        ModuleTargetHandler handler = handlers.get(module);
-        if (handler == null) {
-            Module m = Module.getForFolderConstant(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
-        }
-
-        return handler;
     }
 
 }

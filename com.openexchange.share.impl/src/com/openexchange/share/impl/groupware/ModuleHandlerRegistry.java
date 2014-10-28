@@ -47,31 +47,39 @@
  *
  */
 
-package com.openexchange.share.groupware;
+package com.openexchange.share.impl.groupware;
 
-import java.sql.Connection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.ShareExceptionCodes;
 
 
 /**
- * {@link TargetHandler}
+ * {@link ModuleHandlerRegistry}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface TargetHandler {
+public class ModuleHandlerRegistry {
 
-    void start(Session session, Connection writeCon) throws OXException;
+    private final Map<Integer, ModuleHandler> handlers = new HashMap<Integer, ModuleHandler>();
 
-    void close();
+    public ModuleHandlerRegistry(ServiceLookup services) {
+        super();
+        handlers.put(Module.INFOSTORE.getFolderConstant(), new FileStorageHandler(services));
+    }
 
-    void prefetch(List<ShareTarget> targets) throws OXException;
+    public ModuleHandler get(int module) throws OXException {
+        ModuleHandler handler = handlers.get(module);
+        if (handler == null) {
+            Module m = Module.getForFolderConstant(module);
+            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
+        }
 
-    TargetProxy get(ShareTarget target);
-
-    void update() throws OXException;
+        return handler;
+    }
 
 }

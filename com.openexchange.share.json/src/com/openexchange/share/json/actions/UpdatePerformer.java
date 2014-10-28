@@ -55,19 +55,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.tools.ShareTargetDiff;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -127,6 +128,8 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
 
+
+
             List<ShareTarget> modifiedTargets = buildModifiedTargets(share, targetsToUpdate);
             updateAuthAndPermissions(share, modifiedTargets, writeCon);
             getShareService().updateTargets(session, modifiedTargets, share.getGuestID(), clientLastModified);
@@ -182,15 +185,36 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
              */
             int permissions = recipient.getBits();
             if (permissions >= 0) {
-                Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> origDistinguishedTargets = distinguishTargets(share.getTargets());
-                Map<Integer, List<ShareTarget>> origFolders = origDistinguishedTargets.getFirst();
-                Map<Integer, List<ShareTarget>> origObjects = origDistinguishedTargets.getSecond();
-                Pair<Map<Integer, List<ShareTarget>>, Map<Integer, List<ShareTarget>>> newDistinguishedTargets = distinguishTargets(modifiedTargets);
-                Map<Integer, List<ShareTarget>> newFolders = newDistinguishedTargets.getFirst();
-                Map<Integer, List<ShareTarget>> newObjects = newDistinguishedTargets.getSecond();
+                List<ShareTarget> origTargets = share.getTargets();
+                List<ShareTarget> allTargets = new ArrayList<ShareTarget>(origTargets);
+                for (ShareTarget target : modifiedTargets) {
+                    if (!allTargets.contains(target)) {
+                        allTargets.add(target);
+                    }
+                }
+
                 List<TargetPermission> targetPermissions = Collections.singletonList(new TargetPermission(share.getGuestID(), false, permissions));
-                updateFolders(origFolders, newFolders, targetPermissions, session, writeCon);
-                updateObjects(origObjects, newObjects, targetPermissions, session, writeCon);
+                ShareTargetDiff targetDiff = new ShareTargetDiff(origTargets, modifiedTargets);
+                if (targetDiff.hasDifferences()) {
+                    TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
+                    update.prepare(allTargets);
+                    for (ShareTarget target : targetDiff.getAdded()) {
+                        TargetProxy proxy = update.get(target);
+                        proxy.applyPermissions(targetPermissions);
+                    }
+
+                    for (ShareTarget target : targetDiff.getModified()) {
+                        TargetProxy proxy = update.get(target);
+                        proxy.applyPermissions(targetPermissions);
+                    }
+
+                    for (ShareTarget target : targetDiff.getRemoved()) {
+                        TargetProxy proxy = update.get(target);
+                        proxy.removePermissions(targetPermissions);
+                    }
+                    update.run();
+                    update.close();
+                }
             }
         }
     }

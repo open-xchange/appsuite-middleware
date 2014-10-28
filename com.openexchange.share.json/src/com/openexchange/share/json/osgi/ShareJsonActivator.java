@@ -60,7 +60,7 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.groupware.ModuleHandlerProvider;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.json.GuestShareResultConverter;
 import com.openexchange.share.json.ShareActionFactory;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -85,7 +85,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleHandlerProvider.class };
+            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class };
     }
 
     @Override

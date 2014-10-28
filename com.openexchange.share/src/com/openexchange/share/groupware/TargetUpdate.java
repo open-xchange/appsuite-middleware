@@ -49,27 +49,25 @@
 
 package com.openexchange.share.groupware;
 
-import java.sql.Connection;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 
 
 /**
- * {@link ModuleHandler}
+ * {@link TargetUpdate}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ModuleHandler {
+public interface TargetUpdate {
 
-    int getModule();
+    void prepare(List<ShareTarget> targets) throws OXException;
 
-    String getTargetTitle(ShareTarget target, Session session) throws OXException;
+    TargetProxy get(ShareTarget target);
 
-    void updateObjects(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException;
+    void run() throws OXException;
 
-    void updateFolders(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException;
+    void close();
 
 }

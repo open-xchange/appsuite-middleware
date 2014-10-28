@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.groupware;
+package com.openexchange.share.tools;
 
 import java.util.ArrayList;
 import java.util.Date;

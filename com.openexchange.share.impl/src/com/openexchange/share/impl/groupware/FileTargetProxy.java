@@ -61,7 +61,7 @@ import com.openexchange.share.groupware.TargetPermission;
  * {@link FileTargetProxy}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
 public class FileTargetProxy extends AbstractTargetProxy {
 

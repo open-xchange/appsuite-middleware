@@ -20,4 +20,5 @@ Export-Package: com.openexchange.share,
  com.openexchange.share.groupware,
  com.openexchange.share.notification,
  com.openexchange.share.notification.mail,
- com.openexchange.share.recipient
+ com.openexchange.share.recipient,
+ com.openexchange.share.tools

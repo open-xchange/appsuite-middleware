@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * {@link HandlerParameters}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
 public class HandlerParameters {
 

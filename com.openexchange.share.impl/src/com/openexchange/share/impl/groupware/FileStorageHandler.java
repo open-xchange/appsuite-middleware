@@ -49,26 +49,25 @@
 
 package com.openexchange.share.impl.groupware;
 
-import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.groupware.modules.Module;
+import com.openexchange.file.storage.infostore.PermissionHelper;
+import com.openexchange.groupware.container.EffectiveObjectPermissions;
+import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ShareTargetDiff;
-import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxy;
 
 
 /**
@@ -77,70 +76,65 @@ import com.openexchange.share.groupware.TargetPermission;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class FileStorageHandler extends AbstractModuleHandler {
+public class FileStorageHandler implements ModuleHandler {
 
-    /**
-     * Initializes a new {@link FileStorageHandler}.
-     */
+    private final ServiceLookup services;
+
     public FileStorageHandler(ServiceLookup services) {
-        super(services);
+        super();
+        this.services = services;
     }
 
     @Override
-    public int getModule() {
-        return Module.INFOSTORE.getFolderConstant();
-    }
-
-    @Override
-    protected String getItemTitle(String folder, String item, Session session) throws OXException {
-        FileID fileID = new FileID(item);
-        if (fileID.getFolderId() == null) {
-            fileID.setFolderId(folder);
-        }
-        File file = getFileAccess(session).getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-        String title = file.getTitle();
-        if (title == null) {
-            title = file.getFileName();
+    public List<TargetProxy> loadTargets(List<ShareTarget> targets, HandlerParameters parameters) throws OXException {
+        List<TargetProxy> files = new ArrayList<TargetProxy>(targets.size());
+        IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
+        for (ShareTarget target : targets) {
+            FileID fileID = new FileID(target.getItem());
+            if (fileID.getFolderId() == null) {
+                fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+            }
+            File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+            files.add(new FileTargetProxy(file));
         }
 
-        return title;
+        return files;
     }
 
     @Override
-    public void updateObjects(ShareTargetDiff targetDiff, List<TargetPermission> permissions, Session session, Connection writeCon) throws OXException {
+    public TargetProxy loadTarget(ShareTarget target, Session session) throws OXException {
         IDBasedFileAccess fileAccess = getFileAccess(session);
+        FileID fileID = new FileID(target.getItem());
+        if (fileID.getFolderId() == null) {
+            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+        }
+
+        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
+    }
+
+    @Override
+    public boolean canShare(boolean canShareInFolder, TargetProxy proxy, HandlerParameters parameters) {
+        File file = ((FileTargetProxy) proxy).getFile();
+        List<ObjectPermission> objectPermissions = PermissionHelper.getObjectPermissions(file.getObjectPermissions());
+        if (objectPermissions == null || objectPermissions.isEmpty()) {
+            return canShareInFolder;
+        }
+
+        ObjectPermission objectPermission = EffectiveObjectPermissions.find(parameters.getUser(), objectPermissions);
+        if (objectPermission == null) {
+            return canShareInFolder;
+        }
+
+        return objectPermission.canWrite();
+    }
+
+    @Override
+    public void updateObjects(List<TargetProxy> modified, HandlerParameters parameters) throws OXException {
+        IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
         try {
             fileAccess.startTransaction();
-            for (ShareTarget target : targetDiff.getAdded()) {
-                FileID fileID = new FileID(target.getItem());
-                if (fileID.getFolderId() == null) {
-                    fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
-                }
-
-                File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
-                file.setObjectPermissions(mergePermissions(file.getObjectPermissions(), permissions, CONVERTER));
-                fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
-            }
-
-            for (ShareTarget target : targetDiff.getModified()) {
-                FileID fileID = new FileID(target.getItem());
-                if (fileID.getFolderId() == null) {
-                    fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
-                }
-
-                File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
-                file.setObjectPermissions(mergePermissions(file.getObjectPermissions(), permissions, CONVERTER));
-                fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
-            }
-
-            for (ShareTarget target : targetDiff.getRemoved()) {
-                FileID fileID = new FileID(target.getItem());
-                if (fileID.getFolderId() == null) {
-                    fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
-                }
-
-                File file = new DefaultFile(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
-                file.setObjectPermissions(removePermissions(file.getObjectPermissions(), permissions, CONVERTER));
+            for (TargetProxy proxy : modified) {
+                File file = ((FileTargetProxy) proxy).getFile();
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
 
@@ -151,35 +145,11 @@ public class FileStorageHandler extends AbstractModuleHandler {
         } finally {
             fileAccess.finish();
         }
-
     }
 
     private IDBasedFileAccess getFileAccess(Session session) throws OXException {
-        IDBasedFileAccessFactory factory = getService(IDBasedFileAccessFactory.class);
+        IDBasedFileAccessFactory factory = Tools.requireService(IDBasedFileAccessFactory.class, services);
         return factory.createAccess(session);
     }
-
-    private static final PermissionConverter<FileStorageObjectPermission> CONVERTER = new PermissionConverter<FileStorageObjectPermission>() {
-
-        @Override
-        public int getEntity(FileStorageObjectPermission permission) {
-            return permission.getEntity();
-        }
-
-        @Override
-        public boolean isGroup(FileStorageObjectPermission permission) {
-            return permission.isGroup();
-        }
-
-        @Override
-        public int getBits(FileStorageObjectPermission permission) {
-            return permission.getPermissions();
-        }
-
-        @Override
-        public FileStorageObjectPermission convert(TargetPermission permission) {
-            return new DefaultFileStorageObjectPermission(permission.getEntity(), permission.isGroup(), getObjectPermissionBits(permission.getBits()));
-        }
-    };
 
 }

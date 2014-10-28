@@ -57,7 +57,6 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 
 
@@ -69,15 +68,12 @@ import com.openexchange.share.groupware.TargetPermission;
  */
 public class FolderTargetProxy extends AbstractTargetProxy {
 
-    private final ShareTarget target;
-
     private final UserizedFolder folder;
 
     private final User user;
 
-    public FolderTargetProxy(ShareTarget target, UserizedFolder folder, User user) {
+    public FolderTargetProxy(UserizedFolder folder, User user) {
         super();
-        this.target = target;
         this.folder = folder;
         this.user = user;
     }

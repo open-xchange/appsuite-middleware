@@ -59,8 +59,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ModuleHandler;
-import com.openexchange.share.groupware.ModuleHandlerProvider;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -139,21 +137,6 @@ public abstract class AbstractShareAction implements AJAXActionService {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(TranslatorFactory.class.getName());
         }
         return translatorFactory.translatorFor(session.getUser().getLocale());
-    }
-
-    /**
-     * Gets the {@link ModuleHandler} for a given module.
-     * @param module The module
-     * @return The handler
-     * @throws OXException if no handler is available
-     */
-    protected ModuleHandler getModuleHandler(int module) throws OXException {
-        ModuleHandlerProvider provider = services.getService(ModuleHandlerProvider.class);
-        if (provider == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
-        }
-
-        return provider.getHandler(module);
     }
 
     protected String generateShareURL(int contextId, int guestId, int userId, ShareTarget target, AJAXRequestData requestData) throws OXException {
