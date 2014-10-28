@@ -53,16 +53,22 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.glassfish.grizzly.http.server.Request;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.http.grizzly.eas.EASCommandCodes.EASCommands;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
-
 
 /**
  * {@link RequestTools}
@@ -74,6 +80,8 @@ public final class RequestTools {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestTools.class);
 
+    private static final Transformer LOWER_CASER = new StringToLowerCaseTransformer();
+
     /**
      * Initializes a new {@link RequestTools}.
      */
@@ -81,9 +89,10 @@ public final class RequestTools {
         super();
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------------- //
+    // --------------------------------------------------------------------------------------------------------------------------------------
 
     private static volatile String driveUri;
+
     private static String driveUri() {
         String tmp = driveUri;
         if (null == tmp) {
@@ -123,12 +132,14 @@ public final class RequestTools {
         return driveUri().equals(request.getRequestURI());
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------------- //
+    // --------------------------------------------------------------------------------------------------------------------------------------
 
-    private final static String EAS_URI_DEFAULT = "/Microsoft-Server-ActiveSync";
-    private final static String USM_URI_DEFAULT = "/usm-json";
+    protected final static String EAS_URI_DEFAULT = "/Microsoft-Server-ActiveSync";
+
+    protected static final String EAS_CMD = "Cmd";
 
     private static volatile String easUri;
+
     private static String easUri() {
         String tmp = easUri;
         if (null == tmp) {
@@ -148,7 +159,80 @@ public final class RequestTools {
         return tmp;
     }
 
+    /**
+     * Checks if given request is an EAS request
+     *
+     * @param request The request to check
+     * @return <code>true</code> in case of an EAS request; otherwise <code>false</code>
+     */
+    public static boolean isEasRequest(HttpServletRequest request) {
+        return easUri().equals(request.getRequestURI());
+    }
+
+    /**
+     * Returns if the given request is defined as to ignore
+     *
+     * @param request The request to check
+     * @param ignoredEasCommands - the commands that should be ignored
+     * @return <code>true</code> if given requests is configured to be ignored; otherwise <code>false</code>
+     */
+    public static boolean isIgnoredEasRequest(HttpServletRequest request, Set<String> ignoredEasCommands) {
+        if (isEasRequest(request)) {
+            CollectionUtils.transform(ignoredEasCommands, LOWER_CASER);
+
+            String cmd = request.getParameter(EAS_CMD);
+
+            if ((cmd != null) && (ignoredEasCommands.contains(cmd.toLowerCase()))) {
+                return true;
+            }
+
+            /*-
+             * Check for possibly EAS base64-encoded query string;
+             * see http://download.microsoft.com/download/5/D/D/5DD33FDF-91F5-496D-9884-0A0B0EE698BB/[MS-ASHTTP].pdf
+             *
+             * Second byte reflects EAS command
+             */
+            byte[] bytes = getBase64Bytes(request.getQueryString());
+            if (null != bytes && bytes.length > 2) {
+                Set<EASCommands> set = EASCommands.get(ignoredEasCommands);
+
+                byte code = bytes[1];
+
+                for (EASCommands command : set) {
+                    if (command.getByte() == code) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static byte[] getBase64Bytes(final String queryString) {
+        if (Strings.isEmpty(queryString)) {
+            return null;
+        }
+
+        try {
+            final byte[] encodedBytes = Charsets.toAsciiBytes(queryString);
+            if (Base64.isBase64(encodedBytes)) {
+                return Base64.decodeBase64(encodedBytes);
+            }
+        } catch (final Exception e) {
+            LOG.warn("Could not check for EAS base64-encoded query string", e);
+        }
+
+        return null;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------
+
+    protected final static String USM_URI_DEFAULT = "/usm-json";
+
+    protected static final Cache<String, Boolean> USM_PATH_CACHE = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(2, TimeUnit.HOURS).build();
+
     private static volatile String usmJsonUri;
+
     private static String usmJsonUri() {
         String tmp = usmJsonUri;
         if (null == tmp) {
@@ -168,45 +252,42 @@ public final class RequestTools {
         return tmp;
     }
 
-    /**
-     * Checks if given request is an EAS request
-     *
-     * @param request The request to check
-     * @return <code>true</code> in case of an EAS request; otherwise <code>false</code>
-     */
-    public static boolean isEasRequest(HttpServletRequest request) {
-        return easUri().equals(request.getRequestURI());
+    protected static boolean isUsmRequest(HttpServletRequest request) {
+        return request.getRequestURI().startsWith(usmJsonUri());
     }
 
     /**
-     * Checks if given request is an EAS request
+     * Returns if the given request is defined as to ignore
      *
      * @param request The request to check
-     * @return <code>true</code> in case of an EAS request; otherwise <code>false</code>
+     * @param ignoredUsmCommands - the commands that should be ignored
+     * @return <code>true</code> if given requests is configured to be ignored; otherwise <code>false</code>
      */
-    public static boolean isEasRequest(Request request) {
-        return easUri().equals(request.getRequestURI());
+    public static boolean isIgnoredUsmRequest(HttpServletRequest request, Set<String> ignoredUsmCommands) {
+        String pathInfo = request.getPathInfo();
+
+        if (isUsmRequest(request) && (pathInfo != null)) {
+            pathInfo = pathInfo.toLowerCase();
+
+            Boolean result = USM_PATH_CACHE.getIfPresent(pathInfo);
+            if (null != result) {
+                return result.booleanValue();
+            }
+
+            CollectionUtils.transform(ignoredUsmCommands, LOWER_CASER);
+
+            boolean isIgnored = false;
+            if (ignoredUsmCommands.contains(pathInfo)) {
+                isIgnored = true;
+            }
+            USM_PATH_CACHE.put(pathInfo, isIgnored);
+            return isIgnored;
+
+        }
+        return false;
     }
 
-    /**
-     * Checks if given request is a USM-JSON request
-     *
-     * @param request The request to check
-     * @return <code>true</code> in case of a USM-JSON request; otherwise <code>false</code>
-     */
-    public static boolean isUsmJsonRequest(HttpServletRequest request) {
-        return usmJsonUri().equals(request.getRequestURI());
-    }
-
-    /**
-     * Checks if given request is a USM-JSON request
-     *
-     * @param request The request to check
-     * @return <code>true</code> in case of a USM-JSON request; otherwise <code>false</code>
-     */
-    public static boolean isUsmJsonRequest(Request request) {
-        return usmJsonUri().equals(request.getRequestURI());
-    }
+    // ------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Checks if given request is either a USM-JSON or an EAS request
@@ -217,81 +298,6 @@ public final class RequestTools {
     public static boolean isUsmJsonOrEasRequest(Request request) {
         String requestUri = request.getRequestURI();
         return null != requestUri && (usmJsonUri().equals(requestUri) || easUri().equals(requestUri));
-    }
-
-    // ------------------------------------------------------------------------------------------------------------------------- //
-
-    private static final String EAS_CMD = "Cmd";
-    private static final String EAS_PING = "Ping";
-    private static final int EAS_COMMAND_CODE_PING = 18;
-
-    /**
-     * Checks if given requests signals to be an EAS Ping request
-     *
-     * @param request The request to check
-     * @return <code>true</code> if given requests signals to be an EAS Ping request; otherwise <code>false</code>
-     */
-    public static boolean isEasPingRequest(final HttpServletRequest request) {
-        if (easUri().equals(request.getRequestURI())) {
-            if (EAS_PING.equals(request.getParameter(EAS_CMD))) {
-                return true;
-            }
-
-            /*-
-             * Check for possibly EAS base64-encoded query string
-             *
-             * Second byte reflects EAS command
-             */
-            final byte[] bytes = getBase64Bytes(request.getQueryString());
-            if (null != bytes && bytes.length > 2 && EAS_COMMAND_CODE_PING == bytes[1]) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if given requests signals to be an EAS Ping request
-     *
-     * @param request The request to check
-     * @return <code>true</code> if given requests signals to be an EAS Ping request; otherwise <code>false</code>
-     */
-    public static boolean isEasPingRequest(final Request request) {
-        if (easUri().equals(request.getRequestURI())) {
-            if (EAS_PING.equals(request.getParameter(EAS_CMD))) {
-                return true;
-            }
-
-            /*-
-             * Check for possibly EAS base64-encoded query string
-             *
-             * Second byte reflects EAS command
-             */
-            final byte[] bytes = getBase64Bytes(request.getQueryString());
-            if (null != bytes && bytes.length > 2 && EAS_COMMAND_CODE_PING == bytes[1]) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static byte[] getBase64Bytes(final String queryString) {
-        if (Strings.isEmpty(queryString)) {
-            return null;
-        }
-
-        try {
-            final byte[] encodedBytes = Charsets.toAsciiBytes(queryString);
-            if (Base64.isBase64(encodedBytes)) {
-                return Base64.decodeBase64(encodedBytes);
-            }
-        } catch (final Exception e) {
-            LOG.warn("Could not check for EAS base64-encoded query string", e);
-        }
-
-        return null;
     }
 
     // ------------------------------------------------------------------------------------------------------------------------- //
