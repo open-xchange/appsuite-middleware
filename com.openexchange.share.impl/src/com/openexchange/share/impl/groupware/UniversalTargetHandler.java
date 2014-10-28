@@ -218,7 +218,7 @@ public class UniversalTargetHandler implements TargetHandler {
         Map<String, UserizedFolder> foldersById = new HashMap<String, UserizedFolder>();
         FolderService folderService = getFolderService();
         for (ShareTarget folderTarget : folderTargets) {
-            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderTarget.getFolder(), parameters.getUser(), parameters.getContext(), parameters.getFolderServiceDecorator());
+            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderTarget.getFolder(), parameters.getSession(), parameters.getFolderServiceDecorator());
             FolderTargetProxy proxy = new FolderTargetProxy(folderTarget, folder, parameters.getUser());
             if (checkPermissions && !canShareFolder(folder)) {
                 throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(parameters.getUser().getId(), proxy.getTitle(), parameters.getContext().getContextId());
