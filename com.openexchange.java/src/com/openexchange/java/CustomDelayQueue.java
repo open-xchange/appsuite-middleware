@@ -62,8 +62,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
- * {@link CustomDelayQueue}&nbsp;-&nbsp;A&nbsp;custom&nbsp;<code>java.util.concurrent.DelayQueue</code>;
- * <br>e.g. enhanced by {@link #offerIfAbsentElseReschedule(CustomDelayed<E>) offerIfAbsentElseReschedule()}.
+ * {@link CustomDelayQueue}
+ * <p/>
+ * A <code>java.util.concurrent.DelayQueue</code> holding {@link CustomDelayed} elements, enhanced by
+ * {@link #offerIfAbsentElseReset(CustomDelayed)} and {@link #offerOrReplace(CustomDelayed)}. <p/>
+ * Useful to construct send- or receive-buffers capable of eliminating or stalling multiple duplicate events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>

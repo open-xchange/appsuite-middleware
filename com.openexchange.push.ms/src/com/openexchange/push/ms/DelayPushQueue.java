@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import com.openexchange.java.CustomDelayQueue;
+import com.openexchange.java.CustomDelayed;
 import com.openexchange.ms.Topic;
 
 /**
@@ -69,11 +71,11 @@ public class DelayPushQueue implements Runnable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DelayPushQueue.class);
 
     /** The special poison object */
-    private static final DelayedPushMsObject POISON = new DelayedPushMsObject(null, 0, 0);
+    private static final CustomDelayed<PushMsObject> POISON = new CustomDelayed<PushMsObject>(null, 0, 0);
 
     private final int delayDuration;
     private final int maxDelayDuration;
-    private final PushMSDelayQueue delayQueue;
+    private final CustomDelayQueue<PushMsObject> delayQueue;
     private final Thread pollThread;
     private final AtomicBoolean isRunning;
     private final Topic<Map<String, Object>> publishTopic;
@@ -88,7 +90,7 @@ public class DelayPushQueue implements Runnable {
      */
     public DelayPushQueue(final Topic<Map<String, Object>> publishTopic, final int delayDuration, final int maxDelayDuration) {
         super();
-        delayQueue = new PushMSDelayQueue();
+        delayQueue = new CustomDelayQueue<PushMsObject>();
         this.publishTopic = publishTopic;
         this.delayDuration = delayDuration;
         this.maxDelayDuration = maxDelayDuration;
@@ -105,9 +107,9 @@ public class DelayPushQueue implements Runnable {
      */
     public void add(final PushMsObject pushMsObject, final boolean immediate) {
         if (immediate) {
-            delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, 0, 0));
+            delayQueue.offerOrReplace(new CustomDelayed<PushMsObject>(pushMsObject, 0, 0));
         } else {
-            delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration));
+            delayQueue.offerIfAbsentElseReset(new CustomDelayed<PushMsObject>(pushMsObject, delayDuration, maxDelayDuration));
         }
     }
 
@@ -124,29 +126,29 @@ public class DelayPushQueue implements Runnable {
 
     @Override
     public void run() {
-        final PushMSDelayQueue delayQueue = this.delayQueue;
-        final List<DelayedPushMsObject> objects = new ArrayList<DelayedPushMsObject>(16);
+        final CustomDelayQueue<PushMsObject> delayQueue = this.delayQueue;
+        final List<CustomDelayed<PushMsObject>> objects = new ArrayList<CustomDelayed<PushMsObject>>(16);
         while (isRunning.get()) {
             LOG.debug("Awaiting push objects from DelayQueue with current size: {}", delayQueue.size());
             try {
                 objects.clear();
                 // Blocking wait for at least 1 DelayedPushMsObject to expire.
-                final DelayedPushMsObject object = delayQueue.take();
+                final CustomDelayed<PushMsObject> object = delayQueue.take();
                 if (POISON == object) {
                     return;
                 }
                 objects.add(object);
                 // Drain more if available
                 delayQueue.drainTo(objects);
-                for (final DelayedPushMsObject delayedPushMsObject : objects) {
+                for (final CustomDelayed<PushMsObject> delayedPushMsObject : objects) {
                     if (POISON == delayedPushMsObject) {
                         // Reached poison element
                         return;
                     }
                     if (delayedPushMsObject != null) {
                         // Publish
-                        publishTopic.publish(delayedPushMsObject.getPushObject().writePojo());
-                        LOG.debug("Published delayed PushMsObject: {}", delayedPushMsObject.getPushObject());
+                        publishTopic.publish(delayedPushMsObject.getElement().writePojo());
+                        LOG.debug("Published delayed PushMsObject: {}", delayedPushMsObject.getElement());
                     }
                 }
             } catch (final Exception exc) {
