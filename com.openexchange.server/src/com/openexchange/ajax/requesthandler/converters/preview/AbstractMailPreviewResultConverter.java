@@ -55,6 +55,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.tools.session.ServerSession;
@@ -116,7 +118,13 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
          * Create appropriate file holder
          */
         fileHolder.setContentType("application/octet-stream");
-        fileHolder.setName(new com.openexchange.java.StringAllocator(mail.getSubject()).append(".eml").toString());
+
+        String subject = mail.getSubject();
+        if (subject == null) { // in case no subject was set
+            subject = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.DEFAULT_SUBJECT);
+        }
+
+        fileHolder.setName(new StringBuilder(subject).append(".eml").toString());
         result.setResultObject(fileHolder, "file");
         result.setParameter("__mail", mail);
         /*
