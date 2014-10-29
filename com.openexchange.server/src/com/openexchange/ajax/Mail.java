@@ -121,6 +121,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -129,6 +130,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.html.HtmlService;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -1358,10 +1360,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                         contentType.setSubType("octet-stream");
                         final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
                         httpResponse.setContentType(contentType.toString());
+
+                        String subject = mail.getSubject();
+                        if (subject == null) { // in case no subject was set
+                            subject = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.DEFAULT_SUBJECT);
+                        }
+
                         httpResponse.setHeader(
                             "Content-disposition",
                             getAttachmentDispositionValue(
-                                new StringBuilder(mail.getSubject()).append(".eml").toString(),
+                                new StringBuilder(subject).append(".eml").toString(),
                                 null,
                                 paramContainer.getHeader("user-agent")));
                         Tools.removeCachingHeader(httpResponse);
@@ -1919,7 +1927,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                  */
                 final String fileName;
                 {
-                    final String subject = mailInterface.getMessage(folderPath, uid).getSubject();
+                    String subject = mailInterface.getMessage(folderPath, uid).getSubject();
+                    if (subject == null) { // in case no subject was set
+                        subject = StringHelper.valueOf(localeFrom(getSessionObject(req))).getString(MailStrings.DEFAULT_SUBJECT);
+                    }
                     fileName = new StringBuilder(subject).append(".zip").toString();
                 }
                 /*
