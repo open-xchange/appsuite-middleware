@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionSerializationInterceptor;
 
 /**
- * {@link KerberosSessionSerialization}
+ * Fetches a new TGT for migrated sessions that have been created using login and password.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @since 7.6.0
