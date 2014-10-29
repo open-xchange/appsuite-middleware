@@ -65,7 +65,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link CustomDelayQueue}
  * <p/>
  * A <code>java.util.concurrent.DelayQueue</code> holding {@link CustomDelayed} elements, enhanced by
- * {@link #offerIfAbsentElseReset(CustomDelayed)} and {@link #offerOrReplace(CustomDelayed)}. <p/>
+ * {@link #offerIfAbsent(CustomDelayed)}, {@link #offerIfAbsentElseReset(CustomDelayed)}, {@link #offerOrReplace(CustomDelayed)}.
+ * <p/>
  * Useful to construct send- or receive-buffers capable of eliminating or stalling multiple duplicate events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -108,6 +109,31 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
+            CustomDelayed<E> first = q.peek();
+            q.offer(e);
+            if (first == null || e.compareTo(first) < 0) {
+                available.signalAll();
+            }
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Inserts the specified element into this delay queue if not already present.
+     *
+     * @param e the element to add
+     * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
+     * @throws NullPointerException if the specified element is <code>null</code>
+     */
+    public boolean offerIfAbsent(CustomDelayed<E> e) {
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            if (contains(e)) {
+                return false;
+            }
             CustomDelayed<E> first = q.peek();
             q.offer(e);
             if (first == null || e.compareTo(first) < 0) {

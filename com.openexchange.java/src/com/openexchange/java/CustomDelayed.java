@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit;
 public class CustomDelayed<T> implements Delayed {
 
     private volatile long stamp;
-    private final int delayDuration;
+    private final long delayDuration;
     private final long maxStamp;
     private final T element;
 
@@ -69,11 +69,11 @@ public class CustomDelayed<T> implements Delayed {
      * Initializes a new {@link CustomDelayed} with arbitrary delay durations by wrapping the given element.
      *
      * @param element The actual payload element
-     * @param delayDuration The delay duration to use initially and as increment for each touch-operation
-     * @param maxDelayDuration The the maximum delay duration to use
+     * @param delayDuration The delay duration (in milliseconds) to use initially and as increment for each reset-operation
+     * @param maxDelayDuration The the maximum delay duration (in milliseconds) to apply
      * @throws IllegalArgumentException If <code>delayDuration</code> is greater than <code>maxDelayDuration</code>
      */
-    public CustomDelayed(T element, int delayDuration, int maxDelayDuration) {
+    public CustomDelayed(T element, long delayDuration, long maxDelayDuration) {
         super();
         if (delayDuration > maxDelayDuration) {
             throw new IllegalArgumentException("delayDuration is greater than maxDelayDuration.");
@@ -83,6 +83,18 @@ public class CustomDelayed<T> implements Delayed {
         long now = System.currentTimeMillis();
         stamp = now + delayDuration;
         maxStamp = now + maxDelayDuration;
+    }
+
+    /**
+     * Initializes a new {@link CustomDelayed} with a fixed delay duration by wrapping the given element. Resetting this object has no
+     * effect, i.e. the maximum delay duration is fixed.
+     *
+     * @param element The actual payload element
+     * @param delayDuration The delay duration (in milliseconds) to use
+     * @throws IllegalArgumentException If <code>delayDuration</code> is greater than <code>maxDelayDuration</code>
+     */
+    public CustomDelayed(T element, int delayDuration) {
+        this(element, delayDuration, delayDuration);
     }
 
     @Override
