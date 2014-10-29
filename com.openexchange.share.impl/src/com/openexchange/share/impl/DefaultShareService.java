@@ -82,6 +82,7 @@ import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -121,7 +122,7 @@ public class DefaultShareService implements ShareService {
         if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
-        List<Share> shares = services.getService(ShareStorage.class).loadShares(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
         return 0 == shares.size() ? null : new ResolvedGuestShare(contextID, guest, shares);
     }
@@ -387,7 +388,7 @@ public class DefaultShareService implements ShareService {
                  * delete all targets for all guest users
                  */
                 shareStorage.deleteTargets(contextId, targets, connectionHelper.getParameters());
-                new GuestCleaner(services).triggerForContext(connectionHelper, contextId);
+                new GuestCleaner(services).cleanupContext(connectionHelper, contextId);
             } else {
                 /*
                  * delete targets for specific guests
@@ -399,7 +400,7 @@ public class DefaultShareService implements ShareService {
                     }
                 }
                 shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters());
-                new GuestCleaner(services).triggerForGuests(connectionHelper, contextId, I2i(guestIDs));
+                new GuestCleaner(services).cleanupGuests(connectionHelper, contextId, I2i(guestIDs));
             }
             connectionHelper.commit();
         } finally {
@@ -536,7 +537,7 @@ public class DefaultShareService implements ShareService {
         int contextID = connectionHelper.getContextID();
         int[] guestIDs = I2i(ShareTool.getGuestIDs(shares));
         services.getService(ShareStorage.class).deleteShares(connectionHelper.getContextID(), shares, connectionHelper.getParameters());
-        new GuestCleaner(services).triggerForGuests(connectionHelper, contextID, guestIDs);
+        new GuestCleaner(services).cleanupGuests(connectionHelper, contextID, guestIDs);
     }
 
     /**

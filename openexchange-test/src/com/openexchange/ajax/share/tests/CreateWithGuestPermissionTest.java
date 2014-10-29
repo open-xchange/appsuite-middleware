@@ -73,11 +73,11 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         super(name);
     }
 
-    public void notestCreateSharedFolderRandomly() throws Exception {
+    public void testCreateSharedFolderRandomly() throws Exception {
         testCreateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
     }
 
-    public void testCreateSharedFolderExtensively() throws Exception {
+    public void noTestCreateSharedFolderExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {

@@ -47,14 +47,10 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.impl.cleanup;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,55 +63,71 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.impl.ConnectionHelper;
+import com.openexchange.share.impl.ShareTool;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link GuestCleaner}
+ * {@link GuestCleanupTask}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class GuestCleaner {
+public class GuestCleanupTask extends AbstractCleanupTask<Void> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GuestCleaner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GuestCleanupTask.class);
 
-    private final ServiceLookup services;
+    private final int guestID;
 
     /**
-     * Initializes a new {@link GuestCleaner}.
+     * Initializes a new {@link GuestCleanupTask}.
      *
+     * @param priority The priority of the task
      * @param services A service lookup reference
+     * @param connectionHelper A (started) connection helper
+     * @param contextID The context ID
+     * @param guestID The identifier of the guest to cleanup
      */
-    public GuestCleaner(ServiceLookup services) {
-        super();
-        this.services = services;
+    public GuestCleanupTask(int priority, ServiceLookup services, ConnectionHelper connectionHelper, int contextID, int guestID) {
+        super(priority, services, connectionHelper, contextID);
+        this.guestID = guestID;
     }
 
-    public void triggerForContext(ConnectionHelper connectionHelper, int contextID) throws OXException {
+    /**
+     * Initializes a new {@link GuestCleanupTask}.
+     *
+     * @param priority The priority of the task
+     * @param services A service lookup reference
+     * @param contextID The context ID
+     * @param guestID The identifier of the guest to cleanup
+     */
+    public GuestCleanupTask(int priority, ServiceLookup services, int contextID, int guestID) {
+        this(priority, services, null, contextID, guestID);
+    }
+
+    @Override
+    public Void call() throws Exception {
         Context context = services.getService(ContextService.class).getContext(contextID);
-        int[] guestIDs = services.getService(UserService.class).listAllUser(context, true, true);
-        if (null != guestIDs && 0 < guestIDs.length) {
-            triggerForGuests(connectionHelper, context, guestIDs);
+        User guestUser = services.getService(UserService.class).getUser(guestID, context);
+        if (null != connectionHelper) {
+            cleanGuest(connectionHelper, context, guestUser);
+        } else {
+            cleanGuest(context, guestUser);
         }
+        return null;
     }
 
-    public void triggerForGuests(ConnectionHelper connectionHelper, int contextID, int[] guestIDs) throws OXException {
-        triggerForGuests(connectionHelper, services.getService(ContextService.class).getContext(contextID), guestIDs);
-    }
-
-    public void triggerForGuests(ConnectionHelper connectionHelper, Context context, int[] guestIDs) throws OXException {
-        cleanGuests(connectionHelper, context, guestIDs);
-    }
-
-    private void cleanGuests(ConnectionHelper connectionHelper, Context context, int[] guestIDs) throws OXException {
-        List<User> guestUsers = getGuestUsers(context, guestIDs);
-        if (null != guestUsers && 0 < guestUsers.size()) {
-            for (User guestUser : guestUsers) {
-                cleanGuest(connectionHelper, context, guestUser);
-            }
+    private void cleanGuest(Context context, User guestUser) throws OXException {
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
+        try {
+            connectionHelper.start();
+            cleanGuest(connectionHelper, context, guestUser);
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
         }
     }
 
@@ -129,7 +141,7 @@ public class GuestCleaner {
             /*
              * no shares remaining, delete guest user
              */
-            deleteGuest(connectionHelper, context, guestUser.getId());
+            deleteGuest(connectionHelper.getConnection(), context, guestUser.getId());
         } else {
             /*
              * guest user still has shares, adjust permissions as needed
@@ -180,22 +192,28 @@ public class GuestCleaner {
         return userPermissionBits;
     }
 
-    private void deleteGuest(ConnectionHelper connectionHelper, Context context, int guestID) throws OXException {
+    /**
+     * Deletes a guest user along with an associated guest user contact and permission bits.
+     *
+     * @param connection The database connection to use
+     * @param context The context
+     * @param guestID The identifier of the guest user to delete
+     * @throws OXException
+     */
+    private void deleteGuest(Connection connection, Context context, int guestID) throws OXException {
         /*
          * delete user permission bits
          */
-        services.getService(UserPermissionService.class).deleteUserPermissionBits(
-            connectionHelper.getConnection(), context, guestID);
+        services.getService(UserPermissionService.class).deleteUserPermissionBits(connection, context, guestID);
         /*
          * delete user contact
          */
-        services.getService(ContactUserStorage.class).deleteGuestContact(
-            context.getContextId(), guestID, new Date(), connectionHelper.getConnection());
+        services.getService(ContactUserStorage.class).deleteGuestContact(context.getContextId(), guestID, new Date(), connection);
         /*
          * delete user
          */
         try {
-            services.getService(UserService.class).deleteUser(connectionHelper.getConnection(), context, guestID);
+            services.getService(UserService.class).deleteUser(connection, context, guestID);
         } catch (OXException e) {
             if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 LOG.debug("Guest user no longer found, skipping deletion.", e);
@@ -205,39 +223,40 @@ public class GuestCleaner {
         }
     }
 
-    private List<User> getGuestUsers(Context context, int[] guestIDs) throws OXException {
-        UserService userService = services.getService(UserService.class);
-        /*
-         * try and get all users at once
-         */
-        try {
-            return Arrays.asList(userService.getUser(context, guestIDs));
-        } catch (OXException e) {
-            if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
-                LOG.warn("User not found during guest cleaner run", e);
-                if (1 == guestIDs.length) {
-                    return Collections.emptyList();
-                }
-            } else {
-                throw e;
-            }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextID;
+        result = prime * result + guestID;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-        /*
-         * fallback and load one user after the other
-         */
-        List<User> users = new ArrayList<User>(guestIDs.length);
-        for (int id : guestIDs) {
-            try {
-                users.add(userService.getUser(id, context));
-            } catch (OXException e) {
-                if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
-                    LOG.warn("User not found during guest cleaner run", e);
-                } else {
-                    throw e;
-                }
-            }
+        if (obj == null) {
+            return false;
         }
-        return users;
+        if (!(obj instanceof GuestCleanupTask)) {
+            return false;
+        }
+        GuestCleanupTask other = (GuestCleanupTask) obj;
+        if (contextID != other.contextID) {
+            return false;
+        }
+        if (guestID != other.guestID) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "GuestCleanupTask [contextID=" + contextID + ", guestID=" + guestID + "]";
     }
 
 }
+
