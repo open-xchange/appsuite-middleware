@@ -395,7 +395,7 @@ public class GuestClient extends AJAXClient {
         }
     }
 
-    private Object getItem(FolderObject folder, String id, boolean expectToFail) throws Exception {
+    public Object getItem(FolderObject folder, String id, boolean expectToFail) throws Exception {
         int folderID = folder.getObjectID();
         boolean failOnError = false == expectToFail;
         TimeZone timeZone = TimeZones.UTC;

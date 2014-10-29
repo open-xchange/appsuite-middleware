@@ -58,32 +58,41 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
- * {@link NewRequest}
+ * {@link GetLinkRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class NewRequest implements AJAXRequest<NewResponse> {
-
-    private final boolean failOnError;
+public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
     private final List<ShareTarget> targets;
 
-    private final List<ShareRecipient> recipients;
+    private boolean failOnError = true;
 
-    public NewRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(targets, recipients, true);
-    }
+    private int bits = -1;
 
-    public NewRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
+    private String password = null;
+
+    /**
+     * Initializes a new {@link GetLinkRequest}.
+     */
+    public GetLinkRequest(List<ShareTarget> targets) {
         super();
         this.targets = targets;
-        this.recipients = recipients;
-        this.failOnError = failOnError;
+    }
+
+    public void setBits(int bits) {
+        this.bits = bits;
+    }
+
+    public void setPassword(String password) {
+        this.password  = password;
     }
 
     @Override
@@ -98,30 +107,50 @@ public class NewRequest implements AJAXRequest<NewResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, "new") };
+        return new Params(
+            AJAXServlet.PARAMETER_ACTION, "getLink"
+        ).toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends NewResponse> getParser() {
-        return new AbstractAJAXParser<NewResponse>(failOnError) {
-            @Override
-            protected NewResponse createResponse(Response response) throws JSONException {
-                return new NewResponse(response);
-            }
-        };
+    public AbstractAJAXParser<GetLinkResponse> getParser() {
+        return new Parser(failOnError);
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
         JSONObject json = new JSONObject();
         json.put("targets", ShareWriter.writeTargets(targets));
-        json.put("recipients", ShareWriter.writeRecipients(recipients));
+        if (bits >= 0) {
+            json.put("bits", bits);
+        }
+        if (password != null) {
+            json.put("password", password);
+        }
         return json;
     }
 
     @Override
     public Header[] getHeaders() {
         return NO_HEADER;
+    }
+
+    private static final class Parser extends AbstractAJAXParser<GetLinkResponse> {
+
+        /**
+         * Initializes a new {@link Parser}.
+         * @param failOnError
+         */
+        protected Parser(boolean failOnError) {
+            super(failOnError);
+        }
+
+        @Override
+        protected GetLinkResponse createResponse(Response response) throws JSONException {
+            JSONObject json = ResponseWriter.getJSON(response).getJSONObject("data");
+            return new GetLinkResponse(response, json.getString("url"), json.getString("token"));
+        }
+
     }
 
 }

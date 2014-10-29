@@ -742,8 +742,8 @@ public class RdbUserStorage extends UserStorage {
                     if (null != user.getAttributes()) {
                         updateAttributes(context, user, con);
                     }
-                    if (false == user.isGuest() && null != password && null != mech ||
-                        user.isGuest() && (null != password || null != mech)) {
+                    if ((false == user.isGuest() && null != password && null != mech) ||
+                        (user.isGuest() && (null != password || null != mech))) {
                         PreparedStatement stmt = null;
                         try {
                             String encodedPassword = user.isGuest() ? password : PasswordMechanism.getEncodedPassword(mech, password);

@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -67,7 +68,6 @@ import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.tools.ShareTargetDiff;
 import com.openexchange.tools.session.ServerSession;
 
@@ -88,17 +88,20 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
 
     private final Date clientLastModified;
 
+    private final Map<String, Object> meta;
+
     /**
      * Initializes a new {@link UpdatePerformer}.
      * @param session
      * @param services
      */
-    protected UpdatePerformer(String token, AnonymousRecipient recipient, Date expiry, Date clientLastModified, ServerSession session, ServiceLookup services) {
+    protected UpdatePerformer(String token, AnonymousRecipient recipient, Date expiry, Map<String, Object> meta, Date clientLastModified, ServerSession session, ServiceLookup services) {
         super(session, services);
         this.token = token;
         this.recipient = recipient;
         this.clientLastModified = clientLastModified;
         this.expiry = expiry;
+        this.meta = meta;
     }
 
     @Override
@@ -128,8 +131,6 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
 
-
-
             List<ShareTarget> modifiedTargets = buildModifiedTargets(share, targetsToUpdate);
             updateAuthAndPermissions(share, modifiedTargets, writeCon);
             getShareService().updateTargets(session, modifiedTargets, share.getGuestID(), clientLastModified);
@@ -152,29 +153,27 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
     private List<ShareTarget> buildModifiedTargets(GuestShare share, List<ShareTarget> targetsToUpdate) {
         List<ShareTarget> modifiedTargets = new ArrayList<ShareTarget>(targetsToUpdate.size());
         for (ShareTarget target : share.getTargets()) {
+            ShareTarget modifiedTarget = target;
             if (targetsToUpdate.contains(target)) {
-                ShareTarget modifiedTarget = new ShareTarget(target.getModule(), target.getFolder(), target.getItem());
+                modifiedTarget = target.clone();
                 modifiedTarget.setOwnedBy(target.getOwnedBy());
-                if (expiry == null) {
-                    modifiedTarget.setExpiryDate(target.getExpiryDate());
-                } else {
+                if (expiry != null) {
                     modifiedTarget.setExpiryDate(expiry);
                 }
 
-                // modifiedTarget.setMeta(meta); FIXME
-            } else {
-                modifiedTargets.add(target);
+                if (meta != null) {
+                    modifiedTarget.setMeta(meta);
+                }
             }
+
+            modifiedTargets.add(modifiedTarget);
         }
+
         return modifiedTargets;
     }
 
     private void updateAuthAndPermissions(GuestShare share, List<ShareTarget> modifiedTargets, Connection writeCon) throws OXException {
         if (recipient != null) {
-            if (recipient.getType() != RecipientType.ANONYMOUS) {
-                // throw exception
-            }
-
             /*
              * adjust recipients auth information
              */
