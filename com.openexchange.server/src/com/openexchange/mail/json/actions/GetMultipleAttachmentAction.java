@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import javax.mail.MessageRemovedException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -122,17 +123,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 /*
                  * Set Content-Type and Content-Disposition header
                  */
-                final String fullFileName;
-                {
-                    MailMessage message = mailInterface.getMessage(folderPath, uid);
-
-                    String fileName = message.getSubject();
-                    if (fileName == null) { // in case no subject was set
-                        fileName = StringHelper.valueOf(req.getSession().getUser().getLocale()).getString(MailStrings.DEFAULT_SUBJECT);
-                    }
-
-                    fullFileName = new StringBuilder(fileName).append(".zip").toString();
-                }
+                final String fullFileName = getFileName(req.getSession().getUser().getLocale(), mailInterface.getMessage(folderPath, uid));
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
                  */
@@ -193,6 +184,22 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Returns the filename for the attachment
+     *
+     * @param req - Mailrequest to g
+     * @param userLocale - Locale of the user to get correct subject translation in case subject is not set
+     * @return String - file name
+     */
+    protected String getFileName(final Locale userLocale, final MailMessage message) {
+        String fileName = message.getSubject();
+        if (fileName == null) { // in case no subject was set
+            fileName = StringHelper.valueOf(userLocale).getString(MailStrings.DEFAULT_SUBJECT);
+        }
+
+        return new StringBuilder(fileName).append(".zip").toString();
     }
 
     private void createZipArchive(final String folderPath, final String uid, final String[] sequenceIds, final MailServletInterface mailInterface, OutputStream out) throws OXException {
