@@ -252,33 +252,8 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
             return;
         }
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        try {
-            connectionHelper.start();
-            if (null == guestIDs) {
-                /*
-                 * delete all targets for all guest users
-                 */
-                shareStorage.deleteTargets(session.getContextId(), targets, connectionHelper.getParameters());
-                new GuestCleaner(services).triggerForContext(connectionHelper, session.getContextId());
-            } else {
-                /*
-                 * delete targets for specific guests
-                 */
-                List<Share> shares = new ArrayList<Share>(targets.size() * guestIDs.size());
-                for (ShareTarget target : targets) {
-                    for (Integer guestID : guestIDs) {
-                        shares.add(new Share(guestID.intValue(), target));
-                    }
-                }
-                shareStorage.deleteShares(session.getContextId(), shares, connectionHelper.getParameters());
-                new GuestCleaner(services).triggerForGuests(connectionHelper, session.getContextId(), I2i(guestIDs));
-            }
-            connectionHelper.commit();
-        } finally {
-            connectionHelper.finish();
-        }
+
+        removeTargets(new ConnectionHelper(session, services, true), targets, guestIDs);
     }
 
     @Override
@@ -389,6 +364,44 @@ public class DefaultShareService implements ShareService {
             List<Share> shares = shareStorage.loadSharesCreatedBy(contextId, userId, connectionHelper.getParameters());
             connectionHelper.commit();
             return shares;
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    public void removeTargets(int contextId, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+        if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
+            return;
+        }
+
+        removeTargets(new ConnectionHelper(contextId, services, true), targets, guestIDs);
+    }
+
+    private void removeTargets(ConnectionHelper connectionHelper, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+        int contextId = connectionHelper.getContextID();
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        try {
+            connectionHelper.start();
+            if (null == guestIDs) {
+                /*
+                 * delete all targets for all guest users
+                 */
+                shareStorage.deleteTargets(contextId, targets, connectionHelper.getParameters());
+                new GuestCleaner(services).triggerForContext(connectionHelper, contextId);
+            } else {
+                /*
+                 * delete targets for specific guests
+                 */
+                List<Share> shares = new ArrayList<Share>(targets.size() * guestIDs.size());
+                for (ShareTarget target : targets) {
+                    for (Integer guestID : guestIDs) {
+                        shares.add(new Share(guestID.intValue(), target));
+                    }
+                }
+                shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters());
+                new GuestCleaner(services).triggerForGuests(connectionHelper, contextId, I2i(guestIDs));
+            }
+            connectionHelper.commit();
         } finally {
             connectionHelper.finish();
         }
