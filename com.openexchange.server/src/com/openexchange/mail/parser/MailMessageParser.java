@@ -860,7 +860,7 @@ public final class MailMessageParser {
         {
             String subj = mail.getSubject();
             if (subj == null) { // in case no subject was set
-                subj = "mail";
+                subj = "";
             }
 
             subject = subj;
