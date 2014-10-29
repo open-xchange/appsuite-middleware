@@ -97,7 +97,8 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.user.UserServiceInterceptorRegistryTest.class,
     com.openexchange.groupware.infostore.search.impl.ToMySqlQueryVisitorTest.class,
     com.openexchange.mail.text.HtmlProcessingTest.class,
-    com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverterTest.class
+    com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverterTest.class,
+    com.openexchange.mail.json.actions.GetMultipleAttachmentActionTest.class
 })
 public class UnitTests {
 
