@@ -925,10 +925,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
         {
             Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-            clientParams.put("x-originating-ip", session.getLocalIp());
-            clientParams.put("x-session-id", session.getSessionID() + "-" + imapStore.hashCode());
-            clientParams.put("name", "Open-Xchange");
-            clientParams.put("xversion", Version.getInstance().getVersionString());
+            clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
+            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), session.getSessionID() + "-" + imapStore.hashCode());
+            clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
+            clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
             imapStore.setClientParameters(clientParams);
         }
         /*
