@@ -830,7 +830,14 @@ ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" 
 
 # SoftwareChange_Request-2037
 PFILE=/opt/open-xchange/etc/sessiond.properties
-ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
+if ! grep "com.openexchange.sessiond.remoteParameterNames" >/dev/null $PFILE; then
+    echo -e "\n# Specifies the colon-separated names of such parameters that are supposed to be taken over from session to stored session representation." >> $PFILE
+    echo "# The parameter names MUST NOT contain the ':' colon character that serves as a delimiter." >> $PFILE
+    echo "# E.g.    com.openexchange.sessiond.remoteParameterNames=remoteParameter1:remoteParameter2:...:remoteParameterN" >> $PFILE
+    echo "#" >> $PFILE
+    echo "# By default this setting is empty." >> $PFILE
+    echo "#com.openexchange.sessiond.remoteParameterNames=" >> $PFILE
+fi
 
 # SoftwareChange_Request-2055
 ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
@@ -896,20 +903,20 @@ pfile=/opt/open-xchange/etc/cache.ccf
 if ! grep "jcs.region.UserPermissionBits=LTCP" > /dev/null $pfile; then
     echo -e "\n# # Pre-defined cache for user configuration\n" >> $pfile
     echo "jcs.region.UserPermissionBits=LTCP\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile 
-    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile 
+    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile
 fi
 
 # SoftwareChange_Request-2224
