@@ -51,6 +51,7 @@ package com.openexchange.share.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.ExecutorService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -83,6 +84,8 @@ import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -105,7 +108,8 @@ public class ShareActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserService.class, ContextService.class, TemplateService.class,
             ShareStorage.class, ConfigurationService.class, DatabaseService.class, HtmlService.class,
-            UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class };
+            UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class,
+            ThreadPoolService.class, TimerService.class, ExecutorService.class };
     }
 
     @Override

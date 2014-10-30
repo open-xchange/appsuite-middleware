@@ -50,9 +50,11 @@
 package com.openexchange.share.impl.cleanup;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.BufferingQueue;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.impl.ConnectionHelper;
@@ -66,17 +68,34 @@ import com.openexchange.share.impl.ConnectionHelper;
 public class GuestCleaner {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuestCleaner.class);
+    private static final long DELAY_DURATION = 10000;
+    private static final long MAX_DELAY_DURATION = 60000;
 
     private final ServiceLookup services;
+    private final BufferingQueue<GuestCleanupTask> cleanupTasks;
+    private final BackgroundGuestCleaner backgroundCleaner;
 
     /**
      * Initializes a new {@link GuestCleaner}.
      *
      * @param services A service lookup reference
      */
-    public GuestCleaner(ServiceLookup services) {
+    public GuestCleaner(final ServiceLookup services) {
         super();
         this.services = services;
+        /*
+         * prepare background task queue and worker thread
+         */
+        cleanupTasks = new BufferingQueue<GuestCleanupTask>(DELAY_DURATION, MAX_DELAY_DURATION);
+        backgroundCleaner = new BackgroundGuestCleaner(cleanupTasks);
+        services.getService(ExecutorService.class).submit(backgroundCleaner);
+    }
+
+    /**
+     * Stops all background processing by signaling termination flag.
+     */
+    public void stop() {
+        backgroundCleaner.stop();
     }
 
     /**
@@ -84,9 +103,22 @@ public class GuestCleaner {
      *
      * @param contextID The context ID
      */
-    public void scheduleContextCleanup(int contextID) throws OXException {
-        ContextCleanupTask cleanupTask = new ContextCleanupTask(1, services, contextID);
-        //TODO
+    public void scheduleContextCleanup(final int contextID) throws OXException {
+        services.getService(ExecutorService.class).submit(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    ContextCleanupTask contextCleanupTask = new ContextCleanupTask(services, contextID);
+                    List<GuestCleanupTask> tasks = contextCleanupTask.call();
+                    for (GuestCleanupTask task : tasks) {
+                        cleanupTasks.offerIfAbsentElseReset(task);
+                    }
+                } catch (Exception e) {
+                    LOG.warn("error enqueuing cleanup tasks.", e);
+                }
+            }
+        });
     }
 
     /**
@@ -97,8 +129,8 @@ public class GuestCleaner {
      */
     public void scheduleGuestCleanup(int contextID, int[] guestIDs) throws OXException {
         for (int guestID : guestIDs) {
-            GuestCleanupTask cleanupTask = new GuestCleanupTask(1, services, contextID, guestID);
-            //TODO
+            GuestCleanupTask cleanupTask = new GuestCleanupTask(services, contextID, guestID);
+            cleanupTasks.offerIfAbsentElseReset(cleanupTask);
         }
     }
 
@@ -113,7 +145,7 @@ public class GuestCleaner {
          * execute context- and resulting guest cleanup tasks in current thread
          */
         try {
-            List<GuestCleanupTask> guestCleanupTasks = new ContextCleanupTask(0, services, connectionHelper, contextID).call();
+            List<GuestCleanupTask> guestCleanupTasks = new ContextCleanupTask(services, connectionHelper, contextID).call();
             for (GuestCleanupTask guestCleanupTask : guestCleanupTasks) {
                 guestCleanupTask.call();
             }
@@ -138,7 +170,7 @@ public class GuestCleaner {
          */
         try {
             for (int guestID : guestIDs) {
-                new GuestCleanupTask(0, services, connectionHelper, contextID, guestID).call();
+                new GuestCleanupTask(services, connectionHelper, contextID, guestID).call();
             }
         } catch (Exception e) {
             if (OXException.class.isInstance(e)) {
@@ -149,4 +181,3 @@ public class GuestCleaner {
     }
 
 }
-

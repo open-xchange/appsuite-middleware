@@ -101,6 +101,7 @@ public class DefaultShareService implements ShareService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultShareService.class);
 
     private final ServiceLookup services;
+    private final GuestCleaner guestCleaner;
 
     /**
      * Initializes a new {@link DefaultShareService}.
@@ -110,6 +111,7 @@ public class DefaultShareService implements ShareService {
     public DefaultShareService(ServiceLookup services) {
         super();
         this.services = services;
+        this.guestCleaner = new GuestCleaner(services);
     }
 
     @Override
@@ -355,8 +357,10 @@ public class DefaultShareService implements ShareService {
                 /*
                  * delete all targets for all guest users
                  */
-                shareStorage.deleteTargets(contextId, targets, connectionHelper.getParameters());
-                new GuestCleaner(services).cleanupContext(connectionHelper, contextId);
+                if (0 < shareStorage.deleteTargets(contextId, targets, connectionHelper.getParameters())) {
+                   guestCleaner.cleanupContext(connectionHelper, contextId);
+//                    guestCleaner.scheduleContextCleanup(contextId);
+                }
             } else {
                 /*
                  * delete targets for specific guests
@@ -367,8 +371,10 @@ public class DefaultShareService implements ShareService {
                         shares.add(new Share(guestID.intValue(), target));
                     }
                 }
-                shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters());
-                new GuestCleaner(services).cleanupGuests(connectionHelper, contextId, I2i(guestIDs));
+                if (0 < shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters())) {
+                   guestCleaner.cleanupGuests(connectionHelper, contextId, I2i(guestIDs));
+//                    guestCleaner.scheduleGuestCleanup(contextId, I2i(guestIDs));
+                }
             }
             connectionHelper.commit();
         } finally {
@@ -505,7 +511,8 @@ public class DefaultShareService implements ShareService {
         int contextID = connectionHelper.getContextID();
         int[] guestIDs = I2i(ShareTool.getGuestIDs(shares));
         services.getService(ShareStorage.class).deleteShares(connectionHelper.getContextID(), shares, connectionHelper.getParameters());
-        new GuestCleaner(services).cleanupGuests(connectionHelper, contextID, guestIDs);
+        guestCleaner.cleanupGuests(connectionHelper, contextID, guestIDs);
+//        guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
     }
 
     /**

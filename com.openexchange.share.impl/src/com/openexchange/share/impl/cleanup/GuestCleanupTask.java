@@ -85,27 +85,25 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
     /**
      * Initializes a new {@link GuestCleanupTask}.
      *
-     * @param priority The priority of the task
      * @param services A service lookup reference
      * @param connectionHelper A (started) connection helper
      * @param contextID The context ID
      * @param guestID The identifier of the guest to cleanup
      */
-    public GuestCleanupTask(int priority, ServiceLookup services, ConnectionHelper connectionHelper, int contextID, int guestID) {
-        super(priority, services, connectionHelper, contextID);
+    public GuestCleanupTask(ServiceLookup services, ConnectionHelper connectionHelper, int contextID, int guestID) {
+        super(services, connectionHelper, contextID);
         this.guestID = guestID;
     }
 
     /**
      * Initializes a new {@link GuestCleanupTask}.
      *
-     * @param priority The priority of the task
      * @param services A service lookup reference
      * @param contextID The context ID
      * @param guestID The identifier of the guest to cleanup
      */
-    public GuestCleanupTask(int priority, ServiceLookup services, int contextID, int guestID) {
-        this(priority, services, null, contextID, guestID);
+    public GuestCleanupTask(ServiceLookup services, int contextID, int guestID) {
+        this(services, null, contextID, guestID);
     }
 
     @Override
@@ -141,12 +139,16 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
             /*
              * no shares remaining, delete guest user
              */
+            LOG.debug("No shares for guest user {} in context {} remaining, deleting guest user.", guestUser.getId(), context.getContextId());
+            //TODO: delayed deletion if user is not anonymous
             deleteGuest(connectionHelper.getConnection(), context, guestUser.getId());
         } else {
             /*
              * guest user still has shares, adjust permissions as needed
              */
             int requiredPermissionBits = ShareTool.getRequiredPermissionBits(guestUser, modules);
+            LOG.debug("Shares in modules {} still available for for guest user {} in context {}, adjusting permission bits to {}.",
+                modules, guestUser.getId(), context.getContextId(), requiredPermissionBits);
             setPermissionBits(connectionHelper.getConnection(), context, guestUser.getId(), requiredPermissionBits, true);
         }
     }
@@ -221,6 +223,7 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
                 throw e;
             }
         }
+        LOG.info("Guest user {} in context {} deleted.", guestID, context.getContextId());
     }
 
     @Override

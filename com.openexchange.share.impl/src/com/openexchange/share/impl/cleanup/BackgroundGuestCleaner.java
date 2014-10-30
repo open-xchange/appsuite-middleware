@@ -49,34 +49,63 @@
 
 package com.openexchange.share.impl.cleanup;
 
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.impl.ConnectionHelper;
-import com.openexchange.threadpool.AbstractTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link AbstractCleanupTask}
+ * {@link BackgroundGuestCleaner}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public abstract class AbstractCleanupTask<V> extends AbstractTask<V> {
+public class BackgroundGuestCleaner implements Runnable {
 
-    protected final ServiceLookup services;
-    protected final int contextID;
-    protected final ConnectionHelper connectionHelper;
+    private static final Logger LOG = LoggerFactory.getLogger(BackgroundGuestCleaner.class);
+    private final BlockingQueue<GuestCleanupTask> cleanupTasks;
+    private final AtomicBoolean active;
 
     /**
-     * Initializes a new {@link AbstractCleanupTask}.
+     * Initializes a new {@link BackgroundGuestCleaner}.
      *
-     * @param services A service lookup reference
-     * @param connectionHelper A (started) connection helper, or <code>null</code> if not supplied
-     * @param contextID The context ID
+     * @param cleanupTasks The queue yielding cleanup tasks for the worker
      */
-    protected AbstractCleanupTask(ServiceLookup services, ConnectionHelper connectionHelper, int contextID) {
+    public BackgroundGuestCleaner(BlockingQueue<GuestCleanupTask> cleanupTasks) {
         super();
-        this.services = services;
-        this.connectionHelper = connectionHelper;
-        this.contextID = contextID;
+        this.cleanupTasks = cleanupTasks;
+        this.active = new AtomicBoolean(true);
+    }
+
+    /**
+     * Stops all background processing by signaling termination flag.
+     */
+    public void stop() {
+        active.set(false);
+    }
+
+    @Override
+    public void run() {
+        LOG.info("Background guest cleaner starting.");
+        while (active.get()) {
+            try {
+                GuestCleanupTask task = cleanupTasks.take();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Starting cleanup task {}.", task);
+                    long start = System.currentTimeMillis();
+                    task.call();
+                    LOG.debug("Guest cleanup task {} finished after {}ms.", task, (System.currentTimeMillis() - start));
+                } else {
+                    task.call();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            } catch (Exception e) {
+                LOG.error("Error during guest cleanup", e);
+            }
+        }
+        LOG.info("Background guest cleaner stopped.");
     }
 
 }

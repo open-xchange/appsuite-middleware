@@ -77,24 +77,22 @@ public class ContextCleanupTask extends AbstractCleanupTask<List<GuestCleanupTas
     /**
      * Initializes a new {@link ContextCleanupTask}.
      *
-     * @param priority The priority of the task
      * @param services A service lookup reference
      * @param connectionHelper A (started) connection helper
      * @param contextID The context ID
      */
-    public ContextCleanupTask(int priority, ServiceLookup services, ConnectionHelper connectionHelper, int contextID) {
-        super(priority, services, connectionHelper, contextID);
+    public ContextCleanupTask(ServiceLookup services, ConnectionHelper connectionHelper, int contextID) {
+        super(services, connectionHelper, contextID);
     }
 
     /**
      * Initializes a new {@link ContextCleanupTask}.
      *
-     * @param priority The priority of the task
      * @param services A service lookup reference
      * @param contextID The context ID
      */
-    public ContextCleanupTask(int priority, ServiceLookup services, int contextID) {
-        this(priority, services, null, contextID);
+    public ContextCleanupTask(ServiceLookup services, int contextID) {
+        this(services, null, contextID);
     }
 
     @Override
@@ -122,7 +120,7 @@ public class ContextCleanupTask extends AbstractCleanupTask<List<GuestCleanupTas
         if (null != guestIDs && 0 < guestIDs.length) {
             List<GuestCleanupTask> cleanupTasks = new ArrayList<GuestCleanupTask>(guestIDs.length);
             for (int guestID : guestIDs) {
-                cleanupTasks.add(new GuestCleanupTask(priority, services, connectionHelper, contextID, guestID));
+                cleanupTasks.add(new GuestCleanupTask(services, connectionHelper, contextID, guestID));
             }
             return cleanupTasks;
         }
