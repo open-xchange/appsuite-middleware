@@ -50,6 +50,8 @@
 package com.openexchange.resource.json.actions;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +64,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.resource.Resource;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
@@ -92,16 +95,17 @@ public final class ListAction extends AbstractResourceAction {
 
     @Override
     protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-        final JSONArray jsonResponseArray = new JSONArray();
-
         UserStorage userStorage = null;
 
-        final JSONArray jsonArray = req.getData();
-        final int len = jsonArray.length();
-        final Date timestamp;
+        JSONArray jsonArray = req.getData();
+        int len = jsonArray.length();
+        Date timestamp;
+        List<Resource> resources = new LinkedList<Resource>();
+
         if (len > 0) {
             long lastModified = Long.MIN_VALUE;
-            final ServerSession session = req.getSession();
+            ServerSession session = req.getSession();
+
             for (int a = 0; a < len; a++) {
                 final JSONObject jData = jsonArray.getJSONObject(a);
                 final int id = DataParser.checkInt(jData, DataFields.ID);
@@ -130,14 +134,14 @@ public final class ListAction extends AbstractResourceAction {
                     lastModified = r.getLastModified().getTime();
                 }
 
-                jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(r));
+                resources.add(r);
             }
             timestamp = new Date(lastModified);
         } else {
             timestamp = new Date(0);
         }
 
-        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+        return new AJAXRequestResult(resources, timestamp, "resource");
     }
 
 }

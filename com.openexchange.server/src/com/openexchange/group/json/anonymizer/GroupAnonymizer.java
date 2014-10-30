@@ -50,6 +50,7 @@
 package com.openexchange.group.json.anonymizer;
 
 import com.openexchange.ajax.anonymizer.AnonymizerService;
+import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -82,7 +83,8 @@ public class GroupAnonymizer implements AnonymizerService<Group> {
             return entity;
         }
 
-        String name = new StringBuilder("Group ").append(entity.getIdentifier()).toString();
+        String i18n = Anonymizers.getGroupI18nFor(session);
+        String name = new StringBuilder(i18n).append(' ').append(entity.getIdentifier()).toString();
         entity.setDisplayName(name);
         entity.setSimpleName(name);
         return entity;

@@ -50,13 +50,15 @@
 package com.openexchange.resource.json.actions;
 
 import java.util.Date;
-import org.json.JSONArray;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.resource.Resource;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
@@ -74,6 +76,7 @@ public final class AllAction extends AbstractResourceAction {
 
     /**
      * Initializes a new {@link AllAction}.
+     *
      * @param services
      */
     public AllAction(final ServiceLookup services) {
@@ -84,25 +87,24 @@ public final class AllAction extends AbstractResourceAction {
 
     @Override
     protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-        final JSONArray jsonResponseArray = new JSONArray();
 
-        final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(
-                STR_ALL, req.getSession().getContext());
-        final Date timestamp;
+        com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(STR_ALL, req.getSession().getContext());
+        Date timestamp;
+        List<Resource> list = new LinkedList<Resource>();
+
         if (resources.length > 0) {
             long lastModified = Long.MIN_VALUE;
             for (final com.openexchange.resource.Resource resource : resources) {
                 if (lastModified < resource.getLastModified().getTime()) {
                     lastModified = resource.getLastModified().getTime();
                 }
-                jsonResponseArray.put(resource.getIdentifier());
             }
             timestamp = new Date(lastModified);
         } else {
             timestamp = new Date(0);
         }
 
-        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+        return new AJAXRequestResult(list, timestamp, "resource");
     }
 
 }

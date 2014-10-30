@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.anonymizer.AnonymizerService;
+import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -86,7 +87,7 @@ public class UserAnonymizerService implements AnonymizerService<User> {
         }
 
         // A user
-        return new AnonymizingUser(entity);
+        return new AnonymizingUser(entity, session);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -97,11 +98,13 @@ public class UserAnonymizerService implements AnonymizerService<User> {
 
         private final User delegate;
         private final String displayName;
+        private final String i18n;
 
-        AnonymizingUser(User delegate) {
+        AnonymizingUser(User delegate, Session session) throws OXException {
             super();
             this.delegate = delegate;
-            displayName = new StringBuilder("User ").append(delegate.getId()).toString();
+            i18n = Anonymizers.getUserI18nFor(session);
+            displayName = new StringBuilder(i18n).append(' ').append(delegate.getId()).toString();
         }
 
         @Override
@@ -166,7 +169,7 @@ public class UserAnonymizerService implements AnonymizerService<User> {
 
         @Override
         public String getSurname() {
-            return "User";
+            return i18n;
         }
 
         @Override

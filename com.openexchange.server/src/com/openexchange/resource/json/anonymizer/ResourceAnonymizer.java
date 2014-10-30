@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,48 @@
  *
  */
 
-package com.openexchange.resource.json.osgi;
+package com.openexchange.resource.json.anonymizer;
 
 import com.openexchange.ajax.anonymizer.AnonymizerService;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.resource.json.ResourceActionFactory;
-import com.openexchange.resource.json.anonymizer.ResourceAnonymizer;
-import com.openexchange.resource.json.resultconverter.ResourceJsonResultConverter;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.ajax.anonymizer.Anonymizers;
+import com.openexchange.ajax.anonymizer.Module;
+import com.openexchange.exception.OXException;
+import com.openexchange.resource.Resource;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link ResourceJSONActivator}
+ * {@link ResourceAnonymizer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public final class ResourceJSONActivator extends AJAXModuleActivator {
+public class ResourceAnonymizer implements AnonymizerService<Resource> {
 
     /**
-     * Initializes a new {@link ResourceJSONActivator}.
+     * Initializes a new {@link ResourceAnonymizer}.
      */
-    public ResourceJSONActivator() {
+    public ResourceAnonymizer() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+    public Module getModule() {
+        return Module.RESOURCE;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ResourceActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "resource");
-        registerService(ResultConverter.class, new ResourceJsonResultConverter());
-        registerService(AnonymizerService.class, new ResourceAnonymizer());
+    public Resource anonymize(Resource entity, Session session) throws OXException {
+        if (null == entity) {
+            return entity;
+        }
+
+        String i18n = Anonymizers.getResourceI18nFor(session);
+        String name = new StringBuilder(i18n).append(' ').append(entity.getIdentifier()).toString();
+        entity.setDisplayName(name);
+        entity.setSimpleName(name);
+        entity.setDescription("");
+        return entity;
     }
 
 }

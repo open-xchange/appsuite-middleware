@@ -50,6 +50,8 @@
 package com.openexchange.resource.json.actions;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +61,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceAJAXRequest;
@@ -81,7 +84,6 @@ public final class SearchAction extends AbstractResourceAction {
 
     /**
      * Initializes a new {@link SearchAction}.
-     * @param services
      */
     public SearchAction(final ServiceLookup services) {
         super(services);
@@ -89,44 +91,43 @@ public final class SearchAction extends AbstractResourceAction {
 
     @Override
     protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-        final ResourceService resourceService = ResourceServiceImpl.getInstance();
+        ResourceService resourceService = ResourceServiceImpl.getInstance();
         if (null == resourceService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ResourceService.class.getName());
         }
 
         if (!req.getSession().getUserPermissionBits().hasGroupware()) {
             return new AJAXRequestResult(new JSONArray(0), "json");
         }
 
-        // Appropriate permissiin is granted
+        // Appropriate permission is granted
         // Continue processing search request
 
-        final JSONArray jsonResponseArray = new JSONArray();
-
-        final JSONObject jData = req.getData();
+        JSONObject jData = req.getData();
         if (!jData.hasAndNotNull(SearchFields.PATTERN)) {
             LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
             return new AllAction(services).perform(req);
         }
 
-        final String searchpattern = jData.getString(SearchFields.PATTERN);
+        String searchpattern = jData.getString(SearchFields.PATTERN);
+        com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, req.getSession().getContext());
+        Date timestamp;
+        List<Resource> list = new LinkedList<Resource>();
 
-        final com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, req.getSession().getContext());
-        final Date timestamp;
         if (resources.length > 0) {
             long lastModified = Long.MIN_VALUE;
             for (final com.openexchange.resource.Resource resource : resources) {
                 if (lastModified < resource.getLastModified().getTime()) {
                     lastModified = resource.getLastModified().getTime();
                 }
-                jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(resource));
+                list.add(resource);
             }
             timestamp = new Date(lastModified);
         } else {
             timestamp = new Date(0);
         }
 
-        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+        return new AJAXRequestResult(list, timestamp, "resource");
     }
 
 }

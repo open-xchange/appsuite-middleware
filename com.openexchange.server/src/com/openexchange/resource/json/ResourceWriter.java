@@ -75,7 +75,7 @@ public final class ResourceWriter {
      * @throws JSONException If writing to JSON object fails
      */
     public static JSONObject writeResource(final Resource resource) throws JSONException {
-        final JSONObject retval = new JSONObject();
+        final JSONObject retval = new JSONObject(10);
         retval.put(ResourceFields.ID, resource.getIdentifier() == -1 ? JSONObject.NULL : Integer.valueOf(resource.getIdentifier()));
         retval.put(ResourceFields.NAME, resource.getSimpleName() == null ? JSONObject.NULL : resource.getSimpleName());
         retval.put(ResourceFields.DISPLAY_NAME, resource.getDisplayName() == null ? JSONObject.NULL : resource.getDisplayName());

@@ -52,7 +52,6 @@ package com.openexchange.group.json.resultconverter;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.Group.Field;
 import com.openexchange.groupware.results.CollectionDelta;
-import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -107,22 +105,13 @@ public class GroupJsonResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         try {
-            TimeZone timeZone;
-            {
-                String timeZoneID = requestData.getParameter("timezone");
-                if (null == timeZoneID) {
-                    timeZoneID = session.getUser().getTimeZone();
-                }
-                timeZone = TimeZoneUtils.getTimeZone(timeZoneID);
-            }
-
-            convert(requestData, result, session, converter, timeZone);
+            convert(requestData, result, session);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone timeZone) throws OXException, JSONException {
+    private void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException, JSONException {
         Object resultObject = result.getResultObject();
         if (resultObject instanceof Group) {
             Group group = (Group) resultObject;
@@ -187,7 +176,7 @@ public class GroupJsonResultConverter implements ResultConverter {
             jResult.put("new", jGroups).put("modified", jGroups);
             jResult.put("deleted", jDeletedGroups);
 
-            result.setResultObject(jGroups, "json");
+            result.setResultObject(jResult, "json");
         } else if (AJAXServlet.ACTION_ALL.equalsIgnoreCase(requestData.getAction())) {
             Collection<Group> groups = (Collection<Group>) resultObject;
 

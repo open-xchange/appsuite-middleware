@@ -52,6 +52,7 @@ package com.openexchange.ajax.anonymizer;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -92,21 +93,6 @@ public final class Anonymizers {
      */
     private Anonymizers() {
         super();
-    }
-
-    /**
-     * Gets the the locale associated with session's user.
-     *
-     * @param session The session
-     * @return The locale
-     * @throws OXException If locale cannot be returned
-     */
-    public static Locale getLocaleFrom(Session session) throws OXException {
-        if (null == session) {
-            return Locale.US;
-        }
-        Locale locale = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
-        return null == locale ? Locale.US : locale;
     }
 
     /**
@@ -250,6 +236,75 @@ public final class Anonymizers {
         }
 
         return anonymizer.anonymize(entity, session);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the translated user module identifier for given locale.
+     *
+     * @param string The string to translate
+     * @param session The session to determine the locale from
+     * @return The translated user module identifier
+     * @throws OXException If the translated cannot be returned
+     */
+    public static String getUserI18nFor(Session session) throws OXException {
+        return getI18nFor(AnonymizerStrings.MODULE_USER, session);
+    }
+
+    /**
+     * Gets the translated group module identifier for given locale.
+     *
+     * @param string The string to translate
+     * @param session The session to determine the locale from
+     * @return The translated group module identifier
+     * @throws OXException If the translated cannot be returned
+     */
+    public static String getGroupI18nFor(Session session) throws OXException {
+        return getI18nFor(AnonymizerStrings.MODULE_GROUP, session);
+    }
+
+    /**
+     * Gets the translated resource module identifier for given locale.
+     *
+     * @param string The string to translate
+     * @param session The session to determine the locale from
+     * @return The translated resource module identifier
+     * @throws OXException If the translated cannot be returned
+     */
+    public static String getResourceI18nFor(Session session) throws OXException {
+        return getI18nFor(AnonymizerStrings.MODULE_RESOURCE, session);
+    }
+
+    /**
+     * Gets the translated string for given locale.
+     *
+     * @param string The string to translate
+     * @param session The session to determine the locale from
+     * @return The translated string
+     * @throws OXException If the translated cannot be returned
+     */
+    public static String getI18nFor(String string, Session session) throws OXException {
+        if (null == string) {
+            return string;
+        }
+
+        return StringHelper.valueOf(getLocaleFrom(session)).getString(string);
+    }
+
+    /**
+     * Gets the the locale associated with session's user.
+     *
+     * @param session The session
+     * @return The locale
+     * @throws OXException If locale cannot be returned
+     */
+    public static Locale getLocaleFrom(Session session) throws OXException {
+        if (null == session) {
+            return Locale.US;
+        }
+        Locale locale = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
+        return null == locale ? Locale.US : locale;
     }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.user.json.anonymizer;
 
 import com.openexchange.ajax.anonymizer.AnonymizerService;
+import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -84,9 +85,10 @@ public class ContactAnonymizerService implements AnonymizerService<Contact> {
 
         // A user contact
         int userId = entity.getInternalUserId();
-        entity.setDisplayName(new StringBuilder("User ").append(userId).toString());
+        String i18n = Anonymizers.getUserI18nFor(session);
+        entity.setDisplayName(new StringBuilder(i18n).append(' ').append(userId).toString());
         entity.setGivenName(Integer.toString(userId));
-        entity.setSurName("User");
+        entity.setSurName(i18n);
 
         entity.setEmail1("");
         entity.setEmail2("");
