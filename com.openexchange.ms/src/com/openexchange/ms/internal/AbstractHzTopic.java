@@ -56,6 +56,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.java.BufferingQueue;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.Topic;
@@ -74,7 +75,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
     private final String senderId;
     private final String name;
     private final ConcurrentMap<MessageListener<E>, String> registeredListeners;
-    private final HzDelayQueue<HzDelayed<E>> publishQueue;
+    private final BufferingQueue<E> publishQueue;
     private final ScheduledTimerTask timerTask;
 
     /**
@@ -88,7 +89,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         registeredListeners = new ConcurrentHashMap<MessageListener<E>, String>(8);
-        publishQueue = new HzDelayQueue<HzDelayed<E>>();
+        publishQueue = new BufferingQueue<E>(HzDataUtility.DELAY_MSEC);
         // Timer task
         final TimerService timerService = Services.getService(TimerService.class);
         final org.slf4j.Logger log = LOG;
@@ -153,7 +154,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
 
     @Override
     public void publish(final E message) {
-        publishQueue.offerIfAbsent(new HzDelayed<E>(message, false));
+        publishQueue.offerIfAbsent(message);
         triggerPublish();
     }
 
@@ -161,13 +162,8 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
      * Triggers all due messages.
      */
     public void triggerPublish() {
-        HzDelayed<E> polled = publishQueue.poll();
-        if (null != polled) {
-            final List<E> messages = new LinkedList<E>();
-            do {
-                messages.add(polled.getData());
-                polled = publishQueue.poll();
-            } while (polled != null);
+        List<E> messages = new LinkedList<E>();
+        if (0 < publishQueue.drainTo(messages)) {
             publishNow(messages);
         }
     }
