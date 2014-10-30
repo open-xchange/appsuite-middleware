@@ -183,6 +183,25 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
+    public User getUser(final int userId, final int contextId) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getUser(userId, ContextStorage.getInstance().getContext(contextId));
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        Object object = cache.get(cacheService.newCacheKey(contextId, userId));
+        if (object instanceof User) {
+            return (User) object;
+        }
+
+        Context context = ContextStorage.getInstance().getContext(contextId);
+        User user = delegate.getUser(userId, context);
+        cache.put(cacheService.newCacheKey(contextId, userId), user, false);
+        return user;
+    }
+
+    @Override
     public User getUser(final Context ctx, final int userId, final Connection con) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
