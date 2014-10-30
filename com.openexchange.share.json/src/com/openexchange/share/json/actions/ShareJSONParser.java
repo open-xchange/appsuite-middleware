@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,15 +83,16 @@ public class ShareJSONParser {
      * Parses a list of share targets from the supplied JSON array.
      *
      * @param jsonTargets The JSON array holding the share targets
+     * @param timeZone
      * @return The share targets
      */
-    public static List<ShareTarget> parseTargets(JSONArray jsonTargets) throws OXException, JSONException {
+    public static List<ShareTarget> parseTargets(JSONArray jsonTargets, TimeZone timeZone) throws OXException, JSONException {
         if (null == jsonTargets || 0 == jsonTargets.length()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("targets");
         }
         List<ShareTarget> targets = new ArrayList<ShareTarget>();
         for (int i = 0; i < jsonTargets.length(); i++) {
-            targets.add(parseTarget(jsonTargets.getJSONObject(i)));
+            targets.add(parseTarget(jsonTargets.getJSONObject(i), timeZone));
         }
         return targets;
     }
@@ -102,7 +104,7 @@ public class ShareJSONParser {
      * @return The share target
      * @throws OXException
      */
-    public static ShareTarget parseTarget(JSONObject jsonTarget) throws JSONException, OXException {
+    public static ShareTarget parseTarget(JSONObject jsonTarget, TimeZone timeZone) throws JSONException, OXException {
         if (false == jsonTarget.hasAndNotNull("module")) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("module");
         }
@@ -122,7 +124,7 @@ public class ShareJSONParser {
         }
 
         if (jsonTarget.hasAndNotNull("expiry_date")) {
-            target.setExpiryDate(new Date(jsonTarget.getLong("expiry_date")));
+            target.setExpiryDate(new Date(removeTimeZoneOffset(jsonTarget.getLong("expiry_date"), timeZone)));
         }
 
         if (jsonTarget.hasAndNotNull("meta")) {
@@ -134,6 +136,10 @@ public class ShareJSONParser {
         }
 
         return target;
+    }
+
+    public static long removeTimeZoneOffset(final long date, final TimeZone timeZone) {
+        return null == timeZone ? date : date - timeZone.getOffset(date);
     }
 
     /**

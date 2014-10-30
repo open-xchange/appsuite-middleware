@@ -94,7 +94,7 @@ public class DeleteAction extends AbstractShareAction {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 int guest = jsonObject.getInt("guest");
-                ShareTarget target = ShareJSONParser.parseTarget(jsonObject);
+                ShareTarget target = ShareJSONParser.parseTarget(jsonObject, getTimeZone(requestData, session));
                 shares.add(new Share(guest, target));
             }
         } catch (JSONException e) {

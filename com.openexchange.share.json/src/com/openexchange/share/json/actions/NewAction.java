@@ -95,7 +95,7 @@ public class NewAction extends AbstractShareAction {
         try {
             JSONObject data = (JSONObject) requestData.requireData();
             List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"));
+            List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"), getTimeZone(requestData, session));
             String message = data.optString("message", null);
 
             CreatePerformer createPerformer = new CreatePerformer(recipients, targets, session, services);

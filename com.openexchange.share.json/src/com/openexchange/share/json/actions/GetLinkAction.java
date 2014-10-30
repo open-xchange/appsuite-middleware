@@ -88,7 +88,7 @@ public class GetLinkAction extends AbstractShareAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"));
+            List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"), getTimeZone(requestData, session));
 
             int permissionBits;
             if (json.hasAndNotNull("bits")) {

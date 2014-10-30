@@ -50,6 +50,7 @@
 package com.openexchange.share.json.actions;
 
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -136,6 +137,15 @@ public abstract class AbstractShareAction implements AJAXActionService {
 
     protected String generateShareURL(int contextId, int guestId, int userId, ShareTarget target, AJAXRequestData requestData) throws OXException {
         return getShareService().generateShareURL(contextId, guestId, userId, target, determineProtocol(requestData), determineHostname(requestData));
+    }
+
+    protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
+        String timeZoneID = requestData.getParameter("timezone");
+        if (null == timeZoneID) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
+        return timeZone;
     }
 
     protected static String determineProtocol(AJAXRequestData requestData) {

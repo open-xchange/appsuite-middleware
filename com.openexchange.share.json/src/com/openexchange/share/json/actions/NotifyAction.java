@@ -94,7 +94,7 @@ public class NotifyAction extends AbstractShareAction {
             JSONObject request = (JSONObject) requestData.requireData();
             token = request.getString("token");
             if (request.hasAndNotNull("target")) {
-                target = ShareJSONParser.parseTarget(request.getJSONObject("target"));
+                target = ShareJSONParser.parseTarget(request.getJSONObject("target"), getTimeZone(requestData, session));
             }
             recipient = request.getString("recipient");
             message = request.optString("message");
