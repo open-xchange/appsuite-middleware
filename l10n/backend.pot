@@ -4389,6 +4389,11 @@ msgstr ""
 msgid "Timeout while reading the RSS feed from URL: %1$s"
 msgstr ""
 
+#. No appropriate anonymizer available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
+msgid "No appropriate anonymizer available."
+msgstr ""
+
 #. *
 #. * The value you inserted for %2$s is not correct
 #.
@@ -7787,36 +7792,44 @@ msgid "The requested share does not exist."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:66
-msgid "The link \"%1$s\" is invalid."
+msgid "The token \"%1$s\" is invalid."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
-msgid "\"%1$s\" is not a valid email address."
+msgid "The link \"%1$s\" is invalid."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
+msgid "\"%1$s\" is not a valid email address."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
 msgid ""
 "The share has been modified in the meantime. Please refresh or synchronize "
 "and try again."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:74
 msgid "You don't have sufficient permissions to delete the share."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:76
 msgid "You don't have sufficient permissions to edit the share."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:76
-msgid "Module %1$s does not support sharing."
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:78
-msgid "Module %1$s does not support sharing of items."
+msgid "You don't have sufficient permissions to share folder or item \"%2$s\"."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:80
+msgid "Module %1$s does not support sharing."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:82
+msgid "Module %1$s does not support sharing of items."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:84
 msgid "Module %1$s does not support sharing of folders."
 msgstr ""
 
