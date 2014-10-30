@@ -2,6 +2,12 @@ open-xchange-file-storage-dropbox (7.6.2-0) unstable; urgency=medium
 
   * prepare for 7.6.2 release
 
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 30 Oct 2014 13:39:24 +0100
+
+open-xchange-file-storage-dropbox (7.6.2-0) unstable; urgency=medium
+
+  * prepare for 7.6.2 release
+
  -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 17 Sep 2014 12:36:14 +0200
 
 open-xchange-file-storage-dropbox (7.6.1-6) stable; urgency=medium
