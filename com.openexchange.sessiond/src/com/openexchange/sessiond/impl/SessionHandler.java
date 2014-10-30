@@ -1326,7 +1326,7 @@ public final class SessionHandler {
             if (null != sessionData) {
                 int contextId = session.getContextId();
                 int userId = session.getUserId();
-                if (sessionData.isUserActive(userId, contextId, false)) {
+                if (false == sessionData.isUserActive(userId, contextId, false)) {
                     postLastSessionGone(userId, contextId, eventAdmin);
                 }
             }
@@ -1343,7 +1343,7 @@ public final class SessionHandler {
 
             SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
-                if (sessionData.hasForContext(contextId)) {
+                if (false == sessionData.hasForContext(contextId)) {
                     postContextLastSessionGone(contextId, eventAdmin);
                 }
             }
@@ -1410,7 +1410,7 @@ public final class SessionHandler {
             SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
                 for (UserKey userKey : users) {
-                    if (sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
+                    if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
                         postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
                     }
                 }
@@ -1438,7 +1438,7 @@ public final class SessionHandler {
             SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
                 for (UserKey userKey : users) {
-                    if (sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
+                    if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
                         postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
                     }
                 }
