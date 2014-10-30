@@ -49,10 +49,15 @@
 
 package com.openexchange.jslob.storage.db.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -74,6 +79,7 @@ import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableTask;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobIncreaseBlobSizeTask;
 import com.openexchange.jslob.storage.db.groupware.JSlobDBDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -100,8 +106,9 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
         LOG.info("Starting bundle: com.openexchange.jslob.storage.db");
         try {
             Services.setServices(this);
-            final DBJSlobStorage dbJSlobStorage = new DBJSlobStorage(this);
-            registerService(JSlobStorage.class, CachingJSlobStorage.initialize(dbJSlobStorage));
+            DBJSlobStorage dbJSlobStorage = new DBJSlobStorage(this);
+            final CachingJSlobStorage cachingJSlobStorage = CachingJSlobStorage.initialize(dbJSlobStorage);
+            registerService(JSlobStorage.class, cachingJSlobStorage);
             /*
              * Register services for table creation
              */
@@ -202,6 +209,28 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                 track(JSlobService.class, stc);
             }
             openTrackers();
+
+            {
+                EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(Event event) {
+                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(event.getTopic())) {
+                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                            if (null != contextId) {
+                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                                if (null != userId) {
+                                    cachingJSlobStorage.dropAllUserJSlobs(userId.intValue(), contextId.intValue());
+                                }
+                            }
+                        }
+                    }
+                };
+
+                Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+                props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+                registerService(EventHandler.class, eventHandler, props);
+            }
         } catch (final Exception e) {
             LOG.error("Starting bundle \"com.openexchange.jslob.storage.db\" failed", e);
             throw e;

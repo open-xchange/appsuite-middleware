@@ -65,7 +65,16 @@ public final class SessiondEventConstants {
     }
 
     /**
-     * The topic on last session gone.
+     * The topic on last session gone for a certain context.
+     * <p>
+     * Provides {@link #PROP_CONTEXT_ID} property.
+     */
+    public static final String TOPIC_LAST_SESSION_CONTEXT = "com/openexchange/sessiond/remove/lastcontext";
+
+    /**
+     * The topic on last session gone for a certain user.
+     * <p>
+     * Provides {@link #PROP_CONTEXT_ID} and {@link #PROP_USER_ID} properties.
      */
     public static final String TOPIC_LAST_SESSION = "com/openexchange/sessiond/remove/last";
 
