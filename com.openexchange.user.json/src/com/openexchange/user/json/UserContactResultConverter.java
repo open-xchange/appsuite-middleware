@@ -123,7 +123,7 @@ public class UserContactResultConverter implements ResultConverter {
 			 */
 			UserContact userContact = (UserContact)resultObject;
 
-			if (Anonymizers.isGuest(session)) {
+			if (Anonymizers.isGuest(session) && null != userContact.getUser() && session.getUserId() != userContact.getUser().getId()) {
                 userContact.setContact(Anonymizers.optAnonymize(userContact.getContact(), Module.CONTACT, session));
                 userContact.setUser(Anonymizers.optAnonymize(userContact.getUser(), Module.USER, session));
             }
@@ -141,8 +141,10 @@ public class UserContactResultConverter implements ResultConverter {
                 AnonymizerService<User> userAnonymizer = Anonymizers.optAnonymizerFor(Module.USER);
 
                 for (UserContact userContact : userContacts) {
-                    userContact.setContact(contactAnonymizer.anonymize(userContact.getContact(), session));
-                    userContact.setUser(userAnonymizer.anonymize(userContact.getUser(), session));
+                    if (null != userContact.getUser() && session.getUserId() != userContact.getUser().getId()) {
+                        userContact.setContact(contactAnonymizer.anonymize(userContact.getContact(), session));
+                        userContact.setUser(userAnonymizer.anonymize(userContact.getUser(), session));
+                    }
                     jArray.put(userContact.serialize(session, columnIDs, timeZoneID, attributeParameters));
                 }
             } else {
