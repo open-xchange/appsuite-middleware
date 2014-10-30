@@ -50,6 +50,7 @@
 package com.openexchange.java;
 
 import java.util.AbstractQueue;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -60,22 +61,28 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 /**
- * {@link CustomDelayQueue}
+ * {@link BufferingQueue}
  * <p/>
- * A <code>java.util.concurrent.DelayQueue</code> holding {@link CustomDelayed} elements, enhanced by
- * {@link #offerIfAbsent(CustomDelayed)}, {@link #offerIfAbsentElseReset(CustomDelayed)}, {@link #offerOrReplace(CustomDelayed)}.
+ * Wraps an event queue as a buffer for elements that should be available in the queue after a defined timespan. Offering the same
+ * elements again optionally resets the buffering time via {@link #offerIfAbsentElseReset(BufferedElement)}, up to a defined maximum
+ * duration, or may replace the existing element via {@link #offerOrReplace(BufferedElement)}.
  * <p/>
- * Useful to construct send- or receive-buffers capable of eliminating or stalling multiple duplicate events.
+ * Useful to construct send- or receive-buffers capable of eliminating or stalling multiple duplicate elements before they get available
+ * for consumers.
  *
+ * @param <E> the type of elements held in this collection
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> implements BlockingQueue<CustomDelayed<E>> {
+public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue<E> {
 
-    private transient final ReentrantLock lock = new ReentrantLock();
-    private final PriorityQueue<CustomDelayed<E>> q = new PriorityQueue<CustomDelayed<E>>();
+    /** The lock instance */
+    transient final ReentrantLock lock = new ReentrantLock();
+
+    /** The backing priority queue */
+    final PriorityQueue<BufferedElement<E>> q = new PriorityQueue<BufferedElement<E>>();
 
     /**
      * Thread designated to wait for the element at the head of
@@ -102,23 +109,71 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      */
     private final Condition available = lock.newCondition();
 
+    private final long defaultDelayDuration;
+    private final long defaultMaxDelayDuration;
+
     /**
-     * Creates a new <tt>DelayQueue</tt> that is initially empty.
+     * Creates a new {@link BufferingQueue} that is initially empty, without specific default buffer durations, i.e. each added element
+     * is available immediately after adding.
      */
-    public CustomDelayQueue() {
-        super();
+    public BufferingQueue() {
+        this(0L, 0L);
     }
 
     /**
-     * Creates a <tt>DelayQueue</tt> initially containing the elements of the
-     * given collection of {@link Delayed} instances.
+     * Creates a new {@link BufferingQueue} that is initially empty, using the supplied duration as default for newly added elements.
+     *
+     * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     */
+    public BufferingQueue(long defaultDelayDuration) {
+        this(defaultDelayDuration, 0L);
+    }
+
+    /**
+     * Creates a new {@link BufferingQueue} that is initially empty, using the supplied durations as default for newly added elements.
+     *
+     * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param defaultMaxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
+     */
+    public BufferingQueue(long defaultDelayDuration, long defaultMaxDelayDuration) {
+        super();
+        this.defaultDelayDuration = defaultDelayDuration;
+        this.defaultMaxDelayDuration = defaultMaxDelayDuration;
+    }
+
+    /**
+     * Creates a {@link BufferingQueue} initially containing the elements of the given collection, without specific default durations.
      *
      * @param c the collection of elements to initially contain
-     * @throws NullPointerException if the specified collection or any
-     *         of its elements are null
+     * @throws NullPointerException if the specified collection or any of its elements are null
      */
-    public CustomDelayQueue(Collection<? extends CustomDelayed<E>> c) {
-        super();
+    public BufferingQueue(Collection<? extends E> c) {
+        this(c, 0L);
+    }
+
+    /**
+     * Creates a {@link BufferingQueue} initially containing the elements of the given collection, using the supplied duration as
+     * default for newly added elements.
+     *
+     * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param c the collection of elements to initially contain
+     * @throws NullPointerException if the specified collection or any of its elements are null
+     */
+    public BufferingQueue(Collection<? extends E> c, long defaultDelayDuration) {
+        this(c, defaultDelayDuration, 0L);
+    }
+
+    /**
+     * Creates a {@link BufferingQueue} initially containing the elements of the given collection, using the supplied durations as
+     * default for newly added elements.
+     *
+     * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param defaultMaxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
+     * @param c the collection of elements to initially contain
+     * @throws NullPointerException if the specified collection or any of its elements are null
+     */
+    public BufferingQueue(Collection<? extends E> c, long defaultDelayDuration, long defaultMaxDelayDuration) {
+        this(defaultDelayDuration, defaultMaxDelayDuration);
         this.addAll(c);
     }
 
@@ -126,28 +181,54 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      * Inserts the specified element into this delay queue.
      *
      * @param e the element to add
-     * @return <tt>true</tt> (as specified by {@link Collection#add})
+     * @return <code>true</code> (as specified by {@link Collection#add})
      * @throws NullPointerException if the specified element is null
      */
     @Override
-    public boolean add(CustomDelayed<E> e) {
+    public boolean add(E e) {
         return offer(e);
     }
 
     /**
-     * Inserts the specified element into this delay queue.
+     * Inserts the specified element into this delay queue, using the default delay duration of the queue.
      *
      * @param e the element to add
-     * @return <tt>true</tt>
+     * @return <code>true</code>
      * @throws NullPointerException if the specified element is null
      */
     @Override
-    public boolean offer(CustomDelayed<E> e) {
-        final ReentrantLock lock = this.lock;
+    public boolean offer(E e) {
+        return offer(e, defaultDelayDuration, defaultMaxDelayDuration);
+    }
+
+    /**
+     * Inserts the specified element into this delay queue, applying the supplied buffer duration for the added element.
+     *
+     * @param e the element to add
+     * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @return <code>true</code>
+     * @throws NullPointerException if the specified element is null
+     */
+    public boolean offer(E e, long delayDuration) {
+        return offer(e, delayDuration, 0L);
+    }
+
+    /**
+     * Inserts the specified element into this delay queue, applying the supplied buffer durations for the added element.
+     *
+     * @param e the element to add
+     * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param maxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
+     * @return <code>true</code>
+     * @throws NullPointerException if the specified element is null
+     */
+    public boolean offer(E e, long delayDuration, long maxDelayDuration) {
+        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            q.offer(e);
-            if (q.peek() == e) {
+            q.offer(delayedE);
+            if (q.peek() == delayedE) {
                 leader = null;
                 available.signal();
             }
@@ -155,24 +236,50 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * Inserts the specified element into this delay queue without delays, i.e. the element is available immediately.
+     *
+     * @param e the element to add
+     * @return <code>true</code>
+     * @throws NullPointerException if the specified element is null
+     */
+    public boolean offerImmediately(E e) {
+        return offer(e, 0, 0);
+    }
+
+    /**
+     * Inserts the specified element into this delay queue if not already present, applying the supplied buffer durations for the added
+     * element.
+     *
+     * @param e the element to add
+     * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
+     * @throws NullPointerException if the specified element is <code>null</code>
+     */
+    public boolean offerIfAbsent(E e) {
+        return offerIfAbsent(e, defaultDelayDuration, defaultMaxDelayDuration);
     }
 
     /**
      * Inserts the specified element into this delay queue if not already present.
      *
      * @param e the element to add
+     * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param maxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
      * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
      * @throws NullPointerException if the specified element is <code>null</code>
      */
-    public boolean offerIfAbsent(CustomDelayed<E> e) {
-        final ReentrantLock lock = this.lock;
+    public boolean offerIfAbsent(E e, long delayDuration, long maxDelayDuration) {
+        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            if (contains(e)) {
+            if (contains(delayedE)) {
                 return false;
             }
-            q.offer(e);
-            if (q.peek() == e) {
+            q.offer(delayedE);
+            if (q.peek() == delayedE) {
                 leader = null;
                 available.signal();
             }
@@ -183,23 +290,38 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
     }
 
     /**
-     * Inserts the specified element into this delay queue if not already contained.<br>
-     * Otherwise (meaning already contained), the contained elements delay is reseted (up to the defined maxDelayDuration).
+     * Inserts the specified element into this delay queue if not already contained. Otherwise (meaning already contained), the
+     * contained elements delay is reseted (up to contained element's defined maxDelayDuration).
      *
      * @param e The element to add
      * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
      * @throws NullPointerException if the specified element is <code>null</code>
      */
-    public boolean offerIfAbsentElseReset(final CustomDelayed<E> e) {
-        final ReentrantLock lock = this.lock;
+    public boolean offerIfAbsentElseReset(E e) {
+        return offerIfAbsentElseReset(e, defaultDelayDuration, defaultMaxDelayDuration);
+    }
+
+    /**
+     * Inserts the specified element into this delay queue if not already contained. Otherwise (meaning already contained), the
+     * contained elements delay is reseted (up to contained element's defined maxDelayDuration).
+     *
+     * @param e The element to add
+     * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param maxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
+     * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
+     * @throws NullPointerException if the specified element is <code>null</code>
+     */
+    public boolean offerIfAbsentElseReset(E e, long delayDuration, long maxDelayDuration) {
+        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
             // Check if already contained
             {
-                CustomDelayed<E> prev = null;
-                for (final Iterator<CustomDelayed<E>> it = q.iterator(); null == prev && it.hasNext();) {
-                    final CustomDelayed<E> next = it.next();
-                    if (e.equals(next)) {
+                BufferedElement<E> prev = null;
+                for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
+                    BufferedElement<E> next = it.next();
+                    if (delayedE.equals(next)) {
                         prev = next;
                         it.remove();
                     }
@@ -210,8 +332,8 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
                     return false;
                 }
             }
-            q.offer(e);
-            if (q.peek() == e) {
+            q.offer(delayedE);
+            if (q.peek() == delayedE) {
                 leader = null;
                 available.signal();
             }
@@ -222,30 +344,44 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
     }
 
     /**
-     * Inserts the specified element into this delay queue. An already existing element with an equal payload is replaced.
+     * Inserts the specified element into this delay queue without delays, i.e. the element is available immediately. An already existing
+     * element is replaced.
      *
-     * @param e The element to add
+     * @param e the element to add
      * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
      */
-    public CustomDelayed<E> offerOrReplace(final CustomDelayed<E> e) {
-        final ReentrantLock lock = this.lock;
+    public E offerOrReplaceImmediately(E e) {
+        return offerOrReplace(e, 0, 0);
+    }
+
+    /**
+     * Inserts the specified element into this delay queue. An already existing element is replaced.
+     *
+     * @param e The element to add
+     * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param maxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
+     * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
+     */
+    public E offerOrReplace(E e, long delayDuration, long maxDelayDuration) {
+        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
             // Check if already contained
-            CustomDelayed<E> prev = null;
-            for (final Iterator<CustomDelayed<E>> it = q.iterator(); null == prev && it.hasNext();) {
-                final CustomDelayed<E> next = it.next();
-                if (e.equals(next)) {
+            BufferedElement<E> prev = null;
+            for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
+                BufferedElement<E> next = it.next();
+                if (delayedE.equals(next)) {
                     prev = next;
                     it.remove();
                 }
             }
-            q.offer(e);
-            if (q.peek() == e) {
+            q.offer(delayedE);
+            if (q.peek() == delayedE) {
                 leader = null;
                 available.signal();
             }
-            return prev;
+            return null != prev ? prev.getElement() : null;
         } finally {
             lock.unlock();
         }
@@ -259,7 +395,7 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      * @throws NullPointerException {@inheritDoc}
      */
     @Override
-    public void put(CustomDelayed<E> e) {
+    public void put(E e) {
         offer(e);
     }
 
@@ -274,7 +410,7 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      * @throws NullPointerException {@inheritDoc}
      */
     @Override
-    public boolean offer(CustomDelayed<E> e, long timeout, TimeUnit unit) {
+    public boolean offer(E e, long timeout, TimeUnit unit) {
         return offer(e);
     }
 
@@ -286,16 +422,12 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      *         queue has no elements with an expired delay
      */
     @Override
-    public CustomDelayed<E> poll() {
-        final ReentrantLock lock = this.lock;
+    public E poll() {
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            CustomDelayed<E> first = q.peek();
-            if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
-                return null;
-            } else {
-                return q.poll();
-            }
+            BufferedElement<E> first = q.peek();
+            return first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0 ? null : q.poll().getElement();
         } finally {
             lock.unlock();
         }
@@ -309,18 +441,18 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      * @throws InterruptedException {@inheritDoc}
      */
     @Override
-    public CustomDelayed<E> take() throws InterruptedException {
-        final ReentrantLock lock = this.lock;
+    public E take() throws InterruptedException {
+        ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
             for (;;) {
-                CustomDelayed<E> first = q.peek();
+                BufferedElement<E> first = q.peek();
                 if (first == null) {
                     available.await();
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay <= 0) {
-                        return q.poll();
+                        return q.poll().getElement();
                     } else if (leader != null) {
                         available.await();
                     } else {
@@ -355,13 +487,13 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      * @throws InterruptedException {@inheritDoc}
      */
     @Override
-    public CustomDelayed<E> poll(long timeout, TimeUnit unit) throws InterruptedException {
+    public E poll(long timeout, TimeUnit unit) throws InterruptedException {
         long nanos = unit.toNanos(timeout);
-        final ReentrantLock lock = this.lock;
+        ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
             for (;;) {
-                CustomDelayed<E> first = q.peek();
+                BufferedElement<E> first = q.peek();
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
@@ -371,7 +503,7 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay <= 0) {
-                        return q.poll();
+                        return q.poll().getElement();
                     }
                     if (nanos <= 0) {
                         return null;
@@ -411,11 +543,12 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      *         queue is empty.
      */
     @Override
-    public CustomDelayed<E> peek() {
-        final ReentrantLock lock = this.lock;
+    public E peek() {
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.peek();
+            BufferedElement<E> delayedE = q.peek();
+            return null != delayedE ? delayedE.getElement() : null;
         } finally {
             lock.unlock();
         }
@@ -423,7 +556,7 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
 
     @Override
     public int size() {
-        final ReentrantLock lock = this.lock;
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
             return q.size();
@@ -439,29 +572,8 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      * @throws IllegalArgumentException      {@inheritDoc}
      */
     @Override
-    public int drainTo(Collection<? super CustomDelayed<E>> c) {
-        if (c == null) {
-            throw new NullPointerException();
-        }
-        if (c == this) {
-            throw new IllegalArgumentException();
-        }
-        final ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            int n = 0;
-            for (;;) {
-                CustomDelayed<E> first = q.peek();
-                if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
-                    break;
-                }
-                c.add(q.poll());
-                ++n;
-            }
-            return n;
-        } finally {
-            lock.unlock();
-        }
+    public int drainTo(Collection<? super E> c) {
+        return drainTo(c, Integer.MAX_VALUE);
     }
 
     /**
@@ -471,7 +583,7 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      * @throws IllegalArgumentException      {@inheritDoc}
      */
     @Override
-    public int drainTo(Collection<? super CustomDelayed<E>> c, int maxElements) {
+    public int drainTo(Collection<? super E> c, int maxElements) {
         if (c == null) {
             throw new NullPointerException();
         }
@@ -481,16 +593,16 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
         if (maxElements <= 0) {
             return 0;
         }
-        final ReentrantLock lock = this.lock;
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
             int n = 0;
             while (n < maxElements) {
-                CustomDelayed<E> first = q.peek();
+                BufferedElement<E> first = q.peek();
                 if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                     break;
                 }
-                c.add(q.poll());
+                c.add(q.poll().getElement());
                 ++n;
             }
             return n;
@@ -507,7 +619,7 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      */
     @Override
     public void clear() {
-        final ReentrantLock lock = this.lock;
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
             q.clear();
@@ -542,10 +654,15 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      */
     @Override
     public Object[] toArray() {
-        final ReentrantLock lock = this.lock;
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.toArray();
+            Object[] delayedArray = q.toArray();
+            Object[] array = new Object[delayedArray.length];
+            for (int i = 0; i < delayedArray.length; i++) {
+                array[i] = ((BufferedElement<E>) delayedArray[i]).getElement();
+            }
+            return array;
         } finally {
             lock.unlock();
         }
@@ -589,10 +706,19 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      */
     @Override
     public <T> T[] toArray(T[] a) {
-        final ReentrantLock lock = this.lock;
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.toArray(a);
+            Object[] elements = this.toArray();
+            int size = elements.length;
+            if (a.length < size) {
+                return (T[]) Arrays.copyOf(elements, size, a.getClass());
+            }
+            System.arraycopy(elements, 0, a, 0, size);
+            if (a.length > size) {
+                a[size] = null;
+            }
+            return a;
         } finally {
             lock.unlock();
         }
@@ -604,7 +730,7 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      */
     @Override
     public boolean remove(Object o) {
-        final ReentrantLock lock = this.lock;
+        ReentrantLock lock = this.lock;
         lock.lock();
         try {
             return q.remove(o);
@@ -628,14 +754,14 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
      * @return an iterator over the elements in this queue
      */
     @Override
-    public Iterator<CustomDelayed<E>> iterator() {
-        return new Itr(toArray());
+    public Iterator<E> iterator() {
+        return new Itr(q.toArray());
     }
 
     /**
      * Snapshot iterator that works off copy of underlying q array.
      */
-    private class Itr implements Iterator<CustomDelayed<E>> {
+    private class Itr implements Iterator<E> {
         final Object[] array; // Array of all elements
         int cursor;           // index of next element to return;
         int lastRet;          // index of last element, or -1 if no such
@@ -652,12 +778,12 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
 
         @Override
         @SuppressWarnings("unchecked")
-        public CustomDelayed<E> next() {
+        public E next() {
             if (cursor >= array.length) {
                 throw new NoSuchElementException();
             }
             lastRet = cursor;
-            return (CustomDelayed<E>)array[cursor++];
+            return ((BufferedElement<E>)array[cursor++]).getElement();
         }
 
         @Override
@@ -671,7 +797,7 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
             // not just a .equals element.
             lock.lock();
             try {
-                for (Iterator it = q.iterator(); it.hasNext(); ) {
+                for (Iterator<BufferedElement<E>> it = q.iterator(); it.hasNext(); ) {
                     if (it.next() == x) {
                         it.remove();
                         return;
@@ -681,6 +807,111 @@ public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> i
                 lock.unlock();
             }
         }
+    }
+
+    /**
+     * {@link BufferedElement}
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+     */
+    private static class BufferedElement<T> implements Delayed {
+
+        private volatile long stamp;
+        private final long delayDuration;
+        private final long maxStamp;
+        private final T element;
+        private final int hash;
+
+        /**
+         * Initializes a new {@link BufferedElement} with arbitrary delay durations by wrapping the given element.
+         *
+         * @param element The actual payload element
+         * @param delayDuration The delay duration (in milliseconds) to use initially and as increment for each reset-operation
+         * @param maxDelayDuration The the maximum delay duration (in milliseconds) to apply, or <code>0</code> for no maximum
+         * @throws IllegalArgumentException If <code>delayDuration</code> is greater than <code>maxDelayDuration</code>
+         */
+        BufferedElement(T element, long delayDuration, long maxDelayDuration) {
+            super();
+            if (delayDuration > maxDelayDuration && 0 != maxDelayDuration) {
+                throw new IllegalArgumentException("delayDuration is greater than maxDelayDuration.");
+            }
+            this.element = element;
+            this.delayDuration = delayDuration;
+            long now = System.currentTimeMillis();
+            stamp = now + delayDuration;
+            maxStamp = 0L == maxDelayDuration ? 0L : now + maxDelayDuration;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((element == null) ? 0 : element.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int compareTo(Delayed o) {
+            long thisStamp = this.stamp;
+            long otherStamp = ((BufferedElement) o).stamp;
+            return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
+        }
+
+        /*
+         * The Delay has elapsed if Either: the delayDuration since last time this object was touched has elapsed Or: the maxDelayDuration was
+         * reached
+         */
+        @Override
+        public long getDelay(TimeUnit unit) {
+            long toGo = stamp - System.currentTimeMillis();
+            return unit.convert(toGo, TimeUnit.MILLISECONDS);
+        }
+
+        /**
+         * Get the wrapped pushMsObject.
+         *
+         * @return the wrapped pushMsObject
+         */
+        public T getElement() {
+            return element;
+        }
+
+        /**
+         * Resets the internal delay, up to the configured maximum delay duration.
+         */
+        public void reset() {
+            long stamp = System.currentTimeMillis() + delayDuration;
+            // Stamp must not be greater than maxStamp
+            this.stamp = 0L != maxStamp && stamp >= maxStamp ? maxStamp : stamp;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof BufferedElement)) {
+                return obj.equals(element);
+            }
+            BufferedElement<T> other = (BufferedElement<T>) obj;
+            if (element == null) {
+                if (other.element != null) {
+                    return false;
+                }
+            } else if (!element.equals(other.element)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "BufferedElement [stamp=" + stamp + ", element=" + element + "]";
+        }
+
     }
 
 }

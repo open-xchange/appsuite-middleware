@@ -53,8 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.java.CustomDelayQueue;
-import com.openexchange.java.CustomDelayed;
+import com.openexchange.java.BufferingQueue;
 import com.openexchange.ms.Topic;
 
 /**
@@ -71,11 +70,9 @@ public class DelayPushQueue implements Runnable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DelayPushQueue.class);
 
     /** The special poison object */
-    private static final CustomDelayed<PushMsObject> POISON = new CustomDelayed<PushMsObject>(null, 0, 0);
+    private static final PushMsObject POISON = new PushMsObject(0, 0, 0, null, false, 0, null);
 
-    private final int delayDuration;
-    private final int maxDelayDuration;
-    private final CustomDelayQueue<PushMsObject> delayQueue;
+    private final BufferingQueue<PushMsObject> delayQueue;
     private final Thread pollThread;
     private final AtomicBoolean isRunning;
     private final Topic<Map<String, Object>> publishTopic;
@@ -90,10 +87,8 @@ public class DelayPushQueue implements Runnable {
      */
     public DelayPushQueue(final Topic<Map<String, Object>> publishTopic, final int delayDuration, final int maxDelayDuration) {
         super();
-        delayQueue = new CustomDelayQueue<PushMsObject>();
+        delayQueue = new BufferingQueue<PushMsObject>(delayDuration, maxDelayDuration);
         this.publishTopic = publishTopic;
-        this.delayDuration = delayDuration;
-        this.maxDelayDuration = maxDelayDuration;
         isRunning = new AtomicBoolean(true);
         pollThread = new Thread(this, "DelayPushQueuePoller");
         pollThread.setName(this.getClass().getName());
@@ -107,9 +102,9 @@ public class DelayPushQueue implements Runnable {
      */
     public void add(final PushMsObject pushMsObject, final boolean immediate) {
         if (immediate) {
-            delayQueue.offerOrReplace(new CustomDelayed<PushMsObject>(pushMsObject, 0, 0));
+            delayQueue.offerOrReplaceImmediately(pushMsObject);
         } else {
-            delayQueue.offerIfAbsentElseReset(new CustomDelayed<PushMsObject>(pushMsObject, delayDuration, maxDelayDuration));
+            delayQueue.offerIfAbsentElseReset(pushMsObject);
         }
     }
 
@@ -126,29 +121,29 @@ public class DelayPushQueue implements Runnable {
 
     @Override
     public void run() {
-        final CustomDelayQueue<PushMsObject> delayQueue = this.delayQueue;
-        final List<CustomDelayed<PushMsObject>> objects = new ArrayList<CustomDelayed<PushMsObject>>(16);
+        final BufferingQueue<PushMsObject> delayQueue = this.delayQueue;
+        final List<PushMsObject> objects = new ArrayList<PushMsObject>(16);
         while (isRunning.get()) {
             LOG.debug("Awaiting push objects from DelayQueue with current size: {}", delayQueue.size());
             try {
                 objects.clear();
                 // Blocking wait for at least 1 DelayedPushMsObject to expire.
-                final CustomDelayed<PushMsObject> object = delayQueue.take();
+                final PushMsObject object = delayQueue.take();
                 if (POISON == object) {
                     return;
                 }
                 objects.add(object);
                 // Drain more if available
                 delayQueue.drainTo(objects);
-                for (final CustomDelayed<PushMsObject> delayedPushMsObject : objects) {
+                for (PushMsObject delayedPushMsObject : objects) {
                     if (POISON == delayedPushMsObject) {
                         // Reached poison element
                         return;
                     }
                     if (delayedPushMsObject != null) {
                         // Publish
-                        publishTopic.publish(delayedPushMsObject.getElement().writePojo());
-                        LOG.debug("Published delayed PushMsObject: {}", delayedPushMsObject.getElement());
+                        publishTopic.publish(delayedPushMsObject.writePojo());
+                        LOG.debug("Published delayed PushMsObject: {}", delayedPushMsObject);
                     }
                 }
             } catch (final Exception exc) {
