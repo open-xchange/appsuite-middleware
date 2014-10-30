@@ -59,7 +59,6 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -173,9 +172,11 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
         // Check whether to clear POP3 account's time stamp
         boolean clearStamp = false;
-        {
+
+        if (id != MailAccount.DEFAULT_ID) {
             // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
-            final boolean pop3 = accountDescription.getMailProtocol().toLowerCase(Locale.ENGLISH).startsWith("pop3");
+            boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
+
             if (fieldsToUpdate.contains(Attribute.MAIL_URL_LITERAL) && !toUpdate.generateMailServerURL().equals(accountDescription.generateMailServerURL())) {
                 if (!pop3 && !ValidateAction.checkMailServerURL(accountDescription, session, warnings)) {
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
@@ -193,12 +194,9 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 }
                 clearStamp |= (pop3 && !toUpdate.getTransportServer().equals(accountDescription.getTransportServer()));
             }
-        }
 
-        // Check standard folder names against full names
-        if (id != MailAccount.DEFAULT_ID) {
-            boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
-            if (false == pop3) {
+            // Check standard folder names against full names
+            if (false == isPop3(toUpdate)) {
                 fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
                 Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
@@ -320,4 +318,16 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             accountDescription.setMailServer(toUpdate.getMailServer());
         }
     }
+
+    private boolean isPop3(MailAccount account) {
+        if (null == account) {
+            return false;
+        }
+        if (Strings.toLowerCase(account.getMailProtocol()).startsWith("pop3")) {
+            return true;
+        }
+
+        return false;
+    }
+
 }
