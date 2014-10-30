@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -162,27 +163,28 @@ public final class GetAction extends AbstractMailAction {
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
-    private AJAXRequestResult performGet(final MailRequest req) throws OXException, JSONException {
+    private AJAXRequestResult performGet(MailRequest req) throws OXException, JSONException {
         try {
-            final ServerSession session = req.getSession();
+            ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             String tmp = req.getParameter(Mail.PARAMETER_SHOW_SRC);
-            final boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
+            boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = req.getParameter(Mail.PARAMETER_SHOW_HEADER);
-            final boolean showMessageHeaders = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-            final boolean saveToDisk;
+            boolean showMessageHeaders = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
+            boolean saveToDisk;
             {
-                final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
+                String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
                 saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(AJAXServlet.PARAMETER_DELIVERY)));
             }
             tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
-            final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+            boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+
             // Check for possible MIME filter
             tmp = req.getParameter("ignorable");
-            final MimeFilter mimeFilter;
+            MimeFilter mimeFilter;
             if (isEmpty(tmp)) {
                 mimeFilter = null;
             } else {
@@ -208,17 +210,14 @@ public final class GetAction extends AbstractMailAction {
             tmp = req.getParameter("attach_src");
             final boolean attachMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = null;
-            /*
-             * Warnings container
-             */
-            final List<OXException> warnings = new ArrayList<OXException>(2);
-            /*
-             * Get mail interface
-             */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            /*
-             * Determine mail identifier
-             */
+
+            // Warnings container
+            List<OXException> warnings = new ArrayList<OXException>(2);
+
+            // Get mail interface
+            MailServletInterface mailInterface = getMailInterface(req);
+
+            // Determine mail identifier
             final String uid;
             {
                 String tmp2 = req.getParameter(AJAXServlet.PARAMETER_ID);
@@ -232,20 +231,18 @@ public final class GetAction extends AbstractMailAction {
                     uid = tmp2;
                 }
             }
+
             LogProperties.put(LogProperties.Name.MAIL_MAIL_ID, uid);
             LogProperties.put(LogProperties.Name.MAIL_FULL_NAME, folderPath);
             AJAXRequestResult data = getJSONNullResult();
             if (showMessageSource) {
-                /*
-                 * Get message
-                 */
+                // Get message
                 final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
-                /*
-                 * Direct response if possible
-                 */
+
+                // Direct response if possible
                 if (null == mimeFilter) {
                     final AJAXRequestData requestData = req.getRequest();
                     final OutputStream directOutputStream = requestData.optOutputStream();
@@ -278,9 +275,8 @@ public final class GetAction extends AbstractMailAction {
                         }
                     }
                 }
-                /*-
-                 * The regular way...
-                 */
+
+                // The regular way...
                 ThresholdFileHolder fileHolder = getMimeSource(mail, mimeFilter);
                 try {
                     // Proceed
@@ -474,9 +470,6 @@ public final class GetAction extends AbstractMailAction {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            LogProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
-            LogProperties.remove(LogProperties.Name.MAIL_FULL_NAME);
         }
     }
 
@@ -555,20 +548,6 @@ public final class GetAction extends AbstractMailAction {
             }
         }
         return sb.toString();
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }
