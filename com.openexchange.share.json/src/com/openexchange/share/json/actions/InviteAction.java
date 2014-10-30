@@ -73,20 +73,20 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
- * {@link NewAction}
+ * {@link InviteAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class NewAction extends AbstractShareAction {
+public class InviteAction extends AbstractShareAction {
 
     /**
-     * Initializes a new {@link NewAction}.
+     * Initializes a new {@link InviteAction}.
      *
      * @param services The service lookup
      * @param translatorFactory
      */
-    public NewAction(ServiceLookup services) {
+    public InviteAction(ServiceLookup services) {
         super(services);
     }
 

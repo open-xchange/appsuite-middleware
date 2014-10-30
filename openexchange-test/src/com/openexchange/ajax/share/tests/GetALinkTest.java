@@ -51,21 +51,24 @@ package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.DeleteRequest;
+import com.openexchange.ajax.share.actions.DeleteLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.UpdateLinkRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
@@ -84,10 +87,6 @@ public class GetALinkTest extends ShareTest {
     private InfostoreTestManager itm;
     private FolderObject infostore;
     private DefaultFile file;
-    private String token;
-    private GuestClient guestClient;
-    private String password;
-    private String url;
 
     /**
      * Initializes a new {@link GetALinkTest}.
@@ -112,42 +111,42 @@ public class GetALinkTest extends ShareTest {
         file.setTitle("GetALinkTest_" + now);
         file.setDescription(file.getTitle());
         itm.newAction(file);
-
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()));
-        GetLinkRequest getLinkRequest = new GetLinkRequest(Collections.singletonList(target));
-        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
-        password = UUIDs.getUnformattedString(UUID.randomUUID());
-        getLinkRequest.setPassword(password);
-        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
-        token = getLinkResponse.getToken();
-        url = getLinkResponse.getUrl();
-        guestClient = resolveShare(url, null, password);
     }
 
     @Override
     public void tearDown() throws Exception {
-        if (guestClient != null) {
-            ParsedShare share = discoverShare(client, infostore.getObjectID(), guestClient.getValues().getUserId());
-            if (share != null) {
-                DeleteRequest deleteRequest = new DeleteRequest(share, System.currentTimeMillis(), false);
-                client.execute(deleteRequest);
-            }
-        }
-
         if (itm != null) {
             itm.cleanUp();
         }
 
-
         super.tearDown();
     }
 
-    public void testCreateAndUpdateForAFolder() throws Exception {
+    public void testCreateUpdateAndDeleteLinkForAFolder() throws Exception {
+        /*
+         * Get a link for the new drive subfolder
+         */
+        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()));
+        GetLinkRequest getLinkRequest = new GetLinkRequest(Collections.singletonList(target));
+        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
+        String password = UUIDs.getUnformattedString(UUID.randomUUID());
+        getLinkRequest.setPassword(password);
+        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        String token = getLinkResponse.getToken();
+        String url = getLinkResponse.getUrl();
+
+        /*
+         * Resolve the link and check read permission for folder
+         */
+        GuestClient guestClient = resolveShare(url, null, password);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
         guestClient.checkFolderAccessible(Integer.toString(infostore.getObjectID()), expectedPermission);
         File reloaded = (File) guestClient.getItem(infostore, file.getId(), false);
         assertNotNull(reloaded);
 
+        /*
+         * Update permission, password and expiry
+         */
         OCLGuestPermission allPermission = createAnonymousGuestPermission();
         allPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
@@ -158,11 +157,77 @@ public class GetALinkTest extends ShareTest {
         updateLinkRequest.setPassword(newPassword);
         client.execute(updateLinkRequest);
 
+        /*
+         * Resolve link with new credentials and check permission and expiry
+         */
         GuestClient newClient = resolveShare(url, null, newPassword);
+        int guestId = newClient.getValues().getUserId();
         newClient.checkFolderAccessible(Integer.toString(infostore.getObjectID()), allPermission);
-        ParsedShare share = discoverShare(client, infostore.getObjectID(), newClient.getValues().getUserId());
+        ParsedShare share = discoverShare(guestId, infostore.getObjectID());
         assertNotNull(share);
         assertEquals(newExpiry, share.getTarget().getExpiryDate());
+
+        /*
+         * Delete link and verify that share and folder permission are gone
+         */
+        client.execute(new DeleteLinkRequest(token));
+        assertNull("Share was not deleted", discoverShare(guestId, infostore.getObjectID()));
+        List<OCLPermission> reloadedFolderPermissions = getFolder(EnumAPI.OX_NEW, infostore.getObjectID()).getPermissions();
+        assertEquals("Permission was not deleted", 1, reloadedFolderPermissions.size());
+        assertEquals("Permission was not deleted", client.getValues().getUserId(), reloadedFolderPermissions.get(0).getEntity());
+    }
+
+    public void testCreateUpdateAndDeleteLinkForAFile() throws Exception {
+        /*
+         * Get a link for the new drive subfolder
+         */
+        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
+        GetLinkRequest getLinkRequest = new GetLinkRequest(Collections.singletonList(target));
+        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
+        String password = UUIDs.getUnformattedString(UUID.randomUUID());
+        getLinkRequest.setPassword(password);
+        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        String token = getLinkResponse.getToken();
+        String url = getLinkResponse.getUrl();
+
+        /*
+         * Resolve the link and check read permission for folder
+         */
+        GuestClient guestClient = resolveShare(url, null, password);
+        OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
+        guestClient.checkFileAccessible(file.getId(), expectedPermission);
+
+        /*
+         * Update permission, password and expiry
+         */
+        OCLGuestPermission allPermission = createAnonymousGuestPermission();
+        allPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
+        Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(token, System.currentTimeMillis());
+        updateLinkRequest.setBits(allPermission.getPermissionBits());
+        updateLinkRequest.setExpiry(newExpiry.getTime());
+        updateLinkRequest.setPassword(newPassword);
+        client.execute(updateLinkRequest);
+
+        /*
+         * Resolve link with new credentials and check permission and expiry
+         */
+        GuestClient newClient = resolveShare(url, null, newPassword);
+        int guestId = newClient.getValues().getUserId();
+        newClient.checkFileAccessible(file.getId(), allPermission);
+        ParsedShare share = discoverShare(guestId, infostore.getObjectID(), file.getId());
+        assertNotNull(share);
+        assertEquals(newExpiry, share.getTarget().getExpiryDate());
+
+        /*
+         * Delete link and verify that share and folder permission are gone
+         */
+        client.execute(new DeleteLinkRequest(token));
+        assertNull("Share was not deleted", discoverShare(guestId, infostore.getObjectID(), file.getId()));
+        List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
+        assertEquals("Permission was not deleted", 1, objectPermissions.size());
+        assertEquals("Permission was not deleted", client.getValues().getUserId(), objectPermissions.get(0).getEntity());
     }
 
 }

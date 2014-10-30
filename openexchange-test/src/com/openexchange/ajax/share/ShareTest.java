@@ -239,7 +239,20 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share, or <code>null</code> if not found
      */
     protected static ParsedShare discoverShare(AJAXClient client, int folderID, int guest) throws OXException, IOException, JSONException {
-        return discoverShare(client.execute(new AllRequest()).getParsedShares(), folderID, guest);
+        return discoverShare(client.execute(new AllRequest()).getParsedShares(), folderID, null, guest);
+    }
+
+    /**
+     * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
+     *
+     * @param client The ajax client to use
+     * @param folderID The folder ID to discover the share for
+     * @param item The item ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The share, or <code>null</code> if not found
+     */
+    protected static ParsedShare discoverShare(AJAXClient client, int folderID, String item, int guest) throws OXException, IOException, JSONException {
+        return discoverShare(client.execute(new AllRequest()).getParsedShares(), folderID, item, guest);
     }
 
     /**
@@ -251,10 +264,29 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share, or <code>null</code> if not found
      */
     protected static ParsedShare discoverShare(List<ParsedShare> shares, int folderID, int guest) throws OXException, IOException, JSONException {
+        return discoverShare(shares, folderID, null, guest);
+    }
+
+    /**
+     * Discovers a specific share amongst the supplied shares, based on the folder- and guest identifiers.
+     *
+     * @param shares The shares to search
+     * @param folderID The folder ID to discover the share for
+     * @param item The item ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The share, or <code>null</code> if not found
+     */
+    protected static ParsedShare discoverShare(List<ParsedShare> shares, int folderID, String item, int guest) throws OXException, IOException, JSONException {
         String folder = String.valueOf(folderID);
         for (ParsedShare share : shares) {
             if (folder.equals(share.getTarget().getFolder()) && guest == share.getGuest()) {
-                return share;
+                if (item == null) {
+                    if (share.getTarget().getItem() == null) {
+                        return share;
+                    }
+                } else if (item.equals(share.getTarget().getItem())) {
+                    return share;
+                }
             }
         }
         return null;
@@ -264,10 +296,23 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * Discovers a specific share amongst all available shares of the current user, based on the guest identifier.
      *
      * @param guest The ID of the guest associated to the share
+     * @param folderID The folder ID to discover the share for
      * @return The share, or <code>null</code> if not found
      */
     protected ParsedShare discoverShare(int guest, int folderID) throws OXException, IOException, JSONException {
-        return discoverShare(client, folderID, guest);
+        return discoverShare(client, folderID, null, guest);
+    }
+
+    /**
+     * Discovers a specific share amongst all available shares of the current user, based on the guest identifier.
+     *
+     * @param guest The ID of the guest associated to the share
+     * @param folderID The folder ID to discover the share for
+     * @param item The item ID to discover the share for
+     * @return The share, or <code>null</code> if not found
+     */
+    protected ParsedShare discoverShare(int guest, int folderID, String item) throws OXException, IOException, JSONException {
+        return discoverShare(client, folderID, item, guest);
     }
 
     @Override

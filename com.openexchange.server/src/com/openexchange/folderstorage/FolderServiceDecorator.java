@@ -68,6 +68,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class FolderServiceDecorator {
 
+    public static final String PROPERTY_IGNORE_GUEST_PERMISSIONS = "com.openexchange.folderstorage.ignoreGuestPermissions";
+
     private TimeZone timeZone;
 
     private Locale locale;

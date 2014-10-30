@@ -61,8 +61,8 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.DeleteRequest;
-import com.openexchange.ajax.share.actions.NewRequest;
-import com.openexchange.ajax.share.actions.NewResponse;
+import com.openexchange.ajax.share.actions.InviteRequest;
+import com.openexchange.ajax.share.actions.InviteResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
@@ -138,8 +138,8 @@ public class GuestContactTest extends ShareTest {
         guest.setPassword(GUEST_PASSWORD);
         guest.setBits(FOLDER_READ_PERMISSION);
 
-        NewRequest newRequest = new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest));
-        NewResponse newResponse = client.execute(newRequest);
+        InviteRequest newRequest = new InviteRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest));
+        InviteResponse newResponse = client.execute(newRequest);
         JSONArray jsonArray = (JSONArray) newResponse.getData();
         shares = new ArrayList<ParsedShare>(jsonArray.length());
         for (int i = 0; i < jsonArray.length(); i++) {

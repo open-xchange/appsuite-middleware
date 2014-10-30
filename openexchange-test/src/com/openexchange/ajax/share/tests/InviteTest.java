@@ -64,7 +64,7 @@ import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
-import com.openexchange.ajax.share.actions.NewRequest;
+import com.openexchange.ajax.share.actions.InviteRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -84,11 +84,11 @@ import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
- * {@link NewTest}
+ * {@link InviteTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class NewTest extends ShareTest {
+public class InviteTest extends ShareTest {
 
     private static final int NUM_FILES = 5;
 
@@ -111,10 +111,10 @@ public class NewTest extends ShareTest {
 
 
     /**
-     * Initializes a new {@link NewTest}.
+     * Initializes a new {@link InviteTest}.
      * @param name
      */
-    public NewTest(String name) {
+    public InviteTest(String name) {
         super(name);
     }
 
@@ -157,7 +157,7 @@ public class NewTest extends ShareTest {
         recipient.setEntity(userId2);
         recipient.setBits(FOLDER_READ_PERMISSION);
 
-        client.execute(new NewRequest(targets, Collections.<ShareRecipient>singletonList(recipient)));
+        client.execute(new InviteRequest(targets, Collections.<ShareRecipient>singletonList(recipient)));
 
         /*
          * Reload folders with second client and check permissions
@@ -176,7 +176,7 @@ public class NewTest extends ShareTest {
         recipient.setEntity(userId2);
         recipient.setBits(FOLDER_READ_PERMISSION);
 
-        client.execute(new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(recipient)));
+        client.execute(new InviteRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(recipient)));
         checkFilePermission(userId2, ObjectPermission.READ, itm.getAction(file.getId()));
     }
 
@@ -200,7 +200,7 @@ public class NewTest extends ShareTest {
         recipients.add(internalRecipient);
         recipients.add(anonymousRecipient);
 
-        client.execute(new NewRequest(targets, recipients));
+        client.execute(new InviteRequest(targets, recipients));
 
         /*
          * Assert that all shares have been created and create client for anonymous guest

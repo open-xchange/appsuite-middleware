@@ -47,61 +47,81 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.ajax.share.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.InviteAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
+import java.io.IOException;
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
- * {@link ShareActionFactory}
+ * {@link InviteRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public class InviteRequest implements AJAXRequest<InviteResponse> {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    private final boolean failOnError;
 
-    /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
-     */
-    public ShareActionFactory(ServiceLookup services) {
+    private final List<ShareTarget> targets;
+
+    private final List<ShareRecipient> recipients;
+
+    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
+        this(targets, recipients, true);
+    }
+
+    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
         super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("invite", new InviteAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
+        this.targets = targets;
+        this.recipients = recipients;
+        this.failOnError = failOnError;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public Method getMethod() {
+        return Method.PUT;
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    public String getServletPath() {
+        return "/ajax/share/management";
+    }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, "invite") };
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends InviteResponse> getParser() {
+        return new AbstractAJAXParser<InviteResponse>(failOnError) {
+            @Override
+            protected InviteResponse createResponse(Response response) throws JSONException {
+                return new InviteResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        JSONObject json = new JSONObject();
+        json.put("targets", ShareWriter.writeTargets(targets));
+        json.put("recipients", ShareWriter.writeRecipients(recipients));
+        return json;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
 }

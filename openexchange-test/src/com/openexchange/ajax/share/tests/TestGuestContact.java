@@ -56,7 +56,7 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
-import com.openexchange.ajax.share.actions.NewRequest;
+import com.openexchange.ajax.share.actions.InviteRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
@@ -121,7 +121,7 @@ public class TestGuestContact extends ShareTest {
         guest.setPassword(GUEST_PASSWORD);
         guest.setBits(FOLDER_READ_PERMISSION);
 
-        client.execute(new NewRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest)));
+        client.execute(new InviteRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest)));
     }
 
     public void testGuestContact() throws Exception {

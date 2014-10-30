@@ -50,45 +50,38 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
-import java.util.List;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.ajax.framework.Params;
 
 
 /**
- * {@link NewRequest}
+ * {@link DeleteLinkRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class NewRequest implements AJAXRequest<NewResponse> {
+public class DeleteLinkRequest implements AJAXRequest<DeleteLinkResponse> {
 
-    private final boolean failOnError;
+    private final String token;
 
-    private final List<ShareTarget> targets;
+    private final boolean failOnError = true;
 
-    private final List<ShareRecipient> recipients;
-
-    public NewRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(targets, recipients, true);
-    }
-
-    public NewRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
+    /**
+     * Initializes a new {@link DeleteLinkRequest}.
+     */
+    public DeleteLinkRequest(String token) {
         super();
-        this.targets = targets;
-        this.recipients = recipients;
-        this.failOnError = failOnError;
+        this.token = token;
     }
 
     @Override
     public Method getMethod() {
-        return Method.PUT;
+        return Method.GET;
     }
 
     @Override
@@ -98,25 +91,25 @@ public class NewRequest implements AJAXRequest<NewResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, "new") };
+        return new Params(
+            AJAXServlet.PARAMETER_ACTION, "deleteLink",
+            "token", token
+        ).toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends NewResponse> getParser() {
-        return new AbstractAJAXParser<NewResponse>(failOnError) {
+    public AbstractAJAXParser<DeleteLinkResponse> getParser() {
+        return new AbstractAJAXParser<DeleteLinkResponse>(failOnError) {
             @Override
-            protected NewResponse createResponse(Response response) throws JSONException {
-                return new NewResponse(response);
+            protected DeleteLinkResponse createResponse(Response response) throws JSONException {
+                return new DeleteLinkResponse(response);
             }
         };
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject json = new JSONObject();
-        json.put("targets", ShareWriter.writeTargets(targets));
-        json.put("recipients", ShareWriter.writeRecipients(recipients));
-        return json;
+        return null;
     }
 
     @Override

@@ -62,7 +62,7 @@ import com.openexchange.share.ShareTarget;
  */
 public interface TargetUpdate {
 
-    void prepare(List<ShareTarget> targets) throws OXException;
+    void fetch(List<ShareTarget> targets) throws OXException;
 
     TargetProxy get(ShareTarget target);
 

@@ -47,25 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.share.json.actions;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.util.Date;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link NewResponse}
+ * {@link DeleteLinkAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class NewResponse extends AbstractAJAXResponse {
+public class DeleteLinkAction extends AbstractShareAction {
 
     /**
-     * Initializes a new {@link NewResponse}.
-     * @param response
+     * Initializes a new {@link DeleteLinkAction}.
+     * @param services
      */
-    protected NewResponse(Response response) {
-        super(response);
+    public DeleteLinkAction(ServiceLookup services) {
+        super(services);
+    }
+
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String token = requestData.requireParameter("token");
+        DeletePerformer deletePerformer = new DeletePerformer(token, session, services);
+        deletePerformer.perform();
+
+        /*
+         * return empty result in case of success
+         */
+        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+        result.setTimestamp(new Date());
+        return result;
     }
 
 }

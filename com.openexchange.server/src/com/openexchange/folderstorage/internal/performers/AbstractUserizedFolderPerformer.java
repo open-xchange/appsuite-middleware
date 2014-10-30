@@ -432,6 +432,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param connection The database connection to use or <code>null</code>
      */
     protected void processRemovedGuestPermissions(String folderID, ContentType contentType, List<Permission> removedPermissions, Connection connection) throws OXException {
+        if (ignoreGuestPermissions()) {
+            return;
+        }
+
         List<Integer> guestIDs = new ArrayList<Integer>(removedPermissions.size());
         for (Permission permission : removedPermissions) {
             guestIDs.add(permission.getEntity());
@@ -456,8 +460,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
      *            upon share creation
      * @param connection The database connection to use or <code>null</code>
-     * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares, in
-     *         the same order as the supplied guest permissions list
      */
     protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
@@ -481,6 +483,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
+    }
+
+    private boolean ignoreGuestPermissions() {
+        return decorator != null && decorator.getBoolProperty(FolderServiceDecorator.PROPERTY_IGNORE_GUEST_PERMISSIONS);
     }
 
     /**

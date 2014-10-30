@@ -63,6 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareCryptoService;
@@ -111,22 +112,20 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
 
     @Override
     protected Void perform() throws OXException {
-        String[] paths = token.split("/");
-        GuestShare share;
+        Pair<String, String> tokenAndPath = parseToken(token);
+        String shareToken = tokenAndPath.getFirst();
+        String targetPath = tokenAndPath.getSecond();
+        GuestShare share = getShareService().resolveToken(shareToken);
         List<ShareTarget> targetsToUpdate;
-        if (paths.length == 1) {
-            share = getShareService().resolveToken(paths[0]);
+        if (targetPath == null) {
             targetsToUpdate = share.getTargets();
-        } else if (paths.length == 2) {
-            share = getShareService().resolveToken(paths[0]);
-            ShareTarget target = share.resolveTarget(paths[1]);
+        } else {
+            ShareTarget target = share.resolveTarget(targetPath);
             if (target == null) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
 
             targetsToUpdate = Collections.singletonList(target);
-        } else {
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
 
         DatabaseService dbService = services.getService(DatabaseService.class);
@@ -231,7 +230,7 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
                 ShareTargetDiff targetDiff = new ShareTargetDiff(origTargets, modifiedTargets);
                 if (targetDiff.hasDifferences()) {
                     TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
-                    update.prepare(allTargets);
+                    update.fetch(allTargets);
                     for (ShareTarget target : targetDiff.getAdded()) {
                         TargetProxy proxy = update.get(target);
                         proxy.applyPermissions(targetPermissions);

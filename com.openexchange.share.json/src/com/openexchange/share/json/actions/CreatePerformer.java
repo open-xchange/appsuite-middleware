@@ -121,7 +121,7 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
             }
 
             TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
-            update.prepare(targets);
+            update.fetch(targets);
             for (ShareTarget target : targets) {
                 TargetProxy proxy = update.get(target);
                 target.setOwnedBy(proxy.getOwner());

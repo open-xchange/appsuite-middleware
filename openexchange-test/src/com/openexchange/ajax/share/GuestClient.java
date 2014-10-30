@@ -51,6 +51,7 @@ package com.openexchange.ajax.share;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -89,10 +90,14 @@ import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
@@ -267,6 +272,61 @@ public class GuestClient extends AJAXClient {
          * check item listing
          */
         getAll(folder, false == permissions.canReadOwnObjects());
+    }
+
+    /**
+     * Checks that a file is accessible for the guest according to the granted permissions.
+     * This method checks only for object permissions. If you shared the parent folder you need
+     * to check the files accessibility otherwise.
+     *
+     * @param fileID The identifier of the file to check
+     * @param permissions The guest permissions for that file
+     * @throws Exception
+     */
+    public void checkFileAccessible(String fileID, OCLGuestPermission permissions) throws Exception {
+        /*
+         * get file
+         */
+        GetInfostoreResponse getFileResponse = execute(new GetInfostoreRequest(fileID));
+        File file = getFileResponse.getDocumentMetadata();
+        List<FileStorageObjectPermission> objectPermissions = file.getObjectPermissions();
+        FileStorageObjectPermission permissionForEntity = null;
+        for (FileStorageObjectPermission p : objectPermissions) {
+            if (p.getEntity() == permissions.getEntity() && p.isGroup() == permissions.isGroupPermission()) {
+                permissionForEntity = p;
+                break;
+            }
+        }
+
+        int expected = getObjectPermissionBits(permissions.getPermissionBits());
+        if (permissionForEntity == null) {
+            Assert.fail("File contains no object permission for entity " + permissions.getEntity());
+        }
+
+        Assert.assertEquals("Wrong permission found", expected, permissionForEntity.getPermissions());
+    }
+
+    /**
+     * Takes a folder permission bit mask and deduces the according object permissions.
+     *
+     * @param folderPermissionBits The folder permission bit mask
+     * @return The object permission bits
+     */
+    protected static int getObjectPermissionBits(int folderPermissionBits) {
+        int objectBits = ObjectPermission.NONE;
+        int[] permissionBits = Permissions.parsePermissionBits(folderPermissionBits);
+        int rp = permissionBits[1];
+        int wp = permissionBits[2];
+        int dp = permissionBits[3];
+        if (dp >= Permission.DELETE_ALL_OBJECTS) {
+            objectBits = ObjectPermission.DELETE;
+        } else if (wp >= Permission.WRITE_ALL_OBJECTS) {
+            objectBits = ObjectPermission.WRITE;
+        } else if (rp >= Permission.READ_ALL_OBJECTS) {
+            objectBits = ObjectPermission.READ;
+        }
+
+        return objectBits;
     }
 
     /**

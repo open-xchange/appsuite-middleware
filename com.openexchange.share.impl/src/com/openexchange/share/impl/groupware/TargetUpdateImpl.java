@@ -106,11 +106,12 @@ public class TargetUpdateImpl implements TargetUpdate {
         parameters.setWriteCon(writeCon);
         FolderServiceDecorator folderServiceDecorator = new FolderServiceDecorator();
         folderServiceDecorator.put(Connection.class.getName(), writeCon);
+        folderServiceDecorator.put(FolderServiceDecorator.PROPERTY_IGNORE_GUEST_PERMISSIONS, Boolean.TRUE.toString());
         parameters.setFolderServiceDecorator(folderServiceDecorator);
     }
 
     @Override
-    public void prepare(List<ShareTarget> targets) throws OXException {
+    public void fetch(List<ShareTarget> targets) throws OXException {
         objectsByModule = new HashMap<Integer, List<ShareTarget>>();
         folderTargets = new LinkedList<ShareTarget>();
         for (ShareTarget target : targets) {
