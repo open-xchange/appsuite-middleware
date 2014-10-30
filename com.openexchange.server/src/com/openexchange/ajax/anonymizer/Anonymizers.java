@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.anonymizer;
 
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceExceptionCode;
@@ -94,9 +95,24 @@ public final class Anonymizers {
     }
 
     /**
+     * Gets the the locale associated with session's user.
+     *
+     * @param session The session
+     * @return The locale
+     * @throws OXException If locale cannot be returned
+     */
+    public static Locale getLocaleFrom(Session session) throws OXException {
+        if (null == session) {
+            return Locale.US;
+        }
+        Locale locale = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
+        return null == locale ? Locale.US : locale;
+    }
+
+    /**
      * Checks if specified session denotes a guest user.
      *
-     * @param session The  session
+     * @param session The session
      * @return <code>true</code> if specified session denotes a guest user; otherwise <code>false</code>
      * @throws OXException If check fails
      */
