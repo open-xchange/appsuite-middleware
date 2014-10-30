@@ -234,7 +234,7 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public void updateUserInternal(final User user, final Context context) throws OXException {
+    public void updateUserInternal(final Connection con, final User user, final Context context) throws OXException {
         // First try to detect some lousy client writing the same values all the time.
         boolean doUpdate = false;
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
@@ -264,8 +264,12 @@ public class CachingUserStorage extends UserStorage {
         }
         if (doUpdate) {
             // Only update the user in the database if it differs from the one in the cache.
+            if (con == null) {
+                delegate.updateUser(user, context);
+            } else {
+                delegate.updateUser(con, user, context);
+            }
             invalidateUser(context, user.getId());
-            delegate.updateUser(user, context);
         }
     }
 

@@ -303,6 +303,40 @@ public interface UserService {
     void updateUser(User user, Context context) throws OXException;
 
     /**
+     * This method updates some values of a user, by re-using an existing database connection. In the given user object just set the user
+     * identifier and the attributes you want to change. Every attribute with value <code>null</code> will not be touched.
+     *
+     * <b>
+     * If you use this method within a transaction, you must(!) call {@link UserService#invalidateUser(Context, int)}
+     * after you committed the connection!
+     * </b>
+     *
+     * <p>
+     * Currently supported values for update:
+     * <ul>
+     * <li>Time zone</li>
+     * <li>Language</li>
+     * <li>IMAP server</li>
+     * <li>SMTP server</li>
+     * <li>IMAP login</li>
+     * <li>Attributes (if present, not <code>null</code>)</li>
+     * </ul>
+     * For guest users, additionally the following properties may be changed:
+     * <ul>
+     * <li>User password</li>
+     * <li>Password mechanism</li>
+     * <li>Shadow last change</li>
+     * </ul>
+     *
+     * @param con a writable database connection
+     * @param user user object with the updated values.
+     * @param context The context.
+     * @throws OXException  if an error occurs.
+     * @see #getContext(int)
+     */
+    void updateUser(Connection con, User user, Context context) throws OXException;
+
+    /**
      * Searches a user by its email address. This is used for converting iCal to appointments.
      *
      * @param email The email address of the user.

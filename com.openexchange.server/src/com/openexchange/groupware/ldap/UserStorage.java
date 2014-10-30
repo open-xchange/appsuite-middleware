@@ -235,14 +235,55 @@ public abstract class UserStorage {
      * @throws OXException  if an error occurs.
      */
     public final void updateUser(final User user, final Context context) throws OXException{
-        updateUserInternal(user, context);
+        updateUser(null, user, context);
+    }
+
+    /**
+     * This method updates some values of a user, by re-using an existing database connection. In the given user object just set the user
+     * identifier and the attributes you want to change. Every attribute with value <code>null</code> will not be touched.
+     *
+     * <b>
+     * If you use this method within a transaction, you must(!) call {@link UserService#invalidateUser(Context, int)}
+     * after you committed the connection!
+     * </b>
+     *
+     * <p>
+     * WARNING: Do not use this method to update user attributes. It happens under high load situations that too old user attributes are
+     * used to generate the new attributes for this method call causing wrong attributes to be written.
+     * <p>
+     *
+     * <p>
+     * Currently supported values for update:
+     * <ul>
+     * <li>Time zone</li>
+     * <li>Language</li>
+     * <li>IMAP server</li>
+     * <li>SMTP server</li>
+     * <li>IMAP login</li>
+     * <li>Attributes (if present, not <code>null</code>)</li>
+     * </ul>
+     * For guest users, additionally the following properties may be changed:
+     * <ul>
+     * <li>User password</li>
+     * <li>Password mechanism</li>
+     * <li>Shadow last change</li>
+     * </ul>
+     *
+     * @param con a writable database connection
+     * @param user user object with the updated values.
+     * @param context The context.
+     * @throws OXException  if an error occurs.
+     * @see #getContext(int)
+     */
+    public final void updateUser(final Connection con, final User user, final Context context) throws OXException{
+        updateUserInternal(con, user, context);
         // Drop possible cached locale-sensitive folder data.
         // TODO We need some logic layer above the storage layer for users. Every component then needs to be refactored to use the
         // UserService instead of the UserStorage.
         CacheFolderStorage.dropUserEntries(user.getId(), context.getContextId());
     }
 
-    protected abstract void updateUserInternal(User user, Context context) throws OXException;
+    protected abstract void updateUserInternal(Connection con, User user, Context context) throws OXException;
 
     /**
      * Gets specified user attribute.

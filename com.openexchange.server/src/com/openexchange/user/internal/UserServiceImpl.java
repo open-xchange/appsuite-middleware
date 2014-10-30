@@ -256,9 +256,14 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(final User user, final Context context) throws OXException {
+        updateUser(null, user, context);
+    }
+
+    @Override
+    public void updateUser(Connection con, User user, Context context) throws OXException {
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         beforeUpdate(context, user, UserServiceInterceptor.EMPTY_PROPS, interceptors);
-        UserStorage.getInstance().updateUser(user, context);
+        UserStorage.getInstance().updateUser(con, user, context);
         afterUpdate(context, user, UserServiceInterceptor.EMPTY_PROPS, interceptors);
     }
 

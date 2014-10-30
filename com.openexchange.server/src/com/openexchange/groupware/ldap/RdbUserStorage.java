@@ -702,85 +702,116 @@ public class RdbUserStorage extends UserStorage {
     private static final UserMapper MAPPER = new UserMapper();
 
     @Override
-    protected void updateUserInternal(final User user, final Context context) throws OXException {
+    protected void updateUserInternal(Connection con, final User user, final Context context) throws OXException {
+        try {
+            if (con == null) {
+                final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+                do {
+                    try {
+                        con = DBPool.pickupWriteable(context);
+                    } catch (final OXException e) {
+                        throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
+                    }
+                    condition.resetTransactionRollbackException();
+                    boolean rollback = false;
+                    try {
+                        startTransaction(con);
+                        rollback = true;
+                        updateUserInDB(con, user, context);
+                        con.commit();
+                        rollback = false;
+                    } catch (final SQLException e) {
+                        if (!condition.isFailedTransactionRollback(e)) {
+                            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                        }
+                    } finally {
+                        if (rollback) {
+                            rollback(con);
+                        }
+                        autocommit(con);
+                        DBPool.closeWriterSilent(context, con);
+                    }
+                } while (condition.checkRetry());
+            } else {
+                    boolean autoCommit = con.getAutoCommit();
+                    if (autoCommit) {
+                        try {
+                            startTransaction(con);
+                            updateUserInDB(con, user, context);
+                            con.commit();
+                        } catch (OXException e) {
+                            rollback(con);
+                            throw e;
+                        } catch (SQLException e) {
+                            rollback(con);
+                            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                        } finally {
+                            autocommit(con);
+                        }
+                    } else {
+                        updateUserInDB(con, user, context);
+                    }
+            }
+        } catch (SQLException e) {
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+        }
+    }
+
+    private void updateUserInDB(final Connection con, final User user, final Context context) throws SQLException, OXException {
+        updateUserFields(con, user, context);
+        if (null != user.getAttributes()) {
+            updateAttributes(context, user, con);
+        }
+        updateUserPassword(con, user, context);
+    }
+
+    private void updateUserFields(final Connection con, final User user, final Context context) throws SQLException, OXException {
+        // Update attribute defined through UserMapper
+        UserField[] fields = MAPPER.getAssignedFields(user);
+        if (fields.length > 0) {
+            PreparedStatement stmt = null;
+            try {
+                final String sql = "UPDATE user SET " + MAPPER.getAssignments(fields) + " WHERE cid=? AND id=?";
+                stmt = con.prepareStatement(sql);
+                MAPPER.setParameters(stmt, user, fields);
+                int pos = 1 + fields.length;
+                stmt.setInt(pos++, context.getContextId());
+                stmt.setInt(pos++, user.getId());
+                stmt.execute();
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        }
+    }
+
+    private void updateUserPassword(final Connection con, final User user, final Context context) throws SQLException {
         final int contextId = context.getContextId();
         final int userId = user.getId();
         final String password = user.getUserPassword();
         final String mech = user.getPasswordMech();
         final int shadowLastChanged = user.getShadowLastChange();
-
-        try {
-            final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
-            do {
-                final Connection con;
-                try {
-                    con = DBPool.pickupWriteable(context);
-                } catch (final OXException e) {
-                    throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
+        if ((false == user.isGuest() && null != password && null != mech) ||
+            (user.isGuest() && (null != password || null != mech))) {
+            PreparedStatement stmt = null;
+            try {
+                String encodedPassword = user.isGuest() ? password : PasswordMechanism.getEncodedPassword(mech, password);
+                stmt = con.prepareStatement(user.isGuest() ? SQL_UPDATE_PASSWORD_AND_MECH : SQL_UPDATE_PASSWORD);
+                int pos = 1;
+                stmt.setString(pos++, encodedPassword);
+                if (user.isGuest()) {
+                    stmt.setString(pos++, mech);
                 }
-                condition.resetTransactionRollbackException();
-                boolean rollback = false;
-                try {
-                    startTransaction(con);
-                    rollback = true;
-                    // Update attribute defined through UserMapper
-                    UserField[] fields = MAPPER.getAssignedFields(user);
-                    if (fields.length > 0) {
-                        PreparedStatement stmt = null;
-                        try {
-                            final String sql = "UPDATE user SET " + MAPPER.getAssignments(fields) + " WHERE cid=? AND id=?";
-                            stmt = con.prepareStatement(sql);
-                            MAPPER.setParameters(stmt, user, fields);
-                            int pos = 1 + fields.length;
-                            stmt.setInt(pos++, contextId);
-                            stmt.setInt(pos++, userId);
-                            stmt.execute();
-                        } finally {
-                            closeSQLStuff(stmt);
-                        }
-                    }
-                    if (null != user.getAttributes()) {
-                        updateAttributes(context, user, con);
-                    }
-                    if ((false == user.isGuest() && null != password && null != mech) ||
-                        (user.isGuest() && (null != password || null != mech))) {
-                        PreparedStatement stmt = null;
-                        try {
-                            String encodedPassword = user.isGuest() ? password : PasswordMechanism.getEncodedPassword(mech, password);
-                            stmt = con.prepareStatement(user.isGuest() ? SQL_UPDATE_PASSWORD_AND_MECH : SQL_UPDATE_PASSWORD);
-                            int pos = 1;
-                            stmt.setString(pos++, encodedPassword);
-                            if (user.isGuest()) {
-                                stmt.setString(pos++, mech);
-                            }
-                            stmt.setInt(pos++, shadowLastChanged);
-                            stmt.setInt(pos++, contextId);
-                            stmt.setInt(pos++, userId);
-                            stmt.execute();
-                        } catch (final UnsupportedEncodingException e) {
-                            throw new SQLException(e.toString());
-                        } catch (final NoSuchAlgorithmException e) {
-                            throw new SQLException(e.toString());
-                        } finally {
-                            closeSQLStuff(stmt);
-                        }
-                    }
-                    con.commit();
-                    rollback = false;
-                } catch (final SQLException e) {
-                    if (!condition.isFailedTransactionRollback(e)) {
-                        throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
-                    }
-                } finally {
-                    if (rollback) {
-                        rollback(con);
-                    }
-                    autocommit(con);
-                    DBPool.closeWriterSilent(context, con);
-                }
-            } while (condition.checkRetry());
-        } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                stmt.setInt(pos++, shadowLastChanged);
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, userId);
+                stmt.execute();
+            } catch (final UnsupportedEncodingException e) {
+                throw new SQLException(e.toString());
+            } catch (final NoSuchAlgorithmException e) {
+                throw new SQLException(e.toString());
+            } finally {
+                closeSQLStuff(stmt);
+            }
         }
     }
 

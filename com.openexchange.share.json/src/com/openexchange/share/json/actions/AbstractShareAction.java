@@ -49,13 +49,14 @@
 
 package com.openexchange.share.json.actions;
 
+import static com.openexchange.osgi.Tools.requireService;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -91,11 +92,7 @@ public abstract class AbstractShareAction implements AJAXActionService {
      * @throws OXException if the service is unavailable
      */
     protected ShareService getShareService() throws OXException {
-        ShareService service = services.getService(ShareService.class);
-        if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareService.class.getName());
-        }
-        return service;
+        return requireService(ShareService.class, services);
     }
 
     /**
@@ -105,11 +102,7 @@ public abstract class AbstractShareAction implements AJAXActionService {
      * @throws OXException if the service is unavailable
      */
     protected ShareNotificationService getNotificationService() throws OXException {
-        ShareNotificationService service = services.getService(ShareNotificationService.class);
-        if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareNotificationService.class.getName());
-        }
-        return service;
+        return requireService(ShareNotificationService.class, services);
     }
 
     /**
@@ -118,11 +111,16 @@ public abstract class AbstractShareAction implements AJAXActionService {
      * @throws OXException if the service is unavailable
      */
     protected UserService getUserService() throws OXException {
-        UserService service = services.getService(UserService.class);
-        if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
-        }
-        return service;
+        return requireService(UserService.class, services);
+    }
+
+    /**
+     * Gets the {@link ContextService}
+     * @return The {@link ContextService}
+     * @throws OXException if the service is unavailable
+     */
+    protected ContextService getContextService() throws OXException {
+        return requireService(ContextService.class, services);
     }
 
     /**
@@ -132,10 +130,7 @@ public abstract class AbstractShareAction implements AJAXActionService {
      * @throws OXException
      */
     protected Translator getTranslator(ServerSession session) throws OXException {
-        TranslatorFactory translatorFactory = services.getService(TranslatorFactory.class);
-        if (translatorFactory == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(TranslatorFactory.class.getName());
-        }
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         return translatorFactory.translatorFor(session.getUser().getLocale());
     }
 

@@ -279,4 +279,10 @@ public class SimUserService implements UserService {
         return null == user ? false : user.isGuest();
     }
 
+    @Override
+    public void updateUser(Connection con, User user, Context context) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }

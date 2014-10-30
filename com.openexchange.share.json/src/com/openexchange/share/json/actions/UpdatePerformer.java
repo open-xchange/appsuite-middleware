@@ -60,8 +60,12 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
@@ -70,6 +74,7 @@ import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.tools.ShareTargetDiff;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -106,36 +111,44 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
 
     @Override
     protected Void perform() throws OXException {
+        String[] paths = token.split("/");
+        GuestShare share;
+        List<ShareTarget> targetsToUpdate;
+        if (paths.length == 1) {
+            share = getShareService().resolveToken(paths[0]);
+            targetsToUpdate = share.getTargets();
+        } else if (paths.length == 2) {
+            share = getShareService().resolveToken(paths[0]);
+            ShareTarget target = share.resolveTarget(paths[1]);
+            if (target == null) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+            }
+
+            targetsToUpdate = Collections.singletonList(target);
+        } else {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
+
         DatabaseService dbService = services.getService(DatabaseService.class);
         Context context = session.getContext();
         Connection writeCon = dbService.getWritable(context);
         session.setParameter(Connection.class.getName(), writeCon);
         try {
             Databases.startTransaction(writeCon);
-
-            String[] paths = token.split("/");
-            GuestShare share;
-            List<ShareTarget> targetsToUpdate;
-            if (paths.length == 1) {
-                share = getShareService().resolveToken(paths[0]); // TODO: with session to re-use connection
-                targetsToUpdate = share.getTargets();
-            } else if (paths.length == 2) {
-                share = getShareService().resolveToken(paths[0]); // TODO: with session to re-use connection
-                ShareTarget target = share.resolveTarget(paths[1]);
-                if (target == null) {
-                    throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-                }
-
-                targetsToUpdate = Collections.singletonList(target);
-            } else {
-                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+            List<ShareTarget> modifiedTargets = buildModifiedTargets(share, targetsToUpdate);
+            updatePermissions(share, modifiedTargets, writeCon);
+            getShareService().updateTargets(session, modifiedTargets, share.getGuestID(), clientLastModified);
+            boolean invalidateGuestUser = false;
+            if (updateRecipient(writeCon, share.getGuestID())) {
+                invalidateGuestUser = true;
             }
 
-            List<ShareTarget> modifiedTargets = buildModifiedTargets(share, targetsToUpdate);
-            updateAuthAndPermissions(share, modifiedTargets, writeCon);
-            getShareService().updateTargets(session, modifiedTargets, share.getGuestID(), clientLastModified);
-
             writeCon.commit();
+
+            if (invalidateGuestUser) {
+                getUserService().invalidateUser(context, share.getGuestID());
+            }
+
             return null;
         } catch (OXException e) {
             Databases.rollback(writeCon);
@@ -148,6 +161,33 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
             Databases.autocommit(writeCon);
             dbService.backWritable(context, writeCon);
         }
+    }
+
+    private boolean updateRecipient(Connection con, int guestID) throws OXException {
+        if (recipient != null) {
+            String updatedPassword = recipient.getPassword();
+            if (false == Strings.isEmpty(updatedPassword)) {
+                updatedPassword = services.getService(ShareCryptoService.class).encrypt(updatedPassword);
+            }
+            Context context = getContextService().getContext(session.getContextId());
+            UserService userService = getUserService();
+            User guestUser = userService.getUser(con, guestID, context);
+            String previousPassword = guestUser.getUserPassword();
+            if (null == updatedPassword && null != previousPassword || false == updatedPassword.equals(previousPassword)) {
+                UserImpl updatedUser = new UserImpl(guestUser);
+                if (Strings.isEmpty(updatedPassword)) {
+                    updatedUser.setPasswordMech("");
+                    updatedUser.setUserPassword(null);
+                } else {
+                    updatedUser.setUserPassword(updatedPassword);
+                    updatedUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
+                }
+                userService.updateUser(con, updatedUser, context);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private List<ShareTarget> buildModifiedTargets(GuestShare share, List<ShareTarget> targetsToUpdate) {
@@ -172,13 +212,8 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
         return modifiedTargets;
     }
 
-    private void updateAuthAndPermissions(GuestShare share, List<ShareTarget> modifiedTargets, Connection writeCon) throws OXException {
+    private void updatePermissions(GuestShare share, List<ShareTarget> modifiedTargets, Connection writeCon) throws OXException {
         if (recipient != null) {
-            /*
-             * adjust recipients auth information
-             */
-            getShareService().updateRecipient(session, share.getGuestID(), recipient);
-
             /*
              * adjust folder & object permissions of share targets
              */

@@ -54,12 +54,18 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link UpdateRecipientAction}
@@ -91,16 +97,40 @@ public class UpdateRecipientAction extends AbstractShareAction {
         /*
          * Parse recipient
          */
-        ShareRecipient recipient = null;
+        AnonymousRecipient recipient = null;
         try {
-            recipient = ShareJSONParser.parseRecipient((JSONObject) requestData.requireData());
+            ShareRecipient tmp = ShareJSONParser.parseRecipient((JSONObject) requestData.requireData());
+            if (false == AnonymousRecipient.class.isInstance(tmp)) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create();//TODO
+            }
+
+            recipient = (AnonymousRecipient) tmp;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
-        if (false == AnonymousRecipient.class.isInstance(recipient)) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create();//TODO
+
+
+        String updatedPassword = recipient.getPassword();
+        if (false == Strings.isEmpty(updatedPassword)) {
+            updatedPassword = services.getService(ShareCryptoService.class).encrypt(updatedPassword);
         }
-        getShareService().updateRecipient(session, guestID, (AnonymousRecipient) recipient);
+
+        Context context = getContextService().getContext(session.getContextId());
+        UserService userService = getUserService();
+        User guestUser = userService.getUser(guestID, context);
+        String previousPassword = guestUser.getUserPassword();
+        if (null == updatedPassword && null != previousPassword || false == updatedPassword.equals(previousPassword)) {
+            UserImpl updatedUser = new UserImpl(guestUser);
+            if (Strings.isEmpty(updatedPassword)) {
+                updatedUser.setPasswordMech("");
+                updatedUser.setUserPassword(null);
+            } else {
+                updatedUser.setUserPassword(updatedPassword);
+                updatedUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
+            }
+            userService.updateUser(updatedUser, context);
+        }
+
         /*
          * return empty result in case of success
          */

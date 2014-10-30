@@ -59,7 +59,10 @@ import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
 import com.openexchange.ajax.share.tests.DeleteTest;
 import com.openexchange.ajax.share.tests.ExpiredSharesTest;
+import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderTransactionTest;
+import com.openexchange.ajax.share.tests.GetALinkTest;
+import com.openexchange.ajax.share.tests.GuestContactTest;
 import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.NewTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
@@ -88,10 +91,11 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(FolderTransactionTest.class);
         tests.addTestSuite(AggregateSharesTest.class);
         tests.addTestSuite(NewTest.class);
-//        tests.addTestSuite(FileStorageTransactionTest.class);
-//        tests.addTestSuite(GuestContactTest.class);
+        tests.addTestSuite(FileStorageTransactionTest.class);
+        tests.addTestSuite(GuestContactTest.class);
         tests.addTestSuite(AnonymousGuestPasswordTest.class);
         tests.addTestSuite(GuestPasswordTest.class);
+        tests.addTestSuite(GetALinkTest.class);
         return tests;
     }
 

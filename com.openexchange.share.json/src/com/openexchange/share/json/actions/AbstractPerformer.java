@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
@@ -62,6 +63,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -86,6 +88,14 @@ public abstract class AbstractPerformer<T> {
 
     protected ModuleSupport getModuleSupport() throws OXException {
         return requireService(ModuleSupport.class, services);
+    }
+
+    protected ContextService getContextService() throws OXException {
+        return requireService(ContextService.class, services);
+    }
+
+    protected UserService getUserService() throws OXException {
+        return requireService(UserService.class, services);
     }
 
     /**
