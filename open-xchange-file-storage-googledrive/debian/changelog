@@ -4,6 +4,12 @@ open-xchange-file-storage-googledrive (7.6.2-0) unstable; urgency=medium
 
  -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 17 Sep 2014 12:36:15 +0200
 
+open-xchange-file-storage-googledrive (7.6.1-7) stable; urgency=low
+
+  * Build for patch 2014-10-30
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 27 Oct 2014 09:44:23 +0100
+
 open-xchange-file-storage-googledrive (7.6.1-6) stable; urgency=medium
 
   * Build for patch 2014-10-24
