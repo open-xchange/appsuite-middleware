@@ -131,11 +131,29 @@ public class HashCalculator {
      * @return The calculated hash string
      */
     public String getHash(final HttpServletRequest req, final String userAgent, final String client) {
+        return getHash(req, userAgent, client, (String[])null);
+    }
+
+    /**
+     * Gets the calculated hash string for specified arguments.
+     *
+     * @param req The HTTP Servlet request
+     * @param userAgent The optional <code>User-Agent</code> identifier
+     * @param client The optional client identifier
+     * @param additionals Additional values to include in the hash, or <code>null</code> if not needed
+     * @return The calculated hash string
+     */
+    public String getHash(final HttpServletRequest req, final String userAgent, final String client, String...additionals) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
             md.update((null == userAgent ? parseClientUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
+            }
+            if (null != additionals && 0 < additionals.length) {
+                for (String value : additionals) {
+                    md.update(value.getBytes(Charsets.UTF_8));
+                }
             }
             final String[] fields = this.fields;
             if (null != fields) {

@@ -590,7 +590,16 @@ public final class SessionUtility {
      * @throws OXException If the secrets differ
      */
     public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session, final boolean logInfo) throws OXException {
-        final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"));
+        String[] additionalsForHash;
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            /*
+             * inject context- and user-id to allow parallel guest sessions
+             */
+            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+        } else {
+            additionalsForHash = null;
+        }
+        final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"), additionalsForHash);
         if (secret == null || !session.getSecret().equals(secret)) {
             if (logInfo && null != secret) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
@@ -626,6 +635,22 @@ public final class SessionUtility {
      * @return The secret string or <tt>null</tt>
      */
     public static String extractSecret(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
+        return extractSecret(hashSource, req, hash, client, originalUserAgent, (String[])null);
+    }
+
+    /**
+     * Extracts the secret string from specified cookies using given hash string.
+     *
+     * @param hashSource The hash source for the secret cookie
+     * @param req The HTTP Servlet request object.
+     * @param hash The remembered hash from session.
+     * @param client The remembered client from the session.
+     * @param originalUserAgent The original <tt>'User-Agent'</tt> associated with session
+     * @param additionalsForHash Additional values to include when calculating the client-specific hash for the cookie names, or
+     *                           <code>null</code> if not needed
+     * @return The secret string or <tt>null</tt>
+     */
+    public static String extractSecret(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent, String...additionalsForHash) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             if (cookies.isEmpty()) {
@@ -633,7 +658,7 @@ public final class SessionUtility {
             } else {
                 final String secretPrefix = SECRET_PREFIX;
                 final StringBuilder tmp = new StringBuilder(256);
-                final String expectedSecretCookieName = tmp.append(secretPrefix).append(getHash(hashSource, req, hash, client)).toString();
+                final String expectedSecretCookieName = tmp.append(secretPrefix).append(getHash(hashSource, req, hash, client, additionalsForHash)).toString();
 
                 // Look-up Cookie by expected name
                 Cookie cookie = cookies.get(expectedSecretCookieName);
@@ -705,14 +730,16 @@ public final class SessionUtility {
      * @param req The HTTP request
      * @param hash The previously remembered hash
      * @param client The client identifier
+     * @param additionalsForHash Additional values to include when calculating the client-specific hash for the cookie names, or
+     *                           <code>null</code> if not needed
      * @return The appropriate hash
      */
-    public static String getHash(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client) {
+    public static String getHash(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client, String[] additionalsForHash) {
         if (CookieHashSource.REMEMBER == hashSource) {
             return hash;
         }
         // Default is calculate
-        return HashCalculator.getInstance().getHash(req, client);
+        return HashCalculator.getInstance().getHash(req, HashCalculator.getUserAgent(req), client, additionalsForHash);
     }
 
     /**

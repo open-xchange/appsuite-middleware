@@ -189,7 +189,39 @@ public final class LoginTools {
         return parseParameter(req, LoginFields.USER_AGENT, req.getHeader(Header.USER_AGENT));
     }
 
+    /**
+     * Parses a login request based on the supplied servlet request and credentials.
+     *
+     * @param req The underlying servlet request
+     * @param login The provided login name
+     * @param password The provided password
+     * @param strict <code>true</code> to fail on missing version- or client-parameter in the request, <code>false</code>, otherwise
+     * @param defaultClient The client identifier to use as fallback if the request does provide contain the "client" parameter
+     * @param forceHTTPS
+     * @param requiredAuthId <code>true</code> to fail on missing authId-parameter in the request, <code>false</code>, otherwise
+     * @return The parsed login request
+     * @throws OXException
+     */
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS, boolean requiredAuthId) throws OXException {
+        return parseLogin(req, login, password, strict, defaultClient, forceHTTPS, requiredAuthId, (String[])null);
+    }
+
+    /**
+     * Parses a login request based on the underlying servlet request and provided user credentials.
+     *
+     * @param req The underlying servlet request
+     * @param login The provided login name
+     * @param password The provided password
+     * @param strict <code>true</code> to fail on missing version- or client-parameter in the request, <code>false</code>, otherwise
+     * @param defaultClient The client identifier to use as fallback if the request does provide contain the "client" parameter
+     * @param forceHTTPS
+     * @param requiredAuthId <code>true</code> to fail on missing authId-parameter in the request, <code>false</code>, otherwise
+     * @param additionalsForHash Additional values to include when calculating the client-specific hash for the cookie names, or
+     *                           <code>null</code> if not needed
+     * @return The parsed login request
+     * @throws OXException
+     */
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS, boolean requiredAuthId, String...additionalsForHash) throws OXException {
         final String authId = parseAuthId(req, requiredAuthId);
         final String client = parseClient(req, strict, defaultClient);
         final String version;
@@ -224,7 +256,7 @@ public final class LoginTools {
             authId,
             client,
             version,
-            HashCalculator.getInstance().getHash(req, userAgent, client),
+            HashCalculator.getInstance().getHash(req, userAgent, client, additionalsForHash),
             HTTP_JSON,
             headers,
             cookies,

@@ -205,7 +205,9 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     authService.authorizeUser(context, user);
 
                     // Parse & check the HTTP request
-                    LoginRequestImpl request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false, conf.getDefaultClient(), conf.isCookieForceHTTPS(), false);
+                    String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
+                    LoginRequestImpl request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false,
+                        conf.getDefaultClient(), conf.isCookieForceHTTPS(), false, additionalsForHash);
                     LoginPerformer.sanityChecks(request);
                     LoginPerformer.checkClient(request, user, context);
 

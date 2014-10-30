@@ -109,8 +109,9 @@ public final class ShareServletUtils {
          */
         Context context = ShareServiceLookup.getService(UserService.class, true).getContext(share.getContextID());
         User user = ShareServiceLookup.getService(UserService.class, true).getUser(share.getGuestID(), context);
+        String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
         LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
-            loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false);
+            loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false, additionalsForHash);
         loginRequest.setTransient(tranzient);
         /*
          * login
@@ -123,6 +124,7 @@ public final class ShareServletUtils {
             return null;
         }
         LOG.debug("Successful login for share {} with guest user {} in context {}.", share.getToken(), share.getGuestID(), share.getContextID());
+        loginResult.getSession().setParameter(Session.PARAM_GUEST, Boolean.TRUE);
         return loginResult;
     }
 
