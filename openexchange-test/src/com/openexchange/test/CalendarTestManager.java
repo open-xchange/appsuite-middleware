@@ -365,7 +365,7 @@ public class CalendarTestManager implements TestManager {
         }
 
     }
-    
+
     public void update(int inFolder, Appointment updatedAppointment) {
         UpdateRequest updateRequest = new UpdateRequest(inFolder, updatedAppointment, timezone, getFailOnError());
         UpdateResponse updateResponse = execute(updateRequest);

@@ -70,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * {@inheritDoc}
+ * {@link RdbUserPermissionBitsStorage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -392,7 +392,6 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             if (!rs.next()) {
                 throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
-
             return new UserPermissionBits(rs.getInt(1), userId, ctx.getContextId());
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);

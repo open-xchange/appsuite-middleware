@@ -574,12 +574,15 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @return The preview cache or null if cache is either absent or not enabled for context, user
      */
     public static ResourceCache getResourceCache(int contextId, int userId) {
+        ResourceCache cache = null;
         try {
-            return isResourceCacheEnabled(contextId, userId) ? ResourceCaches.getResourceCache() : null;
+            if(isResourceCacheEnabled(contextId, userId)) {
+                cache = ResourceCaches.getResourceCache();
+            }
         } catch (OXException e) {
             LOGGER.warn("Failed to check if ResourceCache is enabled for context {} and user {}", contextId, userId, e);
         }
-        return null;
+        return cache;
     }
 
     /**

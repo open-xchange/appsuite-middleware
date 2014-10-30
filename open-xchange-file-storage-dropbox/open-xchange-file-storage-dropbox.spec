@@ -58,6 +58,8 @@ Fifth candidate for 7.6.1 release
 Fourth candidate for 7.6.1 release
 * Thu Oct 02 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Third release candidate for 7.6.1
+* Wed Sep 17 2014 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.6.2 release
 * Tue Sep 16 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Second release candidate for 7.6.1
 * Fri Sep 05 2014 Thorben Betten <thorben.betten@open-xchange.com>

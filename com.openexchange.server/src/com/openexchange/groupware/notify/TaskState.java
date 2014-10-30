@@ -177,5 +177,4 @@ public class TaskState extends LinkableState {
         }
         return false;
     }
-
 }

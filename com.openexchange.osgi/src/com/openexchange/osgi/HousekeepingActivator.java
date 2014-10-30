@@ -171,7 +171,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     private final List<ServiceTracker<?, ?>> serviceTrackers;
-
+    
     private final HashMultimap<Object,ServiceRegistration<?>> serviceRegistrations;
 
     /**

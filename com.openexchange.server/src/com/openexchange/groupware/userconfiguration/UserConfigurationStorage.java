@@ -121,8 +121,6 @@ public abstract class UserConfigurationStorage {
         started = false;
     }
 
-
-
     /**
      * A convenience method that invokes
      * {@link #getUserConfigurationSafe(int, int[], Context)} with the group

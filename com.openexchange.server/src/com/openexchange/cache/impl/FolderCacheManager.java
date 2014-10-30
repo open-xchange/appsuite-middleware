@@ -219,7 +219,7 @@ public final class FolderCacheManager {
 
     public void clearFor(final Context ctx, final boolean async) {
         final Runnable task = new Runnable() {
-
+            
             @Override
             public void run() {
                 final int contextId = ctx.getContextId();
@@ -279,7 +279,7 @@ public final class FolderCacheManager {
     public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readCon) throws OXException {
         final Cache folderCache = this.folderCache;
         if (null == folderCache) {
-            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create("foldercache.properties");
         }
         if (fromCache) {
             // Conditional put into cache: Put only if absent.

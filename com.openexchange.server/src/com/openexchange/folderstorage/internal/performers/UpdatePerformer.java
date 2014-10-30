@@ -175,19 +175,30 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         folder.setName(storageFolder.getName());
                     }
 
-                    checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
+                        checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
+                    }
                 }
-            }
 
             final boolean rename;
             {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
-                if (rename && false == move) {
-                    checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                if (rename) {
+                    if ("infostore".equals(storageFolder.getContentType().toString())) { // Maybe something special to consider as not synchronized with OL
+                        if (move) {
+                            checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, folder.getParentID());
+                        } else {
+                            checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                        }
+                    } else {
+                        if (move) {
+                            checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, folder.getParentID());
+                        } else {
+                            checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                        }
+                    }
                 }
             }
-
             final boolean changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
             final ComparedPermissions comparedPermissions = new ComparedPermissions(
                 getContext(),
@@ -311,14 +322,14 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (null == realStorage) {
                             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
                         }
-                        if (storage.equals(realStorage)) {
-                            storage.updateFolder(folder, storageParameters);
-                        } else {
-                            checkOpenedStorage(realStorage, openedStorages);
-                            realStorage.updateFolder(folder, storageParameters);
-                            storage.updateFolder(folder, storageParameters);
-                        }
+                    if (storage.equals(realStorage)) {
+                        storage.updateFolder(folder, storageParameters);
+                    } else {
+                        checkOpenedStorage(realStorage, openedStorages);
+                        realStorage.updateFolder(folder, storageParameters);
+                        storage.updateFolder(folder, storageParameters);
                     }
+                }
                     /*
                      * delete existing shares for removed guest permissions
                      */
@@ -373,6 +384,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+
     } // End of doUpdate()
 
     private void checkForDuplicateOnMove(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newParentId) throws OXException {

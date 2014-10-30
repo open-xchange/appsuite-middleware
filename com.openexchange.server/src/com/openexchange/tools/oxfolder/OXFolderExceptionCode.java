@@ -389,7 +389,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     /**
      * Folder cache has not been enabled in config file %1$s
      */
-    CACHE_NOT_ENABLED("Folder cache has not been enabled in config file 'foldercache.properties'", MESSAGE, Category.CATEGORY_ERROR, 52),
+    CACHE_NOT_ENABLED("Folder cache has not been enabled in config file %1$s", MESSAGE, Category.CATEGORY_ERROR, 52),
     /**
      * Folder %1$s could not be removed from folder cache
      */

@@ -137,7 +137,6 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
         return request.isTransient();
     }
 
-
     @Override
     public SessionModifyCallback getCallback() {
         return callback;
@@ -146,5 +145,4 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
     public void setCallback(SessionModifyCallback callback) {
         this.callback = callback;
     }
-
 }

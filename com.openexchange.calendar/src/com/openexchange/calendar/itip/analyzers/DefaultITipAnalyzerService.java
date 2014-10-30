@@ -100,7 +100,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
         for (ITipMessage message : messages) {
             ITipMethod method = message.getMethod();
             if (mailHeader.containsKey("X-Mailer") && mailHeader.get("X-Mailer").toLowerCase().contains("outlook")) {
-            	message.addFeature(ITipSpecialHandling.MICROSOFT);
+                message.addFeature(ITipSpecialHandling.MICROSOFT);
             }
             if (method == ITipMethod.COUNTER && message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
                 method = ITipMethod.REPLY;
@@ -116,7 +116,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
             if (analyzer == null) {
                 // TODO: Error
             } else {
-            	result.add(analyzer.analyze(message, mailHeader, format, session));
+                result.add(analyzer.analyze(message, mailHeader, format, session));
             }
         }
 

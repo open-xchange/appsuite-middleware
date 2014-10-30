@@ -174,7 +174,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
 
         try {
             // do we have a usable resource cache and are we allowed to use it?
-            if (useCache(requestData)) {
+            if (isResourceCacheEnabled(contextId, userId) && useCache(requestData)) {
                 ResourceCache resourceCache = getResourceCache(contextId, userId);
                 if (resourceCache != null) {
                     CachedResource cachedPreview = getCachedResourceForContext(session, cacheKeyGenerator.generateCacheKey(), resourceCache);
@@ -203,11 +203,8 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                         ThreadPools.getExecutorService().submit(previewAndCache);
                         indicateRequestAccepted(result, requestData);
                     }
-                    return;
                 }
-            }
-
-            if (isBlockingWorkerAllowed) {
+            } else if (isBlockingWorkerAllowed) {
                 // there is no cached resource but we are allowed to wait for thumbnail generation
                 // do as callable anyway
                 PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, THRESHOLD, false);

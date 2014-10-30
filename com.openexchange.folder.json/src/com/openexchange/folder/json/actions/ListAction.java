@@ -64,6 +64,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
+import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
@@ -116,8 +117,22 @@ public final class ListAction extends AbstractFolderAction {
         if (null == parentId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("parent");
         }
-
         int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+
+        // Ensure ID is contained
+        {
+            boolean found = false;
+            final int idCol = FolderField.ID.getColumn();
+            for (int i = 0; !found && i < columns.length; i++) {
+                found = (idCol == columns[i]);
+            }
+            if (!found) {
+                final int[] tmp = columns;
+                columns = new int[tmp.length + 1];
+                System.arraycopy(tmp, 0, columns, 1, tmp.length);
+                columns[0] = idCol;
+            }
+        }
 
         final boolean all;
         {

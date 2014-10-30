@@ -378,7 +378,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.REFERRAL.name);
         }
         referral = props.getProperty(PropertyNames.REFERRAL.name);
-        
+
         useFullLoginInfo = Boolean.parseBoolean(props.getProperty(PropertyNames.USE_FULL_LOGIN_INFO.name));
 
     }

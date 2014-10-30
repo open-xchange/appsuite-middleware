@@ -68,7 +68,7 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
     private final String contentType;
 
     private final int[] columns;
-    
+
     private final boolean failOnError;
 
     /**

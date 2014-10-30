@@ -24,7 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import java.util.Collections;
 import java.util.Set;
 
 
@@ -110,7 +109,7 @@ public class XML {
      * @throws JSONException
      */
     private static boolean parse(final XMLTokener x, final JSONObject context, final String name) throws JSONException {
-        return parse(x, context, name, Collections.<String> emptySet());
+        return parse(x, context, name, java.util.Collections.<String> emptySet());
     }
 
     /**

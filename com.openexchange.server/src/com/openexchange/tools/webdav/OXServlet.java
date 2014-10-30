@@ -505,7 +505,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return The session, or <code>null</code> if no matching session could be looked up
      * @throws OXException
      */
-    public static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
+    private static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         String sessionId = null;
         if (null != cookies) {
