@@ -93,8 +93,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
     @Parameter(name = "attachment", description = "A comma-separated list of IDs of the requested attachments") }, responseDescription = "The raw byte data of the ZIP file.")
 public final class GetMultipleAttachmentAction extends AbstractMailAction {
 
-    protected static final String MAIL_ATTACHMENT_NAME = "Mail";
-
     /**
      * Initializes a new {@link GetMultipleAttachmentAction}.
      *
