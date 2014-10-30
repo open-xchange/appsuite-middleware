@@ -118,6 +118,7 @@ public class DefaultShareService implements ShareService {
     public GuestShare resolveToken(String token) throws OXException {
         ShareToken shareToken = new ShareToken(token);
         int contextID = shareToken.getContextID();
+        // TODO: throws user not found exception. We should detect this and throw a share not found exception.
         User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
         if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
