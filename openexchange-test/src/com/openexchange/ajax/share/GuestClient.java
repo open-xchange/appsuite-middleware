@@ -116,9 +116,9 @@ public class GuestClient extends AJAXClient {
     /**
      * Initializes a new {@link GuestClient}.
      *
-     * @param url
-     * @param username
-     * @param password
+     * @param url The share URL to access
+     * @param username The username to use for authentication, or <code>null</code> if not needed
+     * @param password The password to use for authentication, or <code>null</code> if not needed
      */
     public GuestClient(String url, String username, String password) throws Exception {
         this(url, username, password, false);
@@ -127,14 +127,28 @@ public class GuestClient extends AJAXClient {
     /**
      * Initializes a new {@link GuestClient}.
      *
-     * @param url
-     * @param username
-     * @param password
-     * @param failOnNonRedirect
+     * @param url The share URL to access
+     * @param username The username to use for authentication, or <code>null</code> if not needed
+     * @param password The password to use for authentication, or <code>null</code> if not needed
+     * @param failOnNonRedirect <code>true</code> to fail if the share resolve request is not being redirected, <code>false</code>, otherwise
      * @throws Exception
      */
     public GuestClient(String url, String username, String password, boolean failOnNonRedirect) throws Exception {
-        super(new AJAXSession(), true);
+        this(new AJAXSession(), url, username, password, failOnNonRedirect);
+    }
+
+    /**
+     * Initializes a new {@link GuestClient}.
+     *
+     * @param ajaxSession The underlying ajax session to use
+     * @param url The share URL to access
+     * @param username The username to use for authentication, or <code>null</code> if not needed
+     * @param password The password to use for authentication, or <code>null</code> if not needed
+     * @param failOnNonRedirect <code>true</code> to fail if the share resolve request is not being redirected, <code>false</code>, otherwise
+     * @throws Exception
+     */
+    public GuestClient(AJAXSession ajaxSession, String url, String username, String password, boolean failOnNonRedirect) throws Exception {
+        super(ajaxSession, true);
         prepareClient(getHttpClient(), username, password);
         shareResponse = Executor.execute(this, new ResolveShareRequest(url, failOnNonRedirect));
         if (null != shareResponse.getLoginType()) {
