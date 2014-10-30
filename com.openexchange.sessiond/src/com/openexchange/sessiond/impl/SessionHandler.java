@@ -1204,8 +1204,10 @@ public final class SessionHandler {
             LOG.debug("Posted event for removed session");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
-                if (sessionData.isUserActive(session.getUserId(), session.getContextId())) {
-                    postLastSessionGone(session.getUserId(), session.getContextId(), eventAdmin);
+                int contextId = session.getContextId();
+                int userId = session.getUserId();
+                if (false == sessionData.isUserActive(userId, contextId, false)) {
+                    postLastSessionGone(userId, contextId, eventAdmin);
                 }
             }
         }
@@ -1217,7 +1219,23 @@ public final class SessionHandler {
             dic.put(SessiondEventConstants.PROP_USER_ID, Integer.valueOf(userId));
             dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic));
-            LOG.debug("Posted event for last removed session");
+            LOG.debug("Posted event for last removed session for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
+
+            SessionData sessionData = sessionDataRef.get();
+            if (null != sessionData) {
+                if (false == sessionData.hasForContext(contextId)) {
+                    postContextLastSessionGone(contextId, eventAdmin);
+                }
+            }
+        }
+    }
+
+    private static void postContextLastSessionGone(int contextId, EventAdmin eventAdmin) {
+        if (eventAdmin != null) {
+            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT, dic));
+            LOG.debug("Posted event for last removed session for context {}", Integer.valueOf(contextId));
         }
     }
 
@@ -1269,8 +1287,8 @@ public final class SessionHandler {
             LOG.debug("Posted event for removed session container");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
-                for (final UserKey userKey : users) {
-                    if (sessionData.isUserActive(userKey.userId, userKey.contextId)) {
+                for (UserKey userKey : users) {
+                    if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
                         postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
                     }
                 }
@@ -1296,8 +1314,8 @@ public final class SessionHandler {
             LOG.debug("Posted event for removing temporary session data.");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
-                for (final UserKey userKey : users) {
-                    if (sessionData.isUserActive(userKey.userId, userKey.contextId)) {
+                for (UserKey userKey : users) {
+                    if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
                         postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
                     }
                 }
