@@ -124,10 +124,9 @@ sub testHazelcastsupportsPartitionReplicas{
 	if ($response->is_success) {
 		my $json = decode_json($response->decoded_content);
 		if (defined $json->{value}){
-			print "2 ".$json->{value}."\n";
 			if ( "true" ne $json->{value} ) {
-			} else {
 				die "No owner for all configured partition replicas detected, unable to retrieve map statistic. value=".$json->{value}."\n";
+			} else {
 			}
 		} else {
 			die "No owner for all configured partition replicas detected, unable to retrieve map statistics.\n";

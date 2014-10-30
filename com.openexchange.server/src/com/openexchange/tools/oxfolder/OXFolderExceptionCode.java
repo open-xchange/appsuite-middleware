@@ -387,9 +387,9 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     FOLDER_CACHE_INITIALIZATION_FAILED("Folder cache (region name = %1$s) could not be initialized due to the following reason: %2$s",
         MESSAGE, Category.CATEGORY_ERROR, 51),
     /**
-     * Folder cache has not been enabled in config file %1$s
+     * Folder cache has not been enabled in config file 'foldercache.properties'
      */
-    CACHE_NOT_ENABLED("Folder cache has not been enabled in config file %1$s", MESSAGE, Category.CATEGORY_ERROR, 52),
+    CACHE_NOT_ENABLED("Folder cache has not been enabled in config file 'foldercache.properties'", MESSAGE, Category.CATEGORY_ERROR, 52),
     /**
      * Folder %1$s could not be removed from folder cache
      */
