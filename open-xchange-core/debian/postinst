@@ -830,7 +830,14 @@ ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" 
 
 # SoftwareChange_Request-2037
 PFILE=/opt/open-xchange/etc/sessiond.properties
-ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
+if ! grep "com.openexchange.sessiond.remoteParameterNames" >/dev/null $PFILE; then
+    echo -e "\n# Specifies the colon-separated names of such parameters that are supposed to be taken over from session to stored session representation." >> $PFILE
+    echo "# The parameter names MUST NOT contain the ':' colon character that serves as a delimiter." >> $PFILE
+    echo "# E.g.    com.openexchange.sessiond.remoteParameterNames=remoteParameter1:remoteParameter2:...:remoteParameterN" >> $PFILE
+    echo "#" >> $PFILE
+    echo "# By default this setting is empty." >> $PFILE
+    echo "#com.openexchange.sessiond.remoteParameterNames=" >> $PFILE
+fi
 
 # SoftwareChange_Request-2055
 ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
@@ -936,12 +943,6 @@ for I in "${NAMES[@]}"; do
     VALUE=$(ox_read_property $I /opt/open-xchange/etc/quota.properties)
     ox_set_property $I "$VALUE" /opt/open-xchange/etc/quota.properties
 done
-
-# SoftwareChange_Request-2219
-VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
-if [ "1500" = "${VALUE}" ]; then
-    ox_set_property com.openexchange.servlet.maxRate 500 /opt/open-xchange/etc/server.properties
-fi
 
 # SoftwareChange_Request-2224
 ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
