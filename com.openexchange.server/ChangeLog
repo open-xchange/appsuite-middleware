@@ -2,6 +2,10 @@
 
  - Fix for bug 35693: Fixed conditional expression to check for possible HTML content by Content-Type and/or file name values
 
+* 2014-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35242: Added null guard & improved logging behavior to provide mail information in order to identify the mail later on
+
 * 2014-10-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 35255: Also consider file extension if mail part claims to be HTML by Content-Type

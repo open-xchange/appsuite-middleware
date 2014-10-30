@@ -80,7 +80,6 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -280,20 +279,6 @@ public final class MailMessageParser {
             throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
         try {
-            {
-                final int accountId = mail.getAccountId();
-                if (accountId >= 0) {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId));
-                }
-                final String mailId = mail.getMailId();
-                if (null != mailId) {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_MAIL_ID, mailId);
-                }
-                final String folder = mail.getFolder();
-                if (null != folder) {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, folder);
-                }
-            }
             /*
              * Parse mail's envelope
              */
@@ -323,11 +308,8 @@ public final class MailMessageParser {
                 }
             }
             throw e;
-        } finally {
-            LogProperties.removeProperty(LogProperties.Name.MAIL_ACCOUNT_ID);
-            LogProperties.removeProperty(LogProperties.Name.MAIL_MAIL_ID);
-            LogProperties.removeProperty(LogProperties.Name.MAIL_FULL_NAME);
         }
+
         handler.handleMessageEnd(mail);
     }
 
