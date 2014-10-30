@@ -1,3 +1,7 @@
+* 2014-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35242: Added null guard & improved logging behavior to provide mail information in order to identify the mail later on
+
 * 2014-10-29 - martin.schneider@open-xchange.com
 
  - Fix for bug 35073: set default subject when processed mail was sent without subject
