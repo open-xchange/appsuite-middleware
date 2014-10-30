@@ -49,16 +49,17 @@
 
 package com.openexchange.share.json.actions;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,36 +87,54 @@ public class UpdateLinkAction extends AbstractShareAction {
          * extract parameters
          */
         Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
-        String token = requestData.requireParameter("token");
 
         /*
          * Parse recipient and targets
          */
         try {
-            JSONObject jsonObject = (JSONObject) requestData.requireData();
+            JSONObject json = (JSONObject) requestData.requireData();
+            String token = json.getString("token");
             Date expiry = null;
-            String expires = jsonObject.optString("expires");
+            String expires = json.optString("expiry_date");
             if (expires != null) {
                 expiry = new Date(Long.parseLong(expires));
             }
 
-            AnonymousRecipient recipient = null;
-            if (jsonObject.hasAndNotNull("recipient")) {
-                ShareRecipient tmp = ShareJSONParser.parseRecipient(jsonObject.getJSONObject("recipient"));
-                if (tmp.getType() != RecipientType.ANONYMOUS) {
-                    // TODO: throw exception
-                }
-
-                recipient = (AnonymousRecipient) tmp;
+            int permissionBits = -1;
+            if (json.hasAndNotNull("bits")) {
+                permissionBits = json.getInt("bits");
             }
 
-            UpdatePerformer updatePerformer = new UpdatePerformer(token, recipient, expiry, clientTimestamp, session, services);
+            String password = null;
+            if (json.hasAndNotNull("password")) {
+                password = json.getString("password");
+            }
+
+            Map<String, Object> meta = null;
+            if (json.hasAndNotNull("meta")) {
+                if (json.isNull("meta")) {
+                    meta = Collections.<String, Object> emptyMap();
+                } else {
+                    meta = (Map<String, Object>)JSONCoercion.coerceToNative(json.getJSONObject("meta"));
+                }
+            }
+
+            AnonymousRecipient recipient = null;
+            if (permissionBits >= 0 || password != null) {
+                recipient = new AnonymousRecipient();
+                recipient.setBits(permissionBits);
+                recipient.setPassword(password);
+            }
+
+            UpdatePerformer updatePerformer = new UpdatePerformer(token, recipient, expiry, meta, clientTimestamp, session, services);
             updatePerformer.perform();
 
             /*
              * return empty result in case of success
              */
-            return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+            AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+            result.setTimestamp(new Date());
+            return result;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }

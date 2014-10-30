@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,60 @@
  *
  */
 
-package com.openexchange.push.ms;
+package com.openexchange.java;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Wrapper for PushMSObject if the Push should be delayed by a certain amount of time. Use case for this delaying wrapper: Unlike E-Mails
- * other PIM Objects shouldn't be pushed immediately because they can be changed within a short time frame to adjust details or other objects
- * might be created in the same folder which would lead to yet another push event. Introduced to stay compatible with old {c.o}.push.udp
- * implementation.
+ * {@link AbstractCustomDelayed}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DelayedPushMsObject implements Delayed {
+public class CustomDelayed<T> implements Delayed {
 
-    /** How long should the Push of the wrapped PIM Object be delayed in milliseconds */
-    private final int delayDuration;
-
-    /** Determine when the object should be pushed by saving when it was last touched (either created or delayed) */
     private volatile long stamp;
-
-    /** Determine when the object should be pushed by saving when it was last touched (either created or delayed) */
+    private final long delayDuration;
     private final long maxStamp;
-
-    /** The wrapped object */
-    private final PushMsObject pushMsObject;
+    private final T element;
 
     /**
-     * Initializes a new {@link DelayedPushMsObject} by wrapping the given PushMsObject.
+     * Initializes a new {@link CustomDelayed} with arbitrary delay durations by wrapping the given element.
      *
-     * @param pushMsObject the original PushMsObject
-     * @param delayDuration how long should the push of the wrapped PushMsObject be delayed in milliseconds
-     * @param maxDelayDuration the maximum time a PushMsObject can be delayed
+     * @param element The actual payload element
+     * @param delayDuration The delay duration (in milliseconds) to use initially and as increment for each reset-operation
+     * @param maxDelayDuration The the maximum delay duration (in milliseconds) to apply
      * @throws IllegalArgumentException If <code>delayDuration</code> is greater than <code>maxDelayDuration</code>
      */
-    public DelayedPushMsObject(final PushMsObject pushMsObject, final int delayDuration, final int maxDelayDuration) {
+    public CustomDelayed(T element, long delayDuration, long maxDelayDuration) {
         super();
         if (delayDuration > maxDelayDuration) {
             throw new IllegalArgumentException("delayDuration is greater than maxDelayDuration.");
         }
-        this.pushMsObject = pushMsObject;
+        this.element = element;
         this.delayDuration = delayDuration;
-        final long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
         stamp = now + delayDuration;
         maxStamp = now + maxDelayDuration;
     }
 
+    /**
+     * Initializes a new {@link CustomDelayed} with a fixed delay duration by wrapping the given element. Resetting this object has no
+     * effect, i.e. the maximum delay duration is fixed.
+     *
+     * @param element The actual payload element
+     * @param delayDuration The delay duration (in milliseconds) to use
+     * @throws IllegalArgumentException If <code>delayDuration</code> is greater than <code>maxDelayDuration</code>
+     */
+    public CustomDelayed(T element, int delayDuration) {
+        this(element, delayDuration, delayDuration);
+    }
+
     @Override
     public int compareTo(final Delayed o) {
-        final long thisStamp = this.stamp;
-        final long otherStamp = ((DelayedPushMsObject) o).stamp;
+        long thisStamp = this.stamp;
+        long otherStamp = ((CustomDelayed) o).stamp;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
     }
 
@@ -107,7 +110,7 @@ public class DelayedPushMsObject implements Delayed {
      */
     @Override
     public long getDelay(final TimeUnit unit) {
-        final long toGo = stamp - System.currentTimeMillis();
+        long toGo = stamp - System.currentTimeMillis();
         return unit.convert(toGo, TimeUnit.MILLISECONDS);
     }
 
@@ -116,17 +119,52 @@ public class DelayedPushMsObject implements Delayed {
      *
      * @return the wrapped pushMsObject
      */
-    public PushMsObject getPushObject() {
-        return pushMsObject;
+    public T getElement() {
+        return element;
     }
 
     /**
-     * Refresh delay by touching the object.
+     * Resets the internal delay, up to the configured maximum delay duration.
      */
-    public void touch() {
+    public void reset() {
         final long stamp = System.currentTimeMillis() + delayDuration;
         // Stamp must not be greater than maxStamp
         this.stamp = stamp >= maxStamp ? maxStamp : stamp;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((element == null) ? 0 : element.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof CustomDelayed)) {
+            return false;
+        }
+        CustomDelayed other = (CustomDelayed) obj;
+        if (element == null) {
+            if (other.element != null) {
+                return false;
+            }
+        } else if (!element.equals(other.element)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "CustomDelayed [stamp=" + stamp + ", element=" + element + "]";
     }
 
 }

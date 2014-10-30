@@ -92,10 +92,40 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadShares(int contextID, int guest, StorageParameters parameters) throws OXException {
+    public List<Share> loadSharesForGuest(int contextID, int guest, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
             return new ShareSelector(contextID).guests(new int[] { guest }).select(provider.get());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ShareSelector(contextID).select(provider.get());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ShareSelector(contextID).expiredAfter(expires).select(provider.get());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public int deleteSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(contextID, parameters);
+        try {
+            return new ShareSelector(contextID).expiredAfter(expires).delete(provider.get());
         } finally {
             provider.close();
         }

@@ -58,7 +58,7 @@ import java.util.Map;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareTarget {
+public class ShareTarget implements Cloneable {
 
     private int module;
     private String folder;
@@ -96,6 +96,17 @@ public class ShareTarget {
         this.module = module;
         this.folder = folder;
         this.item = item;
+    }
+
+    /**
+     * Copy constructor
+     * @param target
+     */
+    public ShareTarget(ShareTarget target) {
+        this(target.getModule(), target.getFolder(), target.getItem());
+        this.ownedBy = target.getOwnedBy();
+        this.expiryDate = target.getExpiryDate();
+        this.meta = target.getMeta();
     }
 
     /**
@@ -218,6 +229,11 @@ public class ShareTarget {
      */
     public String getPath() {
         return String.format("%08x", hashCode());
+    }
+
+    @Override
+    public ShareTarget clone() {
+        return new ShareTarget(this);
     }
 
     @Override

@@ -180,7 +180,7 @@ public class SelectShareBuilder {
         }
         if (null != expiredAfter) {
             stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.EXPIRES).getColumnLabel()).append(" IS NOT NULL")
-                .append(" AND ").append(SHARE_MAPPER.get(ShareField.EXPIRES).getColumnLabel()).append("<?)")
+                .append(" AND ").append(SHARE_MAPPER.get(ShareField.EXPIRES).getColumnLabel()).append("<?")
             ;
         }
         if (null != targets && 0 < targets.size()) {
@@ -216,7 +216,6 @@ public class SelectShareBuilder {
             }
         }
         if (null != expiredAfter) {
-            stmt.setInt(parameterIndex++, contextID);
             stmt.setLong(parameterIndex++, expiredAfter.getTime());
         }
         if (null != targets) {

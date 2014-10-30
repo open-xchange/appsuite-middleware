@@ -50,8 +50,8 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -87,22 +87,38 @@ public class GetLinkAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
-            List<ShareTarget> targets = ShareJSONParser.parseTargets((JSONArray) requestData.requireData());
-            int permissionBits = Permissions.createPermissionBits(
-                Permission.READ_FOLDER,
-                Permission.READ_ALL_OBJECTS,
-                Permission.NO_PERMISSIONS,
-                Permission.NO_PERMISSIONS,
-                false);
+            JSONObject json = (JSONObject) requestData.requireData();
+            List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"));
+
+            int permissionBits;
+            if (json.hasAndNotNull("bits")) {
+                permissionBits = json.getInt("bits");
+            } else {
+                permissionBits = Permissions.createPermissionBits(
+                    Permission.READ_FOLDER,
+                    Permission.READ_ALL_OBJECTS,
+                    Permission.NO_PERMISSIONS,
+                    Permission.NO_PERMISSIONS,
+                    false);
+            }
+
+            String password = null;
+            if (json.hasAndNotNull("password")) {
+                password = json.getString("password");
+            }
+
             AnonymousRecipient recipient = new AnonymousRecipient();
             recipient.setBits(permissionBits);
+            recipient.setPassword(password);
             CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient>singletonList(recipient), targets, session, services);
             GuestShare share = createPerformer.perform().get(0);
 
             JSONObject jResult = new JSONObject();
-            jResult.put("url", generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, requestData));
+            jResult.put("url", generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), share.isMultiTarget() ? null : share.getTargets().get(0), requestData));
             jResult.put("token", share.getToken());
-            return new AJAXRequestResult(jResult, "json");
+            AJAXRequestResult result = new AJAXRequestResult(jResult, "json");
+            result.setTimestamp(new Date());
+            return result;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         } catch (ClassCastException e) {

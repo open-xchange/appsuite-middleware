@@ -54,11 +54,10 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.impl.DefaultShareService;
 
 /**
  * {@link FileStorageShareCleanUp}
@@ -70,12 +69,12 @@ public class FileStorageShareCleanUp implements EventHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageShareCleanUp.class);
 
-    private final ShareService shareService;
+    private final DefaultShareService shareService;
 
     /**
      * Initializes a new {@link FileStorageShareCleanUp}.
      */
-    public FileStorageShareCleanUp(ShareService shareService) {
+    public FileStorageShareCleanUp(DefaultShareService shareService) {
         super();
         this.shareService = shareService;
     }
@@ -84,11 +83,15 @@ public class FileStorageShareCleanUp implements EventHandler {
     public void handleEvent(Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
             try {
-                ShareTarget target = new ShareTarget(Module.INFOSTORE.getFolderConstant(),
-                    FileStorageEventHelper.extractFolderId(event), FileStorageEventHelper.extractObjectId(event));
-                shareService.deleteTargets(
-                    FileStorageEventHelper.extractSession(event), Collections.singletonList(target), null);
-            } catch (OXException e) {
+                ShareTarget target = new ShareTarget(
+                    Module.INFOSTORE.getFolderConstant(),
+                    FileStorageEventHelper.extractFolderId(event),
+                    FileStorageEventHelper.extractObjectId(event));
+                shareService.removeTargets(
+                    FileStorageEventHelper.extractSession(event).getContextId(),
+                    Collections.singletonList(target),
+                    null);
+            } catch (Exception e) {
                 StringBuilder sb = new StringBuilder();
                 for (String name : event.getPropertyNames()) {
                     sb.append(name).append(":").append(event.getProperty(name)).append(", ");

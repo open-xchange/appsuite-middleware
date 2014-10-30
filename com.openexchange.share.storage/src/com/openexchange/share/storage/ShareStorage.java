@@ -73,7 +73,36 @@ public interface ShareStorage {
      * @param parameters The storage parameters
      * @return The shares, or an empty list if none were found
      */
-    List<Share> loadShares(int contextID, int guest, StorageParameters parameters) throws OXException;
+    List<Share> loadSharesForGuest(int contextID, int guest, StorageParameters parameters) throws OXException;
+
+    /**
+     * Loads all shares that were created in a specific context.
+     *
+     * @param contextID The context ID
+     * @param parameters The storage parameters
+     * @return The shares
+     */
+    List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException;
+
+    /**
+     * Loads all shares that are expired after the given date.
+     *
+     * @param contextID The context ID
+     * @param expires The date to compare the share's expires value with
+     * @param parameters The storage parameters
+     * @return The shares
+     */
+    List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException;
+
+    /**
+     * Deletes all shares that are expired after the given date.
+     *
+     * @param contextID The context ID
+     * @param expires The date to compare the share's expires value with
+     * @param parameters The storage parameters
+     * @return The number of affected entries
+     */
+    int deleteSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException;
 
     /**
      * Gets a value indicating whether there are any stored shares for a specific guest user or not.
@@ -145,6 +174,4 @@ public interface ShareStorage {
     List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
 
 //    int deleteShares(int contextID, List<ShareTarget> targets, int[] guests, StorageParameters parameters) throws OXException;
-
-
 }

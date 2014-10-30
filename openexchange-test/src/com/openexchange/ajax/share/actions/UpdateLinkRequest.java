@@ -50,7 +50,7 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -58,32 +58,55 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.ajax.framework.Params;
+import com.openexchange.ajax.tools.JSONCoercion;
 
 
 /**
- * {@link NewRequest}
+ * {@link UpdateLinkRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class NewRequest implements AJAXRequest<NewResponse> {
+public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
 
-    private final boolean failOnError;
+    private final String token;
 
-    private final List<ShareTarget> targets;
+    private final long timestamp;
 
-    private final List<ShareRecipient> recipients;
+    private boolean failOnError = true;
 
-    public NewRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(targets, recipients, true);
+    private int bits = -1;
+
+    private String password = null;
+
+    private long expiry;
+
+    private Map<String, Object> meta;
+
+    /**
+     * Initializes a new {@link UpdateLinkRequest}.
+     */
+    public UpdateLinkRequest(String token, long timestamp) {
+        super();
+        this.token = token;
+        this.timestamp = timestamp;
     }
 
-    public NewRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
-        super();
-        this.targets = targets;
-        this.recipients = recipients;
-        this.failOnError = failOnError;
+    public void setBits(int bits) {
+        this.bits = bits;
+    }
+
+    public void setPassword(String password) {
+        this.password  = password;
+    }
+
+    public void setExpiry(long expiry) {
+        this.expiry = expiry;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     @Override
@@ -98,30 +121,56 @@ public class NewRequest implements AJAXRequest<NewResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, "new") };
+        return new Params(
+            AJAXServlet.PARAMETER_ACTION, "updateLink",
+            AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(timestamp)
+        ).toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends NewResponse> getParser() {
-        return new AbstractAJAXParser<NewResponse>(failOnError) {
-            @Override
-            protected NewResponse createResponse(Response response) throws JSONException {
-                return new NewResponse(response);
-            }
-        };
+    public AbstractAJAXParser<UpdateLinkResponse> getParser() {
+        return new Parser(failOnError);
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
         JSONObject json = new JSONObject();
-        json.put("targets", ShareWriter.writeTargets(targets));
-        json.put("recipients", ShareWriter.writeRecipients(recipients));
+        json.put("token", token);
+        if (expiry >= 0) {
+            json.put("expiry_date", expiry);
+        }
+        if (bits >= 0) {
+            json.put("bits", bits);
+        }
+        if (password != null) {
+            json.put("password", password);
+        }
+        if (meta != null) {
+            json.put("meta", JSONCoercion.coerceToJSON(meta));
+        }
         return json;
     }
 
     @Override
     public Header[] getHeaders() {
         return NO_HEADER;
+    }
+
+    private static final class Parser extends AbstractAJAXParser<UpdateLinkResponse> {
+
+        /**
+         * Initializes a new {@link Parser}.
+         * @param failOnError
+         */
+        protected Parser(boolean failOnError) {
+            super(failOnError);
+        }
+
+        @Override
+        protected UpdateLinkResponse createResponse(Response response) throws JSONException {
+            return new UpdateLinkResponse(response);
+        }
+
     }
 
 }

@@ -47,37 +47,79 @@
  *
  */
 
-package com.openexchange.push.ms;
+package com.openexchange.java;
 
 import java.util.AbstractQueue;
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
- * {@link PushMSDelayQueue}&nbsp;-&nbsp;A&nbsp;custom&nbsp;<code>java.util.concurrent.DelayQueue</code>;
- * <br>e.g. enhanced by {@link #offerIfAbsentElseReschedule(DelayedPushMsObject) offerIfAbsentElseReschedule()}.
+ * {@link CustomDelayQueue}
+ * <p/>
+ * A <code>java.util.concurrent.DelayQueue</code> holding {@link CustomDelayed} elements, enhanced by
+ * {@link #offerIfAbsent(CustomDelayed)}, {@link #offerIfAbsentElseReset(CustomDelayed)}, {@link #offerOrReplace(CustomDelayed)}.
+ * <p/>
+ * Useful to construct send- or receive-buffers capable of eliminating or stalling multiple duplicate events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> implements BlockingQueue<DelayedPushMsObject> {
+public final class CustomDelayQueue<E> extends AbstractQueue<CustomDelayed<E>> implements BlockingQueue<CustomDelayed<E>> {
 
     private transient final ReentrantLock lock = new ReentrantLock();
-    private transient final Condition available = lock.newCondition();
-    private final PriorityQueue<DelayedPushMsObject> q = new PriorityQueue<DelayedPushMsObject>();
+    private final PriorityQueue<CustomDelayed<E>> q = new PriorityQueue<CustomDelayed<E>>();
 
     /**
-     * Initializes a new {@link PushMSDelayQueue}.
+     * Thread designated to wait for the element at the head of
+     * the queue.  This variant of the Leader-Follower pattern
+     * (http://www.cs.wustl.edu/~schmidt/POSA/POSA2/) serves to
+     * minimize unnecessary timed waiting.  When a thread becomes
+     * the leader, it waits only for the next delay to elapse, but
+     * other threads await indefinitely.  The leader thread must
+     * signal some other thread before returning from take() or
+     * poll(...), unless some other thread becomes leader in the
+     * interim.  Whenever the head of the queue is replaced with
+     * an element with an earlier expiration time, the leader
+     * field is invalidated by being reset to null, and some
+     * waiting thread, but not necessarily the current leader, is
+     * signalled.  So waiting threads must be prepared to acquire
+     * and lose leadership while waiting.
      */
-    public PushMSDelayQueue() {
+    private Thread leader = null;
+
+    /**
+     * Condition signalled when a newer element becomes available
+     * at the head of the queue or a new thread may need to
+     * become leader.
+     */
+    private final Condition available = lock.newCondition();
+
+    /**
+     * Creates a new <tt>DelayQueue</tt> that is initially empty.
+     */
+    public CustomDelayQueue() {
         super();
+    }
+
+    /**
+     * Creates a <tt>DelayQueue</tt> initially containing the elements of the
+     * given collection of {@link Delayed} instances.
+     *
+     * @param c the collection of elements to initially contain
+     * @throws NullPointerException if the specified collection or any
+     *         of its elements are null
+     */
+    public CustomDelayQueue(Collection<? extends CustomDelayed<E>> c) {
+        super();
+        this.addAll(c);
     }
 
     /**
@@ -88,7 +130,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws NullPointerException if the specified element is null
      */
     @Override
-    public boolean add(final DelayedPushMsObject e) {
+    public boolean add(CustomDelayed<E> e) {
         return offer(e);
     }
 
@@ -100,14 +142,39 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws NullPointerException if the specified element is null
      */
     @Override
-    public boolean offer(final DelayedPushMsObject e) {
+    public boolean offer(CustomDelayed<E> e) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            final DelayedPushMsObject first = q.peek();
             q.offer(e);
-            if (first == null || e.compareTo(first) < 0) {
-                available.signalAll();
+            if (q.peek() == e) {
+                leader = null;
+                available.signal();
+            }
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Inserts the specified element into this delay queue if not already present.
+     *
+     * @param e the element to add
+     * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
+     * @throws NullPointerException if the specified element is <code>null</code>
+     */
+    public boolean offerIfAbsent(CustomDelayed<E> e) {
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            if (contains(e)) {
+                return false;
+            }
+            q.offer(e);
+            if (q.peek() == e) {
+                leader = null;
+                available.signal();
             }
             return true;
         } finally {
@@ -117,38 +184,68 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
 
     /**
      * Inserts the specified element into this delay queue if not already contained.<br>
-     * Otherwise (meaning already contained) element is newly scheduled into this delay queue.
+     * Otherwise (meaning already contained), the contained elements delay is reseted (up to the defined maxDelayDuration).
      *
      * @param e The element to add
      * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
      * @throws NullPointerException if the specified element is <code>null</code>
      */
-    public boolean offerIfAbsentElseReschedule(final DelayedPushMsObject e) {
+    public boolean offerIfAbsentElseReset(final CustomDelayed<E> e) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
             // Check if already contained
             {
-                DelayedPushMsObject prev = null;
-                for (final Iterator<DelayedPushMsObject> it = q.iterator(); null == prev && it.hasNext();) {
-                    final DelayedPushMsObject next = it.next();
-                    if (e.getPushObject().equals(next.getPushObject())) {
+                CustomDelayed<E> prev = null;
+                for (final Iterator<CustomDelayed<E>> it = q.iterator(); null == prev && it.hasNext();) {
+                    final CustomDelayed<E> next = it.next();
+                    if (e.equals(next)) {
                         prev = next;
                         it.remove();
                     }
                 }
                 if (null != prev) {
-                    prev.touch();
+                    prev.reset();
                     q.offer(prev);
                     return false;
                 }
             }
-            final DelayedPushMsObject first = q.peek();
             q.offer(e);
-            if (first == null || e.compareTo(first) < 0) {
-                available.signalAll();
+            if (q.peek() == e) {
+                leader = null;
+                available.signal();
             }
             return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Inserts the specified element into this delay queue. An already existing element with an equal payload is replaced.
+     *
+     * @param e The element to add
+     * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
+     */
+    public CustomDelayed<E> offerOrReplace(final CustomDelayed<E> e) {
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            // Check if already contained
+            CustomDelayed<E> prev = null;
+            for (final Iterator<CustomDelayed<E>> it = q.iterator(); null == prev && it.hasNext();) {
+                final CustomDelayed<E> next = it.next();
+                if (e.equals(next)) {
+                    prev = next;
+                    it.remove();
+                }
+            }
+            q.offer(e);
+            if (q.peek() == e) {
+                leader = null;
+                available.signal();
+            }
+            return prev;
         } finally {
             lock.unlock();
         }
@@ -162,7 +259,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws NullPointerException {@inheritDoc}
      */
     @Override
-    public void put(final DelayedPushMsObject e) {
+    public void put(CustomDelayed<E> e) {
         offer(e);
     }
 
@@ -177,7 +274,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws NullPointerException {@inheritDoc}
      */
     @Override
-    public boolean offer(final DelayedPushMsObject e, final long timeout, final TimeUnit unit) {
+    public boolean offer(CustomDelayed<E> e, long timeout, TimeUnit unit) {
         return offer(e);
     }
 
@@ -189,20 +286,15 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      *         queue has no elements with an expired delay
      */
     @Override
-    public DelayedPushMsObject poll() {
+    public CustomDelayed<E> poll() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            final DelayedPushMsObject first = q.peek();
+            CustomDelayed<E> first = q.peek();
             if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                 return null;
             } else {
-                final DelayedPushMsObject x = q.poll();
-                assert x != null;
-                if (q.size() != 0) {
-                    available.signalAll();
-                }
-                return x;
+                return q.poll();
             }
         } finally {
             lock.unlock();
@@ -217,30 +309,37 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws InterruptedException {@inheritDoc}
      */
     @Override
-    public DelayedPushMsObject take() throws InterruptedException {
+    public CustomDelayed<E> take() throws InterruptedException {
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
             for (;;) {
-                final DelayedPushMsObject first = q.peek();
+                CustomDelayed<E> first = q.peek();
                 if (first == null) {
                     available.await();
                 } else {
-                    final long delay =  first.getDelay(TimeUnit.NANOSECONDS);
-                    if (delay > 0) {
-                        final long tl = available.awaitNanos(delay);
+                    long delay = first.getDelay(TimeUnit.NANOSECONDS);
+                    if (delay <= 0) {
+                        return q.poll();
+                    } else if (leader != null) {
+                        available.await();
                     } else {
-                        final DelayedPushMsObject x = q.poll();
-                        assert x != null;
-                        if (q.size() != 0) {
-                            available.signalAll(); // wake up other takers
+                        Thread thisThread = Thread.currentThread();
+                        leader = thisThread;
+                        try {
+                            available.awaitNanos(delay);
+                        } finally {
+                            if (leader == thisThread) {
+                                leader = null;
+                            }
                         }
-                        return x;
-
                     }
                 }
             }
         } finally {
+            if (leader == null && q.peek() != null) {
+                available.signal();
+            }
             lock.unlock();
         }
     }
@@ -256,13 +355,13 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws InterruptedException {@inheritDoc}
      */
     @Override
-    public DelayedPushMsObject poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+    public CustomDelayed<E> poll(long timeout, TimeUnit unit) throws InterruptedException {
         long nanos = unit.toNanos(timeout);
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
             for (;;) {
-                final DelayedPushMsObject first = q.peek();
+                CustomDelayed<E> first = q.peek();
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
@@ -271,26 +370,32 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
                     }
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
-                    if (delay > 0) {
-                        if (nanos <= 0) {
-                            return null;
-                        }
-                        if (delay > nanos) {
-                            delay = nanos;
-                        }
-                        final long timeLeft = available.awaitNanos(delay);
-                        nanos -= delay - timeLeft;
+                    if (delay <= 0) {
+                        return q.poll();
+                    }
+                    if (nanos <= 0) {
+                        return null;
+                    }
+                    if (nanos < delay || leader != null) {
+                        nanos = available.awaitNanos(nanos);
                     } else {
-                        final DelayedPushMsObject x = q.poll();
-                        assert x != null;
-                        if (q.size() != 0) {
-                            available.signalAll();
+                        Thread thisThread = Thread.currentThread();
+                        leader = thisThread;
+                        try {
+                            long timeLeft = available.awaitNanos(delay);
+                            nanos -= delay - timeLeft;
+                        } finally {
+                            if (leader == thisThread) {
+                                leader = null;
+                            }
                         }
-                        return x;
                     }
                 }
             }
         } finally {
+            if (leader == null && q.peek() != null) {
+                available.signal();
+            }
             lock.unlock();
         }
     }
@@ -306,7 +411,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      *         queue is empty.
      */
     @Override
-    public DelayedPushMsObject peek() {
+    public CustomDelayed<E> peek() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -334,7 +439,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws IllegalArgumentException      {@inheritDoc}
      */
     @Override
-    public int drainTo(final Collection<? super DelayedPushMsObject> c) {
+    public int drainTo(Collection<? super CustomDelayed<E>> c) {
         if (c == null) {
             throw new NullPointerException();
         }
@@ -346,15 +451,12 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
         try {
             int n = 0;
             for (;;) {
-                final DelayedPushMsObject first = q.peek();
+                CustomDelayed<E> first = q.peek();
                 if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                     break;
                 }
                 c.add(q.poll());
                 ++n;
-            }
-            if (n > 0) {
-                available.signalAll();
             }
             return n;
         } finally {
@@ -369,7 +471,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws IllegalArgumentException      {@inheritDoc}
      */
     @Override
-    public int drainTo(final Collection<? super DelayedPushMsObject> c, final int maxElements) {
+    public int drainTo(Collection<? super CustomDelayed<E>> c, int maxElements) {
         if (c == null) {
             throw new NullPointerException();
         }
@@ -384,15 +486,12 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
         try {
             int n = 0;
             while (n < maxElements) {
-                final DelayedPushMsObject first = q.peek();
+                CustomDelayed<E> first = q.peek();
                 if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                     break;
                 }
                 c.add(q.poll());
                 ++n;
-            }
-            if (n > 0) {
-                available.signalAll();
             }
             return n;
         } finally {
@@ -489,7 +588,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * @throws NullPointerException if the specified array is null
      */
     @Override
-    public <T> T[] toArray(final T[] a) {
+    public <T> T[] toArray(T[] a) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -504,7 +603,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
      * queue, if it is present, whether or not it has expired.
      */
     @Override
-    public boolean remove(final Object o) {
+    public boolean remove(Object o) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -517,29 +616,31 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
     /**
      * Returns an iterator over all the elements (both expired and
      * unexpired) in this queue. The iterator does not return the
-     * elements in any particular order.  The returned
-     * <tt>Iterator</tt> is a "weakly consistent" iterator that will
-     * never throw {@link ConcurrentModificationException}, and
-     * guarantees to traverse elements as they existed upon
-     * construction of the iterator, and may (but is not guaranteed
-     * to) reflect any modifications subsequent to construction.
+     * elements in any particular order.
+     *
+     * <p>The returned iterator is a "weakly consistent" iterator that
+     * will never throw {@link java.util.ConcurrentModificationException
+     * ConcurrentModificationException}, and guarantees to traverse
+     * elements as they existed upon construction of the iterator, and
+     * may (but is not guaranteed to) reflect any modifications
+     * subsequent to construction.
      *
      * @return an iterator over the elements in this queue
      */
     @Override
-    public Iterator<DelayedPushMsObject> iterator() {
+    public Iterator<CustomDelayed<E>> iterator() {
         return new Itr(toArray());
     }
 
     /**
      * Snapshot iterator that works off copy of underlying q array.
      */
-    private class Itr implements Iterator<DelayedPushMsObject> {
+    private class Itr implements Iterator<CustomDelayed<E>> {
         final Object[] array; // Array of all elements
-    int cursor;           // index of next element to return;
-    int lastRet;          // index of last element, or -1 if no such
+        int cursor;           // index of next element to return;
+        int lastRet;          // index of last element, or -1 if no such
 
-        Itr(final Object[] array) {
+        Itr(Object[] array) {
             lastRet = -1;
             this.array = array;
         }
@@ -550,12 +651,13 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
         }
 
         @Override
-        public DelayedPushMsObject next() {
+        @SuppressWarnings("unchecked")
+        public CustomDelayed<E> next() {
             if (cursor >= array.length) {
                 throw new NoSuchElementException();
             }
             lastRet = cursor;
-            return (DelayedPushMsObject)array[cursor++];
+            return (CustomDelayed<E>)array[cursor++];
         }
 
         @Override
@@ -563,13 +665,13 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
             if (lastRet < 0) {
                 throw new IllegalStateException();
             }
-            final Object x = array[lastRet];
+            Object x = array[lastRet];
             lastRet = -1;
             // Traverse underlying queue to find == element,
             // not just a .equals element.
             lock.lock();
             try {
-                for (final Iterator it = q.iterator(); it.hasNext(); ) {
+                for (Iterator it = q.iterator(); it.hasNext(); ) {
                     if (it.next() == x) {
                         it.remove();
                         return;

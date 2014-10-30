@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.actions;
 
 import java.util.Date;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -158,6 +159,10 @@ public class OCLGuestPermission extends OCLPermission {
      */
     public void setActivationDate(Date activationDate) {
         this.activationDate = activationDate;
+    }
+
+    public int getPermissionBits() {
+        return Permissions.createPermissionBits(getFolderPermission(), getReadPermission(), getWritePermission(), getDeletePermission(), isFolderAdmin());
     }
 
 }

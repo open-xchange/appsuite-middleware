@@ -47,59 +47,47 @@
  *
  */
 
-package com.openexchange.share.json;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
+package com.openexchange.imap;
 
 
 /**
- * {@link ShareActionFactory}
+ * {@link IMAPClientParameters} - An enumeration for IMAP client parameters passed to IMAP store using <code>"ID"</code> command (if supported)
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public enum IMAPClientParameters {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
+     * The parameter for the client's originating IP address.
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
+    ORIGINATING_IP("x-originating-ip"),
+    /**
+     * The parameter for the client's session identifier.
+     */
+    SESSION_ID("x-session-ext-id"),
+    /**
+     * The parameter for the client's name.
+     */
+    NAME("name"),
+    /**
+     * The parameter for the client's version identifier.
+     */
+    VERSION("xversion"),
+    ;
+
+    private final String paramName;
+
+    private IMAPClientParameters(String paramName) {
+        this.paramName = paramName;
     }
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    /**
+     * Gets the parameter name
+     *
+     * @return The parameter name
+     */
+    public String getParamName() {
+        return paramName;
     }
 
 }

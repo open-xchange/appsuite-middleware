@@ -47,59 +47,26 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.ajax.share.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 
 /**
- * {@link ShareActionFactory}
+ * {@link UpdateLinkResponse}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public class UpdateLinkResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
+     * Initializes a new {@link UpdateLinkResponse}.
+     * @param response
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    protected UpdateLinkResponse(Response response) {
+        super(response);
     }
 
 }

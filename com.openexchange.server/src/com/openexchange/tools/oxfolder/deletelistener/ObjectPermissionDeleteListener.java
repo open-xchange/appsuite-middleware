@@ -81,48 +81,60 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
          * Writable connection
          */
         final int contextId = event.getContext().getContextId();
-        PreparedStatement stmt = null;
         try {
             final int userId = event.getId();
+            PreparedStatement stmt = null;
             /*
              * Delete permissions created by this user
              */
-            stmt = writeCon.prepareStatement("DELETE FROM object_permission WHERE cid = ? AND (created_by = ? OR shared_by = ?)");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos, userId);
-            stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
-            stmt = null;
+            try {
+                stmt = writeCon.prepareStatement("DELETE FROM object_permission WHERE cid = ? AND (created_by = ? OR shared_by = ?)");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, userId);
+                stmt.setInt(pos, userId);
+                stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
 
-            stmt = writeCon.prepareStatement("DELETE FROM del_object_permission WHERE cid = ? AND (created_by = ? OR shared_by = ?)");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos, userId);
-            stmt.executeUpdate();
+            try {
+                stmt = writeCon.prepareStatement("DELETE FROM del_object_permission WHERE cid = ? AND (created_by = ? OR shared_by = ?)");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, userId);
+                stmt.setInt(pos, userId);
+                stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
 
             /*
              * Delete permissions for this user
              */
-            stmt = writeCon.prepareStatement("DELETE FROM object_permission WHERE cid = ? AND permission_id = ? AND group_flag = 0");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos, userId);
-            stmt.executeUpdate();
+            try {
+                stmt = writeCon.prepareStatement("DELETE FROM object_permission WHERE cid = ? AND permission_id = ? AND group_flag = 0");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos, userId);
+                stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
 
-            stmt = writeCon.prepareStatement("DELETE FROM del_object_permission WHERE cid = ? AND permission_id = ? AND group_flag = 0");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos, userId);
-            stmt.executeUpdate();
+            try {
+                stmt = writeCon.prepareStatement("DELETE FROM del_object_permission WHERE cid = ? AND permission_id = ? AND group_flag = 0");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos, userId);
+                stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
         }
     }
 

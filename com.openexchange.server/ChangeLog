@@ -1,3 +1,7 @@
+* 2014-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35255: Also consider file extension if mail part claims to be HTML by Content-Type
+
 * 2014-10-27 - marc.arens@open-xchange.com
 
  - Fix for bug 34973: Allow minimal caching to prevent superfluous browser requests.

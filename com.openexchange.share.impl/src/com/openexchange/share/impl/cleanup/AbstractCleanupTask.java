@@ -47,59 +47,50 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.impl.cleanup;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
-
+import com.openexchange.share.impl.ConnectionHelper;
+import com.openexchange.threadpool.AbstractTask;
 
 /**
- * {@link ShareActionFactory}
+ * {@link AbstractCleanupTask}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public abstract class AbstractCleanupTask<V> extends AbstractTask<V> implements Comparable<AbstractCleanupTask<V>> {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    protected final int priority;
+    protected final ServiceLookup services;
+    protected final int contextID;
+    protected final ConnectionHelper connectionHelper;
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
+     * Initializes a new {@link AbstractCleanupTask}.
+     *
+     * @param priority The priority of the task
+     * @param services A service lookup reference
+     * @param connectionHelper A (started) connection helper, or <code>null</code> if not supplied
+     * @param contextID The context ID
      */
-    public ShareActionFactory(ServiceLookup services) {
+    protected AbstractCleanupTask(int priority, ServiceLookup services, ConnectionHelper connectionHelper, int contextID) {
         super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
+        this.priority = priority;
+        this.services = services;
+        this.connectionHelper = connectionHelper;
+        this.contextID = contextID;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    public int compareTo(AbstractCleanupTask<V> o) {
+        if (priority != o.priority) {
+            return priority - o.priority;
+        }
+        if (null == connectionHelper) {
+            return null == o.connectionHelper ? 0 : 1;
+        }
+        return null != o.connectionHelper ? 0 : -1;
     }
 
 }
