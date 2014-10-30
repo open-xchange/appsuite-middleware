@@ -1,3 +1,9 @@
+open-xchange-freebusy (7.6.1-7) stable; urgency=low
+
+  * Build for patch 2014-10-30
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 27 Oct 2014 09:44:14 +0100
+
 open-xchange-freebusy (7.6.1-6) stable; urgency=medium
 
   * Build for patch 2014-10-24
