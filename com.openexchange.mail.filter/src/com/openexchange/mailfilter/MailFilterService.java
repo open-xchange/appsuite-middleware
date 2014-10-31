@@ -64,7 +64,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface MailFilterService {
 
     public enum FilterType {
-        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), custom("");
+        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), all(""), custom("custom");
 
         private final String flag;
 
