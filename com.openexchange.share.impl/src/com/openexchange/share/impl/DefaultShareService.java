@@ -244,7 +244,7 @@ public class DefaultShareService implements ShareService {
          * schedule cleanup tasks as needed
          */
         if (0 < affectedShares) {
-            scheduleGuestCleanup(session.getContextId(), I2i(guestIDs));
+            scheduleGuestCleanup(session.getContextId(), null != guestIDs ? I2i(guestIDs) : null);
         }
     }
 
