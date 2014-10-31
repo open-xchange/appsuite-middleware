@@ -84,7 +84,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
+        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class,
             SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class };
     }
 
@@ -94,6 +94,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
         trackService(TranslatorFactory.class);
+        trackService(DispatcherPrefixService.class);
         openTrackers();
 
         registerModule(new ShareActionFactory(this), "share/management");

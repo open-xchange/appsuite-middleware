@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -143,29 +142,16 @@ public abstract class AbstractPerformer<T> {
         return new Pair<Map<Integer,List<ShareTarget>>, Map<Integer,List<ShareTarget>>>(folders, objects);
     }
 
-    /**
-     * Takes a token as provided by a client and parses it to determine the plain
-     * share token and the optional target path.
-     *
-     * @param token The token
-     * @return A pair containing the share token as first and the target path as second
-     * element. If no target path is set, the according element is <code>null</code>.
-     */
-    protected Pair<String, String> parseToken(String token) throws OXException {
-        String shareToken = null;
-        String targetPath = null;
-        String[] split = token.split("/");
-        if (split.length == 1) {
-            shareToken = token;
-            targetPath = null;
-        } else if (split.length == 2) {
-            shareToken = split[0];
-            targetPath = split[1];
-        } else {
-            throw ShareExceptionCodes.INVALID_TOKEN.create(token);
-        }
-
-        return new Pair<String, String>(shareToken, targetPath);
-    }
+//    /**
+//     * Takes a token as provided by a client and parses it to determine the plain
+//     * share token and the optional target path.
+//     *
+//     * @param token The token
+//     * @return A pair containing the share token as first and the target path as second
+//     * element. If no target path is set, the according element is <code>null</code>.
+//     */
+//    protected Pair<String, String> parseToken(String token) throws OXException {
+//        return TokenParser.parseToken(token);
+//    }
 
 }

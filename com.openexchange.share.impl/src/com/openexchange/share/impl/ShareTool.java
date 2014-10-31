@@ -301,6 +301,7 @@ public class ShareTool {
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
         String password = Strings.isEmpty(recipient.getPassword()) ? PasswordUtility.generate() : recipient.getPassword();
         try {
+            recipient.setPassword(password);
             guestUser.setUserPassword(PasswordMech.BCRYPT.encode(password));
         } catch (UnsupportedEncodingException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

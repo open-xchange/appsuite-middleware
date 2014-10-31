@@ -47,53 +47,49 @@
  *
  */
 
-package com.openexchange.share.impl.notification;
+package com.openexchange.share.notification;
 
-import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * Translatable Strings to compose share notification mails.
+ * {@link DefaultLinkProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class NotificationStrings implements LocalizableStrings {
+public class DefaultLinkProvider implements LinkProvider {
 
-    // [John Doe] shared "[holiday pictures]" with you
-    public static final String SUBJECT = "%1$s shared \"%2$s\" with you";
+    private final String protocol;
 
-    // Message from [John Doe]
-    public static final String MESSAGE_INTRO = "Message from %1$s";
+    private final String hostname;
 
-    // Click here to view [holiday pictures]
-    public static final String LINK_INTRO = "Click here to view %1$s";
+    private final String servletPrefix;
 
-    // Please use the following credentials if asked for
-    public static final String GUEST_CREDENTIALS_INTRO = "Please use the following credentials if asked for";
+    private final String shareToken;
 
-    // Please use your existing credentials if asked for.
-    public static final String GUEST_EXISTING_CREDENTIALS_INTRO = "Please use your existing credentials if asked for.";
+    private final String mailAddress;
 
-    // Please use the following password if asked for
-    public static final String ANONYMOUS_PASSWORD_INTRO = "Please use the following password if asked for";
+    public DefaultLinkProvider(String protocol, String hostname, String servletPrefix, String shareToken, String mailAddress) {
+        super();
+        this.protocol = protocol;
+        this.hostname = hostname;
+        this.servletPrefix = servletPrefix;
+        this.shareToken = shareToken;
+        this.mailAddress = mailAddress;
+    }
 
-    // Click here to reset your password
-    public static final String RESET_PW_LINK_INTRO = "Click here to reset your password";
+    @Override
+    public String getShareUrl() {
+        return baseUrl() + "share" + '/' + shareToken;
+    }
 
-    // Username
-    public static final String USERNAME_FIELD = "Username";
+    @Override
+    public String getPasswordResetUrl() {
+        return baseUrl() + "share/reset/password?share=" + shareToken + "&mail=" + mailAddress;
+    }
 
-    // Password
-    public static final String PASSWORD_FIELD = "Password";
-
-    // John Doe shared 7 items with you
-    public static final String GENERIC_TITLE = "%d items";
-
-    // Your password has been reseted
-    public static final String TITLE_RESET_PASSWORD = "Your password has been reseted";
-
-    // Your password for the following URL has been reseted to %1$s:\n\n%2$s
-    public static final String MESSAGE_RESET_PASSWORD = "Your password for the following URL has been reseted to %1$s:\n\n%2$s";
+    private String baseUrl() {
+        return protocol + hostname + servletPrefix;
+    }
 
 }

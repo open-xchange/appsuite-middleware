@@ -55,12 +55,15 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.context.ContextService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.DefaultLinkProvider;
+import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -133,6 +136,19 @@ public abstract class AbstractShareAction implements AJAXActionService {
     protected Translator getTranslator(ServerSession session) throws OXException {
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         return translatorFactory.translatorFor(session.getUser().getLocale());
+    }
+
+    protected String getServletPrefix() {
+        DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
+        if (prefixService == null) {
+            return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+
+        return prefixService.getPrefix();
+    }
+
+    protected LinkProvider buildLinkProvider(AJAXRequestData requestData, String shareToken, String mailAddress) {
+        return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(requestData), getServletPrefix(), shareToken, mailAddress);
     }
 
     protected String generateShareURL(int contextId, int guestId, int userId, ShareTarget target, AJAXRequestData requestData) throws OXException {

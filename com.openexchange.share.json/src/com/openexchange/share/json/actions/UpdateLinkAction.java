@@ -95,7 +95,7 @@ public class UpdateLinkAction extends AbstractShareAction {
             JSONObject json = (JSONObject) requestData.requireData();
             String token = json.getString("token");
             Date expiry = null;
-            String expires = json.optString("expiry_date");
+            String expires = json.optString("expiry_date", null);
             if (expires != null) {
                 expiry = new Date(ShareJSONParser.removeTimeZoneOffset(Long.parseLong(expires), getTimeZone(requestData, session)));
             }

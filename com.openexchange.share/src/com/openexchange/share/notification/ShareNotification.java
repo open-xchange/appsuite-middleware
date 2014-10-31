@@ -51,6 +51,7 @@ package com.openexchange.share.notification;
 
 import java.util.List;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * A {@link ShareNotification} encapsulates all information necessary to notify
@@ -84,6 +85,26 @@ public interface ShareNotification<T> {
     NotificationType getType();
 
     /**
+     * Gets the recipient that shall receive the notification. If a password
+     * is necessary to access the share the notification is about, this
+     * password must be set un-encoded within the recipient object. Otherwise
+     * the notification will contain a hint that the existing password has to
+     * be re-used and a link to reset that password will be provided, if the
+     * recipient is a guest. If the recipient is anonymous it is assumed, that
+     * no password is necessary to log in.
+     *
+     * @return The {@link ShareRecipient}, never <code>null</code>
+     */
+    ShareRecipient getRecipient();
+
+    /**
+     * Gets the transport information used to notify the recipient.
+     *
+     * @return The transport information, never <code>null</code>
+     */
+    T getTransportInfo();
+
+    /**
      * Gets the share targets to notify the recipient about.
      *
      * @return The share targets, never <code>null</code>
@@ -91,19 +112,12 @@ public interface ShareNotification<T> {
     List<ShareTarget> getShareTargets();
 
     /**
-     * Gets the URL needed for accessing the share.
+     * Gets the {@link LinkProvider} used for obtaining necessary URLs that are
+     * part of the notification messages.
      *
-     * @return The url, never <code>null</code>
+     * @return The provider, never <code>null</code>
      */
-    String getUrl();
-
-//    /**
-//     * Gets the title of the share that is shown to the recipient
-//     * (e.g. "My Photos").
-//     *
-//     * @return The title, never <code>null</code>
-//     */
-//    String getTitle();
+    LinkProvider getLinkProvider();
 
     /**
      * Gets an optional message that will be shown to the recipient if appropriate.
@@ -112,12 +126,5 @@ public interface ShareNotification<T> {
      * @return The message or <code>null</code>, if nothing was provided
      */
     String getMessage();
-
-    /**
-     * Gets the transport information used to notify the recipient.
-     *
-     * @return The transport information, never <code>null</code>
-     */
-    T getTransportInfo();
 
 }

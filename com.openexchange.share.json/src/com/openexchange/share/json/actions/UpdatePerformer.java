@@ -63,11 +63,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
@@ -112,21 +112,9 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
 
     @Override
     protected Void perform() throws OXException {
-        Pair<String, String> tokenAndPath = parseToken(token);
-        String shareToken = tokenAndPath.getFirst();
-        String targetPath = tokenAndPath.getSecond();
-        GuestShare share = getShareService().resolveToken(shareToken);
-        List<ShareTarget> targetsToUpdate;
-        if (targetPath == null) {
-            targetsToUpdate = share.getTargets();
-        } else {
-            ShareTarget target = share.resolveTarget(targetPath);
-            if (target == null) {
-                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-            }
-
-            targetsToUpdate = Collections.singletonList(target);
-        }
+        ShareService shareService = getShareService();
+        GuestShare share = TokenParser.resolveShare(token, shareService);
+        List<ShareTarget> targetsToUpdate = TokenParser.resolveTargets(share, token);
 
         DatabaseService dbService = services.getService(DatabaseService.class);
         Context context = session.getContext();

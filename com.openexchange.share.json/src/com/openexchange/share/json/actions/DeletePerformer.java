@@ -57,10 +57,10 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
@@ -96,21 +96,9 @@ public class DeletePerformer extends AbstractPerformer<Void> {
         session.setParameter(Connection.class.getName(), writeCon);
         try {
             Databases.startTransaction(writeCon);
-            Pair<String, String> tokenAndPath = parseToken(token);
-            String shareToken = tokenAndPath.getFirst();
-            String targetPath = tokenAndPath.getSecond();
-            GuestShare guestShare = getShareService().resolveToken(shareToken);
-            List<ShareTarget> targetsToDelete;
-            if (targetPath == null) {
-                targetsToDelete = guestShare.getTargets();
-            } else {
-                ShareTarget target = guestShare.resolveTarget(targetPath);
-                if (target == null) {
-                    throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-                }
-
-                targetsToDelete = Collections.singletonList(target);
-            }
+            ShareService shareService = getShareService();
+            GuestShare guestShare = TokenParser.resolveShare(token, shareService);
+            List<ShareTarget> targetsToDelete = TokenParser.resolveTargets(guestShare, token);
 
             /*
              * Remove folder and object permissions
@@ -128,7 +116,7 @@ public class DeletePerformer extends AbstractPerformer<Void> {
             /*
              * Remove share targets
              */
-            getShareService().deleteTargets(session, targetsToDelete, Collections.singletonList(guestShare.getGuestID()));
+            shareService.deleteTargets(session, targetsToDelete, Collections.singletonList(guestShare.getGuestID()));
             writeCon.commit();
         } catch (OXException e) {
             Databases.rollback(writeCon);

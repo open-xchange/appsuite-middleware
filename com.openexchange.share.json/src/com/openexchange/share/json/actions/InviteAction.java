@@ -50,6 +50,7 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -64,6 +65,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
@@ -101,7 +103,7 @@ public class InviteAction extends AbstractShareAction {
             CreatePerformer createPerformer = new CreatePerformer(recipients, targets, session, services);
             List<GuestShare> shares = createPerformer.perform();
             AJAXRequestResult result = new AJAXRequestResult();
-            List<OXException> warnings = sendNotifications(shares, message, requestData, session);
+            List<OXException> warnings = sendNotifications(recipients, shares, message, requestData, session);
             result.addWarnings(warnings);
 
             JSONArray jTokens = new JSONArray(recipients.size());
@@ -122,32 +124,47 @@ public class InviteAction extends AbstractShareAction {
 
     }
 
-    private List<OXException> sendNotifications(List<GuestShare> shares, String message, AJAXRequestData requestData, ServerSession session) {
+    private List<OXException> sendNotifications(List<ShareRecipient> recipients, List<GuestShare> shares, String message, AJAXRequestData requestData, ServerSession session) {
         List<OXException> warnings = new LinkedList<OXException>();
         try {
-            if (!shares.isEmpty()) {
+            if (!recipients.isEmpty()) {
                 ShareNotificationService notificationService = getNotificationService();
                 UserService userService = getUserService();
-                for (GuestShare share : shares) {
-                    String url;
-                    if (share.isMultiTarget()) {
-                        url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), null, requestData);
-                    } else {
-                        url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), share.getSingleTarget(), requestData);
-                    }
-
-                    User guest = userService.getUser(share.getGuestID(), session.getContextId());
-                    String mailAddress = guest.getMail();
-                    if (!Strings.isEmpty(mailAddress)) {
-                        try {
-                            notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share.getTargets(), url, message, mailAddress), session);
-                        } catch (Exception e) {
-                            if (e instanceof OXException) {
-                                warnings.add((OXException) e);
+                Iterator<ShareRecipient> recipientIterator = recipients.iterator();
+                Iterator<GuestShare> shareIterator = shares.iterator();
+                while (recipientIterator.hasNext()) {
+                    ShareRecipient recipient = recipientIterator.next();
+                    GuestShare share = shareIterator.next();
+                    switch (recipient.getType()) {
+                        case GUEST:
+                        {
+                            String shareToken;
+                            if (share.isMultiTarget()) {
+                                shareToken = share.getToken();
                             } else {
-                                warnings.add(ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
+                                shareToken = share.getToken() + '/' + share.getSingleTarget().getPath();
                             }
+
+                            User guest = userService.getUser(share.getGuestID(), session.getContextId());
+                            String mailAddress = guest.getMail();
+
+                            if (!Strings.isEmpty(mailAddress)) {
+                                try {
+                                    LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, mailAddress);
+                                    notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, recipient, share.getTargets(), linkProvider, message, mailAddress), session);
+                                } catch (Exception e) {
+                                    if (e instanceof OXException) {
+                                        warnings.add((OXException) e);
+                                    } else {
+                                        warnings.add(ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
+                                    }
+                                }
+                            }
+                            break;
                         }
+
+                        default:
+                            break;
                     }
                 }
             }

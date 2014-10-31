@@ -49,18 +49,28 @@
 
 package com.openexchange.share.json.actions;
 
+import static com.openexchange.osgi.Tools.requireService;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,27 +96,54 @@ public class NotifyAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String token = null;
-        String recipient = null;
+        String mailAddress = null;
         String message = null;
-        ShareTarget target = null;
 
         try {
             JSONObject request = (JSONObject) requestData.requireData();
             token = request.getString("token");
-            if (request.hasAndNotNull("target")) {
-                target = ShareJSONParser.parseTarget(request.getJSONObject("target"), getTimeZone(requestData, session));
-            }
-            recipient = request.getString("recipient");
+            mailAddress = request.getString("mail_address");
             message = request.optString("message");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
         ShareService shareService = getShareService();
-        GuestShare share = shareService.resolveToken(token);
-        String url = generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), target, requestData);
+        GuestShare share = TokenParser.resolveShare(token, shareService);
+        List<ShareTarget> targets = TokenParser.resolveTargets(share, token);
+
+        User guest = getUserService().getUser(share.getGuestID(), share.getContextID());
+        ShareRecipient recipient;
+        if (share.getAuthentication() == AuthenticationMode.ANONYMOUS) {
+            AnonymousRecipient ar = new AnonymousRecipient();
+            recipient = ar;
+        } else if (share.getAuthentication() == AuthenticationMode.ANONYMOUS_PASSWORD) {
+            AnonymousRecipient ar = new AnonymousRecipient();
+            ar.setPassword(requireService(ShareCryptoService.class, services).decrypt(guest.getUserPassword()));
+            recipient = ar;
+        } else if (share.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
+            GuestRecipient gr = new GuestRecipient();
+            gr.setContactFolder(Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID)); // TODO
+            gr.setContactID(Integer.toString(guest.getContactId()));
+            gr.setEmailAddress(guest.getLoginInfo());
+            gr.setDisplayName(guest.getDisplayName());
+            recipient = gr;
+        } else {
+            recipient = null;
+            // TODO: exception
+        }
+
+
+        String shareToken;
+        if (share.isMultiTarget()) {
+            shareToken = share.getToken();
+        } else {
+            shareToken = share.getToken() + '/' + share.getSingleTarget().getPath();
+        }
+
         ShareNotificationService notificationService = getNotificationService();
-        notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, share.getTargets(), url, message, recipient), session);
+        LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, mailAddress);
+        notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, recipient, targets, linkProvider, message, mailAddress), session);
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
 

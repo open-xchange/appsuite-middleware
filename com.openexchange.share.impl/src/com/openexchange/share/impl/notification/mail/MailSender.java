@@ -95,7 +95,11 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.impl.notification.NotificationStrings;
+import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.mail.MailNotification;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
@@ -110,49 +114,28 @@ import com.openexchange.user.UserService;
  */
 public class MailSender {
 
-    /**
-     *
-     */
+    private static final String FIELD_RESET_PW_LINK = "reset_pw_link";
+
+    private static final String FIELD_RESET_PW_LINK_INTRO = "reset_pw_link_intro";
+
+    private static final String FIELD_RECIPIENT_TYPE = "recipient_type";
+
     private static final String FIELD_PASSWORD = "password";
 
-    /**
-     *
-     */
     private static final String FIELD_USERNAME = "username";
 
-    /**
-     *
-     */
     private static final String FIELD_PASSWORD_FIELD = "password_field";
 
-    /**
-     *
-     */
     private static final String FIELD_USERNAME_FIELD = "username_field";
 
-    /**
-     *
-     */
     private static final String FIELD_CREDENTIALS_INTRO = "credentials_intro";
 
-    /**
-     *
-     */
     private static final String FIELD_LINK = "link";
 
-    /**
-     *
-     */
     private static final String FIELD_LINK_INTRO = "link_intro";
 
-    /**
-     *
-     */
     private static final String FIELD_MESSAGE = "message";
 
-    /**
-     *
-     */
     private static final String FIELD_MESSAGE_INTRO = "message_intro";
 
     private static final Set<String> SHARE_CREATED_FIELDS = new HashSet<String>();
@@ -166,6 +149,8 @@ public class MailSender {
         SHARE_CREATED_FIELDS.add(FIELD_USERNAME);
         SHARE_CREATED_FIELDS.add(FIELD_PASSWORD_FIELD);
         SHARE_CREATED_FIELDS.add(FIELD_PASSWORD);
+        SHARE_CREATED_FIELDS.add(FIELD_RECIPIENT_TYPE);
+        SHARE_CREATED_FIELDS.add(FIELD_RESET_PW_LINK);
     }
 
     private static final Set<String> PASSWORD_RESET_FIELDS = new HashSet<String>();
@@ -250,12 +235,13 @@ public class MailSender {
 
     private MimeMessage buildPasswordResetMail(NoReplyConfig noReplyConfig) throws OXException, MessagingException, UnsupportedEncodingException {
         String title = translator.translate(NotificationStrings.TITLE_RESET_PASSWORD);
+        Map<String, Object> vars = prepareTemplateVars(PASSWORD_RESET_FIELDS, title);
         MimeMessage mail = prepareEnvelope(title, noReplyConfig.getAddress());
         mail.setContent(prepareContent(
             "notify.share.pwreset.mail.txt.tmpl",
-            prepareTemplateVars(null, PASSWORD_RESET_FIELDS, title),
+            vars,
             "notify.share.pwreset.mail.html.tmpl",
-            prepareTemplateVars(getHtmlService(), PASSWORD_RESET_FIELDS, title)));
+            vars));
         mail.saveChanges();
         return mail;
     }
@@ -271,14 +257,15 @@ public class MailSender {
             title = translator.translate(String.format(NotificationStrings.GENERIC_TITLE, targets.size()));
         }
 
+        Map<String, Object> vars = prepareTemplateVars(SHARE_CREATED_FIELDS, title);
         String subject = String.format(translator.translate(NotificationStrings.SUBJECT), user.getDisplayName(), title);
         MimeMessage mail = prepareEnvelope(subject, getSenderAddress());
-        mail.addHeader("X-Open-Xchange-Share", notification.getUrl());
+        mail.addHeader("X-Open-Xchange-Share", notification.getLinkProvider().getShareUrl());
         mail.setContent(prepareContent(
             "notify.share.create.mail.txt.tmpl",
-            prepareTemplateVars(null, SHARE_CREATED_FIELDS, title),
+            vars,
             "notify.share.create.mail.html.tmpl",
-            prepareTemplateVars(getHtmlService(), SHARE_CREATED_FIELDS, title)));
+            vars));
         mail.saveChanges();
         return mail;
     }
@@ -338,52 +325,56 @@ public class MailSender {
         return htmlPart;
     }
 
-    private Map<String, Object> prepareTemplateVars(HtmlService htmlService, Set<String> fields, String title) throws OXException {
-//        List<Share> shares = notification.getShares();
-        String displayName;
-        String message = null;
-        String username = null;
-        String password = null;
-        if (htmlService == null) {
-            displayName = user.getDisplayName();
-            message = notification.getMessage();
-        } else {
-            displayName = htmlService.htmlFormat(user.getDisplayName() == null ? "" : user.getDisplayName());
-            title = htmlService.htmlFormat(title);
-            String tmpMessage = notification.getMessage();
-            if (tmpMessage != null) {
-                message = htmlService.htmlFormat(tmpMessage);
-            }
-        }
-
-//        if (share.getAuthentication() != AuthenticationMode.ANONYMOUS) {
-//            UserService userService = getUserService();
-//            ShareCryptoService shareCryptoService = getShareCryptoService();
-//            User guest = userService.getUser(share.getGuest(), share.getContextID());
-//            // FIXME!!!
-//            String decryptedPassword = "mumpitz!";//shareCryptoService.decrypt(guest.getUserPassword());
-//            if (htmlService == null) {
-//                username = guest.getMail();
-//                password = decryptedPassword;
-//            } else {
-//                username = htmlService.htmlFormat(guest.getMail());
-//                password = htmlService.htmlFormat(decryptedPassword);
-//            }
-//        }
-
+    private Map<String, Object> prepareTemplateVars(Set<String> fields, String title) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
+        String message = notification.getMessage();
         if (!Strings.isEmpty(message)) {
-            checkAndPutField(fields, vars, FIELD_MESSAGE_INTRO, String.format(translator.translate(NotificationStrings.MESSAGE_INTRO), displayName));
+            checkAndPutField(fields, vars, FIELD_MESSAGE_INTRO, String.format(translator.translate(NotificationStrings.MESSAGE_INTRO), user.getDisplayName()));
             checkAndPutField(fields, vars, FIELD_MESSAGE, message);
         }
+
+        LinkProvider linkProvider = notification.getLinkProvider();
         checkAndPutField(fields, vars, FIELD_LINK_INTRO, String.format(translator.translate(NotificationStrings.LINK_INTRO), title));
-        checkAndPutField(fields, vars, FIELD_LINK, notification.getUrl());
-        checkAndPutField(fields, vars, FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.CREDENTIALS_INTRO));
-        checkAndPutField(fields, vars, FIELD_USERNAME_FIELD, translator.translate(NotificationStrings.USERNAME_FIELD));
-        checkAndPutField(fields, vars, FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
-        if (username != null && password != null) {
-            checkAndPutField(fields, vars, FIELD_USERNAME, username);
-            checkAndPutField(fields, vars, FIELD_PASSWORD, password);
+        checkAndPutField(fields, vars, FIELD_LINK, linkProvider.getShareUrl());
+
+        ShareRecipient recipient = notification.getRecipient();
+        switch (recipient.getType()) {
+            case ANONYMOUS:
+            {
+                vars.put(FIELD_RECIPIENT_TYPE, "anonymous");
+                AnonymousRecipient ar = (AnonymousRecipient) recipient;
+                String password = ar.getPassword();
+                if (password != null) {
+                    checkAndPutField(fields, vars, FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.ANONYMOUS_PASSWORD_INTRO));
+                    checkAndPutField(fields, vars, FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
+                    checkAndPutField(fields, vars, FIELD_PASSWORD, password);
+                }
+
+                break;
+            }
+
+            case GUEST:
+            {
+                vars.put(FIELD_RECIPIENT_TYPE, "guest");
+                GuestRecipient gr = (GuestRecipient) recipient;
+                String password = gr.getPassword();
+                if (password == null) {
+                    checkAndPutField(fields, vars, FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.GUEST_EXISTING_CREDENTIALS_INTRO));
+                    vars.put(FIELD_RESET_PW_LINK_INTRO, translator.translate(NotificationStrings.RESET_PW_LINK_INTRO));
+                    vars.put(FIELD_RESET_PW_LINK, linkProvider.getPasswordResetUrl());
+                } else {
+                    checkAndPutField(fields, vars, FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.GUEST_CREDENTIALS_INTRO));
+                    checkAndPutField(fields, vars, FIELD_USERNAME_FIELD, translator.translate(NotificationStrings.USERNAME_FIELD));
+                    checkAndPutField(fields, vars, FIELD_USERNAME, gr.getEmailAddress());
+                    checkAndPutField(fields, vars, FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
+                    checkAndPutField(fields, vars, FIELD_PASSWORD, password);
+                }
+
+                break;
+            }
+
+            default:
+                break;
         }
 
         return vars;

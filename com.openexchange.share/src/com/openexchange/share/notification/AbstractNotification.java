@@ -52,11 +52,10 @@ package com.openexchange.share.notification;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 import com.openexchange.share.ShareTarget;
-
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * Abstract convenience implementation that provides all common fields for
- * {@link ShareNotification}s.
+ * Abstract convenience implementation that provides all common fields for {@link ShareNotification}s.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -65,21 +64,24 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
 
     protected final NotificationType type;
 
+    protected final ShareRecipient recipient;
+
     protected final List<ShareTarget> targets;
 
-    protected final String url;
+    protected final LinkProvider linkProvider;
 
     protected final String message;
 
-
-    public AbstractNotification(NotificationType type, List<ShareTarget> targets, String url, String message) {
+    public AbstractNotification(NotificationType type, ShareRecipient recipient, List<ShareTarget> targets, LinkProvider linkProvider, String message) {
         super();
         checkNotNull(type);
+        checkNotNull(recipient);
         checkNotNull(targets);
-        checkNotNull(url);
+        checkNotNull(linkProvider);
         this.type = type;
+        this.recipient = recipient;
         this.targets = targets;
-        this.url = url;
+        this.linkProvider = linkProvider;
         this.message = message;
     }
 
@@ -89,13 +91,18 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
     }
 
     @Override
+    public ShareRecipient getRecipient() {
+        return recipient;
+    }
+
+    @Override
     public List<ShareTarget> getShareTargets() {
         return targets;
     }
 
     @Override
-    public String getUrl() {
-        return url;
+    public LinkProvider getLinkProvider() {
+        return linkProvider;
     }
 
     @Override

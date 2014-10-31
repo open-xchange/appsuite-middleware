@@ -47,53 +47,19 @@
  *
  */
 
-package com.openexchange.share.impl.notification;
-
-import com.openexchange.i18n.LocalizableStrings;
+package com.openexchange.share.notification;
 
 
 /**
- * Translatable Strings to compose share notification mails.
+ * {@link LinkProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class NotificationStrings implements LocalizableStrings {
+public interface LinkProvider {
 
-    // [John Doe] shared "[holiday pictures]" with you
-    public static final String SUBJECT = "%1$s shared \"%2$s\" with you";
+    String getShareUrl();
 
-    // Message from [John Doe]
-    public static final String MESSAGE_INTRO = "Message from %1$s";
-
-    // Click here to view [holiday pictures]
-    public static final String LINK_INTRO = "Click here to view %1$s";
-
-    // Please use the following credentials if asked for
-    public static final String GUEST_CREDENTIALS_INTRO = "Please use the following credentials if asked for";
-
-    // Please use your existing credentials if asked for.
-    public static final String GUEST_EXISTING_CREDENTIALS_INTRO = "Please use your existing credentials if asked for.";
-
-    // Please use the following password if asked for
-    public static final String ANONYMOUS_PASSWORD_INTRO = "Please use the following password if asked for";
-
-    // Click here to reset your password
-    public static final String RESET_PW_LINK_INTRO = "Click here to reset your password";
-
-    // Username
-    public static final String USERNAME_FIELD = "Username";
-
-    // Password
-    public static final String PASSWORD_FIELD = "Password";
-
-    // John Doe shared 7 items with you
-    public static final String GENERIC_TITLE = "%d items";
-
-    // Your password has been reseted
-    public static final String TITLE_RESET_PASSWORD = "Your password has been reseted";
-
-    // Your password for the following URL has been reseted to %1$s:\n\n%2$s
-    public static final String MESSAGE_RESET_PASSWORD = "Your password for the following URL has been reseted to %1$s:\n\n%2$s";
+    String getPasswordResetUrl();
 
 }

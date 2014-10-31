@@ -66,31 +66,60 @@
   <div class="content">
    <#if message?has_content>
     <div class="message-intro">
-      ${message_intro}:
+      ${message_intro?html}:
     </div>
     <div class="message">
-      ${message}
+      ${message?html}
     </div>
    </#if>
 
    <div>
-     <a href="${link}"><span class="link">${link_intro}</span></a>
+     <a href="${link}"><span class="link">${link_intro?html}</span></a>
    </div>
-
-   <#if username?has_content && password?has_content>
-    <div class="credential-container">
-    ${credentials_intro}:
-     <table class="credentials">
-      <tr>
-       <td>${username_field}:</td>
-       <td><span class="unpw">${username}</td>
-      </tr>
-      <tr>
-       <td>${password_field}:</td>
-       <td><span class="unpw">${password}</td>
-      </tr>
-     </table>
-    </div>
+   
+   <#if recipient_type == "anonymous">
+     <#if password?has_content>
+       <div class="credential-container">
+         ${credentials_intro?html}:
+         <table class="credentials">
+           <tr>
+             <td>${password_field?html}:</td>
+             <td><span class="unpw">${password?html}</td>
+           </tr>
+         </table>
+       </div>
+     </#if>
+   <#elseif recipient_type == "guest">
+     <#if password?has_content>
+       <div class="credential-container">
+         ${credentials_intro?html}:
+         <table class="credentials">
+           <tr>
+             <td>${username_field?html}:</td>
+             <td><span class="unpw">${username?html}</td>
+           </tr>
+           <tr>
+             <td>${password_field?html}:</td>
+             <td><span class="unpw">${password?html}</td>
+           </tr>
+         </table>
+      </div>
+     <#else>
+       <div class="credential-container">
+         <p>${credentials_intro?html}</p>
+         <p><a href="${reset_pw_link}"><span class="link">${reset_pw_link_intro?html}</span></a></p>
+         <table class="credentials">
+           <tr>
+             <td>${username_field?html}:</td>
+             <td><span class="unpw">${username?html}</td>
+           </tr>
+           <tr>
+             <td>${password_field?html}:</td>
+             <td><span class="unpw">${password?html}</td>
+           </tr>
+         </table>
+       </div>
+     </#if>
    </#if>
   </div>
 </body>
