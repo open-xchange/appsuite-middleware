@@ -1994,7 +1994,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr ""
@@ -7776,23 +7776,38 @@ msgstr ""
 msgid "Please use the following credentials if asked for"
 msgstr ""
 
-#. Username
+#. Please use your existing credentials if asked for.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:76
+msgid "Please use your existing credentials if asked for."
+msgstr ""
+
+#. Please use the following password if asked for
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:79
+msgid "Please use the following password if asked for"
+msgstr ""
+
+#. Click here to reset your password
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:82
+msgid "Click here to reset your password"
+msgstr ""
+
+#. Username
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:85
 msgid "Username"
 msgstr ""
 
 #. John Doe shared 7 items with you
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:91
 msgid "%d items"
 msgstr ""
 
 #. Your password has been reseted
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:94
 msgid "Your password has been reseted"
 msgstr ""
 
 #. Your password for the following URL has been reseted to %1$s:\n\n%2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:97
 msgid ""
 "Your password for the following URL has been reseted to %1$s:\n"
 "\n"
