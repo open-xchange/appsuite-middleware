@@ -71,9 +71,9 @@ import com.openexchange.user.json.osgi.Services;
 public class ContactAnonymizerService implements AnonymizerService<Contact> {
 
     private static final ContactField[] WHITELIST_FIELDS = new ContactField[] {
-        ContactField.INTERNAL_USERID, ContactField.CONTEXTID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID,
-        ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED,
-        ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.LAST_MODIFIED_UTC, ContactField.USE_COUNT };
+        ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID, ContactField.CREATED_BY,
+        ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED, ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
+        ContactField.LAST_MODIFIED_UTC, ContactField.USE_COUNT };
 
     /**
      * Initializes a new {@link ContactAnonymizerService}.
@@ -113,8 +113,12 @@ public class ContactAnonymizerService implements AnonymizerService<Contact> {
         Contact anonymizedContact = new Contact();
         ContactMapper instance = ContactMapper.getInstance();
         for (ContactField contactField : WHITELIST_FIELDS) {
-            JsonMapping<? extends Object, Contact> mapping = instance.get(contactField);
-            mapping.copy(entity, anonymizedContact);
+            try {
+                JsonMapping<? extends Object, Contact> mapping = instance.get(contactField);
+                mapping.copy(entity, anonymizedContact);
+            } catch (Exception e) {
+                // Failed to copy value
+            }
         }
 
         int userId = entity.getInternalUserId();
