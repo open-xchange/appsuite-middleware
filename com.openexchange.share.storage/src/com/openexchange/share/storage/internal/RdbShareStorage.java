@@ -156,6 +156,18 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
+    public Set<Integer> getSharingUsers(int contextID, int guest, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return getCreatedByForGuest(provider.get(), contextID, guest);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
     public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
@@ -331,6 +343,29 @@ public class RdbShareStorage implements ShareStorage {
     private static Set<Integer> getModules(Connection connection, int contextID, int guest) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT DISTINCT ").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append(" FROM share WHERE ")
+            .append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.GUEST).getColumnLabel()).append("=?;")
+        ;
+        Set<Integer> modules = new HashSet<Integer>();
+        ResultSet result = null;
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, guest);
+            result = SQL.logExecuteQuery(stmt);
+            while (result.next()) {
+                modules.add(Integer.valueOf(result.getInt(1)));
+            }
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+        }
+        return modules;
+    }
+
+    private static Set<Integer> getCreatedByForGuest(Connection connection, int contextID, int guest) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT DISTINCT ").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append(" FROM share WHERE ")
             .append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(SHARE_MAPPER.get(ShareField.GUEST).getColumnLabel()).append("=?;")
         ;

@@ -126,6 +126,17 @@ public interface ShareStorage {
     Set<Integer> getSharedModules(int contextID, int guest, StorageParameters parameters) throws OXException;
 
     /**
+     * Gets the identifiers of all users that have at least created one share for a specific guest.
+     *
+     * @param contextID The context ID
+     * @param guest The identifier of the guest user to get the sharing users for
+     * @param parameters The storage parameters
+     * @return The identifiers of the sharing users, or an empty set if there are none
+     * @throws OXException
+     */
+    Set<Integer> getSharingUsers(int contextID, int guest, StorageParameters parameters) throws OXException;
+
+    /**
      * Saves multiple shares in the storage. Existing shares for a guest pointing to the same target are updated implicitly.
      *
      * @param contextID The context ID

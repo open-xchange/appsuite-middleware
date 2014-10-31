@@ -145,6 +145,11 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException {
+        return services.getService(ShareStorage.class).getSharingUsers(contextId, guestId, StorageParameters.NO_PARAMETERS);
+    }
+
+    @Override
     public List<GuestShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
             return Collections.emptyList();
@@ -674,12 +679,6 @@ public class DefaultShareService implements ShareService {
         } else {
             guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
         }
-    }
-
-    @Override
-    public Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException {
-        // TODO Auto-generated method stub
-        return Collections.emptySet();
     }
 
 }
