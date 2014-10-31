@@ -185,7 +185,7 @@ public class TargetUpdateImpl implements TargetUpdate {
             List<ShareTarget> targetList = objectsByModule.get(module);
             for (ShareTarget target : targetList) {
                 if (!foldersById.containsKey(target.getFolder())) {
-                    UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), parameters.getUser(), parameters.getContext(), parameters.getFolderServiceDecorator());
+                    UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), parameters.getSession(), parameters.getFolderServiceDecorator());
                     foldersById.put(folder.getID(), folder);
                 }
             }
