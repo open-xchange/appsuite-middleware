@@ -50,6 +50,7 @@
 package com.openexchange.ajax.passwordchange.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 
 /**
@@ -58,7 +59,7 @@ import com.openexchange.ajax.framework.Header;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public abstract class AbstractPasswordChangeResourceRequest implements AJAXRequest {
+public abstract class AbstractPasswordChangeResourceRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the tasks AJAX interface.
