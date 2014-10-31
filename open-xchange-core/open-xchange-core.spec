@@ -1102,6 +1102,10 @@ done
 # SoftwareChange_Request-2224
 ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2235
+ox_add_property com.openexchange.ajax.login.maxRateTimeWindow 300000 /opt/open-xchange/etc/login.properties
+ox_add_property com.openexchange.ajax.login.maxRate 50 /opt/open-xchange/etc/login.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
