@@ -8,7 +8,7 @@ BuildRequires: open-xchange-realtime-json
 BuildRequires: open-xchange-realtime-events
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 9
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Oct 27 2014 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2014-10-30
 * Fri Oct 17 2014 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Marc Arens <marc.arens@open-xchange.com>
