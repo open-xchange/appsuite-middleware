@@ -1058,11 +1058,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             try {
                 // Check request's character encoding
                 if (null == req.getCharacterEncoding()) {
+                    String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
                     try {
-                        req.setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
+                        // Might be ineffective if already fully parsed
+                        req.setCharacterEncoding(defaultEnc);
                     } catch (final Exception e) {
                         // Ignore
                     }
+                    upload.setHeaderEncoding(defaultEnc);
                 }
                 // Parse multipart request
                 items = upload.parseRequest(new ServletRequestContext(req));

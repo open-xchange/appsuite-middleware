@@ -1,3 +1,7 @@
+* 2014-10-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35267: Explicitly specify header encoding when parsing multipart/form-upload requests with Apache FileUpload
+
 * 2014-10-30 - marcus.klein@open-xchange.com
 
  - Fix for bug 34981: Corrected post installation script for property com.openexchange.sessiond.remoteParameterNames in sessiond.properties
