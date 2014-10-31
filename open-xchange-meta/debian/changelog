@@ -1,3 +1,9 @@
+open-xchange-meta (7.6.2-1) stable; urgency=medium
+
+  * First candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 31 Oct 2014 12:33:21 +0000
+
 open-xchange-meta (7.6.2-0) unstable; urgency=medium
 
   * prepare for 7.6.2 release
