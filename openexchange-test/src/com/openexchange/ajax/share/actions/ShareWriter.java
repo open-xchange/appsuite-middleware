@@ -102,7 +102,7 @@ public class ShareWriter {
 
     public static void writeGuestRecipient(GuestRecipient recipient, JSONObject jRecipient) throws JSONException {
         jRecipient.put("email_address", recipient.getEmailAddress());
-        jRecipient.put("password", recipient.getPassword());
+        jRecipient.put("override_password", recipient.getPassword());
         jRecipient.put("display_name", recipient.getDisplayName());
         jRecipient.put("contact_id", recipient.getContactID());
         jRecipient.put("contact_folder", recipient.getContactFolder());

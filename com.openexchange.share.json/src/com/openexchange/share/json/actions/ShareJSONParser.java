@@ -208,8 +208,8 @@ public class ShareJSONParser {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("email_address");
             }
             guestRecipient.setEmailAddress(jsonRecipient.getString("email_address"));
-            if (jsonRecipient.hasAndNotNull("password")) {
-                guestRecipient.setPassword(jsonRecipient.getString("password"));
+            if (jsonRecipient.hasAndNotNull("override_password")) {
+                guestRecipient.setPassword(jsonRecipient.getString("override_password"));
             }
             if (jsonRecipient.hasAndNotNull("display_name")) {
                 guestRecipient.setDisplayName(jsonRecipient.getString("display_name"));
