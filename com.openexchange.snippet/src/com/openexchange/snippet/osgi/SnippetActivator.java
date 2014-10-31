@@ -49,8 +49,13 @@
 
 package com.openexchange.snippet.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.conversion.DataSource;
 import com.openexchange.html.HtmlService;
+import com.openexchange.image.ImageActionFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.snippet.SnippetImageDataSource;
 import com.openexchange.snippet.internal.Services;
 
 /**
@@ -75,6 +80,14 @@ public final class SnippetActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+
+        {
+            SnippetImageDataSource signImageDataSource = SnippetImageDataSource.getInstance();
+            Dictionary<String, Object> signImageProps = new Hashtable<String, Object>(1);
+            signImageProps.put("identifier", signImageDataSource.getRegistrationName());
+            registerService(DataSource.class, signImageDataSource, signImageProps);
+            ImageActionFactory.addMapping(signImageDataSource.getRegistrationName(), signImageDataSource.getAlias());
+        }
     }
 
     @Override

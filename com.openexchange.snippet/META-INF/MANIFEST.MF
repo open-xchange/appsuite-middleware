@@ -5,15 +5,20 @@ Bundle-SymbolicName: com.openexchange.snippet
 Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.conversion,
+ com.openexchange.exception,
  com.openexchange.html,
  com.openexchange.i18n,
+ com.openexchange.image,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.servlet,
+ com.openexchange.tools.stream,
+ org.apache.commons.io;version="2.0.1",
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
