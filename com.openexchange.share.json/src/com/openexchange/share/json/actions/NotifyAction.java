@@ -113,7 +113,7 @@ public class NotifyAction extends AbstractShareAction {
         List<ShareTarget> targets = TokenParser.resolveTargets(share, token);
 
         User guest = getUserService().getUser(share.getGuestID(), share.getContextID());
-        ShareRecipient recipient;
+        ShareRecipient recipient = null;
         if (share.getAuthentication() == AuthenticationMode.ANONYMOUS) {
             AnonymousRecipient ar = new AnonymousRecipient();
             recipient = ar;
@@ -123,16 +123,12 @@ public class NotifyAction extends AbstractShareAction {
             recipient = ar;
         } else if (share.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
             GuestRecipient gr = new GuestRecipient();
-            gr.setContactFolder(Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID)); // TODO
+            gr.setContactFolder(Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID));
             gr.setContactID(Integer.toString(guest.getContactId()));
             gr.setEmailAddress(guest.getLoginInfo());
             gr.setDisplayName(guest.getDisplayName());
             recipient = gr;
-        } else {
-            recipient = null;
-            // TODO: exception
         }
-
 
         String shareToken;
         if (share.isMultiTarget()) {

@@ -162,7 +162,9 @@ public class TargetUpdateImpl implements TargetUpdate {
             List<TargetProxy> modified = new ArrayList<TargetProxy>(targets.size());
             for (ShareTarget target : targets) {
                 TargetProxy proxy = get(target);
-                modified.add(proxy);
+                if (proxy.wasModified()) {
+                    modified.add(proxy);
+                }
             }
 
             if (!modified.isEmpty()) {

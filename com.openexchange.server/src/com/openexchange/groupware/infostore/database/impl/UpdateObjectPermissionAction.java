@@ -133,10 +133,10 @@ public class UpdateObjectPermissionAction extends AbstractObjectPermissionAction
                     stmt.setInt(1, document.getModifiedBy());
                     stmt.setInt(2, document.getCreatedBy());
                     stmt.setInt(3, updatedPermission.getPermissions());
-                    stmt.setInt(4, getContext().getContextId());
-                    stmt.setInt(5, document.getId());
-                    stmt.setInt(6, updatedPermission.getEntity());
-                    stmt.setLong(7, document.getLastModified().getTime());
+                    stmt.setLong(4, document.getLastModified().getTime());
+                    stmt.setInt(5, getContext().getContextId());
+                    stmt.setInt(6, document.getId());
+                    stmt.setInt(7, updatedPermission.getEntity());
                 }
             });
         }
