@@ -522,7 +522,6 @@ public class DefaultShareService implements ShareService {
             try {
                 connectionHelper.start();
                 affectedShares = shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                removeShares(connectionHelper, expiredShares);
                 connectionHelper.commit();
             } finally {
                 connectionHelper.finish();
@@ -535,25 +534,6 @@ public class DefaultShareService implements ShareService {
             }
         }
         return shares;
-    }
-
-    /**
-     * Removes the supplied shares, i.e. deletes the share entries from the underlying storage along with triggering corresponding
-     * cleanup tasks.
-     *
-     * @param connectionHelper A (started) connection helper
-     * @param shares The shares to delete
-     * @throws OXException
-     */
-    private void removeShares(ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
-        if (null == shares || 0 == shares.size()) {
-            return;
-        }
-        int contextID = connectionHelper.getContextID();
-        int[] guestIDs = I2i(ShareTool.getGuestIDs(shares));
-        services.getService(ShareStorage.class).deleteShares(connectionHelper.getContextID(), shares, connectionHelper.getParameters());
-        guestCleaner.cleanupGuests(connectionHelper, contextID, guestIDs);
-//        guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
     }
 
     /**
