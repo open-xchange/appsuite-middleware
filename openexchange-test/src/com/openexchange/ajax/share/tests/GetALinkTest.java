@@ -181,7 +181,7 @@ public class GetALinkTest extends ShareTest {
 
     public void testCreateUpdateAndDeleteLinkForAFile() throws Exception {
         /*
-         * Get a link for the new drive subfolder
+         * Get a link for the file
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
         GetLinkRequest getLinkRequest = new GetLinkRequest(Collections.singletonList(target));
@@ -193,7 +193,7 @@ public class GetALinkTest extends ShareTest {
         String url = getLinkResponse.getUrl();
 
         /*
-         * Resolve the link and check read permission for folder
+         * Resolve the link and check read permission for file
          */
         GuestClient guestClient = resolveShare(url, null, password);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
@@ -225,7 +225,7 @@ public class GetALinkTest extends ShareTest {
         assertEquals(newExpiry, share.getTarget().getExpiryDate());
 
         /*
-         * Delete link and verify that share and folder permission are gone
+         * Delete link and verify that share and object permission are gone
          */
         client.execute(new DeleteLinkRequest(token));
         assertNull("Share was not deleted", discoverShare(guestId, infostore.getObjectID(), file.getId()));
