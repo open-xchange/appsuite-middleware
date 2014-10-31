@@ -56,10 +56,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -224,29 +222,51 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
             return;
         }
-
-        removeTargets(new ConnectionHelper(session, services, true), targets, guestIDs);
+        /*
+         * delete targets from storage
+         */
+        int affectedShares = 0;
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            affectedShares = removeTargets(connectionHelper, targets, guestIDs);
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (0 < affectedShares) {
+            scheduleGuestCleanup(session.getContextId(), I2i(guestIDs));
+        }
     }
 
     @Override
     public void deleteShares(Session session, List<Share> shares, Date clientTimestamp) throws OXException {
+        //TODO: check permissions prior deletion (session user == share owner || session user == share created by)
+        //TODO: method really needed, or is deletaTargets sufficient?
         if (null == shares || 0 == shares.size()) {
             return;
         }
-
-        //TODO: check permissions prior deletion (session user == share owner || session user == share created by)
-
-        Set<Integer> guestIDs = new HashSet<Integer>();
-        for (Share share : shares) {
-            guestIDs.add(Integer.valueOf(share.getGuest()));
-        }
+        /*
+         * delete shares from storage
+         */
+        int affectedShares = 0;
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            removeShares(connectionHelper, shares);
+            affectedShares = shareStorage.deleteShares(connectionHelper.getContextID(), shares, connectionHelper.getParameters());
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
+        }
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (0 < affectedShares) {
+            scheduleGuestCleanup(session.getContextId(), I2i(ShareTool.getGuestIDs(shares)));
         }
     }
 
@@ -341,45 +361,56 @@ public class DefaultShareService implements ShareService {
         }
     }
 
+    /**
+     * Removes share targets for specific guest users in a context.
+     *
+     * @param contextId The context identifier
+     * @param targets The share targets
+     * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
+     * @throws OXException
+     */
     public void removeTargets(int contextId, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
         if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
             return;
         }
-
-        removeTargets(new ConnectionHelper(contextId, services, true), targets, guestIDs);
-    }
-
-    private void removeTargets(ConnectionHelper connectionHelper, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
-        int contextId = connectionHelper.getContextID();
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
         try {
             connectionHelper.start();
-            if (null == guestIDs) {
-                /*
-                 * delete all targets for all guest users
-                 */
-                if (0 < shareStorage.deleteTargets(contextId, targets, connectionHelper.getParameters())) {
-                   guestCleaner.cleanupContext(connectionHelper, contextId);
-//                    guestCleaner.scheduleContextCleanup(contextId);
-                }
-            } else {
-                /*
-                 * delete targets for specific guests
-                 */
-                List<Share> shares = new ArrayList<Share>(targets.size() * guestIDs.size());
-                for (ShareTarget target : targets) {
-                    for (Integer guestID : guestIDs) {
-                        shares.add(new Share(guestID.intValue(), target));
-                    }
-                }
-                if (0 < shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters())) {
-                   guestCleaner.cleanupGuests(connectionHelper, contextId, I2i(guestIDs));
-//                    guestCleaner.scheduleGuestCleanup(contextId, I2i(guestIDs));
-                }
-            }
+            removeTargets(connectionHelper, targets, guestIDs);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
+        }
+
+    }
+
+    /**
+     * Deletes a list of share targets for all shares that belong to a certain list of guests.
+     *
+     * @param connectionHelper A (started) connection helper
+     * @param targets The share targets to delete
+     * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
+     * @return The number of deleted shares in the storage
+     */
+    private int removeTargets(ConnectionHelper connectionHelper, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+        int contextId = connectionHelper.getContextID();
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        if (null == guestIDs) {
+            /*
+             * delete all targets for all guest users
+             */
+            return shareStorage.deleteTargets(contextId, targets, connectionHelper.getParameters());
+        } else {
+            /*
+             * delete targets for specific guests
+             */
+            List<Share> shares = new ArrayList<Share>(targets.size() * guestIDs.size());
+            for (ShareTarget target : targets) {
+                for (Integer guestID : guestIDs) {
+                    shares.add(new Share(guestID.intValue(), target));
+                }
+            }
+            return shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters());
         }
     }
 
@@ -485,13 +516,22 @@ public class DefaultShareService implements ShareService {
     private List<Share> removeExpired(int contextID, List<Share> shares) throws OXException {
         List<Share> expiredShares = ShareTool.filterExpiredShares(shares);
         if (null != expiredShares && 0 < expiredShares.size()) {
+            int affectedShares = 0;
+            ShareStorage shareStorage = services.getService(ShareStorage.class);
             ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
             try {
                 connectionHelper.start();
+                affectedShares = shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
                 removeShares(connectionHelper, expiredShares);
                 connectionHelper.commit();
             } finally {
                 connectionHelper.finish();
+            }
+            /*
+             * schedule cleanup tasks as needed
+             */
+            if (0 < affectedShares) {
+                scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
             }
         }
         return shares;
@@ -638,6 +678,21 @@ public class DefaultShareService implements ShareService {
             services.getService(UserConfigurationService.class).removeUserConfiguration(userID, context);
         }
         return userPermissionBits;
+    }
+
+    /**
+     * Schedules guest cleanup tasks in a context.
+     *
+     * @param contextID The context ID
+     * @param guestIDs The guest IDs to consider, or <code>null</code> to cleanup all guest users in the context
+     * @throws OXException
+     */
+    private void scheduleGuestCleanup(int contextID, int[] guestIDs) throws OXException {
+        if (null == guestIDs) {
+            guestCleaner.scheduleContextCleanup(contextID);
+        } else {
+            guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
+        }
     }
 
 }

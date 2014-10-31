@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.cleanup;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
@@ -68,8 +69,8 @@ import com.openexchange.share.impl.ConnectionHelper;
 public class GuestCleaner {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuestCleaner.class);
-    private static final long DELAY_DURATION = 10000;
-    private static final long MAX_DELAY_DURATION = 60000;
+    private static final long DELAY_DURATION = 1000;
+    private static final long MAX_DELAY_DURATION = 20000;
 
     private final ServiceLookup services;
     private final BufferingQueue<GuestCleanupTask> cleanupTasks;
@@ -104,6 +105,7 @@ public class GuestCleaner {
      * @param contextID The context ID
      */
     public void scheduleContextCleanup(final int contextID) throws OXException {
+        LOG.debug("Scheduling context cleanup task for context {}.", contextID);
         services.getService(ExecutorService.class).submit(new Runnable() {
 
             @Override
@@ -128,6 +130,7 @@ public class GuestCleaner {
      * @param guestIDs The identifiers of the guest users to consider for cleanup
      */
     public void scheduleGuestCleanup(int contextID, int[] guestIDs) throws OXException {
+        LOG.debug("Scheduling guest cleanup tasks for guest users {} in context {}.", Arrays.toString(guestIDs), contextID);
         for (int guestID : guestIDs) {
             GuestCleanupTask cleanupTask = new GuestCleanupTask(services, contextID, guestID);
             cleanupTasks.offerIfAbsentElseReset(cleanupTask);
