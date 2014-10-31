@@ -84,17 +84,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.change(soap2Context(parameters.getCtx()), soap2Credentials(parameters.getAuth()));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -104,19 +124,42 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.delete(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
-            throw new DatabaseUpdateException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
+        } catch (DatabaseUpdateException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DatabaseUpdateException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DatabaseUpdateException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DatabaseUpdateException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DatabaseUpdateException();
+            faultDetail.setDatabaseUpdateException(value);
+            throw new DatabaseUpdateException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -126,21 +169,47 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.disable(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchReasonException e) {
-            throw new NoSuchReasonException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchReasonException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchReasonException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchReasonException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchReasonException();
+            faultDetail.setNoSuchReasonException(value);
+            throw new NoSuchReasonException_Exception(e.getMessage(), faultDetail, e);
         } catch (final OXContextException e) {
-            throw new OXContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.OXContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.OXContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.OXContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.OXContextException();
+            faultDetail.setOXContextException(value);
+            throw new OXContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -158,13 +227,27 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             }
             return list;
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -174,17 +257,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.changeModuleAccess(soap2Context(parameters.ctx), soap2ModuleAccess(parameters.access), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -194,17 +297,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.changeModuleAccess(soap2Context(parameters.getCtx()), parameters.getAccessCombinationName(), soap2Credentials(parameters.getAuth()));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -214,17 +337,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.enable(soap2Context(parameters.getCtx()), soap2Credentials(parameters.getAuth()));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -234,19 +377,42 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.downgrade(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
-            throw new DatabaseUpdateException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
+        } catch (DatabaseUpdateException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DatabaseUpdateException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DatabaseUpdateException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DatabaseUpdateException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DatabaseUpdateException();
+            faultDetail.setDatabaseUpdateException(value);
+            throw new DatabaseUpdateException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -256,17 +422,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             return moduleAccess2Soap(contextInterface.getModuleAccess(soap2Context(ctx), soap2Credentials(auth)));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -284,13 +470,27 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             }
             return list;
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -308,15 +508,32 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             }
             return list;
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final NoSuchFilestoreException e) {
-            throw new NoSuchFilestoreException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
+        } catch (NoSuchFilestoreException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchFilestoreException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchFilestoreException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchFilestoreException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchFilestoreException();
+            faultDetail.setNoSuchFilestoreException(value);
+            throw new NoSuchFilestoreException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -334,15 +551,32 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             }
             return list;
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final NoSuchDatabaseException e) {
-            throw new NoSuchDatabaseException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
+        } catch (NoSuchDatabaseException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchDatabaseException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchDatabaseException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchDatabaseException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchDatabaseException();
+            faultDetail.setNoSuchDatabaseException(value);
+            throw new NoSuchDatabaseException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -353,17 +587,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2Credentials(auth)));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final ContextExistsException e) {
-            throw new ContextExistsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
+        } catch (ContextExistsException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.ContextExistsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.ContextExistsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException();
+            faultDetail.setContextExistsException(value);
+            throw new ContextExistsException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -373,17 +627,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth)));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final ContextExistsException e) {
-            throw new ContextExistsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
+        } catch (ContextExistsException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.ContextExistsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.ContextExistsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException();
+            faultDetail.setContextExistsException(value);
+            throw new ContextExistsException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -393,17 +667,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             return context2Soap(contextInterface.getData(soap2Context(ctx), soap2Credentials(auth)));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -413,17 +707,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth)));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final ContextExistsException e) {
-            throw new ContextExistsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
+        } catch (ContextExistsException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.ContextExistsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.ContextExistsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.ContextExistsException();
+            faultDetail.setContextExistsException(value);
+            throw new ContextExistsException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -433,15 +747,32 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             return Boolean.valueOf(contextInterface.exists(soap2Context(ctx), soap2Credentials(auth)));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -451,15 +782,32 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.disableAll(soap2Credentials(parameters.getAuth()));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchReasonException e) {
-            throw new NoSuchReasonException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchReasonException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchReasonException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchReasonException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchReasonException();
+            faultDetail.setNoSuchReasonException(value);
+            throw new NoSuchReasonException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -469,11 +817,21 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             contextInterface.enableAll(soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -483,17 +841,37 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         try {
             return contextInterface.getAccessCombinationName(soap2Context(ctx), soap2Credentials(auth));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.NoSuchContextException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         } catch (DuplicateExtensionException e) {
-            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 

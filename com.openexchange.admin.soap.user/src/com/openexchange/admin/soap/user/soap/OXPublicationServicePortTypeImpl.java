@@ -75,11 +75,21 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             }
             return publication2Soap(pub);
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
+            com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchPublicationException e) {
-            throw new NoSuchPublicationException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.user.soap.NoSuchPublicationException faultDetail = new com.openexchange.admin.soap.user.soap.NoSuchPublicationException();
+            com.openexchange.admin.soap.user.exceptions.NoSuchPublicationException value = new com.openexchange.admin.soap.user.exceptions.NoSuchPublicationException();
+            faultDetail.setNoSuchPublicationException(value);
+            throw new NoSuchPublicationException_Exception(e.getMessage(), faultDetail, e);
         } catch (final MissingServiceException e) {
-            throw new MissingServiceException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.user.soap.MissingServiceException faultDetail = new com.openexchange.admin.soap.user.soap.MissingServiceException();
+            com.openexchange.admin.soap.user.exceptions.MissingServiceException value = new com.openexchange.admin.soap.user.exceptions.MissingServiceException();
+            faultDetail.setMissingServiceException(value);
+            throw new MissingServiceException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
@@ -96,11 +106,21 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
                 throw new RemoteException("Failed to delete publication with URL \"" + parameters.getUrl() + "\" for any reason.");
             }
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
+            com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
         } catch (final NoSuchPublicationException e) {
-            throw new NoSuchPublicationException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.user.soap.NoSuchPublicationException faultDetail = new com.openexchange.admin.soap.user.soap.NoSuchPublicationException();
+            com.openexchange.admin.soap.user.exceptions.NoSuchPublicationException value = new com.openexchange.admin.soap.user.exceptions.NoSuchPublicationException();
+            faultDetail.setNoSuchPublicationException(value);
+            throw new NoSuchPublicationException_Exception(e.getMessage(), faultDetail, e);
         } catch (final MissingServiceException e) {
-            throw new MissingServiceException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.user.soap.MissingServiceException faultDetail = new com.openexchange.admin.soap.user.soap.MissingServiceException();
+            com.openexchange.admin.soap.user.exceptions.MissingServiceException value = new com.openexchange.admin.soap.user.exceptions.MissingServiceException();
+            faultDetail.setMissingServiceException(value);
+            throw new MissingServiceException_Exception(e.getMessage(), faultDetail, e);
         }
     }
 
