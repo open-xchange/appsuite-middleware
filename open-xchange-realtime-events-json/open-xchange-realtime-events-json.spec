@@ -8,7 +8,7 @@ BuildRequires: open-xchange-realtime-json
 BuildRequires: open-xchange-realtime-events
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Wed Nov 05 2014 Marc Arens <marc.arens@open-xchange.com>
 prepare for 7.6.2 release
+* Fri Oct 31 2014 Marc Arens <marc.arens@open-xchange.com>
+First candidate for 7.6.2 release
 * Mon Oct 27 2014 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2014-10-30
 * Fri Oct 17 2014 Marc Arens <marc.arens@open-xchange.com>
