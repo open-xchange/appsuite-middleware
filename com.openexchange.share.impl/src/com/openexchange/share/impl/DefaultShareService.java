@@ -244,7 +244,7 @@ public class DefaultShareService implements ShareService {
          * schedule cleanup tasks as needed
          */
         if (0 < affectedShares) {
-            scheduleGuestCleanup(session.getContextId(), null != guestIDs ? I2i(guestIDs) : null);
+            scheduleGuestCleanup(session.getContextId(), guestIDs == null ? null : I2i(guestIDs));
         }
     }
 
@@ -592,7 +592,6 @@ public class DefaultShareService implements ShareService {
             }
             if (null != existingGuestUser) {
                 /*
-                 * TODO: try to use new AdjustGuestPermissionTask
                  * combine permission bits with existing ones
                  */
                 UserPermissionBits userPermissionBits = setPermissionBits(connection, context, existingGuestUser.getId(), permissionBits, true);
