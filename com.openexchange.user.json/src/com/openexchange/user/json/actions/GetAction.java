@@ -119,12 +119,12 @@ public final class GetAction extends AbstractUserAction {
          * Obtain user's contact
          */
         Contact contact = null;
-        if (false == user.isGuest()) {
-            ContactService contactService = services.getService(ContactService.class);
-            contact = contactService.getUser(session, userId, contactFields);
-        } else {
+        if (user.isGuest()) {
             ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
             contact = contactUserStorage.getGuestContact(session.getContextId(), userId, contactFields);
+        } else {
+            ContactService contactService = services.getService(ContactService.class);
+            contact = contactService.getUser(session, userId, contactFields);
         }
         if (contact.getInternalUserId() != user.getId() || user.getContactId() != contact.getObjectID()) {
 //            throw UserC

@@ -51,6 +51,7 @@ package com.openexchange.share;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -141,5 +142,14 @@ public interface ShareService {
     String generateShareURL(int contextId, int guestId, int shareCreator, ShareTarget target, String protocol, String fallbackHostname) throws OXException;
 
     AuthenticationMode getAuthenticationMode(int contextId, int guestID) throws OXException;
+
+    /**
+     * Gets all users that shared something to specified guest.
+     *
+     * @param contextId The context identifier
+     * @param guestId The guest identifier
+     * @return The identifiers from sharing users or an empty set
+     */
+    Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
 
 }

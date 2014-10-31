@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -673,6 +674,12 @@ public class DefaultShareService implements ShareService {
         } else {
             guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
         }
+    }
+
+    @Override
+    public Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException {
+        // TODO Auto-generated method stub
+        return Collections.emptySet();
     }
 
 }

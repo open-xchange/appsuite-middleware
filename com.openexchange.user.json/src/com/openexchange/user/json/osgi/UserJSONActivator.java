@@ -56,6 +56,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.share.ShareService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContactResultConverter;
@@ -97,6 +98,7 @@ public class UserJSONActivator extends AJAXModuleActivator {
             trackService(ContactService.class);
             trackService(DatabaseService.class);
             trackService(ContactUserStorage.class);
+            trackService(ShareService.class);
             openTrackers();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(UserJSONActivator.class).error("Failed to start bundle {}", context.getBundle().getSymbolicName(), e);
