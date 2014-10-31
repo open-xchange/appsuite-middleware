@@ -140,6 +140,7 @@ public class GetALinkTest extends ShareTest {
          */
         GuestClient guestClient = resolveShare(url, null, password);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
+        expectedPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFolderAccessible(Integer.toString(infostore.getObjectID()), expectedPermission);
         File reloaded = (File) guestClient.getItem(infostore, file.getId(), false);
         assertNotNull(reloaded);
@@ -148,6 +149,7 @@ public class GetALinkTest extends ShareTest {
          * Update permission, password and expiry
          */
         OCLGuestPermission allPermission = createAnonymousGuestPermission();
+        allPermission.setEntity(guestClient.getValues().getUserId());
         allPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
@@ -195,12 +197,14 @@ public class GetALinkTest extends ShareTest {
          */
         GuestClient guestClient = resolveShare(url, null, password);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
+        expectedPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFileAccessible(file.getId(), expectedPermission);
 
         /*
          * Update permission, password and expiry
          */
         OCLGuestPermission allPermission = createAnonymousGuestPermission();
+        allPermission.setEntity(guestClient.getValues().getUserId());
         allPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
@@ -226,8 +230,7 @@ public class GetALinkTest extends ShareTest {
         client.execute(new DeleteLinkRequest(token));
         assertNull("Share was not deleted", discoverShare(guestId, infostore.getObjectID(), file.getId()));
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
-        assertEquals("Permission was not deleted", 1, objectPermissions.size());
-        assertEquals("Permission was not deleted", client.getValues().getUserId(), objectPermissions.get(0).getEntity());
+        assertNull("Permission was not deleted", objectPermissions);
     }
 
 }

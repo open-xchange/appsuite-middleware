@@ -91,6 +91,7 @@ import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -283,13 +284,21 @@ public class GuestClient extends AJAXClient {
      * @param permissions The guest permissions for that file
      * @throws Exception
      */
-    public void checkFileAccessible(String fileID, OCLGuestPermission permissions) throws Exception {
+    public void checkFileAccessible(String id, OCLGuestPermission permissions) throws Exception {
         /*
          * get file
          */
-        GetInfostoreResponse getFileResponse = execute(new GetInfostoreRequest(fileID));
+        FileID fileID = new FileID(id);
+        fileID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        GetInfostoreRequest getFileRequest = new GetInfostoreRequest(fileID.toUniqueID());
+        getFileRequest.setFailOnError(true);
+        GetInfostoreResponse getFileResponse = execute(getFileRequest);
         File file = getFileResponse.getDocumentMetadata();
         List<FileStorageObjectPermission> objectPermissions = file.getObjectPermissions();
+        if (objectPermissions == null) {
+            Assert.fail("File contains no object permission for entity " + permissions.getEntity());
+        }
+
         FileStorageObjectPermission permissionForEntity = null;
         for (FileStorageObjectPermission p : objectPermissions) {
             if (p.getEntity() == permissions.getEntity() && p.isGroup() == permissions.isGroupPermission()) {
