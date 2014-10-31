@@ -88,6 +88,7 @@ public class ResourceAnonymizer implements AnonymizerService<Resource> {
         entity.setDisplayName(name);
         entity.setSimpleName(name);
         entity.setDescription("");
+        entity.setMail(null);
         return entity;
     }
 
