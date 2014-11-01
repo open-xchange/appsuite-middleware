@@ -68,6 +68,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.strings.BasicTypesStringParser;
@@ -111,6 +112,9 @@ public class GetAttachmentActionTest {
         doReturn("1").when(mailRequest).getParameter(Mail.PARAMETER_FILTER);
         doReturn(ajaxRequestData).when(mailRequest).getRequest();
 
+        // Jenkins might not load mime.types
+        MimeType2ExtMap.addMimeType("image/jpg", "jpg");
+
         String filename = "I_am_a_filename_for_an_image.jpg";
         MailPart mailPart = mock(MailPart.class);
         when(mailPart.getFileName()).thenReturn(filename);
@@ -147,6 +151,9 @@ public class GetAttachmentActionTest {
         doReturn("0").when(mailRequest).getParameter(Mail.PARAMETER_SAVE);
         doReturn("1").when(mailRequest).getParameter(Mail.PARAMETER_FILTER);
         doReturn(ajaxRequestData).when(mailRequest).getRequest();
+
+        // Jenkins might not load mime.types
+        MimeType2ExtMap.addMimeType("application/pdf", "pdf");
 
         String filename = "I_am_a_filename_for_a_pdf.pdf";
         MailPart mailPart = mock(MailPart.class);
