@@ -75,11 +75,11 @@ public interface MailFilterService {
         public String getFlag() {
             return flag;
         }
-    };
-    
+    }
+
     public enum DayOfWeek {
         sunday, monday, tuesday, wednesday, thursday, friday, saturday
-    };
+    }
 
     /**
      * Create a new mail filter rule and return it's UID.
