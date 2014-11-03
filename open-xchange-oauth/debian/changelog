@@ -2,7 +2,7 @@ open-xchange-oauth (7.6.2-1) stable; urgency=medium
 
   * First candidate for 7.6.2 release
 
- -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 31 Oct 2014 12:32:58 +0000
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 31 Oct 2014 13:32:58 +0100
 
 open-xchange-oauth (7.6.2-0) unstable; urgency=medium
 
@@ -225,6 +225,12 @@ open-xchange-oauth (7.6.0-0) unstable; urgency=low
   * prepare for 7.6.0
 
  -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 12 Feb 2014 09:35:58 +0100
+
+open-xchange-oauth (7.4.2-38) stable; urgency=medium
+
+  * Build for patch 2014-11-03
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 24 Oct 2014 11:26:24 +0200
 
 open-xchange-oauth (7.4.2-37) stable; urgency=low
 
