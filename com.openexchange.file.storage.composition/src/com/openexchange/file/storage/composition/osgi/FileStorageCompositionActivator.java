@@ -59,15 +59,18 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderAware;
+import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFileAccess;
 import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFolderAccess;
+import com.openexchange.file.storage.composition.internal.CompositingIDBasedAdministrativeFileAccess;
 import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
 import com.openexchange.file.storage.composition.internal.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -155,12 +158,18 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+        final ServiceLookup services = this;
+        Services.setServiceLookup(services);
         registerService(IDBasedFileAccessFactory.class, new IDBasedFileAccessFactory() {
 
             @Override
             public IDBasedFileAccess createAccess(final Session session) {
                 return new CompositingIDBasedFileAccessImpl(session);
+            }
+
+            @Override
+            public IDBasedAdministrativeFileAccess createAccess(int contextId) {
+                return new CompositingIDBasedAdministrativeFileAccess(contextId, services);
             }
 
         });

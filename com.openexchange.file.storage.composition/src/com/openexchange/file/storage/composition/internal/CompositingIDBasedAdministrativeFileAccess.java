@@ -47,34 +47,82 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage.composition.internal;
 
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import java.io.InputStream;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link IDBasedFileAccessFactory}
+ * {@link CompositingIDBasedAdministrativeFileAccess}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-@SingletonService
-public interface IDBasedFileAccessFactory {
+public class CompositingIDBasedAdministrativeFileAccess implements IDBasedAdministrativeFileAccess {
 
-    /**
-     * Creates the file access instance for given session.
-     *
-     * @param session The session
-     * @return The appropriate file access instance
-     */
-    IDBasedFileAccess createAccess(Session session);
+    private final int contextId;
 
-    /**
-     * Creates an administrative file access for the given context.
-     *
-     * @param contextId The context id.
-     * @return The administrative file access
-     */
-    IDBasedAdministrativeFileAccess createAccess(int contextId);
+    private final ServiceLookup services;
+
+    public CompositingIDBasedAdministrativeFileAccess(int contextId, ServiceLookup services) {
+        super();
+        this.contextId = contextId;
+        this.services = services;
+    }
+
+    @Override
+    public boolean supports(String id) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public File getFileMetadata(String id, String version) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public InputStream getDocument(String id, String version) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Document getDocumentAndMetadata(String id, String version) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void saveFileMetadata(File document, long sequenceNumber, List<Field> modifiedColumns) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removeDocument(String id) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removeDocuments(List<String> ids) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
 
 }
