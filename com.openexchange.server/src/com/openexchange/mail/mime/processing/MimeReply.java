@@ -73,6 +73,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -319,75 +320,7 @@ public final class MimeReply {
              * Set "From"
              */
             if (setFrom) {
-                final Set<InternetAddress> fromCandidates = new HashSet<InternetAddress>(8);
-                if (accountId == MailAccount.DEFAULT_ID) {
-                    addUserAliases(fromCandidates, session, ctx);
-                } else {
-                    // Check for Unified Mail account
-                    ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
-                    UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
-                    if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
-                        int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
-                        if (realAccountId == MailAccount.DEFAULT_ID) {
-                            addUserAliases(fromCandidates, session, ctx);
-                        } else {
-                            final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
-                            if (null == mass) {
-                                addUserAliases(fromCandidates, session, ctx);
-                            } else {
-                                fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
-                            }
-                        }
-                    } else {
-                        final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
-                        if (null == mass) {
-                            addUserAliases(fromCandidates, session, ctx);
-                        } else {
-                            fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
-                        }
-                    }
-                }
-                /*
-                 * Check if present anywhere
-                 */
-                InternetAddress from = null;
-                {
-                    String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
-                    InternetAddress[] toAddrs = null;
-                    if (hdrVal != null) {
-                        toAddrs = parseAddressList(hdrVal, true);
-                        for (final InternetAddress addr : toAddrs) {
-                            if (fromCandidates.contains(addr)) {
-                                from = addr;
-                                break;
-                            }
-                        }
-                    }
-                    if (null == from) {
-                        hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
-                        if (hdrVal != null) {
-                            toAddrs = parseAddressList(unfold(hdrVal), true);
-                            for (final InternetAddress addr : toAddrs) {
-                                if (fromCandidates.contains(addr)) {
-                                    from = addr;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (null == from) {
-                        hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
-                        if (hdrVal != null) {
-                            toAddrs = parseAddressList(unfold(hdrVal), true);
-                            for (final InternetAddress addr : toAddrs) {
-                                if (fromCandidates.contains(addr)) {
-                                    from = addr;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
+                InternetAddress from = determinePossibleFrom(origMsg, accountId, session, ctx);
                 /*
                  * Set if a "From" candidate applies
                  */
@@ -697,6 +630,90 @@ public final class MimeReply {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
 
+    }
+
+    /**
+     * Determines a possible <code>From</code> address
+     *
+     * @param origMsg The referenced message
+     * @param accountId The associated account identifier
+     * @param session The session
+     * @param ctx The context
+     * @return The possible <code>From</code> address or <code>null</code>
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws AddressException If address cannot be parsed
+     */
+    public static InternetAddress determinePossibleFrom(final MailMessage origMsg, final int accountId, final Session session, final Context ctx) throws OXException, AddressException {
+        final Set<InternetAddress> fromCandidates = new HashSet<InternetAddress>(8);
+        if (accountId == MailAccount.DEFAULT_ID) {
+            addUserAliases(fromCandidates, session, ctx);
+        } else {
+            // Check for Unified Mail account
+            ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+            UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+            if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
+                int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
+                if (realAccountId == MailAccount.DEFAULT_ID) {
+                    addUserAliases(fromCandidates, session, ctx);
+                } else {
+                    final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                    if (null == mass) {
+                        addUserAliases(fromCandidates, session, ctx);
+                    } else {
+                        fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                    }
+                }
+            } else {
+                final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                if (null == mass) {
+                    addUserAliases(fromCandidates, session, ctx);
+                } else {
+                    fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                }
+            }
+        }
+        /*
+         * Check if present anywhere
+         */
+        InternetAddress from = null;
+        {
+            String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+            InternetAddress[] toAddrs = null;
+            if (hdrVal != null) {
+                toAddrs = parseAddressList(hdrVal, true);
+                for (final InternetAddress addr : toAddrs) {
+                    if (fromCandidates.contains(addr)) {
+                        from = addr;
+                        break;
+                    }
+                }
+            }
+            if (null == from) {
+                hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
+                if (hdrVal != null) {
+                    toAddrs = parseAddressList(unfold(hdrVal), true);
+                    for (final InternetAddress addr : toAddrs) {
+                        if (fromCandidates.contains(addr)) {
+                            from = addr;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (null == from) {
+                hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
+                if (hdrVal != null) {
+                    toAddrs = parseAddressList(unfold(hdrVal), true);
+                    for (final InternetAddress addr : toAddrs) {
+                        if (fromCandidates.contains(addr)) {
+                            from = addr;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return from;
     }
 
     private static void addUserAddresses(final Set<InternetAddress> filter, final javax.mail.Session mailSession, final Session session, final Context ctx) throws OXException {
