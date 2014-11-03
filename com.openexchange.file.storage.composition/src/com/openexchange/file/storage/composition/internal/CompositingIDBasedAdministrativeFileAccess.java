@@ -108,7 +108,7 @@ public class CompositingIDBasedAdministrativeFileAccess implements IDBasedAdmini
     }
 
     @Override
-    public void saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns) throws OXException {
+    public void saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreVersion) throws OXException {
         // TODO Auto-generated method stub
 
     }
