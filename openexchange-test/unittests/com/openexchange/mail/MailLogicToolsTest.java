@@ -181,7 +181,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 
 						final MailMessage[] ms = new MailMessage[] { mailAccess.getMessageStorage().getMessage("INBOX",
 								mails[i].getMailId(), false) };
-						final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(ms);
+						final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(ms, false);
 						final DumperMessageHandler msgHandler = new DumperMessageHandler(false);
 						new MailMessageParser().parseMailMessage(forwardMail, msgHandler);
 						if (++count == 50) {

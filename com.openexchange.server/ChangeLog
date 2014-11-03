@@ -1,6 +1,7 @@
 * 2014-11-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 35291: Obey forbidden end tags when generating conform/well-formed HTML content
+ - Fix for bug 34979: Honor "setFrom" parameter when composing forward message
 
 * 2014-10-31 - thorben.betten@open-xchange.com
 

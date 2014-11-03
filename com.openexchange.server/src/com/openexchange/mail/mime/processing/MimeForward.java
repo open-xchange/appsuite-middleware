@@ -140,11 +140,12 @@ public final class MimeForward {
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws OXException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID) throws OXException {
-        return getFowardMail(originalMails, session, accountID, null);
+    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID, boolean setFrom) throws OXException {
+        return getFowardMail(originalMails, session, accountID, null, setFrom);
     }
 
     /**
@@ -156,11 +157,12 @@ public final class MimeForward {
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws OXException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID, final UserSettingMail usm) throws OXException {
-        for (final MailMessage cur : originalMails) {
+    public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int accountID, UserSettingMail usm, boolean setFrom) throws OXException {
+        for (MailMessage cur : originalMails) {
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountID) {
                 cur.setAccountId(accountID);
             }
@@ -168,7 +170,7 @@ public final class MimeForward {
         /*
          * Compose forward message
          */
-        return getFowardMail0(originalMails, session, usm);
+        return getFowardMail0(originalMails, new int[] {accountID}, session, usm, setFrom);
     }
 
     /**
@@ -181,12 +183,13 @@ public final class MimeForward {
      * @param session The session containing needed user data
      * @param accountIDs The account IDs of the referenced original mails
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws OXException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int[] accountIDs, final UserSettingMail usm) throws OXException {
+    public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int[] accountIDs, UserSettingMail usm, boolean setFrom) throws OXException {
         for (int i = 0; i < originalMails.length; i++) {
-            final MailMessage cur = originalMails[i];
+            MailMessage cur = originalMails[i];
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountIDs[i]) {
                 cur.setAccountId(accountIDs[i]);
             }
@@ -194,7 +197,7 @@ public final class MimeForward {
         /*
          * Compose forward message
          */
-        return getFowardMail0(originalMails, session, usm);
+        return getFowardMail0(originalMails, accountIDs, session, usm, setFrom);
     }
 
     /**
@@ -203,94 +206,103 @@ public final class MimeForward {
      * If multiple messages are given these messages are forwarded as attachments.
      *
      * @param originalMsgs The referenced original messages
+     * @param accountIds The account identifiers
      * @param session The session containing needed user data
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws OXException If forward mail cannot be composed
      */
-    private static MailMessage getFowardMail0(final MailMessage[] originalMsgs, final Session session, final UserSettingMail userSettingMail) throws OXException {
+    private static MailMessage getFowardMail0(MailMessage[] originalMsgs, int[] accountIds, Session session, UserSettingMail userSettingMail, boolean setFrom) throws OXException {
         try {
             /*
              * Clone them to ensure consistent data
              */
-            final MailMessage[] origMsgs = ManagedMimeMessage.clone(originalMsgs);
+            MailMessage[] origMsgs = ManagedMimeMessage.clone(originalMsgs);
             /*
              * New MIME message with a dummy session
              */
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final UserSettingMail usm =
-                userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
-                final MimeMessage forwardMsg = new MimeMessage(MimeDefaultSession.getDefaultSession());
-                {
-                    /*
-                     * Set its headers. Start with subject constructed from first message.
-                     */
-                    final String subjectPrefix = PREFIX_FWD;
-                    String origSubject = MimeMessageUtility.checkNonAscii(origMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
-                    if (origSubject == null) {
-                        forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
-                    } else {
-                        origSubject = MimeMessageUtility.unfold(origSubject);
-                        final String subject =
-                            MimeMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(
-                                true,
-                                0,
-                                subjectPrefix,
-                                0,
-                                subjectPrefix.length()) ? origSubject : new StringBuilder(subjectPrefix.length() + origSubject.length()).append(
-                                    subjectPrefix).append(origSubject).toString());
-                        forwardMsg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
+            UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
+            final MimeMessage forwardMsg = new MimeMessage(MimeDefaultSession.getDefaultSession());
+            {
+                /*
+                 * Set its headers. Start with subject constructed from first message.
+                 */
+                final String subjectPrefix = PREFIX_FWD;
+                String origSubject = MimeMessageUtility.checkNonAscii(origMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
+                if (origSubject == null) {
+                    forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
+                } else {
+                    origSubject = MimeMessageUtility.unfold(origSubject);
+                    final String subject =
+                        MimeMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(true, 0, subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder(
+                            subjectPrefix.length() + origSubject.length()).append(subjectPrefix).append(origSubject).toString());
+                    forwardMsg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
+                }
+            }
+            /*
+             * Set from
+             */
+            {
+                boolean fromSet = false;
+                if (setFrom) {
+                    InternetAddress from = MimeReply.determinePossibleFrom(origMsgs[0], accountIds[0], session, ctx);
+                    if (null != from) {
+                        forwardMsg.setFrom(from);
+                        fromSet = true;
                     }
                 }
-                /*
-                 * Set from
-                 */
-                if (usm.getSendAddr() != null) {
-                    forwardMsg.setFrom(new QuotedInternetAddress(usm.getSendAddr(), false));
+                if (!fromSet) {
+                    String sendAddr = usm.getSendAddr();
+                    if (sendAddr != null) {
+                        forwardMsg.setFrom(new QuotedInternetAddress(sendAddr, false));
+                    }
                 }
-                if (usm.isForwardAsAttachment() || origMsgs.length > 1) {
-                    /*
-                     * Attachment-Forward
-                     */
-                    if (1 == origMsgs.length) {
-                        final MailMessage originalMsg = origMsgs[0];
-                        final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
-                        if (null != owner) {
-                            final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
-                            if (null != users && users.length > 0) {
-                                final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
-                                forwardMsg.setFrom(onBehalfOf);
-                                final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
-                                forwardMsg.setSender(sender);
-                            }
+            }
+            if (usm.isForwardAsAttachment() || origMsgs.length > 1) {
+                /*
+                 * Attachment-Forward
+                 */
+                if (1 == origMsgs.length) {
+                    final MailMessage originalMsg = origMsgs[0];
+                    final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+                    if (null != owner) {
+                        final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                        if (null != users && users.length > 0) {
+                            final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                            forwardMsg.setFrom(onBehalfOf);
+                            final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                            forwardMsg.setSender(sender);
                         }
                     }
-                    return asAttachmentForward(origMsgs, forwardMsg);
                 }
-                /*
-                 * Inline-Forward
-                 */
-                final MailMessage originalMsg;
-                {
-                    final MailMessage omm = origMsgs[0];
-                    final ContentType contentType = omm.getContentType();
-                    if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
-                        originalMsg = MimeSmilFixer.getInstance().process(omm);
-                    } else {
-                        originalMsg = omm;
-                    }
+                return asAttachmentForward(origMsgs, forwardMsg);
+            }
+            /*
+             * Inline-Forward
+             */
+            final MailMessage originalMsg;
+            {
+                final MailMessage omm = origMsgs[0];
+                final ContentType contentType = omm.getContentType();
+                if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+                    originalMsg = MimeSmilFixer.getInstance().process(omm);
+                } else {
+                    originalMsg = omm;
                 }
-                final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
-                if (null != owner) {
-                    final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
-                    if (null != users && users.length > 0) {
-                        final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
-                        forwardMsg.setFrom(onBehalfOf);
-                        final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
-                        forwardMsg.setSender(sender);
-                    }
+            }
+            final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+            if (null != owner) {
+                final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                if (null != users && users.length > 0) {
+                    final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                    forwardMsg.setFrom(onBehalfOf);
+                    final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                    forwardMsg.setSender(sender);
                 }
-                return asInlineForward(originalMsg, session, ctx, usm, forwardMsg);
+            }
+            return asInlineForward(originalMsg, session, ctx, usm, forwardMsg);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
