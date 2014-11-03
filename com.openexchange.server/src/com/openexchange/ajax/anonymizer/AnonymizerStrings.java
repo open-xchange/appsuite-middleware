@@ -71,7 +71,7 @@ public final class AnonymizerStrings implements LocalizableStrings {
     public static final String MODULE_USER = "User";
 
     // The identifier for group module
-    public static final String MODULE_GROUP = "Groupt";
+    public static final String MODULE_GROUP = "Group";
 
     // The identifier for resource module
     public static final String MODULE_RESOURCE = "Resource";
