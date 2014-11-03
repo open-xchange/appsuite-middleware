@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/com.openexchange.admin.console/src/com/openexchange/admin/console/util/database/ListDatabase.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<mapAttribute key="org.eclipse.debug.core.environmentVariables">
+<mapEntry key="RMI_HOSTNAME" value="localhost"/>
+</mapAttribute>
+<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.openexchange.admin.console.util.database.ListDatabase"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-A oxadminmaster -P secret"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.openexchange.admin.console"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dsun.rmi.transport.connectionTimeout=100&#10;-Dsun.rmi.transport.tcp.handshakeTimeout=100&#10;-Dsun.rmi.transport.tcp.responseTimeout=100&#10;-Dsun.rmi.transport.tcp.readTimeout=100"/>
+</launchConfiguration>
