@@ -49,7 +49,7 @@
 
 package com.openexchange.share.groupware;
 
-import java.util.List;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareTarget;
 
@@ -62,7 +62,7 @@ import com.openexchange.share.ShareTarget;
  */
 public interface TargetUpdate {
 
-    void fetch(List<ShareTarget> targets) throws OXException;
+    void fetch(Collection<ShareTarget> targets) throws OXException;
 
     TargetProxy get(ShareTarget target);
 
