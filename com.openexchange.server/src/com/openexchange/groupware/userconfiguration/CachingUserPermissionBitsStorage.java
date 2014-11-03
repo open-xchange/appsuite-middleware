@@ -125,7 +125,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     @Override
     protected void startInternal() throws OXException {
-        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+        CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
         if (null != reg && !reg.registerListener(cacheAvailabilityListener)) {
             LOG.error("Cache availability listener could not be registered", new Throwable());
         }
@@ -133,18 +133,18 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     @Override
     protected void stopInternal() throws OXException {
-        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+        CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
         if (null != reg) {
             reg.unregisterListener(cacheAvailabilityListener);
         }
         releaseCache();
     }
 
-    private final static CacheKey getKey(final int userId, final Context ctx, final Cache cache) {
+    private final static CacheKey getKey(int userId, Context ctx, Cache cache) {
         return cache.newCacheKey(ctx.getContextId(), userId);
     }
 
-    private final static CacheKey getKey(final int userId, final int contextId, final Cache cache) {
+    private final static CacheKey getKey(int userId, int contextId, Cache cache) {
         return cache.newCacheKey(contextId, userId);
     }
 
@@ -161,7 +161,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
                 if (null == cache) {
                     try {
                         this.cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
                     }
                 }
@@ -175,17 +175,17 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
      * @throws OXException If an error occurs
      */
     void releaseCache() throws OXException {
-        final Cache cache = this.cache;
+        Cache cache = this.cache;
         if (cache == null) {
             return;
         }
         try {
             cache.clear();
-            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 cacheService.freeCache(CACHE_REGION_NAME);
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
         } finally {
             this.cache = null;
@@ -193,8 +193,8 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public UserPermissionBits getUserPermissionBits(final int userId, final int contextId) throws OXException {
-        final Cache cache = this.cache;
+    public UserPermissionBits getUserPermissionBits(int userId, int contextId) throws OXException {
+        Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(userId, contextId);
         }
@@ -202,8 +202,8 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException {
-        final Cache cache = this.cache;
+    public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
+        Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(userId, ctx);
         }
@@ -211,12 +211,15 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException {
-        final Cache cache = this.cache;
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
+        if (null == users || 0 == users.length) {
+            return new UserPermissionBits[0];
+        }
+        Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(ctx, users);
         }
-        final int[] userIds = new int[users.length];
+        int[] userIds = new int[users.length];
         for (int i = 0; i < users.length; i++) {
             userIds[i] = users[i].getId();
         }
@@ -225,8 +228,11 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public UserPermissionBits[] getUserPermissionBits(final Context ctx, final int[] userIds) throws OXException {
-        final Cache cache = this.cache;
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
+        if (null == userIds || 0 == userIds.length) {
+            return new UserPermissionBits[0];
+        }
+        Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(ctx, userIds);
         }
@@ -235,20 +241,20 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     @Override
     public void clearStorage() throws OXException {
-        final Cache cache = this.cache;
+        Cache cache = this.cache;
         if (cache == null) {
             return;
         }
         try {
             cache.clear();
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             LOG.warn("A runtime error occurred.", rte);
         }
     }
 
     @Override
-    public void removeUserPermissionBits(final int userId, final Context ctx) throws OXException {
-        final Cache cache = this.cache;
+    public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
+        Cache cache = this.cache;
         if (cache == null) {
             return;
         }
@@ -256,28 +262,28 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException {
+    public void saveUserPermissionBits(int permissionBits, int userId, Context ctx) throws OXException {
         delegateStorage.saveUserPermissionBits(permissionBits, userId, ctx);
         removeUserPermissionBits(userId, ctx);
     }
 
-    private UserPermissionBits get(final Cache cache, final int contextId, final int userId) throws OXException {
-        final CacheKey key = getKey(userId, contextId, cache);
-        final Object object = cache.get(key);
+    private UserPermissionBits get(Cache cache, int contextId, int userId) throws OXException {
+        CacheKey key = getKey(userId, contextId, cache);
+        Object object = cache.get(key);
         if (object != null) {
             return ((UserPermissionBits) object).clone();
         }
 
-        final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
         if (null == contextService) {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
         return load(cache, contextService.getContext(contextId), userId);
     }
 
-    private UserPermissionBits get(final Cache cache, final Context ctx, final int userId) throws OXException {
-        final CacheKey key = getKey(userId, ctx, cache);
-        final Object object = cache.get(key);
+    private UserPermissionBits get(Cache cache, Context ctx, int userId) throws OXException {
+        CacheKey key = getKey(userId, ctx, cache);
+        Object object = cache.get(key);
         if (object != null) {
             return ((UserPermissionBits) object).clone();
         }
@@ -285,22 +291,22 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         return load(cache, ctx, userId);
     }
 
-    private UserPermissionBits load(final Cache cache, final Context ctx, final int userId) throws OXException {
-        final UserPermissionBits perm = delegateStorage.getUserPermissionBits(userId, ctx);
+    private UserPermissionBits load(Cache cache, Context ctx, int userId) throws OXException {
+        UserPermissionBits perm = delegateStorage.getUserPermissionBits(userId, ctx);
         cache.put(getKey(userId, ctx, cache), perm.clone(), false);
         return perm;
     }
 
-    private UserPermissionBits[] get(final Cache cache, final Context ctx, final int[] userIds) throws OXException {
+    private UserPermissionBits[] get(Cache cache, Context ctx, int[] userIds) throws OXException {
         if (userIds.length == 0) {
             return new UserPermissionBits[0];
         }
 
-        final TIntObjectMap<UserPermissionBits> map = new TIntObjectHashMap<UserPermissionBits>(userIds.length);
-        final TIntList toLoad = new TIntArrayList(userIds.length);
-        for (final int id : userIds) {
-            final CacheKey key = getKey(id, ctx, cache);
-            final Object object = cache.get(key);
+        TIntObjectMap<UserPermissionBits> map = new TIntObjectHashMap<UserPermissionBits>(userIds.length);
+        TIntList toLoad = new TIntArrayList(userIds.length);
+        for (int id : userIds) {
+            CacheKey key = getKey(id, ctx, cache);
+            Object object = cache.get(key);
             if (object == null) {
                 toLoad.add(id);
             } else {
@@ -309,22 +315,26 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         }
 
         if (!toLoad.isEmpty()) {
-            for (final UserPermissionBits perms : load(cache, ctx, toLoad)) {
-                map.put(perms.getUserId(), perms);
+            for (UserPermissionBits bits : load(cache, ctx, toLoad)) {
+                if (null != bits) {
+                    map.put(bits.getUserId(), bits);
+                }
             }
         }
 
-        final UserPermissionBits[] retval = new UserPermissionBits[userIds.length];
+        UserPermissionBits[] retval = new UserPermissionBits[userIds.length];
         for (int i = 0; i < userIds.length; i++) {
             retval[i] = map.get(userIds[i]);
         }
         return retval;
     }
 
-    private UserPermissionBits[] load(final Cache cache, final Context ctx, final TIntList userIds) throws OXException {
-        final UserPermissionBits[] perms = delegateStorage.getUserPermissionBits(ctx, userIds.toArray());
-        for (final UserPermissionBits userPermissionBits : perms) {
-            cache.put(getKey(userPermissionBits.getUserId(), ctx, cache), userPermissionBits.clone(), false);
+    private UserPermissionBits[] load(Cache cache, Context ctx, TIntList userIds) throws OXException {
+        UserPermissionBits[] perms = delegateStorage.getUserPermissionBits(ctx, userIds.toArray());
+        for (UserPermissionBits bits : perms) {
+            if (null != bits) {
+                cache.put(getKey(bits.getUserId(), ctx, cache), bits.clone(), false);
+            }
         }
         return perms;
     }
