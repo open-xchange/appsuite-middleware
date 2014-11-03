@@ -1123,6 +1123,8 @@ exit 0
 %changelog
 * Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.6.2 release
+* Tue Oct 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-03
 * Mon Oct 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-30
 * Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
