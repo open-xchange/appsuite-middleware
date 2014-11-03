@@ -1,3 +1,7 @@
+* 2014-11-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35291: Obey forbidden end tags when generating conform/well-formed HTML content
+
 * 2014-10-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 35267: Explicitly specify header encoding when parsing multipart/form-upload requests with Apache FileUpload
