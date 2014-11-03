@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.groupware;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,12 +59,13 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.infostore.PermissionHelper;
 import com.openexchange.groupware.container.EffectiveObjectPermissions;
 import com.openexchange.groupware.container.ObjectPermission;
-import com.openexchange.osgi.Tools;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
@@ -88,14 +90,26 @@ public class FileStorageHandler implements ModuleHandler {
     @Override
     public List<TargetProxy> loadTargets(List<ShareTarget> targets, HandlerParameters parameters) throws OXException {
         List<TargetProxy> files = new ArrayList<TargetProxy>(targets.size());
-        IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
-        for (ShareTarget target : targets) {
-            FileID fileID = new FileID(target.getItem());
-            if (fileID.getFolderId() == null) {
-                fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+        if (parameters.isAdministrative()) {
+            IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(parameters.getContext());
+            for (ShareTarget target : targets) {
+                FileID fileID = new FileID(target.getItem());
+                if (fileID.getFolderId() == null) {
+                    fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+                }
+                File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+                files.add(new FileTargetProxy(file));
             }
-            File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-            files.add(new FileTargetProxy(file));
+        } else {
+            IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
+            for (ShareTarget target : targets) {
+                FileID fileID = new FileID(target.getItem());
+                if (fileID.getFolderId() == null) {
+                    fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+                }
+                File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+                files.add(new FileTargetProxy(file));
+            }
         }
 
         return files;
@@ -130,25 +144,38 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public void updateObjects(List<TargetProxy> modified, HandlerParameters parameters) throws OXException {
-        IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
-        try {
-            fileAccess.startTransaction();
+        if (parameters.isAdministrative()) {
+            IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(parameters.getContext());
             for (TargetProxy proxy : modified) {
                 File file = ((FileTargetProxy) proxy).getFile();
                 fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
             }
+        } else {
+            IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
+            try {
+                fileAccess.startTransaction();
+                for (TargetProxy proxy : modified) {
+                    File file = ((FileTargetProxy) proxy).getFile();
+                    fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                }
 
-            fileAccess.commit();
-        } catch (OXException e) {
-            fileAccess.rollback();
-            throw e;
-        } finally {
-            fileAccess.finish();
+                fileAccess.commit();
+            } catch (OXException e) {
+                fileAccess.rollback();
+                throw e;
+            } finally {
+                fileAccess.finish();
+            }
         }
     }
 
+    private IDBasedAdministrativeFileAccess getAdministrativeFileAccess(Context context) throws OXException {
+        IDBasedFileAccessFactory factory = requireService(IDBasedFileAccessFactory.class, services);
+        return factory.createAccess(context.getContextId());
+    }
+
     private IDBasedFileAccess getFileAccess(Session session) throws OXException {
-        IDBasedFileAccessFactory factory = Tools.requireService(IDBasedFileAccessFactory.class, services);
+        IDBasedFileAccessFactory factory = requireService(IDBasedFileAccessFactory.class, services);
         return factory.createAccess(session);
     }
 

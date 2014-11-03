@@ -124,6 +124,17 @@ public class HandlerParameters {
         this.user = user;
     }
 
+    /**
+     * Returns whether we are in an administrative context, i.e. no session is available and according
+     * calls to the concrete module have to be used.
+     *
+     * @return <code>true</code> if administrative methods must be used.
+     *         {@link HandlerParameters#getSession()} will return <code>null</code> in this case.
+     */
+    public boolean isAdministrative() {
+        return session == null; // TODO: more visible through boolean flag or the like?
+    }
+
 
 
 }
