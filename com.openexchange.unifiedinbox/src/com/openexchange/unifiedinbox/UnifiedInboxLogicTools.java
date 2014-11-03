@@ -80,8 +80,8 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
     }
 
     @Override
-    public MailMessage getFowardMessage(final MailMessage[] originalMails) throws OXException {
-        final MailMessage mail = super.getFowardMessage(originalMails);
+    public MailMessage getFowardMessage(MailMessage[] originalMails, boolean setFrom) throws OXException {
+        final MailMessage mail = super.getFowardMessage(originalMails, setFrom);
         try {
             final TIntList accountIds = new TIntArrayList(originalMails.length);
             final UnifiedInboxUID uid = new UnifiedInboxUID();
@@ -147,8 +147,8 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
     }
 
     @Override
-    public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm) throws OXException {
-        final MailMessage mail = super.getFowardMessage(originalMails, usm);
+    public MailMessage getFowardMessage(MailMessage[] originalMails, UserSettingMail usm, boolean setFrom) throws OXException {
+        final MailMessage mail = super.getFowardMessage(originalMails, usm, setFrom);
         try {
             final TIntList accountIds = new TIntArrayList(originalMails.length);
             final UnifiedInboxUID uid = new UnifiedInboxUID();

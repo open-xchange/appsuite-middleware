@@ -107,6 +107,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.Category;
@@ -983,6 +984,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
             final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
+            boolean setFrom = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("setFrom"));
             /*
              * Deny saving for this request-specific settings
              */
@@ -1003,7 +1005,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 data = MessageWriter.writeMailMessage(
                     mailInterface.getAccountID(),
-                    mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave),
+                    mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave, setFrom),
                     displayMode,
                     false,
                     session,
@@ -2526,6 +2528,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", PARAMETER_VIEW, view);
                 }
             }
+            boolean setFrom = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("setFrom"));
             /*
              * Get forward message
              */
@@ -2538,7 +2541,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 data = MessageWriter.writeMailMessage(
                     mailInterface.getAccountID(),
-                    mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave),
+                    mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave, setFrom),
                     DisplayMode.MODIFYABLE,
                     false,
                     session,

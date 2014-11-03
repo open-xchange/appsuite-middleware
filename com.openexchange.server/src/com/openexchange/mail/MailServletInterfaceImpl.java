@@ -1144,7 +1144,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm) throws OXException {
+    public MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, boolean setFrom) throws OXException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
@@ -1208,7 +1208,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     originalMails[i] = origMail;
                 }
             }
-            return mailAccess.getLogicTools().getFowardMessage(originalMails, usm);
+            return mailAccess.getLogicTools().getFowardMessage(originalMails, usm, setFrom);
         }
         MailMessage[] originalMails = new MailMessage[folders.length];
         if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
@@ -1260,7 +1260,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; i < accountIDs.length; i++) {
             accountIDs[i] = arguments[i].getAccountId();
         }
-        return MimeForward.getFowardMail(originalMails, session, accountIDs, usm);
+        return MimeForward.getFowardMail(originalMails, session, accountIDs, usm, setFrom);
     }
 
     @Override

@@ -446,7 +446,7 @@ public abstract class MailServletInterface implements Closeable {
      * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send
      * the forward.
      */
-    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm) throws OXException;
+    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, boolean setFrom) throws OXException;
 
     /**
      * Deletes the message located in given folder corresponding to given <code>msgUID</code>
