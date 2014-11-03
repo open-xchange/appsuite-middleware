@@ -4299,6 +4299,13 @@ msgid ""
 "refers to all attachments of all users in this context."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
+msgid ""
+"Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
+msgstr ""
+
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not send stanza to resource. Resource was offline: %1$s"
@@ -4401,7 +4408,7 @@ msgstr ""
 
 #. The identifier for group module
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:74
-msgid "Groupt"
+msgid "Group"
 msgstr ""
 
 #. The identifier for resource module
