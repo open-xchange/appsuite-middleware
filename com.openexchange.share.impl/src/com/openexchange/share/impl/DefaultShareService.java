@@ -331,68 +331,53 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Gets all shares created in the supplied context.
+     * Gets all shares created in a specific context.
      *
-     * @param contextId The contextId
-     * @return The shares
-     * @throws OXException
+     * @param contextID The context identifier
+     * @return The shares, or an empty list if there are none
      */
-    public List<Share> getAllShares(int contextId) throws OXException {
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, false);
-        try {
-            connectionHelper.start();
-//            List<Share> shares = shareStorage.loadSharesForContext(contextId, connectionHelper.getParameters());
-            connectionHelper.commit();
-//            return shares;
-            return null;
-        } finally {
-            connectionHelper.finish();
-        }
+    public List<Share> getAllShares(int contextID) throws OXException {
+        return services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS);
     }
 
     /**
-     * Gets all shares created in the supplied context by supplied user.
+     * Gets all shares created in a specific context that were created by a specific user.
      *
-     * @param contextId The contextId
-     * @param userId The userId
-     * @return The shares
-     * @throws OXException
+     * @param contextID The context identifier
+     * @param userID The user identifier
+     * @return The shares, or an empty list if there are none
      */
-    public List<Share> getAllShares(int contextId, int userId) throws OXException {
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, false);
-        try {
-            connectionHelper.start();
-            List<Share> shares = shareStorage.loadSharesCreatedBy(contextId, userId, connectionHelper.getParameters());
-            connectionHelper.commit();
-            return shares;
-        } finally {
-            connectionHelper.finish();
-        }
+    public List<Share> getAllShares(int contextID, int userID) throws OXException {
+        return services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, StorageParameters.NO_PARAMETERS);
     }
 
     /**
      * Removes share targets for specific guest users in a context.
      *
-     * @param contextId The context identifier
+     * @param contextID The context identifier
      * @param targets The share targets
      * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
      * @throws OXException
      */
-    public void removeTargets(int contextId, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+    public void removeTargets(int contextID, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
         if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
             return;
         }
-        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
+        int affectedShares;
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
-            removeTargets(connectionHelper, targets, guestIDs);
+            affectedShares = removeTargets(connectionHelper, targets, guestIDs);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
         }
-
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (0 < affectedShares) {
+            scheduleGuestCleanup(contextID, null == guestIDs ? null : I2i(guestIDs));
+        }
     }
 
     /**
