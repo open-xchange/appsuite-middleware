@@ -522,7 +522,7 @@ public class DefaultShareService implements ShareService {
             ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
             try {
                 connectionHelper.start();
-                affectedShares = shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
+                affectedShares = shareStorage.deleteShares(contextID, expiredShares, connectionHelper.getParameters());
                 removePermissions(connectionHelper, expiredShares);
                 connectionHelper.commit();
             } finally {
