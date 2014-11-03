@@ -47,41 +47,68 @@
  *
  */
 
-package com.openexchange.share.groupware;
+package com.openexchange.share.impl.groupware.administrative;
 
 import java.sql.Connection;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.AdministrativeModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.groupware.TargetUpdate;
+import com.openexchange.share.impl.groupware.ModuleHandlerRegistry;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 
 /**
- * {@link AdministrativeModuleSupport}
- * <p/>
- * Module support using administrative access to the underlying module services. Used when performing operations triggered after a share
- * is expired, or if a shares are removed by the administrator manually.
+ * {@link AdministrativeModuleSupportImpl}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface AdministrativeModuleSupport {
+public class AdministrativeModuleSupportImpl implements AdministrativeModuleSupport {
+
+    private final ServiceLookup services;
 
     /**
-     * Initiates an update operation by spawning an appropriate {@link TargetUpdate} using the supplied writable connection to the
-     * database.
+     * Initializes a new {@link AdministrativeModuleSupportImpl}.
      *
-     * @param contextID The context identifier
-     * @param writeCon The write connection to use
-     * @return The target update
+     * @param services A service lookup reference
      */
-    TargetUpdate prepareUpdate(int contextID, Connection writeCon) throws OXException;
+    public AdministrativeModuleSupportImpl(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
-    /**
-     * Loads a proxy object providing possible update operations for a specific share target.
-     *
-     * @param contextID The context identifier
-     * @param target The target to get the proxy for
-     * @return The proxy
-     */
-    TargetProxy load(int contextID, ShareTarget target) throws OXException;
+    @Override
+    public TargetUpdate prepareUpdate(int contextID, Connection writeCon) throws OXException {
+        //TODO: custom module handler registry?
+        return new AdministrativeTargetUpdateImpl(services, contextID, writeCon, new ModuleHandlerRegistry(services));
+    }
+
+    @Override
+    public TargetProxy load(int contextID, ShareTarget target) throws OXException {
+        if (null == target) {
+            return null;
+        }
+        if (target.isFolder()) {
+            int folderID;
+            try {
+                folderID = Integer.valueOf(target.getFolder());
+            } catch (NumberFormatException e) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+            Context context = services.getService(ContextService.class).getContext(contextID);
+            FolderObject folder = new OXFolderAccess(context).getFolderObject(folderID);
+            return new AdministrativeFolderTargetProxy(folder);
+        } else {
+            // TODO
+            return null;
+        }
+    }
 
 }

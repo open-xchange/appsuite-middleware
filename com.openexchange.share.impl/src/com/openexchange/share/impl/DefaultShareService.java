@@ -89,7 +89,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.AdministrativeModuleSupport;
 import com.openexchange.share.groupware.TargetPermission;
-import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -524,8 +523,7 @@ public class DefaultShareService implements ShareService {
             try {
                 connectionHelper.start();
                 affectedShares = shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                // TODO
-                // removePermissions(connectionHelper, expiredShares);
+                removePermissions(connectionHelper, expiredShares);
                 connectionHelper.commit();
             } finally {
                 connectionHelper.finish();
@@ -550,7 +548,7 @@ public class DefaultShareService implements ShareService {
      */
     private void removePermissions(ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
         AdministrativeModuleSupport moduleSupport = services.getService(AdministrativeModuleSupport.class);
-        TargetUpdate targetUpdate = moduleSupport.prepareUpdate(connectionHelper.getConnection());
+        TargetUpdate targetUpdate = moduleSupport.prepareUpdate(connectionHelper.getContextID(), connectionHelper.getConnection());
         Map<ShareTarget, Set<Integer>> guestsByTarget = ShareTool.mapGuestsByTarget(shares);
         targetUpdate.fetch(guestsByTarget.keySet());
         for (Entry<ShareTarget, Set<Integer>> entry : guestsByTarget.entrySet()) {
@@ -559,8 +557,7 @@ public class DefaultShareService implements ShareService {
             for (Integer guestID : guestIDs) {
                 permissions.add(new TargetPermission(guestID.intValue(), false, 0));
             }
-            TargetProxy targetProxy = moduleSupport.load(entry.getKey());
-            targetProxy.removePermissions(permissions);
+            targetUpdate.get(entry.getKey()).removePermissions(permissions);
         }
         targetUpdate.run();
         targetUpdate.close();
