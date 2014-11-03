@@ -47,51 +47,28 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.osgi;
+package com.openexchange.file.storage;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
-import com.openexchange.file.storage.infostore.Services;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link InfostoreFileStorageActivator}
+ * Extended interface for {@link FileStorageService} inheritors that come along with a
+ * {@link AdministrativeFileStorageFileAccess} implementation.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class InfostoreFileStorageActivator extends HousekeepingActivator {
+public interface AdministrativeFileStorageService extends FileStorageService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, ContextService.class };
-    }
+    /**
+     * Gets the {@link AdministrativeFileStorageFileAccess} for the given account id.
+     *
+     * @param accountId The account ID
+     * @param contextId The according context ID
+     * @return The administrative file access
+     * @throws OXException
+     */
+    AdministrativeFileStorageFileAccess getAdministrativeFileAccess(String accountId, int contextId) throws OXException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FileStorageService.class, new InfostoreFileStorageService() {
-            @Override
-            public InfostoreFacade getInfostore() {
-                return getService(InfostoreFacade.class);
-            }
-
-            @Override
-            public InfostoreSearchEngine getSearch() {
-                return getService(InfostoreSearchEngine.class);
-            }
-        }, null);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
-    }
 }

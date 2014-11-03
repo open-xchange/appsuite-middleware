@@ -49,13 +49,24 @@
 
 package com.openexchange.file.storage.composition.internal;
 
-import java.io.InputStream;
+import static com.openexchange.osgi.Tools.requireService;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
+import com.openexchange.file.storage.AdministrativeFileStorageService;
+import com.openexchange.file.storage.AdministrativeFileStorageFileAccess;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -79,50 +90,92 @@ public class CompositingIDBasedAdministrativeFileAccess implements IDBasedAdmini
 
     @Override
     public boolean supports(String id) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+        FileID fileID = toFileID(id);
+        return getFileAccess(fileID.getService(), fileID.getAccountId()) != null;
     }
 
     @Override
     public File getFileMetadata(String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public InputStream getDocument(String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Document getDocumentAndMetadata(String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        FileID fileID = toFileID(id);
+        AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());
+        return fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
     }
 
     @Override
     public void saveFileMetadata(File document, long sequenceNumber, List<Field> modifiedColumns) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreVersion) throws OXException {
-        // TODO Auto-generated method stub
-
+        FolderID folderID = new FolderID(document.getFolderId());
+        AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(folderID.getService(), folderID.getAccountId());
+        fileAccess.saveFileMetadata(document, sequenceNumber, modifiedColumns);
     }
 
     @Override
     public void removeDocument(String id) throws OXException {
-        // TODO Auto-generated method stub
-
+        FileID fileID = toFileID(id);
+        AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());
+        fileAccess.removeDocument(fileID.getFolderId(), fileID.getFileId());
     }
 
     @Override
     public void removeDocuments(List<String> ids) throws OXException {
-        // TODO Auto-generated method stub
+        Map<String, Map<String, List<IDTuple>>> idsByService = new HashMap<String, Map<String, List<IDTuple>>>();
+        for (String id : ids) {
+            FileID fileID = toFileID(id);
+            String service = fileID.getService();
+            String account = fileID.getAccountId();
+            Map<String, List<IDTuple>> idsByAccount = idsByService.get(service);
+            if (idsByAccount == null) {
+                idsByAccount = new HashMap<String, List<IDTuple>>();
+                idsByService.put(service, idsByAccount);
+            }
 
+            List<IDTuple> tuples = idsByAccount.get(account);
+            if (tuples == null) {
+                tuples = new LinkedList<IDTuple>();
+                idsByAccount.put(account, tuples);
+            }
+
+            tuples.add(new IDTuple(fileID.getFolderId(), fileID.getFileId()));
+        }
+
+        Map<AdministrativeFileStorageFileAccess, List<IDTuple>> idsByAccess = new HashMap<AdministrativeFileStorageFileAccess, List<IDTuple>>();
+        for (Entry<String, Map<String, List<IDTuple>>> idsByServiceEntry : idsByService.entrySet()) {
+            String service = idsByServiceEntry.getKey();
+            Map<String, List<IDTuple>> idsByAccount = idsByServiceEntry.getValue();
+            for (Entry<String, List<IDTuple>> accountEntry : idsByAccount.entrySet()) {
+                String account = accountEntry.getKey();
+                AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(service, account);
+                idsByAccess.put(fileAccess, accountEntry.getValue());
+            }
+        }
+
+        for (Entry<AdministrativeFileStorageFileAccess, List<IDTuple>> entry : idsByAccess.entrySet()) {
+            AdministrativeFileStorageFileAccess fileAccess = entry.getKey();
+            fileAccess.removeDocuments(entry.getValue());
+        }
     }
+
+    private static FileID toFileID(String id) {
+        return new FileID(id);
+    }
+
+    private AdministrativeFileStorageFileAccess requireFileAccess(final String serviceId, final String accountId) throws OXException {
+        AdministrativeFileStorageFileAccess fileAccess = getFileAccess(serviceId, accountId);
+        if (fileAccess == null) {
+            throw FileStorageExceptionCodes.ADMIN_FILE_ACCESS_NOT_AVAILABLE.create(serviceId);
+        }
+
+        return fileAccess;
+    }
+
+    private AdministrativeFileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
+        FileStorageServiceRegistry storageRegistry = requireService(FileStorageServiceRegistry.class, services);
+        FileStorageService fileStorageService = storageRegistry.getFileStorageService(serviceId);
+        if (fileStorageService instanceof AdministrativeFileStorageService) {
+            return ((AdministrativeFileStorageService) fileStorageService).getAdministrativeFileAccess(accountId, contextId);
+        }
+
+        return null;
+    }
+
 
 }

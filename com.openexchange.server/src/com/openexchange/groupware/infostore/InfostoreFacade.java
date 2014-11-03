@@ -92,9 +92,7 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param id The identifier
      * @param version The version
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The session
      * @return <code>true</code> if exists; otherwise <code>false</code>
      * @throws OXException If checking for existence fails
      * @see #CURRENT_VERSION
@@ -106,14 +104,25 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param id The identifier
      * @param version The version
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The session
      * @return The meta data
      * @throws OXException If operation fails
      * @see #CURRENT_VERSION
      */
     public DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException;
+
+    /**
+     * Gets the denoted document's meta data information.<br>
+     * <b>This method is only for administrative tasks!</b>
+     *
+     * @param id The identifier
+     * @param version The version
+     * @param context The context
+     * @return The meta data
+     * @throws OXException If operation fails
+     * @see #CURRENT_VERSION
+     */
+    public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException;
 
     /**
      * Saves given document meta data.
@@ -137,6 +146,18 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If save operation fails
      */
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+
+    /**
+     * Saves given document meta data
+     * <b>This method is only for administrative tasks!</b>
+     *
+     * @param document The meta data of the document
+     * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param modifiedColumns The columns to modify; <code>null</code> means all columns.
+     * @param context The context
+     * @throws OXException If save operation fails
+     */
+    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException;
 
     /**
      * Gets the document's binary content.
@@ -208,6 +229,15 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If remove operation fails
      */
     public List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException;
+
+    /**
+     * Removes denoted documents.
+     *
+     * @param ids The identifiers of the documents to remove
+     * @param context The context
+     * @throws OXException If remove operation fails
+     */
+    public void removeDocuments(List<IDTuple> ids, Context context) throws OXException;
 
     /**
      * Moves denoted documents to another folder. Colliding filenames in the target folder may be renamed automatically.

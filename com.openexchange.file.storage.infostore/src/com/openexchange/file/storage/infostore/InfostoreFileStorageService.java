@@ -51,12 +51,15 @@ package com.openexchange.file.storage.infostore;
 
 import java.util.Collections;
 import java.util.Set;
+import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AdministrativeFileStorageFileAccess;
+import com.openexchange.file.storage.AdministrativeFileStorageService;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.infostore.internal.AdministrativeInfostoreFileAccess;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.session.Session;
@@ -66,7 +69,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFileStorageService implements FileStorageService {
+public class InfostoreFileStorageService implements AdministrativeFileStorageService {
 
     private InfostoreFacade infostore;
 
@@ -121,6 +124,14 @@ public class InfostoreFileStorageService implements FileStorageService {
 
     public void setSearch(final InfostoreSearchEngine search) {
         this.search = search;
+    }
+
+    @Override
+    public AdministrativeFileStorageFileAccess getAdministrativeFileAccess(String accountId, int contextId) throws OXException {
+        if (!accountId.equals(InfostoreDefaultAccountManager.DEFAULT_ID)) {
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), "admin", contextId);
+        }
+        return new AdministrativeInfostoreFileAccess(getInfostore(), Services.getService(ContextService.class).getContext(contextId));
     }
 
 }

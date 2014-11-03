@@ -47,51 +47,54 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.osgi;
+package com.openexchange.file.storage.infostore;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
-import com.openexchange.file.storage.infostore.Services;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.FolderService;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
- * {@link InfostoreFileStorageActivator}
+ * {@link InfostoreAccess}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class InfostoreFileStorageActivator extends HousekeepingActivator {
+public abstract class InfostoreAccess {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, ContextService.class };
+    protected static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
+    protected static final Set<Long> VIRTUAL_FOLDERS;
+    static {
+        final Set<Long> set = new HashSet<Long>(4);
+        set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
+        VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FileStorageService.class, new InfostoreFileStorageService() {
-            @Override
-            public InfostoreFacade getInfostore() {
-                return getService(InfostoreFacade.class);
-            }
+    protected final InfostoreFacade infostore;
 
-            @Override
-            public InfostoreSearchEngine getSearch() {
-                return getService(InfostoreSearchEngine.class);
-            }
-        }, null);
+    protected InfostoreAccess(InfostoreFacade infostore) {
+        super();
+        this.infostore = infostore;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
+    protected InfostoreFacade getInfostore(final String folderId) {
+        if (folderId != null && VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
+            return VIRTUAL_INFOSTORE;
+        }
+        return infostore;
     }
+
+    protected static int ID(final String id) {
+        return Integer.parseInt(id);
+    }
+
+    protected static long FOLDERID(final String folderId) {
+        return Long.parseLong(folderId);
+    }
+
 }

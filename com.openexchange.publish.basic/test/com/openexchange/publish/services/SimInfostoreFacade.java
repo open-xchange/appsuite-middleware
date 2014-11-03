@@ -346,4 +346,22 @@ public class SimInfostoreFacade implements InfostoreFacade {
         return ids;
     }
 
+    @Override
+    public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removeDocuments(List<IDTuple> ids, Context context) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }

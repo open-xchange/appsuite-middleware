@@ -342,4 +342,20 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         virtualFolder();
     }
 
+    @Override
+    public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException {
+        virtualFolder();
+        return null;
+    }
+
+    @Override
+    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
+        virtualFolder();
+    }
+
+    @Override
+    public void removeDocuments(List<IDTuple> ids, Context context) throws OXException {
+        virtualFolder();
+    }
+
 }

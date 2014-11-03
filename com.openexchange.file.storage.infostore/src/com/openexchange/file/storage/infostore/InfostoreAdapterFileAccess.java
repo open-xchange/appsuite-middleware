@@ -54,12 +54,9 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -69,9 +66,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.file.storage.search.SearchTerm;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -88,19 +83,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider {
+public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider {
 
-    private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
-    private static final Set<Long> VIRTUAL_FOLDERS;
-    static {
-        final Set<Long> set = new HashSet<Long>(4);
-        set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
-        VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
-    }
 
-    private final InfostoreFacade infostore;
+
+
     private final InfostoreSearchEngine search;
     private final Context ctx;
     private final User user;
@@ -116,14 +103,13 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
      * @param infostore2
      */
     public InfostoreAdapterFileAccess(final ServerSession session, final InfostoreFacade infostore, final InfostoreSearchEngine search, final FileStorageAccountAccess accountAccess) {
-        super();
+        super(infostore);
         this.sessionObj = session;
 
         this.ctx = sessionObj.getContext();
         this.user = sessionObj.getUser();
         this.userPermissions = sessionObj.getUserPermissionBits();
 
-        this.infostore = infostore;
         this.search = search;
         this.accountAccess = accountAccess;
 
@@ -611,14 +597,6 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
         infostore.startTransaction();
     }
 
-    private static int ID(final String id) {
-        return Integer.parseInt(id);
-    }
-
-    private static long FOLDERID(final String folderId) {
-        return Long.parseLong(folderId);
-    }
-
     @Override
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
@@ -661,13 +639,6 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
         update.setId(source.getId());
         this.saveFileMetadata(update, sequenceNumber, modifiedFields);
         return new IDTuple(update.getFolderId(), update.getId());
-    }
-
-    public InfostoreFacade getInfostore(final String folderId) {
-        if (folderId != null && VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
-            return VIRTUAL_INFOSTORE;
-        }
-        return infostore;
     }
 
     /**

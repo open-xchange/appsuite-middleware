@@ -261,6 +261,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
+    public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException {
+        /*
+         * load document metadata (including object permissions)
+         */
+        DocumentMetadata document = objectPermissionLoader.add(load(id, version, context), context, null);
+        /*
+         * add further metadata and return
+         */
+        return numberOfVersionsLoader.add(lockedUntilLoader.add(document, context, null), context, null);
+    }
+
+    @Override
     public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession session) throws OXException {
         saveDocument(document, null, sequenceNumber, session);
     }
@@ -268,6 +280,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
         saveDocument(document, null, sequenceNumber, modifiedColumns, session);
+    }
+
+    @Override
+    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
+        // FIXME:
     }
 
     @Override
@@ -1318,6 +1335,71 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
 
         return rejectedIDs;
+    }
+
+    @Override
+    public void removeDocuments(List<IDTuple> ids, Context context) throws OXException {
+        if (null == ids || 0 == ids.size()) {
+            return;
+        }
+
+        final Map<Integer, Long> idsToFolders = Tools.getIDsToFolders(ids);
+        final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
+        Set<Integer> objectIDs = idsToFolders.keySet();
+        String whereClause;
+        if (1 == objectIDs.size()) {
+            whereClause = "infostore.id=" + objectIDs.iterator().next();
+        } else {
+            StringBuilder stringBuilder = new StringBuilder("infostore.id IN (");
+            Strings.join(objectIDs, ",", stringBuilder);
+            whereClause = stringBuilder.append(')').toString();
+        }
+        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
+            whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
+        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
+            whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
+
+        // Ensure folder ids are consistent between request and existing documents
+        for (DocumentMetadata document : allDocuments) {
+            Long requestedFolder = idsToFolders.get(document.getId());
+            long expectedFolder = document.getFolderId();
+            if (requestedFolder == null || requestedFolder.longValue() != expectedFolder) {
+                throw InfostoreExceptionCodes.NOT_EXIST.create();
+            }
+        }
+
+        final Set<Integer> unknownDocuments = new HashSet<Integer>(idsToFolders.keySet());
+        for (DocumentMetadata document : allDocuments) {
+            unknownDocuments.remove(document.getId());
+        }
+
+        if (!unknownDocuments.isEmpty()) {
+            throw InfostoreExceptionCodes.NOT_EXIST.create();
+        }
+
+        /*
+         * Move records into del_* tables
+         */
+        perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, context, allDocuments), true);
+        /*
+         * Remove referenced files from underlying storage
+         */
+        List<String> filestoreLocations = new ArrayList<String>(allVersions.size());
+        for (final DocumentMetadata m : allVersions) {
+            if (null != m.getFilestoreLocation()) {
+                filestoreLocations.add(m.getFilestoreLocation());
+            }
+        }
+        removeFiles(context, filestoreLocations);
+
+        /*
+         * Delete documents and all versions from database
+         */
+        perform(new DeleteDocumentAction(this, QUERIES, context, allDocuments), true);
+        /*
+         * delete object permissions
+         */
+        perform(new DeleteObjectPermissionAction(this, context, allDocuments), true);
     }
 
     /**

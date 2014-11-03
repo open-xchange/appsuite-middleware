@@ -49,10 +49,8 @@
 
 package com.openexchange.file.storage.composition;
 
-import java.io.InputStream;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 
@@ -85,26 +83,6 @@ public interface IDBasedAdministrativeFileAccess {
     File getFileMetadata(String id, String version) throws OXException;
 
     /**
-     * Loads the documents content
-     *
-     * @param id The id of the document
-     * @param version The version of the document. Pass in {@link FileStorageFileAccess#CURRENT_VERSION} for the current version of the document.
-     * @return The content
-     * @throws OXException If operation fails
-     */
-    InputStream getDocument(String id, String version) throws OXException;
-
-    /**
-     * Loads the documents content and associated metadata
-     *
-     * @param id The id of the document
-     * @param version The version of the document. Pass in {@link FileStorageFileAccess#CURRENT_VERSION} for the current version of the document.
-     * @return An InputStream Source and metadata
-     * @throws OXException
-     */
-    Document getDocumentAndMetadata(String id, String version) throws OXException;
-
-    /**
      * Saves the file metadata. The fields to consider as modified have to be specified in the <code>modifiedColumns</code>. Therefore
      * it is even possible to override the <code>modified by</code> field. Otherwise the context admin will be used. The document
      * must always have the fields <code>folder id</code> and <code>id</code> set.
@@ -116,20 +94,6 @@ public interface IDBasedAdministrativeFileAccess {
      * @throws OXException If operation fails
      */
     void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException;
-
-    /**
-     * Saves the file metadata along with the given binary data. The fields to consider as modified have to be specified in the <code>modifiedColumns</code>. Therefore
-     * it is even possible to override the <code>modified by</code> field. Otherwise the context admin will be used. The document
-     * must always have the fields <code>folder id</code> and <code>id</code> set.
-     *
-     * @param document The metadata to save
-     * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
-     * @param modifiedColumns The fields to save. All other fields will be ignored
-     * @param ignoreVersion <code>false</code> if a new version is supposed to be set if binary content is available or <code>true</code> to keep version as is
-     * @throws OXException If operation fails
-     */
-    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException ;
 
     /**
      * Removes the file with the given identifier. This method always results in a hard delete

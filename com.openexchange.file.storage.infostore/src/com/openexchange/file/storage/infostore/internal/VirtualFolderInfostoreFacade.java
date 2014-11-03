@@ -125,6 +125,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException {
+        virtualFolder();
+        return null;
+    }
+
+    @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, ServerSession session) {
         return new EmptyTimedResult();
     }
@@ -192,6 +198,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public void removeDocuments(List<IDTuple> ids, Context context) throws OXException {
+        virtualFolder();
+    }
+
+    @Override
     public void removeUser(final int userId, final Context context, final ServerSession session) {
         // Nothing to do.
     }
@@ -218,6 +229,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession session) throws OXException {
+        virtualFolder();
+    }
+
+    @Override
+    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
         virtualFolder();
     }
 
