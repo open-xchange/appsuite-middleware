@@ -1813,6 +1813,8 @@ public final class HtmlServiceImpl implements HtmlService {
         props.setIgnoreQuestAndExclam(false);
         props.setUseCdataForScriptAndStyle(false);
         props.setIgnoreQuestAndExclam(true);
+        props.setAddNewlineToHeadAndBody(true);
+        props.setCharset("UTF-8");
         return props;
     }
 
@@ -1867,6 +1869,22 @@ public final class HtmlServiceImpl implements HtmlService {
         return ret;
     }
 
+    private static final Pattern END_TAG_FORBIDDEN_PATTERN = Pattern.compile("<(area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)([ \\t\\n\\x0B\\f\\r])([^>]*)/>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static String obeyForbiddenEndTags(String html) {
+        Matcher m = END_TAG_FORBIDDEN_PATTERN.matcher(html);
+        if (false == m.find()) {
+            return html;
+        }
+        StringBuffer sb = new StringBuffer(html.length());
+        StringBuilder tmp = new StringBuilder(64);
+        do {
+            tmp.setLength(0);
+            m.appendReplacement(sb, Matcher.quoteReplacement(tmp.append('<').append(m.group(1)).append(m.group(2)).append(m.group(3)).append('>').toString()));
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
 
     protected static String validateWithHtmlCleaner(final String htmlContent) {
         try {
@@ -1875,33 +1893,34 @@ public final class HtmlServiceImpl implements HtmlService {
              *
              * Clean...
              */
-            String preprocessed = preprocessWithJSoup(htmlContent);
+            boolean preprocessWithJSoup = false;
+            String preprocessed = preprocessWithJSoup ? preprocessWithJSoup(htmlContent) : htmlContent;
             preprocessed = replaceSpecialEntities(preprocessed);
             final TagNode htmlNode = newHtmlCleaner().clean(preprocessed);
-            /*
-             * Check for presence of HTML namespace
-             */
+
+            // Check for presence of HTML namespace
             if (!htmlNode.hasAttribute("xmlns")) {
                 final Map<String, String> attributes = new HashMap<String, String>(1);
                 attributes.put("xmlns", "http://www.w3.org/1999/xhtml");
                 htmlNode.setAttributes(attributes);
             }
-            /*
-             * Serialize
-             */
+
+            // Serialize
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             newSerializer().write(htmlNode, writer, "UTF-8");
             final StringBuilder buffer = writer.getBuffer();
-            /*
-             * Insert DOCTYPE if absent
-             */
+
+            // Insert DOCTYPE if absent
             if (buffer.indexOf("<!DOCTYPE") < 0) {
                 buffer.insert(0, DOCTYPE_DECL);
             }
-            /*
-             * Keep Unicode representation of 'copy' and 'reg' intact
-             */
-            return keepUnicodeForEntities(buffer.toString());
+
+            // Keep Unicode representation of 'copy' and 'reg' intact
+            String result = keepUnicodeForEntities(buffer.toString());
+
+            // Obey forbidden end tags
+            result = obeyForbiddenEndTags(result);
+            return result;
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding", e);
