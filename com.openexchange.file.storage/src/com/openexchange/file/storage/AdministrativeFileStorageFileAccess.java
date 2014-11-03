@@ -118,10 +118,10 @@ public interface AdministrativeFileStorageFileAccess {
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @param ignoreVersion <code>false</code> if a new version is supposed to be set if binary content is available or <code>true</code> to keep version as is
      * @throws OXException If operation fails
      */
-    // TODO: how are versions affected?
-    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
+    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException ;
 
     /**
      * Removes the file with the given identifier. This method always results in a hard delete
