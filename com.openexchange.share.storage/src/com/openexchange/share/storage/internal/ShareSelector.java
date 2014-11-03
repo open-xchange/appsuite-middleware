@@ -172,6 +172,31 @@ public class ShareSelector {
     }
 
     /**
+     * Performs the <code>COUNT</code> query.
+     *
+     * @param connection The database connection
+     * @return The number of created shares
+     * @throws OXException
+     */
+    public int count(Connection connection) throws OXException {
+        int shareCount = 0;
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            stmt = builder.prepareCount(connection);
+            resultSet = logExecuteQuery(stmt);
+            if (resultSet.next()) {
+                shareCount = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(resultSet, stmt);
+        }
+        return shareCount;
+    }
+
+    /**
      * Performs the <code>DELETE</code> query.
      *
      * @param connection The database connection

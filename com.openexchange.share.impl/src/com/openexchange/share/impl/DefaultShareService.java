@@ -72,6 +72,13 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaProvider;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
@@ -105,6 +112,7 @@ public class DefaultShareService implements ShareService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultShareService.class);
 
     private final ServiceLookup services;
+
     private final GuestCleaner guestCleaner;
 
     /**
@@ -144,8 +152,7 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public List<Share> getAllShares(Session session) throws OXException {
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(
-            session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
         return removeExpired(session.getContextId(), shares);
     }
 
@@ -159,6 +166,8 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
             return Collections.emptyList();
         }
+        checkQuota(session);
+
         int contextID = session.getContextId();
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
         List<GuestShare> guestShares = new ArrayList<GuestShare>(recipients.size());
@@ -219,8 +228,7 @@ public class DefaultShareService implements ShareService {
         try {
             connectionHelper.start();
             User guestUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), guestID, context);
-            services.getService(ShareStorage.class).updateShares(
-                session.getContextId(), shares, clientTimestamp, connectionHelper.getParameters());
+            services.getService(ShareStorage.class).updateShares(session.getContextId(), shares, clientTimestamp, connectionHelper.getParameters());
             connectionHelper.commit();
             return new ResolvedGuestShare(session.getContextId(), guestUser, shares);
         } finally {
@@ -255,8 +263,8 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public void deleteShares(Session session, List<Share> shares, Date clientTimestamp) throws OXException {
-        //TODO: check permissions prior deletion (session user == share owner || session user == share created by)
-        //TODO: method really needed, or is deletaTargets sufficient?
+        // TODO: check permissions prior deletion (session user == share owner || session user == share created by)
+        // TODO: method really needed, or is deletaTargets sufficient?
         if (null == shares || 0 == shares.size()) {
             return;
         }
@@ -289,8 +297,6 @@ public class DefaultShareService implements ShareService {
             User guest = userService.getUser(share.getGuest(), contextId);
             String hostname = getHostname(share.getCreatedBy(), contextId, fallbackHostname);
             String prefix = getServletPrefix();
-
-
 
             urls.add(protocol + hostname + prefix + ShareTool.SHARE_SERVLET + '/' + new ShareToken(contextId, guest).getToken());
         }
@@ -455,8 +461,8 @@ public class DefaultShareService implements ShareService {
         ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
         try {
             connectionHelper.start();
-//            List<Share> sharesToRemove = shareStorage.loadShares(contextId, tokens, connectionHelper.getParameters());
-//            removeShares(connectionHelper, sharesToRemove);
+            // List<Share> sharesToRemove = shareStorage.loadShares(contextId, tokens, connectionHelper.getParameters());
+            // removeShares(connectionHelper, sharesToRemove);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -474,8 +480,8 @@ public class DefaultShareService implements ShareService {
         ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
         try {
             connectionHelper.start();
-//            List<ShareList> shares = shareStorage.loadSharesForContext(contextId, connectionHelper.getParameters());
-//            removeShares(connectionHelper, shares);
+            // List<ShareList> shares = shareStorage.loadSharesForContext(contextId, connectionHelper.getParameters());
+            // removeShares(connectionHelper, shares);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -494,8 +500,8 @@ public class DefaultShareService implements ShareService {
         ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
         try {
             connectionHelper.start();
-//            List<ShareList> shares = shareStorage.loadSharesCreatedBy(contextId, userId, connectionHelper.getParameters());
-//            removeShares(connectionHelper, shares);
+            // List<ShareList> shares = shareStorage.loadSharesCreatedBy(contextId, userId, connectionHelper.getParameters());
+            // removeShares(connectionHelper, shares);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -518,8 +524,8 @@ public class DefaultShareService implements ShareService {
             try {
                 connectionHelper.start();
                 affectedShares = shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                //TODO
-//                removePermissions(connectionHelper, expiredShares);
+                // TODO
+                // removePermissions(connectionHelper, expiredShares);
                 connectionHelper.commit();
             } finally {
                 connectionHelper.finish();
@@ -574,11 +580,11 @@ public class DefaultShareService implements ShareService {
         }
         Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
         ShareStorage shareStorage = services.getService(ShareStorage.class);
-//        shareStorage.updateShares(context.getContextId(), shares, connectionHelper.getParameters());
-//        for (Share share : shares) {
-//            int requiredPermissionBits = ShareTool.getUserPermissionBits(share);
-//            setPermissionBits(connectionHelper.getConnection(), context, share.getGuest(), requiredPermissionBits, false);
-//        }
+        // shareStorage.updateShares(context.getContextId(), shares, connectionHelper.getParameters());
+        // for (Share share : shares) {
+        // int requiredPermissionBits = ShareTool.getUserPermissionBits(share);
+        // setPermissionBits(connectionHelper.getConnection(), context, share.getGuest(), requiredPermissionBits, false);
+        // }
     }
 
     /**
@@ -613,8 +619,7 @@ public class DefaultShareService implements ShareService {
                  * combine permission bits with existing ones
                  */
                 UserPermissionBits userPermissionBits = setPermissionBits(connection, context, existingGuestUser.getId(), permissionBits, true);
-                LOG.debug("Using existing guest user {} with permissions {} in context {}: {}",
-                    existingGuestUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
+                LOG.debug("Using existing guest user {} with permissions {} in context {}: {}", existingGuestUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
                 return existingGuestUser;
             }
         }
@@ -632,8 +637,7 @@ public class DefaultShareService implements ShareService {
         /*
          * store permission bits
          */
-        services.getService(UserPermissionService.class).saveUserPermissionBits(
-            connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
+        services.getService(UserPermissionService.class).saveUserPermissionBits(connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
         if (AnonymousRecipient.class.isInstance(recipient)) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {
@@ -698,4 +702,41 @@ public class DefaultShareService implements ShareService {
         }
     }
 
+    /**
+     * Checks the quota for the user associated to the session
+     *
+     * @param session The session
+     * @throws OXException
+     */
+    protected void checkQuota(Session session) throws OXException {
+        QuotaService quotaService = services.getService(QuotaService.class);
+        if (quotaService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class.getName());
+        }
+
+        QuotaProvider provider = quotaService.getProvider("share");
+        if (provider == null) {
+            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
+            return;
+        }
+
+        AccountQuota userQuota = provider.getFor(session, Integer.toString(session.getUserId()));
+
+        Quota quota = userQuota.getQuota(QuotaType.AMOUNT);
+        if (!quota.isUnlimited() && quota.isExceeded()) {
+            long limit = quota.getLimit();
+            long usage = quota.getUsage();
+            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.create(usage, limit);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getUsedQuota(int contextId, int userId) throws OXException {
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        int shareCount = shareStorage.countShares(contextId, userId, StorageParameters.NO_PARAMETERS);
+        return shareCount;
+    }
 }

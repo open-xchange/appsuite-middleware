@@ -179,10 +179,19 @@ public interface ShareStorage {
      */
     int deleteTargets(int contextID, List<ShareTarget> targets, StorageParameters parameters) throws OXException;
 
-
+    /**
+     * Counts the number of currently created shares for the given user id.
+     * 
+     * @param contextID The context ID
+     * @param userId The user Id to count for
+     * @param parameters The storage parameters
+     * @return The number of created shares for the user within the context
+     * @throws OXException
+     */
+    int countShares(int contextID, int userId, StorageParameters parameters) throws OXException;
 
     //TODO: ownedBy and/or createdBy?
     List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
 
-//    int deleteShares(int contextID, List<ShareTarget> targets, int[] guests, StorageParameters parameters) throws OXException;
+    //    int deleteShares(int contextID, List<ShareTarget> targets, int[] guests, StorageParameters parameters) throws OXException;
 }

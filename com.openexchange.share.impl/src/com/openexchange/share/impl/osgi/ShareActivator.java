@@ -59,6 +59,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
@@ -71,6 +72,8 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.quota.QuotaProvider;
+import com.openexchange.quota.QuotaService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -78,6 +81,7 @@ import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
+import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.impl.notification.DefaultNotificationService;
 import com.openexchange.share.impl.notification.mail.MailNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationHandler;
@@ -106,10 +110,11 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, TemplateService.class,
-            ShareStorage.class, ConfigurationService.class, DatabaseService.class, HtmlService.class,
-            UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class,
-            ThreadPoolService.class, TimerService.class, ExecutorService.class };
+        return new Class<?>[] {
+            UserService.class, ContextService.class, TemplateService.class, ShareStorage.class, ConfigurationService.class,
+            DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
+            ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
+            QuotaService.class };
     }
 
     @Override
@@ -124,7 +129,9 @@ public class ShareActivator extends HousekeepingActivator {
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
             private volatile ServiceRegistration<ShareCryptoService> cryptoRegistration;
+
             private volatile ServiceRegistration<ShareService> shareRegistration;
+
             private volatile ServiceRegistration<EventHandler> cleanUpRegistration;
 
             @Override
@@ -202,6 +209,8 @@ public class ShareActivator extends HousekeepingActivator {
 
         registerService(ModuleSupport.class, new ModuleSupportImpl(this));
         registerService(ShareNotificationService.class, defaultNotificationService);
+
+        registerService(QuotaProvider.class, new ShareQuotaProvider(this, shareService));
 
         trackService(ModuleSupport.class);
         track(ManagementService.class, new ManagementServiceTracker(context, shareService));

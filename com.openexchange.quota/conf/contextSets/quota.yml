@@ -4,4 +4,5 @@ Example restriction:
     com.openexchange.quota.contact: -1
     com.openexchange.quota.infostore: -1
     com.openexchange.quota.attachment: -1
+    com.openexchange.quota.share: -1
     withTags: restricted-quota-example

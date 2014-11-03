@@ -141,6 +141,18 @@ public class SelectShareBuilder {
     }
 
     /**
+     * Prepares the COUNT statement and sets all required parameters
+     *
+     * @param connection The connection to use
+     * @return The prepared statement
+     * @throws SQLException
+     * @throws OXException
+     */
+    public PreparedStatement prepareCount(Connection connection) throws SQLException, OXException {
+        return prepare(connection, "SELECT COUNT(*) FROM share");
+    }
+
+    /**
      * Prepares the statement and sets all required parameters.
      *
      * @param connection The connection to use
@@ -161,7 +173,7 @@ public class SelectShareBuilder {
          * build query
          */
         StringBuilder stringBuilder = new StringBuilder(256)
-            .append(sqlBeforeWhere).append(" WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?")
+        .append(sqlBeforeWhere).append(" WHERE ").append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=?")
         ;
         if (0 < createdBy) {
             stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?");
@@ -180,23 +192,23 @@ public class SelectShareBuilder {
         }
         if (null != expiredAfter) {
             stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.EXPIRES).getColumnLabel()).append(" IS NOT NULL")
-                .append(" AND ").append(SHARE_MAPPER.get(ShareField.EXPIRES).getColumnLabel()).append("<?")
+            .append(" AND ").append(SHARE_MAPPER.get(ShareField.EXPIRES).getColumnLabel()).append("<?")
             ;
         }
         if (null != targets && 0 < targets.size()) {
             if (1 == targets.size()) {
                 stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=?")
-                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
-                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?")
+                .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
+                .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?")
                 ;
             } else {
                 stringBuilder.append(" AND (").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=?")
-                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
-                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?");
+                .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
+                .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?");
                 for (int i = 1; i < targets.size(); i++) {
                     stringBuilder.append(" OR ").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=?")
-                        .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
-                        .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?");
+                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
+                    .append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?");
                 }
                 stringBuilder.append(')');
             }

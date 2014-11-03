@@ -125,16 +125,15 @@ public interface ShareService {
      */
     void deleteShares(Session session, List<Share> shares, Date clientTimestamp) throws OXException;
 
-
     /**
      * Generates a URL for every share that is passed.
      *
      * @param contextId The context ID
      * @param shares A list of shares
-     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code> <code>https://</code> is used.
-     *                 You probably want to pass com.openexchange.tools.servlet.http.Tools.getProtocol() here.
-     * @param fallbackHostname The hostname to use if no HostnameService is available.
-     *                 You probably want to pass HttpServletRequest.getServerName() here.
+     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code> <code>https://</code> is used. You probably
+     *            want to pass com.openexchange.tools.servlet.http.Tools.getProtocol() here.
+     * @param fallbackHostname The hostname to use if no HostnameService is available. You probably want to pass
+     *            HttpServletRequest.getServerName() here.
      * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
      */
     List<String> generateShareURLs(int contextId, List<Share> shares, String protocol, String fallbackHostname) throws OXException;
@@ -151,5 +150,15 @@ public interface ShareService {
      * @return The identifiers from sharing users or an empty set
      */
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
+
+    /**
+     * Returns the currently created number of shares for the given user.
+     *
+     * @param contextId - id of the relevant context
+     * @param userId - id of the user to get the count for
+     * @return int - number of created shares
+     * @throws OXException
+     */
+    int getUsedQuota(int contextId, int userId) throws OXException;
 
 }
