@@ -147,9 +147,12 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
              * guest user still has shares, adjust permissions as needed
              */
             int requiredPermissionBits = ShareTool.getRequiredPermissionBits(guestUser, modules);
-            LOG.debug("Shares in modules {} still available for for guest user {} in context {}, adjusting permission bits to {}.",
-                modules, guestUser.getId(), context.getContextId(), requiredPermissionBits);
-            setPermissionBits(connectionHelper.getConnection(), context, guestUser.getId(), requiredPermissionBits, false);
+            UserPermissionBits updatedPermissionBits = setPermissionBits(
+                connectionHelper.getConnection(), context, guestUser.getId(), requiredPermissionBits, false);
+            if (updatedPermissionBits.getPermissionBits() != requiredPermissionBits) {
+                LOG.debug("Shares in modules {} still available for for guest user {} in context {}, permission bits adjuested to {}.",
+                    modules, guestUser.getId(), context.getContextId(), updatedPermissionBits);
+            }
         }
     }
 
