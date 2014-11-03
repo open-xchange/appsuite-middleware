@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
@@ -79,6 +80,10 @@ import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.AdministrativeModuleSupport;
+import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -528,6 +533,8 @@ public class DefaultShareService implements ShareService {
             try {
                 connectionHelper.start();
                 affectedShares = shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
+                //TODO
+//                removePermissions(connectionHelper, expiredShares);
                 connectionHelper.commit();
             } finally {
                 connectionHelper.finish();
@@ -540,6 +547,32 @@ public class DefaultShareService implements ShareService {
             }
         }
         return shares;
+    }
+
+    /**
+     * Removes any permissions that are directly associated with the supplied shares, i.e. the permissions in the share targets for the
+     * guest entities.
+     *
+     * @param connectionHelper A (started) connection helper
+     * @param shares The share to remove the associated permissions for
+     * @throws OXException
+     */
+    private void removePermissions(ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
+        AdministrativeModuleSupport moduleSupport = services.getService(AdministrativeModuleSupport.class);
+        TargetUpdate targetUpdate = moduleSupport.prepareUpdate(connectionHelper.getConnection());
+        Map<ShareTarget, Set<Integer>> guestsByTarget = ShareTool.mapGuestsByTarget(shares);
+        targetUpdate.fetch(guestsByTarget.keySet());
+        for (Entry<ShareTarget, Set<Integer>> entry : guestsByTarget.entrySet()) {
+            Set<Integer> guestIDs = entry.getValue();
+            List<TargetPermission> permissions = new ArrayList<TargetPermission>(guestIDs.size());
+            for (Integer guestID : guestIDs) {
+                permissions.add(new TargetPermission(guestID.intValue(), false, 0));
+            }
+            TargetProxy targetProxy = moduleSupport.load(entry.getKey());
+            targetProxy.removePermissions(permissions);
+        }
+        targetUpdate.run();
+        targetUpdate.close();
     }
 
     /**

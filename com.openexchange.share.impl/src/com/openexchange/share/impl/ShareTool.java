@@ -461,6 +461,28 @@ public class ShareTool {
     }
 
     /**
+     * Maps each different target of the supplied shares to one or more referenced guest user identifiers.
+     *
+     * @param shares The shares to perform the mapping for
+     * @return All different share targets, mapped to the referenced guest user identifiers.
+     */
+    public static Map<ShareTarget, Set<Integer>> mapGuestsByTarget(List<Share> shares) {
+        if (null == shares || 0 == shares.size()) {
+            return Collections.emptyMap();
+        }
+        Map<ShareTarget, Set<Integer>> guestsByTarget = new HashMap<ShareTarget, Set<Integer>>();
+        for (Share share : shares) {
+            Set<Integer> guestIDs = guestsByTarget.get(share.getTarget());
+            if (null == guestIDs) {
+                guestIDs = new HashSet<Integer>();
+                guestsByTarget.put(share.getTarget(), guestIDs);
+            }
+            guestIDs.add(Integer.valueOf(share.getGuest()));
+        }
+        return guestsByTarget;
+    }
+
+    /**
      * Extracts all tokens from the supplied shares.
      *
      * @param shares The shares to get the tokens for
