@@ -74,6 +74,8 @@ Build for patch 2014-10-30
 Build for patch 2014-11-04
 * Fri Oct 24 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-10-22
+* Fri Oct 24 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-11-03
 * Fri Oct 17 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
