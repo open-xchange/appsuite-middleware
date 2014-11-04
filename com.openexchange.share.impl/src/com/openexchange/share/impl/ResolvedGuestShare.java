@@ -51,8 +51,11 @@ package com.openexchange.share.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
@@ -70,16 +73,18 @@ public class ResolvedGuestShare implements GuestShare {
     private final int contextID;
     private final User guestUser;
     private final List<ShareTarget> targets;
+    private ServiceLookup services;
 
     /**
      * Initializes a new {@link ResolvedGuestShare}.
      *
+     * @param services A service lookup reference
      * @param contextID The context ID
      * @param guestUser The guest user
      * @param shares The shares
      * @throws OXException
      */
-    public ResolvedGuestShare(int contextID, User guestUser, List<Share> shares) throws OXException {
+    public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares) throws OXException {
         super();
         this.contextID = contextID;
         this.guestUser = guestUser;
@@ -170,6 +175,43 @@ public class ResolvedGuestShare implements GuestShare {
     @Override
     public ShareTarget getSingleTarget() {
         return null != targets && 1 == targets.size() ? targets.get(0) : null;
+    }
+
+    @Override
+    public String getShareURL(String protocol, String fallbackHostname) throws OXException {
+        return getShareURL(protocol, fallbackHostname, getSingleTarget());
+    }
+
+    @Override
+    public String getShareURL(String protocol, String fallbackHostname, ShareTarget target) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append(null == protocol ? "https://" : protocol)
+            .append(getHostname(guestUser.getCreatedBy(), contextID, fallbackHostname))
+            .append(getServletPrefix())
+            .append(ShareTool.SHARE_SERVLET).append('/')
+            .append(getToken());
+        if (null != target) {
+            stringBuilder.append('/').append(target.getPath());
+        }
+        return stringBuilder.toString();
+    }
+
+    private String getHostname(int userID, int contextID, String fallbackHostname) {
+        HostnameService hostnameService = services.getService(HostnameService.class);
+        if (hostnameService == null) {
+            return fallbackHostname;
+        }
+
+        return hostnameService.getHostname(userID, contextID);
+    }
+
+    private String getServletPrefix() {
+        DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
+        if (prefixService == null) {
+            return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+
+        return prefixService.getPrefix();
     }
 
     @Override

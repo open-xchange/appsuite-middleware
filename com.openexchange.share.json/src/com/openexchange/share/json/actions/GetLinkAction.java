@@ -114,7 +114,7 @@ public class GetLinkAction extends AbstractShareAction {
             GuestShare share = createPerformer.perform().get(0);
 
             JSONObject jResult = new JSONObject();
-            jResult.put("url", generateShareURL(session.getContextId(), share.getGuestID(), session.getUserId(), share.isMultiTarget() ? null : share.getTargets().get(0), requestData));
+            jResult.put("url", share.getShareURL(determineProtocol(requestData), determineHostname(requestData)));
             jResult.put("token", share.getToken());
             AJAXRequestResult result = new AJAXRequestResult(jResult, "json");
             result.setTimestamp(new Date());
