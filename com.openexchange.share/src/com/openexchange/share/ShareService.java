@@ -65,32 +65,45 @@ import com.openexchange.share.recipient.ShareRecipient;
 public interface ShareService {
 
     /**
-     * Resolves the supplied guest token a guest share, holding all accessible share targets from the guest user's point of view.
+     * Resolves the supplied guest token to a guest share, holding all accessible share targets from the guest user's point of view.
      *
      * @param token The token to resolve
      * @return The guest share, containing all shares the user has access to, or <code>null</code> if no valid share could be looked up
-     * @throws OXException
      */
     GuestShare resolveToken(String token) throws OXException;
 
     /**
-     * Adds multiple targets to the shares of guest users. Initial shares for each individual recipient are created implicitly as needed.
+     * Adds multiple targets to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated permissions of the guest users on the share targets are not updated implicitly, so that it's up to the
+     * caller to take care of the referenced share targets on his own</li>
+     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
+     * or not, so again it's up to the caller to perform the necessary checks</li>
+     * </ul>
      *
      * @param session The session
      * @param targets The share targets to add
      * @param recipients The recipients for the shares
      * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
-     * @throws OXException
      */
     List<GuestShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Deletes a list of share targets for all shares that belong to a certain list of guests.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated permissions of the guest users on the share targets are not updated implicitly, so that it's up to the
+     * caller to take care of the referenced share targets on his own</li>
+     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
+     * or not, so again it's up to the caller to perform the necessary checks</li>
+     * </ul>
      *
      * @param session The session
      * @param targets The share targets to delete
      * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
-     * @throws OXException
      */
     void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
 
@@ -107,11 +120,10 @@ public interface ShareService {
     GuestShare updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientTimestamp) throws OXException;
 
     /**
-     * Gets all shares created by the supplied session's user.
+     * Gets all shares that were created by the supplied session's user.
      *
      * @param session The session
-     * @return The shares
-     * @throws OXException
+     * @return The shares, or an empty list if there are none.
      */
     List<Share> getAllShares(Session session) throws OXException;
 
@@ -121,7 +133,6 @@ public interface ShareService {
      * @param session The session
      * @param shares The shares to delete, where each one must provide at least guest- and target-information
      * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
-     * @throws OXException
      */
     void deleteShares(Session session, List<Share> shares, Date clientTimestamp) throws OXException;
 
@@ -150,15 +161,5 @@ public interface ShareService {
      * @return The identifiers from sharing users or an empty set
      */
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
-
-    /**
-     * Returns the currently created number of shares for the given user.
-     *
-     * @param contextId - id of the relevant context
-     * @param userId - id of the user to get the count for
-     * @return int - number of created shares
-     * @throws OXException
-     */
-    int getUsedQuota(int contextId, int userId) throws OXException;
 
 }
