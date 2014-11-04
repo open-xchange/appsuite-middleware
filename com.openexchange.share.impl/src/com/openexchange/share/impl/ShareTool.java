@@ -50,6 +50,7 @@
 package com.openexchange.share.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -63,6 +64,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -80,10 +82,12 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -594,6 +598,42 @@ public class ShareTool {
             services.getService(UserConfigurationService.class).removeUserConfiguration(userID, context);
         }
         return userPermissionBits;
+    }
+
+    /**
+     * Creates a list of extended share info objects for the supplied shares.
+     *
+     * @param services A service lookup reference
+     * @param contextID The context ID
+     * @param shares The shares
+     * @return The share infos
+     * @throws OXException
+     */
+    public static List<ShareInfo> toShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
+        if (null == shares || 0 == shares.size()) {
+            return Collections.emptyList();
+        }
+        /*
+         * retrieve referenced guest users
+         */
+        Context context = services.getService(ContextService.class).getContext(contextID);
+        Set<Integer> guestIDs = ShareTool.getGuestIDs(shares);
+        User[] users = services.getService(UserService.class).getUser(context, I2i(guestIDs));
+        Map<Integer, User> guestUsers = new HashMap<Integer, User>(users.length);
+        for (User user : users) {
+            if (false == user.isGuest()) {
+                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(user.getId()));
+            }
+            guestUsers.put(Integer.valueOf(user.getId()), user);
+        }
+        /*
+         * build & return share infos
+         */
+        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
+        for (Share share : shares) {
+            shareInfos.add(new DefaultShareInfo(services, contextID, guestUsers.get(I(share.getGuest())), share));
+        }
+        return shareInfos;
     }
 
 }
