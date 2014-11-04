@@ -1189,7 +1189,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
             final MailMessage nestedMail;
             if (content instanceof MailMessage) {
                 nestedMail = (MailMessage) content;
-            } else if (content instanceof InputStream) {
+            } else if (content instanceof MimeMessage) {
+                nestedMail = MimeMessageConverter.convertMessage((MimeMessage) content, false);
+            }else if (content instanceof InputStream) {
                 try {
                     nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
