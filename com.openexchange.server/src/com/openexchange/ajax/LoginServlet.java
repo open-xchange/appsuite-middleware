@@ -291,11 +291,17 @@ public class LoginServlet extends AJAXServlet {
                     if (session != null) {
                         final LoginConfiguration conf = confReference.get();
                         SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
+                        String[] additionalsForHash;
+                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                            /*
+                             * inject context- and user-id to allow parallel guest sessions
+                             */
+                            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+                        } else {
+                            additionalsForHash = null;
+                        }
                         final String secret = SessionUtility.extractSecret(
-                            conf.getHashSource(),
-                            req,
-                            session.getHash(),
-                            session.getClient());
+                            conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
 
                         if (secret == null || !session.getSecret().equals(secret)) {
                             LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
