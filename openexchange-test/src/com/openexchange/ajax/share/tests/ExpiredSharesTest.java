@@ -149,7 +149,8 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * check if previous session is still alive
          */
-        guestClient.checkSessionAlive(true);
+        //TODO: only do this, if we shared to anonymous ?
+//        guestClient.checkSessionAlive(true);
     }
 
 }

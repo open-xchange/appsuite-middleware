@@ -58,6 +58,7 @@ import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link RemoveGuestPermissionTest}
@@ -132,16 +133,30 @@ public class RemoveGuestPermissionTest extends ShareTest {
         for (OCLPermission permission : folder.getPermissions()) {
             assertTrue("Guest permission still present", permission.getEntity() != matchingPermission.getEntity());
         }
+        if (RecipientType.ANONYMOUS.toString().equalsIgnoreCase(guestPermission.getType())) {
+            /*
+             * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
+             */
+            Thread.sleep(CLEANUP_DELAY);
+            guestClient.checkSessionAlive(true);
+            /*
+             * check if share link still accessible
+             */
+            GuestClient revokedGuestClient = new GuestClient(share.getShareURL(),guestPermission.getEmailAddress(), guestPermission.getPassword(), false);
+            ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
+            assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+        } else {
+            /*
+             * check share target no longer accessible for non-anonymous guest user
+             */
+            guestClient.checkFolderNotAccessible(share.getTarget().getFolder());
+            guestClient.logout();
+        }
         /*
-         * check access with previous guest session
+         * check shares list
          */
-        guestClient.checkSessionAlive(true);
-        /*
-         * check if share link still accessible
-         */
-        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword(), false);
-        ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
-        assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        assertTrue("share still found", null == share);
     }
 
 }

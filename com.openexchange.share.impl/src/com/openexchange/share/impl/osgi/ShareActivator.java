@@ -68,6 +68,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.management.ManagementService;
@@ -116,7 +117,7 @@ public class ShareActivator extends HousekeepingActivator {
             UserService.class, ContextService.class, TemplateService.class, ShareStorage.class, ConfigurationService.class,
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
-            QuotaService.class };
+            QuotaService.class, FolderCacheInvalidationService.class };
     }
 
     @Override

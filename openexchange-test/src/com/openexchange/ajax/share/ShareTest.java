@@ -89,8 +89,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
         createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
         createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
-        createAnonymousAuthorPermission("secret"),
-        createAnonymousGuestPermission()
+//        createAnonymousAuthorPermission("secret"),
+//        createAnonymousGuestPermission()
     };
 
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
@@ -100,6 +100,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     };
 
     protected static final Random random = new Random();
+    protected static final int CLEANUP_DELAY = 5000;
 
     private Map<Integer, FolderObject> foldersToDelete;
 

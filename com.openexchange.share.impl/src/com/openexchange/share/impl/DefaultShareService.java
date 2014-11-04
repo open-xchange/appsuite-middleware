@@ -292,6 +292,7 @@ public class DefaultShareService implements ShareService {
         try {
             connectionHelper.start();
             affectedShares = shareStorage.deleteShares(connectionHelper.getContextID(), shares, connectionHelper.getParameters());
+            removeTargetPermissions(connectionHelper, shares);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -385,7 +386,6 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-<<<<<<< Updated upstream
      * Remove all shares identified by supplied tokens.
      *
      * @param tokens The tokens

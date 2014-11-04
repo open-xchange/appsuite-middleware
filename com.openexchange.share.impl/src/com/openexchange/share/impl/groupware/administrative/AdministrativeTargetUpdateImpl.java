@@ -59,6 +59,8 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.osgi.Tools;
@@ -73,6 +75,7 @@ import com.openexchange.share.impl.groupware.ModuleHandler;
 import com.openexchange.share.impl.groupware.ModuleHandlerRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -142,14 +145,24 @@ public class AdministrativeTargetUpdateImpl implements TargetUpdate {
         if (objectsByModule == null || folderTargets == null) {
             throw new IllegalStateException("prefetch() must be called on TargetHandler before update!");
         }
-
-        OXFolderManager folderManager = OXFolderManager.getInstance(
-            getAdministrativeSession(contextID), folderAccess, connection, connection);
         for (ShareTarget target : folderTargets) {
             TargetProxy proxy = get(target);
             if (proxy.wasModified()) {
-                FolderObject folder = ((AdministrativeFolderTargetProxy) proxy).getFolder();
-                folderManager.updateFolder(folder, false, System.currentTimeMillis());
+                /*
+                 * perform folder update, impersonated as folder owner
+                 */
+                AdministrativeFolderTargetProxy folderTargetProxy = (AdministrativeFolderTargetProxy) proxy;
+                Session syntheticOwnerSession = ServerSessionAdapter.valueOf(folderTargetProxy.getOwner(), contextID);
+                OXFolderManager folderManager = OXFolderManager.getInstance(syntheticOwnerSession, folderAccess, connection, connection);
+                folderManager.updateFolder(folderTargetProxy.getFolder(), false, System.currentTimeMillis());
+                /*
+                 * clear some additional caches for all potentially affected users that are not covered when updating through folder manager
+                 */
+                FolderCacheInvalidationService invalidationService = services.getService(FolderCacheInvalidationService.class);
+                for (Integer affectedUser : folderTargetProxy.getAffectedUsers()) {
+                    ServerSession syntheticSession = ServerSessionAdapter.valueOf(affectedUser.intValue(), contextID);
+                    invalidationService.invalidateSingle(target.getFolder(), FolderStorage.REAL_TREE_ID, syntheticSession);
+                }
             }
         }
 
@@ -223,11 +236,6 @@ public class AdministrativeTargetUpdateImpl implements TargetUpdate {
 
     private <T> T getService(Class<T> clazz) throws OXException {
         return Tools.requireService(clazz, services);
-    }
-
-    private Session getAdministrativeSession(int contextID) throws OXException {
-        Context context = services.getService(ContextService.class).getContext(contextID);
-        return ServerSessionAdapter.valueOf(context.getMailadmin(), contextID);
     }
 
 }

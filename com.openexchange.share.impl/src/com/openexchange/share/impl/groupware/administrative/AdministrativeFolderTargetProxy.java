@@ -50,7 +50,10 @@
 package com.openexchange.share.impl.groupware.administrative;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -67,6 +70,7 @@ import com.openexchange.share.impl.groupware.AbstractTargetProxy;
 public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
     private final FolderObject folder;
+    private final Set<Integer> affectedUsers;
 
     /**
      * Initializes a new {@link AdministrativeFolderTargetProxy}.
@@ -76,6 +80,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     public AdministrativeFolderTargetProxy(FolderObject folder) {
         super();
         this.folder = folder;
+        this.affectedUsers = new HashSet<Integer>();
     }
 
     @Override
@@ -95,6 +100,11 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             originalPermissions = new ArrayList<OCLPermission>();
         }
         List<OCLPermission> newPermissions = mergePermissions(originalPermissions, permissions, new OCLPermissionConverter(folder));
+        for (OCLPermission permission : newPermissions) {
+            if (false == permission.isSystem() && false == permission.isGroupPermission()) {
+                affectedUsers.add(Integer.valueOf(permission.getEntity()));
+            }
+        }
         folder.setPermissions(newPermissions);
         setModified();
     }
@@ -105,13 +115,33 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         if (null == originalPermissions || 0 == originalPermissions.size()) {
             return;
         }
+        for (OCLPermission permission : originalPermissions) {
+            if (false == permission.isSystem() && false == permission.isGroupPermission()) {
+                affectedUsers.add(Integer.valueOf(permission.getEntity()));
+            }
+        }
         List<OCLPermission> newPermissions = removePermissions(originalPermissions, permissions, new OCLPermissionConverter(folder));
         folder.setPermissions(newPermissions);
         setModified();
     }
 
+    /**
+     * Gets the underlying folder.
+     *
+     * @return The folder
+     */
     public FolderObject getFolder() {
         return folder;
+    }
+
+    /**
+     * Gets the identifiers of all potentially affected users that had or will have access to this folder based on the underlying
+     * permissions.
+     *
+     * @return The identifiers of all affected users
+     */
+    public Collection<Integer> getAffectedUsers() {
+        return affectedUsers;
     }
 
     @Override
