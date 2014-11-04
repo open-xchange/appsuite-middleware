@@ -70,10 +70,10 @@ import com.openexchange.share.ShareTarget;
  */
 public class ResolvedGuestShare implements GuestShare {
 
-    private final int contextID;
-    private final User guestUser;
-    private final List<ShareTarget> targets;
-    private ServiceLookup services;
+    protected final int contextID;
+    protected final User guestUser;
+    protected final List<ShareTarget> targets;
+    protected ServiceLookup services;
 
     /**
      * Initializes a new {@link ResolvedGuestShare}.
@@ -89,6 +89,7 @@ public class ResolvedGuestShare implements GuestShare {
         this.contextID = contextID;
         this.guestUser = guestUser;
         this.targets = new ArrayList<ShareTarget>(shares.size());
+        this.services = services;
         for (Share share : shares) {
             if (share.getGuest() != guestUser.getId()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Share " + share + " does not belong to guest " + guestUser);

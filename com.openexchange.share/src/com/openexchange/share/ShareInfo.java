@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,70 @@
  *
  */
 
-package com.openexchange.share.json.osgi;
+package com.openexchange.share;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.share.json.ShareInfoResultConverter;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.user.UserService;
+import com.openexchange.exception.OXException;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
- * {@link ShareJsonActivator}
+ * {@link ShareInfo}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public class ShareJsonActivator extends AJAXModuleActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareJsonActivator.class);
+public interface ShareInfo {
 
     /**
-     * Initializes a new {@link ShareJsonActivator}.
+     * Gets the underlying share.
+     *
+     * @return The share
      */
-    public ShareJsonActivator() {
-        super();
-    }
+    Share getShare();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class };
-    }
+    /**
+     * Gets the authentication mode used for the share's guest user.
+     *
+     * @return The authentication mode
+     */
+    AuthenticationMode getAuthentication();
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.share.json\"");
-        trackService(IDBasedFileAccessFactory.class);
-        trackService(FolderService.class);
-        trackService(TranslatorFactory.class);
-        trackService(DispatcherPrefixService.class);
-        openTrackers();
+    /**
+     * Gets the token associated with the share's guest user.
+     *
+     * @return The token
+     */
+    String getToken() throws OXException;
 
-        registerModule(new ShareActionFactory(this), "share/management");
-        registerService(ResultConverter.class, new ShareInfoResultConverter());
+    /**
+     * Gets the (base) share URL to access the share as guest user and jump to the underlying target directly.
+     *
+     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code>, <code>https://</code> is used. You probably
+     *        want to pass <code>com.openexchange.tools.servlet.http.Tools.getProtocol()</code> here.
+     * @param fallbackHostname The hostname to use if no HostnameService is available. You probably want to pass
+     *        <code>HttpServletRequest.getServerName()</code> here.
+     * @return The share URL as used to access the share as guest
+     */
+    String getShareURL(String protocol, String fallbackHostname) throws OXException;
 
-    }
+    /**
+     * Gets the e-mail address of the guest user if it denotes a named recipient.
+     *
+     * @return The e-mail address of the named share recipient, or <code>null</code> if the guest user is anonymous
+     */
+    String getEmailAddress();
+
+    /**
+     * Gets the password of the guest user in case the share recipient is anonymous and a password is required to access the share.
+     *
+     * @return The password of the anonymous share recipient, or <code>null</code> if no password is set or the guest user is not anonymous
+     */
+    String getPassword() throws OXException;
+
+    /**
+     * Gets the recipient type of the guest user.
+     *
+     * @return The recipient type
+     */
+    RecipientType getRecipientType();
 
 }

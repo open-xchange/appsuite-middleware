@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,78 @@
  *
  */
 
-package com.openexchange.share.json.osgi;
+package com.openexchange.share.impl;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.sessiond.SessiondService;
+import java.util.Collections;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.share.json.ShareInfoResultConverter;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.user.UserService;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
- * {@link ShareJsonActivator}
+ * {@link DefaultShareInfo}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public class ShareJsonActivator extends AJAXModuleActivator {
+public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareJsonActivator.class);
+    private final Share share;
 
     /**
-     * Initializes a new {@link ShareJsonActivator}.
+     * Initializes a new {@link DefaultShareInfo}.
+     *
+     * @param services A service lookup reference
+     * @param contextID The context ID
+     * @param guestUser The guest user
+     * @param share The share
+     * @throws OXException
      */
-    public ShareJsonActivator() {
-        super();
+    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share) throws OXException {
+        super(services, contextID, guestUser, Collections.singletonList(share));
+        this.share = share;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class };
+    public Share getShare() {
+        return share;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.share.json\"");
-        trackService(IDBasedFileAccessFactory.class);
-        trackService(FolderService.class);
-        trackService(TranslatorFactory.class);
-        trackService(DispatcherPrefixService.class);
-        openTrackers();
+    public String getEmailAddress() {
+        if (RecipientType.GUEST == getRecipientType()) {
+            return guestUser.getMail();
+        }
+        return null;
+    }
 
-        registerModule(new ShareActionFactory(this), "share/management");
-        registerService(ResultConverter.class, new ShareInfoResultConverter());
+    @Override
+    public String getPassword() throws OXException {
+        if (AuthenticationMode.ANONYMOUS_PASSWORD == getAuthentication()) {
+            String cryptedPassword = guestUser.getUserPassword();
+            if (false == Strings.isEmpty(cryptedPassword)) {
+                return services.getService(ShareCryptoService.class).decrypt(cryptedPassword);
+            }
+        }
+        return null;
+    }
 
+    @Override
+    public RecipientType getRecipientType() {
+        switch (getAuthentication()) {
+        case ANONYMOUS:
+        case ANONYMOUS_PASSWORD:
+            return RecipientType.ANONYMOUS;
+        case GUEST_PASSWORD:
+            return RecipientType.GUEST;
+        default:
+            throw new UnsupportedOperationException("Unknown authentication mode: " + getAuthentication());
+        }
     }
 
 }

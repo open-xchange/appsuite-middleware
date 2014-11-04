@@ -84,6 +84,7 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.AdministrativeModuleSupport;
@@ -149,10 +150,38 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<Share> getAllShares(Session session) throws OXException {
+    public List<ShareInfo> getAllShares(Session session) throws OXException {
+        /*
+         * load shares from storage
+         */
         List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(
             session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
-        return removeExpired(session.getContextId(), shares);
+        shares = removeExpired(session.getContextId(), shares);
+        if (null == shares || 0 == shares.size()) {
+            return Collections.emptyList();
+        }
+        /*
+         * retrieve referenced guest users
+         */
+        Context context = services.getService(ContextService.class).getContext(session.getContextId());
+        Set<Integer> guestIDs = ShareTool.getGuestIDs(shares);
+        User[] users = services.getService(UserService.class).getUser(context, I2i(guestIDs));
+        Map<Integer, User> guestUsers = new HashMap<Integer, User>(users.length);
+        for (User user : users) {
+            if (false == user.isGuest()) {
+                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(user.getId()));
+            }
+            guestUsers.put(Integer.valueOf(user.getId()), user);
+        }
+        /*
+         * build & return share infos
+         */
+        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
+        for (Share share : shares) {
+            shareInfos.add(new DefaultShareInfo(
+                services, session.getContextId(), guestUsers.get(Integer.valueOf(share.getGuest())), share));
+        }
+        return shareInfos;
     }
 
     @Override

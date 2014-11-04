@@ -125,7 +125,7 @@ public interface ShareService {
      * @param session The session
      * @return The shares, or an empty list if there are none.
      */
-    List<Share> getAllShares(Session session) throws OXException;
+    List<ShareInfo> getAllShares(Session session) throws OXException;
 
     /**
      * Deletes multiple shares.
