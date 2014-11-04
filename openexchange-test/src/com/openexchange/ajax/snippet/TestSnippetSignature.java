@@ -130,6 +130,7 @@ public class TestSnippetSignature extends AbstractAJAXSession {
     private byte[] readFile(String filename) throws IOException {
         ByteArrayOutputStream ous = null;
         InputStream ios = null;
+        byte[] ret;
         try {
             byte[] buffer = new byte[4096];
             ous = new ByteArrayOutputStream();
@@ -138,19 +139,15 @@ public class TestSnippetSignature extends AbstractAJAXSession {
             while ((read = ios.read(buffer)) != -1) {
                 ous.write(buffer, 0, read);
             }
+            ret = ous.toByteArray();
         } finally {
-            try {
-                if (ous != null)
-                    ous.close();
-            } catch (IOException e) {
+            if (ous != null) {
+                ous.close();
             }
-
-            try {
-                if (ios != null)
-                    ios.close();
-            } catch (IOException e) {
+            if (ios != null) {
+                ios.close();
             }
         }
-        return ous.toByteArray();
+        return ret;
     }
 }
