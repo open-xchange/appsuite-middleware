@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ import java.util.Map;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareTarget implements Cloneable {
+public class ShareTarget implements Cloneable, Serializable {
 
     private int module;
     private String folder;
