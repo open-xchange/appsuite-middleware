@@ -1134,6 +1134,11 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
         try {
             return create(contextId, contact, con);
+        } catch (OXException e) {
+            if (newCon) {
+                DBUtils.rollback(con);
+            }
+            throw e;
         } finally {
             if (newCon && null != dbService) {
                 dbService.backWritable(contextId, con);
@@ -1160,10 +1165,14 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 executor.deleteSingle(con, Table.CONTACTS, contextId, toDelete.getObjectID(), lastRead.getTime());
             }
         } catch (SQLException e) {
-            DBUtils.rollback(con);
+            if (newCon) {
+                DBUtils.rollback(con);
+            }
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } catch (OXException e) {
-            DBUtils.rollback(con);
+            if (newCon) {
+                DBUtils.rollback(con);
+            }
             throw e;
         } finally {
             if (newCon && null != dbService) {
@@ -1193,17 +1202,12 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              */
             this.executor.insert(con, Table.CONTACTS, contact, Fields.CONTACT_DATABASE_ARRAY);
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (OXException e) {
-            DBUtils.rollback(con);
-            throw e;
         }
         return objectId;
     }
 
-    @Override
-    public void updateGuestContact(int contextId, int userId, int contactId, Contact contact, Date lastRead, Connection con) throws OXException {
+    private void updateGuestContact(int contextId, int userId, int contactId, Contact contact, Connection con) throws OXException {
         boolean newCon = false;
         DatabaseService dbService = null;
         if (null == con) {
@@ -1221,11 +1225,13 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
             }
             if (toUpdate.getCreatedBy() != userId) {
-//                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }
-            executor.update(con, Table.CONTACTS, contextId, contactId, lastRead.getTime(), contact, Fields.sort(queryFields.getContactDataFields()));
+            executor.update(con, Table.CONTACTS, contextId, contactId, System.currentTimeMillis(), contact, Fields.sort(queryFields.getContactDataFields()));
         } catch (SQLException e) {
-            DBUtils.rollback(con);
+            if (newCon) {
+                DBUtils.rollback(con);
+            }
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             if (newCon && null != dbService) {
@@ -1272,6 +1278,49 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             dbService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public void updateGuestContact(Session session, int contactId, Contact contact, Date lastRead) throws OXException {
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getWritable();
+        try {
+            if (contact.containsParentFolderID() && FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID != contact.getParentFolderID()) {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+            }
+            Contact c = executor.selectSingle(connection, Table.CONTACTS, contextId, contactId,
+                new ContactField[] {ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED});
+            if (!c.containsInternalUserId() || userId != c.getInternalUserId()) {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+            }
+            if (!c.containsParentFolderID() || FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID != c.getParentFolderID()) {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+            }
+            if (!c.containsLastModified() || lastRead.before(c.getLastModified())) {
+                throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
+            }
+            updateGuestContact(contextId, userId, contactId, contact, connection);
+            connectionHelper.commit();
+        } catch (DataTruncation e) {
+            throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            connectionHelper.backWritable();
+        }
+    }
+
+    @Override
+    public void updateGuestContact(int contextId, int contactId, Contact contact, Connection con) throws OXException {
+        QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
+        try {
+            executor.update(con, Table.CONTACTS, contextId, contactId, System.currentTimeMillis(), contact,
+                Fields.sort(queryFields.getContactDataFields()));
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         }
     }
 

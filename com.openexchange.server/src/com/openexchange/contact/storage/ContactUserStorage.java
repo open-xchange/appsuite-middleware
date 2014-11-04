@@ -54,6 +54,7 @@ import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 
 
 /**
@@ -87,16 +88,26 @@ public interface ContactUserStorage extends ContactStorage {
     void deleteGuestContact(int contextId, int userId, Date lastRead, Connection con) throws OXException;
 
     /**
-     * Updates a contact for a guest user
+     * Updates a contact for a guest user without any checks
      *
      * @param contextId The context id
      * @param contactId The contact id
      * @param contact The updated contact
-     * @param lastRead Time when the contact was last read from storage
      * @param con Database connection
      * @throws OXException On error
      */
-    void updateGuestContact(int contextId, int userId, int contactId, Contact contact, Date lastRead, Connection con) throws OXException;
+    void updateGuestContact(int contextId, int contactId, Contact contact, Connection con) throws OXException;
+
+    /**
+     * Updates a contact for a guest user
+     *
+     * @param session
+     * @param contactId The contact id
+     * @param contact The updated contact
+     * @param lastRead Time when the contact was last read from storage
+     * @throws OXException On error
+     */
+    void updateGuestContact(Session session, int contactId, Contact contact, Date lastRead) throws OXException;
 
     /**
      * Gets the guest's contact
