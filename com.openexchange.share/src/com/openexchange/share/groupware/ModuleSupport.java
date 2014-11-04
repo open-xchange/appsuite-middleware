@@ -56,15 +56,37 @@ import com.openexchange.share.ShareTarget;
 
 
 /**
- * {@link ModuleSupport}
+ * Sharing requires some module-specific actions like changing permissions of targets or
+ * getting required data from those. {@link ModuleSupport} is meant to provide an abstraction
+ * layer that allows module-agnostic access to groupware items and services. This layer
+ * consists of interfaces which allow operations that are common for all module implementations.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
 public interface ModuleSupport {
 
+    /**
+     * Prepares an update procedure to modify the groupware items for one or more share targets.
+     * {@link TargetUpdate} behaves module-independent, i.e. you can modify items from different
+     * modules within one update call.
+     *
+     * @param session The current session
+     * @param writeCon A transactional writable database connection to use for the update operations.
+     * @return A new {@link TargetUpdate} instance
+     * @throws OXException if preparing the update procedure fails
+     */
     TargetUpdate prepareUpdate(Session session, Connection writeCon) throws OXException;
 
+    /**
+     * Loads the groupware item for the given share target and returns an according
+     * {@link TargetProxy} instance.
+     *
+     * @param target The target to load
+     * @param session The current session
+     * @return The target proxy
+     * @throws OXException if loading fails
+     */
     TargetProxy load(ShareTarget target, Session session) throws OXException;
 
 }

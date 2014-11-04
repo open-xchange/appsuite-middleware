@@ -49,9 +49,15 @@
 
 package com.openexchange.share.groupware;
 
+import com.openexchange.share.ShareTarget;
+
 
 /**
- * {@link TargetPermission}
+ * A {@link TargetPermission} instance represents a permission of a groupware object
+ * for a certain {@link ShareTarget}. The permission bits must be always defined as a full
+ * folder permission bitmask. For items, the bits for reading, writing and deleting all(!)
+ * objects in folders are taken into account. The highest value will be chosen based on the
+ * following sequence: delete all > write all > read all.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -64,6 +70,13 @@ public class TargetPermission {
 
     private final int permissionBits;
 
+    /**
+     * Initializes a new {@link TargetPermission}.
+     *
+     * @param entityId The entity ID (i.e. user or group ID)
+     * @param isGroup <code>true</code> if this entity is a group
+     * @param permissionBits The permission bits (folder permission bit mask)
+     */
     public TargetPermission(int entityId, boolean isGroup, int permissionBits) {
         super();
         this.entityId = entityId;
@@ -71,14 +84,30 @@ public class TargetPermission {
         this.isGroup = isGroup;
     }
 
+    /**
+     * Gets the ID of the entity denoted by this permission instance.
+     *
+     * @return The entity ID
+     */
     public int getEntity() {
         return entityId;
     }
 
+    /**
+     * Gets the permission bits (folder permission bit mask).
+     *
+     * @return The bit mask
+     */
     public int getBits() {
         return permissionBits;
     }
 
+    /**
+     * Gets whether the denoted entity is a group or not.
+     *
+     * @return <code>true</code> if this entity is a group, <code>false</code>
+     *         if it's a user
+     */
     public boolean isGroup() {
         return isGroup;
     }

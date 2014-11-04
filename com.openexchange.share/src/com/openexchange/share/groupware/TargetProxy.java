@@ -50,24 +50,54 @@
 package com.openexchange.share.groupware;
 
 import java.util.List;
+import com.openexchange.share.ShareTarget;
 
 
 /**
- * {@link TargetProxy}
+ * A {@link TargetProxy} delegates module-specific calls to an underlying groupware object
+ * that is identified by a certain {@link ShareTarget}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
 public interface TargetProxy {
 
+    /**
+     * Gets the owner of this folder or item.
+     *
+     * @return The entity ID of the owner (i.e. a user or group ID)
+     */
     int getOwner();
 
+    /**
+     * Gets the title of this folder or item.
+     *
+     * @return The title (e.g. a folder or file name)
+     */
     String getTitle();
 
+    /**
+     * Applies a list of permissions, i.e. the permissions are merged. New ones
+     * are added and existing ones are updated. No permissions are removed.
+     *
+     * @param permissions The permissions to apply
+     */
     void applyPermissions(List<TargetPermission> permissions);
 
+    /**
+     * Removes a list of permissions from the underlying object. Only
+     * the entity is taken into account, permission bits are not compared.
+     *
+     * @param permissions The permissions to remove
+     */
     void removePermissions(List<TargetPermission> permissions);
 
+    /**
+     * Returns whether the underlying object has been modified.
+     *
+     * @return <code>true</code> if any destructive methods have been called on this instance
+     *         (e.g. {@link #applyPermissions(List)}), otherwise <code>false</code>.
+     */
     boolean wasModified();
 
 }
