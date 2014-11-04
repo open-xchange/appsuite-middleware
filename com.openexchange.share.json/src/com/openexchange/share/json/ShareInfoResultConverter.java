@@ -64,6 +64,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -116,7 +117,7 @@ public class ShareInfoResultConverter implements ResultConverter {
          * convert result object
          */
         Object resultObject = result.getResultObject();
-        if (GuestShare.class.isInstance(resultObject)) {
+        if (ShareInfo.class.isInstance(resultObject)) {
             resultObject = convert((ShareInfo)resultObject, timeZone, protocol, hostname);
         } else {
             resultObject = convert((List<ShareInfo>) resultObject, timeZone, protocol, hostname);

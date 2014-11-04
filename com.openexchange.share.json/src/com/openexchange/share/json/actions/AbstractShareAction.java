@@ -61,7 +61,6 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.DefaultLinkProvider;
 import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -149,10 +148,6 @@ public abstract class AbstractShareAction implements AJAXActionService {
 
     protected LinkProvider buildLinkProvider(AJAXRequestData requestData, String shareToken, String mailAddress) {
         return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(requestData), getServletPrefix(), shareToken, mailAddress);
-    }
-
-    protected String generateShareURL(int contextId, int guestId, int userId, ShareTarget target, AJAXRequestData requestData) throws OXException {
-        return getShareService().generateShareURL(contextId, guestId, userId, target, determineProtocol(requestData), determineHostname(requestData));
     }
 
     protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
