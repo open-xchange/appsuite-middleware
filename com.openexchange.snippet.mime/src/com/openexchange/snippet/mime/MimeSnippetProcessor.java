@@ -52,6 +52,8 @@ package com.openexchange.snippet.mime;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -70,13 +72,13 @@ import com.openexchange.snippet.Snippet;
  */
 public class MimeSnippetProcessor {
 
-    private class InputStreamProviderImpl implements InputStreamProvider {
+    private static class InputStreamProviderImpl implements InputStreamProvider {
 
-        private ManagedFile managedFile;
+        private final ManagedFile managedFile;
 
         /**
          * Initializes a new {@link InputStreamProviderImpl}.
-         * 
+         *
          * @param mf
          */
         protected InputStreamProviderImpl(ManagedFile managedFile) {
@@ -98,21 +100,24 @@ public class MimeSnippetProcessor {
         }
     }
 
-    private Session session;
+    private final Session session;
+    private final Pattern pattern;
 
     /**
      * Initializes a new {@link MimeSnippetProcessor}.
-     * 
+     *
      * @param session
      * @param ctx
      */
     public MimeSnippetProcessor(Session session) {
+        super();
         this.session = session;
+        pattern = Pattern.compile("(?i)src=\"[^\"]*\"");
     }
 
     /**
      * Process the image in the snippet, extract it and convert it to an attachment
-     * 
+     *
      * @param snippet
      * @throws OXException
      */
@@ -142,9 +147,10 @@ public class MimeSnippetProcessor {
 
                 //final String url = SnippetImageDataSource.getInstance().generateUrl(new ImageLocation.Builder(id).id(snippet.getId()).build(), session);
                 final String url = mf.constructURL(session);
-                content = content.replaceAll("(?i)src=\"[^\"]*\"", "src=\"" + url + "\"");
+                content = pattern.matcher(content).replaceAll(Matcher.quoteReplacement("src=\"" + url + "\""));
                 ds.setContent(content);
             }
         }
     }
+
 }
