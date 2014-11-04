@@ -50,7 +50,7 @@
 package com.openexchange.snippet.mime;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.Multipart;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
@@ -73,7 +73,7 @@ public class MimeSnippetFiller extends MimeMessageFiller {
         super(session, ctx);
     }
 
-    public String processSnippetContent(final String content, final MimeMultipart mp) throws MessagingException, OXException {
+    public String processSnippetContent(final String content, final Multipart mp) throws MessagingException, OXException {
         return processReferencedLocalImages(content, mp, this);
     }
 }

@@ -719,8 +719,16 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 final Multipart primaryMultipart = new MimeMultipart();
                 // Add text part
                 final MimeBodyPart textPart = new MimeBodyPart();
+                final String subType = determineContentSubtype(snippet.getMisc());
+                final String processedContent;
+                if (subType.startsWith("html")) {
+                    MimeSnippetFiller snippetFiller = new MimeSnippetFiller(session, getContext(contextId));
+                    processedContent = snippetFiller.processSnippetContent(content, primaryMultipart);
+                } else {
+                    processedContent = content;
+                }
                 // MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == miscPart ? "plain" : determineContentSubtype(MessageUtility.readMimePart(miscPart, "UTF-8")), textPart);
-                textPart.setText(sanitizeContent(content), "UTF-8", "plain");
+                textPart.setText(sanitizeContent(processedContent), "UTF-8", subType);
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
                 // Add attachment parts
