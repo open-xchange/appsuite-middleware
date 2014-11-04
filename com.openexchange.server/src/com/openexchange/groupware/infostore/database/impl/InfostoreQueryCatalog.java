@@ -634,7 +634,7 @@ public class InfostoreQueryCatalog {
     }
 
     public String getDeletedDocumentsQuery(final long folderId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder("SELECT infostore.id").append(
+        final StringBuilder builder = new StringBuilder("SELECT infostore.id, infostore.folder_id").append(
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
             contextId).append(SQL_CHUNK05).append(since);
         if (sort != null) {
@@ -664,7 +664,7 @@ public class InfostoreQueryCatalog {
     }
 
     public String getDeletedDocumentsQuery(final long folderId, final int userId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder("SELECT infostore.id").append(
+        final StringBuilder builder = new StringBuilder("SELECT infostore.id, infostore.folder_id").append(
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
             contextId).append(SQL_CHUNK05).append(since).append(SQL_CHUNK02).append(userId);
         if (sort != null) {
