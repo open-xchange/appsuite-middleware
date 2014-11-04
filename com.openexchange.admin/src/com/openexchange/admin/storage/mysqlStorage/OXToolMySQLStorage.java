@@ -1219,10 +1219,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
+            con = cache.getConnectionForContext(ctx.getId().intValue());
             if (isGuest(con, ctx, user_id)) {
                 return "Guest User";
             }
-            con = cache.getConnectionForContext(ctx.getId().intValue());
             prep_check = con.prepareStatement("SELECT uid from login2user where cid = ? and id = ?");
             prep_check.setInt(1,ctx.getId().intValue());
             prep_check.setInt(2, user_id);
