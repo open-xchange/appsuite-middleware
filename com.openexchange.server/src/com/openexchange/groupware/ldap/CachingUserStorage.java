@@ -60,8 +60,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -73,8 +71,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
 
 /**
- * This class implements the user storage using a cache to store once read
- * objects.
+ * This class implements the user storage using a cache to store once read objects.
  */
 public class CachingUserStorage extends UserStorage {
 
@@ -91,26 +88,11 @@ public class CachingUserStorage extends UserStorage {
     private final UserStorage delegate;
 
     /**
-     * The cache for guest users.
-     */
-    private final ConcurrentMap<Integer, ConcurrentMap<Integer, Boolean>> guestCache;
-
-    /**
      * Default constructor.
      */
     public CachingUserStorage(final UserStorage delegate) {
         super();
         this.delegate = delegate;
-        guestCache = new ConcurrentHashMap<Integer, ConcurrentMap<Integer,Boolean>>(256);
-    }
-
-    /**
-     * Invalidates the guest cache for given context identifier
-     *
-     * @param contextId The context identifier
-     */
-    public void invalidateGuestCacheFor(int contextId) {
-        guestCache.remove(Integer.valueOf(contextId));
     }
 
     @Override
@@ -320,33 +302,33 @@ public class CachingUserStorage extends UserStorage {
         if (null == cacheService) {
             return delegate.getUserId(uid, context);
         }
-//        try {
-            final Cache cache = cacheService.getCache(REGION_NAME);
-            final CacheKey key = cache.newCacheKey(context.getContextId(), uid);
-            int identifier = -1;
-            Integer tmp;
+        // try {
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final CacheKey key = cache.newCacheKey(context.getContextId(), uid);
+        int identifier = -1;
+        Integer tmp;
+        try {
+            tmp = (Integer) cache.get(key);
+        } catch (final ClassCastException e) {
+            tmp = null;
+        }
+        if (null == tmp) {
+            LOG.trace("Cache MISS. Context: {} User: {}", context.getContextId(), uid);
+            identifier = delegate.getUserId(uid, context);
             try {
-                tmp = (Integer) cache.get(key);
-            } catch (final ClassCastException e) {
-                tmp = null;
+                cache.put(key, Integer.valueOf(identifier), false);
+            } catch (final OXException e) {
+                throw LdapExceptionCode.CACHE_PROBLEM.create(e, new Object[0]).setPrefix("USR");
             }
-            if (null == tmp) {
-                LOG.trace("Cache MISS. Context: {} User: {}", context.getContextId(), uid);
-                identifier = delegate.getUserId(uid, context);
-                try {
-                    cache.put(key, Integer.valueOf(identifier), false);
-                } catch (final OXException e) {
-                    throw LdapExceptionCode.CACHE_PROBLEM.create(e, new Object[0]).setPrefix("USR");
-                }
-            } else {
-                LOG.trace("Cache HIT. Context: {} User: {}", context.getContextId(), uid);
-                identifier = tmp.intValue();
-            }
-            return identifier;
-//        }
-//        catch (final OXException e) {
-//            throw LdapExceptionCode.CACHE_PROBLEM.create(e).setPrefix("USR");
-//        }
+        } else {
+            LOG.trace("Cache HIT. Context: {} User: {}", context.getContextId(), uid);
+            identifier = tmp.intValue();
+        }
+        return identifier;
+        // }
+        // catch (final OXException e) {
+        // throw LdapExceptionCode.CACHE_PROBLEM.create(e).setPrefix("USR");
+        // }
     }
 
     @Override
@@ -372,7 +354,6 @@ public class CachingUserStorage extends UserStorage {
         return delegate.searchUserByName(name, context, searchType);
     }
 
-
     @Override
     public int[] listAllUser(Connection con, Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
         return delegate.listAllUser(con, context, includeGuests, excludeUsers);
@@ -386,8 +367,7 @@ public class CachingUserStorage extends UserStorage {
         }
         try {
             final Cache cache = cacheService.getCache(REGION_NAME);
-            final CacheKey key = cache.newCacheKey(context.getContextId(), new StringBuilder(imapLogin.length() + 1)
-                    .append('~').append(imapLogin).toString());
+            final CacheKey key = cache.newCacheKey(context.getContextId(), new StringBuilder(imapLogin.length() + 1).append('~').append(imapLogin).toString());
             final int[] identifiers;
             int[] tmp;
             try {
