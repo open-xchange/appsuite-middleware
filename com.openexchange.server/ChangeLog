@@ -18,6 +18,9 @@
 * 2014-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 34947: Check for a possible unrecoverable socket error when attempting to load mail settings (esp. standard folders); signal an empty value instead of throwing an error
+ - Fix for bug 35023: Orderly deal with absent user permission bits
+ - Fix for bug 34706: Do not consult session storage in case session look-up is performed by alternative identifier and
+                      ensure a timed-out (but still pending) session storage query get orderly interrupted to relieve pressure on Hazelcast
 
 * 2014-10-20 - tobias.friedrich@open-xchange.com
 
@@ -26,6 +29,7 @@
 * 2014-10-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger
+ - Fix for bug 34921: Do not generally apply HTML sanitizing to XML content
 
 * 2014-10-08 - thorben.betten@open-xchange.com
 
@@ -38,6 +42,11 @@
  - Fix for bug 34706: Use timeout-aware operations to distribute either change of local IP address, client identifier or hash string through
                       cluster to prevent the system from increasing number of stalled threads
  - Fix for bug 34765: Use secure value insertion through PreparedStatement
+
+
+* 2014-10-06 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 34704: Parse the escaped double quotes correctly and convert all octet string literals to their ASCII/Unicode representations
 
 * 2014-10-02 - tobias.friedrich@open-xchange.com
 
@@ -63,6 +72,10 @@
 
  - Fix for bug 34281: Facebook made access to permissions more restrictive since April 30th 2014.
                       Removed these permissions, because they were unused.
+
+* 2014-09-09 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 34322: Consider the 'OK' keyword in Sieve comments
 
 * 2014-09-11 - martin.herfurth@open-xchange.com
 

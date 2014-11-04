@@ -290,7 +290,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                  */
                 final String[] ct = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
                 if (ct != null && ct.length > 0) {
-                    this.setContentType(ct[0]);
+                    this.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(ct[0]));
                 } else {
                     this.setContentType(MimeTypes.MIME_DEFAULT);
                 }

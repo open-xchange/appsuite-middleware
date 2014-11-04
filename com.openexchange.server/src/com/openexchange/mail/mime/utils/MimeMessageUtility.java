@@ -876,6 +876,29 @@ public final class MimeMessageUtility {
             sb.append(hdrVal.substring(lastMatch));
             return sb.toString();
         }
+
+        // Try to recover from malformed Content-Type value like ``=?windows-1252?q?application/pdf; name="blatt8.pdf"\u00b4\u00b4
+        if (!hdrVal.startsWith("=?")) {
+            // Encoded word does not start with "=?"
+            return hdrVal;
+        }
+        int start = 2;
+        int pos;
+        if ((pos = hdrVal.indexOf('?', start)) == -1) {
+            // Encoded word does not include charset
+            return hdrVal;
+        }
+        start = pos+1;
+        if ((pos = hdrVal.indexOf('?', start)) == -1) {
+            // Encoded word does not include encoding
+            return hdrVal;
+        }
+        start = pos+1;
+        if ((pos = hdrVal.indexOf("?=", start)) == -1) {
+            // Encoded word does not end with "?="
+            return hdrVal.substring(start);
+        }
+
         return hdrVal;
     }
 
