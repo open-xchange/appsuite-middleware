@@ -441,8 +441,17 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == misc ? "plain" : determineContentSubtype(misc), textPart);
+                    final String contentType = determineContentSubtype(misc);
+                    final String content;
+                    if (contentType.startsWith("html")) {
+                        MimeSnippetFiller snippetFiller = new MimeSnippetFiller(session, getContext(contextId));
+                        content = snippetFiller.processSnippetContent(snippet.getContent(), multipart);
+                    } else {
+                        content = snippet.getContent();
+                    }
+                    MessageUtility.setText(sanitizeContent(content), "UTF-8", null == misc ? "plain" : contentType, textPart);
                     // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
+                    
                     multipart.addBodyPart(textPart);
                 }
                 // Misc
