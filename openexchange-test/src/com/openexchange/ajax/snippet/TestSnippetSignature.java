@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.snippet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -79,7 +82,8 @@ public class TestSnippetSignature extends AbstractAJAXSession {
     }
 
     public void testCreateSignatureWithImageWorkflow() throws Exception {
-        NewManagedFileRequest newMFReq = new NewManagedFileRequest("snippet", "image", readFile("contact_image.png"));
+        byte[] file = readFile("contact_image.png");
+        NewManagedFileRequest newMFReq = new NewManagedFileRequest("snippet", "image", file);
         NewManagedFileResponse newMFResp = client.execute(newMFReq);
         Object data = newMFResp.getData();
         assertTrue("Response not a JSONArray", data instanceof JSONArray);
@@ -110,11 +114,6 @@ public class TestSnippetSignature extends AbstractAJAXSession {
         data = resp.getData();
         assertNotNull(data);
         int signId = Integer.parseInt((String) data);
-        // AttachSnippetRequest attachReq = new AttachSnippetRequest(readFile("contact_image.png"), signId);
-        // AttachSnippetResponse attachResp = client.execute(attachReq);
-        // data = attachResp.getData();
-        // assertNotNull(data);
-        // String sid = (String) data;
         array = new JSONArray();
         array.put(signId);
         ListSnippetRequest listReq = new ListSnippetRequest(array, true);
@@ -123,27 +122,35 @@ public class TestSnippetSignature extends AbstractAJAXSession {
         data = listResp.getData();
         JSONArray json = (JSONArray) data;
         assertEquals(1, json.length());
-        JSONObject files = json.getJSONObject(0);
-        JSONObject file = files.getJSONArray("files").getJSONObject(0);
-        //String cid = file.getString("id");
-        // GetSnippetAttachmentRequest getAttReq = new GetSnippetAttachmentRequest(sid, cid, false);
-        // GetSnippetAttachmentResponse getAttResp = client.execute(getAttReq);
-        // assertNotNull(getAttResp);
-
+        JSONObject signature = json.getJSONObject(0);
+        String content = signature.getString("content");
+        System.out.println(content);
     }
 
-    private static byte[] readFile(String fileName) {
-        byte[] data = new byte[1024];
-        int readBytes;
+    private byte[] readFile(String filename) throws IOException {
+        ByteArrayOutputStream ous = null;
+        InputStream ios = null;
         try {
-            FileInputStream in = new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
-            while ((readBytes = in.read(data)) != -1) {
-                System.out.println("read " + readBytes + " bytes, and placed them into temp array named data");
+            byte[] buffer = new byte[4096];
+            ous = new ByteArrayOutputStream();
+            ios = new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename));
+            int read = 0;
+            while ((read = ios.read(buffer)) != -1) {
+                ous.write(buffer, 0, read);
             }
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            try {
+                if (ous != null)
+                    ous.close();
+            } catch (IOException e) {
+            }
+
+            try {
+                if (ios != null)
+                    ios.close();
+            } catch (IOException e) {
+            }
         }
-        return data;
+        return ous.toByteArray();
     }
 }
