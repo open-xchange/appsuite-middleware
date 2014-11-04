@@ -56,8 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.AdministrativeFileStorageService;
 import com.openexchange.file.storage.AdministrativeFileStorageFileAccess;
+import com.openexchange.file.storage.AdministrativeFileStorageService;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -71,7 +71,9 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link CompositingIDBasedAdministrativeFileAccess}
+ * This implementation of {@link IDBasedAdministrativeFileAccess} determines the actual
+ * {@link AdministrativeFileStorageFileAccess} implementation for given full-qualified
+ * {@link FileID}s and {@link FolderID}s and delegates the actual calls.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -176,6 +178,5 @@ public class CompositingIDBasedAdministrativeFileAccess implements IDBasedAdmini
 
         return null;
     }
-
 
 }

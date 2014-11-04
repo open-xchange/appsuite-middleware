@@ -113,7 +113,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the denoted document's meta data information.<br>
-     * <b>This method is only for administrative tasks!</b>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
      *
      * @param id The identifier
      * @param version The version
@@ -126,7 +126,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Saves given document meta data.
-     * <p>
+     * <br>
      * <b>Note</b>: No <tt>modifiedColumns</tt> means all columns.
      *
      * @param document The meta data of the document
@@ -148,8 +148,8 @@ public interface InfostoreFacade extends TransactionAware {
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
 
     /**
-     * Saves given document meta data
-     * <b>This method is only for administrative tasks!</b>
+     * Saves given document meta data<br>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
      *
      * @param document The meta data of the document
      * @param sequenceNumber The sequence number; e.g. client most recent time stamp
@@ -231,7 +231,8 @@ public interface InfostoreFacade extends TransactionAware {
     public List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException;
 
     /**
-     * Removes denoted documents.
+     * Removes denoted documents.<br>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
      *
      * @param ids The identifiers of the documents to remove
      * @param context The context

@@ -58,7 +58,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 
 
 /**
- * {@link InfostoreAccess}
+ * Encapsulates common methods needed by classes that delegate calls to {@link InfostoreFacade}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

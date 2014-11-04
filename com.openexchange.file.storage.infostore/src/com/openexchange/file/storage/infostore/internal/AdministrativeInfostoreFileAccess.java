@@ -72,7 +72,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 
 
 /**
- * {@link AdministrativeInfostoreFileAccess}
+ * An {@link AdministrativeFileStorageFileAccess} implementation of the infostore.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

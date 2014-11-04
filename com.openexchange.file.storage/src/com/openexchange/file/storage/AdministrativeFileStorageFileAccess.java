@@ -55,7 +55,9 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 
 
 /**
- * {@link AdministrativeFileStorageFileAccess}
+ * An {@link AdministrativeFileStorageFileAccess} can be used for administrative tasks when no
+ * user session is available. Implementations will perform the provided calls without any
+ * further permission checks then.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -69,20 +71,20 @@ public interface AdministrativeFileStorageFileAccess {
      * @param id The id of the file
      * @param version The version number of the file. May pass in {@link FileStorageFileAccess#CURRENT_VERSION} to load the current version
      * @return The File Metadata
-     * @throws OXException If operation fails
+     * @throws OXException If the file doesn't exist or an error occurs
      */
     File getFileMetadata(String folderId, String id, String version) throws OXException;
 
     /**
-     * Saves the file metadata. The fields to consider as modified have to be specified in the <code>modifiedColumns</code>. Therefore
-     * it is even possible to override the <code>modified by</code> field. Otherwise the context admin will be used. The document
+     * Saves the file metadata. The fields to consider as modified have to be specified with the <code>modifiedColumns</code> parameter.
+     * Therefore it is even possible to override the <code>modified by</code> field. Otherwise the context admin will be used. The document
      * must always have the fields <code>folder id</code> and <code>id</code> set.
      *
      * @param document The metadata to save
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files
      * or {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check.
      * @param modifiedColumns The fields to save. All other fields will be ignored. Use {@link FileStorageFileAccess#ALL_FIELDS} if all fields shall be considered.
-     * @throws OXException If operation fails
+     * @throws OXException If the file doesn't exist or an error occurs
      */
     void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException;
 
@@ -92,7 +94,7 @@ public interface AdministrativeFileStorageFileAccess {
      *
      * @param folderId The folder identifier
      * @param id The identifier
-     * @throws OXException If operation fails
+     * @throws OXException If the file doesn't exist or an error occurs
      */
     void removeDocument(String folderId, String id) throws OXException;
 
@@ -101,7 +103,7 @@ public interface AdministrativeFileStorageFileAccess {
      * of the according files.
      *
      * @param ids The identifiers
-     * @throws OXException If operation fails
+     * @throws OXException If one of the files doesn't exist or an error occurs
      */
     void removeDocuments(List<IDTuple> ids) throws OXException;
 
