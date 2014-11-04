@@ -136,9 +136,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param logMessage The log message
      * @return A general exception.
      */
-    public static OXException general(final String logMessage) {
-        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(
-            PREFIX_GENERAL);
+    public static OXException general(String logMessage) {
+        return OXExceptions.general(logMessage);
     }
 
     /**
@@ -148,9 +147,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param cause The cause
      * @return A general exception.
      */
-    public static OXException general(final String logMessage, final Throwable cause) {
-        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE, cause).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(
-            PREFIX_GENERAL);
+    public static OXException general(String logMessage, Throwable cause) {
+        return OXExceptions.general(logMessage, cause);
     }
 
     /**
@@ -159,9 +157,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param id The identifier of the missing object
      * @return A not-found exception.
      */
-    public static OXException notFound(final String id) {
-        return new OXException(1, OXExceptionStrings.MESSAGE_NOT_FOUND, id).setCategory(CATEGORY_USER_INPUT).setPrefix(PREFIX_GENERAL).setGeneric(
-            Generic.NOT_FOUND);
+    public static OXException notFound(String id) {
+        return OXExceptions.notFound(id);
     }
 
     /**
@@ -170,9 +167,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param module The identifier of the module
      * @return A module-denied exception.
      */
-    public static OXException noPermissionForModule(final String module) {
-        return new OXException(1, OXExceptionStrings.MESSAGE_PERMISSION_MODULE, module).setCategory(CATEGORY_USER_INPUT).setPrefix(
-            PREFIX_GENERAL).setGeneric(Generic.NO_PERMISSION);
+    public static OXException noPermissionForModule(String module) {
+        return OXExceptions.noPermissionForModule(module);
     }
 
     /**
@@ -181,8 +177,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return A folder-denied exception.
      */
     public static OXException noPermissionForFolder() {
-        return new OXException(1, OXExceptionStrings.MESSAGE_PERMISSION_FOLDER).setCategory(CATEGORY_PERMISSION_DENIED).setPrefix(
-            PREFIX_GENERAL).setGeneric(Generic.NO_PERMISSION);
+        return OXExceptions.noPermissionForFolder();
     }
 
     /**
@@ -191,9 +186,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param name The field name
      * @return A missing-field exception.
      */
-    public static OXException mandatoryField(final String name) {
-        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE_MISSING_FIELD, name).setCategory(CATEGORY_ERROR).setPrefix(
-            PREFIX_GENERAL).setGeneric(Generic.MANDATORY_FIELD);
+    public static OXException mandatoryField(String name) {
+        return OXExceptions.mandatoryField(name);
     }
 
     /**
@@ -203,9 +197,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param name The field name
      * @return A missing-field exception.
      */
-    public static OXException mandatoryField(final int code, final String name) {
-        return new OXException(code, OXExceptionStrings.MESSAGE_MISSING_FIELD, name).setCategory(CATEGORY_ERROR).setPrefix(PREFIX_GENERAL).setGeneric(
-            Generic.MANDATORY_FIELD);
+    public static OXException mandatoryField(int code, String name) {
+        return OXExceptions.mandatoryField(code, name);
     }
 
     /**
@@ -214,8 +207,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return A general conflict exception.
      */
     public static OXException conflict() {
-        return new OXException(1, OXExceptionStrings.MESSAGE_CONFLICT).setCategory(CATEGORY_CONFLICT).setPrefix(PREFIX_GENERAL).setGeneric(
-            Generic.CONFLICT);
+        return OXExceptions.conflict();
     }
 
     /*-
@@ -264,7 +256,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param cause The cause
      */
-    public OXException(final Throwable cause) {
+    public OXException(Throwable cause) {
         super(cause);
         interceptable = true;
         generic = Generic.NONE;
@@ -285,7 +277,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param cloneMe The <code>OXException</code> instance to clone
      */
-    public OXException(final OXException cloneMe) {
+    public OXException(OXException cloneMe) {
         super();
         interceptable = true;
         setStackTrace(cloneMe.getStackTrace());
@@ -309,7 +301,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param code The numeric error code
      */
-    public OXException(final int code) {
+    public OXException(int code) {
         super();
         interceptable = true;
         generic = Generic.NONE;
@@ -331,7 +323,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param displayMessage The printf-style display message (usually a constant from a class implementing {@link LocalizableStrings})
      * @param displayArgs The arguments for display message
      */
-    public OXException(final int code, final String displayMessage, final Object... displayArgs) {
+    public OXException(int code, String displayMessage, Object... displayArgs) {
         super();
         interceptable = true;
         generic = Generic.NONE;
@@ -354,7 +346,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param cause The optional cause for this {@link OXException}
      * @param displayArgs The arguments for display message
      */
-    public OXException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
+    public OXException(int code, String displayMessage, Throwable cause, Object... displayArgs) {
         super(cause);
         interceptable = true;
         generic = Generic.NONE;
@@ -374,7 +366,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param e The {@link OXException} to copy from
      */
-    public void copyFrom(final OXException e) {
+    public void copyFrom(OXException e) {
         this.interceptable = e.interceptable;
         this.code = e.code;
         this.generic = e.generic;
@@ -411,6 +403,27 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Checks if the error code from this {@link OXException} instance matches the given code.
+     *
+     * @param code The error code number
+     * @param prefix The error code prefix
+     * @return <code>true</code> if error code matches; otherwise <code>false</code>
+     * @throws NullPointerException If <code>prefix</code> argument is <code>null</code>
+     */
+    public boolean equalsCode(int code, String prefix) {
+        // Check error code number
+        if (this.code != code) {
+            return false;
+        }
+
+        // Check error code prefix
+        if (null == prefix) {
+            throw new NullPointerException("prefix is null");
+        }
+        return prefix.equals(this.prefix);
+    }
+
+    /**
      * Gets the numeric code.
      *
      * @return The code
@@ -434,7 +447,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param generic The generic
      * @return <code>true</code> if equal; otherwise <code>false</code>
      */
-    public boolean isGeneric(final Generic generic) {
+    public boolean isGeneric(Generic generic) {
         return null != generic && generic.equals(this.generic);
     }
 
@@ -495,7 +508,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param generic The generic to set
      * @return This {@link OXException} with generic applied
      */
-    public OXException setGeneric(final Generic generic) {
+    public OXException setGeneric(Generic generic) {
         this.generic = generic;
         return this;
     }
@@ -506,7 +519,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param logMessage The log error message
      * @return This exception with log error message applied (for chained invocations)
      */
-    public OXException setLogMessage(final String logMessage) {
+    public OXException setLogMessage(String logMessage) {
         this.logMessage = logMessage;
         return this;
     }
@@ -518,16 +531,16 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param args The printf arguments
      * @return This exception with log error message applied (for chained invocations)
      */
-    public OXException setLogMessage(final String displayFormat, final Object... args) {
+    public OXException setLogMessage(String displayFormat, Object... args) {
         if (null == displayFormat) {
             return this;
         }
         try {
             this.logMessage = String.format(Locale.US, displayFormat, args);
             logArgs = args;
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             this.logMessage = null;
-        } catch (final IllegalFormatException e) {
+        } catch (IllegalFormatException e) {
             LOG.error("Illegal format: >>{}<<, params: {}, code: {}", displayFormat, (null == args || 0 == args.length ? "<none>" : Arrays.toString(args)), getErrorCode(), e);
             this.logMessage = null;
         }
@@ -541,7 +554,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param displayArgs The optional arguments
      * @return This {@link OXException} with display message applied
      */
-    public OXException setDisplayMessage(final String displayMessage, final Object... displayArgs) {
+    public OXException setDisplayMessage(String displayMessage, Object... displayArgs) {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
         return this;
@@ -580,12 +593,12 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param log The logger
      */
-    public void log(final org.slf4j.Logger log) {
-        final LogLevel logLevel = getCategories().get(0).getLogLevel();
+    public void log(org.slf4j.Logger log) {
+        LogLevel logLevel = getCategories().get(0).getLogLevel();
         if (!logLevel.appliesTo(log)) {
             return;
         }
-        final String loggable = getLogMessage(logLevel, null);
+        String loggable = getLogMessage(logLevel, null);
         if (null == loggable) {
             return;
         }
@@ -601,7 +614,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The log message for specified log level or <code>null</code> if not loggable.
      * @see #getLogMessage(LogLevel, String)
      */
-    public String getLogMessage(final LogLevel logLevel) {
+    public String getLogMessage(LogLevel logLevel) {
         return getLogMessage(logLevel, null);
     }
 
@@ -612,7 +625,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param defaultLog The default logging to return if this exception is not loggable for specified log level
      * @return The log message for specified log level or <code>defaultLog</code> if not loggable.
      */
-    public String getLogMessage(final LogLevel logLevel, final String defaultLog) {
+    public String getLogMessage(LogLevel logLevel, String defaultLog) {
         if (!isLoggable()) {
             return defaultLog;
         }
@@ -628,15 +641,15 @@ public class OXException extends Exception implements OXExceptionConstants {
         /*
          * Log details
          */
-        final StringBuilder sb = new StringBuilder(256).append(getErrorCode());
+        StringBuilder sb = new StringBuilder(256).append(getErrorCode());
         /*
          * Iterate categories
          */
         sb.append(" Categories=");
         {
-            final List<Category> cats = getCategories();
+            List<Category> cats = getCategories();
             sb.append(cats.get(0));
-            final int size = cats.size();
+            int size = cats.size();
             for (int i = 1; i < size; i++) {
                 sb.append(',').append(cats.get(i));
             }
@@ -646,7 +659,7 @@ public class OXException extends Exception implements OXExceptionConstants {
          */
         sb.append(" Message=");
         if (null == logMessage) {
-            final String str = getDisplayMessage0(Locale.US);
+            String str = getDisplayMessage0(Locale.US);
             if (null == str) {
                 sb.append(EMPTY_MSG);
             } else {
@@ -663,7 +676,7 @@ public class OXException extends Exception implements OXExceptionConstants {
          * Properties
          */
         if (!properties.isEmpty()) {
-            for (final String propertyName : new TreeSet<String>(properties.keySet())) {
+            for (String propertyName : new TreeSet<String>(properties.keySet())) {
                 sb.append(DELIM).append(propertyName).append(": ").append(properties.get(propertyName));
             }
         }
@@ -682,13 +695,13 @@ public class OXException extends Exception implements OXExceptionConstants {
         /*
          * Log details
          */
-        final StringBuilder sb = new StringBuilder(256);
+        StringBuilder sb = new StringBuilder(256);
         /*
          * Append message
          */
-        final String logMessage = this.logMessage;
+        String logMessage = this.logMessage;
         if (null == logMessage) {
-            final String str = getDisplayMessage0(Locale.US);
+            String str = getDisplayMessage0(Locale.US);
             if (null == str) {
                 sb.append(EMPTY_MSG);
             } else {
@@ -748,20 +761,20 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param categories The categories to sort
      */
-    public static void sortCategories(final List<Category> categories) {
-        final List<ComparableCategory> comparables = toComparables(categories);
+    public static void sortCategories(List<Category> categories) {
+        List<ComparableCategory> comparables = toComparables(categories);
         Collections.sort(comparables);
         categories.clear();
-        for (final ComparableCategory comparable : comparables) {
+        for (ComparableCategory comparable : comparables) {
             if (null != comparable) {
                 categories.add(comparable.category);
             }
         }
     }
 
-    private static List<ComparableCategory> toComparables(final List<Category> categories) {
-        final List<ComparableCategory> ret = new ArrayList<ComparableCategory>(categories.size());
-        for (final Category category : categories) {
+    private static List<ComparableCategory> toComparables(List<Category> categories) {
+        List<ComparableCategory> ret = new ArrayList<ComparableCategory>(categories.size());
+        for (Category category : categories) {
             if (null != category) {
                 ret.add(new ComparableCategory(category));
             }
@@ -773,13 +786,13 @@ public class OXException extends Exception implements OXExceptionConstants {
 
         protected final Category category;
 
-        protected ComparableCategory(final Category category) {
+        protected ComparableCategory(Category category) {
             super();
             this.category = category;
         }
 
         @Override
-        public int compareTo(final ComparableCategory other) {
+        public int compareTo(ComparableCategory other) {
             return category.compareTo(other.category);
         }
 
@@ -791,7 +804,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param category The category to add
      * @return This exception with category added (for chained invocations)
      */
-    public final OXException addCategory(final Category category) {
+    public final OXException addCategory(Category category) {
         if (null != category) {
             if (categories.isEmpty() && EnumType.TRY_AGAIN.equals(category.getType()) && OXExceptionStrings.MESSAGE.equals(displayMessage)) {
                 displayMessage = OXExceptionStrings.MESSAGE_RETRY;
@@ -807,7 +820,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param category The category to set
      * @return This exception with category set (for chained invocations)
      */
-    public OXException setCategory(final Category category) {
+    public OXException setCategory(Category category) {
         if (null != category) {
             categories.clear();
             /*-
@@ -826,7 +839,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param category The category to remove
      */
-    public void removeCategory(final Category category) {
+    public void removeCategory(Category category) {
         categories.remove(category);
     }
 
@@ -850,7 +863,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param exceptionId The identifier
      */
-    public void setExceptionId(final String exceptionId) {
+    public void setExceptionId(String exceptionId) {
         this.exceptionId = exceptionId;
     }
 
@@ -872,7 +885,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param expected The expected prefix to check against
      * @return <code>true</code> if prefix equals specified expected prefix; otherwise <code>false</code>
      */
-    public boolean isPrefix(final String expected) {
+    public boolean isPrefix(String expected) {
         return (null == prefix ? PREFIX_GENERAL : prefix).equals(expected);
     }
 
@@ -882,7 +895,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param prefix The prefix
      * @return This {@link OXException} with new prefix applied (for chained invocations)
      */
-    public OXException setPrefix(final String prefix) {
+    public OXException setPrefix(String prefix) {
         this.prefix = prefix;
         return this;
     }
@@ -941,22 +954,22 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param locale The locale providing the language to which the message shall be translated
      * @return The internationalized message
      */
-    public String getDisplayMessage(final Locale locale) {
-        final String msg = getDisplayMessage0(locale);
+    public String getDisplayMessage(Locale locale) {
+        String msg = getDisplayMessage0(locale);
         return msg == null ? EMPTY_MSG : msg;
     }
 
-    private String getDisplayMessage0(final Locale locale) {
-        final Locale lcl = null == locale ? Locale.US : locale;
+    private String getDisplayMessage0(Locale locale) {
+        Locale lcl = null == locale ? Locale.US : locale;
         String msg = I18n.getInstance().translate(lcl, displayMessage);
         if (msg != null && displayArgs != null) {
             try {
                 msg = String.format(lcl, msg, displayArgs);
-            } catch (final NullPointerException e) {
+            } catch (NullPointerException e) {
                 msg = null;
-            } catch (final MissingFormatArgumentException e) {
+            } catch (MissingFormatArgumentException e) {
                 LOG.debug("Missing format argument: >>{}<<", msg, e);
-            } catch (final IllegalFormatException e) {
+            } catch (IllegalFormatException e) {
                 LOG.error("Illegal message format: >>{}<<", msg, e);
             }
         }
@@ -969,7 +982,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param exceptionCode The exception code to check against
      * @return <code>true</code> if this exception is similar to specified exception code; otherwise <code>false</code>
      */
-    public final boolean similarTo(final OXExceptionCode exceptionCode) {
+    public final boolean similarTo(OXExceptionCode exceptionCode) {
         return (exceptionCode.getCategory() == this.getCategory() && exceptionCode.getNumber() == this.getCode());
     }
 
@@ -979,7 +992,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param other The exception to check against
      * @return <code>true</code> if this exception is similar to specified exception; otherwise <code>false</code>
      */
-    public final boolean similarTo(final OXException other) {
+    public final boolean similarTo(OXException other) {
         if (other == this) {
             return true;
         }
@@ -1075,7 +1088,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     /**
      * Adds a problematic attribute.
      */
-    public void addProblematic(final ProblematicAttribute problematic) {
+    public void addProblematic(ProblematicAttribute problematic) {
         problematics.add(problematic);
     }
 
@@ -1100,7 +1113,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param name The argument name
      * @return <code>true</code> if such an argument exists; otherwise <code>false</code>
      */
-    public boolean containsArgument(final String name) {
+    public boolean containsArgument(String name) {
         return arguments.containsKey(name);
     }
 
@@ -1110,7 +1123,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param name The argument name
      * @return The argument value or <code>null</code> if absent
      */
-    public Object getArgument(final String name) {
+    public Object getArgument(String name) {
         return arguments.get(name);
     }
 
@@ -1121,7 +1134,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param value The argument value
      * @return The value previously associated with argument value or <code>null</code> if not present before
      */
-    public Object setArgument(final String name, final Object value) {
+    public Object setArgument(String name, Object value) {
         if (null == value) {
             return arguments.remove(name);
         }
@@ -1134,7 +1147,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param name The argument name
      * @return The removed argument value or <code>null</code> if absent
      */
-    public Object removeArgument(final String name) {
+    public Object removeArgument(String name) {
         return arguments.remove(name);
     }
 
@@ -1170,7 +1183,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return <code>true</code> if such a property exists; otherwise <code>false</code>
      * @see OXExceptionConstants
      */
-    public boolean containsProperty(final String name) {
+    public boolean containsProperty(String name) {
         return properties.containsKey(name);
     }
 
@@ -1183,7 +1196,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The property value or <code>null</code> if absent
      * @see OXExceptionConstants
      */
-    public String getProperty(final String name) {
+    public String getProperty(String name) {
         return properties.get(name);
     }
 
@@ -1197,7 +1210,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The value previously associated with property name or <code>null</code> if not present before
      * @see OXExceptionConstants
      */
-    public String setProperty(final String name, final String value) {
+    public String setProperty(String name, String value) {
         if (null == value) {
             return properties.remove(name);
         }
@@ -1218,7 +1231,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param session The session
      * @return The exception with session properties applide (for chained invocations)
      */
-    public OXException setSessionProperties(final Session session) {
+    public OXException setSessionProperties(Session session) {
         properties.put(PROPERTY_SESSION, session.getSessionID());
         properties.put(PROPERTY_CLIENT, session.getClient());
         properties.put(PROPERTY_AUTH_ID, session.getAuthId());
@@ -1237,7 +1250,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The removed property value or <code>null</code> if absent
      * @see OXExceptionConstants
      */
-    public String removeProperty(final String name) {
+    public String removeProperty(String name) {
         return properties.remove(name);
     }
 
@@ -1256,7 +1269,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private static final Pattern P = Pattern.compile("(\\p{L}) {2,}(\\p{L})");
     /** Drops multiple subsequent white-spaces from given message */
-    private static String dropSubsequentWhitespaces(final String message) {
+    private static String dropSubsequentWhitespaces(String message) {
         if (null == message) {
             return message;
         }

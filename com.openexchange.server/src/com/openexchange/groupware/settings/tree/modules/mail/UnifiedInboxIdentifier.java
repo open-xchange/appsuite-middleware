@@ -97,7 +97,7 @@ public class UnifiedInboxIdentifier implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 try {
                     final UnifiedInboxManagement management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
-                    final int id = management.getUnifiedINBOXAccountID(session.getUserId(), session.getContextId());
+                    final int id = management.getUnifiedINBOXAccountIDIfEnabled(session.getUserId(), session.getContextId());
                     if (id >= 0) {
                         setting.setSingleValue(MailFolderUtility.prepareFullname(id, "INBOX"));
                     } else {
