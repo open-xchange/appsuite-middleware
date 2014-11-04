@@ -8,7 +8,7 @@ BuildRequires: open-xchange-soap-cxf
 BuildRequires: open-xchange-admin-user-copy
 BuildRequires: java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -52,6 +52,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.6.2 release
 * Tue Oct 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-03
 * Mon Oct 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -67,6 +69,8 @@ Build for patch 2014-10-24
 * Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.6.1 release
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-20
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.6.1 release
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-20
@@ -75,13 +79,17 @@ Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-09
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-09
+* Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-10
+* Thu Oct 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.6.1
 * Tue Sep 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-06
 * Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-10-06
-* Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-29
+* Fri Sep 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-06
 * Tue Sep 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
