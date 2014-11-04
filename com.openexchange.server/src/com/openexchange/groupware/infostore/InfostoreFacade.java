@@ -148,7 +148,8 @@ public interface InfostoreFacade extends TransactionAware {
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
 
     /**
-     * Saves given document meta data<br>
+     * Saves given document meta data. This is currently only meant for updating existing documents. Trying to create a new one will throw
+     * an exception!<br>
      * <b>This method is only for administrative tasks, no permissions are checked!</b>
      *
      * @param document The meta data of the document

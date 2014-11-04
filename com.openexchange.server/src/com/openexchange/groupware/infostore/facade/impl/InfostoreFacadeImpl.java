@@ -283,11 +283,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
-        // FIXME:
-    }
-
-    @Override
     public InputStream getDocument(final int id, final int version, final ServerSession session) throws OXException {
         return getDocument(id, version, 0L, -1L, session);
     }
@@ -723,222 +718,256 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         if (0 < offset && (NEW == document.getId() || false == ignoreVersion)) {
             throw InfostoreExceptionCodes.NO_OFFSET_FOR_NEW_VERSIONS.create();
         }
+
         if (document.getId() == NEW) {
             saveDocument(document, data, sequenceNumber, session);
             indexDocument(session.getContext(), session.getUserId(), document.getId(), -1L, true);
             return;
         }
-        final Context context = session.getContext();
-        // Check permission
-        {
-            final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-                document.getId(),
-                context,
-                session.getUser(),
-                session.getUserPermissionBits());
-            if (!infoPerm.canWriteObject()) {
-                throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
-            }
 
-            List<Metadata> sanitizedColumns = new ArrayList<Metadata>(modifiedColumns.length);
-            Collections.addAll(sanitizedColumns, modifiedColumns);
-            if (sanitizedColumns.contains(Metadata.FOLDER_ID_LITERAL)) {
-                long folderId = document.getFolderId();
-                if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-                    document.setFolderId(infoPerm.getObject().getFolderId());
-                    sanitizedColumns.remove(Metadata.FOLDER_ID_LITERAL);
-                    modifiedColumns = sanitizedColumns.toArray(new Metadata[sanitizedColumns.size()]);
-                } else if (document.getFolderId() != -1 && infoPerm.getObject().getFolderId() != document.getFolderId()) {
-                    security.checkFolderId(document.getFolderId(), context);
-                    final EffectivePermission isperm = security.getFolderPermission(
-                        document.getFolderId(),
-                        context,
-                        session.getUser(),
-                        session.getUserPermissionBits());
-                    if (!(isperm.canCreateObjects())) {
-                        throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
-                    }
-                    if (!infoPerm.canDeleteObject()) {
-                        throw InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION.create();
-                    }
+        // Check permission
+        Context context = session.getContext();
+        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
+            document.getId(),
+            context,
+            session.getUser(),
+            session.getUserPermissionBits());
+        if (!infoPerm.canWriteObject()) {
+            throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
+        }
+
+        // Check and adjust folder id
+        List<Metadata> sanitizedColumns = new ArrayList<Metadata>(modifiedColumns.length);
+        Collections.addAll(sanitizedColumns, modifiedColumns);
+        if (sanitizedColumns.contains(Metadata.FOLDER_ID_LITERAL)) {
+            long folderId = document.getFolderId();
+            if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+                document.setFolderId(infoPerm.getObject().getFolderId());
+                sanitizedColumns.remove(Metadata.FOLDER_ID_LITERAL);
+                modifiedColumns = sanitizedColumns.toArray(new Metadata[sanitizedColumns.size()]);
+            } else if (document.getFolderId() != -1 && infoPerm.getObject().getFolderId() != document.getFolderId()) {
+                security.checkFolderId(document.getFolderId(), context);
+                final EffectivePermission isperm = security.getFolderPermission(
+                    document.getFolderId(),
+                    context,
+                    session.getUser(),
+                    session.getUserPermissionBits());
+                if (!(isperm.canCreateObjects())) {
+                    throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+                }
+                if (!infoPerm.canDeleteObject()) {
+                    throw InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION.create();
                 }
             }
         }
 
-        CheckSizeSwitch.checkSizes(document, getProvider(), context);
-
-        final DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
-
-        Metadata[] modifiedCols = modifiedColumns;
-        final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedCols));
+        // Set modified information
+        Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
         if (!updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL)) {
             document.setLastModified(new Date());
         }
         document.setModifiedBy(session.getUserId());
-
-        VALIDATION.validate(document);
-
-        // db.updateDocument(document, data, sequenceNumber,
-        // modifiedColumns, sessionObj.getContext(),
-        // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
-
-        // db.createDocument(document, data, sessionObj.getContext(),
-        // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
-
         updatedCols.add(Metadata.LAST_MODIFIED_LITERAL);
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
-        final List<InfostoreFilenameReservation> reservations = new ArrayList<InfostoreFilenameReservation>(2);
+        CheckSizeSwitch.checkSizes(document, getProvider(), context);
+        VALIDATION.validate(document);
+
+        DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
+        SaveParameters saveParameters = new SaveParameters(context, document, oldDocument, sequenceNumber, updatedCols);
+        saveParameters.setData(data, offset, session.getUserId(), ignoreVersion);
+        saveModifiedDocument(saveParameters);
+
+        long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
+        indexDocument(context, session.getUserId(), oldDocument.getId(), indexFolderId, false);
+    }
+
+    @Override
+    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
+        if (document.getId() == NEW) {
+            throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
+        }
+
+        long folderId = document.getFolderId();
+        if (folderId < 0) {
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(folderId);
+        } else if (folderId < FolderObject.MIN_FOLDER_ID) {
+            throw InfostoreExceptionCodes.NO_DOCUMENTS_IN_VIRTUAL_FOLDER.create();
+        }
+
+        Set<Metadata> updatedCols = new HashSet<Metadata>();
+        Collections.addAll(updatedCols, modifiedColumns == null ? Metadata.VALUES_ARRAY : modifiedColumns);
+        if (!updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL)) {
+            document.setLastModified(new Date());
+            updatedCols.add(Metadata.LAST_MODIFIED_LITERAL);
+        }
+
+        if (!updatedCols.contains(Metadata.MODIFIED_BY_LITERAL)) {
+            document.setModifiedBy(context.getMailadmin());
+            updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
+        }
+
+        CheckSizeSwitch.checkSizes(document, getProvider(), context);
+        VALIDATION.validate(document);
+
+        DocumentMetadata oldDocument = objectPermissionLoader.add(load(document.getId(), context), context, null);
+        saveModifiedDocument(new SaveParameters(context, document, oldDocument, sequenceNumber, updatedCols));
+    }
+
+    private void saveModifiedDocument(SaveParameters parameters) throws OXException {
+        InfostoreFilenameReservation reservation = null;
         try {
+            Set<Metadata> updatedCols = parameters.getUpdatedCols();
+            DocumentMetadata document = parameters.getDocument();
+            DocumentMetadata oldDocument = parameters.getOldDocument();
+
             if (updatedCols.contains(Metadata.VERSION_LITERAL)) {
-                final String fname = load(document.getId(), document.getVersion(), context).getFileName();
+                final String fname = load(document.getId(), document.getVersion(), parameters.getContext()).getFileName();
                 if (!updatedCols.contains(Metadata.FILENAME_LITERAL)) {
                     updatedCols.add(Metadata.FILENAME_LITERAL);
                     document.setFileName(fname);
                 }
             }
 
-            final String oldFileName = oldDocument.getFileName();
-            if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId()) {
+            boolean isMove = updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId();
+            boolean isRename = updatedCols.contains(Metadata.FILENAME_LITERAL) && null != document.getFileName() && false == document.getFileName().equals(oldDocument.getFileName());
+            if (isMove) {
                 // this is a move - reserve in target folder
-                String fileName = null != document.getFileName() ? document.getFileName() : oldFileName;
-                final InfostoreFilenameReservation reservation = reserve(
-                    fileName,
+                String newFileName = null != document.getFileName() ? document.getFileName() : oldDocument.getFileName();
+                reservation = reserve(
+                    newFileName,
                     document.getFolderId(),
                     oldDocument.getId(),
-                    context, true);
-                reservations.add(reservation);
+                    parameters.getContext(), true);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
-            } else if (updatedCols.contains(Metadata.FILENAME_LITERAL) && null != document.getFileName() &&
-                false == document.getFileName().equals(oldFileName)) {
+
+                // insert tombstone row to del_infostore table in case of move operations to aid folder based synchronizations
+                DocumentMetadataImpl tombstoneDocument = new DocumentMetadataImpl(oldDocument);
+                tombstoneDocument.setLastModified(document.getLastModified());
+                tombstoneDocument.setModifiedBy(document.getModifiedBy());
+                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, parameters.getContext(), tombstoneDocument), true);
+            } else if (isRename) {
                 // this is a rename - reserve in current folder
-                final InfostoreFilenameReservation reservation = reserve(
+                reservation = reserve(
                     document.getFileName(),
                     oldDocument.getFolderId(),
                     oldDocument.getId(),
-                    context, true);
-                reservations.add(reservation);
+                    parameters.getContext(), true);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
             }
 
-            final String oldTitle = oldDocument.getTitle();
-            if (!updatedCols.contains(Metadata.TITLE_LITERAL) && oldFileName != null && oldTitle != null && oldFileName.equals(oldTitle)) {
-                final String fileName = document.getFileName();
-                if (null == fileName) {
-                    document.setTitle(oldFileName);
-                    document.setFileName(oldFileName);
+            String oldTitle = oldDocument.getTitle();
+            if (!updatedCols.contains(Metadata.TITLE_LITERAL) && oldDocument.getFileName() != null && oldTitle != null && oldDocument.getFileName().equals(oldTitle)) {
+                if (null == document.getFileName()) {
+                    document.setTitle(oldDocument.getFileName());
+                    document.setFileName(oldDocument.getFileName());
                     updatedCols.add(Metadata.FILENAME_LITERAL);
                 } else {
-                    document.setTitle(fileName);
+                    document.setTitle(document.getFileName());
                 }
                 updatedCols.add(Metadata.TITLE_LITERAL);
             }
 
-            modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
-
-            if (data != null) {
-                QuotaFileStorage qfs = getFileStorage(context);
-                if (0 < offset) {
-                    AppendFileAction appendFile = new AppendFileAction(
-                        qfs, data, oldDocument.getFilestoreLocation(), document.getFileSize(), offset);
-                    perform(appendFile, false);
-                    document.setFilestoreLocation(oldDocument.getFilestoreLocation());
-                    document.setFileSize(appendFile.getByteCount() + offset);
-                    document.setFileMD5Sum(null); // invalidate due to append-operation
-                    updatedCols.addAll(Arrays.asList(Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL));
-                } else {
-                    SaveFileAction saveFile = new SaveFileAction(qfs, data, document.getFileSize());
-                    perform(saveFile, false);
-                    document.setFilestoreLocation(saveFile.getFileStorageID());
-                    document.setFileSize(saveFile.getByteCount());
-                    document.setFileMD5Sum(saveFile.getChecksum());
-                    updatedCols.addAll(Arrays.asList(
-                        Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL, Metadata.FILESTORE_LOCATION_LITERAL));
-                }
-
-                final GetSwitch get = new GetSwitch(oldDocument);
-                final SetSwitch set = new SetSwitch(document);
-                final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(modifiedCols));
-                for (final Metadata m : Arrays.asList(Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL, Metadata.URL_LITERAL)) {
-                    if (alreadySet.contains(m)) {
-                        continue;
-                    }
-                    set.setValue(m.doSwitch(get));
-                    m.doSwitch(set);
-                }
-
-                document.setCreatedBy(session.getUserId());
-                if (!updatedCols.contains(Metadata.CREATION_DATE_LITERAL)) {
-                    document.setCreationDate(new Date());
-                }
-
-                // Set version
-                final UndoableAction action;
-                if (ignoreVersion) {
-                    document.setVersion(oldDocument.getVersion());
-                    updatedCols.add(Metadata.VERSION_LITERAL);
-                    updatedCols.add(Metadata.FILESTORE_LOCATION_LITERAL);
-                    action = new UpdateVersionAction(this, QUERIES, context, document, oldDocument,
-                        updatedCols.toArray(new Metadata[updatedCols.size()]), sequenceNumber);
-
-                    // Remove old file "version" if not appended
-                    if (0 >= offset) {
-                        removeFile(context, oldDocument.getFilestoreLocation());
-                    }
-                } else {
-                    Connection con = null;
-                    try {
-                        con = getReadConnection(context);
-                        document.setVersion(getNextVersionNumberForInfostoreObject(
-                            context.getContextId(),
-                            document.getId(),
-                            con));
-                        updatedCols.add(Metadata.VERSION_LITERAL);
-                    } catch (final SQLException e) {
-                        LOG.error("SQLException: ", e);
-                    } finally {
-                        releaseReadConnection(context, con);
+            Metadata[] modifiedCols;
+            if (parameters.hasData()) {
+                storeNewData(parameters);
+                modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
+            } else {
+                modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
+                if (QUERIES.updateVersion(modifiedCols)) {
+                    if (!updatedCols.contains(Metadata.VERSION_LITERAL)) {
+                        document.setVersion(oldDocument.getVersion());
                     }
 
-                    action = new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document));
+                    perform(new UpdateVersionAction(this, QUERIES, parameters.getContext(), document, oldDocument, modifiedCols, parameters.getSequenceNumber()), true);
                 }
-                // Perform action
-                perform(action, true);
-            } else if (QUERIES.updateVersion(modifiedCols)) {
-                if (!updatedCols.contains(Metadata.VERSION_LITERAL)) {
-                    document.setVersion(oldDocument.getVersion());
-                }
-                perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedCols, sequenceNumber), true);
             }
 
-            modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
             if (QUERIES.updateDocument(modifiedCols)) {
-                perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedCols, Long.MAX_VALUE), true);
+                perform(new UpdateDocumentAction(this, QUERIES, parameters.getContext(), document, oldDocument, modifiedCols, Long.MAX_VALUE), true);
             }
             /*
              * update object permissions as needed
              */
             if (updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)) {
-                perform(new UpdateObjectPermissionAction(this, context, document, oldDocument), true);
+                perform(new UpdateObjectPermissionAction(this, parameters.getContext(), document, oldDocument), true);
             }
-
-            // insert tombstone row to del_infostore table in case of move operations to aid folder based synchronizations
-            if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId()) {
-                DocumentMetadataImpl tombstoneDocument = new DocumentMetadataImpl(oldDocument);
-                tombstoneDocument.setLastModified(document.getLastModified());
-                tombstoneDocument.setModifiedBy(document.getModifiedBy());
-                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, session.getContext(), tombstoneDocument), true);
-            }
-
-            final long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
-            indexDocument(context, session.getUserId(), oldDocument.getId(), indexFolderId, false);
         } finally {
-            for (final InfostoreFilenameReservation infostoreFilenameReservation : reservations) {
-                infostoreFilenameReservation.destroySilently();
+            if (reservation != null) {
+                reservation.destroySilently();
             }
         }
+    }
+
+    private void storeNewData(SaveParameters parameters) throws OXException {
+        QuotaFileStorage qfs = getFileStorage(parameters.getContext());
+        if (0 < parameters.getOffset()) {
+            AppendFileAction appendFile = new AppendFileAction(
+                qfs, parameters.getData(), parameters.getOldDocument().getFilestoreLocation(), parameters.getDocument().getFileSize(), parameters.getOffset());
+            perform(appendFile, false);
+            parameters.getDocument().setFilestoreLocation(parameters.getOldDocument().getFilestoreLocation());
+            parameters.getDocument().setFileSize(appendFile.getByteCount() + parameters.getOffset());
+            parameters.getDocument().setFileMD5Sum(null); // invalidate due to append-operation
+            parameters.getUpdatedCols().addAll(Arrays.asList(Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL));
+        } else {
+            SaveFileAction saveFile = new SaveFileAction(qfs, parameters.getData(), parameters.getDocument().getFileSize());
+            perform(saveFile, false);
+            parameters.getDocument().setFilestoreLocation(saveFile.getFileStorageID());
+            parameters.getDocument().setFileSize(saveFile.getByteCount());
+            parameters.getDocument().setFileMD5Sum(saveFile.getChecksum());
+            parameters.getUpdatedCols().addAll(Arrays.asList(
+                Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL, Metadata.FILESTORE_LOCATION_LITERAL));
+        }
+
+        final GetSwitch get = new GetSwitch(parameters.getOldDocument());
+        final SetSwitch set = new SetSwitch(parameters.getDocument());
+        for (Metadata m : new Metadata[] { Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL, Metadata.URL_LITERAL }) {
+            if (parameters.getUpdatedCols().contains(m)) {
+                continue;
+            }
+            set.setValue(m.doSwitch(get));
+            m.doSwitch(set);
+        }
+
+        parameters.getDocument().setCreatedBy(parameters.getFileCreatedBy());
+        if (!parameters.getUpdatedCols().contains(Metadata.CREATION_DATE_LITERAL)) {
+            parameters.getDocument().setCreationDate(new Date());
+        }
+
+        // Set version
+        final UndoableAction action;
+        if (parameters.isIgnoreVersion()) {
+            parameters.getDocument().setVersion(parameters.getOldDocument().getVersion());
+            parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
+            parameters.getUpdatedCols().add(Metadata.FILESTORE_LOCATION_LITERAL);
+            action = new UpdateVersionAction(this, QUERIES, parameters.getContext(), parameters.getDocument(), parameters.getOldDocument(),
+                parameters.getUpdatedCols().toArray(new Metadata[parameters.getUpdatedCols().size()]), parameters.getSequenceNumber());
+
+            // Remove old file "version" if not appended
+            if (0 >= parameters.getOffset()) {
+                removeFile(parameters.getContext(), parameters.getOldDocument().getFilestoreLocation());
+            }
+        } else {
+            Connection con = null;
+            try {
+                con = getReadConnection(parameters.getContext());
+                parameters.getDocument().setVersion(getNextVersionNumberForInfostoreObject(
+                    parameters.getContext().getContextId(),
+                    parameters.getDocument().getId(),
+                    con));
+                parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
+            } catch (final SQLException e) {
+                LOG.error("SQLException: ", e);
+            } finally {
+                releaseReadConnection(parameters.getContext(), con);
+            }
+
+            action = new CreateVersionAction(this, QUERIES, parameters.getContext(), Collections.singletonList(parameters.getDocument()));
+        }
+        // Perform action
+        perform(action, true);
     }
 
     @Override
