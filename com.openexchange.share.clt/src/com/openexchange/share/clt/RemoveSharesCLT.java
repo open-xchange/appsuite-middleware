@@ -151,7 +151,8 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
                 String shareToken = tokenAndPath.getFirst();
                 String targetPath = tokenAndPath.getSecond();
                 if ((null == targetPath || "".equals(targetPath)) && !iKnowWhatIamDoing) {
-                    //warn
+                    throw new MissingOptionException("Seems like you supplied a token without a share path. If you want to remove"
+                        + " all share identified by this token use option -f/--force");
                 }
                 if (null != contextId && !contextId.isEmpty() && !"-1".equals(contextId)) {
                     mbean.removeShare(shareToken, targetPath, Integer.parseInt(contextId));
