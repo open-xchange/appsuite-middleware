@@ -64,6 +64,8 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
 
+    private volatile CacheEventServiceImpl service;
+
     /**
      * Initializes a new {@link CacheEventServiceActivator}.
      */
@@ -80,12 +82,19 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         CacheEventServiceLookup.set(this);
-        registerService(CacheEventService.class, new CacheEventServiceImpl());
+        CacheEventServiceImpl service = new CacheEventServiceImpl();
+        this.service = service;
+        registerService(CacheEventService.class, service);
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
+        CacheEventServiceImpl service = this.service;
+        if (null != service) {
+            service.shutdown();
+            this.service = null;
+        }
         CacheEventServiceLookup.set(null);
         super.stopBundle();
     }
