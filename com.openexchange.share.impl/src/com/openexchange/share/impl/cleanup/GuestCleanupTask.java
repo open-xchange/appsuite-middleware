@@ -60,14 +60,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
-import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.impl.ConnectionHelper;
 import com.openexchange.share.impl.ShareTool;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -147,54 +145,13 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
              * guest user still has shares, adjust permissions as needed
              */
             int requiredPermissionBits = ShareTool.getRequiredPermissionBits(guestUser, modules);
-            UserPermissionBits updatedPermissionBits = setPermissionBits(
-                connectionHelper.getConnection(), context, guestUser.getId(), requiredPermissionBits, false);
+            UserPermissionBits updatedPermissionBits = ShareTool.setPermissionBits(
+                services, connectionHelper.getConnection(), context, guestUser.getId(), requiredPermissionBits, false);
             if (updatedPermissionBits.getPermissionBits() != requiredPermissionBits) {
                 LOG.debug("Shares in modules {} still available for for guest user {} in context {}, permission bits adjuested to {}.",
                     modules, guestUser.getId(), context.getContextId(), updatedPermissionBits);
             }
         }
-    }
-
-    /**
-     * Sets a user's permission bits. This includes assigning initial permission bits, as well as updating already existing permissions.
-     *
-     * @param connection The database connection to use
-     * @param context The context
-     * @param userID The identifier of the user to set the permission bits for
-     * @param permissionBits The permission bits to set
-     * @param merge <code>true</code> to merge with the previously assigned permissions, <code>false</code> to overwrite
-     * @return The updated permission bits
-     * @throws OXException
-     */
-    private UserPermissionBits setPermissionBits(Connection connection, Context context, int userID, int permissionBits, boolean merge) throws OXException {
-        UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-        UserPermissionBits userPermissionBits = null;
-        try {
-            userPermissionBits = userPermissionService.getUserPermissionBits(connection, userID, context);
-        } catch (OXException e) {
-            if (false == UserConfigurationCodes.NOT_FOUND.equals(e)) {
-                throw e;
-            }
-        }
-        if (null == userPermissionBits) {
-            /*
-             * save permission bits
-             */
-            userPermissionBits = new UserPermissionBits(permissionBits, userID, context.getContextId());
-            userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
-        } else if (userPermissionBits.getPermissionBits() != permissionBits) {
-            /*
-             * update permission bits
-             */
-            userPermissionBits.setPermissionBits(merge ? permissionBits | userPermissionBits.getPermissionBits() : permissionBits);
-            userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
-            /*
-             * invalidate affected user configuration
-             */
-            services.getService(UserConfigurationService.class).removeUserConfiguration(userID, context);
-        }
-        return userPermissionBits;
     }
 
     /**

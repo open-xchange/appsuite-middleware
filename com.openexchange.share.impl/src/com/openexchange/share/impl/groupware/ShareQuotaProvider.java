@@ -64,7 +64,7 @@ import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareService;
+import com.openexchange.share.impl.DefaultShareService;
 
 /**
  * {@link ShareQuotaProvider}
@@ -78,11 +78,11 @@ public class ShareQuotaProvider implements QuotaProvider {
 
     private static final String MODULE_ID = "share";
 
-    private final ShareService shareService;
+    private final DefaultShareService shareService;
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
-    public ShareQuotaProvider(ServiceLookup services, ShareService shareService) {
+    public ShareQuotaProvider(ServiceLookup services, DefaultShareService shareService) {
         super();
 
         Validate.notNull(services, "ServiceLookup might not be null!");

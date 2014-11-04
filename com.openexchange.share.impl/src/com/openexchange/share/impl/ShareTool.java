@@ -52,6 +52,7 @@ package com.openexchange.share.impl;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -65,10 +66,13 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceLookup;
@@ -80,6 +84,8 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -546,6 +552,48 @@ public class ShareTool {
         } catch (NumberFormatException e) {
             return true;
         }
+    }
+
+    /**
+     * Sets a user's permission bits. This includes assigning initial permission bits, as well as updating already existing permissions.
+     *
+     * @param services A service lookup reference
+     * @param connection The database connection to use
+     * @param context The context
+     * @param userID The identifier of the user to set the permission bits for
+     * @param permissionBits The permission bits to set
+     * @param merge <code>true</code> to merge with the previously assigned permissions, <code>false</code> to overwrite
+     * @return The updated permission bits
+     * @throws OXException
+     */
+    public static UserPermissionBits setPermissionBits(ServiceLookup services, Connection connection, Context context, int userID, int permissionBits, boolean merge) throws OXException {
+        UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
+        UserPermissionBits userPermissionBits = null;
+        try {
+            userPermissionBits = userPermissionService.getUserPermissionBits(connection, userID, context);
+        } catch (OXException e) {
+            if (false == UserConfigurationCodes.NOT_FOUND.equals(e)) {
+                throw e;
+            }
+        }
+        if (null == userPermissionBits) {
+            /*
+             * save permission bits
+             */
+            userPermissionBits = new UserPermissionBits(permissionBits, userID, context.getContextId());
+            userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
+        } else if (userPermissionBits.getPermissionBits() != permissionBits) {
+            /*
+             * update permission bits
+             */
+            userPermissionBits.setPermissionBits(merge ? permissionBits | userPermissionBits.getPermissionBits() : permissionBits);
+            userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
+            /*
+             * invalidate affected user configuration
+             */
+            services.getService(UserConfigurationService.class).removeUserConfiguration(userID, context);
+        }
+        return userPermissionBits;
     }
 
 }
