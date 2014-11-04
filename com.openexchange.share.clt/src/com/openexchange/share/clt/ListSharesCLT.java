@@ -140,21 +140,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
         }
         for (Share share : result) {
             StringBuilder sb = new StringBuilder();
-//            sb.append("Token: ").append(share.getToken()).append(", ");
-//            sb.append("Context: ").append(share.getContextID()).append(", ");
-            sb.append("Created by: ").append(share.getCreatedBy()).append(", ");
-            sb.append("Targets: ");
-//            for (Share target : share.getTargets()) {
-//                sb.append("(Module: ").append(target.getModule()).append(", ");
-//                sb.append("Folder: ").append(target.getFolder()).append(", ");
-//                String item = target.getItem();
-//                if (null != item && !"".equals(item)) {
-//                    sb.append("Item: ").append(item).append("), ");
-//                } else {
-//                    sb.insert(sb.length() - 2, ")");
-//                }
-//            }
-            sb.append("Guest: ").append(share.getGuest());
+            sb.append(share.toString());
             System.out.println(sb.toString());
         }
         return null;

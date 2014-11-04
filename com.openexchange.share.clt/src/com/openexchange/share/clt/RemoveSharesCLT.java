@@ -59,6 +59,9 @@ import org.apache.commons.cli.Options;
 import org.apache.http.ParseException;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Pair;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.impl.mbean.ShareMBean;
 
 /**
@@ -75,6 +78,8 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     private String token;
 
+    private boolean iKnowWhatIamDoing = false;
+
     public RemoveSharesCLT() {
         super();
     }
@@ -90,6 +95,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         }
         userId = cmd.getOptionValue("i");
         token = cmd.getOptionValue("t");
+        iKnowWhatIamDoing = cmd.hasOption("f");
     }
 
     @Override
@@ -128,7 +134,8 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "");
         options.addOption("i", "userid", true, "");
-        options.addOption("t", "tokens", true, "Tokens to remove as comma-separated list.");
+        options.addOption("t", "tokens", true, "Token to remove.");
+        options.addOption("f", "force", false, "Force removal of token.");
     }
 
     @Override
@@ -140,13 +147,19 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {
             if (null != token && !token.isEmpty()) {
-                String[] tokens = token.trim().split(",");
-                if (null == contextId || contextId.isEmpty() || "-1".equals(contextId)) {
-                    mbean.removeShares(tokens);
-                } else {
-                    mbean.removeShares(tokens, Integer.parseInt(contextId));
+                Pair<String, String> tokenAndPath = parseToken(token);
+                String shareToken = tokenAndPath.getFirst();
+                String targetPath = tokenAndPath.getSecond();
+                if ((null == targetPath || "".equals(targetPath)) && !iKnowWhatIamDoing) {
+                    //warn
                 }
-            } else if (null != contextId && !contextId.isEmpty()) {
+                if (null != contextId && !contextId.isEmpty() && !"-1".equals(contextId)) {
+                    mbean.removeShare(shareToken, targetPath, Integer.parseInt(contextId));
+                } else {
+                    mbean.removeShare(shareToken, targetPath);
+                }
+                return null;
+            } else if (null != contextId && !contextId.isEmpty() && !"-1".equals(contextId)) {
                 if (null != userId && !userId.isEmpty()) {
                     mbean.removeShares(Integer.parseInt(contextId), Integer.parseInt(userId));
                 } else {
@@ -157,6 +170,22 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
             throw new ParseException("Cannot parse value: " + e.getMessage());
         }
         return null;
+    }
+
+    private Pair<String, String> parseToken(String token) throws OXException {
+        String shareToken = null;
+        String targetPath = null;
+        String[] split = token.split("/");
+        if (split.length == 1) {
+            shareToken = token;
+        } else if (split.length == 2) {
+            shareToken = split[0];
+            targetPath = split[1];
+        } else {
+            throw ShareExceptionCodes.INVALID_TOKEN.create(token);
+        }
+
+        return new Pair<String, String>(shareToken, targetPath);
     }
 
 }

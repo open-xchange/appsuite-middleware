@@ -84,21 +84,21 @@ public interface ShareMBean {
     List<Share> listShares(int contextId, int userId) throws OXException;
 
     /**
-     * Removes all shares identified by supplied tokens.
-     *
-     * @param tokens The tokens
-     * @throws OXException On error
+     * Removes all targets identified by supplied token.
+     * @param token The token
+     * @param path The share path
+     * @throws OXException
      */
-    void removeShares(String[] tokens) throws OXException;
+    void removeShare(String token, String path) throws OXException;
 
     /**
-     * Removes all shares in supplied context identified by supplied tokens
-     *
-     * @param tokens The tokens
+     * Removes all targets in supplied context identified by supplied token.
+     * @param shareToken The token
+     * @param targetPath The share path
      * @param contextId The contextId
-     * @throws OXException On error
+     * @throws OXException
      */
-    void removeShares(String[] tokens, int contextId) throws OXException;
+    void removeShare(String shareToken, String targetPath, int contextId) throws OXException;
 
     /**
      * Remove all shares from supplied context.
