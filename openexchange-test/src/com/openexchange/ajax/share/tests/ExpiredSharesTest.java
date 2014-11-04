@@ -59,6 +59,7 @@ import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link ExpiredSharesTest}
@@ -147,10 +148,26 @@ public class ExpiredSharesTest extends ShareTest {
             assertTrue("Guest permission still present", permission.getEntity() != matchingPermission.getEntity());
         }
         /*
-         * check if previous session is still alive
+         * check shares list
          */
-        //TODO: only do this, if we shared to anonymous ?
-//        guestClient.checkSessionAlive(true);
+        ParsedShare discoveredShare = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        assertTrue("share still found", null == discoveredShare);
+        /*
+         * check guest access to share
+         */
+        if (RecipientType.ANONYMOUS.toString().equalsIgnoreCase(guestPermission.getType())) {
+            /*
+             * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
+             */
+            Thread.sleep(CLEANUP_DELAY);
+            guestClient.checkSessionAlive(true);
+        } else {
+            /*
+             * check if share target no longer accessible for non-anonymous guest user, since session may still be alive
+             */
+            guestClient.checkFolderNotAccessible(share.getTarget().getFolder());
+            guestClient.logout();
+        }
     }
 
 }
