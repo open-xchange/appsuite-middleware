@@ -456,13 +456,6 @@ public class DefaultShareService implements ShareService {
                 shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
                 removeTargetPermissions(connectionHelper, shares);
             }
-            List<ShareTarget> targets = new ArrayList<ShareTarget>();
-            List<Integer> guestIds = new ArrayList<Integer>();
-            for (Share share : shares) {
-                targets.add(share.getTarget());
-                guestIds.add(share.getGuest());
-            }
-            removeTargets(connectionHelper, targets, guestIds);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -495,13 +488,6 @@ public class DefaultShareService implements ShareService {
                 shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
                 removeTargetPermissions(connectionHelper, shares);
             }
-            List<ShareTarget> targets = new ArrayList<ShareTarget>();
-            List<Integer> guestIds = new ArrayList<Integer>();
-            for (Share share : shares) {
-                targets.add(share.getTarget());
-                guestIds.add(share.getGuest());
-            }
-            removeTargets(connectionHelper, targets, guestIds);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
