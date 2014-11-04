@@ -10,6 +10,7 @@ import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class DeleteTest extends InfostoreAJAXTest {
@@ -51,17 +52,23 @@ public class DeleteTest extends InfostoreAJAXTest {
 		}
 		assertTrue(notDeletedExpect.isEmpty());
 
-		notDeletedExpect = new HashSet<String>(clean);
 		removeDocumentsAndFolders();
 		clean.clear();
 
 		final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), sessionId), false);
+		String infostoreTrashFolder = String.valueOf(client.getValues().getInfostoreTrashFolder());
+		notDeletedExpect = new HashSet<String>();
 		for(int i = 0; i < toDelete.length; i++) {
-            toDelete[i][0] = String.valueOf(client.getValues().getInfostoreTrashFolder());
+            FileID fileID = new FileID(toDelete[i][1]);
+            fileID.setFolderId(infostoreTrashFolder);
+            String uniqueID = fileID.toUniqueID();
+
+            toDelete[i][0] = infostoreTrashFolder;
+            toDelete[i][1] = uniqueID;
+            notDeletedExpect.add(uniqueID);
         }
 		notDeleted = delete(getWebConversation(),getHostName(),sessionId, 0, toDelete);
 		assertEquals(toDelete.length,notDeleted.length);
-
 
 		for(final String i : notDeleted) {
 			assertTrue(notDeletedExpect.remove(i));
