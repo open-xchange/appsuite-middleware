@@ -58,9 +58,11 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.snippet.SnippetService;
@@ -85,7 +87,9 @@ public class MimeSnippetActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, CacheService.class, CryptoService.class, IDGeneratorService.class, ConfigurationService.class };
+        return new Class<?>[] {
+            DatabaseService.class, ContextService.class, CacheService.class, CryptoService.class, IDGeneratorService.class,
+            ConfigurationService.class, ManagedFileManagement.class, HtmlService.class };
     }
 
     @Override

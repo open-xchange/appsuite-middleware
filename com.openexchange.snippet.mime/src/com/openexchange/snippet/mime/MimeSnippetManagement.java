@@ -88,6 +88,7 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
@@ -363,7 +364,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
-    private static void parsePart(final MimePart part, final DefaultSnippet snippet) throws OXException, MessagingException {
+    private static void parsePart(final MimePart part, final DefaultSnippet snippet) throws OXException, MessagingException, IOException {
         String header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
         final ContentType contentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);
         if (contentType.startsWith("text/javascript")) {
@@ -433,25 +434,26 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     mimeMessage.setHeader(name,encode(entry.getValue().toString()));
                 }
             }
+            
+            final Object misc = snippet.getMisc();
+            final String contentSubType = determineContentSubtype(misc);
+            
+            // Process image and add it as an attachment
+            final MimeSnippetProcessor snippetProcessor = new MimeSnippetProcessor(session);
+            if (contentSubType.equals("html")) {
+                snippetProcessor.processImage(snippet);
+            }
+            
             // Set other stuff
             final List<Attachment> attachments = snippet.getAttachments();
-            final Object misc = snippet.getMisc();
             if (notEmpty(attachments) || (null != misc)) {
                 final MimeMultipart multipart = new MimeMultipart("mixed");
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    final String contentType = determineContentSubtype(misc);
-                    final String content;
-                    if (contentType.startsWith("html")) {
-                        MimeSnippetFiller snippetFiller = new MimeSnippetFiller(session, getContext(contextId));
-                        content = snippetFiller.processSnippetContent(snippet.getContent(), multipart);
-                    } else {
-                        content = snippet.getContent();
-                    }
-                    MessageUtility.setText(sanitizeContent(content), "UTF-8", null == misc ? "plain" : contentType, textPart);
+                    final String content = snippet.getContent();
+                    MessageUtility.setText(sanitizeContent(content), "UTF-8", null == misc ? "plain" : contentSubType, textPart);
                     // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
-                    
                     multipart.addBodyPart(textPart);
                 }
                 // Misc
@@ -658,6 +660,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
             final MimePart miscPart;
             if (properties.contains(Property.MISC)) {
                 final Object misc = snippet.getMisc();
+                final String contentSubType = determineContentSubtype(misc);
+                
+                // Process image and add it as an attachment
+                final MimeSnippetProcessor snippetProcessor = new MimeSnippetProcessor(session);
+                if (contentSubType.equals("html")) {
+                    snippetProcessor.processImage(snippet);
+                }   
+                
                 if (null == misc) {
                     miscPart = null;
                 } else {
@@ -720,15 +730,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Add text part
                 final MimeBodyPart textPart = new MimeBodyPart();
                 final String subType = determineContentSubtype(snippet.getMisc());
-                final String processedContent;
-                if (subType.startsWith("html")) {
-                    MimeSnippetFiller snippetFiller = new MimeSnippetFiller(session, getContext(contextId));
-                    processedContent = snippetFiller.processSnippetContent(content, primaryMultipart);
-                } else {
-                    processedContent = content;
-                }
                 // MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == miscPart ? "plain" : determineContentSubtype(MessageUtility.readMimePart(miscPart, "UTF-8")), textPart);
-                textPart.setText(sanitizeContent(processedContent), "UTF-8", subType);
+                textPart.setText(sanitizeContent(content), "UTF-8", subType);
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
                 // Add attachment parts

@@ -190,8 +190,9 @@ public class SnippetImageDataSource implements ImageDataSource {
 
     @Override
     public DataArguments generateDataArgumentsFrom(ImageLocation imageLocation) {
-        final DataArguments dataArgs = new DataArguments(1);
+        final DataArguments dataArgs = new DataArguments(2);
         dataArgs.put(ARGS[0], imageLocation.getId());
+        dataArgs.put(ARGS[1], imageLocation.getImageId());
         return dataArgs;
     }
 
