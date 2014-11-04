@@ -49,23 +49,32 @@
 
 package com.openexchange.spamhandler.spamassassin;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import org.apache.spamassassin.spamc.Spamc;
 import org.apache.spamassassin.spamc.Spamc.SpamdResponse;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
@@ -287,18 +296,41 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     }
 
     private MailMessage[] getNestedMailsAndHandleOthersAsPlain(final UnwrapParameter paramObject, final String confirmedHamFullname, final String[] nestedMessages, final SpamdSettings spamdSettings, final int accountId, final Session session) throws OXException {
-        final int nestedmessagelength = nestedMessages.length;
-        final List<MailMessage> nestedMails = new ArrayList<MailMessage>(nestedmessagelength);
-        final String[] exc = new String[1];
+        int nestedmessagelength = nestedMessages.length;
+        List<MailMessage> nestedMails = new ArrayList<MailMessage>(nestedmessagelength);
+        String[] exc = new String[1];
         for (int i = 0; i < nestedmessagelength; i++) {
-            final MailPart wrapped = paramObject.getMailAccess().getMessageStorage().getAttachment(paramObject.getSpamFullname(), nestedMessages[i], "2");
+            MailPart wrapped = paramObject.getMailAccess().getMessageStorage().getAttachment(paramObject.getSpamFullname(), nestedMessages[i], "2");
             wrapped.loadContent();
+
             MailMessage tmp = null;
-            if (wrapped instanceof MailMessage) {
-                tmp = (MailMessage) wrapped;
-            } else if (wrapped.getContentType().startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
-                tmp = (MailMessage) (wrapped.getContent());
+            {
+                if (wrapped instanceof MailMessage) {
+                    tmp = (MailMessage) wrapped;
+                } else if (wrapped.getContentType().startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
+                    Object content = wrapped.getContent();
+                    if (content instanceof MailMessage) {
+                        tmp = (MailMessage) content;
+                    } else if (content instanceof MimeMessage) {
+                        tmp = MimeMessageConverter.convertMessage((MimeMessage) content, false);
+                    } else if (content instanceof InputStream) {
+                        try {
+                            tmp = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
+                        } catch (MessagingException e) {
+                            throw MimeMailException.handleMessagingException(e);
+                        }
+                    } else if (content instanceof String) {
+                        try {
+                            tmp = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8"))));
+                        } catch (UnsupportedEncodingException e) {
+                            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
+                        } catch (MessagingException e) {
+                            throw MimeMailException.handleMessagingException(e);
+                        }
+                    }
+                }
             }
+
             if (null == tmp) {
                 /*
                  * Handle like a plain spam message
