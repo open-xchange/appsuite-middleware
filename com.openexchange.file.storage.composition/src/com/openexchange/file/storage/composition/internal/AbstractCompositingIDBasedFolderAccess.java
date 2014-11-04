@@ -65,6 +65,7 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -345,7 +346,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
                 }
             } catch (OXException e) {
                 // Check for com.openexchange.folderstorage.FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE -- 'FLD-0003'
-                if (3 != e.getCode() || !"FLD".equals(e.getPrefix())) {
+                if (false == e.equalsCode(3, "FLD")) {
                     LOG.warn("Could not load root folder for account {}", accessWrapper.displayName, e);
                 }
             }
@@ -372,7 +373,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
                     accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
                 } catch (OXException e) {
                     // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
-                    if (4 != e.getCode() || !"OAUTH".equals(e.getPrefix())) {
+                    if (!e.equalsCode(4, "OAUTH") && !OXExceptions.containsCommunicationError(e)) {
                         throw e;
                     }
                 }
