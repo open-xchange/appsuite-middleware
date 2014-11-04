@@ -135,7 +135,7 @@ public class DefaultShareService implements ShareService {
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(
             contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
-        return 0 == shares.size() ? null : new ResolvedGuestShare(contextID, guest, shares);
+        return 0 == shares.size() ? null : new ResolvedGuestShare(services, contextID, guest, shares);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class DefaultShareService implements ShareService {
                     sharesForGuest.add(share);
                     sharesToStore.add(share);
                 }
-                guestShares.add(new ResolvedGuestShare(contextID, guestUser, sharesForGuest));
+                guestShares.add(new ResolvedGuestShare(services, contextID, guestUser, sharesForGuest));
             }
             /*
              * store shares
@@ -229,7 +229,7 @@ public class DefaultShareService implements ShareService {
             User guestUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), guestID, context);
             services.getService(ShareStorage.class).updateShares(session.getContextId(), shares, clientTimestamp, connectionHelper.getParameters());
             connectionHelper.commit();
-            return new ResolvedGuestShare(session.getContextId(), guestUser, shares);
+            return new ResolvedGuestShare(services, session.getContextId(), guestUser, shares);
         } finally {
             connectionHelper.finish();
         }

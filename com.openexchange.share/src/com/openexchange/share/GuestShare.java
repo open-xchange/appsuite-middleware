@@ -131,4 +131,29 @@ public interface GuestShare {
      */
     ShareTarget getSingleTarget();
 
+    /**
+     * Gets the share URL to access the share as guest user. If there is a single target behind this guest share, the target's path is
+     * appended to the base share URL implicitly, otherwise, just the base share URL is returned.
+     *
+     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code>, <code>https://</code> is used. You probably
+     *        want to pass <code>com.openexchange.tools.servlet.http.Tools.getProtocol()</code> here.
+     * @param fallbackHostname The hostname to use if no HostnameService is available. You probably want to pass
+     *        <code>HttpServletRequest.getServerName()</code> here.
+     * @return The share URL as used to access the share as guest
+     */
+    String getShareURL(String protocol, String fallbackHostname) throws OXException;
+
+    /**
+     * Gets the (base) share URL to access the share as guest user and jump to the supplied target directly.
+     *
+     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code>, <code>https://</code> is used. You probably
+     *        want to pass <code>com.openexchange.tools.servlet.http.Tools.getProtocol()</code> here.
+     * @param fallbackHostname The hostname to use if no HostnameService is available. You probably want to pass
+     *        <code>HttpServletRequest.getServerName()</code> here.
+     * @param target One of this share's targets to address by appending the it's path, or <code>null</code> to always return the base
+     *        share URL for the guest
+     * @return The share URL as used to access the share as guest
+     */
+    String getShareURL(String protocol, String fallbackHostname, ShareTarget target) throws OXException;
+
 }
