@@ -53,14 +53,12 @@ import java.io.IOException;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.CommonDeleteParser;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
-import com.openexchange.groupware.modules.Module;
 
 /**
  * {@link DeleteRequest}
@@ -145,12 +143,7 @@ public class DeleteRequest implements AJAXRequest<CommonDeleteResponse>{
     public Object getBody() throws IOException, JSONException {
         JSONArray jsonArray = new JSONArray();
         for (ParsedShare share : shares) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("guest", share.getGuest());
-            jsonObject.put("module", Module.getForFolderConstant(share.getTarget().getModule()).getName());
-            jsonObject.put("folder", share.getTarget().getFolder());
-            jsonObject.put("item", share.getTarget().getItem());
-            jsonArray.put(jsonObject);
+            jsonArray.put(share.getToken());
         }
         return jsonArray;
     }

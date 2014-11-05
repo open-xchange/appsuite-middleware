@@ -108,7 +108,6 @@ public class DefaultShareService implements ShareService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultShareService.class);
 
     private final ServiceLookup services;
-
     private final GuestCleaner guestCleaner;
 
     /**
@@ -256,35 +255,6 @@ public class DefaultShareService implements ShareService {
          */
         if (0 < affectedShares) {
             scheduleGuestCleanup(session.getContextId(), guestIDs == null ? null : I2i(guestIDs));
-        }
-    }
-
-    @Override
-    public void deleteShares(Session session, List<Share> shares, Date clientTimestamp) throws OXException {
-        // TODO: check permissions prior deletion (session user == share owner || session user == share created by)
-        // TODO: method really needed, or is deletaTargets sufficient?
-        if (null == shares || 0 == shares.size()) {
-            return;
-        }
-        /*
-         * delete shares from storage
-         */
-        int affectedShares = 0;
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        try {
-            connectionHelper.start();
-            affectedShares = shareStorage.deleteShares(connectionHelper.getContextID(), shares, connectionHelper.getParameters());
-            removeTargetPermissions(connectionHelper, shares);
-            connectionHelper.commit();
-        } finally {
-            connectionHelper.finish();
-        }
-        /*
-         * schedule cleanup tasks as needed
-         */
-        if (0 < affectedShares) {
-            scheduleGuestCleanup(session.getContextId(), I2i(ShareTool.getGuestIDs(shares)));
         }
     }
 

@@ -59,8 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,8 +73,7 @@ public class DeleteAction extends AbstractShareAction {
     /**
      * Initializes a new {@link DeleteAction}.
      *
-     * @param services The service lookup
-     * @param translatorFactory
+     * @param services A service lookup reference
      */
     public DeleteAction(ServiceLookup services) {
         super(services);
@@ -85,17 +82,13 @@ public class DeleteAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
-         * extract parameters
+         * extract tokens to delete
          */
-        Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
-        List<Share> shares = new ArrayList<Share>();
+        List<String> tokens = new ArrayList<String>();
         try {
             JSONArray jsonArray = (JSONArray) requestData.requireData();
             for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                int guest = jsonObject.getInt("guest");
-                ShareTarget target = ShareJSONParser.parseTarget(jsonObject, getTimeZone(requestData, session));
-                shares.add(new Share(guest, target));
+                tokens.add(jsonArray.getString(i));
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -103,13 +96,15 @@ public class DeleteAction extends AbstractShareAction {
         /*
          * delete shares
          */
-        if (0 < shares.size()) {
-            getShareService().deleteShares(session, shares, clientTimestamp);
+        if (0 < tokens.size()) {
+            //TODO: allow multiple tokens
+            DeletePerformer deletePerformer = new DeletePerformer(tokens.get(0), session, services);
+            deletePerformer.perform();
         }
         /*
          * return empty results in case of success
          */
-        return new AJAXRequestResult(new JSONObject(0), clientTimestamp, "json");
+        return new AJAXRequestResult(new JSONObject(0), new Date(), "json");
     }
 
 }

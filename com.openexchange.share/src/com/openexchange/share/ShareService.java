@@ -128,15 +128,6 @@ public interface ShareService {
     List<ShareInfo> getAllShares(Session session) throws OXException;
 
     /**
-     * Deletes multiple shares.
-     *
-     * @param session The session
-     * @param shares The shares to delete, where each one must provide at least guest- and target-information
-     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
-     */
-    void deleteShares(Session session, List<Share> shares, Date clientTimestamp) throws OXException;
-
-    /**
      * Gets all users that shared something to specified guest.
      *
      * @param contextId The context identifier

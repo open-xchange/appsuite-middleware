@@ -85,7 +85,7 @@ public class DeleteTest extends ShareTest {
         testDeleteShare(randomFolderAPI(), randomModule(), randomGuestPermission());
     }
 
-    public void testDeleteShareExtensively() throws Exception {
+    public void noTestDeleteShareExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
