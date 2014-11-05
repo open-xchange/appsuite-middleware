@@ -1,12 +1,10 @@
-<<<<<<< HEAD
 * 2014-11-05 - marcus.klein@open-xchange.com
 
  - US 72756024: backend packages can be built on RHEL7
-=======
+
 * 2014-11-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 35139: Allow "data" URI scheme in <img> src attribute
->>>>>>> 2636694... Fix for bug 35139: Allow "data" URI scheme in <img> src attribute
 
 * 2014-11-03 - thorben.betten@open-xchange.com
 
