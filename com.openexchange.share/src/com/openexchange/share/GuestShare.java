@@ -82,11 +82,18 @@ public interface GuestShare {
     AuthenticationMode getAuthentication();
 
     /**
-     * Gets the token associated with the guest user.
+     * Gets the base token associated with the share's guest user.
+     *
+     * @return The base token
+     */
+    String getBaseToken() throws OXException;
+
+    /**
+     * Gets the (absolute) token for one of the guest share's targets, i.e. the base token plus the target path.
      *
      * @return The token
      */
-    String getToken() throws OXException;
+    String getToken(ShareTarget target) throws OXException;
 
     /**
      * Gets a list of all share targets the guest has access to.

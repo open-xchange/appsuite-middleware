@@ -111,7 +111,7 @@ public class InviteAction extends AbstractShareAction {
                 if (share == null) {
                     jTokens.put(JSONObject.NULL);
                 } else {
-                    jTokens.put(share.getToken());
+                    jTokens.put(share.getBaseToken());
                 }
             }
 
@@ -140,9 +140,9 @@ public class InviteAction extends AbstractShareAction {
                         {
                             String shareToken;
                             if (share.isMultiTarget()) {
-                                shareToken = share.getToken();
+                                shareToken = share.getBaseToken();
                             } else {
-                                shareToken = share.getToken() + '/' + share.getSingleTarget().getPath();
+                                shareToken = share.getBaseToken() + '/' + share.getSingleTarget().getPath();
                             }
 
                             User guest = userService.getUser(share.getGuestID(), session.getContextId());

@@ -75,9 +75,16 @@ public interface ShareInfo {
     AuthenticationMode getAuthentication();
 
     /**
-     * Gets the token associated with the share's guest user.
+     * Gets the base token associated with the share's guest user.
      *
-     * @return The token
+     * @return The base token
+     */
+    String getBaseToken() throws OXException;
+
+    /**
+     * Gets the (absolute) token for the share target, i.e. the base token plus the target path.
+     *
+     * @return The absolute token
      */
     String getToken() throws OXException;
 

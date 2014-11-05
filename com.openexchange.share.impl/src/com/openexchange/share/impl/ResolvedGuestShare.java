@@ -119,8 +119,13 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
-    public String getToken() throws OXException {
+    public String getBaseToken() throws OXException {
         return new ShareToken(contextID, guestUser).getToken();
+    }
+
+    @Override
+    public String getToken(ShareTarget target) throws OXException {
+        return getBaseToken() + '/' + target.getPath();
     }
 
     @Override
@@ -190,7 +195,7 @@ public class ResolvedGuestShare implements GuestShare {
             .append(getHostname(guestUser.getCreatedBy(), contextID, fallbackHostname))
             .append(getServletPrefix())
             .append(ShareTool.SHARE_SERVLET).append('/')
-            .append(getToken());
+            .append(getBaseToken());
         if (null != target) {
             stringBuilder.append('/').append(target.getPath());
         }

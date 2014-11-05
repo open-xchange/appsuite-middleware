@@ -90,6 +90,11 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
     }
 
     @Override
+    public String getToken() throws OXException {
+        return super.getToken(share.getTarget());
+    }
+
+    @Override
     public String getEmailAddress() {
         if (RecipientType.GUEST == getRecipientType()) {
             return guestUser.getMail();

@@ -123,7 +123,7 @@ public final class ShareServletUtils {
             loginMethod.sendUnauthorized(request, response);
             return null;
         }
-        LOG.debug("Successful login for share {} with guest user {} in context {}.", share.getToken(), share.getGuestID(), share.getContextID());
+        LOG.debug("Successful login for share {} with guest user {} in context {}.", share.getBaseToken(), share.getGuestID(), share.getContextID());
         loginResult.getSession().setParameter(Session.PARAM_GUEST, Boolean.TRUE);
         return loginResult;
     }

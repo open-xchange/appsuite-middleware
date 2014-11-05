@@ -69,6 +69,7 @@ import com.openexchange.share.recipient.ShareRecipient;
 public class ParsedShare {
 
     private String shareURL;
+    private String token;
     private AuthenticationMode authentication;
     private Date created;
     private int createdBy;
@@ -93,6 +94,7 @@ public class ParsedShare {
     public ParsedShare(JSONObject json) throws JSONException {
         super();
         shareURL = json.optString("share_url");
+        token = json.optString("token");
         if (json.has("authentication")) {
             authentication = Enums.parse(AuthenticationMode.class, json.getString("authentication"));
         }
@@ -216,6 +218,24 @@ public class ParsedShare {
      */
     public void setTarget(ParsedShareTarget target) {
         this.target = target;
+    }
+
+    /**
+     * Gets the token
+     *
+     * @return The token
+     */
+    public String getToken() {
+        return token;
+    }
+
+    /**
+     * Sets the token
+     *
+     * @param token The token to set
+     */
+    public void setToken(String token) {
+        this.token = token;
     }
 
 }

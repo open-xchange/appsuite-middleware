@@ -132,9 +132,9 @@ public class NotifyAction extends AbstractShareAction {
 
         String shareToken;
         if (share.isMultiTarget()) {
-            shareToken = share.getToken();
+            shareToken = share.getBaseToken();
         } else {
-            shareToken = share.getToken() + '/' + share.getSingleTarget().getPath();
+            shareToken = share.getBaseToken() + '/' + share.getSingleTarget().getPath();
         }
 
         ShareNotificationService notificationService = getNotificationService();

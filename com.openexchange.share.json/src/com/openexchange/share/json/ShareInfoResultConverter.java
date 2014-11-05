@@ -64,7 +64,6 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -209,6 +208,7 @@ public class ShareInfoResultConverter implements ResultConverter {
     private JSONObject serializeShareRecipient(ShareInfo share, TimeZone timeZone) throws JSONException, OXException {
         JSONObject jsonRecipient = new JSONObject(8);
         jsonRecipient.put("type", share.getRecipientType().toString().toLowerCase());
+        jsonRecipient.put("base_token", share.getBaseToken());
         jsonRecipient.putOpt("password", share.getPassword());
         jsonRecipient.putOpt("email_address", share.getEmailAddress());
         jsonRecipient.put("entity", String.valueOf(share.getShare().getGuest()));
