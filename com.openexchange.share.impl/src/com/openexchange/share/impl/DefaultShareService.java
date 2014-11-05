@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.quota.AccountQuota;
@@ -125,9 +126,18 @@ public class DefaultShareService implements ShareService {
     public GuestShare resolveToken(String token) throws OXException {
         ShareToken shareToken = new ShareToken(token);
         int contextID = shareToken.getContextID();
-        // TODO: throws user not found exception. We should detect this and throw a share not found exception.
-        User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+        User guest;
+        try {
+            guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+        } catch (OXException e) {
+            if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                LOG.debug("Guest user for share token {} not found, unable to resolve token.", shareToken, e);
+                return null;
+            }
+            throw e;
+        }
         if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
+            LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(
