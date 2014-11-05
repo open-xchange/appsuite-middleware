@@ -51,8 +51,8 @@ package com.openexchange.ajax.share.tests;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import org.json.JSONArray;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -62,13 +62,13 @@ import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.DeleteRequest;
 import com.openexchange.ajax.share.actions.InviteRequest;
-import com.openexchange.ajax.share.actions.InviteResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.ajax.user.actions.UpdateRequest;
 import com.openexchange.ajax.user.actions.UpdateResponse;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -76,7 +76,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -139,20 +138,16 @@ public class GuestContactTest extends ShareTest {
         guest.setBits(FOLDER_READ_PERMISSION);
 
         InviteRequest newRequest = new InviteRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(guest));
-        InviteResponse newResponse = client.execute(newRequest);
-        JSONArray jsonArray = (JSONArray) newResponse.getData();
-        shares = new ArrayList<ParsedShare>(jsonArray.length());
-        for (int i = 0; i < jsonArray.length(); i++) {
-            //TODO: shares from new response
-            //tokens.add(jsonArray.getString(i));
-        }
+        client.execute(newRequest);
         List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
         guestId = -1;
         share = null;
+        shares = new ArrayList<ParsedShare>(1);
         for (ParsedShare parsedShare : allShares) {
             if (parsedShare.getTarget().equals(target)) {
                 guestId = parsedShare.getGuest();
                 share = parsedShare;
+                shares.add(share);
                 break;
             }
         }
@@ -162,6 +157,9 @@ public class GuestContactTest extends ShareTest {
     public void tearDown() throws Exception {
         DeleteRequest deleteRequest = new DeleteRequest(shares, System.currentTimeMillis(), false);
         client.execute(deleteRequest);
+        if (null == file.getLastModified()) {
+            file.setLastModified(new Date());
+        }
         itm.deleteAction(file);
         super.tearDown();
     }
@@ -234,7 +232,7 @@ public class GuestContactTest extends ShareTest {
         DeleteRequest deleteRequest = new DeleteRequest(shares, System.currentTimeMillis(), false);
         CommonDeleteResponse deleteResponse = secondClient.execute(deleteRequest);
         assertTrue("Any user can delete any shares.", deleteResponse.hasError());
-        assertEquals(ShareExceptionCodes.NO_DELETE_PERMISSIONS.getNumber(), deleteResponse.getException().getCode());
+        assertEquals(FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.getNumber(), deleteResponse.getException().getCode());
     }
 
 }
