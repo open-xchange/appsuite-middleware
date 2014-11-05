@@ -157,8 +157,10 @@ public final class SnippetUtils {
     public static String getImageId(final Object misc) throws OXException {
         String imageId = null;
         try {
-            JSONObject m = new JSONObject(misc.toString());
-            imageId = m.optString("imageId");
+            if (misc != null) {
+                JSONObject m = new JSONObject(misc.toString());
+                imageId = m.optString("imageId");
+            }
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
         }
