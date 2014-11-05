@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -70,12 +71,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -89,6 +87,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
+import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -163,7 +162,6 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
             return Collections.emptyList();
         }
-        checkQuota(session);
 
         int contextID = session.getContextId();
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
@@ -173,14 +171,18 @@ public class DefaultShareService implements ShareService {
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
+
+            int newShares = targets.size() * recipients.size();
+            checkQuota(connectionHelper, session, newShares);
             /*
              * prepare guest users and resulting shares
              */
-            List<Share> sharesToStore = new ArrayList<Share>(targets.size() * recipients.size());
-            User sharingUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), session.getUserId(), context);
+            Connection connection = connectionHelper.getConnection();
+            User sharingUser = services.getService(UserService.class).getUser(connection, session.getUserId(), context);
+            List<Share> sharesToStore = new ArrayList<Share>(newShares);
             for (ShareRecipient recipient : recipients) {
                 int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
-                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient);
+                User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient);
                 List<Share> sharesForGuest = new ArrayList<Share>(targets.size());
                 for (ShareTarget target : targets) {
                     Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
@@ -594,43 +596,34 @@ public class DefaultShareService implements ShareService {
     /**
      * Checks the quota for the user associated to the session
      *
+     * @param connectionHelper The ConnectionHelper
      * @param session The session
+     * @param additionalQuotaUsage The quota that should be added to existing one
      * @throws OXException
      */
-    protected void checkQuota(Session session) throws OXException {
+    protected void checkQuota(ConnectionHelper connectionHelper, Session session, int additionalQuotaUsage) throws OXException {
         QuotaService quotaService = services.getService(QuotaService.class);
         if (quotaService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class.getName());
         }
 
-        QuotaProvider provider = quotaService.getProvider("share");
+        ShareQuotaProvider provider = (ShareQuotaProvider) quotaService.getProvider("share");
         if (provider == null) {
             LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
             return;
         }
 
-        AccountQuota userQuota = provider.getFor(session, Integer.toString(session.getUserId()));
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
+        }
 
-        Quota quota = userQuota.getQuota(QuotaType.AMOUNT);
-        if (!quota.isUnlimited() && quota.isExceeded()) {
+        Quota quota = provider.getAmountQuota(session, connectionHelper.getConnection(), connectionHelper.getParameters(), viewFactory);
+
+        if (!quota.isUnlimited() && quota.willExceed(additionalQuotaUsage)) {
             long limit = quota.getLimit();
             long usage = quota.getUsage();
             throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.create(usage, limit);
         }
     }
-
-    /**
-     * Returns the currently created number of shares for the given user.
-     *
-     * @param contextId - id of the relevant context
-     * @param userId - id of the user to get the count for
-     * @return int - number of created shares
-     * @throws OXException
-     */
-    public int getUsedQuota(int contextId, int userId) throws OXException {
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        int shareCount = shareStorage.countShares(contextId, userId, StorageParameters.NO_PARAMETERS);
-        return shareCount;
-    }
-
 }

@@ -211,7 +211,7 @@ public class ShareActivator extends HousekeepingActivator {
         ModuleSupport moduleSupport = new ModuleSupportImpl(this);
         registerService(ModuleSupport.class, moduleSupport);
         registerService(ShareNotificationService.class, defaultNotificationService);
-        registerService(QuotaProvider.class, new ShareQuotaProvider(this, shareService));
+        registerService(QuotaProvider.class, new ShareQuotaProvider(this));
 
         trackService(ModuleSupport.class);
         track(ManagementService.class, new ManagementServiceTracker(context, shareService, moduleSupport, getService(DatabaseService.class)));

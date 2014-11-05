@@ -150,6 +150,24 @@ public class AmountQuotas {
      * @throws OXException
      */
     public static long getLimit(Session session, String moduleID, ConfigViewFactory configViewFactory, Connection connection) throws OXException {
+        return getLimit(session, moduleID, configViewFactory, connection, Quota.UNLIMITED);
+    }
+
+    /**
+     * Gets the configured amount limit in a specific module for the supplied session's user. The value is either retrieved directly from
+     * the database, or, if not defined there, through the user's configuration view.<br>
+     * <br>
+     * If no value can be found the provided default value will be returned
+     *
+     * @param session The session
+     * @param moduleID The module ID
+     * @param configViewFactory A reference to the config view factory
+     * @param connection An open database connection
+     * @param defaultValue Value that will be returned if amount can not be found
+     * @return The limit or the defaultValue if no amount quota is defined
+     * @throws OXException
+     */
+    public static long getLimit(Session session, String moduleID, ConfigViewFactory configViewFactory, Connection connection, long defaultValue) throws OXException {
         final Long quotaFromDB = getQuotaFromDB(connection, session.getContextId(), moduleID);
         if (null != quotaFromDB) {
             return quotaFromDB.longValue();
@@ -158,13 +176,13 @@ public class AmountQuotas {
         // Get property
         ConfigProperty<String> property = configView.property("com.openexchange.quota." + moduleID, String.class);
         if (!property.isDefined()) {
-            return Quota.UNLIMITED;
+            return defaultValue;
         }
         try {
             return Long.parseLong(property.get().trim());
         } catch (final RuntimeException e) {
             LOG.warn("Couldn't detect quota for {} (user={}, context={})", moduleID, session.getUserId(), session.getContextId(), e);
-            return Quota.UNLIMITED;
+            return defaultValue;
         }
     }
 

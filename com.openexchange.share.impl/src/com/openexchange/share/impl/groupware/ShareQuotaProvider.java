@@ -49,22 +49,25 @@
 
 package com.openexchange.share.impl.groupware;
 
+import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.Validate;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.share.storage.StorageParameters;
 
 /**
  * {@link ShareQuotaProvider}
@@ -74,21 +77,17 @@ import com.openexchange.share.impl.DefaultShareService;
  */
 public class ShareQuotaProvider implements QuotaProvider {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareQuotaProvider.class);
+    private static final long DEFAULT_SHARE_QUOTA_LIMIT = 150;
 
     private static final String MODULE_ID = "share";
 
-    private final DefaultShareService shareService;
-
     private final ServiceLookup services;
 
-    public ShareQuotaProvider(ServiceLookup services, DefaultShareService shareService) {
+    public ShareQuotaProvider(ServiceLookup services) {
         super();
 
         Validate.notNull(services, "ServiceLookup might not be null!");
-        Validate.notNull(shareService, "ShareService might not be null!");
         this.services = services;
-        this.shareService = shareService;
     }
 
     /**
@@ -112,7 +111,7 @@ public class ShareQuotaProvider implements QuotaProvider {
      */
     @Override
     public List<AccountQuota> getFor(Session session) throws OXException {
-        return Collections.singletonList(getFor(session, Integer.toString(session.getUserId())));
+        return Collections.singletonList(getFor(session, "0"));
     }
 
     /**
@@ -120,40 +119,58 @@ public class ShareQuotaProvider implements QuotaProvider {
      */
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
-        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        if (viewFactory == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
+        if (accountID.equals("0")) {
+            ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+            if (viewFactory == null) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
+            }
+
+            DatabaseService databaseService = services.getService(DatabaseService.class);
+            if (databaseService == null) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+            }
+
+            Quota quota = getAmountQuota(session, databaseService.getReadOnly(session.getContextId()), StorageParameters.NO_PARAMETERS, viewFactory);
+
+            return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(quota);
         }
-
-        final ConfigView configView = viewFactory.getView(session.getUserId(), session.getContextId());
-        long limit = getQuota(configView);
-        if (limit == Quota.UNLIMITED) {
-            return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(Quota.UNLIMITED_AMOUNT);
-        }
-
-        int usedQuota = shareService.getUsedQuota(session.getContextId(), Integer.parseInt(accountID));
-
-        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(new Quota(QuotaType.AMOUNT, limit, usedQuota));
+        throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
     }
 
     /**
-     * Returns the defined quota limit for defined for the user.
+     * Returns the quota available for the user associated to the session
      *
-     * @param configView - view for the given user.
-     * @return long - quota limit for the given user
+     * @param session - the session to get quota for
+     * @param connection - connection for quota retrieving
+     * @param viewFactory - ConfigViewFactory
+     * @return current existing/available Quota
      * @throws OXException
      */
-    protected long getQuota(final ConfigView configView) throws OXException {
-        ConfigProperty<String> property = configView.property("com.openexchange.quota.share", String.class);
-        if (!property.isDefined()) {
-            LOG.warn("Property 'com.openxchange.quota.share' not found. Will use default value 150 as quota. Please define the property to change the value.");
-            return 150;
+    public Quota getAmountQuota(Session session, Connection connection, StorageParameters parameters, ConfigViewFactory viewFactory) throws OXException {
+        long limit = AmountQuotas.getLimit(session, MODULE_ID, viewFactory, connection, DEFAULT_SHARE_QUOTA_LIMIT);
+        if (limit == Quota.UNLIMITED) {
+            return Quota.UNLIMITED_AMOUNT;
         }
-        try {
-            return Long.parseLong(property.get().trim());
-        } catch (final RuntimeException e) {
-            LOG.warn("Could not parse value found for property 'com.openxchange.quota.share'. Will use default value 150 as quota.", e);
-            return 150;
+
+        long usage = this.getUsedQuota(session.getContextId(), session.getUserId(), parameters);
+        return new Quota(QuotaType.AMOUNT, limit, usage);
+    }
+
+    /**
+     * Returns the currently existing number of shares for the given user.
+     *
+     * @param contextId - id of the relevant context
+     * @param userId - id of the user to get the count for
+     * @return int - number of currently existing shares
+     * @throws OXException
+     */
+    private int getUsedQuota(int contextId, int userId, StorageParameters parameters) throws OXException {
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        if (shareStorage == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareStorage.class.getName());
         }
+
+        int usedCount = shareStorage.countShares(contextId, userId, parameters);
+        return usedCount;
     }
 }
