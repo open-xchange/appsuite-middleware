@@ -51,8 +51,14 @@ package com.openexchange.share.json.actions;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -76,16 +82,26 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DeletePerformer extends AbstractPerformer<Void> {
 
-    private final String token;
+    private final List<String> tokens;
 
     /**
      * Initializes a new {@link DeletePerformer}.
      * @param session
      * @param services
      */
-    protected DeletePerformer(String token, ServerSession session, ServiceLookup services) {
+    DeletePerformer(String token, ServerSession session, ServiceLookup services) {
         super(session, services);
-        this.token = token;
+        this.tokens = Collections.singletonList(token);
+    }
+
+    /**
+     * Initializes a new {@link DeletePerformer}.
+     * @param session
+     * @param services
+     */
+    DeletePerformer(List<String> tokens, ServerSession session, ServiceLookup services) {
+        super(session, services);
+        this.tokens = tokens;
     }
 
     @Override
@@ -94,29 +110,60 @@ public class DeletePerformer extends AbstractPerformer<Void> {
         Context context = session.getContext();
         Connection writeCon = dbService.getWritable(context);
         session.setParameter(Connection.class.getName(), writeCon);
+        TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
         try {
             Databases.startTransaction(writeCon);
             ShareService shareService = getShareService();
-            GuestShare guestShare = TokenParser.resolveShare(token, shareService);
-            List<ShareTarget> targetsToDelete = TokenParser.resolveTargets(guestShare, token);
+            Map<Integer, List<ShareTarget>> targetsByGuest = new HashMap<Integer, List<ShareTarget>>();
+            Map<ShareTarget, Set<Integer>> guestsByTarget = new HashMap<ShareTarget, Set<Integer>>();
+            for (String token : tokens) {
+                GuestShare guestShare = TokenParser.resolveShare(token, shareService);
+                List<ShareTarget> targets = TokenParser.resolveTargets(guestShare, token);
+                List<ShareTarget> targetsToDelete = targetsByGuest.get(guestShare.getGuestID());
+                if (targetsToDelete == null) {
+                    targetsToDelete = new ArrayList<ShareTarget>(guestShare.getTargets().size());
+                    targetsByGuest.put(guestShare.getGuestID(), targetsToDelete);
+                }
 
-            /*
-             * Remove folder and object permissions
-             */
-            TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
-            update.fetch(targetsToDelete);
-            List<TargetPermission> permissions = Collections.singletonList(new TargetPermission(guestShare.getGuestID(), false, 0));
-            for (ShareTarget target : targetsToDelete) {
+                for (ShareTarget target : targets) {
+                    targetsToDelete.add(target);
+                    Set<Integer> guestIDs = guestsByTarget.get(target);
+                    if (guestIDs == null) {
+                        guestIDs = new HashSet<Integer>();
+                        guestsByTarget.put(target, guestIDs);
+                    }
+
+                    guestIDs.add(guestShare.getGuestID());
+                }
+            }
+
+            update.fetch(guestsByTarget.keySet());
+
+            for (Entry<ShareTarget, Set<Integer>> targetAndGuests : guestsByTarget.entrySet()) {
+                ShareTarget target = targetAndGuests.getKey();
+                Set<Integer> guestIDs = targetAndGuests.getValue();
+
+                /*
+                 * Remove folder and object permissions
+                 */
+                List<TargetPermission> permissions = new ArrayList<TargetPermission>(guestIDs.size());
+                for (int guestID : guestIDs) {
+                    permissions.add(new TargetPermission(guestID, false, 0));
+                }
+
                 TargetProxy proxy = update.get(target);
                 proxy.removePermissions(permissions);
             }
+
             update.run();
-            update.close();
 
             /*
              * Remove share targets
              */
-            shareService.deleteTargets(session, targetsToDelete, Collections.singletonList(guestShare.getGuestID()));
+            for (Entry<Integer, List<ShareTarget>> guestAndTarget : targetsByGuest.entrySet()) {
+                shareService.deleteTargets(session, guestAndTarget.getValue(), Collections.singletonList(guestAndTarget.getKey()));
+            }
+
             writeCon.commit();
         } catch (OXException e) {
             Databases.rollback(writeCon);
@@ -128,6 +175,7 @@ public class DeletePerformer extends AbstractPerformer<Void> {
             session.setParameter(Connection.class.getName(), null);
             Databases.autocommit(writeCon);
             dbService.backWritable(context, writeCon);
+            update.close();
         }
 
         return null;
