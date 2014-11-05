@@ -61,8 +61,12 @@ import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.java.Enums;
-import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
@@ -109,49 +113,87 @@ public class FileMetadataFieldParser {
             JSONArray jsonArray = (JSONArray) val;
             List<FileStorageObjectPermission> objectPermissions = new ArrayList<FileStorageObjectPermission>(jsonArray.length());
             for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonPermission = jsonArray.getJSONObject(i);
-                int permissions = jsonPermission.getInt("bits");
                 FileStorageObjectPermission permission;
-                if (jsonPermission.hasAndNotNull("entity")) {
-                    int entity = jsonPermission.getInt("entity");
-                    boolean group = jsonPermission.getBoolean("group");
-                    permission = new DefaultFileStorageObjectPermission(entity, group, permissions);
-                } else if (jsonPermission.hasAndNotNull("guest_auth")) {
-                    DefaultFileStorageGuestObjectPermission perm = new DefaultFileStorageGuestObjectPermission(permissions);
-                    String authValue = jsonPermission.getString("guest_auth");
-                    try {
-                        perm.setAuthenticationMode(Enums.parse(AuthenticationMode.class, authValue));
-                    } catch (IllegalArgumentException e) {
-                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "guest_auth", authValue);
-                    }
-                    if (jsonPermission.hasAndNotNull("expires")) {
-                        perm.setExpires(new Date(jsonPermission.getLong("expires")));
-                    }
-                    if (AuthenticationMode.ANONYMOUS != perm.getAuthenticationMode()) {
-                        if (false == jsonPermission.hasAndNotNull("mail_address")) {
-                            throw AjaxExceptionCodes.MISSING_PARAMETER.create("mail_address");
-                        }
-                        perm.setEmailAddress(jsonPermission.getString("mail_address"));
-                        if (false == jsonPermission.hasAndNotNull("password")) {
-                            throw AjaxExceptionCodes.MISSING_PARAMETER.create("password");
-                        }
-                        perm.setPassword(jsonPermission.optString("password", null));
-                        perm.setDisplayName(jsonPermission.optString("display_name", null));
-                        perm.setContactID(jsonPermission.optString("contact_id", null));
-                        perm.setContactFolderID(jsonPermission.optString("contact_folder", null));
-                    }
-
-                    permission = perm;
-                } else {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("entity");
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                if (false == jsonObject.hasAndNotNull("bits")) {
+                    throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("bits");
                 }
-
+                int bits = jsonObject.getInt("bits");
+                /*
+                 * check for external guest permissions
+                 */
+                RecipientType type = Enums.parse(RecipientType.class, jsonObject.optString("type"), null);
+                if (null != type && (RecipientType.ANONYMOUS == type || RecipientType.GUEST == type)) {
+                    /*
+                     * parse as guest permission entity
+                     */
+                    DefaultFileStorageGuestObjectPermission parsedGuestPermission = new DefaultFileStorageGuestObjectPermission();
+                    parsedGuestPermission.setRecipient(parseRecipient(type, jsonObject));
+                    if (jsonObject.hasAndNotNull("expiry_date")) {
+                        parsedGuestPermission.setExpiryDate(new Date(jsonObject.getLong("expiry_date")));
+                    }
+                    parsedGuestPermission.setPermissions(bits);
+                    permission = parsedGuestPermission;
+                } else {
+                    /*
+                     * parse as already known permission entity
+                     */
+                    DefaultFileStorageObjectPermission parsedPermission = new DefaultFileStorageObjectPermission();
+                    if (false == jsonObject.has("entity")) {
+                        throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("entity");
+                    }
+                    parsedPermission.setEntity(jsonObject.getInt("entity"));
+                    if (false == jsonObject.has("group")) {
+                        throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("group");
+                    }
+                    parsedPermission.setGroup(jsonObject.getBoolean("group"));
+                    parsedPermission.setPermissions(bits);
+                    permission = parsedPermission;
+                }
                 objectPermissions.add(permission);
             }
             return objectPermissions;
         default:
             return val;
         }
+    }
+
+    /**
+     * Parses a share recipient from JSON.
+     *
+     * @param type The recipient type to parse
+     * @param jsonObject The JSON object to parse
+     * @return The parsed share recipient
+     */
+    private static ShareRecipient parseRecipient(RecipientType type, JSONObject jsonObject) throws OXException, JSONException {
+        ShareRecipient recipient;
+        switch (type) {
+        case ANONYMOUS:
+            AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
+            anonymousRecipient.setPassword(jsonObject.optString("password", null));
+            recipient = anonymousRecipient;
+            break;
+        case GUEST:
+            GuestRecipient guestRecipient = new GuestRecipient();
+            guestRecipient.setPassword(jsonObject.optString("password", null));
+            if (false == jsonObject.hasAndNotNull("mail_address")) {
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("mail_address");
+            }
+            guestRecipient.setEmailAddress(jsonObject.getString("mail_address"));
+            guestRecipient.setPassword(jsonObject.optString("password", null));
+            guestRecipient.setDisplayName(jsonObject.optString("display_name", null));
+            guestRecipient.setContactID(jsonObject.optString("contact_id", null));
+            guestRecipient.setContactFolder(jsonObject.optString("contact_folder", null));
+            recipient = guestRecipient;
+            break;
+        default:
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
+        }
+        if (false == jsonObject.hasAndNotNull("bits")) {
+            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("bits");
+        }
+        recipient.setBits(jsonObject.getInt("bits"));
+        return recipient;
     }
 
     private static Object categories(final JSONArray value) throws JSONException {

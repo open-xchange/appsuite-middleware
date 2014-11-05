@@ -75,7 +75,7 @@ import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.recipient.AnonymousRecipient;
 
 
 /**
@@ -129,8 +129,9 @@ public class FileStorageTransactionTest extends ShareTest {
         List<DefaultFile> sharedFiles = new ArrayList<DefaultFile>(files.size());
         for (DefaultFile file : files) {
             if (r.nextBoolean()) {
-                DefaultFileStorageGuestObjectPermission permission = new DefaultFileStorageGuestObjectPermission(ObjectPermission.READ);
-                permission.setAuthenticationMode(AuthenticationMode.ANONYMOUS);
+                DefaultFileStorageGuestObjectPermission permission = new DefaultFileStorageGuestObjectPermission();
+                permission.setPermissions(ObjectPermission.READ);
+                permission.setRecipient(new AnonymousRecipient());
                 file.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(permission));
                 itm.updateAction(file, new Field[] { Field.OBJECT_PERMISSIONS }, new Date());
                 sharedFiles.add(file);
@@ -146,7 +147,7 @@ public class FileStorageTransactionTest extends ShareTest {
                     continue;
                 }
 
-                if (target.getModule() == FolderObject.INFOSTORE && target.getFolder().equals(Integer.toString(testFolder.getObjectID())) && new FileID(file.getId()).getFileId().equals(target.getItem())) {
+                if (target.getModule() == FolderObject.INFOSTORE && target.getFolder().equals(Integer.toString(testFolder.getObjectID())) && file.getId().equals(target.getItem())) {
                     fileShares.add(share);
                     break;
                 }
@@ -157,6 +158,8 @@ public class FileStorageTransactionTest extends ShareTest {
 
         for (ParsedShare share : fileShares) {
             ParsedShareTarget target = share.getTarget();
+            //TODO: guest client needs to use folder 10 (not the folder as seen by the sharing user)
+            //      probably best to list the available items via guest client here
             GuestClient guestClient = new GuestClient(share.getShareURL(), null, null);
             File file = guestClient.execute(new GetInfostoreRequest(target.getItem())).getDocumentMetadata();
             assertEquals(target.getItem(), new FileID(file.getId()).getFileId());

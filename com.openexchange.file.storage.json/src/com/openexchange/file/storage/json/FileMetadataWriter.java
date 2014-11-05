@@ -65,6 +65,9 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -169,15 +172,26 @@ public class FileMetadataWriter {
                     for (Object obj : list) {
                         if (obj instanceof FileStorageGuestObjectPermission) {
                             FileStorageGuestObjectPermission permission = (FileStorageGuestObjectPermission) obj;
-                            JSONObject json = new JSONObject(3);
+                            ShareRecipient recipient = permission.getRecipient();
+                            JSONObject json = new JSONObject();
                             try {
-                                json.put("guest_auth", permission.getAuthenticationMode().name().toLowerCase());
-                                json.put("mail_address", permission.getEmailAddress());
-                                json.put("password", permission.getPassword());
-                                json.put("display_name", permission.getDisplayName());
-                                json.put("contact_id", permission.getContactID());
-                                json.put("contact_folder", permission.getContactFolderID());
+                                json.put("type", recipient.getType().toString().toLowerCase());
                                 json.put("bits", permission.getPermissions());
+                                switch (recipient.getType()) {
+                                case ANONYMOUS:
+                                    json.putOpt("password", ((AnonymousRecipient) recipient).getPassword());
+                                    break;
+                                case GUEST:
+                                    GuestRecipient guestRecipient = (GuestRecipient) recipient;
+                                    json.putOpt("password", guestRecipient.getPassword());
+                                    json.putOpt("mail_address", guestRecipient.getEmailAddress());
+                                    json.putOpt("display_name", guestRecipient.getDisplayName());
+                                    json.putOpt("contact_id", guestRecipient.getContactID());
+                                    json.putOpt("contact_folder", guestRecipient.getContactFolder());
+                                    break;
+                                default:
+                                    throw new UnsupportedOperationException("Unable to write recipients of type " + recipient.getType());
+                                }
                                 jPermissions.put(json);
                             } catch (JSONException e) {
                                 LOG.error("", e);

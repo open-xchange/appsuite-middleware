@@ -50,7 +50,6 @@
 package com.openexchange.file.storage;
 
 import java.util.Date;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
@@ -63,59 +62,18 @@ import com.openexchange.share.recipient.ShareRecipient;
 public interface FileStorageGuestObjectPermission extends FileStorageObjectPermission {
 
     /**
-     * Gets the e-mail address of the guest.
+     * Gets the share recipient.
      *
-     * @return the e-mail address
+     * @return The share recipient
      */
-    String getEmailAddress();
+    ShareRecipient getRecipient();
 
     /**
-     * Gets the identifier of a known, existing contact representing the guest if available.
-     *
-     * @return The contact ID, or <code>null</code> if not known
-     */
-    String getContactID();
-
-    /**
-     * Gets the identifier of the parent folder where the known contact is located in.
-     *
-     * @return The ID of the parent contact folder, or <code>null</code> if not known
-     */
-    String getContactFolderID();
-
-    /**
-     * Gets the display name of the guest if available.
-     *
-     * @return The display name, or <code>null</code> if not known
-     */
-    String getDisplayName();
-
-    /**
-     * Gets the authentication mode used for the guest.
-     *
-     * @return The authentication mode
-     */
-    AuthenticationMode getAuthenticationMode();
-
-    /**
-     * Gets the password used for authentication if available.
-     *
-     * @return The password, or <code>null</code> if not known
-     */
-    String getPassword();
-
-    /**
-     * Gets the date when this guest permission should expire.
+     * If defined, gets the date when the share target associated with the permission should expire, i.e. it should be no longer
+     * accessible.
      *
      * @return The expiry date of the share, or <code>null</code> if not defined
      */
-    Date getExpires();
-
-    /**
-     * Converts this object to a {@link ShareRecipient} instance.
-     *
-     * @return The share recipient instance
-     */
-    ShareRecipient toShareRecipient();
+    Date getExpiryDate();
 
 }

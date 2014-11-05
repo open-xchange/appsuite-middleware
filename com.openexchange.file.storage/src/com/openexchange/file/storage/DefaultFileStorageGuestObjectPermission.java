@@ -50,9 +50,6 @@
 package com.openexchange.file.storage;
 
 import java.util.Date;
-import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
@@ -64,121 +61,32 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class DefaultFileStorageGuestObjectPermission extends DefaultFileStorageObjectPermission implements FileStorageGuestObjectPermission {
 
-    private String mailAddress;
-    private String contactID;
-    private String contactFolderID;
-    private String displayName;
-    private AuthenticationMode authenticationMode;
-    private String password;
-    private Date expires;
-
-    public DefaultFileStorageGuestObjectPermission(int bits) {
-        super(-1, false, bits);
-    }
-
-    @Override
-    public String getEmailAddress() {
-        return mailAddress;
-    }
-
-
-    public void setEmailAddress(String mailAddress) {
-        this.mailAddress = mailAddress;
-    }
-
-    @Override
-    public String getContactID() {
-        return contactID;
-    }
-
-    public void setContactID(String contactID) {
-        this.contactID = contactID;
-    }
-
-    @Override
-    public String getContactFolderID() {
-        return contactFolderID;
-    }
-
-    public void setContactFolderID(String contactFolderID) {
-        this.contactFolderID = contactFolderID;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
-    public AuthenticationMode getAuthenticationMode() {
-        return authenticationMode;
-    }
+    private ShareRecipient recipient;
+    private Date expiryDate;
 
     /**
-     * Sets the authenticationMode
-     *
-     * @param authenticationMode The authenticationMode to set
+     * Initializes an empty {@link DefaultFileStorageGuestObjectPermission}.
      */
-    public void setAuthenticationMode(AuthenticationMode authenticationMode) {
-        this.authenticationMode = authenticationMode;
+    public DefaultFileStorageGuestObjectPermission() {
+        super();
     }
 
     @Override
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets the password
-     *
-     * @param password The password to set
-     */
-    public void setPassword(String password) {
-        this.password = password;
+    public ShareRecipient getRecipient() {
+        return recipient;
     }
 
     @Override
-    public Date getExpires() {
-        return expires;
+    public Date getExpiryDate() {
+        return expiryDate;
     }
 
-    /**
-     * Sets the expires
-     *
-     * @param expires The expires to set
-     */
-    public void setExpires(Date expires) {
-        this.expires = expires;
+    public void setRecipient(ShareRecipient recipient) {
+        this.recipient = recipient;
     }
 
-    @Override
-    public ShareRecipient toShareRecipient() {
-        ShareRecipient r;
-        if (AuthenticationMode.ANONYMOUS == authenticationMode) {
-            AnonymousRecipient ar = new AnonymousRecipient();
-            ar.setPassword(password);
-            r = ar;
-        } else {
-            GuestRecipient gr = new GuestRecipient();
-            gr.setContactFolder(contactFolderID);
-            gr.setContactID(contactID);
-            gr.setPassword(password);
-            gr.setDisplayName(displayName);
-            gr.setEmailAddress(mailAddress);
-            gr.setPassword(password);
-            r = gr;
-        }
-
-        r.setBits(getPermissions());
-//        r.setActivationDate(new Date()); // FIXME
-//        r.setExpiryDate(expires);
-
-
-        return r;
+    public void setExpiryDate(Date date) {
+        this.expiryDate = date;
     }
 
 }
