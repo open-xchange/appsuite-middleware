@@ -124,6 +124,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     private int index;
     private final MailMessage[] retval;
     private boolean determineAttachmentByHeader;
+    private boolean checkICal;
+    private boolean checkVCard;
     private final String fullname;
     private final Set<FetchItemHandler> lastHandlers;
     private final TLongIntHashMap uid2index;
@@ -215,8 +217,30 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
      */
-    public MailMessageFetchIMAPCommand setDetermineAttachmentByHeader(final boolean determineAttachmentByHeader) {
+    public MailMessageFetchIMAPCommand setDetermineAttachmentByHeader(boolean determineAttachmentByHeader) {
         this.determineAttachmentByHeader = determineAttachmentByHeader;
+        return this;
+    }
+
+    /**
+     * Sets the checkICal
+     *
+     * @param checkICal The checkICal to set
+     * @return This FETCH IMAP command with value applied
+     */
+    public MailMessageFetchIMAPCommand setCheckICal(boolean checkICal) {
+        this.checkICal = checkICal;
+        return this;
+    }
+
+    /**
+     * Sets the checkVCard
+     *
+     * @param checkVCard The checkVCard to set
+     * @return This FETCH IMAP command with value applied
+     */
+    public MailMessageFetchIMAPCommand setCheckVCard(boolean checkVCard) {
+        this.checkVCard = checkVCard;
         return this;
     }
 
@@ -365,7 +389,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         boolean error = false;
         MailMessage mail;
         try {
-            mail = handleFetchRespone(fetchResponse, fullname, separator, lastHandlers, determineAttachmentByHeader);
+            mail = handleFetchRespone(fetchResponse, fullname, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard);
         } catch (final MessagingException e) {
             /*
              * Discard corrupt message
@@ -401,7 +425,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @throws OXException If an OX error occurs
      */
     public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false);
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false, false, false);
     }
 
     /**
@@ -416,14 +440,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @throws OXException If an OX error occurs
      */
     public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false);
+        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false, false, false);
     }
 
-    private static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader);
+    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard) throws MessagingException, OXException {
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard);
     }
 
-    private static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
+    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard) throws MessagingException, OXException {
         final IDMailMessage m;
         if (null == mail) {
             m = new IDMailMessage(null, fullName);
@@ -442,7 +466,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             final Item item = fetchResponse.getItem(j);
             FetchItemHandler itemHandler = map.get(item.getClass());
             if (null == itemHandler) {
-                itemHandler = getItemHandlerByItem(item);
+                itemHandler = getItemHandlerByItem(item, checkICal, checkVCard);
                 if (null == itemHandler) {
                     LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
                 } else {
@@ -467,8 +491,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         return m;
     }
 
-    private static FetchItemHandler getItemHandlerByItem(final Item item) {
-        if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
+    private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard) {
+        if (item instanceof BODYSTRUCTURE) {
+            return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard);
+        } else if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
         } else if (item instanceof UID) {
             return UID_ITEM_HANDLER;
@@ -480,8 +506,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return ENVELOPE_ITEM_HANDLER;
         } else if (item instanceof RFC822SIZE) {
             return SIZE_ITEM_HANDLER;
-        } else if (item instanceof BODYSTRUCTURE) {
-            return BODYSTRUCTURE_ITEM_HANDLER;
         } else if (item instanceof X_REAL_UID) {
             return X_REAL_UID_ITEM_HANDLER;
         } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
@@ -913,7 +937,22 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
-    private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class BODYSTRUCTUREFetchItemHandler implements FetchItemHandler {
+
+        private final boolean checkICal;
+        private final boolean checkVCard;
+
+        BODYSTRUCTUREFetchItemHandler() {
+            this(false, false);
+        }
+
+        BODYSTRUCTUREFetchItemHandler(boolean checkICal, boolean checkVCard) {
+            super();
+            this.checkICal = checkICal;
+            this.checkVCard = checkVCard;
+        }
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
@@ -940,6 +979,50 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             msg.setContentType(contentType);
             msg.addHeader("Content-Type", contentType.toString(true));
             msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
+
+            if (checkICal && hasICal(bs)) {
+                msg.addHeader("X-ICAL", "true");
+            }
+
+            if (checkVCard && hasVCard(bs)) {
+                msg.addHeader("X-VCARD", "true");
+            }
+        }
+
+        private boolean hasICal(BODYSTRUCTURE bs) {
+            String baseContentType = bs.type + "/" + bs.subtype;
+            if (baseContentType.indexOf("calendar") >= 0 || baseContentType.indexOf("ics") >= 0) {
+                return true;
+            }
+
+            BODYSTRUCTURE[] subs = bs.bodies;
+            if (null != subs) {
+                for (BODYSTRUCTURE sub : subs) {
+                    if (hasICal(sub)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private boolean hasVCard(BODYSTRUCTURE bs) {
+            String baseContentType = bs.type + "/" + bs.subtype;
+            if (baseContentType.indexOf("card") >= 0 || baseContentType.indexOf("vcf") >= 0) {
+                return true;
+            }
+
+            BODYSTRUCTURE[] subs = bs.bodies;
+            if (null != subs) {
+                for (BODYSTRUCTURE sub : subs) {
+                    if (hasVCard(sub)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         @Override
@@ -968,7 +1051,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 }
             }
         }
-    };
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
 
     private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
 
@@ -1024,7 +1109,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
         MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
         MAP.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
-        MAP.put(BODYSTRUCTURE.class, BODYSTRUCTURE_ITEM_HANDLER);
         MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
     }
 
