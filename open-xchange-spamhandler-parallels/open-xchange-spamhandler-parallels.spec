@@ -2,8 +2,11 @@
 Name:           open-xchange-spamhandler-parallels
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
+%else
 BuildRequires:  ant-nodeps
+%endif
 BuildRequires:  open-xchange-spamhandler-spamassassin >= @OXVERSION@
 BuildRequires:  open-xchange-parallels >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0

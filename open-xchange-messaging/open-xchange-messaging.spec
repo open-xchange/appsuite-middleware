@@ -3,8 +3,11 @@
 Name:           open-xchange-messaging
 BuildArch:      noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
+%else
 BuildRequires:  ant-nodeps
+%endif
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces

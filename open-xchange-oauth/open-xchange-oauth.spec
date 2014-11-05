@@ -2,7 +2,11 @@
 Name:          open-xchange-oauth
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
+BuildRequires: ant
+%else
 BuildRequires: ant-nodeps
+%endif
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@

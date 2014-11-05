@@ -2,8 +2,11 @@
 Name:           open-xchange-upsell-multiple
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
+%else
 BuildRequires:  ant-nodeps
+%endif
 BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
