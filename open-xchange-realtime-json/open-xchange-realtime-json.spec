@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-realtime-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Nov 05 2014 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.8.0 release
 * Fri Oct 31 2014 Steffen Templin <steffen.templin@open-xchange.com>
 First candidate for 7.6.2 release
 * Tue Oct 28 2014 Steffen Templin <steffen.templin@open-xchange.com>
@@ -56,9 +58,9 @@ Build for patch 2014-10-30
 * Fri Oct 24 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-11-04
 * Fri Oct 24 2014 Steffen Templin <steffen.templin@open-xchange.com>
-Build for patch 2014-10-22
-* Fri Oct 24 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-11-03
+* Fri Oct 24 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2014-10-22
 * Fri Oct 17 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Steffen Templin <steffen.templin@open-xchange.com>

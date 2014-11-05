@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Filestorage implementation storing files in a S3 API compatible storage
 Bundle-SymbolicName: com.openexchange.filestore.s3
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.amazonaws,

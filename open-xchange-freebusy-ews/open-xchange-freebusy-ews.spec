@@ -59,6 +59,8 @@ done
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Nov 05 2014 Markus Wagner <markus.wagner@open-xchange.com>
+prepare for 7.8.0 release
 * Thu Oct 30 2014 Markus Wagner <markus.wagner@open-xchange.com>
 prepare for 7.6.2 release
 * Thu Jun 26 2014 Markus Wagner <markus.wagner@open-xchange.com>
