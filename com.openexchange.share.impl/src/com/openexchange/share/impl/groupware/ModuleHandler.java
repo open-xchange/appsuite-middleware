@@ -51,6 +51,7 @@ package com.openexchange.share.impl.groupware;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetProxy;
@@ -67,6 +68,8 @@ public interface ModuleHandler {
     List<TargetProxy> loadTargets(List<ShareTarget> list, HandlerParameters parameters) throws OXException;
 
     TargetProxy loadTarget(ShareTarget target, Session session) throws OXException;
+
+    TargetProxy loadTarget(ShareTarget target, Context context) throws OXException;
 
     boolean canShare(boolean canShareInFolder, TargetProxy proxy, HandlerParameters parameters);
 

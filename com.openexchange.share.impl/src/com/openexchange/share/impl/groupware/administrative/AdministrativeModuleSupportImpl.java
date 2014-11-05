@@ -73,6 +73,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 public class AdministrativeModuleSupportImpl implements AdministrativeModuleSupport {
 
     private final ServiceLookup services;
+    private final ModuleHandlerRegistry registry;
 
     /**
      * Initializes a new {@link AdministrativeModuleSupportImpl}.
@@ -82,12 +83,12 @@ public class AdministrativeModuleSupportImpl implements AdministrativeModuleSupp
     public AdministrativeModuleSupportImpl(ServiceLookup services) {
         super();
         this.services = services;
+        this.registry = new ModuleHandlerRegistry(services);
     }
 
     @Override
     public TargetUpdate prepareUpdate(int contextID, Connection writeCon) throws OXException {
-        //TODO: custom module handler registry?
-        return new AdministrativeTargetUpdateImpl(services, contextID, writeCon, new ModuleHandlerRegistry(services));
+        return new AdministrativeTargetUpdateImpl(services, contextID, writeCon, registry);
     }
 
     @Override
@@ -95,6 +96,7 @@ public class AdministrativeModuleSupportImpl implements AdministrativeModuleSupp
         if (null == target) {
             return null;
         }
+        Context context = services.getService(ContextService.class).getContext(contextID);
         if (target.isFolder()) {
             int folderID;
             try {
@@ -102,12 +104,10 @@ public class AdministrativeModuleSupportImpl implements AdministrativeModuleSupp
             } catch (NumberFormatException e) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-            Context context = services.getService(ContextService.class).getContext(contextID);
             FolderObject folder = new OXFolderAccess(context).getFolderObject(folderID);
             return new AdministrativeFolderTargetProxy(folder);
         } else {
-            // TODO
-            return null;
+            return registry.get(target.getModule()).loadTarget(target, context);
         }
     }
 

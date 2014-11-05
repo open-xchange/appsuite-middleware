@@ -127,6 +127,17 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
+    public TargetProxy loadTarget(ShareTarget target, Context context) throws OXException {
+        IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(context);
+        FileID fileID = new FileID(target.getItem());
+        if (fileID.getFolderId() == null) {
+            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+        }
+
+        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
+    }
+
+    @Override
     public boolean canShare(boolean canShareInFolder, TargetProxy proxy, HandlerParameters parameters) {
         File file = ((FileTargetProxy) proxy).getFile();
         List<ObjectPermission> objectPermissions = PermissionHelper.getObjectPermissions(file.getObjectPermissions());
