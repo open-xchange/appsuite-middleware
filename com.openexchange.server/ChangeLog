@@ -1,6 +1,66 @@
+* 2014-11-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35291: Obey forbidden end tags when generating conform/well-formed HTML content
+ - Fix for bug 34979: Honor "setFrom" parameter when composing forward message
+
+* 2014-10-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35267: Explicitly specify header encoding when parsing multipart/form-upload requests with Apache FileUpload
+
+* 2014-10-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34981: Corrected post installation script for property com.openexchange.sessiond.remoteParameterNames in sessiond.properties
+   configuration file.
+
+* 2014-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35242: Added null guard & improved logging behavior to provide mail information in order to identify the mail later on
+
+* 2014-10-29 - martin.schneider@open-xchange.com
+
+ - Fix for bug 35073: set default subject when processed mail was sent without subject
+ - Fix for bug 34894: set default subject when processed mail was sent without subject
+
+* 2014-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35255: Also consider file extension if mail part claims to be HTML by Content-Type
+
+* 2014-10-27 - marc.arens@open-xchange.com
+
+ - Fix for bug 34973: Allow minimal caching to prevent superfluous browser requests.
+ - Fix for bug 35154: Shut down StateManager and interrupt already running CleanupTimer
+
+* 2014-10-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35198: Use Jericho HTML parser to perform necessary modifications
+
+* 2014-10-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34998: Restored previous default value for "com.openexchange.servlet.maxRate" property
+
+* 2014-10-23 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35168: Consider '#' as literals and not as comments when inside of double quotes
+
+* 2014-10-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35059: Sort distribution list members by (display name, e-mail address) ascending when reading them from the database
+
+* 2014-10-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35129: Do not throw any misleading log messages if client comes to HTTP auth URL without Authorization header.
+
+* 2014-10-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35109: Do not dispose kerberos tickets when sessions are moved over to long term session container.
+ - Fix for bug 35103: Synchronized multiple threads on IMAP login if a Kerberos subject is used to authenticate the user.
+
 * 2014-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 34947: Check for a possible unrecoverable socket error when attempting to load mail settings (esp. standard folders); signal an empty value instead of throwing an error
+ - Fix for bug 35023: Orderly deal with absent user permission bits
+ - Fix for bug 34706: Do not consult session storage in case session look-up is performed by alternative identifier and
+                      ensure a timed-out (but still pending) session storage query get orderly interrupted to relieve pressure on Hazelcast
 
 * 2014-10-20 - tobias.friedrich@open-xchange.com
 
@@ -26,6 +86,10 @@
 
  - Fix for bug 34962: Mail notification on state changes for organizer.
 
+* 2014-10-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34517: Put Kerberos tickets of session parameters into distributed session storage.
+
 * 2014-10-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 34920: Do not close SQL resources on SearchIterator creation
@@ -46,6 +110,7 @@
 
  - Fix for bug 34776: Drop passed Message-ID header on draft-edit action
  - Fix for bug 34867: Added missing import to 'com.openexchange.mailfilter.json' bundle
+ - Fix for bug 34510: Respond with common JavaScript call-back snippet for USM user agent
 
 * 2014-10-09 - steffen.templin@open-xchange.com
 
