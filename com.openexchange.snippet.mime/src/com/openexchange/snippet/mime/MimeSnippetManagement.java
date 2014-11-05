@@ -88,6 +88,7 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
@@ -114,7 +115,6 @@ import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
-
 
 /**
  * {@link MimeSnippetManagement}
@@ -170,7 +170,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     private final int contextId;
+
     private final int userId;
+
     private final Session session;
 
     /**
@@ -390,6 +392,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 attachment.setId(header);
             }
             attachment.setStreamProvider(new InputStreamProviderImpl(part));
+            
+            ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
+            if (!mfm.contains(header)) {
+                ManagedFile mf = mfm.createManagedFile(header, attachment.getInputStream());
+                mf.setContentDisposition(attachment.getContentDisposition());
+                mf.setContentType(attachment.getContentType());
+            }
+            
             snippet.addAttachment(attachment);
         }
     }
@@ -400,8 +410,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final ContentType contentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);
         snippet.setContent(MessageUtility.readMimePart(part, contentType));
         // Read message's headers
-        @SuppressWarnings("unchecked")
-        final Enumeration<Header> others = mimeMessage.getAllHeaders();
+        @SuppressWarnings("unchecked") final Enumeration<Header> others = mimeMessage.getAllHeaders();
         while (others.hasMoreElements()) {
             final Header hdr = others.nextElement();
             snippet.put(hdr.getName(), MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
@@ -431,19 +440,19 @@ public final class MimeSnippetManagement implements SnippetManagement {
             for (final Map.Entry<String, Object> entry : snippet.getProperties().entrySet()) {
                 final String name = entry.getKey();
                 if (!IGNORABLES.contains(name)) {
-                    mimeMessage.setHeader(name,encode(entry.getValue().toString()));
+                    mimeMessage.setHeader(name, encode(entry.getValue().toString()));
                 }
             }
-            
+
             final Object misc = snippet.getMisc();
             final String contentSubType = determineContentSubtype(misc);
-            
+
             // Process image and add it as an attachment
             final MimeSnippetProcessor snippetProcessor = new MimeSnippetProcessor(session);
             if (contentSubType.equals("html")) {
                 snippetProcessor.processImage(snippet);
             }
-            
+
             // Set other stuff
             final List<Attachment> attachments = snippet.getAttachments();
             if (notEmpty(attachments) || (null != misc)) {
@@ -461,7 +470,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     final MimeBodyPart miscPart = new MimeBodyPart();
                     miscPart.setDataHandler(new DataHandler(new MessageDataSource(misc.toString(), "text/javascript; charset=UTF-8")));
                     miscPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                    miscPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("text/javascript; charset=UTF-8"));
+                    miscPart.setHeader(
+                        MessageHeaders.HDR_CONTENT_TYPE,
+                        MimeMessageUtility.foldContentType("text/javascript; charset=UTF-8"));
                     multipart.addBodyPart(miscPart);
                 }
                 // Attachments
@@ -499,8 +510,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             String newId = Integer.toString(getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId));
             boolean error = true;
             try {
-                stmt =
-                    con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
+                stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, newId);
@@ -629,8 +639,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     }
                 }
                 // Copy remaining to updateMessage; this action includes unnamed properties
-                @SuppressWarnings("unchecked")
-                final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
+                @SuppressWarnings("unchecked") final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
                 final Set<String> propertyNames = Property.getPropertyNames();
                 while (nonMatchingHeaders.hasMoreElements()) {
                     final Header hdr = nonMatchingHeaders.nextElement();
@@ -661,20 +670,22 @@ public final class MimeSnippetManagement implements SnippetManagement {
             if (properties.contains(Property.MISC)) {
                 final Object misc = snippet.getMisc();
                 final String contentSubType = determineContentSubtype(misc);
-                
+
                 // Process image and add it as an attachment
                 final MimeSnippetProcessor snippetProcessor = new MimeSnippetProcessor(session);
                 if (contentSubType.equals("html")) {
                     snippetProcessor.processImage(snippet);
-                }   
-                
+                }
+
                 if (null == misc) {
                     miscPart = null;
                 } else {
                     miscPart = new MimeBodyPart();
                     miscPart.setDataHandler(new DataHandler(new MessageDataSource(misc.toString(), "text/javascript; charset=UTF-8")));
                     miscPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                    miscPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("text/javascript; charset=UTF-8"));
+                    miscPart.setHeader(
+                        MessageHeaders.HDR_CONTENT_TYPE,
+                        MimeMessageUtility.foldContentType("text/javascript; charset=UTF-8"));
                 }
             } else {
                 if (storageContentType.startsWith("multipart/")) {
@@ -730,7 +741,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Add text part
                 final MimeBodyPart textPart = new MimeBodyPart();
                 final String subType = determineContentSubtype(snippet.getMisc());
-                // MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == miscPart ? "plain" : determineContentSubtype(MessageUtility.readMimePart(miscPart, "UTF-8")), textPart);
+                // MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == miscPart ? "plain" :
+                // determineContentSubtype(MessageUtility.readMimePart(miscPart, "UTF-8")), textPart);
                 textPart.setText(sanitizeContent(content), "UTF-8", subType);
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
@@ -783,8 +795,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     final String dummyId = "--" + identifier;
                     con.setAutoCommit(false); // BEGIN
                     rollback = true;
-                    stmt =
-                        con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
+                    stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
                     int pos = 0;
                     stmt.setInt(++pos, contextId);
                     stmt.setInt(++pos, userId);
@@ -797,7 +808,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                             stmt.setNull(++pos, Types.INTEGER);
                         }
                     }
-                    stmt.setString(++pos, properties.contains(Property.DISPLAY_NAME) ? getObject(snippet.getDisplayName(), displayName) : displayName);
+                    stmt.setString(
+                        ++pos,
+                        properties.contains(Property.DISPLAY_NAME) ? getObject(snippet.getDisplayName(), displayName) : displayName);
                     stmt.setString(++pos, properties.contains(Property.MODULE) ? getObject(snippet.getModule(), module) : module);
                     stmt.setString(++pos, properties.contains(Property.TYPE) ? getObject(snippet.getType(), type) : type);
                     stmt.setInt(++pos, properties.contains(Property.SHARED) ? (snippet.isShared() ? 1 : 0) : (shared ? 1 : 0));
@@ -913,7 +926,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             final QuotaFileStorage fileStorage = getFileStorage(getContext(contextId));
             fileStorage.deleteFile(file);
-            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+FS_TYPE);
+            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
             int pos = 0;
             stmt.setLong(++pos, contextId);
             stmt.setLong(++pos, userId);
