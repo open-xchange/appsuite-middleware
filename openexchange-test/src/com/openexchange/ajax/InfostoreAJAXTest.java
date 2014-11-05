@@ -67,6 +67,7 @@ import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.ResponseParser;
@@ -94,7 +95,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
     @Override
     public void setUp() throws Exception {
         this.sessionId = getSessionId();
-        final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+        final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), sessionId);
         this.folderId = createFolderForTest(userId);
 
         Map<String,String> create = m(
