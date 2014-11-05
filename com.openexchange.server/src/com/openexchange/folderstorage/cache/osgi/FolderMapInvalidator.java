@@ -100,9 +100,11 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
                 } else {
                     for (Serializable cacheKey : cacheKeys) {
                         final Serializable[] keys = ((CacheKey) cacheKey).getKeys();
-                        final String id = keys[1].toString();
-                        final String treeId = keys[0].toString();
-                        removeFromUserCache(id, treeId, contextId);
+                        if (keys.length > 1) {
+                            final String id = keys[1].toString();
+                            final String treeId = keys[0].toString();
+                            removeFromUserCache(id, treeId, contextId);
+                        }
                     }
                 }
             } else if ("OXFolderCache".equals(region)) {
