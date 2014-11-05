@@ -448,10 +448,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
             final String contentSubType = determineContentSubtype(misc);
 
             // Process image and add it as an attachment
-            final MimeSnippetProcessor snippetProcessor = new MimeSnippetProcessor(session);
+            /*final MimeSnippetProcessor snippetProcessor = new MimeSnippetProcessor(session);
             if (contentSubType.equals("html")) {
                 snippetProcessor.processImage(snippet);
-            }
+            }*/
 
             // Set other stuff
             final List<Attachment> attachments = snippet.getAttachments();
@@ -669,13 +669,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
             final MimePart miscPart;
             if (properties.contains(Property.MISC)) {
                 final Object misc = snippet.getMisc();
-                final String contentSubType = determineContentSubtype(misc);
+                //final String contentSubType = determineContentSubtype(misc);
 
                 // Process image and add it as an attachment
-                final MimeSnippetProcessor snippetProcessor = new MimeSnippetProcessor(session);
+                /*final MimeSnippetProcessor snippetProcessor = new MimeSnippetProcessor(session);
                 if (contentSubType.equals("html")) {
                     snippetProcessor.processImage(snippet);
-                }
+                }*/
 
                 if (null == misc) {
                     miscPart = null;

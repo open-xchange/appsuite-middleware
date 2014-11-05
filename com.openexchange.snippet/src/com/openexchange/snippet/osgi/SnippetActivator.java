@@ -52,6 +52,7 @@ package com.openexchange.snippet.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -74,7 +75,7 @@ public final class SnippetActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class };
+        return new Class<?>[] { HtmlService.class, ManagedFileManagement.class  };
     }
 
     @Override

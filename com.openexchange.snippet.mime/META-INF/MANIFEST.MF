@@ -67,3 +67,4 @@ Import-Package: com.openexchange.cache,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.snippet.mime.osgi.MimeSnippetActivator
+Export-Package: com.openexchange.snippet.mime

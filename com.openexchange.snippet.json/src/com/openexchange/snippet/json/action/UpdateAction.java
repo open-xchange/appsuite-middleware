@@ -69,6 +69,7 @@ import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
@@ -115,6 +116,14 @@ public final class UpdateAction extends SnippetAction {
         final DefaultSnippet snippet = new DefaultSnippet();
         final Set<Property> properties = EnumSet.noneOf(Property.class);
         SnippetJsonParser.parse(jsonSnippet, snippet, properties);
+
+        // Process image in an img HTML tag and add it as an attachment
+        final String contentSubType = getContentSubType(snippet);
+        final SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
+        if (contentSubType.equals("html")) {
+            snippetProcessor.processImage(snippet);
+        }
+
         // Update
         final SnippetManagement management = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession());
         final String newId = management.updateSnippet(id, snippet, properties, Collections.<Attachment> emptyList(), Collections.<Attachment> emptyList());

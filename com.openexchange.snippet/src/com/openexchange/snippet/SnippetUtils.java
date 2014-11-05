@@ -89,7 +89,7 @@ public final class SnippetUtils {
             return content;
         }
         try {
-            //String retval = service.getConformHTML(content, "UTF-8");
+            // String retval = service.getConformHTML(content, "UTF-8");
             String retval = service.sanitize(content, null, false, null, null);
 
             int start = retval.indexOf("<body>");
@@ -152,6 +152,17 @@ public final class SnippetUtils {
     public static String parseContentTypeFromMisc(final JSONObject misc) {
         String cts = misc.optString("content-type", null);
         return null == cts ? "text/plain" : cts;
+    }
+
+    public static String getImageId(final Object misc) throws OXException {
+        String imageId = null;
+        try {
+            JSONObject m = new JSONObject(misc.toString());
+            imageId = m.optString("imageId");
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
+        }
+        return imageId;
     }
 
 }
