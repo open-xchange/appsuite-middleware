@@ -169,7 +169,7 @@ public class RedirectingShareHandler extends AbstractShareHandler {
              * construct & send redirect
              */
             String url = getRedirectURL(resolvedShare.getSession(), resolvedShare.getUser(), resolvedShare.getShare(), resolvedShare.getTarget(), resolvedShare.getLoginConfig());
-            LOG.info("Redirecting share {} to {}...", resolvedShare.getShare().getToken(), url);
+            LOG.info("Redirecting share {} to {}...", resolvedShare.getShare().getBaseToken(), url);
             response.sendRedirect(url);
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -220,7 +220,7 @@ public class RedirectingShareHandler extends AbstractShareHandler {
          * replace templates
          */
         String uiWebPath = loginConfig.getUiWebPath();
-        uiWebPath = "/ox6/index.html";
+//        uiWebPath = "/ox6/index.html";
         redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
         redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
         redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));

@@ -88,6 +88,7 @@ public class LoginShareHandler extends AbstractShareHandler {
         // By property
         {
             ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
+//            String sLink = configService.getProperty("com.openexchange.share.loginLink", "/appsuite/ui");
             String sLink = configService.getProperty("com.openexchange.share.loginLink");
 
             if (false == Strings.isEmpty(sLink)) {
@@ -152,7 +153,7 @@ public class LoginShareHandler extends AbstractShareHandler {
             StringBuilder url = new StringBuilder(loginPageLink);
 
             // Start fragment portion
-            url.append('#').append("share=").append(urlEncode(share.getToken()));
+            url.append('#').append("share=").append(urlEncode(share.getBaseToken()));
             if (null != target) {
                 url.append('&').append("target=").append(urlEncode(target.getPath()));
             }
