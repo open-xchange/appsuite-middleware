@@ -74,6 +74,16 @@ public class FileTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
+    public String getID() {
+        return file.getId();
+    }
+
+    @Override
+    public String getFolderID() {
+        return file.getFolderId();
+    }
+
+    @Override
     public int getOwner() {
         return file.getCreatedBy();
     }

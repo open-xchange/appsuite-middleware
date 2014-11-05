@@ -79,14 +79,37 @@ public interface ModuleSupport {
     TargetUpdate prepareUpdate(Session session, Connection writeCon) throws OXException;
 
     /**
+     * Initiates an update operation by spawning an appropriate {@link TargetUpdate} using the supplied
+     * writable connection to the database. The {@link TargetUpdate} instance is using administrative access
+     * to the underlying module services. This method must only be used for administrative tasks when no
+     * session object is available.
+     *
+     * @param contextID The context identifier
+     * @param writeCon A transactional writable database connection to use for the update operations.
+     * @return The target update
+     */
+    TargetUpdate prepareAdministrativeUpdate(int contextID, Connection writeCon) throws OXException;
+
+    /**
      * Loads the groupware item for the given share target and returns an according
      * {@link TargetProxy} instance.
      *
-     * @param target The target to load
+     * @param target The target to get the proxy for
      * @param session The current session
      * @return The target proxy
      * @throws OXException if loading fails
      */
     TargetProxy load(ShareTarget target, Session session) throws OXException;
+
+    /**
+     * Loads the groupware item for the given share target and returns an according {@link TargetProxy} instance.
+     * The item is loaded using administrative access to the underlying module services. This method must only
+     * be used for administrative tasks when no session object is available.
+     *
+     * @param contextID The context identifier
+     * @param target The target to get the proxy for
+     * @return The proxy
+     */
+    TargetProxy loadAsAdmin(int contextID, ShareTarget target) throws OXException;
 
 }

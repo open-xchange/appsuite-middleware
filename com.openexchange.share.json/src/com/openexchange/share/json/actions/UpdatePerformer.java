@@ -218,23 +218,26 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
                 ShareTargetDiff targetDiff = new ShareTargetDiff(origTargets, modifiedTargets);
                 if (targetDiff.hasDifferences()) {
                     TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
-                    update.fetch(allTargets);
-                    for (ShareTarget target : targetDiff.getAdded()) {
-                        TargetProxy proxy = update.get(target);
-                        proxy.applyPermissions(targetPermissions);
-                    }
+                    try {
+                        update.fetch(allTargets);
+                        for (ShareTarget target : targetDiff.getAdded()) {
+                            TargetProxy proxy = update.get(target);
+                            proxy.applyPermissions(targetPermissions);
+                        }
 
-                    for (ShareTarget target : targetDiff.getModified()) {
-                        TargetProxy proxy = update.get(target);
-                        proxy.applyPermissions(targetPermissions);
-                    }
+                        for (ShareTarget target : targetDiff.getModified()) {
+                            TargetProxy proxy = update.get(target);
+                            proxy.applyPermissions(targetPermissions);
+                        }
 
-                    for (ShareTarget target : targetDiff.getRemoved()) {
-                        TargetProxy proxy = update.get(target);
-                        proxy.removePermissions(targetPermissions);
+                        for (ShareTarget target : targetDiff.getRemoved()) {
+                            TargetProxy proxy = update.get(target);
+                            proxy.removePermissions(targetPermissions);
+                        }
+                        update.run();
+                    } finally {
+                        update.close();
                     }
-                    update.run();
-                    update.close();
                 }
             }
         }

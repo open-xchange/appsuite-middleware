@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.impl.groupware.administrative;
+package com.openexchange.share.impl.groupware;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +58,6 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.groupware.TargetPermission;
-import com.openexchange.share.impl.groupware.AbstractTargetProxy;
 
 
 /**
@@ -81,6 +80,16 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         super();
         this.folder = folder;
         this.affectedUsers = new HashSet<Integer>();
+    }
+
+    @Override
+    public String getID() {
+        return Integer.toString(folder.getObjectID());
+    }
+
+    @Override
+    public String getFolderID() {
+        return Integer.toString(folder.getParentFolderID());
     }
 
     @Override

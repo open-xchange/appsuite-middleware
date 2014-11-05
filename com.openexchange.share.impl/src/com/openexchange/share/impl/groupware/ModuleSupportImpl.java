@@ -51,17 +51,22 @@ package com.openexchange.share.impl.groupware;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.user.UserService;
 
 
@@ -89,6 +94,11 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
+    public TargetUpdate prepareAdministrativeUpdate(int contextID, Connection writeCon) throws OXException {
+        return new AdministrativeTargetUpdateImpl(services, contextID, writeCon, handlers);
+    }
+
+    @Override
     public TargetProxy load(ShareTarget target, Session session) throws OXException {
         if (target == null) {
             return null;
@@ -100,6 +110,26 @@ public class ModuleSupportImpl implements ModuleSupport {
             return new FolderTargetProxy(userizedFolder, user);
         } else {
             return handlers.get(target.getModule()).loadTarget(target, session);
+        }
+    }
+
+    @Override
+    public TargetProxy loadAsAdmin(int contextID, ShareTarget target) throws OXException {
+        if (null == target) {
+            return null;
+        }
+        Context context = services.getService(ContextService.class).getContext(contextID);
+        if (target.isFolder()) {
+            int folderID;
+            try {
+                folderID = Integer.valueOf(target.getFolder());
+            } catch (NumberFormatException e) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+            FolderObject folder = new OXFolderAccess(context).getFolderObject(folderID);
+            return new AdministrativeFolderTargetProxy(folder);
+        } else {
+            return handlers.get(target.getModule()).loadTarget(target, context);
         }
     }
 

@@ -85,7 +85,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.AdministrativeModuleSupport;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
@@ -494,20 +494,23 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private void removeTargetPermissions(ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
-        AdministrativeModuleSupport moduleSupport = services.getService(AdministrativeModuleSupport.class);
-        TargetUpdate targetUpdate = moduleSupport.prepareUpdate(connectionHelper.getContextID(), connectionHelper.getConnection());
-        Map<ShareTarget, Set<Integer>> guestsByTarget = ShareTool.mapGuestsByTarget(shares);
-        targetUpdate.fetch(guestsByTarget.keySet());
-        for (Entry<ShareTarget, Set<Integer>> entry : guestsByTarget.entrySet()) {
-            Set<Integer> guestIDs = entry.getValue();
-            List<TargetPermission> permissions = new ArrayList<TargetPermission>(guestIDs.size());
-            for (Integer guestID : guestIDs) {
-                permissions.add(new TargetPermission(guestID.intValue(), false, 0));
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        TargetUpdate targetUpdate = moduleSupport.prepareAdministrativeUpdate(connectionHelper.getContextID(), connectionHelper.getConnection());
+        try {
+            Map<ShareTarget, Set<Integer>> guestsByTarget = ShareTool.mapGuestsByTarget(shares);
+            targetUpdate.fetch(guestsByTarget.keySet());
+            for (Entry<ShareTarget, Set<Integer>> entry : guestsByTarget.entrySet()) {
+                Set<Integer> guestIDs = entry.getValue();
+                List<TargetPermission> permissions = new ArrayList<TargetPermission>(guestIDs.size());
+                for (Integer guestID : guestIDs) {
+                    permissions.add(new TargetPermission(guestID.intValue(), false, 0));
+                }
+                targetUpdate.get(entry.getKey()).removePermissions(permissions);
             }
-            targetUpdate.get(entry.getKey()).removePermissions(permissions);
+            targetUpdate.run();
+        } finally {
+            targetUpdate.close();
         }
-        targetUpdate.run();
-        targetUpdate.close();
     }
 
     /**

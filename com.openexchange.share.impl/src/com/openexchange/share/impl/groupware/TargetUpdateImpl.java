@@ -50,11 +50,8 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.context.ContextService;
@@ -70,7 +67,6 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetProxy;
-import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.user.UserService;
 
 
@@ -80,25 +76,12 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class TargetUpdateImpl implements TargetUpdate {
-
-    private final Map<ShareTarget, TargetProxy> proxies = new HashMap<ShareTarget, TargetProxy>();
-
-    private final ServiceLookup services;
-
-    private final ModuleHandlerRegistry handlers;
+public class TargetUpdateImpl extends AbstractTargetUpdate {
 
     private final HandlerParameters parameters;
 
-    private Map<Integer, List<ShareTarget>> objectsByModule;
-
-    private List<ShareTarget> folderTargets;
-
-
     public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleHandlerRegistry handlers) throws OXException {
-        super();
-        this.services = services;
-        this.handlers = handlers;
+        super(services, handlers);
         parameters = new HandlerParameters();
         parameters.setSession(session);
         Context context = getContextService().getContext(session.getContextId());
@@ -112,76 +95,28 @@ public class TargetUpdateImpl implements TargetUpdate {
     }
 
     @Override
-    public void fetch(Collection<ShareTarget> targets) throws OXException {
-        objectsByModule = new HashMap<Integer, List<ShareTarget>>();
-        folderTargets = new LinkedList<ShareTarget>();
-        for (ShareTarget target : targets) {
-            if (target.isFolder()) {
-                folderTargets.add(target);
-            } else {
-                int module = target.getModule();
-                List<ShareTarget> targetList = objectsByModule.get(module);
-                if (targetList == null) {
-                    targetList = new LinkedList<ShareTarget>();
-                    objectsByModule.put(module, targetList);
-                }
-
-                targetList.add(target);
-            }
-        }
-
-        Map<String, UserizedFolder> foldersById = loadFolderTargets(folderTargets, true);
-        loadObjectTargets(objectsByModule, foldersById, true);
+    protected HandlerParameters getHandlerParameters() {
+        return parameters;
     }
 
     @Override
-    public TargetProxy get(ShareTarget target) {
-        if (target == null) {
-            return null;
-        }
-
-        return proxies.get(target);
+    protected Map<ShareTarget, TargetProxy> prepareProxies(List<ShareTarget> folderTargets, Map<Integer, List<ShareTarget>> objectsByModule) throws OXException {
+        Map<ShareTarget, TargetProxy> proxies = new HashMap<ShareTarget, TargetProxy>(folderTargets.size() + objectsByModule.size(), 1.0F);
+        Map<String, UserizedFolder> foldersById = loadFolderTargets(folderTargets, true, proxies);
+        loadObjectTargets(objectsByModule, foldersById, true, proxies);
+        return proxies;
     }
 
     @Override
-    public void run() throws OXException {
-        if (objectsByModule == null || folderTargets == null) {
-            throw new IllegalStateException("prefetch() must be called on TargetHandler before update!");
-        }
-
+    protected void updateFolders(List<TargetProxy> proxies) throws OXException {
         FolderService folderService = getFolderService();
-        for (ShareTarget target : folderTargets) {
-            TargetProxy proxy = get(target);
-            if (proxy.wasModified()) {
-                UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
-                folderService.updateFolder(folder, folder.getLastModified(), parameters.getSession(), parameters.getFolderServiceDecorator());
-            }
+        for (TargetProxy proxy : proxies) {
+            UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
+            folderService.updateFolder(folder, folder.getLastModified(), parameters.getSession(), parameters.getFolderServiceDecorator());
         }
-
-        for (int module : objectsByModule.keySet()) {
-            List<ShareTarget> targets = objectsByModule.get(module);
-            List<TargetProxy> modified = new ArrayList<TargetProxy>(targets.size());
-            for (ShareTarget target : targets) {
-                TargetProxy proxy = get(target);
-                if (proxy.wasModified()) {
-                    modified.add(proxy);
-                }
-            }
-
-            if (!modified.isEmpty()) {
-                ModuleHandler handler = handlers.get(module);
-                handler.updateObjects(modified, parameters);
-            }
-        }
-
     }
 
-    @Override
-    public void close() {
-
-    }
-
-    private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, UserizedFolder> foldersById, boolean checkPermissions) throws OXException {
+    private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, UserizedFolder> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         FolderService folderService = getFolderService();
         for (int module : objectsByModule.keySet()) {
             ModuleHandler handler = handlers.get(module);
@@ -207,7 +142,7 @@ public class TargetUpdateImpl implements TargetUpdate {
         }
     }
 
-    private Map<String, UserizedFolder> loadFolderTargets(List<ShareTarget> folderTargets, boolean checkPermissions) throws OXException {
+    private Map<String, UserizedFolder> loadFolderTargets(List<ShareTarget> folderTargets, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         Map<String, UserizedFolder> foldersById = new HashMap<String, UserizedFolder>();
         FolderService folderService = getFolderService();
         for (ShareTarget folderTarget : folderTargets) {

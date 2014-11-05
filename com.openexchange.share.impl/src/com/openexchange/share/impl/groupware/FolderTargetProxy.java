@@ -79,6 +79,16 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
+    public String getID() {
+        return folder.getID();
+    }
+
+    @Override
+    public String getFolderID() {
+        return folder.getParentID();
+    }
+
+    @Override
     public int getOwner() {
         return folder.getCreatedBy();
     }

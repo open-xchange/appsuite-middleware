@@ -109,6 +109,7 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
         Context context = session.getContext();
         Connection writeCon = dbService.getWritable(context);
         session.setParameter(Connection.class.getName(), writeCon);
+        TargetUpdate update = null;
         try {
             Databases.startTransaction(writeCon);
             /*
@@ -120,7 +121,7 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
                 permissions.add(new TargetPermission(internal.getEntity(), internal.isGroup(), internal.getBits()));
             }
 
-            TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
+            update = getModuleSupport().prepareUpdate(session, writeCon);
             update.fetch(targets);
             for (ShareTarget target : targets) {
                 TargetProxy proxy = update.get(target);
@@ -146,8 +147,6 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
             }
 
             update.run();
-            update.close();
-
             writeCon.commit();
 
             return createdShares;
@@ -161,6 +160,9 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
             session.setParameter(Connection.class.getName(), null);
             Databases.autocommit(writeCon);
             dbService.backWritable(context, writeCon);
+            if (update != null) {
+                update.close();
+            }
         }
     }
 

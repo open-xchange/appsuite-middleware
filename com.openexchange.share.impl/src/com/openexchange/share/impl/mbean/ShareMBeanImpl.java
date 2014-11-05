@@ -62,7 +62,7 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.AdministrativeModuleSupport;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
@@ -78,14 +78,14 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 
     private final DefaultShareService shareService;
 
-    private final AdministrativeModuleSupport adminModuleSupport;
+    private final ModuleSupport moduleSupport;
 
     private final DatabaseService dbService;
 
-    public ShareMBeanImpl(Class<?> mbeanInterface, DefaultShareService shareService, AdministrativeModuleSupport adminModuleSupport, DatabaseService dbService) throws NotCompliantMBeanException {
+    public ShareMBeanImpl(Class<?> mbeanInterface, DefaultShareService shareService, ModuleSupport moduleSupport, DatabaseService dbService) throws NotCompliantMBeanException {
         super(mbeanInterface);
         this.shareService = shareService;
-        this.adminModuleSupport = adminModuleSupport;
+        this.moduleSupport = moduleSupport;
         this.dbService = dbService;
     }
 
@@ -130,9 +130,10 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
          * Remove folder and object permissions
          */
         Connection con = dbService.getWritable(contextId);
+        TargetUpdate update = null;
         try {
             Databases.startTransaction(con);
-            TargetUpdate update = adminModuleSupport.prepareUpdate(contextId, con);
+            update = moduleSupport.prepareAdministrativeUpdate(contextId, con);
             update.fetch(targetsToDelete);
             List<TargetPermission> permissions = Collections.singletonList(new TargetPermission(contextId, false, 0));
             for (ShareTarget target : targetsToDelete) {
@@ -140,7 +141,6 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
                 proxy.removePermissions(permissions);
             }
             update.run();
-            update.close();
 
             shareService.removeTargets(contextId, targetsToDelete, Collections.singletonList(guestShare.getGuestID()));
             con.commit();
@@ -153,6 +153,9 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
         } finally {
             Databases.autocommit(con);
             dbService.backWritable(contextId, con);
+            if (update != null) {
+                update.close();
+            }
         }
     }
 

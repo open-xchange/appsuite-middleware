@@ -63,6 +63,21 @@ import com.openexchange.share.ShareTarget;
 public interface TargetProxy {
 
     /**
+     * Gets the ID of the underlying groupware object.
+     *
+     * @return The objects ID
+     */
+    String getID();
+
+    /**
+     * Gets the folder ID of the underlying groupware object. If the object
+     * is a folder, the ID of its parent folder is returned.
+     *
+     * @return The objects parent folder ID
+     */
+    String getFolderID();
+
+    /**
      * Gets the owner of this folder or item.
      *
      * @return The entity ID of the owner (i.e. a user or group ID)
@@ -79,6 +94,8 @@ public interface TargetProxy {
     /**
      * Applies a list of permissions, i.e. the permissions are merged. New ones
      * are added and existing ones are updated. No permissions are removed.
+     * Furthermore only the in-memory representation of this object is
+     * modified. To save changes you need to use {@link TargetUpdate}.
      *
      * @param permissions The permissions to apply
      */
@@ -87,6 +104,8 @@ public interface TargetProxy {
     /**
      * Removes a list of permissions from the underlying object. Only
      * the entity is taken into account, permission bits are not compared.
+     * Furthermore only the in-memory representation of this object is
+     * modified. To save changes you need to use {@link TargetUpdate}.
      *
      * @param permissions The permissions to remove
      */

@@ -110,9 +110,10 @@ public class DeletePerformer extends AbstractPerformer<Void> {
         Context context = session.getContext();
         Connection writeCon = dbService.getWritable(context);
         session.setParameter(Connection.class.getName(), writeCon);
-        TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);
+        TargetUpdate update = null;
         try {
             Databases.startTransaction(writeCon);
+            update = getModuleSupport().prepareUpdate(session, writeCon);
             ShareService shareService = getShareService();
             Map<Integer, List<ShareTarget>> targetsByGuest = new HashMap<Integer, List<ShareTarget>>();
             Map<ShareTarget, Set<Integer>> guestsByTarget = new HashMap<ShareTarget, Set<Integer>>();
@@ -175,7 +176,9 @@ public class DeletePerformer extends AbstractPerformer<Void> {
             session.setParameter(Connection.class.getName(), null);
             Databases.autocommit(writeCon);
             dbService.backWritable(context, writeCon);
-            update.close();
+            if (update != null) {
+                update.close();
+            }
         }
 
         return null;

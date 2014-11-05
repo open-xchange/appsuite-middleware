@@ -77,14 +77,12 @@ import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.groupware.AdministrativeModuleSupport;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
-import com.openexchange.share.impl.groupware.administrative.AdministrativeModuleSupportImpl;
 import com.openexchange.share.impl.notification.DefaultNotificationService;
 import com.openexchange.share.impl.notification.mail.MailNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationHandler;
@@ -210,15 +208,13 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-        registerService(ModuleSupport.class, new ModuleSupportImpl(this));
-        AdministrativeModuleSupportImpl adminModuleSupport = new AdministrativeModuleSupportImpl(this);
-        registerService(AdministrativeModuleSupport.class, adminModuleSupport);
+        ModuleSupport moduleSupport = new ModuleSupportImpl(this);
+        registerService(ModuleSupport.class, moduleSupport);
         registerService(ShareNotificationService.class, defaultNotificationService);
         registerService(QuotaProvider.class, new ShareQuotaProvider(this, shareService));
 
         trackService(ModuleSupport.class);
-        trackService(AdministrativeModuleSupport.class);
-        track(ManagementService.class, new ManagementServiceTracker(context, shareService, adminModuleSupport, getService(DatabaseService.class)));
+        track(ManagementService.class, new ManagementServiceTracker(context, shareService, moduleSupport, getService(DatabaseService.class)));
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
         trackService(TranslatorFactory.class);
