@@ -185,7 +185,7 @@ public final class JerichoParser {
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("^\\s*(<[^>]+)(>?)\\s*$");
+    private static final Pattern FIX_START_TAG = Pattern.compile("^\\s*(<[^?][^>]+)(>?)\\s*$");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -216,7 +216,7 @@ public final class JerichoParser {
                 lastSegmentEnd = segment.getEnd();
 
                 // Handle current segment
-                handleSegment(handler, segment);
+                handleSegment(handler, segment, true);
             }
         } catch (StackOverflowError parserOverflow) {
             throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);
@@ -244,7 +244,7 @@ public final class JerichoParser {
         }
     }
 
-    private static void handleSegment(JerichoHandler handler, Segment segment) {
+    private static void handleSegment(JerichoHandler handler, Segment segment, boolean fixStartTags) {
         if (segment instanceof Tag) {
             Tag tag = (Tag) segment;
             TagType tagType = tag.getTagType();
@@ -282,7 +282,7 @@ public final class JerichoParser {
             /*
              * Safety re-parse
              */
-            if (contains('<', segment)) {
+            if (fixStartTags && contains('<', segment)) {
                 Matcher m = FIX_START_TAG.matcher(segment);
                 if (m.find()) {
                     /*
@@ -292,7 +292,7 @@ public final class JerichoParser {
                     Thread thread = Thread.currentThread();
                     for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
                         Segment nestedSegment = iter.next();
-                        handleSegment(handler, nestedSegment);
+                        handleSegment(handler, nestedSegment, false);
                     }
                 } else {
                     handler.handleSegment(segment);
