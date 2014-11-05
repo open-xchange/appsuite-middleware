@@ -47,30 +47,29 @@
  *
  */
 
-package com.openexchange.snippet.mime;
+package com.openexchange.snippet;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
-import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
-import com.openexchange.snippet.DefaultSnippet;
-import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.internal.Services;
 
 /**
- * {@link MimeSnippetProcessor}
+ * {@link SnippetProcessor}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MimeSnippetProcessor {
+public class SnippetProcessor {
 
     private static class InputStreamProviderImpl implements InputStreamProvider {
 
@@ -104,12 +103,12 @@ public class MimeSnippetProcessor {
     private final Pattern pattern;
 
     /**
-     * Initializes a new {@link MimeSnippetProcessor}.
+     * Initializes a new {@link SnippetProcessor}.
      *
      * @param session
      * @param ctx
      */
-    public MimeSnippetProcessor(Session session) {
+    public SnippetProcessor(Session session) {
         super();
         this.session = session;
         pattern = Pattern.compile("(?i)src=\"[^\"]*\"");
@@ -141,10 +140,11 @@ public class MimeSnippetProcessor {
                 att.setId(mf.getID());
                 att.setSize(mf.getSize());
                 att.setStreamProvider(new InputStreamProviderImpl(mf));
+                att.setFilename(mf.getFileName());
 
                 DefaultSnippet ds = (DefaultSnippet) snippet;
                 ds.addAttachment(att);
-
+                
                 //final String url = SnippetImageDataSource.getInstance().generateUrl(new ImageLocation.Builder(id).id(snippet.getId()).build(), session);
                 final String url = mf.constructURL(session);
                 content = pattern.matcher(content).replaceAll(Matcher.quoteReplacement("src=\"" + url + "\""));
