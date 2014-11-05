@@ -134,6 +134,7 @@ Import-Package: com.googlecode.concurrentlinkedhashmap,
  org.slf4j,
  sun.misc
 Export-Package: com.openexchange.imap,
+ com.openexchange.imap.command,
  com.openexchange.imap.config,
  com.openexchange.imap.notify,
  com.openexchange.imap.search,
