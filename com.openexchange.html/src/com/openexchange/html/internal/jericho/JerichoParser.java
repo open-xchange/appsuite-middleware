@@ -140,8 +140,6 @@ public final class JerichoParser {
         super();
     }
 
-    private final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-
     private volatile Integer maxLength;
     private int maxLength() {
         Integer i = maxLength;
@@ -174,24 +172,16 @@ public final class JerichoParser {
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    private StreamedSource checkBody(final String html) {
+    private boolean checkBody(final String html) {
         if (null == html) {
-            return null;
+            return false;
         }
         final int maxLength = maxLength();
         final boolean big = html.length() > maxLength;
         if (big) {
             throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
         }
-        if ((html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0)) {
-            return new StreamedSource(html);
-        }
-        // <body> tag missing
-        String sep = System.getProperty("line.separator");
-        if (null == sep) {
-            sep = "\n";
-        }
-        return new StreamedSource(new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
+        return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
@@ -207,23 +197,25 @@ public final class JerichoParser {
     public void parse(final String html, final JerichoHandler handler) {
         StreamedSource streamedSource = null;
         try {
-            streamedSource = checkBody(html);
+            if (false == checkBody(html)) {
+                // <body> tag not available
+                handler.markBodyAbsent();
+            }
+
+            // Start regular parsing
+            streamedSource = new StreamedSource(html);
             streamedSource.setLogger(null);
             final Thread thread = Thread.currentThread();
             int lastSegmentEnd = 0;
             for (final Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
                 final Segment segment = iter.next();
                 if (segment.getEnd() <= lastSegmentEnd) {
-                    /*
-                     * If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the
-                     * previous tag.
-                     */
+                    // If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the previous tag.
                     continue;
                 }
                 lastSegmentEnd = segment.getEnd();
-                /*
-                 * Handle current segment
-                 */
+
+                // Handle current segment
                 handleSegment(handler, segment);
             }
         } catch (final StackOverflowError parserOverflow) {

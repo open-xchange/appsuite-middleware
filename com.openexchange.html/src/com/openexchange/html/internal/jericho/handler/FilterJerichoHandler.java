@@ -442,6 +442,12 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     @Override
+    public void markBodyAbsent() {
+        // If there is no body tag, assume parsing starts in body
+        body = true;
+    }
+
+    @Override
     public void handleUnknownTag(final Tag tag) {
         if (!body) {
             htmlBuilder.append(tag.toString());

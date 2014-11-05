@@ -96,4 +96,6 @@ public interface JerichoHandler {
 
     void handleUnknownTag(Tag tag);
 
+    void markBodyAbsent();
+
 }
