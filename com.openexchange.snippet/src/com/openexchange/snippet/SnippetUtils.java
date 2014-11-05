@@ -154,6 +154,13 @@ public final class SnippetUtils {
         return null == cts ? "text/plain" : cts;
     }
 
+    /**
+     * Get the image identifier stored in the misc JSONObject of the snippet.
+     * 
+     * @param misc The misc JSONObject of the snippet
+     * @return The image identifier or null
+     * @throws OXException
+     */
     public static String getImageId(final Object misc) throws OXException {
         String imageId = null;
         try {
