@@ -234,8 +234,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                     // IGNORE
                     return;
                 } catch (final RuntimeException x) {
-                    log.error(file.toString(), x);
-                    throw x;
+                    log.warn("Could not parse .yml file: {}", file.toString(), x);
                 }
                 yamlPaths.put(file.getName(), file.getPath());
                 yamlFiles.put(file.getPath(), o);
