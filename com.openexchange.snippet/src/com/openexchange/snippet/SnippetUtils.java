@@ -89,8 +89,8 @@ public final class SnippetUtils {
             return content;
         }
         try {
-            String retval = service.getConformHTML(content, "UTF-8");
-            retval = service.sanitize(retval, null, false, null, null);
+            //String retval = service.getConformHTML(content, "UTF-8");
+            String retval = service.sanitize(content, null, false, null, null);
 
             int start = retval.indexOf("<body>");
             if (start >= 0) {
