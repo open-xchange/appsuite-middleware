@@ -7,6 +7,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.codehaus.stax2"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.ctc.wstx"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.fasterxml.jackson.core.jackson-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.annotation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching.events"/>
