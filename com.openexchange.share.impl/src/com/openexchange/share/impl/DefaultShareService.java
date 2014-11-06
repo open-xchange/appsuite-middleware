@@ -341,7 +341,7 @@ public class DefaultShareService implements ShareService {
             /*
              * load & delete all shares in the context, removing associated target permissions
              */
-            shares = shareStorage.loadSharesForGuest(contextID, userID, connectionHelper.getParameters());
+            shares = shareStorage.loadSharesCreatedBy(contextID, userID, connectionHelper.getParameters());
             if (0 < shares.size()) {
                 shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
                 removeTargetPermissions(connectionHelper, shares);

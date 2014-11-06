@@ -137,7 +137,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
     @Override
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "The context id.");
-        options.addOption("i", "userid", true, "The user id.");
+        options.addOption("i", "userid", true, "The id of the user who created the shares.");
         options.addOption("t", "tokens", true, "Token to remove.");
         options.addOption("f", "force", false, "Force removal of token.");
     }
@@ -157,7 +157,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
                 String targetPath = tokenAndPath.getSecond();
                 if ((null == targetPath || "".equals(targetPath)) && !iKnowWhatIamDoing) {
                     throw new MissingOptionException("Seems like you supplied a token without a share path. If you want to remove"
-                        + " all share identified by this token use option -f/--force");
+                        + " all shares identified by this token use option -f/--force");
                 }
                 if (null != contextId && !contextId.isEmpty() && !"-1".equals(contextId)) {
                     result = mbean.removeShare(shareToken, targetPath, Integer.parseInt(contextId));
@@ -174,7 +174,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         } catch (NumberFormatException e) {
             throw new ParseException("Cannot parse value: " + e.getMessage());
         }
-        System.out.println(result + " shares removed.");
+        System.out.println(result + (result == 1 ? " share " : " shares ") + "removed.");
         return null;
     }
 
