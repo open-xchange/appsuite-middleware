@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,18 +66,29 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.BooleanTerm;
+import com.openexchange.mail.search.FlagTerm;
+import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -306,27 +318,50 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         }
                     }
                 } else {
-                    final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                    /*
-                     * Get iterator
-                     */
-                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, filterApplied ? null : fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
-                    final int size = it.size();
-                    for (int i = 0; i < size; i++) {
-                        final MailMessage mm = it.next();
-                        if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
-                            if (!mm.containsAccountId()) {
-                                mm.setAccountId(mailInterface.getAccountID());
+                    int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+
+                    if (filterApplied) {
+                        mailInterface.openFor(folderId);
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
+
+                        SearchTerm<?> searchTerm;
+                        {
+                            SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : BooleanTerm.TRUE;
+                            SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, false) : BooleanTerm.TRUE;
+                            searchTerm = new ANDTerm(first, second);
+                        }
+
+                        FullnameArgument fa = prepareMailFolderParam(folderId);
+                        IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
+                        MailSortField sortField = MailSortField.getField(sortCol);
+                        OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
+                        MailMessage[] result = mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
+
+                        for (MailMessage mm : result) {
+                            if (null != mm) {
+                                if (!mm.containsAccountId()) {
+                                    mm.setAccountId(mailInterface.getAccountID());
+                                }
+                                mails.add(mm);
                             }
-                            mails.add(mm);
+                        }
+                    } else {
+                        // Get iterator
+                        it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, filterApplied ? null : fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
+                        final int size = it.size();
+                        for (int i = 0; i < size; i++) {
+                            final MailMessage mm = it.next();
+                            if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
+                                if (!mm.containsAccountId()) {
+                                    mm.setAccountId(mailInterface.getAccountID());
+                                }
+                                mails.add(mm);
+                            }
                         }
                     }
                 }
             } finally {
-                if (null != it) {
-                    it.close();
-                    it = null;
-                }
+                SearchIterators.close(it);
             }
             if (filterApplied && (null != fromToIndices)) {
                 final int fromIndex = fromToIndices[0];
