@@ -277,7 +277,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         return retval;
     }
 
-    private String putToHzMapIfAbsent(String mapIdentifier, final String key, final String value) {
+    private String putToHzMapIfAbsent(String mapIdentifier, String key, String value) {
         final IMap<String, String> hzMap = hzMap(mapIdentifier);
         String retval = null;
         if (null == hzMap) {
@@ -289,7 +289,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         return retval;
     }
 
-    private void putToHzMap(String mapIdentifier, final String key, final String value) {
+    private void putToHzMap(String mapIdentifier, String key, String value) {
         final IMap<String, String> hzMap = hzMap(mapIdentifier);
         if (null == hzMap) {
             LOG.trace("Hazelcast map for remote token logins is not available.");
@@ -300,7 +300,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
     }
 
-    private String getFromHzMap(String mapIdentifier, final String key) {
+    private String getFromHzMap(String mapIdentifier, String key) {
         final IMap<String, String> hzMap = hzMap(mapIdentifier);
         String retval = null;
         if (null == hzMap) {
@@ -312,7 +312,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public String acquireToken(final Session session) {
+    public String acquireToken(Session session) {
         Validate.notNull(session);
 
         // Only one token per session
@@ -330,7 +330,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public Session redeemToken(final String token, final String appSecret, final String optClientId, final String optAuthId, final String optHash) throws OXException {
+    public Session redeemToken(String token, String appSecret, String optClientIdentifier, String optAuthId, String optHash, String optClientIp) throws OXException {
         final TokenLoginSecret tokenLoginSecret = Strings.isEmpty(appSecret) ? null : getTokenLoginSecret(appSecret);
         if (null == tokenLoginSecret) {
             throw TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.create();
@@ -370,11 +370,12 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
         // Create parameter object
         final DefaultAddSessionParameter parameter = new DefaultAddSessionParameter().setUserId(session.getUserId());
-        parameter.setClientIP(session.getLocalIp()).setFullLogin(session.getLogin()).setPassword(session.getPassword());
+        parameter.setClientIP(Strings.isEmpty(optClientIp) ? session.getLocalIp() : optClientIp);
+        parameter.setFullLogin(session.getLogin()).setPassword(session.getPassword());
         parameter.setContext(contextService.getContext(session.getContextId()));
         parameter.setUserLoginInfo(session.getLoginName()).setTransient(session.isTransient());
         // Client identifier
-        parameter.setClient(Strings.isEmpty(optClientId) ? session.getClient() : optClientId);
+        parameter.setClient(Strings.isEmpty(optClientIdentifier) ? session.getClient() : optClientIdentifier);
         // Authentication identifier
         parameter.setAuthId(Strings.isEmpty(optAuthId) ? session.getAuthId() : optAuthId);
         // Hash value
