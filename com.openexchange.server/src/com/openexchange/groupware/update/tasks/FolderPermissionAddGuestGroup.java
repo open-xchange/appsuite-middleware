@@ -85,6 +85,8 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
         FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
     };
 
+    private static Logger log = org.slf4j.LoggerFactory.getLogger(FolderPermissionAddGuestGroup.class);
+
     /**
      * Default constructor.
      */
@@ -104,7 +106,6 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Logger log = org.slf4j.LoggerFactory.getLogger(FolderPermissionAddGuestGroup.class);
         log.info("Performing update task {}", FolderPermissionAddGuestGroup.class.getSimpleName());
         ProgressState progress = params.getProgressState();
         Connection connection = Database.getNoTimeout(params.getContextId(), true);
@@ -115,10 +116,6 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
             progress.setTotal(contextIDs.length);
             for (int i = 0; i < contextIDs.length; i++) {
                 progress.setState(i);
-                if (!systemFoldersExist(connection, contextIDs[i])) {
-                    log.warn("System folders not found in context {}, skipping.", contextIDs[i]);
-                    continue;
-                }
                 insertGroupPermission(connection, contextIDs[i]);
             }
             connection.commit();
@@ -145,7 +142,7 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
      * @return The batch update count
      * @throws SQLException
      */
-    private static int[] insertGroupPermission(Connection connection, int contextID) throws SQLException {
+    private static int[] insertGroupPermission(Connection connection, int contextID) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(
@@ -165,8 +162,12 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
              * add permissions to system folders with "read_folder" folder access
              */
             for (int folderID : systemFolderIDs) {
-                stmt.setInt(2, folderID);
-                stmt.addBatch();
+                if (systemFolderExist(connection, contextID, folderID)) {
+                    stmt.setInt(2, folderID);
+                    stmt.addBatch();
+                } else {
+                    log.warn("System folder {} not found in context {}, skipping.", folderID, contextID);
+                }
             }
             /*
              * execute batch for context
@@ -177,16 +178,13 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
         }
     }
 
-    private boolean systemFoldersExist(Connection con, int contextId) throws OXException {
+    private static boolean systemFolderExist(Connection con, int contextId, int fuid) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
             stmt.setInt(1, contextId);
-            for (int fuid : systemFolderIDs) {
-                stmt.setInt(2, fuid);
-                stmt.addBatch();
-            }
+            stmt.setInt(2, fuid);
             rs = stmt.executeQuery();
             return rs.next();
         } catch (SQLException e) {
