@@ -282,6 +282,120 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
+     * Removes all shares in a context.
+     * <P/>
+     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
+     * as needed.
+     * <p/>
+     * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
+     *
+     * @param contextID The context identifier
+     * @return The number of affected shares
+     */
+    public int removeShares(int contextID) throws OXException {
+        List<Share> shares;
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
+        try {
+            connectionHelper.start();
+            /*
+             * load & delete all shares in the context, removing associated target permissions
+             */
+            shares = shareStorage.loadSharesForContext(contextID, connectionHelper.getParameters());
+            if (0 < shares.size()) {
+                shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
+                removeTargetPermissions(connectionHelper, shares);
+            }
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (0 < shares.size()) {
+            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
+        }
+        return shares.size();
+    }
+
+    /**
+     * Removes all shares in a context that were created by a specific user.
+     * <P/>
+     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
+     * as needed.
+     * <p/>
+     * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
+     *
+     * @param contextID The context identifier
+     * @param userID The identifier of the user to delete the shares for
+     * @return The number of affected shares
+     */
+    public int removeShares(int contextID, int userID) throws OXException {
+        List<Share> shares;
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
+        try {
+            connectionHelper.start();
+            /*
+             * load & delete all shares in the context, removing associated target permissions
+             */
+            shares = shareStorage.loadSharesForGuest(contextID, userID, connectionHelper.getParameters());
+            if (0 < shares.size()) {
+                shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
+                removeTargetPermissions(connectionHelper, shares);
+            }
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (0 < shares.size()) {
+            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
+        }
+        return shares.size();
+    }
+
+    /**
+     * Removes all shares identified by the supplied tokens. The tokens might either be in their absolute format (i.e. base token plus
+     * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being
+     * removed.
+     * <P/>
+     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
+     * as needed.
+     * <p/>
+     * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
+     *
+     * @param tokens The tokens to delete the shares for
+     * @return The number of affected shares
+     */
+    public int removeShares(List<String> tokens) throws OXException {
+        /*
+         * order tokens by context
+         */
+        Map<Integer, List<String>> tokensByContextID = new HashMap<Integer, List<String>>();
+        for (String token : tokens) {
+            Integer contextID = I(new ShareToken(token).getContextID());
+            List<String> tokensInContext = tokensByContextID.get(contextID);
+            if (null == tokensInContext) {
+                tokensInContext = new ArrayList<String>();
+                tokensByContextID.put(contextID, tokensInContext);
+            }
+            tokensInContext.add(token);
+        }
+        /*
+         * delete shares per context
+         */
+        int affectedShares = 0;
+        for (Map.Entry<Integer, List<String>> entry : tokensByContextID.entrySet()) {
+            affectedShares += removeShares(entry.getKey().intValue(), entry.getValue());
+        }
+        return affectedShares;
+    }
+
+    /**
      * Removes share targets for specific guest users in a context.
      *
      * @param contextID The context identifier
@@ -341,118 +455,36 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Remove all shares identified by supplied tokens.
+     * Removes all shares identified by the supplied tokens. The tokens might either be in their absolute format (i.e. base token plus
+     * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being
+     * removed.
+     * <P/>
+     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
+     * as needed.
+     * <p/>
+     * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
      *
-     * @param tokens The tokens
+     * @param tokens The tokens to delete the shares for
+     * @return The number of affected shares
      */
-    public void removeShares(List<String> tokens) throws OXException {
-        /*
-         * order tokens by context
-         */
-        Map<Integer, List<String>> tokensByContextID = new HashMap<Integer, List<String>>();
+    private int removeShares(int contextID, List<String> tokens) throws OXException {
         for (String token : tokens) {
-            Integer contextId = I(new ShareToken(token).getContextID());
-            List<String> tokensInContext = tokensByContextID.get(contextId);
-            if (null == tokensInContext) {
-                tokensInContext = new ArrayList<String>();
-                tokensByContextID.put(contextId, tokensInContext);
-            }
-            tokensInContext.add(token);
-        }
-        /*
-         * delete shares per context
-         */
-        for (Map.Entry<Integer, List<String>> entry : tokensByContextID.entrySet()) {
-            removeShares(entry.getKey().intValue(), entry.getValue());
-        }
-    }
-
-    /**
-     * Remove all shares in context identified by supplied tokens.
-     *
-     * @param contextId The contextId
-     * @param tokens The tokens
-     * @throws OXException If removal fails
-     */
-    public void removeShares(int contextId, List<String> tokens) throws OXException {
-        for (String token : tokens) {
-            if (new ShareToken(token).getContextID() != contextId) {
+            if (new ShareToken(token).getContextID() != contextID) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
         }
         ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
+
             // List<Share> sharesToRemove = shareStorage.loadShares(contextId, tokens, connectionHelper.getParameters());
             // removeShares(connectionHelper, sharesToRemove);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
         }
-    }
-
-    /**
-     * Remove all shares in a context.
-     *
-     * @param contextID The context identifier
-     */
-    public void removeShares(int contextID) throws OXException {
-        List<Share> shares;
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
-        try {
-            connectionHelper.start();
-            /*
-             * load & delete all shares in the context, removing associated target permissions
-             */
-            shares = shareStorage.loadSharesForContext(contextID, connectionHelper.getParameters());
-            if (0 < shares.size()) {
-                shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                removeTargetPermissions(connectionHelper, shares);
-            }
-            connectionHelper.commit();
-        } finally {
-            connectionHelper.finish();
-        }
-        /*
-         * schedule cleanup tasks as needed
-         */
-        if (0 < shares.size()) {
-            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
-        }
-    }
-
-    /**
-     * Removes all shares that were created by a specific user.
-     *
-     * @param contextID The context identifier
-     * @param userID The identifier of the user to delete the shares for
-     */
-    public void removeShares(int contextID, int userID) throws OXException {
-        List<Share> shares;
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
-        try {
-            connectionHelper.start();
-            /*
-             * load & delete all shares in the context, removing associated target permissions
-             */
-            shares = shareStorage.loadSharesForGuest(contextID, userID, connectionHelper.getParameters());
-            if (0 < shares.size()) {
-                shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                removeTargetPermissions(connectionHelper, shares);
-            }
-            connectionHelper.commit();
-        } finally {
-            connectionHelper.finish();
-        }
-        /*
-         * schedule cleanup tasks as needed
-         */
-        if (0 < shares.size()) {
-            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
-        }
+        return 0;
     }
 
     /**
