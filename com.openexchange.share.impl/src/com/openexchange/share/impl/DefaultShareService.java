@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -468,23 +469,82 @@ public class DefaultShareService implements ShareService {
      * @return The number of affected shares
      */
     private int removeShares(int contextID, List<String> tokens) throws OXException {
+        /*
+         * distinguish between base tokens only or base token with specific paths
+         */
+        Set<ShareToken> baseTokensOnly = new HashSet<ShareToken>();
+        Map<ShareToken, Set<String>> pathsPerBaseToken = new HashMap<ShareToken, Set<String>>();
         for (String token : tokens) {
-            if (new ShareToken(token).getContextID() != contextID) {
+            ShareToken shareToken = new ShareToken(token);
+            if (contextID != shareToken.getContextID()) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
+            String baseToken = shareToken.getToken();
+            if (token.length() > baseToken.length() + 1 && '/' == token.charAt(baseToken.length())) {
+                /*
+                 * base token with path
+                 */
+                Set<String> paths = pathsPerBaseToken.get(baseToken);
+                if (null == paths) {
+                    paths = new HashSet<String>();
+                    pathsPerBaseToken.put(shareToken, paths);
+                }
+                paths.add(token.substring(baseToken.length() + 1));
+            } else {
+                /*
+                 * base token only
+                 */
+                baseTokensOnly.add(shareToken);
+            }
         }
+        /*
+         * proceed with deletion
+         */
+        List<Share> shares = new ArrayList<Share>();
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
-
-            // List<Share> sharesToRemove = shareStorage.loadShares(contextId, tokens, connectionHelper.getParameters());
-            // removeShares(connectionHelper, sharesToRemove);
+            /*
+             * gather all shares for guest users with base token only (removing redundant tokens with paths implicitly)
+             */
+            for (ShareToken baseToken : baseTokensOnly) {
+                pathsPerBaseToken.remove(baseToken);
+                shares.addAll(shareStorage.loadSharesForGuest(contextID, baseToken.getUserID(), connectionHelper.getParameters()));
+            }
+            /*
+             * pick specific shares for guest users with base tokens and paths
+             */
+            for (Map.Entry<ShareToken, Set<String>> entry : pathsPerBaseToken.entrySet()) {
+                List<Share> sharesForGuest = shareStorage.loadSharesForGuest(
+                    contextID, entry.getKey().getUserID(), connectionHelper.getParameters());
+                for (String path : entry.getValue()) {
+                    for (Share share : sharesForGuest) {
+                        if (null != share.getTarget() && path.equals(share.getTarget().getPath())) {
+                            shares.add(share);
+                            break;
+                        }
+                    }
+                }
+            }
+            /*
+             * delete the shares in storage, removing the associated target permissions as well
+             */
+            if (0 < shares.size()) {
+                shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
+                removeTargetPermissions(connectionHelper, shares);
+            }
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
         }
-        return 0;
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (0 < shares.size()) {
+            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
+        }
+        return shares.size();
     }
 
     /**

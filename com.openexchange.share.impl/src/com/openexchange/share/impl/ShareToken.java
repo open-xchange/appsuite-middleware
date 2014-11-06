@@ -95,16 +95,16 @@ public class ShareToken {
     }
 
     /**
-     * Initializes a new {@link ShareToken}, based on the supplied (fully qualified) share token.
+     * Initializes a new {@link ShareToken}, based on the supplied share token. Any appended path fragments are swallowed.
      *
      * @param token The token
      */
     public ShareToken(String token) throws OXException {
         super();
-        if (null == token || false == TOKEN_PATTERN.matcher(token).matches()) {
+        if (null == token || 48 > token.length() || false == TOKEN_PATTERN.matcher(token.substring(0, 48)).matches()) {
             throw ShareExceptionCodes.INVALID_TOKEN.create(token);
         }
-        baseToken = token.substring(16);
+        baseToken = token.substring(16, 48);
         contextID = Integer.parseInt(token.substring(0, 8), 16) ^ getContextObfuscator(baseToken);
         userID = Integer.parseInt(token.substring(8, 16), 16) ^ getUserObfuscator(baseToken);
     }
