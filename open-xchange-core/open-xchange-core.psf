@@ -3,6 +3,7 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,cern.colt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.google.common"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.codehaus.stax2"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.ctc.wstx"/>
