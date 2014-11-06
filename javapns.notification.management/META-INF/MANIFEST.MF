@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Apple Push Notification Service Provider for Java
+Bundle-SymbolicName: javapns.notification.management
+Eclipse-BuddyPolicy: registered
+Bundle-Version: 2.3.3
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .,
+ lib/JavaPNS_2.3_Beta_3.jar
+Import-Package:  javax.crypto,
+ javax.crypto.interfaces,
+ javax.crypto.spec,
+ javax.net.ssl,
+ org.apache.log4j
+Export-Package: javapns,
+ javapns.communication.exceptions,
+ javapns.devices,
+ javapns.devices.exceptions,
+ javapns.json,
+ javapns.notification,
+ javapns.notification.management
