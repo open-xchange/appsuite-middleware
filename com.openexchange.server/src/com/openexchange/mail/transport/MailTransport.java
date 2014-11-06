@@ -68,26 +68,6 @@ import com.openexchange.session.Session;
 public abstract class MailTransport {
 
     /**
-     * Triggers all implementation-specific startup actions; especially its configuration initialization
-     *
-     * @param transport A {@link MailTransport transport}
-     * @throws OXException If implementation start-up fails
-     */
-    static final void startupImpl(final MailTransport transport) throws OXException {
-        transport.startup();
-    }
-
-    /**
-     * Triggers all implementation-specific shutdown actions; especially its configuration shut-down
-     *
-     * @param transport A {@link MailTransport transport}
-     * @throws OXException If implementation shut-down fails
-     */
-    static final void shutdownImpl(final MailTransport transport) throws OXException {
-        transport.shutdown();
-    }
-
-    /**
      * Gets the proper instance of {@link MailTransport mail transport} parameterized with given session.
      * <p>
      * Note: Don't forget to call final {@link #close()} on obtained {@link MailTransport mail transport}:
@@ -241,20 +221,6 @@ public abstract class MailTransport {
      * @return The transport configuration
      */
     public abstract TransportConfig getTransportConfig() throws OXException;
-
-    /**
-     * Trigger all necessary startup actions; especially configuration start-up
-     *
-     * @throws OXException If startup actions fail
-     */
-    protected abstract void startup() throws OXException;
-
-    /**
-     * Trigger all necessary shutdown actions; especially configuration shut-down
-     *
-     * @throws OXException If shutdown actions fail
-     */
-    protected abstract void shutdown() throws OXException;
 
     /**
      * Gets an implementation-specific new instance of {@link ITransportProperties}.

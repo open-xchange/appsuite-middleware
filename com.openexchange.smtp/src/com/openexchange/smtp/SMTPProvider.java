@@ -67,6 +67,7 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.SMTPProperties;
+import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.dataobjects.SMTPBodyPart;
 import com.openexchange.smtp.dataobjects.SMTPDataPart;
 import com.openexchange.smtp.dataobjects.SMTPDocumentPart;
@@ -102,6 +103,19 @@ public final class SMTPProvider extends TransportProvider {
      */
     private SMTPProvider() {
         super();
+    }
+
+    @Override
+    protected void startUp() throws OXException {
+        super.startUp();
+        SMTPCapabilityCache.init();
+    }
+
+    @Override
+    protected void shutDown() throws OXException {
+        SMTPSessionProperties.resetDefaultSessionProperties();
+        SMTPCapabilityCache.tearDown();
+        super.shutDown();
     }
 
     @Override

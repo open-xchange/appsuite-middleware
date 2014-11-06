@@ -800,18 +800,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         clearUp();
     }
 
-    @Override
-    protected void shutdown() {
-        SMTPSessionProperties.resetDefaultSessionProperties();
-        SMTPCapabilityCache.tearDown();
-    }
-
-    @Override
-    protected void startup() {
-        SMTPCapabilityCache.init();
-    }
-
-
     /*
      * end interface implementation
      */

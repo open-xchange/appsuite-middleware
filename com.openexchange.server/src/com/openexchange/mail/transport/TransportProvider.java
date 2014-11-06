@@ -132,9 +132,8 @@ public abstract class TransportProvider {
      *
      * @throws OXException If start-up fails
      */
-    protected final void startUp() throws OXException {
+    protected void startUp() throws OXException {
         getProtocolProperties().loadProperties();
-        MailTransport.startupImpl(createNewMailTransport(null));
     }
 
     /**
@@ -142,8 +141,7 @@ public abstract class TransportProvider {
      *
      * @throws OXException if shut-down fails
      */
-    protected final void shutDown() throws OXException {
-        MailTransport.shutdownImpl(createNewMailTransport(null));
+    protected void shutDown() throws OXException {
         getProtocolProperties().resetProperties();
     }
 
