@@ -52,15 +52,13 @@ package com.openexchange.smtp.filler;
 import java.io.IOException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.MailPath;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.filler.FillerContext;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
+import com.openexchange.mail.mime.filler.SessionFillerContext;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -80,37 +78,25 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
     /**
      * Constructor
      *
+     * @param smtpProperties
      * @param session The session
      * @param ctx The context
+     * @param usm The user's mail settings
      */
-    public SMTPMessageFiller(final ISMTPProperties smtpProperties, final Session session, final Context ctx) {
-        super(session, ctx);
+    public SMTPMessageFiller(final ISMTPProperties smtpProperties, final Session session, final Context ctx, final UserSettingMail usm) {
+        super(new SessionFillerContext(session, ctx, usm));
         this.smtpProperties = smtpProperties;
     }
 
     /**
      * Constructor
      *
-     * @param session The session
-     * @param ctx The context
-     * @param usm The user's mail settings
+     * @param smtpProperties
+     * @param fillerContext
      */
-    public SMTPMessageFiller(final ISMTPProperties smtpProperties, final Session session, final Context ctx, final UserSettingMail usm) {
-        super(session, ctx, usm);
+    public SMTPMessageFiller(final ISMTPProperties smtpProperties, final FillerContext fillerContext) {
+        super(fillerContext);
         this.smtpProperties = smtpProperties;
-    }
-
-    /**
-     * Fills given instance of {@link SMTPMessage}
-     *
-     * @param mail The source mail
-     * @param smtpMessage The SMTP message to fill
-     * @throws MessagingException If a messaging error occurs
-     * @throws OXException If a mail error occurs
-     * @throws IOException If an I/O error occurs
-     */
-    public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage) throws MessagingException, OXException, IOException {
-        fillMail(mail, smtpMessage, ComposeType.NEW);
     }
 
     /**
@@ -126,24 +112,6 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
     public void fillMail(final ComposedMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type) throws MessagingException, OXException, IOException {
         if (null != type) {
             mail.setSendType(type);
-        }
-        /*
-         * Check for reply
-         */
-        {
-            final MailPath msgref;
-            if (ComposeType.REPLY.equals(type) && ((msgref = mail.getMsgref()) != null)) {
-                MailAccess<?, ?> access = null;
-                try {
-                    access = MailAccess.getInstance(session, msgref.getAccountId());
-                    access.connect();
-                    setReplyHeaders(access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false), smtpMessage);
-                } finally {
-                    if (null != access) {
-                        access.close(true);
-                    }
-                }
-            }
         }
         /*
          * Set headers
@@ -169,7 +137,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
             /*
              * Set ENVELOPE-FROM in SMTP message to user's primary email address
              */
-            ((SMTPMessage) mimeMessage).setEnvelopeFrom(IDNA.toACE(UserStorage.getInstance().getUser(session.getUserId(), ctx).getMail()));
+            ((SMTPMessage) mimeMessage).setEnvelopeFrom(fillerContext.getEnvelopeFrom());
         }
     }
 

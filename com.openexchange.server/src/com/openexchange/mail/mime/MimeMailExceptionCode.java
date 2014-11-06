@@ -318,6 +318,10 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * Error message: %5$s
      */
     IN_USE_ERROR_EXT(MimeMailExceptionCode.IN_USE_ERROR_EXT_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber),
+    /**
+     * Image attachments are not supported
+     */
+    IMAGE_ATTACHMENTS_UNSUPPORTED("Image attachments are not supported", CATEGORY_ERROR, 1032);
 
     ;
 
