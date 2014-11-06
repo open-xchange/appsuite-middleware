@@ -1,6 +1,7 @@
 * 2014-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 35374: Pass incoming request's IP address on redeem token call
+ - Fix for bug 35359: Improved special /ajax/mail?action=all request fired when loading portal page
 
 * 2014-11-05 - marcus.klein@open-xchange.com
 
