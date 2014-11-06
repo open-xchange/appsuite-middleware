@@ -81,7 +81,7 @@ public class ExpiredSharesTest extends ShareTest {
         testAccessExpiredShare(randomFolderAPI(), randomModule(), randomGuestPermission());
     }
 
-    public void noTestAccessExpiredShareExtensively() throws Exception {
+    public void testAccessExpiredShareExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {

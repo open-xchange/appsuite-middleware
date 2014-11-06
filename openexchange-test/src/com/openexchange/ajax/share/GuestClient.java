@@ -83,6 +83,8 @@ import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
+import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
@@ -90,6 +92,8 @@ import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.Permission;
@@ -237,6 +241,16 @@ public class GuestClient extends AJAXClient {
      * @param permissions The guest permissions
      * @throws Exception
      */
+    public void checkShareAccessible(FileStorageGuestObjectPermission permissions) throws Exception {
+        checkFileAccessible(getItem(), permissions);
+    }
+
+    /**
+     * Checks that a share is accessible for the guest according to the granted permissions.
+     *
+     * @param permissions The guest permissions
+     * @throws Exception
+     */
     public void checkShareAccessible(OCLGuestPermission permissions) throws Exception {
         checkFolderAccessible(getFolder(), permissions);
     }
@@ -273,6 +287,47 @@ public class GuestClient extends AJAXClient {
          * check item listing
          */
         getAll(folder, false == permissions.canReadOwnObjects());
+    }
+
+    /**
+     * Checks that a folder is accessible for the guest according to the granted permissions.
+     *
+     * @param folderID The identifier of the file to check
+     * @param permissions The guest permissions for that file
+     * @throws Exception
+     */
+    public void checkFileAccessible(String fileID, FileStorageGuestObjectPermission permissions) throws Exception {
+        //TODO: should not be necessary!
+        FileID temp = new FileID(fileID);
+        temp.setFolderId(String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        fileID = temp.toUniqueID();
+        /*
+         * check item retrieval
+         */
+        GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(fileID);
+        getInfostoreRequest.setFailOnError(permissions.canRead());
+        GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
+        checkResponse(getInfostoreResponse, false == permissions.canRead());
+        if (permissions.canRead()) {
+            DefaultFile file = new DefaultFile(getInfostoreResponse.getDocumentMetadata());
+            /*
+             * check item update
+             */
+            file.setFileName(file.getFileName() + "_edit");
+            UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, new Field[] { Field.FILENAME }, file.getLastModified());
+            updateInfostoreRequest.setFailOnError(permissions.canWrite());
+            UpdateInfostoreResponse updateInfostoreResponse = execute(updateInfostoreRequest);
+            checkResponse(updateInfostoreResponse, false == permissions.canWrite());
+            file.setLastModified(updateInfostoreResponse.getTimestamp());
+            /*
+             * check item delete
+             */
+            //TODO: throws "not exist" in folder 10
+//            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileID, new FileID(fileID).getFolderId(), file.getLastModified());
+//            deleteInfostoreRequest.setFailOnError(permissions.canDelete());
+//            DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
+//            checkResponse(deleteInfostoreResponse, false == permissions.canDelete());
+        }
     }
 
     /**

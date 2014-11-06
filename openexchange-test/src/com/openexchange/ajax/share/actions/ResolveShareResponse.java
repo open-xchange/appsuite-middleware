@@ -144,7 +144,8 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     }
 
     public String getItem() {
-        return parameters.get("id");
+        String id = parameters.get("id");
+        return Strings.isEmpty(id) ? parameters.get("i") : id;
     }
 
     /**
