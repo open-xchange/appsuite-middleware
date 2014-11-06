@@ -115,6 +115,11 @@ public final class SMTPProvider extends TransportProvider {
     }
 
     @Override
+    public MailTransport createNewNoReplyTransport(int contextId) throws OXException {
+        return new NoReplySMTPTransport(contextId);
+    }
+
+    @Override
     public ComposedMailMessage getNewComposedMailMessage(final Session session, final Context ctx) throws OXException {
         return new SMTPMailMessage(session, ctx);
     }

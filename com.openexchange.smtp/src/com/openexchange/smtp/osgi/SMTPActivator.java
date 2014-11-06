@@ -56,6 +56,7 @@ import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -64,6 +65,7 @@ import com.openexchange.smtp.SMTPProvider;
 import com.openexchange.smtp.SmtpReloadable;
 import com.openexchange.smtp.services.Services;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SMTPActivator} - The {@link BundleActivator activator} for SMTP bundle.
@@ -83,7 +85,7 @@ public final class SMTPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class, ContextService.class, UserService.class };
     }
 
     @Override
