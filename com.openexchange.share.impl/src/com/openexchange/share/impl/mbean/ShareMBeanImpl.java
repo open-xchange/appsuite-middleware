@@ -49,23 +49,12 @@
 
 package com.openexchange.share.impl.mbean;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.groupware.TargetPermission;
-import com.openexchange.share.groupware.TargetProxy;
-import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.DefaultShareService;
 
 /**
@@ -78,15 +67,9 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 
     private final DefaultShareService shareService;
 
-    private final ModuleSupport moduleSupport;
-
-    private final DatabaseService dbService;
-
-    public ShareMBeanImpl(Class<?> mbeanInterface, DefaultShareService shareService, ModuleSupport moduleSupport, DatabaseService dbService) throws NotCompliantMBeanException {
+    public ShareMBeanImpl(Class<?> mbeanInterface, DefaultShareService shareService) throws NotCompliantMBeanException {
         super(mbeanInterface);
         this.shareService = shareService;
-        this.moduleSupport = moduleSupport;
-        this.dbService = dbService;
     }
 
     @Override
@@ -100,73 +83,26 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public void removeShare(String token, String path) throws OXException {
-        removeShare(token, path, -1);
+    public int removeShare(String token, String path) throws OXException {
+        return removeShare(token, path, -1);
     }
 
     @Override
-    public void removeShare(String token, String path, int contextId) throws OXException {
-        GuestShare guestShare = shareService.resolveToken(token);
-        if (-1 == contextId) {
-            contextId = guestShare.getContextID();
-        } else {
-            if (contextId != guestShare.getContextID()) {
-                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token + "/" + path);
-            }
+    public int removeShare(String token, String path, int contextId) throws OXException {
+        if (null != path && !path.isEmpty() && !"".equals(path)) {
+            token = token + "/" + path;
         }
-        List<ShareTarget> targetsToDelete;
-        if (path == null) {
-            targetsToDelete = guestShare.getTargets();
-        } else {
-            ShareTarget target = guestShare.resolveTarget(path);
-            if (target == null) {
-                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-            }
-
-            targetsToDelete = Collections.singletonList(target);
-        }
-
-        /*
-         * Remove folder and object permissions
-         */
-        Connection con = dbService.getWritable(contextId);
-        TargetUpdate update = null;
-        try {
-            Databases.startTransaction(con);
-            update = moduleSupport.prepareAdministrativeUpdate(contextId, con);
-            update.fetch(targetsToDelete);
-            List<TargetPermission> permissions = Collections.singletonList(new TargetPermission(contextId, false, 0));
-            for (ShareTarget target : targetsToDelete) {
-                TargetProxy proxy = update.get(target);
-                proxy.removePermissions(permissions);
-            }
-            update.run();
-
-            shareService.removeTargets(contextId, targetsToDelete, Collections.singletonList(guestShare.getGuestID()));
-            con.commit();
-        } catch (OXException e) {
-            Databases.rollback(con);
-            throw e;
-        } catch (SQLException e) {
-            Databases.rollback(con);
-            throw ShareExceptionCodes.SQL_ERROR.create(e.getMessage());
-        } finally {
-            Databases.autocommit(con);
-            dbService.backWritable(contextId, con);
-            if (update != null) {
-                update.close();
-            }
-        }
+        return shareService.removeShares(Collections.singletonList(token));
     }
 
     @Override
-    public void removeShares(int contextId) throws OXException {
-        shareService.removeShares(contextId);
+    public int removeShares(int contextId) throws OXException {
+        return shareService.removeShares(contextId);
     }
 
     @Override
-    public void removeShares(int contextId, int userId) throws OXException {
-        shareService.removeShares(contextId, userId);
+    public int removeShares(int contextId, int userId) throws OXException {
+        return shareService.removeShares(contextId, userId);
     }
 
 }

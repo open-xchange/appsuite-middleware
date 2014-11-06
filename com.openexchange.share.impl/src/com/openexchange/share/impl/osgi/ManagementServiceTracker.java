@@ -54,10 +54,8 @@ import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.mbean.ShareMBean;
 import com.openexchange.share.impl.mbean.ShareMBeanImpl;
@@ -76,16 +74,11 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
     private ObjectName objectName;
 
     private final DefaultShareService defaultShareService;
-    private final ModuleSupport moduleSupport;
-    private final DatabaseService dbService;
 
-    ManagementServiceTracker(final BundleContext context, DefaultShareService shareService, ModuleSupport moduleSupport,
-        DatabaseService dbService) {
+    ManagementServiceTracker(final BundleContext context, DefaultShareService shareService) {
         super();
         this.context = context;
         this.defaultShareService = shareService;
-        this.moduleSupport = moduleSupport;
-        this.dbService = dbService;
     }
 
     @Override
@@ -112,7 +105,7 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class);
             try {
                 objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
-                management.registerMBean(objectName, new ShareMBeanImpl(ShareMBean.class, defaultShareService, moduleSupport, dbService));
+                management.registerMBean(objectName, new ShareMBeanImpl(ShareMBean.class, defaultShareService));
             } catch (final MalformedObjectNameException e) {
                 logger.error("", e);
             } catch (final OXException e) {

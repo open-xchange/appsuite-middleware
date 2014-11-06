@@ -214,7 +214,7 @@ public class ShareActivator extends HousekeepingActivator {
         registerService(QuotaProvider.class, new ShareQuotaProvider(this));
 
         trackService(ModuleSupport.class);
-        track(ManagementService.class, new ManagementServiceTracker(context, shareService, moduleSupport, getService(DatabaseService.class)));
+        track(ManagementService.class, new ManagementServiceTracker(context, shareService));
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
         trackService(TranslatorFactory.class);

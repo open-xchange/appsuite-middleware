@@ -89,7 +89,7 @@ public interface ShareMBean {
      * @param path The share path
      * @throws OXException
      */
-    void removeShare(String token, String path) throws OXException;
+    int removeShare(String token, String path) throws OXException;
 
     /**
      * Removes all targets in supplied context identified by supplied token.
@@ -98,7 +98,7 @@ public interface ShareMBean {
      * @param contextId The contextId
      * @throws OXException
      */
-    void removeShare(String shareToken, String targetPath, int contextId) throws OXException;
+    int removeShare(String shareToken, String targetPath, int contextId) throws OXException;
 
     /**
      * Remove all shares from supplied context.
@@ -106,7 +106,7 @@ public interface ShareMBean {
      * @param contextId The contextId
      * @throws OXException On error
      */
-    void removeShares(int contextId) throws OXException;
+    int removeShares(int contextId) throws OXException;
 
     /**
      * Removes all shares in supplied context created by supplied user.
@@ -115,6 +115,6 @@ public interface ShareMBean {
      * @param userId The userId
      * @throws OXException On error
      */
-    void removeShares(int contextId, int userId) throws OXException;
+    int removeShares(int contextId, int userId) throws OXException;
 
 }

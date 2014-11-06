@@ -93,8 +93,12 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         if (cmd.hasOption("c")) {
             contextId = cmd.getOptionValue("c");
         }
-        userId = cmd.getOptionValue("i");
-        token = cmd.getOptionValue("t");
+        if (cmd.hasOption("i")) {
+            userId = cmd.getOptionValue("i");
+        }
+        if (cmd.hasOption("t")) {
+            token = cmd.getOptionValue("t");
+        }
         iKnowWhatIamDoing = cmd.hasOption("f");
     }
 
@@ -132,8 +136,8 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption("c", "context", true, "");
-        options.addOption("i", "userid", true, "");
+        options.addOption("c", "context", true, "The context id.");
+        options.addOption("i", "userid", true, "The user id.");
         options.addOption("t", "tokens", true, "Token to remove.");
         options.addOption("f", "force", false, "Force removal of token.");
     }
@@ -143,6 +147,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         if ((null == contextId || contextId.isEmpty() || "-1".equals(contextId)) && (null == token || token.isEmpty())) {
             throw new MissingOptionException("ContextId and/or token is missing.");
         }
+        int result = 0;
         ObjectName objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {
@@ -155,21 +160,21 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
                         + " all share identified by this token use option -f/--force");
                 }
                 if (null != contextId && !contextId.isEmpty() && !"-1".equals(contextId)) {
-                    mbean.removeShare(shareToken, targetPath, Integer.parseInt(contextId));
+                    result = mbean.removeShare(shareToken, targetPath, Integer.parseInt(contextId));
                 } else {
-                    mbean.removeShare(shareToken, targetPath);
+                    result = mbean.removeShare(shareToken, targetPath);
                 }
-                return null;
             } else if (null != contextId && !contextId.isEmpty() && !"-1".equals(contextId)) {
                 if (null != userId && !userId.isEmpty()) {
-                    mbean.removeShares(Integer.parseInt(contextId), Integer.parseInt(userId));
+                    result = mbean.removeShares(Integer.parseInt(contextId), Integer.parseInt(userId));
                 } else {
-                    mbean.removeShares(Integer.parseInt(contextId));
+                    result = mbean.removeShares(Integer.parseInt(contextId));
                 }
             }
         } catch (NumberFormatException e) {
             throw new ParseException("Cannot parse value: " + e.getMessage());
         }
+        System.out.println(result + " shares removed.");
         return null;
     }
 
