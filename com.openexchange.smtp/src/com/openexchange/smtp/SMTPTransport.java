@@ -520,7 +520,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
     private static final String MULTI_SUBTYPE_REPORT = "report; report-type=disposition-notification";
 
     @Override
-    public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws OXException {
+    public void sendReceiptAck(MailMessage srcMail, String fromAddr) throws OXException {
         if (null == srcMail) {
             return;
         }
@@ -534,16 +534,19 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             // Set the ClassLoader to the javax.mail bundle loader.
             // Thread.currentThread().setContextClassLoader(MailMessage.class.getClassLoader());
             // Go ahead...
-            final InternetAddress dispNotification = srcMail.getDispositionNotification();
+            InternetAddress dispNotification = srcMail.getDispositionNotification();
             if (dispNotification == null) {
-                throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
+                dispNotification = srcMail.getFrom()[0];
+                if (null == dispNotification) {
+                    throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
+                }
             }
-            final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
-            final String userMail = UserStorage.getInstance().getUser(session.getUserId(), ctx).getMail();
+            SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
+            String userMail = UserStorage.getInstance().getUser(session.getUserId(), ctx).getMail();
             /*
              * Set from
              */
-            final String from;
+            String from;
             if (fromAddr == null) {
                 if ((usm.getSendAddr() == null) && (userMail == null)) {
                     throw SMTPExceptionCode.NO_SEND_ADDRESS_FOUND.create();
@@ -556,7 +559,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Set to
              */
-            final Address[] recipients = new Address[] { dispNotification };
+            Address[] recipients = new Address[] { dispNotification };
             processAddressHeader(smtpMessage);
             checkRecipients(recipients);
             smtpMessage.addRecipients(RecipientType.TO, recipients);
@@ -568,14 +571,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Subject
              */
-            final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
-            final StringHelper strHelper = StringHelper.valueOf(locale);
+            Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
+            StringHelper strHelper = StringHelper.valueOf(locale);
             smtpMessage.setSubject(strHelper.getString(MailStrings.ACK_SUBJECT));
             /*
              * Sent date in UTC time
              */
             {
-                final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
+                MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
                 synchronized (mdf) {
                     smtpMessage.setHeader("Date", mdf.format(new Date()));
                 }
@@ -588,19 +591,23 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Compose body
              */
-            final String defaultMimeCS = MailProperties.getInstance().getDefaultMimeCharset();
-            final ContentType ct = new ContentType(CT_TEXT_PLAIN.replaceFirst("#CS#", defaultMimeCS));
-            final Multipart mixedMultipart = new MimeMultipart(MULTI_SUBTYPE_REPORT);
+            String defaultMimeCS = MailProperties.getInstance().getDefaultMimeCharset();
+            ContentType ct = new ContentType(CT_TEXT_PLAIN.replaceFirst("#CS#", defaultMimeCS));
+            Multipart mixedMultipart = new MimeMultipart(MULTI_SUBTYPE_REPORT);
             /*
              * Define text content
              */
-            final Date sentDate = srcMail.getSentDate();
+            Date sentDate = srcMail.getSentDate();
             {
-                final MimeBodyPart text = new MimeBodyPart();
-                final String txt = performLineFolding(
-                    strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT)
-                    .replaceFirst("#DATE#", sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate)))
-                    .replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())), usm.getAutoLinebreak());
+                MimeBodyPart text = new MimeBodyPart();
+                String txt =
+                    performLineFolding(
+                        strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
+                            "#DATE#",
+                            sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
+                            "#RECIPIENT#",
+                            quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
+                        usm.getAutoLinebreak());
                 MessageUtility.setText(txt, defaultMimeCS, text);
                 // text.setText(txt,defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -612,11 +619,9 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
              */
             ct.setContentType(CT_READ_ACK);
             {
-                final MimeBodyPart ack = new MimeBodyPart();
-                final String msgId = srcMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
-                final String txt = strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
-                    "#MSG ID#",
-                    quoteReplacement(msgId));
+                MimeBodyPart ack = new MimeBodyPart();
+                String msgId = srcMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
+                String txt = strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst("#MSG ID#", quoteReplacement(msgId));
                 MessageUtility.setText(txt, defaultMimeCS, ack);
                 // ack.setText(txt,defaultMimeCS);
                 ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -632,19 +637,19 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Transport message
              */
-            final long start = System.currentTimeMillis();
-            final Transport transport = getSMTPSession().getTransport(SMTP);
+            long start = System.currentTimeMillis();
+            Transport transport = getSMTPSession().getTransport(SMTP);
             try {
                 connectTransport(transport, smtpConfig);
                 saveChangesSafe(smtpMessage);
                 transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            } catch (final javax.mail.AuthenticationFailedException e) {
+            } catch (javax.mail.AuthenticationFailedException e) {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
             } finally {
                 transport.close();
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } finally {
             // Restore the ClassLoader
