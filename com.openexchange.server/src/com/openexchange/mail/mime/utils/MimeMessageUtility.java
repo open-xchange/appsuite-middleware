@@ -711,9 +711,14 @@ public final class MimeMessageUtility {
 
     private static boolean hasAttachments0(final BODYSTRUCTURE bodystructure) {
         boolean found = false;
-        for (int i = 0; !found && (i < bodystructure.bodies.length); i++) {
-            found |= hasAttachments(bodystructure.bodies[i]);
+
+        BODYSTRUCTURE[] bodies = bodystructure.bodies;
+        if (null != bodies) {
+            for (int i = 0; !found && (i < bodies.length); i++) {
+                found |= hasAttachments(bodies[i]);
+            }
         }
+
         return found;
     }
 

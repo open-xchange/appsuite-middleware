@@ -126,6 +126,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     private boolean determineAttachmentByHeader;
     private boolean checkICal;
     private boolean checkVCard;
+    private boolean treatEmbeddedAsAttachment;
     private final String fullname;
     private final Set<FetchItemHandler> lastHandlers;
     private final TLongIntHashMap uid2index;
@@ -241,6 +242,17 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      */
     public MailMessageFetchIMAPCommand setCheckVCard(boolean checkVCard) {
         this.checkVCard = checkVCard;
+        return this;
+    }
+
+    /**
+     * Sets the treatEmbeddedAsAttachment
+     *
+     * @param treatEmbeddedAsAttachment The treatEmbeddedAsAttachment to set
+     * @return This FETCH IMAP command with value applied
+     */
+    public MailMessageFetchIMAPCommand setTreatEmbeddedAsAttachment(boolean treatEmbeddedAsAttachment) {
+        this.treatEmbeddedAsAttachment = treatEmbeddedAsAttachment;
         return this;
     }
 
@@ -389,7 +401,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         boolean error = false;
         MailMessage mail;
         try {
-            mail = handleFetchRespone(fetchResponse, fullname, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard);
+            mail = handleFetchRespone(fetchResponse, fullname, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
         } catch (final MessagingException e) {
             /*
              * Discard corrupt message
@@ -425,7 +437,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @throws OXException If an OX error occurs
      */
     public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false, false, false);
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false, false, false, false);
     }
 
     /**
@@ -440,14 +452,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @throws OXException If an OX error occurs
      */
     public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false, false, false);
+        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false, false, false, false);
     }
 
-    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard);
+    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
     }
 
-    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard) throws MessagingException, OXException {
+    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
         final IDMailMessage m;
         if (null == mail) {
             m = new IDMailMessage(null, fullName);
@@ -466,7 +478,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             final Item item = fetchResponse.getItem(j);
             FetchItemHandler itemHandler = map.get(item.getClass());
             if (null == itemHandler) {
-                itemHandler = getItemHandlerByItem(item, checkICal, checkVCard);
+                itemHandler = getItemHandlerByItem(item, checkICal, checkVCard, treatEmbeddedAsAttachment);
                 if (null == itemHandler) {
                     LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
                 } else {
@@ -491,9 +503,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         return m;
     }
 
-    private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard) {
+    private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
         if (item instanceof BODYSTRUCTURE) {
-            return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard);
+            return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment);
         } else if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
         } else if (item instanceof UID) {
@@ -943,15 +955,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         private final boolean checkICal;
         private final boolean checkVCard;
+        private final boolean treatEmbeddedAsAttachment;
 
-        BODYSTRUCTUREFetchItemHandler() {
-            this(false, false);
-        }
-
-        BODYSTRUCTUREFetchItemHandler(boolean checkICal, boolean checkVCard) {
+        BODYSTRUCTUREFetchItemHandler(boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
             super();
             this.checkICal = checkICal;
             this.checkVCard = checkVCard;
+            this.treatEmbeddedAsAttachment = treatEmbeddedAsAttachment;
         }
 
         @Override
@@ -978,14 +988,21 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
             msg.setContentType(contentType);
             msg.addHeader("Content-Type", contentType.toString(true));
-            msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
 
-            if (checkICal && hasICal(bs)) {
-                msg.addHeader("X-ICAL", "true");
-            }
 
-            if (checkVCard && hasVCard(bs)) {
-                msg.addHeader("X-VCARD", "true");
+            boolean hasAttachment = bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs));
+            if (hasAttachment) {
+                msg.setHasAttachment(hasAttachment);
+
+                if (checkICal && hasICal(bs)) {
+                    msg.addHeader("X-ICAL", "true");
+                }
+
+                if (checkVCard && hasVCard(bs)) {
+                    msg.addHeader("X-VCARD", "true");
+                }
+            } else if (treatEmbeddedAsAttachment) {
+                hasAttachment = hasEmbedded(bs);
             }
         }
 
@@ -1017,6 +1034,23 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             if (null != subs) {
                 for (BODYSTRUCTURE sub : subs) {
                     if (hasVCard(sub)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private boolean hasEmbedded(BODYSTRUCTURE bs) {
+            if ("image".equals(bs.type) && !Strings.isEmpty(bs.id)) {
+                return true;
+            }
+
+            BODYSTRUCTURE[] subs = bs.bodies;
+            if (null != subs) {
+                for (BODYSTRUCTURE sub : subs) {
+                    if (hasEmbedded(sub)) {
                         return true;
                     }
                 }
