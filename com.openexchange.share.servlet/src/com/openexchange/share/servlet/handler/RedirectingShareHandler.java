@@ -241,17 +241,4 @@ public class RedirectingShareHandler extends AbstractShareHandler {
         return redirectLink;
     }
 
-    private static String trimSlashes(String path) {
-        String pazz = path;
-        if (null != pazz && 0 < pazz.length()) {
-            if ('/' == pazz.charAt(0)) {
-                pazz = pazz.substring(1);
-            }
-            if (0 < pazz.length() && '/' == pazz.charAt(pazz.length() - 1)) {
-                pazz = pazz.substring(0, pazz.length() - 1);
-            }
-        }
-        return pazz;
-    }
-
 }

@@ -91,6 +91,15 @@ public class ShareLoginConfiguration {
     }
 
     /**
+     * Gets the default login configuration.
+     *
+     * @return The login configuration
+     */
+    public LoginConfiguration getLoginConfig() {
+        return loginConfiguration;
+    }
+
+    /**
      * Gets the transientShareSessions
      *
      * @return The transientShareSessions

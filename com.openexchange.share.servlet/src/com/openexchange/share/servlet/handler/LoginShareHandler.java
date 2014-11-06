@@ -52,13 +52,14 @@ package com.openexchange.share.servlet.handler;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
@@ -75,6 +76,8 @@ import com.openexchange.user.UserService;
  */
 public class LoginShareHandler extends AbstractShareHandler {
 
+    private static final Pattern P_UIWEBPATH = Pattern.compile("[uiwebpath]", Pattern.LITERAL);
+
     /**
      * Initializes a new {@link LoginShareHandler}.
      *
@@ -85,38 +88,21 @@ public class LoginShareHandler extends AbstractShareHandler {
     }
 
     private String getLoginPageLink(int userId, int contextId, HttpServletRequest request) {
-        // By property
+        /*
+         * get configured login link
+         */
+        String loginLink;
         {
             ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-//            String sLink = configService.getProperty("com.openexchange.share.loginLink", "/appsuite/ui");
-            String sLink = configService.getProperty("com.openexchange.share.loginLink");
-
-            if (false == Strings.isEmpty(sLink)) {
-                return sLink;
-            }
+            loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
         }
-
-        // By HostnameService or given HTTP request
-        String serverName = null;
-        {
-            HostnameService hostnameService = ShareServiceLookup.getService(HostnameService.class);
-            if (null != hostnameService) {
-                try {
-                    String hostName = hostnameService.getHostname(userId, contextId);
-                    if (false == Strings.isEmpty(hostName)) {
-                        // Set server name as returned by HostnameService
-                        serverName = hostName;
-                    }
-                } catch (Exception e) {
-                    // Unable to check for proper host name
-                }
-            }
-            if (null == serverName) {
-                serverName = request.getServerName();
-            }
-        }
-
-        return serverName + "/signin";
+        /*
+         * replace templates
+         */
+        LoginConfiguration loginConfig = getShareLoginConfiguration().getLoginConfig();
+        String uiWebPath = loginConfig.getUiWebPath();
+        loginLink = P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
+        return loginLink;
     }
 
     @Override
