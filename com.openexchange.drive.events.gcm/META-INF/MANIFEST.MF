@@ -6,9 +6,9 @@ Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.drive.events.gcm.osgi.GCMActivator
-Bundle-ClassPath: .,
- lib/json_simple-1.1.jar
-Import-Package: com.openexchange.ajax,
+Bundle-ClassPath: .
+Import-Package: com.google.android.gcm,
+ com.openexchange.ajax,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.drive.events,
