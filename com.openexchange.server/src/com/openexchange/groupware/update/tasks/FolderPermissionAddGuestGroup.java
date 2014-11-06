@@ -54,6 +54,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
@@ -77,6 +78,12 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:tobias.Friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
+
+    private static int[] systemFolderIDs = new int[] {
+        FolderObject.SYSTEM_PRIVATE_FOLDER_ID, FolderObject.SYSTEM_SHARED_FOLDER_ID,
+        FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+        FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
+    };
 
     /**
      * Default constructor.
@@ -108,6 +115,10 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
             progress.setTotal(contextIDs.length);
             for (int i = 0; i < contextIDs.length; i++) {
                 progress.setState(i);
+                if (!systemFoldersExist(connection, contextIDs[i])) {
+                    log.warn("System folders not found in context {}, skipping.", contextIDs[i]);
+                    continue;
+                }
                 insertGroupPermission(connection, contextIDs[i]);
             }
             connection.commit();
@@ -135,11 +146,6 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
      * @throws SQLException
      */
     private static int[] insertGroupPermission(Connection connection, int contextID) throws SQLException {
-        int[] systemFolderIDs = new int[] {
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID, FolderObject.SYSTEM_SHARED_FOLDER_ID,
-            FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
-        };
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(
@@ -168,6 +174,25 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
             return stmt.executeBatch();
         } finally {
             DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private boolean systemFoldersExist(Connection con, int contextId) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
+            stmt.setInt(1, contextId);
+            for (int fuid : systemFolderIDs) {
+                stmt.setInt(2, fuid);
+                stmt.addBatch();
+            }
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 

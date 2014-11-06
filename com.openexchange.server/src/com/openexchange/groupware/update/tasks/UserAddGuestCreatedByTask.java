@@ -104,7 +104,9 @@ public final class UserAddGuestCreatedByTask extends UpdateTaskAdapter {
             Column guestCreatedByColumn = new Column("guestCreatedBy", "int(10) unsigned NOT NULL DEFAULT 0");
             Tools.checkAndAddColumns(connection, "user", guestCreatedByColumn);
             Tools.checkAndAddColumns(connection, "del_user", guestCreatedByColumn);
-            Tools.createIndex(connection, "user", "guestCreatedByIndex", new String[] { "cid", "guestCreatedBy"}, false);
+            if (null == Tools.existsIndex(connection, "user", new String[] { "cid", "guestCreatedBy"})) {
+                Tools.createIndex(connection, "user", "guestCreatedByIndex", new String[] { "cid", "guestCreatedBy"}, false);
+            }
             connection.commit();
             committed = true;
         } catch (SQLException e) {
