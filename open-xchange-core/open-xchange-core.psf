@@ -156,6 +156,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.utils"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.version"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javapns.notification.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javax.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,liquibase.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.felix.eventadmin.monitoring"/>

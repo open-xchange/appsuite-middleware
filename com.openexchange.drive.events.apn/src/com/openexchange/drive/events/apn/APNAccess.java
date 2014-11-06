@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.events.apn;
 
-
 /**
  * {@link APNAccess}
  *
