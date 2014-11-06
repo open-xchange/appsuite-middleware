@@ -1,3 +1,7 @@
+* 2014-11-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35374: Pass incoming request's IP address on redeem token call
+
 * 2014-11-05 - marcus.klein@open-xchange.com
 
  - US 72756024: backend packages can be built on RHEL7
