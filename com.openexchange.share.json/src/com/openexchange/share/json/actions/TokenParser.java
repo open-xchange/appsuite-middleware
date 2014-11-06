@@ -126,6 +126,10 @@ public class TokenParser {
      * @throws OXException
      */
     public static List<ShareTarget> resolveTargets(GuestShare share, String token) throws OXException {
+        if (share == null) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
+
         String sharePath = null;
         String[] split = token.split("/");
         if (split.length == 2) {
