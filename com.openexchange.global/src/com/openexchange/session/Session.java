@@ -203,7 +203,7 @@ public interface Session {
     public int getContextId();
 
     /**
-     * Gets the local IP address
+     * IP address of the session client. Normally every request from the client using this session is verified to come from this IP address.
      *
      * @return The local IP address
      */
