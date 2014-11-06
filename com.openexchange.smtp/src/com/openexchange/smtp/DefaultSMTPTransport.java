@@ -201,9 +201,16 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
         }
         SMTPConfig smtpConfig = null;
         try {
-            final InternetAddress dispNotification = srcMail.getDispositionNotification();
+            InternetAddress dispNotification = srcMail.getDispositionNotification();
             if (dispNotification == null) {
-                throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
+                InternetAddress[] from = srcMail.getFrom();
+                if (from != null && from.length > 0) {
+                    dispNotification = from[0];
+                }
+
+                if (null == dispNotification) {
+                    throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
+                }
             }
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
             final String userMail = UserStorage.getInstance().getUser(session.getUserId(), ctx).getMail();
