@@ -239,7 +239,20 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected File insertSharedFile(int folderID, String filename, FileStorageGuestObjectPermission guestPermission) throws Exception {
-        byte[] data = UUIDs.toByteArray(UUID.randomUUID());
+        return insertSharedFile(folderID, filename, guestPermission, UUIDs.toByteArray(UUID.randomUUID()));
+    }
+
+    /**
+     * Inserts and remembers a new shared file with random content.
+     *
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @param guestPermission The guest permission to assign
+     * @param data The file contents
+     * @return The inserted file
+     * @throws Exception
+     */
+    protected File insertSharedFile(int folderID, String filename, FileStorageGuestObjectPermission guestPermission, byte[] data) throws Exception {
         DefaultFile metadata = new DefaultFile();
         metadata.setFolderId(String.valueOf(folderID));
         metadata.setFileName(filename);
