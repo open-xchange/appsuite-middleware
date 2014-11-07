@@ -7,18 +7,18 @@ BuildRequires:  ant
 %else
 BuildRequires:  ant-nodeps
 %endif
-BuildRequires:  java-sdk-ibm >= 1.6.0
-Version:    	@OXVERSION@
-%define        ox_release 0
-Release:     	%{ox_release}_<CI_CNT>.<B_CNT>
+BuildRequires:  java-devel >= 1.7.0
+Version:        @OXVERSION@
+%define         ox_release 0
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Xerces Compat for IBM Java
-Autoreqprov:   no
-Requires:       java-ibm >= 1.6.0
+Autoreqprov:    no
+Requires:       java-ibm >= 1.7.0
 Provides:       open-xchange-xerces
 Conflicts:      open-xchange-xerces-sun
 

@@ -8,7 +8,11 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-BuildRequires: java-devel >= 1.6.0
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 BuildRequires: open-xchange-sessionstorage-hazelcast
 Version:       @OXVERSION@
 %define        ox_release 0

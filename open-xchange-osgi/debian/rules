@@ -6,20 +6,7 @@
 include /usr/share/cdbs/1/class/ant.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 
-# Which distribution is this?
-DIST_CODE = $(shell lsb_release -sc)
-
-ifeq "$(DIST_CODE)" "wheezy"
-DEB_DH_GENCONTROL_ARGS_ALL = -- -Vdist:Pre-Depends="java7-runtime-headless"
-else
-DEB_DH_GENCONTROL_ARGS_ALL = -- -Vdist:Pre-Depends="sun-java6-jre|java6-runtime-headless"
-endif
-
-ifeq "$(DIST_CODE)" "squeeze"
-    DEB_JARS = ant-nodeps
-endif
-
-JAVA_HOME = /usr/lib/jvm/default-java
+JAVA_HOME = $(shell readlink -f /usr/bin/javac | sed 's:/bin/javac$$::')
 DEB_ANT_ARGS = -DdestDir=$(DEB_DESTDIR) -DpackageName=$(DEB_SOURCE_PACKAGE)
 DEB_ANT_BUILDFILE = build/build.xml
 DEB_ANT_INSTALL_TARGET = build

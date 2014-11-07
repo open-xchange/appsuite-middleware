@@ -7,7 +7,11 @@ BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
-BuildRequires: java-devel >= 1.6.0
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -22,15 +26,9 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-activation = %{version}
 Obsoletes:     open-xchange-activation < %{version}
-%if 0%{?rhel_version} && 0%{?rhel_version} < 599
-# rhel needs special handling because on rhel5 supplementary bea java will be installed by default
-# bug id #22563
-Requires:      java-sun >= 1.6.0
-%else
-Requires:      java >= 1.6.0
-%endif
-%if 0%{?rhel_version} >= 600
-# ibm java only on sles11, please
+Requires:      java >= 1.7.0
+%if 0%{?rhel_version}
+# ibm java only on SLE, please
 Conflicts:     java-ibm
 %endif
 
