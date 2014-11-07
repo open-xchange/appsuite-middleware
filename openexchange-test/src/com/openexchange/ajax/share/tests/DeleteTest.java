@@ -126,7 +126,7 @@ public class DeleteTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -152,7 +152,7 @@ public class DeleteTest extends ShareTest {
         /*
          * check guest access to share
          */
-        if (RecipientType.ANONYMOUS.toString().equalsIgnoreCase(guestPermission.getType())) {
+        if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
             /*
              * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
              */
@@ -161,7 +161,7 @@ public class DeleteTest extends ShareTest {
             /*
              * check if share link still accessible
              */
-            GuestClient revokedGuestClient = new GuestClient(share.getShareURL(),guestPermission.getEmailAddress(), guestPermission.getPassword(), false);
+            GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
             ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
             assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
         } else {

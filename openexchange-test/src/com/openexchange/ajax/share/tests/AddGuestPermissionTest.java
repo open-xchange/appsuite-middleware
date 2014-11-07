@@ -121,7 +121,7 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }

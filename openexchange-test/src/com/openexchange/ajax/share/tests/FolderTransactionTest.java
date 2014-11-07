@@ -189,7 +189,7 @@ public class FolderTransactionTest extends ShareTest {
         }
         assertTrue("API: " + api + ", Module: " + module, updateFailed);
 
-        GuestClient guestClient = new GuestClient(share.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient());
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
         assertEquals("API: " + api + ", Module: " + module, Integer.toString(sharedFolder.getObjectID()), resolveResponse.getFolder());
     }

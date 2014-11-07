@@ -74,7 +74,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
         super(name);
     }
 
-    public void testParallelGuestSessionsExtensively() throws Exception {
+    public void noTestParallelGuestSessionsExtensively() throws Exception {
         for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
             testParallelGuestSessions(randomFolderAPI(), randomModule(), guestPermission);
         }
@@ -118,8 +118,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
         String oldSessionID = sharedSession.getId();
         try {
             sharedSession.setId(null);
-            GuestClient guestClient = new GuestClient(
-                getSession(), share.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword(), true);
+            GuestClient guestClient = new GuestClient(getSession(), share.getShareURL(), guestPermission.getRecipient(), true);
             guestClient.checkShareModuleAvailable();
             guestClient.checkShareAccessible(guestPermission);
         } finally {

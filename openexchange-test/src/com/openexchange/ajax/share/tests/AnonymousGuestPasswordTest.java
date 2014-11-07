@@ -173,24 +173,25 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         /*
          * try to update password
          */
         String newPassword = "secret2";
-        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(newPassword, guestPermission.getPassword(), false);
+        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(
+            newPassword, ((AnonymousRecipient) guestPermission.getRecipient()).getPassword(), false);
         PasswordChangeUpdateResponse response = guestClient.execute(updateRequest);
         assertTrue("No errors in response", response.hasError());
         /*
          * check if share link still accessible with old password
          */
-        guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        guestClient = resolveShare(share, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         /*
          * check access to share with new password
          */
-        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getEmailAddress(), newPassword, false);
+        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), null, newPassword, false);
         assertTrue("No errors during login with new password", revokedGuestClient.getLoginResponse().hasError());
         assertNull("Got session ID from login with new password", revokedGuestClient.getLoginResponse().getSessionId());
     }

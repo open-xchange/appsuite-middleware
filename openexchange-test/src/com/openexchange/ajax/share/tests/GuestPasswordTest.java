@@ -56,6 +56,7 @@ import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.GuestRecipient;
 
 /**
  * {@link GuestPasswordTest}
@@ -100,24 +101,25 @@ public class GuestPasswordTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         /*
          * update password
          */
         String newPassword = "secret2";
-        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(newPassword, guestPermission.getPassword(), true);
+        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(
+            newPassword, ((GuestRecipient) guestPermission.getRecipient()).getPassword(), true);
         guestClient.execute(updateRequest);
         /*
          * check if share link still accessible with old password
          */
-        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword(), false);
+        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
         assertTrue("No errors during login with old password", revokedGuestClient.getLoginResponse().hasError());
         assertNull("Got session ID from login with old password", revokedGuestClient.getLoginResponse().getSessionId());
         /*
          * check access to share with new password
          */
-        guestClient = resolveShare(share, guestPermission.getEmailAddress(), newPassword);
+        guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPassword);
         guestClient.checkShareModuleAvailable();
     }
 

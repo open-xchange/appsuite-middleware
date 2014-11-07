@@ -109,6 +109,9 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link GuestClient}
@@ -122,6 +125,39 @@ public class GuestClient extends AJAXClient {
     private final String module;
     private final String item;
     private final String folder;
+
+    /**
+     * Initializes a new {@link GuestClient}.
+     *
+     * @param url The share URL to access
+     * @param recipient The recipient
+     */
+    public GuestClient(String url, ShareRecipient recipient) throws Exception {
+        this(url, recipient, false);
+    }
+
+    /**
+     * Initializes a new {@link GuestClient}.
+     *
+     * @param url The share URL to access
+     * @param recipient The recipient
+     * @param failOnNonRedirect <code>true</code> to fail if the share resolve request is not being redirected, <code>false</code>, otherwise
+     */
+    public GuestClient(String url, ShareRecipient recipient, boolean failOnNonRedirect) throws Exception {
+        this(new AJAXSession(), url, getUsername(recipient), getPassword(recipient), failOnNonRedirect);
+    }
+
+    /**
+     * Initializes a new {@link GuestClient}.
+     *
+     * @param ajaxSession The underlying ajax session to use
+     * @param url The share URL to access
+     * @param recipient The recipient
+     * @param failOnNonRedirect <code>true</code> to fail if the share resolve request is not being redirected, <code>false</code>, otherwise
+     */
+    public GuestClient(AJAXSession ajaxSession, String url, ShareRecipient recipient, boolean failOnNonRedirect) throws Exception {
+        this(ajaxSession, url, getUsername(recipient), getPassword(recipient), failOnNonRedirect);
+    }
 
     /**
      * Initializes a new {@link GuestClient}.
@@ -650,6 +686,30 @@ public class GuestClient extends AJAXClient {
 
     private static Date getFutureTimestamp() {
         return new Date(System.currentTimeMillis() + 1000000);
+    }
+
+    private static String getUsername(ShareRecipient recipient) {
+        switch (recipient.getType()) {
+        case ANONYMOUS:
+            return recipient.getType().toString().toLowerCase();
+        case GUEST:
+            return ((GuestRecipient) recipient).getEmailAddress();
+        default:
+            Assert.fail("Unknown recipient: " + recipient.getType());
+            return null;
+        }
+    }
+
+    private static String getPassword(ShareRecipient recipient) {
+        switch (recipient.getType()) {
+        case ANONYMOUS:
+            return ((AnonymousRecipient) recipient).getPassword();
+        case GUEST:
+            return ((GuestRecipient) recipient).getPassword();
+        default:
+            Assert.fail("Unknown recipient: " + recipient.getType());
+            return null;
+        }
     }
 
 }

@@ -220,7 +220,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder A
          */
-        GuestClient guestClientA = resolveShare(shareA, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClientA = resolveShare(shareA, guestPermission.getRecipient());
         guestClientA.checkModuleAvailable(shareA.getTarget().getModule());
         guestClientA.checkModuleAvailable(shareB.getTarget().getModule());
         guestClientA.checkFolderAccessible(shareA.getTarget().getFolder(), guestPermission);
@@ -228,7 +228,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder B
          */
-        GuestClient guestClientB = resolveShare(shareB, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClientB = resolveShare(shareB, guestPermission.getRecipient());
         guestClientB.checkModuleAvailable(shareA.getTarget().getModule());
         guestClientB.checkModuleAvailable(shareB.getTarget().getModule());
         guestClientB.checkFolderAccessible(shareA.getTarget().getFolder(), guestPermission);
@@ -304,7 +304,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder A
          */
-        GuestClient guestClientA = resolveShare(shareA, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClientA = resolveShare(shareA, guestPermission.getRecipient());
         guestClientA.checkModuleAvailable(shareA.getTarget().getModule());
         guestClientA.checkModuleAvailable(shareB.getTarget().getModule());
         guestClientA.checkFolderAccessible(shareA.getTarget().getFolder(), guestPermission);
@@ -312,7 +312,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder B
          */
-        GuestClient guestClientB = resolveShare(shareB, guestPermission.getEmailAddress(), guestPermission.getPassword());
+        GuestClient guestClientB = resolveShare(shareB, guestPermission.getRecipient());
         guestClientB.checkModuleAvailable(shareA.getTarget().getModule());
         guestClientB.checkModuleAvailable(shareB.getTarget().getModule());
         guestClientB.checkFolderAccessible(shareA.getTarget().getFolder(), guestPermission);
@@ -351,12 +351,12 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check if share link to folder A still accessible
          */
-        ResolveShareResponse shareResolveResponse = new GuestClient(shareA.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword(), false).getShareResolveResponse();
+        ResolveShareResponse shareResolveResponse = new GuestClient(shareA.getShareURL(), guestPermission.getRecipient(), false).getShareResolveResponse();
         assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
         /*
          * check if share link to folder A still accessible
          */
-        shareResolveResponse = new GuestClient(shareB.getShareURL(), guestPermission.getEmailAddress(), guestPermission.getPassword()).getShareResolveResponse();
+        shareResolveResponse = new GuestClient(shareB.getShareURL(), guestPermission.getRecipient()).getShareResolveResponse();
         assertEquals("Status code wrong", HttpServletResponse.SC_MOVED_TEMPORARILY, shareResolveResponse.getStatusCode());
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.ajax.folder.actions;
 import java.util.Date;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -60,14 +61,8 @@ public class OCLGuestPermission extends OCLPermission {
 
     private static final long serialVersionUID = -3277662647906767821L;
 
-    private String emailAddress;
-    private String contactID;
-    private String contactFolderID;
-    private String displayName;
-    private String type;
-    private String password;
-    private Date expires;
-    private Date activationDate;
+    private ShareRecipient recipient;
+    private Date expiryDate;
 
     /**
      * Initializes an empty {@link OCLGuestPermission}.
@@ -76,93 +71,35 @@ public class OCLGuestPermission extends OCLPermission {
         super();
     }
 
-    public String getEmailAddress() {
-        return emailAddress;
-    }
-
-
-    public void setEmailAddress(String mailAddress) {
-        this.emailAddress = mailAddress;
-    }
-
-    public String getContactID() {
-        return contactID;
-    }
-
-    public void setContactID(String contactID) {
-        this.contactID = contactID;
-    }
-
-    public String getContactFolderID() {
-        return contactFolderID;
-    }
-
-    public void setContactFolderID(String contactFolderID) {
-        this.contactFolderID = contactFolderID;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     /**
-     * Sets the password
+     * Initializes a new {@link OCLGuestPermission}.
      *
-     * @param password The password to set
+     * @param recipient The share recipient
      */
-    public void setPassword(String password) {
-        this.password = password;
+    public OCLGuestPermission(ShareRecipient recipient) {
+        super();
+        this.recipient = recipient;
     }
 
-    public Date getExpires() {
-        return expires;
+    public ShareRecipient getRecipient() {
+        return recipient;
     }
 
-    /**
-     * Sets the expires
-     *
-     * @param expires The expires to set
-     */
-    public void setExpires(Date expires) {
-        this.expires = expires;
+    public Date getExpiryDate() {
+        return expiryDate;
     }
 
-    /**
-     * Gets the activationDate
-     *
-     * @return The activationDate
-     */
-    public Date getActivationDate() {
-        return activationDate;
+    public void setRecipient(ShareRecipient recipient) {
+        this.recipient = recipient;
     }
 
-    /**
-     * Sets the activationDate
-     *
-     * @param activationDate The activationDate to set
-     */
-    public void setActivationDate(Date activationDate) {
-        this.activationDate = activationDate;
+    public void setExpiryDate(Date date) {
+        this.expiryDate = date;
     }
 
     public int getPermissionBits() {
-        return Permissions.createPermissionBits(getFolderPermission(), getReadPermission(), getWritePermission(), getDeletePermission(), isFolderAdmin());
+        return Permissions.createPermissionBits(
+            getFolderPermission(), getReadPermission(), getWritePermission(), getDeletePermission(), isFolderAdmin());
     }
 
 }

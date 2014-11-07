@@ -54,6 +54,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -64,6 +65,9 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -98,17 +102,27 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
             final JSONObject jsonPermission = new JSONObject();
             if (OCLGuestPermission.class.isInstance(perm)) {
                 OCLGuestPermission guestPerm = (OCLGuestPermission) perm;
-                jsonPermission.put("type", guestPerm.getType());
-                jsonPermission.putOpt(FolderField.EMAIL_ADDRESS.getName(), guestPerm.getEmailAddress());
-                jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestPerm.getPassword());
-                jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestPerm.getDisplayName());
-                jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestPerm.getContactFolderID());
-                jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestPerm.getContactID());
-                if (null != guestPerm.getExpires()) {
-                    jsonPermission.put(FolderField.EXPIRY_DATE.getName(), guestPerm.getExpires().getTime());
+                ShareRecipient recipient = guestPerm.getRecipient();
+                jsonPermission.put("type", recipient.getType());
+                switch (recipient.getType()) {
+                case ANONYMOUS:
+                    AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
+                    jsonPermission.putOpt(FolderField.PASSWORD.getName(), anonymousRecipient.getPassword());
+                    break;
+                case GUEST:
+                    GuestRecipient guestRecipient = (GuestRecipient) recipient;
+                    jsonPermission.putOpt(FolderField.EMAIL_ADDRESS.getName(), guestRecipient.getEmailAddress());
+                    jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestRecipient.getPassword());
+                    jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestRecipient.getDisplayName());
+                    jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestRecipient.getContactFolder());
+                    jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestRecipient.getContactID());
+                    break;
+                default:
+                    Assert.fail("Unsupported recipient: " + recipient.getType());
+                    break;
                 }
-                if (null != guestPerm.getActivationDate()) {
-                    jsonPermission.put(FolderField.ACTIVATION_DATE.getName(), guestPerm.getActivationDate().getTime());
+                if (null != guestPerm.getExpiryDate()) {
+                    jsonPermission.put(FolderField.EXPIRY_DATE.getName(), guestPerm.getExpiryDate().getTime());
                 }
             } else {
                 jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
