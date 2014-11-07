@@ -1299,7 +1299,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (!c.containsParentFolderID() || FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID != c.getParentFolderID()) {
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }
-            if (!c.containsLastModified() || lastRead.before(c.getLastModified())) {
+            if (!c.containsLastModified() || (null != lastRead && lastRead.before(c.getLastModified()))) {
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
             }
             updateGuestContact(contextId, userId, contactId, contact, connection);
