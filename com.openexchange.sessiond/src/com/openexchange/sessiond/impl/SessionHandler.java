@@ -718,7 +718,7 @@ public final class SessionHandler {
         }
         SessionControl sessionControl = sessionData.clearSession(sessionid);
         if (null == sessionControl) {
-            LOG.debug("Cannot find session for given identifier to remove session <{}{}", sessionid, '>');
+            LOG.debug("Cannot find session for given identifier to remove session <{}>", sessionid);
             return false;
         }
         postSessionRemoval(sessionControl.getSession());
@@ -1033,7 +1033,7 @@ public final class SessionHandler {
             SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    Session storedSession = getSessionFrom(sessionId, storageService);
+                    Session storedSession = getSessionFrom(sessionId, 10000, storageService);
                     if (null != storedSession) {
                         SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
                         SessionControl retval = null == sc ? sessionToSessionControl(storedSession) : sc;
@@ -1635,7 +1635,28 @@ public final class SessionHandler {
         return tmp.intValue();
     }
 
-    private static Session getSessionFrom(String sessionId, final SessionStorageService storageService) throws OXException {
+    /**
+     * Gets the denoted session from session storage using {@link #timeout() default timeout}.
+     *
+     * @param sessionId The session identifier
+     * @param storageService The session storage instance
+     * @return The session or <code>null</code> if timeout elapsed
+     * @throws OXException If fetching session from session storage fails
+     */
+    private static Session getSessionFrom(String sessionId, SessionStorageService storageService) throws OXException {
+        return getSessionFrom(sessionId, timeout(), storageService);
+    }
+
+    /**
+     * Gets the denoted session from session storage using given timeout.
+     *
+     * @param sessionId The session identifier
+     * @param timeoutMillis The timeout in milliseconds
+     * @param storageService The session storage instance
+     * @return The session or <code>null</code> if timeout elapsed
+     * @throws OXException If fetching session from session storage fails
+     */
+    private static Session getSessionFrom(String sessionId, long timeoutMillis, SessionStorageService storageService) throws OXException {
         Future<Session> f;
         try {
             f = ThreadPools.getThreadPool().submit(new GetStoredSessionTask(sessionId, storageService));
@@ -1643,9 +1664,8 @@ public final class SessionHandler {
             return null;
         }
 
-        int tout = timeout();
         try {
-            return f.get(tout, TimeUnit.MILLISECONDS);
+            return f.get(timeoutMillis, TimeUnit.MILLISECONDS);
         } catch (RejectedExecutionException e) {
             return storageService.lookupSession(sessionId);
         } catch (InterruptedException e) {
@@ -1664,7 +1684,7 @@ public final class SessionHandler {
             }
             throw new IllegalStateException("Not unchecked", t);
         } catch (TimeoutException e) {
-            LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, tout);
+            LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, timeoutMillis);
             f.cancel(true);
             return null;
         } catch (CancellationException e) {
