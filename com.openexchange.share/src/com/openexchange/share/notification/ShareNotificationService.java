@@ -50,7 +50,6 @@
 package com.openexchange.share.notification;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 
 
@@ -63,11 +62,17 @@ import com.openexchange.session.Session;
 public interface ShareNotificationService {
 
     /**
+     * The transport mechanism to use for notification messages.
+     */
+    public enum Transport {
+        MAIL
+    }
+
+    /**
      * Notifies the recipient of {@link ShareNotification} about the according share.
      *
      * @param notification The notification
-     * @param session The session
      */
-    <T extends ShareNotification<?>> void notify(T notification, Session session) throws OXException;
+    <T extends ShareNotification<?>> void notify(T notification) throws OXException;
 
 }

@@ -66,9 +66,7 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -151,7 +149,8 @@ public class InviteAction extends AbstractShareAction {
                             if (!Strings.isEmpty(mailAddress)) {
                                 try {
                                     LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, mailAddress);
-                                    notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, recipient, share.getTargets(), linkProvider, message, mailAddress), session);
+                                    // FIXME:
+                                    // notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, recipient, share.getTargets(), linkProvider, message, mailAddress), session);
                                 } catch (Exception e) {
                                     if (e instanceof OXException) {
                                         warnings.add((OXException) e);

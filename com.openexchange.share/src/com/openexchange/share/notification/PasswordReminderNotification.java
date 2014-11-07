@@ -49,78 +49,13 @@
 
 package com.openexchange.share.notification;
 
-import java.util.Locale;
-
 
 /**
- * A {@link ShareNotification} encapsulates all information necessary to notify
- * the according recipient about a share and provide her a link to access that share.
+ * {@link PasswordReminderNotification}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareNotification<T> {
-
-    /**
-     * Possible notification types. Meant to be extended for future requirements.
-     */
-    public enum NotificationType {
-        /**
-         * Notification type for a newly created share.
-         * Use to send notifications about a new share to
-         * a recipient of any type.
-         */
-        SHARE_CREATED,
-
-        /**
-         * Notification type for a password-reset message.
-         * Use to send a recently reset password for a guest share
-         * to the shares recipient.
-         */
-        PASSWORD_RESET,
-
-        /**
-         * Notification type for a password-reminder message.
-         * Use to re-send the password for a secured anonymous share
-         * to one or more recipients.
-         */
-        PASSWORD_REMINDER;
-    }
-
-    /**
-     * Gets the type of this notification (e.g. "a share has been created").
-     *
-     * @return The {@link NotificationType}, never <code>null</code>
-     */
-    NotificationType getType();
-
-    /**
-     * Gets the transport information used to notify the recipient.
-     *
-     * @return The transport information, never <code>null</code>
-     */
-    T getTransportInfo();
-
-    /**
-     * Gets the {@link LinkProvider} used for obtaining necessary URLs that are
-     * part of the notification messages.
-     *
-     * @return The provider, never <code>null</code>
-     */
-    LinkProvider getLinkProvider();
-
-    /**
-     * Gets the ID of the context where the share is located.
-     *
-     * @return The context ID
-     */
-    int getContextID();
-
-    /**
-     * Gets the locale used to translate the notification message before it is sent out.
-     *
-     * @return The locale
-     */
-    Locale getLocale();
+public interface PasswordReminderNotification<T> extends ShareNotification<T> {
 
 }

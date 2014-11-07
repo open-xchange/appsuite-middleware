@@ -51,7 +51,6 @@ package com.openexchange.share.impl.notification;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
-import com.openexchange.session.Session;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -142,11 +141,11 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public <T extends ShareNotification<?>> void notify(T notification, Session session) throws OXException {
+    public <T extends ShareNotification<?>> void notify(T notification) throws OXException {
         for (Wrapper wrapper : handlers) {
             ShareNotificationHandler currentHandler = wrapper.handler;
             if (currentHandler.handles(notification)) {
-                currentHandler.notify(notification, session);
+                currentHandler.notify(notification);
                 return;
             }
         }

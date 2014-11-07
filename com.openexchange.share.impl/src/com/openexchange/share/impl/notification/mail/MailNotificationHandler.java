@@ -49,13 +49,21 @@
 
 package com.openexchange.share.impl.notification.mail;
 
+import java.io.UnsupportedEncodingException;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.mail.MailNotification;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -77,8 +85,36 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     }
 
     @Override
-    public <T extends ShareNotification<?>> void notify(T notification, Session session) throws OXException {
-        new MailSender(services, (MailNotification) notification, ServerSessionAdapter.valueOf(session)).send();
+    public <T extends ShareNotification<?>> void notify(T notification) throws OXException {
+        TransportProvider transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
+        ComposedMailMessage mail = null;
+        MailTransport transport = null;
+        MailSender composer = new MailSender(services);
+        try {
+            switch (notification.getType()) {
+                case SHARE_CREATED:
+                    ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
+                    transport = transportProvider.createNewMailTransport(casted.getSession());
+                    mail = composer.buildShareCreatedMail(casted);
+                    break;
+
+                default: // TODO exception
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (MessagingException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
+        try {
+            transport.sendMailMessage(mail, ComposeType.NEW);
+        } finally {
+            try {
+                transport.close();
+            } catch (OXException e) {
+                // ignore
+            }
+        }
     }
 
     @Override

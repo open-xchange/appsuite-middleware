@@ -65,9 +65,7 @@ import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -139,7 +137,8 @@ public class NotifyAction extends AbstractShareAction {
 
         ShareNotificationService notificationService = getNotificationService();
         LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, mailAddress);
-        notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, recipient, targets, linkProvider, message, mailAddress), session);
+        // FIXME:
+        // notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, recipient, targets, linkProvider, message, mailAddress), session);
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
 

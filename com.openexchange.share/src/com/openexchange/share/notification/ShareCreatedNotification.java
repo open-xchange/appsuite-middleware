@@ -49,78 +49,53 @@
 
 package com.openexchange.share.notification;
 
-import java.util.Locale;
+import java.util.List;
+import com.openexchange.session.Session;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
- * A {@link ShareNotification} encapsulates all information necessary to notify
- * the according recipient about a share and provide her a link to access that share.
+ * {@link ShareCreatedNotification}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareNotification<T> {
+public interface ShareCreatedNotification<T> extends ShareNotification<T> {
 
     /**
-     * Possible notification types. Meant to be extended for future requirements.
-     */
-    public enum NotificationType {
-        /**
-         * Notification type for a newly created share.
-         * Use to send notifications about a new share to
-         * a recipient of any type.
-         */
-        SHARE_CREATED,
-
-        /**
-         * Notification type for a password-reset message.
-         * Use to send a recently reset password for a guest share
-         * to the shares recipient.
-         */
-        PASSWORD_RESET,
-
-        /**
-         * Notification type for a password-reminder message.
-         * Use to re-send the password for a secured anonymous share
-         * to one or more recipients.
-         */
-        PASSWORD_REMINDER;
-    }
-
-    /**
-     * Gets the type of this notification (e.g. "a share has been created").
+     * Gets the session of the new shares creator.
      *
-     * @return The {@link NotificationType}, never <code>null</code>
+     * @return The session
      */
-    NotificationType getType();
+    Session getSession();
 
     /**
-     * Gets the transport information used to notify the recipient.
+     * Gets the recipient that shall receive the notification. If a password
+     * is necessary to access the share the notification is about, this
+     * password must be set un-encoded within the recipient object. Otherwise
+     * the notification will contain a hint that the existing password has to
+     * be re-used and a link to reset that password will be provided, if the
+     * recipient is a guest. If the recipient is anonymous it is assumed, that
+     * no password is necessary to log in.
      *
-     * @return The transport information, never <code>null</code>
+     * @return The {@link ShareRecipient}, never <code>null</code>
      */
-    T getTransportInfo();
+    ShareRecipient getRecipient();
 
     /**
-     * Gets the {@link LinkProvider} used for obtaining necessary URLs that are
-     * part of the notification messages.
+     * Gets the share targets to notify the recipient about.
      *
-     * @return The provider, never <code>null</code>
+     * @return The share targets, never <code>null</code>
      */
-    LinkProvider getLinkProvider();
+    List<ShareTarget> getShareTargets();
 
     /**
-     * Gets the ID of the context where the share is located.
+     * Gets an optional message that will be shown to the recipient if appropriate.
+     * Whether a message is shown or not depends on the {@link NotificationType}.
      *
-     * @return The context ID
+     * @return The message or <code>null</code>, if nothing was provided
      */
-    int getContextID();
-
-    /**
-     * Gets the locale used to translate the notification message before it is sent out.
-     *
-     * @return The locale
-     */
-    Locale getLocale();
+    String getMessage();
 
 }
