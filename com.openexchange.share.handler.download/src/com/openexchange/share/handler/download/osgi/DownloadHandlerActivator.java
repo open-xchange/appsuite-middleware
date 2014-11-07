@@ -87,7 +87,8 @@ public class DownloadHandlerActivator extends HousekeepingActivator {
         /*
          * register handler
          */
-        registerService(ShareHandler.class, new DownloadHandler(), 100);
+        DownloadHandler handler = new DownloadHandler();
+        registerService(ShareHandler.class, handler, handler.getRanking());
     }
 
     @Override

@@ -91,7 +91,8 @@ public class ICalHandlerActivator extends HousekeepingActivator {
         /*
          * register handler
          */
-        registerService(ShareHandler.class, new ICalHandler(), 100);
+        ICalHandler handler = new ICalHandler();
+        registerService(ShareHandler.class, handler, handler.getRanking());
     }
 
     @Override

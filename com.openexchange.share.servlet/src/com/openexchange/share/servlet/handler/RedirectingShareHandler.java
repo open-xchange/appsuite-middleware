@@ -59,13 +59,10 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
-import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -78,7 +75,7 @@ import com.openexchange.tools.servlet.http.Tools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class RedirectingShareHandler extends AbstractShareHandler {
+public class RedirectingShareHandler extends HttpAuthShareHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RedirectingShareHandler.class);
 
@@ -101,6 +98,7 @@ public class RedirectingShareHandler extends AbstractShareHandler {
      *
      * @return <code>true</code> if the session should be kept, <code>false</code>, otherwise
      */
+    @Override
     protected boolean keepSession() {
         return true;
     }
@@ -114,38 +112,9 @@ public class RedirectingShareHandler extends AbstractShareHandler {
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
      */
+    @Override
     protected boolean handles(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         return true;
-    }
-
-    @Override
-    public boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (false == handles(share, target, request, response)) {
-            return false;
-        }
-        Session session = null;
-        try {
-            /*
-             * get, authenticate and login as associated guest user
-             */
-            ShareLoginConfiguration shareLoginConfig = getShareLoginConfiguration();
-            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
-            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions());
-            if (null == loginResult) {
-                return false;
-            }
-            session = loginResult.getSession();
-            handleResolvedShare(new ResolvedShare(share, target, loginResult, loginConfig, request, response));
-            return true;
-        } catch (IOException e) {
-            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (false == keepSession()) {
-                ShareServletUtils.logout(session);
-            }
-        }
     }
 
     /**
@@ -155,6 +124,7 @@ public class RedirectingShareHandler extends AbstractShareHandler {
      * @throws OXException If handling the resolved share fails
      * @throws IOException If an I/O error occurs
      */
+    @Override
     protected void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException {
         try {
             /*

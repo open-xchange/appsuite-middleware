@@ -84,7 +84,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.servlet.handler.RedirectingShareHandler;
+import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -95,7 +95,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ICalHandler extends RedirectingShareHandler {
+public class ICalHandler extends HttpAuthShareHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalHandler.class);
 
@@ -127,6 +127,11 @@ public class ICalHandler extends RedirectingShareHandler {
      */
     public ICalHandler() {
         super();
+    }
+
+    @Override
+    public int getRanking() {
+        return 100;
     }
 
     @Override

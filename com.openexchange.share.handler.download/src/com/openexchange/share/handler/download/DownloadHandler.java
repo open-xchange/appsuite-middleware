@@ -71,7 +71,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.servlet.handler.RedirectingShareHandler;
+import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DownloadHandler extends RedirectingShareHandler {
+public class DownloadHandler extends HttpAuthShareHandler {
 
     private final FileResponseRenderer renderer;
 
@@ -96,6 +96,11 @@ public class DownloadHandler extends RedirectingShareHandler {
     @Override
     public boolean keepSession() {
         return false;
+    }
+
+    @Override
+    public int getRanking() {
+        return 100;
     }
 
     @Override
