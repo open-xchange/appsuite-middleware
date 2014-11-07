@@ -74,7 +74,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
         super(name);
     }
 
-    public void noTestParallelGuestSessionsExtensively() throws Exception {
+    public void testParallelGuestSessions() throws Exception {
         for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
             testParallelGuestSessions(randomFolderAPI(), randomModule(), guestPermission);
         }
