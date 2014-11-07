@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link MobileNotifierExceptionCodes} - Error codes for mobile notifier module.
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since 7.6.0
  */
@@ -75,9 +75,14 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
      */
     IO_ERROR("An I/O error occured %1$s", Category.CATEGORY_ERROR, 3, MobileNotifierExceptionMessages.MESSAGE),
     /**
-     * An unexpected SQL error occured
+     * An unexpected SQL error occured.
      */
-    SQL_ERROR("An unexpected SQL error occured.", CATEGORY_ERROR, 4, MobileNotifierExceptionMessages.SQL_ERROR_MSG);
+    SQL_ERROR("An unexpected SQL error occured.", CATEGORY_ERROR, 4, MobileNotifierExceptionMessages.SQL_ERROR_MSG),
+    /**
+     * An unexpected error occured.
+     */
+    UNEXPECTED_ERROR("An unexpected error occured.", CATEGORY_ERROR, 5, MobileNotifierExceptionMessages.MESSAGE);
+
     /**
      * The prefix constant.
      */
@@ -101,7 +106,7 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
         this.category = category;
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
-    
+
     @Override
     public int getNumber() {
         return detailNumber;
@@ -134,7 +139,7 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -143,7 +148,7 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -153,7 +158,7 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
