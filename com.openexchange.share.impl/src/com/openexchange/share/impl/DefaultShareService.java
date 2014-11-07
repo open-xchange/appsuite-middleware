@@ -146,6 +146,39 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public List<ShareInfo> getShares(Session session, String token) throws OXException {
+        ShareToken shareToken = new ShareToken(token);
+        int contextID = shareToken.getContextID();
+        User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+        if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
+            LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(
+            contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
+        shares = removeExpired(contextID, shares);
+
+        // TODO:
+        // theoretically, we should check the session user's permission to each target before returning them, since the shares may
+        // contain information how to access foreign share targets that were added by other users
+        // however, probably the check can be skipped safely for "anonymous" guests that were created by the session's user
+
+        return ShareTool.toShareInfos(services, session.getContextId(), shares);
+    }
+
+    @Override
+    public ShareInfo getShare(Session session, String token, String path) throws OXException {
+        List<ShareInfo> sharesInfos = getShares(session, token);
+        for (ShareInfo shareInfo : sharesInfos) {
+            ShareTarget target = shareInfo.getShare().getTarget();
+            if (null != target && path.equals(target.getPath())) {
+                return shareInfo;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<ShareInfo> getAllShares(Session session) throws OXException {
         List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(
             session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
