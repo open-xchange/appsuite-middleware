@@ -59,6 +59,7 @@ import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -67,14 +68,6 @@ import com.openexchange.share.recipient.RecipientType;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ExpiredSharesTest extends ShareTest {
-
-    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
-        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
-        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
-        //TODO: currently not working with anonymous_password, cookie expiry is not adjusted for guest login
-        //        createAnonymousAuthorPermission("secret"),
-        createAnonymousGuestPermission()
-    };
 
     /**
      * Initializes a new {@link ExpiredSharesTest}.
@@ -163,7 +156,9 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * check guest access to share
          */
-        if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
+        if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType()) &&
+            null == ((AnonymousRecipient) guestPermission.getRecipient()).getPassword()) {
+            //TODO: apply cookie expiry also for anonymous_password authentication
             /*
              * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
              */

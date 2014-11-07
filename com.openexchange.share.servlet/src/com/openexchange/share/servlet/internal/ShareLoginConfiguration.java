@@ -50,6 +50,7 @@
 package com.openexchange.share.servlet.internal;
 
 import java.util.Date;
+import java.util.List;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigTools;
@@ -57,6 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link ShareLoginConfiguration}
@@ -130,13 +132,15 @@ public class ShareLoginConfiguration {
      * @throws OXException
      */
     private static LoginConfiguration adjustCookieTTL(LoginConfiguration loginConfig, GuestShare share) {
-        // TODO
-        Date expires = null;//share.getExpiryDate();
-        if (null != expires) {
-            int shareExpiry = (int) ((expires.getTime() - System.currentTimeMillis()) / 1000);
+        /*
+         * determine maximum expiry of all contained share targets (if all targets are decorated with an expiry date)
+         */
+        Date effectiveExpiry = getEffectiveExpiryDate(share.getTargets());
+        if (null != effectiveExpiry) {
+            int shareExpiry = (int) ((effectiveExpiry.getTime() - System.currentTimeMillis()) / 1000);
             if (0 <= shareExpiry && loginConfig.getCookieExpiry() > shareExpiry) {
                 /*
-                 * share is about to expire earlier than default TTL, adjust login configuration
+                 * all share targets are about to expire earlier than default TTL, adjust login configuration
                  */
                 return new LoginConfiguration(
                     loginConfig.getUiWebPath(),
@@ -204,6 +208,28 @@ public class ShareLoginConfiguration {
             defaultConfig.isFormLoginWithoutAuthId(),
             defaultConfig.isRandomTokenEnabled()
         );
+    }
+
+    /**
+     * Gets the maximum expiry date of all supplied shared targets in case all of them have an expiry date defined.
+     *
+     * @param targets The targets to get the maximum expiry for
+     * @return The maxium expiry date, or <code>null</code> if at least one of the targets has no expiry date set
+     */
+    private static Date getEffectiveExpiryDate(List<ShareTarget> targets) {
+        Date effectiveExpiry = null;
+        if (null != targets && 0 < targets.size()) {
+            for (ShareTarget target : targets) {
+                Date targetExpiry = target.getExpiryDate();
+                if (null == targetExpiry) {
+                    return null;
+                }
+                if (null == effectiveExpiry || targetExpiry.after(effectiveExpiry)) {
+                    effectiveExpiry = targetExpiry;
+                }
+            }
+        }
+        return effectiveExpiry;
     }
 
 }
