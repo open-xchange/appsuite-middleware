@@ -112,4 +112,16 @@ public interface ModuleSupport {
      */
     TargetProxy loadAsAdmin(int contextID, ShareTarget target) throws OXException;
 
+    /**
+     * Optionally adjusts a share target to be used by a specific user. This might be required if the target identifiers are different
+     * depending on the user who accesses the share target, especially if the user is a guest or not.
+     *
+     * @param target The share target to adjust
+     * @param contextID The identifier of the context the user is located in
+     * @param userID The identifier of the user to adjust the share target for
+     * @param isGuest <code>true</code> if the user identifier refers to a guest user, <code>false</code>, otherwise
+     * @return The adjusted target, or the supplied target if no adjustments were necessary
+     */
+    ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException;
+
 }

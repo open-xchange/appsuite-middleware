@@ -299,7 +299,7 @@ public class ShareTarget implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return "ShareTarget [module=" + module + ", folder=" + folder + (null != item ? (", item=" + item) : "") + "]";
+        return "ShareTarget [module=" + module + ", folder=" + getFolder() + (null != getItem() ? (", item=" + getItem()) : "") + "]";
     }
 
 }

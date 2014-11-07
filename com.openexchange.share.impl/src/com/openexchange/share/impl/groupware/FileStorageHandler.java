@@ -64,6 +64,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.infostore.PermissionHelper;
 import com.openexchange.groupware.container.EffectiveObjectPermissions;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
@@ -178,6 +179,21 @@ public class FileStorageHandler implements ModuleHandler {
                 fileAccess.finish();
             }
         }
+    }
+
+    @Override
+    public ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException {
+        if (null != target && false == target.isFolder() && isGuest) {
+            /*
+             * access single files via FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID as guest
+             */
+            String adjustedFolder = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+            FileID fileID = new FileID(target.getItem());
+            fileID.setFolderId(adjustedFolder);
+            String adjustedItem = fileID.toUniqueID();
+            return new AdjustedShareTarget(target, adjustedFolder, adjustedItem);
+        }
+        return target;
     }
 
     private IDBasedAdministrativeFileAccess getAdministrativeFileAccess(Context context) throws OXException {

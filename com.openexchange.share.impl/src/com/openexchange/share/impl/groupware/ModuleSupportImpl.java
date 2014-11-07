@@ -133,4 +133,19 @@ public class ModuleSupportImpl implements ModuleSupport {
         }
     }
 
+    @Override
+    public ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException {
+        if (null == target) {
+            return target;
+        }
+        /*
+         * adjust target via module handler as required
+         */
+        ModuleHandler handler = handlers.opt(target.getModule());
+        if (null != handler) {
+            return handler.adjustTarget(target, contextID, userID, isGuest);
+        }
+        return target;
+    }
+
 }

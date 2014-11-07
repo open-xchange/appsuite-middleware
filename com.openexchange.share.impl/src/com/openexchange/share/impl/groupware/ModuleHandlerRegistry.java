@@ -67,19 +67,39 @@ public class ModuleHandlerRegistry {
 
     private final Map<Integer, ModuleHandler> handlers = new HashMap<Integer, ModuleHandler>();
 
+    /**
+     * Initializes a new {@link ModuleHandlerRegistry}.
+     *
+     * @param services A service lookup reference
+     */
     public ModuleHandlerRegistry(ServiceLookup services) {
         super();
         handlers.put(Module.INFOSTORE.getFolderConstant(), new FileStorageHandler(services));
     }
 
+    /**
+     * Gets the handler being responsible for a specific module, throwing an excpetion if there is none registered.
+     *
+     * @param module The module to get the handler for
+     * @return The handler
+     */
     public ModuleHandler get(int module) throws OXException {
-        ModuleHandler handler = handlers.get(module);
+        ModuleHandler handler = opt(module);
         if (handler == null) {
             Module m = Module.getForFolderConstant(module);
             throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
         }
-
         return handler;
+    }
+
+    /**
+     * Optionally gets the handler being responsible for a specific module.
+     *
+     * @param module The module to get the handler for
+     * @return The handler, or <code>null</code> if there is none registered
+     */
+    public ModuleHandler opt(int module) {
+        return handlers.get(module);
     }
 
 }

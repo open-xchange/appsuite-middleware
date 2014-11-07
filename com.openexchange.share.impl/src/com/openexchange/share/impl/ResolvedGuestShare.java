@@ -61,6 +61,7 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 
 /**
  * {@link ResolvedGuestShare}
@@ -85,16 +86,36 @@ public class ResolvedGuestShare implements GuestShare {
      * @throws OXException
      */
     public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares) throws OXException {
+        this(services, contextID, guestUser, shares, false);
+    }
+
+    /**
+     * Initializes a new {@link ResolvedGuestShare}, performing optional personalizations of the share targets for the session's user
+     * implicitly.
+     *
+     * @param services A service lookup reference
+     * @param contextID The context ID
+     * @param guestUser The guest user
+     * @param shares The shares
+     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares, boolean adjustTargets) throws OXException {
         super();
+        this.services = services;
         this.contextID = contextID;
         this.guestUser = guestUser;
+        ModuleSupport moduleSupport = adjustTargets ? services.getService(ModuleSupport.class) : null;;
         this.targets = new ArrayList<ShareTarget>(shares.size());
-        this.services = services;
         for (Share share : shares) {
             if (share.getGuest() != guestUser.getId()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Share " + share + " does not belong to guest " + guestUser);
             }
-            targets.add(share.getTarget());
+            if (null == moduleSupport) {
+                targets.add(share.getTarget());
+            } else {
+                targets.add(moduleSupport.adjustTarget(share.getTarget(), contextID, guestUser.getId(), guestUser.isGuest()));
+            }
         }
     }
 

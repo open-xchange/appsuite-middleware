@@ -362,10 +362,6 @@ public class GuestClient extends AJAXClient {
      * @throws Exception
      */
     public void checkFileAccessible(String fileID, FileStorageGuestObjectPermission permissions) throws Exception {
-        //TODO: should not be necessary!
-        FileID temp = new FileID(fileID);
-        temp.setFolderId(String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
-        fileID = temp.toUniqueID();
         /*
          * check item retrieval
          */

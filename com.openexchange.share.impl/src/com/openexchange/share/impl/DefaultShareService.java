@@ -142,7 +142,7 @@ public class DefaultShareService implements ShareService {
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(
             contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
-        return 0 == shares.size() ? null : new ResolvedGuestShare(services, contextID, guest, shares);
+        return 0 == shares.size() ? null : new ResolvedGuestShare(services, contextID, guest, shares, true);
     }
 
     @Override

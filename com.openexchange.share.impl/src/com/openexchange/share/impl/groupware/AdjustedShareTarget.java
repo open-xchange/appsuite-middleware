@@ -49,42 +49,53 @@
 
 package com.openexchange.share.impl.groupware;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.TargetProxy;
-
 
 /**
- * {@link ModuleHandler}
+ * {@link AdjustedShareTarget}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public interface ModuleHandler {
+public class AdjustedShareTarget extends ShareTarget {
 
-    List<TargetProxy> loadTargets(List<ShareTarget> list, HandlerParameters parameters) throws OXException;
+    private static final long serialVersionUID = -5651534596560678911L;
 
-    TargetProxy loadTarget(ShareTarget target, Session session) throws OXException;
-
-    TargetProxy loadTarget(ShareTarget target, Context context) throws OXException;
-
-    boolean canShare(boolean canShareInFolder, TargetProxy proxy, HandlerParameters parameters);
-
-    void updateObjects(List<TargetProxy> modified, HandlerParameters parameters) throws OXException;
+    private String adjustedFolder;
+    private String adjustedItem;
 
     /**
-     * Optionally adjusts a share target to be used by a specific user. This might be required if the target identifiers are different
-     * depending on the user who accesses the share target, especially if the user is a guest or not.
+     * Initializes a new {@link AdjustedShareTarget}, pretending the adjusted folder- and item identifiers, yet preserving the parent
+     * target's path.
      *
-     * @param target The share target to adjust
-     * @param contextID The identifier of the context the user is located in
-     * @param userID The identifier of the user to adjust the share target for
-     * @param isGuest <code>true</code> if the user identifier refers to a guest user, <code>false</code>, otherwise
-     * @return The adjusted target, or the supplied target if no adjustments were necessary
+     * @param target The underlying target
+     * @param adjustedFolder The adjusted identifier of the folder
+     * @param adjustedItem The adjusted identifier of the item
      */
-    ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException;
+    public AdjustedShareTarget(ShareTarget target, String adjustedFolder, String adjustedItem) {
+        super(target);
+        this.adjustedFolder = adjustedFolder;
+        this.adjustedItem = adjustedItem;
+    }
+
+    @Override
+    public String getFolder() {
+        return adjustedFolder;
+    }
+
+    @Override
+    public void setFolder(String folder) {
+        this.adjustedFolder = folder;
+    }
+
+    @Override
+    public String getItem() {
+        return adjustedItem;
+    }
+
+    @Override
+    public void setItem(String item) {
+        this.adjustedItem = item;
+    }
 
 }
