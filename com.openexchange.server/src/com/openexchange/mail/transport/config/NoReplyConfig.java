@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,71 @@
  *
  */
 
-package com.openexchange.mail.transport.config.impl;
+package com.openexchange.mail.transport.config;
 
 import javax.mail.internet.InternetAddress;
-import com.openexchange.mail.transport.config.NoReplyConfig;
+
+
 
 /**
- * {@link NoReplyConfig} - The configuration for the no-reply account used for system-initiated messages.
+ * {@link NoReplyConfig}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-final class DefaultNoReplyConfig implements NoReplyConfig {
-
-    private InternetAddress address;
-
-    private String login;
-
-    private String password;
-
-    private String server;
-
-    private int port;
-
-    private SecureMode secureMode;
+public interface NoReplyConfig {
 
     /**
-     * Initializes a new {@link NoReplyConfig}.
+     * The secure mode enumeration.
      */
-    DefaultNoReplyConfig() {
-        super();
-    }
+    public static enum SecureMode {
 
-    /**
-     * Checks if this no-reply configuration is valid
-     *
-     * @return <code>true</code> if valid; otherwise <code>false</code>
-     */
-    public boolean isValid() {
-        return (null != address) && (null != login) && (null != password) && (null != server) && (port > 0) && (port < 65536) && (null != secureMode);
+        /**
+         * The plain connection mode
+         */
+        PLAIN("plain"),
+        /**
+         * The SSL secure mode
+         */
+        SSL("SSL"),
+        /**
+         * The TLS secure mode
+         */
+        TLS("TLS"), ;
+
+        private final String identifier;
+
+        private SecureMode(String identifier) {
+            this.identifier = identifier;
+        }
+
+        /**
+         * Gets the identifier
+         *
+         * @return The identifier
+         */
+        public String getIdentifier() {
+            return identifier;
+        }
+
+        /**
+         * Gets the secure mode for given identifier.
+         *
+         * @param identifier The identifier
+         * @return The associated secure mode or <code>null</code>
+         */
+        public static SecureMode secureModeFor(String identifier) {
+            if (null == identifier) {
+                return null;
+            }
+
+            for (SecureMode sm : SecureMode.values()) {
+                if (identifier.equalsIgnoreCase(sm.identifier)) {
+                    return sm;
+                }
+            }
+            return null;
+        }
     }
 
     /**
@@ -93,113 +119,41 @@ final class DefaultNoReplyConfig implements NoReplyConfig {
      *
      * @return The address
      */
-    @Override
-    public InternetAddress getAddress() {
-        return address;
-    }
-
-    /**
-     * Sets the address
-     *
-     * @param address The address to set
-     */
-    public void setAddress(InternetAddress address) {
-        this.address = address;
-    }
+    InternetAddress getAddress();
 
     /**
      * Gets the login
      *
      * @return The login
      */
-    @Override
-    public String getLogin() {
-        return login;
-    }
-
-    /**
-     * Sets the login
-     *
-     * @param login The login to set
-     */
-    public void setLogin(String login) {
-        this.login = login;
-    }
+    String getLogin();
 
     /**
      * Gets the password
      *
      * @return The password
      */
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets the password
-     *
-     * @param password The password to set
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    String getPassword();
 
     /**
      * Gets the server
      *
      * @return The server
      */
-    @Override
-    public String getServer() {
-        return server;
-    }
-
-    /**
-     * Sets the server
-     *
-     * @param server The server to set
-     */
-    public void setServer(String server) {
-        this.server = server;
-    }
+    String getServer();
 
     /**
      * Gets the port
      *
      * @return The port
      */
-    @Override
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * Sets the port
-     *
-     * @param port The port to set
-     */
-    public void setPort(int port) {
-        this.port = port;
-    }
+    int getPort();
 
     /**
      * Gets the secure mode
      *
      * @return The secure mode
      */
-    @Override
-    public SecureMode getSecureMode() {
-        return secureMode;
-    }
-
-    /**
-     * Sets the secureMode
-     *
-     * @param secureMode The secureMode to set
-     */
-    public void setSecureMode(SecureMode secureMode) {
-        this.secureMode = secureMode;
-    }
+    SecureMode getSecureMode();
 
 }

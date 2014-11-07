@@ -178,6 +178,8 @@ import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.config.NoReplyConfigFactory;
+import com.openexchange.mail.transport.config.impl.DefaultNoReplyConfigFactory;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -640,6 +642,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
+        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(this));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());
