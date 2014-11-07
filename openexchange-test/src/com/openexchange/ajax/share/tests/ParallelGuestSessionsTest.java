@@ -118,13 +118,18 @@ public class ParallelGuestSessionsTest extends ShareTest {
         String oldSessionID = sharedSession.getId();
         try {
             sharedSession.setId(null);
-            GuestClient guestClient = new GuestClient(getSession(), share.getShareURL(), guestPermission.getRecipient(), true);
+            GuestClient guestClient = new GuestClient(sharedSession, share.getShareURL(), guestPermission.getRecipient(), true, false);
             guestClient.checkShareModuleAvailable();
             guestClient.checkShareAccessible(guestPermission);
         } finally {
             // restore sharing user's session ID for teardown
             sharedSession.setId(oldSessionID);
         }
+        /*
+         * re-discover share, using the sharing user's session, thus verifying the old session is still alive, too
+         */
+        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        checkShare(guestPermission, share);
     }
 
 }

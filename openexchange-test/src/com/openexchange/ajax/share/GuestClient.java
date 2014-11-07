@@ -156,7 +156,20 @@ public class GuestClient extends AJAXClient {
      * @param failOnNonRedirect <code>true</code> to fail if the share resolve request is not being redirected, <code>false</code>, otherwise
      */
     public GuestClient(AJAXSession ajaxSession, String url, ShareRecipient recipient, boolean failOnNonRedirect) throws Exception {
-        this(ajaxSession, url, getUsername(recipient), getPassword(recipient), failOnNonRedirect);
+        this(ajaxSession, url, recipient, failOnNonRedirect, true);
+    }
+
+    /**
+     * Initializes a new {@link GuestClient}.
+     *
+     * @param ajaxSession The underlying ajax session to use
+     * @param url The share URL to access
+     * @param recipient The recipient
+     * @param failOnNonRedirect <code>true</code> to fail if the share resolve request is not being redirected, <code>false</code>, otherwise
+     * @param mustLogout <code>true</code> to enforce logging out on finalize, <code>false</code>, otherwise
+     */
+    public GuestClient(AJAXSession ajaxSession, String url, ShareRecipient recipient, boolean failOnNonRedirect, boolean mustLogout) throws Exception {
+        this(ajaxSession, url, getUsername(recipient), getPassword(recipient), failOnNonRedirect, mustLogout);
     }
 
     /**
@@ -191,10 +204,26 @@ public class GuestClient extends AJAXClient {
      * @param username The username to use for authentication, or <code>null</code> if not needed
      * @param password The password to use for authentication, or <code>null</code> if not needed
      * @param failOnNonRedirect <code>true</code> to fail if the share resolve request is not being redirected, <code>false</code>, otherwise
+     * @param mustLogout <code>true</code> to enforce logging out on finalize, <code>false</code>, otherwise
      * @throws Exception
      */
     public GuestClient(AJAXSession ajaxSession, String url, String username, String password, boolean failOnNonRedirect) throws Exception {
-        super(ajaxSession, true);
+        this(ajaxSession, url, username, password, failOnNonRedirect, true);
+    }
+
+    /**
+     * Initializes a new {@link GuestClient}.
+     *
+     * @param ajaxSession The underlying ajax session to use
+     * @param url The share URL to access
+     * @param username The username to use for authentication, or <code>null</code> if not needed
+     * @param password The password to use for authentication, or <code>null</code> if not needed
+     * @param failOnNonRedirect <code>true</code> to fail if the share resolve request is not being redirected, <code>false</code>, otherwise
+     * @param mustLogout <code>true</code> to enforce logging out on finalize, <code>false</code>, otherwise
+     * @throws Exception
+     */
+    public GuestClient(AJAXSession ajaxSession, String url, String username, String password, boolean failOnNonRedirect, boolean mustLogout) throws Exception {
+        super(ajaxSession, mustLogout);
         prepareClient(getHttpClient(), username, password);
         shareResponse = Executor.execute(this, new ResolveShareRequest(url, failOnNonRedirect));
         if (null != shareResponse.getLoginType()) {
