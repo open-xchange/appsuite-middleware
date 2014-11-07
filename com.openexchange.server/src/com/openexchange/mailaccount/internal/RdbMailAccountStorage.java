@@ -1930,17 +1930,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
+            // Mail data
             {
                 stmt = con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                final String encryptedPassword;
+
+                // Encrypt password
+                String encryptedPassword;
                 if (session == null) {
                     encryptedPassword = null;
                 } else {
                     encryptedPassword = encrypt(mailAccount.getPassword(), session);
                 }
-                int pos = 1;
+
                 // cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam,
                 // confirmed_ham, spam_handler
+                int pos = 1;
                 stmt.setLong(pos++, contextId);
                 stmt.setLong(pos++, id);
                 stmt.setLong(pos++, userId);
@@ -1954,9 +1958,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
-                /*
-                 * Default folder names: trash, sent, drafts, spam, confirmed_spam, confirmed_ham
-                 */
+
+                // Default folder names: trash, sent, drafts, spam, confirmed_spam, confirmed_ham
                 {
                     setOptionalString(stmt, pos++, mailAccount.getTrash());
                     setOptionalString(stmt, pos++, mailAccount.getSent());
@@ -1965,9 +1968,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
                     setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
                 }
-                /*
-                 * Spam handler
-                 */
+
+                // Spam handler
                 final String sh = mailAccount.getSpamHandler();
                 if (null == sh) {
                     stmt.setNull(pos++, TYPE_VARCHAR);
@@ -1975,9 +1977,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setString(pos++, sh);
                 }
                 stmt.setInt(pos++, mailAccount.isUnifiedINBOXEnabled() ? 1 : 0);
-                /*
-                 * Default folder full names
-                 */
+
+                // Default folder full names
                 {
                     setOptionalString(stmt, pos++, extractFullname(mailAccount.getTrashFullname()));
                     setOptionalString(stmt, pos++, extractFullname(mailAccount.getSentFullname()));
@@ -1986,9 +1987,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     setOptionalString(stmt, pos++, extractFullname(mailAccount.getConfirmedSpamFullname()));
                     setOptionalString(stmt, pos++, extractFullname(mailAccount.getConfirmedHamFullname()));
                 }
-                /*
-                 * Personal
-                 */
+
+                // Personal
                 final String personal = mailAccount.getPersonal();
                 if (isEmpty(personal)) {
                     stmt.setNull(pos++, TYPE_VARCHAR);
@@ -2001,24 +2001,31 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     stmt.setString(pos++, replyTo);
                 }
-                /*
-                 * Archive
-                 */
+
+                // Archive
                 setOptionalString(stmt, pos++, mailAccount.getArchive());
                 setOptionalString(stmt, pos++, mailAccount.getArchiveFullname());
+
+                // Execute update
                 stmt.executeUpdate();
+                closeSQLStuff(null, stmt);
+                stmt = null;
             }
-            final String transportURL = mailAccount.generateTransportServerURL();
+
+            // Transport data
+            String transportURL = mailAccount.generateTransportServerURL();
             if (null != transportURL) {
-                stmt.close();
-                final String encryptedTransportPassword;
+                stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+
+                // Encrypt password
+                String encryptedTransportPassword;
                 if (session == null) {
                     encryptedTransportPassword = null;
                 } else {
                     encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                 }
+
                 // cid, id, user, name, url, login, password, send_addr, default_flag
-                stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
                 int pos = 1;
                 stmt.setLong(pos++, contextId);
                 stmt.setLong(pos++, id);
@@ -2049,9 +2056,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     stmt.setString(pos++, replyTo);
                 }
+
+                // Execute update
                 stmt.executeUpdate();
+                closeSQLStuff(null, stmt);
+                stmt = null;
             }
-            // Properties
+
+            // Mail properties
             Map<String, String> properties = mailAccount.getProperties();
             if (!properties.isEmpty()) {
                 if (properties.containsKey("pop3.deletewt")) {
@@ -2070,18 +2082,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     updateProperty(contextId, userId, id, "pop3.path", properties.get("pop3.path"), false, con);
                 }
             }
-            TransportAuth transportAuth = mailAccount.getTransportAuth();
-            if (null != transportAuth) {
-                updateProperty(contextId, userId, id, "transport.auth", transportAuth.getId(), true, con);
+
+            // Transport properties (only if transport data available)
+            if (null != transportURL) {
+                TransportAuth transportAuth = mailAccount.getTransportAuth();
+                if (null != transportAuth) {
+                    updateProperty(contextId, userId, id, "transport.auth", transportAuth.getId(), true, con);
+                }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
-        /*
-         * Automatically check Unified Mail existence
-         */
+
+        // Automatically check Unified Mail existence
         if (mailAccount.isUnifiedINBOXEnabled()) {
             final UnifiedInboxManagement management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
             if (null != management && !management.exists(userId, contextId, con)) {
