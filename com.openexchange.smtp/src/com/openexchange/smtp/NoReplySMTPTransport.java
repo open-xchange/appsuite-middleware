@@ -52,7 +52,6 @@ package com.openexchange.smtp;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
@@ -60,11 +59,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
+import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
+import com.openexchange.smtp.services.Services;
 
 
 /**
@@ -81,10 +83,12 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
 
     public NoReplySMTPTransport(int contextId) throws OXException {
         super(contextId);
-        noReplyConfig = NoReplyConfig.getInstance(ConfigProviderService.NO_USER, ctx.getContextId());
-        if (!noReplyConfig.isValid()) {
-            throw SMTPExceptionCode.NOT_CONNECTED.create(); // FIXME: own exception
+        NoReplyConfigFactory configFactory = Services.getService(NoReplyConfigFactory.class);
+        if (configFactory == null) {
+            throw ServiceExceptionCode.serviceUnavailable(NoReplyConfigFactory.class);
         }
+
+        noReplyConfig = configFactory.getNoReplyConfig(contextId);
     }
 
     @Override
@@ -94,7 +98,7 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
 
     @Override
     protected SMTPMessageFiller createSMTPMessageFiller() throws OXException {
-        return new SMTPMessageFiller(getTransportConfig().getSMTPProperties(), new NoReplyFillerContext());
+        return new SMTPMessageFiller(getTransportConfig().getSMTPProperties(), new NoReplyCompositionParameters());
     }
 
     @Override
@@ -109,6 +113,14 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         smtpConfig.setSecure(NoReplyConfig.SecureMode.SSL.equals(secureMode));
         smtpConfig.setTransportProperties(new NoReplySMTPProperties());
         return smtpConfig;
+    }
+
+    @Override
+    protected void processAddressHeader(MimeMessage mimeMessage) throws OXException, MessagingException {
+        super.processAddressHeader(mimeMessage);
+        mimeMessage.setFrom(noReplyConfig.getAddress());
+        mimeMessage.setSender(null);
+        mimeMessage.setReplyTo(null);
     }
 
     @Override
@@ -192,6 +204,5 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
             return smtpProperties.getSSLCipherSuites();
         }
     }
-
 
 }

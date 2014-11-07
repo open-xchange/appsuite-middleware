@@ -56,9 +56,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.mime.filler.FillerContext;
+import com.openexchange.mail.mime.filler.CompositionParameters;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
-import com.openexchange.mail.mime.filler.SessionFillerContext;
+import com.openexchange.mail.mime.filler.SessionCompositionParameters;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -84,7 +84,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
      * @param usm The user's mail settings
      */
     public SMTPMessageFiller(final ISMTPProperties smtpProperties, final Session session, final Context ctx, final UserSettingMail usm) {
-        super(new SessionFillerContext(session, ctx, usm));
+        super(new SessionCompositionParameters(session, ctx, usm));
         this.smtpProperties = smtpProperties;
     }
 
@@ -92,10 +92,10 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
      * Constructor
      *
      * @param smtpProperties
-     * @param fillerContext
+     * @param compositionParameters
      */
-    public SMTPMessageFiller(final ISMTPProperties smtpProperties, final FillerContext fillerContext) {
-        super(fillerContext);
+    public SMTPMessageFiller(final ISMTPProperties smtpProperties, final CompositionParameters compositionParameters) {
+        super(compositionParameters);
         this.smtpProperties = smtpProperties;
     }
 
@@ -137,7 +137,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
             /*
              * Set ENVELOPE-FROM in SMTP message to user's primary email address
              */
-            ((SMTPMessage) mimeMessage).setEnvelopeFrom(fillerContext.getEnvelopeFrom());
+            ((SMTPMessage) mimeMessage).setEnvelopeFrom(compositionParameters.getEnvelopeFrom());
         }
     }
 

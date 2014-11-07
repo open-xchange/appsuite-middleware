@@ -196,13 +196,13 @@ public class MimeMessageFiller {
 
     private final HtmlService htmlService;
 
-    protected final FillerContext fillerContext;
+    protected final CompositionParameters compositionParameters;
 
-    public MimeMessageFiller(final FillerContext fillerContext) {
+    public MimeMessageFiller(final CompositionParameters compositionParameters) {
         super();
         discardReferencedInlinedImages = true;
         htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-        this.fillerContext = fillerContext;
+        this.compositionParameters = compositionParameters;
     }
 
     /**
@@ -226,7 +226,7 @@ public class MimeMessageFiller {
         super();
         discardReferencedInlinedImages = true;
         htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-        fillerContext = new SessionFillerContext(session, ctx, usm);
+        compositionParameters = new SessionCompositionParameters(session, ctx, usm);
     }
 
     /**
@@ -248,8 +248,8 @@ public class MimeMessageFiller {
      */
     public MimeMessageFiller setAccountId(final int accountId) {
         this.accountId = accountId;
-        if (fillerContext instanceof SessionFillerContext) {
-            ((SessionFillerContext) fillerContext).setAccountId(accountId);
+        if (compositionParameters instanceof SessionCompositionParameters) {
+            ((SessionCompositionParameters) compositionParameters).setAccountId(accountId);
         }
         return this;
     }
@@ -305,7 +305,7 @@ public class MimeMessageFiller {
          */
         if (accountId <= 0) {
             try {
-                final String organization = fillerContext.getOrganization();
+                final String organization = compositionParameters.getOrganization();
                 if (null != organization && 0 < organization.length()) {
                     final String encoded = MimeUtility.fold(
                         14,
@@ -323,7 +323,7 @@ public class MimeMessageFiller {
             addClientIPAddress(mimeMessage);
         }
         {
-            String client = fillerContext.getClient();
+            String client = compositionParameters.getClient();
             if (!Strings.isEmpty(client)) {
                 try {
                     final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, MailProperties.getInstance().getDefaultMimeCharset(), null));
@@ -342,7 +342,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If an error occurs
      */
     private void addClientIPAddress(final MimeMessage mimeMessage) throws OXException, MessagingException {
-        String originatingIP = fillerContext.getOriginatingIP();
+        String originatingIP = compositionParameters.getOriginatingIP();
         if (originatingIP != null) {
             mimeMessage.setHeader("X-Originating-IP", originatingIP);
         }
@@ -407,7 +407,7 @@ public class MimeMessageFiller {
              * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
              * Field.
              */
-            InternetAddress sender = fillerContext.getSenderAddress(from);
+            InternetAddress sender = compositionParameters.getSenderAddress(from);
             if (sender != null) {
                 mimeMessage.setSender(sender);
             }
@@ -444,7 +444,7 @@ public class MimeMessageFiller {
          * Set sent date
          */
         if (mail.containsSentDate()) {
-            final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(fillerContext.getTimeZoneID());
+            final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(compositionParameters.getTimeZoneID());
             synchronized (mdf) {
                 mimeMessage.setHeader("Date", mdf.format(mail.getSentDate()));
             }
@@ -530,7 +530,7 @@ public class MimeMessageFiller {
     }
 
     private void setReplyTo(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws OXException, MessagingException {
-        if (fillerContext.setReplyTo()) {
+        if (compositionParameters.setReplyTo()) {
             /*
              * Reply-To
              */
@@ -549,7 +549,7 @@ public class MimeMessageFiller {
                     mimeMessage.setReplyTo(mail.getFrom());
                 }
             } else {
-                String replyTo = fillerContext.getReplyToAddress();
+                String replyTo = compositionParameters.getReplyToAddress();
                 if (replyTo != null) {
                     try {
                         mimeMessage.setReplyTo(QuotedInternetAddress.parse(replyTo, true));
@@ -674,7 +674,7 @@ public class MimeMessageFiller {
              */
             {
                 final Date sentDate = mimeMessage.getSentDate();
-                final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(fillerContext.getTimeZoneID());
+                final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(compositionParameters.getTimeZoneID());
                 synchronized (mdf) {
                     mimeMessage.setHeader("Date", mdf.format(sentDate == null ? new Date() : sentDate));
                 }
@@ -683,7 +683,7 @@ public class MimeMessageFiller {
              * Set default subject if none set
              */
             if (null == mimeMessage.getSubject()) {
-                mimeMessage.setSubject(StringHelper.valueOf(fillerContext.getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+                mimeMessage.setSubject(StringHelper.valueOf(compositionParameters.getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
             }
         } catch (final AddressException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -725,7 +725,7 @@ public class MimeMessageFiller {
             /*
              * A non-inline forward message
              */
-            isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (fillerContext.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
+            isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (compositionParameters.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
                 mail,
                 size))));
         }
@@ -989,9 +989,9 @@ public class MimeMessageFiller {
                     } else if (isHtml) {
                         mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(
                             htmlService.html2text(text, true),
-                            fillerContext.getAutoLinebreak());
+                            compositionParameters.getAutoLinebreak());
                     } else {
-                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(text, fillerContext.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(text, compositionParameters.getAutoLinebreak());
                     }
                     mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 } else {
@@ -1054,7 +1054,7 @@ public class MimeMessageFiller {
 
     private void appendVCard(ComposedMailMessage mail, Multipart primaryMultipart, MimeMessage mimeMessage) throws OXException, MessagingException, UnsupportedEncodingException {
         final String charset = MailProperties.getInstance().getDefaultMimeCharset();
-        final String fileName = fillerContext.getUserVCardFileName();
+        final String fileName = compositionParameters.getUserVCardFileName();
         AppendVCard: if (mail.isAppendVCard() && fileName != null) {
             final String encodedFileName = MimeUtility.encodeText(fileName, charset, "Q");
             for (int i = 0; i < mail.getEnclosedCount(); i++) {
@@ -1070,7 +1070,7 @@ public class MimeMessageFiller {
                 primaryMultipart = new MimeMultipart();
             }
             try {
-                final String userVCard = fillerContext.getUserVCard(charset);
+                final String userVCard = compositionParameters.getUserVCard(charset);
                 /*
                  * Create a body part for vcard
                  */
@@ -1472,13 +1472,13 @@ public class MimeMessageFiller {
                 if (ComposeType.NEW_SMS.equals(type)) {
                     textContent = contents[1];
                 } else {
-                    textContent = performLineFolding(htmlService.html2text(content, appendHref), fillerContext.getAutoLinebreak());
+                    textContent = performLineFolding(htmlService.html2text(content, appendHref), compositionParameters.getAutoLinebreak());
                 }
             } else {
                 if (ComposeType.NEW_SMS.equals(type)) {
                     textContent = content;
                 } else {
-                    textContent = performLineFolding(content, fillerContext.getAutoLinebreak());
+                    textContent = performLineFolding(content, compositionParameters.getAutoLinebreak());
                 }
             }
         }
@@ -1665,7 +1665,7 @@ public class MimeMessageFiller {
                             continue;
                         }
                         try {
-                            imageProvider = fillerContext.createImageProvider(dataSource, imageLocation);
+                            imageProvider = compositionParameters.createImageProvider(dataSource, imageLocation);
                         } catch (final OXException e) {
                             if (isIgnorableException(e)) {
                                 m.appendLiteralReplacement(sb, blankSrc(imageTag));

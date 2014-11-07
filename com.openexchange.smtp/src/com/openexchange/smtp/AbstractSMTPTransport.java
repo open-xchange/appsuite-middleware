@@ -247,6 +247,111 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         return getSMTPSession(smtpConfig, accountId > 0 && (smtpConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection()));
     }
 
+    protected void processAddressHeader(final MimeMessage mimeMessage) throws OXException, MessagingException {
+        {
+            final String str = mimeMessage.getHeader("From", null);
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setFrom(addresses[0]);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Sender", null);
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setSender(addresses[0]);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("To", null);
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setRecipients(RecipientType.TO, addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Cc", null);
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setRecipients(RecipientType.CC, addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Bcc", null);
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setRecipients(RecipientType.BCC, addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Reply-To", null);
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setReplyTo(addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Disposition-Notification-To", null);
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setHeader("Disposition-Notification-To", addresses[0].toString());
+            }
+        }
+    }
+
+    protected boolean checkRecipients(final Address[] recipients) throws OXException {
+        if ((recipients == null) || (recipients.length == 0)) {
+            throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
+        }
+        Boolean poisoned = null;
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
+        if (null != service) {
+            final Filter filter = service.getFilterFromProperty("com.openexchange.mail.transport.redirectWhitelist");
+            if (null != filter) {
+                for (final Address address : recipients) {
+                    if (MimeMessageUtility.POISON_ADDRESS == address) {
+                        poisoned = Boolean.TRUE;
+                    } else {
+                        final InternetAddress internetAddress = (InternetAddress) address;
+                        if (!filter.accepts(internetAddress.getAddress())) {
+                            throw SMTPExceptionCode.RECIPIENT_NOT_ALLOWED.create(internetAddress.toUnicodeString());
+                        }
+                    }
+                }
+            }
+        }
+        if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+            InternetAddress internetAddress;
+            for (final Address address : recipients) {
+                if (MimeMessageUtility.POISON_ADDRESS == address) {
+                    poisoned = Boolean.TRUE;
+                } else {
+                    internetAddress = (InternetAddress) address;
+                    final String sAddress = internetAddress.getAddress();
+                    if (MsisdnCheck.checkMsisdn(sAddress)) {
+                        if (sAddress.indexOf('/') < 0) {
+                            // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
+                            internetAddress.setAddress(sAddress + "/TYPE=PLMN");
+                        }
+                        try {
+                            internetAddress.setPersonal("", "US-ASCII");
+                        } catch (final UnsupportedEncodingException e) {
+                            // Ignore as personal is cleared
+                        }
+                    }
+                }
+            }
+        }
+        return null == poisoned ? isPoisoned(recipients) : poisoned.booleanValue();
+    }
+
     /*
      * helper methods
      */
@@ -499,111 +604,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      * begin interface implementation
      */
 
-    protected static void processAddressHeader(final MimeMessage mimeMessage) throws OXException, MessagingException {
-        {
-            final String str = mimeMessage.getHeader("From", null);
-            if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setFrom(addresses[0]);
-            }
-        }
-        {
-            final String str = mimeMessage.getHeader("Sender", null);
-            if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setSender(addresses[0]);
-            }
-        }
-        {
-            final String str = mimeMessage.getHeader("To", null);
-            if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setRecipients(RecipientType.TO, addresses);
-            }
-        }
-        {
-            final String str = mimeMessage.getHeader("Cc", null);
-            if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setRecipients(RecipientType.CC, addresses);
-            }
-        }
-        {
-            final String str = mimeMessage.getHeader("Bcc", null);
-            if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setRecipients(RecipientType.BCC, addresses);
-            }
-        }
-        {
-            final String str = mimeMessage.getHeader("Reply-To", null);
-            if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setReplyTo(addresses);
-            }
-        }
-        {
-            final String str = mimeMessage.getHeader("Disposition-Notification-To", null);
-            if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setHeader("Disposition-Notification-To", addresses[0].toString());
-            }
-        }
-    }
-
-    protected static boolean checkRecipients(final Address[] recipients) throws OXException {
-        if ((recipients == null) || (recipients.length == 0)) {
-            throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
-        }
-        Boolean poisoned = null;
-        final ConfigurationService service = Services.getService(ConfigurationService.class);
-        if (null != service) {
-            final Filter filter = service.getFilterFromProperty("com.openexchange.mail.transport.redirectWhitelist");
-            if (null != filter) {
-                for (final Address address : recipients) {
-                    if (MimeMessageUtility.POISON_ADDRESS == address) {
-                        poisoned = Boolean.TRUE;
-                    } else {
-                        final InternetAddress internetAddress = (InternetAddress) address;
-                        if (!filter.accepts(internetAddress.getAddress())) {
-                            throw SMTPExceptionCode.RECIPIENT_NOT_ALLOWED.create(internetAddress.toUnicodeString());
-                        }
-                    }
-                }
-            }
-        }
-        if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
-            InternetAddress internetAddress;
-            for (final Address address : recipients) {
-                if (MimeMessageUtility.POISON_ADDRESS == address) {
-                    poisoned = Boolean.TRUE;
-                } else {
-                    internetAddress = (InternetAddress) address;
-                    final String sAddress = internetAddress.getAddress();
-                    if (MsisdnCheck.checkMsisdn(sAddress)) {
-                        if (sAddress.indexOf('/') < 0) {
-                            // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
-                            internetAddress.setAddress(sAddress + "/TYPE=PLMN");
-                        }
-                        try {
-                            internetAddress.setPersonal("", "US-ASCII");
-                        } catch (final UnsupportedEncodingException e) {
-                            // Ignore as personal is cleared
-                        }
-                    }
-                }
-            }
-        }
-        return null == poisoned ? isPoisoned(recipients) : poisoned.booleanValue();
-    }
-
     @Override
     public SMTPConfig getTransportConfig() throws OXException {
         SMTPConfig tmp = cachedSmtpConfig;
@@ -736,7 +736,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
 
-            sendMimeMessage(mimeMessage, allRecipients);
+            sendMimeMessage(mimeMessage, allRecipients, mtaStatusInfo);
             return MimeMessageConverter.convertMessage(mimeMessage);
         } catch (final MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
@@ -756,12 +756,16 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             throw handleMessagingException(e, smtpConfig);
         }
 
-        sendMimeMessage(smtpMessage, allRecipients);
+        sendMimeMessage(smtpMessage, allRecipients, null);
         return MimeMessageConverter.convertMessage(smtpMessage);
     }
 
     @Override
     public void sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients) throws OXException {
+        sendMimeMessage(mimeMessage, allRecipients, null);
+    }
+
+    private void sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients, MtaStatusInfo mtaStatusInfo) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig();
         try {
             /*
@@ -779,7 +783,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     try {
                         connectTransport(transport, smtpConfig);
                         saveChangesSafe(mimeMessage);
-                        transport(mimeMessage, recipients, transport, smtpConfig);
+                        transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {
                         throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());

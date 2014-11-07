@@ -59,6 +59,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.smtp.SMTPProvider;
@@ -94,6 +95,7 @@ public final class SMTPActivator extends HousekeepingActivator {
             Services.setServiceLookup(this);
 
             trackService(HostnameService.class);
+            trackService(NoReplyConfigFactory.class);
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             openTrackers();
 

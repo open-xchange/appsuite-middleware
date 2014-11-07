@@ -58,7 +58,7 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.mime.filler.MimeMessageFiller.ImageProvider;
 
-public interface FillerContext {
+public interface CompositionParameters {
 
     /**
      * Gets the value for the {@link #HDR_ORGANIZATION} header.
@@ -84,7 +84,7 @@ public interface FillerContext {
     String getOriginatingIP() throws OXException;
 
     /**
-     * Gets the value for the 'MAIL FROM' command resp. the 'Envelope-From' header.
+     * Gets the ASCII-encoded value for the 'MAIL FROM' command resp. the 'Envelope-From' header.
      *
      * @return The header value, not <code>null</code>
      * @throws OXException

@@ -188,7 +188,7 @@ public abstract class ComposedMailMessage extends MailMessage {
     /**
      * Gets the session
      *
-     * @return the session
+     * @return the session, possibly <code>null</code>!
      */
     public Session getSession() {
         return session;

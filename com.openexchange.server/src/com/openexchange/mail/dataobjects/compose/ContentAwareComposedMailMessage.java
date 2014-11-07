@@ -96,6 +96,20 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
         this.content = content;
     }
 
+    /**
+     * Initializes a new {@link ContentAwareComposedMailMessage}. Use this
+     * constructor for administrative mails that should not be send in the name of a
+     * certain user.
+     *
+     * @param content The content object
+     * @param contextId The context identifier
+     * @throws OXException If initialization fails
+     */
+    public ContentAwareComposedMailMessage(final MimeMessage content, final int contextId) throws OXException {
+        super(null, ContextStorage.getStorageContext(contextId));
+        this.content = content;
+    }
+
     private static InternetAddress[] convert(final Address[] a) {
         if (null == a) {
             return null;
@@ -110,7 +124,12 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
 
     @Override
     public boolean containsFrom() {
-        return true;
+        try {
+            Address[] from = content.getFrom();
+            return from != null && from.length > 0;
+        } catch (MessagingException e) {
+            return false;
+        }
     }
 
     @Override

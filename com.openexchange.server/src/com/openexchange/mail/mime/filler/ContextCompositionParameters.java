@@ -47,27 +47,52 @@
  *
  */
 
-package com.openexchange.smtp;
+package com.openexchange.mail.mime.filler;
 
 import java.util.Locale;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
-import com.openexchange.mail.mime.filler.CompositionParameters;
 import com.openexchange.mail.mime.filler.MimeMessageFiller.ImageProvider;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.UserService;
 
 
 /**
- * {@link NoReplyCompositionParameters}
+ * {@link ContextCompositionParameters}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class NoReplyCompositionParameters implements CompositionParameters {
+public class ContextCompositionParameters implements CompositionParameters {
+
+    private final String envelopeFrom;
+
+    private final InternetAddress senderAddress;
+
+    private final User contextAdmin;
+
+    private final UserSettingMail contextAdminUSM;
+
+    public ContextCompositionParameters(Context context) throws OXException {
+        this(context, "<>", null);
+    }
+
+    public ContextCompositionParameters(Context context, String envelopeFrom, InternetAddress senderAddress) throws OXException {
+        super();
+        this.envelopeFrom = envelopeFrom;
+        this.senderAddress = senderAddress;
+        contextAdmin = ServerServiceRegistry.getServize(UserService.class, true).getUser(context.getMailadmin(), context);
+        contextAdminUSM = UserSettingMailStorage.getInstance().getUserSettingMail(context.getMailadmin(), context);
+    }
 
     @Override
     public String getOrganization() throws OXException {
@@ -85,18 +110,26 @@ public class NoReplyCompositionParameters implements CompositionParameters {
     }
 
     @Override
+    public String getEnvelopeFrom() throws OXException {
+        try {
+            return IDNA.toACE(envelopeFrom);
+        } catch (AddressException e) {
+            throw MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.create(envelopeFrom);
+        }
+    }
+
+    @Override
     public InternetAddress getSenderAddress(InternetAddress from) throws OXException, AddressException {
+        if (senderAddress != null && !senderAddress.equals(from)) {
+            return senderAddress;
+        }
+
         return null;
     }
 
     @Override
     public String getTimeZoneID() throws OXException {
-        return TimeZones.UTC.getID();
-    }
-
-    @Override
-    public boolean setReplyTo() {
-        return false;
+        return contextAdmin.getTimeZone();
     }
 
     @Override
@@ -105,13 +138,13 @@ public class NoReplyCompositionParameters implements CompositionParameters {
     }
 
     @Override
-    public String getEnvelopeFrom() throws OXException {
-        return "<>";
+    public boolean setReplyTo() {
+        return true;
     }
 
     @Override
     public Locale getLocale() throws OXException {
-        return Locale.US;
+        return contextAdmin.getLocale();
     }
 
     @Override
@@ -126,11 +159,19 @@ public class NoReplyCompositionParameters implements CompositionParameters {
 
     @Override
     public int getAutoLinebreak() {
+        if (contextAdminUSM != null) {
+            return contextAdminUSM.getAutoLinebreak();
+        }
+
         return -1;
     }
 
     @Override
     public boolean isForwardAsAttachment() {
+        if (contextAdminUSM != null) {
+            return contextAdminUSM.isForwardAsAttachment();
+        }
+
         return false;
     }
 

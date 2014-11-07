@@ -94,7 +94,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.user.UserService;
 
-public final class SessionFillerContext implements FillerContext {
+public final class SessionCompositionParameters implements CompositionParameters {
 
     private final Session session;
 
@@ -104,7 +104,7 @@ public final class SessionFillerContext implements FillerContext {
 
     private int accountId = MailAccount.DEFAULT_ID;
 
-    public SessionFillerContext(final Session session, final Context ctx, final UserSettingMail usm) {
+    public SessionCompositionParameters(final Session session, final Context ctx, final UserSettingMail usm) {
         super();
         this.session = session;
         this.ctx = ctx;

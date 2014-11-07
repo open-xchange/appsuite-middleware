@@ -119,7 +119,7 @@ public class Version {
         return numbers.getPatch();
     }
 
-    private Version() {
+    protected Version() {
         super();
     }
 
