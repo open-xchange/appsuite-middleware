@@ -877,11 +877,11 @@ public class LoginServlet extends AJAXServlet {
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return;
             }
-            final String version;
-            final Credentials creds;
             if (!Authorization.checkForAuthorizationHeader(auth)) {
                 throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
             }
+            final String version;
+            final Credentials creds;
             if (Authorization.checkForBasicAuthorization(auth)) {
                 creds = Authorization.decode(auth);
                 version = conf.getClientVersion();
