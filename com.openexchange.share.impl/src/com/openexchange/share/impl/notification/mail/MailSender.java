@@ -82,10 +82,7 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mail.transport.config.NoReplyConfig;
-import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
-import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
@@ -191,25 +188,11 @@ public class MailSender {
             switch (notification.getType()) {
                 case SHARE_CREATED:
                     mail = buildShareCreatedMail();
-                    transport = MailTransport.getInstance(session);
+                    transport = TransportProviderRegistry.getTransportProvider("smtp").createNewMailTransport(session);
                     break;
                 case PASSWORD_RESET:
-                    NoReplyConfig noReplyConfig = NoReplyConfig.getInstance(session.getUserId(), session.getContextId());
-                    if (!noReplyConfig.isValid()) {
-                        // TODO: exception
-                    }
-
-                    mail = buildPasswordResetMail(noReplyConfig);
-                    TransportProvider transportProvider = com.openexchange.mail.transport.TransportProviderRegistry.getTransportProvider("smtp");
-                    transport = transportProvider.createNewMailTransport(session);
-                    TransportConfig transportConfig = transport.getTransportConfig();
-                    transportConfig.setLogin(noReplyConfig.getLogin());
-                    transportConfig.setPassword(noReplyConfig.getPassword());
-                    transportConfig.setServer(noReplyConfig.getServer());
-                    transportConfig.setPort(noReplyConfig.getPort());
-                    SecureMode secureMode = noReplyConfig.getSecureMode();
-                    transportConfig.setRequireTls(NoReplyConfig.SecureMode.TLS.equals(secureMode));
-                    transportConfig.setSecure(NoReplyConfig.SecureMode.SSL.equals(secureMode));
+                    mail = buildPasswordResetMail();
+                    transport = TransportProviderRegistry.getTransportProvider("smtp").createNewNoReplyTransport(session.getContextId());
                     break;
                 default:
                     // TODO: exception
@@ -233,10 +216,10 @@ public class MailSender {
         }
     }
 
-    private MimeMessage buildPasswordResetMail(NoReplyConfig noReplyConfig) throws OXException, MessagingException, UnsupportedEncodingException {
+    private MimeMessage buildPasswordResetMail() throws OXException, MessagingException, UnsupportedEncodingException {
         String title = translator.translate(NotificationStrings.TITLE_RESET_PASSWORD);
         Map<String, Object> vars = prepareTemplateVars(PASSWORD_RESET_FIELDS, title);
-        MimeMessage mail = prepareEnvelope(title, noReplyConfig.getAddress());
+        MimeMessage mail = prepareEnvelope(title, null);
         mail.setContent(prepareContent(
             "notify.share.pwreset.mail.txt.tmpl",
             vars,
@@ -259,7 +242,7 @@ public class MailSender {
 
         Map<String, Object> vars = prepareTemplateVars(SHARE_CREATED_FIELDS, title);
         String subject = String.format(translator.translate(NotificationStrings.SUBJECT), user.getDisplayName(), title);
-        MimeMessage mail = prepareEnvelope(subject, getSenderAddress());
+        MimeMessage mail = prepareEnvelope(subject, new Address[] { getSenderAddress() });
         mail.addHeader("X-Open-Xchange-Share", notification.getLinkProvider().getShareUrl());
         mail.setContent(prepareContent(
             "notify.share.create.mail.txt.tmpl",
@@ -270,9 +253,9 @@ public class MailSender {
         return mail;
     }
 
-    private MimeMessage prepareEnvelope(String subject, Address senderAddress) throws MessagingException {
+    private MimeMessage prepareEnvelope(String subject, Address[] senderAddresses) throws MessagingException {
         MimeMessage mail = new MimeMessage(MimeDefaultSession.getDefaultSession());
-        mail.addFrom(new Address[] { senderAddress });
+        mail.addFrom(senderAddresses);
         mail.addRecipient(RecipientType.TO, notification.getTransportInfo());
         mail.setSubject(subject, "UTF-8");
         return mail;
