@@ -78,12 +78,15 @@ import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
+import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
@@ -223,19 +226,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected File insertFile(int folderID, String filename) throws Exception {
-        byte[] data = UUIDs.toByteArray(UUID.randomUUID());
-        DefaultFile metadata = new DefaultFile();
-        metadata.setFolderId(String.valueOf(folderID));
-        metadata.setFileName(filename);
-        NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
-        NewInfostoreResponse newResponse = getClient().execute(newRequest);
-        String id = newResponse.getID();
-        remember(metadata);
-        GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
-        GetInfostoreResponse getResponse = client.execute(getRequest);
-        File createdFile = getResponse.getDocumentMetadata();
-        assertNotNull(createdFile);
-        return createdFile;
+        return insertSharedFile(folderID, filename, null);
     }
 
     /**
@@ -252,7 +243,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
         DefaultFile metadata = new DefaultFile();
         metadata.setFolderId(String.valueOf(folderID));
         metadata.setFileName(filename);
-        metadata.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(guestPermission));
+        if (null != guestPermission) {
+            metadata.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(guestPermission));
+        }
         NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
         String id = newResponse.getID();
@@ -261,6 +254,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         GetInfostoreResponse getResponse = client.execute(getRequest);
         File createdFile = getResponse.getDocumentMetadata();
         assertNotNull(createdFile);
+        remember(createdFile);
         return createdFile;
     }
 
@@ -280,6 +274,24 @@ public abstract class ShareTest extends AbstractAJAXSession {
         assertNotNull(updatedFolder);
         assertEquals("Folder name wrong", folder.getFolderName(), updatedFolder.getFolderName());
         return updatedFolder;
+    }
+
+    /**
+     * Updates and remembers a file.
+     *
+     * @param file The file to udpate
+     * @return The updated file, re-fetched from the server
+     * @throws Exception
+     */
+    protected File updateFile(File file, Field[] modifiedColumns) throws Exception {
+        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, modifiedColumns, file.getLastModified());
+        updateInfostoreRequest.setFailOnError(true);
+        UpdateInfostoreResponse updateInfostoreResponse = getClient().execute(updateInfostoreRequest);
+        assertFalse(updateInfostoreResponse.hasError());
+        GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(file.getId());
+        getInfostoreRequest.setFailOnError(true);
+        GetInfostoreResponse getInfostoreResponse = getClient().execute(getInfostoreRequest);
+        return getInfostoreResponse.getDocumentMetadata();
     }
 
     /**

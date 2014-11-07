@@ -49,11 +49,16 @@
 
 package com.openexchange.ajax.share.tests;
 
+import java.util.Collections;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageGuestObjectPermission;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -84,6 +89,16 @@ public class AddGuestPermissionTest extends ShareTest {
                     testUpdateSharedFolder(api, module, guestPermission);
                 }
             }
+        }
+    }
+
+    public void testUpdateSharedFileRandomly() throws Exception {
+        testUpdateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
+    }
+
+    public void noTestUpdateSharedFileExtensively() throws Exception {
+        for (FileStorageGuestObjectPermission guestPermission : TESTED_OBJECT_PERMISSIONS) {
+            testUpdateSharedFile(randomFolderAPI(), guestPermission);
         }
     }
 
@@ -122,6 +137,46 @@ public class AddGuestPermissionTest extends ShareTest {
          * check access to share
          */
         GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+    }
+
+    private void testUpdateSharedFile(EnumAPI api, FileStorageGuestObjectPermission guestPermission) throws Exception {
+        testUpdateSharedFile(api, getDefaultFolder(FolderObject.INFOSTORE), guestPermission);
+    }
+
+    private void testUpdateSharedFile(EnumAPI api, int parent, FileStorageGuestObjectPermission guestPermission) throws Exception {
+        /*
+         * create folder and a file inside
+         */
+        FolderObject folder = insertPrivateFolder(api, FolderObject.INFOSTORE, parent);
+        File file = insertFile(folder.getObjectID());
+        /*
+         * update file, add permissions for guest
+         */
+        file.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(guestPermission));
+        file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
+        /*
+         * check permissions
+         */
+        FileStorageObjectPermission matchingPermission = null;
+        for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created file found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
+        /*
+         * discover & check share
+         */
+        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
+        checkShare(guestPermission, share);
+        /*
+         * check access to share
+         */
+        GuestClient guestClient =  resolveShare(share, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }

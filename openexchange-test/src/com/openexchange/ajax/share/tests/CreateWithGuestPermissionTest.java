@@ -95,10 +95,8 @@ public class CreateWithGuestPermissionTest extends ShareTest {
     }
 
     public void noTestCreateSharedFileExtensively() throws Exception {
-        for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (FileStorageGuestObjectPermission guestPermission : TESTED_OBJECT_PERMISSIONS) {
-                testCreateSharedFile(api, guestPermission);
-            }
+        for (FileStorageGuestObjectPermission guestPermission : TESTED_OBJECT_PERMISSIONS) {
+            testCreateSharedFile(EnumAPI.OX_NEW, guestPermission);
         }
     }
 
