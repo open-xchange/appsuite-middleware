@@ -87,6 +87,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;

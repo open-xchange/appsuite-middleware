@@ -78,6 +78,7 @@ import com.openexchange.quota.QuotaService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
@@ -750,5 +751,25 @@ public class DefaultShareService implements ShareService {
             long usage = quota.getUsage();
             throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.create(usage, limit);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GuestInfo resolveGuest(String token) throws OXException {
+        ShareToken shareToken = new ShareToken(token);
+        int contextID = shareToken.getContextID();
+        User guestUser;
+        try {
+            guestUser = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+        } catch (OXException e) {
+            if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                LOG.debug("Guest user for share token {} not found, unable to resolve token.", shareToken, e);
+                return null;
+            }
+            throw e;
+        }
+        return new DefaultGuestInfo(services, contextID, guestUser, token);
     }
 }

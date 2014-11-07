@@ -47,61 +47,27 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.ajax.share.actions;
 
-import java.util.Collections;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link DefaultShareInfo}
+ * {@link ResetPasswordServletResponse}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
+public final class ResetPasswordServletResponse extends AbstractAJAXResponse {
 
-    private final Share share;
+    private final String location;
 
-    private final GuestInfo guestInfo;
-
-    /**
-     * Initializes a new {@link DefaultShareInfo}.
-     *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestUser The guest user
-     * @param share The share
-     * @throws OXException
-     */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share));
-        this.share = share;
-        this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, getBaseToken());
+    ResetPasswordServletResponse(final String location) {
+        super(null);
+        this.location = location;
     }
 
-    @Override
-    public Share getShare() {
-        return share;
+    public String getLocation() {
+        return location;
     }
 
-    @Override
-    public String getToken() throws OXException {
-        return super.getToken(share.getTarget());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws OXException
-     * @Override
-     */
-    @Override
-    public GuestInfo getGuest() {
-        return guestInfo;
-    }
 }

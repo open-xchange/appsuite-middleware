@@ -47,61 +47,56 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share;
 
-import java.util.Collections;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
- * {@link DefaultShareInfo}
+ * Handles the user specific parts of a share
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
-
-    private final Share share;
-
-    private final GuestInfo guestInfo;
+public interface GuestInfo {
 
     /**
-     * Initializes a new {@link DefaultShareInfo}.
+     * Gets the authentication mode used for the share's guest user.
      *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestUser The guest user
-     * @param share The share
-     * @throws OXException
+     * @return The authentication mode
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share));
-        this.share = share;
-        this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, getBaseToken());
-    }
-
-    @Override
-    public Share getShare() {
-        return share;
-    }
-
-    @Override
-    public String getToken() throws OXException {
-        return super.getToken(share.getTarget());
-    }
+    AuthenticationMode getAuthentication();
 
     /**
-     * {@inheritDoc}
+     * Gets the base token associated with the share's guest user.
      *
-     * @throws OXException
-     * @Override
+     * @return The base token
      */
-    @Override
-    public GuestInfo getGuest() {
-        return guestInfo;
-    }
+    String getBaseToken() throws OXException;
+
+    /**
+     * Gets the e-mail address of the guest user if it denotes a named recipient.
+     *
+     * @return The e-mail address of the named share recipient, or <code>null</code> if the guest user is anonymous
+     */
+    String getEmailAddress();
+
+    /**
+     * Gets the password of the guest user in case the share recipient is anonymous and a password is required to access the share.
+     *
+     * @return The password of the anonymous share recipient, or <code>null</code> if no password is set or the guest user is not anonymous
+     */
+    String getPassword() throws OXException;
+
+    /**
+     * Gets the recipient type of the guest user.
+     *
+     * @return The recipient type
+     */
+    RecipientType getRecipientType();
+
+    int getGuestID();
+
+    int getContextID();
+
 }

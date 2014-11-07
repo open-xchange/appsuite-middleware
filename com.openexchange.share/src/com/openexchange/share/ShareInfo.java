@@ -50,7 +50,6 @@
 package com.openexchange.share;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link ShareInfo}
@@ -68,18 +67,12 @@ public interface ShareInfo {
     Share getShare();
 
     /**
-     * Gets the authentication mode used for the share's guest user.
+     * Returns the information to the guest this ShareInfo is based on.
      *
-     * @return The authentication mode
+     * @return
+     * @throws OXException
      */
-    AuthenticationMode getAuthentication();
-
-    /**
-     * Gets the base token associated with the share's guest user.
-     *
-     * @return The base token
-     */
-    String getBaseToken() throws OXException;
+    GuestInfo getGuest() throws OXException;
 
     /**
      * Gets the (absolute) token for the share target, i.e. the base token plus the target path.
@@ -98,26 +91,4 @@ public interface ShareInfo {
      * @return The share URL as used to access the share as guest
      */
     String getShareURL(String protocol, String fallbackHostname) throws OXException;
-
-    /**
-     * Gets the e-mail address of the guest user if it denotes a named recipient.
-     *
-     * @return The e-mail address of the named share recipient, or <code>null</code> if the guest user is anonymous
-     */
-    String getEmailAddress();
-
-    /**
-     * Gets the password of the guest user in case the share recipient is anonymous and a password is required to access the share.
-     *
-     * @return The password of the anonymous share recipient, or <code>null</code> if no password is set or the guest user is not anonymous
-     */
-    String getPassword() throws OXException;
-
-    /**
-     * Gets the recipient type of the guest user.
-     *
-     * @return The recipient type
-     */
-    RecipientType getRecipientType();
-
 }

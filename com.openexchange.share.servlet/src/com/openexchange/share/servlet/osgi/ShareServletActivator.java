@@ -98,6 +98,9 @@ public class ShareServletActivator extends HousekeepingActivator {
         trackService(DatabaseService.class);
         trackService(ShareNotificationService.class);
 
+        // Initialize login configuration for shares
+        ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(getService(ConfigurationService.class));
+        AbstractShareHandler.setShareLoginConfiguration(loginConfig);
         // Dependently registers Servlets
         {
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
@@ -106,16 +109,13 @@ public class ShareServletActivator extends HousekeepingActivator {
         }
         {
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
-            ResetPasswordServletRegisterer registerer = new ResetPasswordServletRegisterer(context);
+            ResetPasswordServletRegisterer registerer = new ResetPasswordServletRegisterer(context, loginConfig);
             track(filter, registerer);
         }
 
         // Open trackers
         openTrackers();
 
-        // Initialize login configuration for shares
-        ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(getService(ConfigurationService.class));
-        AbstractShareHandler.setShareLoginConfiguration(loginConfig);
 
         // Register default handlers
         {

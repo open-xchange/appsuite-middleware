@@ -49,59 +49,116 @@
 
 package com.openexchange.share.impl;
 
-import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
- * {@link DefaultShareInfo}
+ * {@link DefaultGuestInfo}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
+public class DefaultGuestInfo implements GuestInfo {
 
-    private final Share share;
+    private final ServiceLookup services;
 
-    private final GuestInfo guestInfo;
+    private final User guestUser;
+
+    private int contextID;
+
+    private String token;
 
     /**
-     * Initializes a new {@link DefaultShareInfo}.
+     * Initializes a new {@link DefaultGuestInfo}.
      *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestUser The guest user
-     * @param share The share
-     * @throws OXException
+     * @param services - the ServiceLookup
+     * @param contextID - the contextID
+     * @param guestUser - the user
+     * @param token - the token
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share));
-        this.share = share;
-        this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, getBaseToken());
-    }
-
-    @Override
-    public Share getShare() {
-        return share;
-    }
-
-    @Override
-    public String getToken() throws OXException {
-        return super.getToken(share.getTarget());
+    public DefaultGuestInfo(ServiceLookup services, int contextID, User guestUser, String token) {
+        this.services = services;
+        this.guestUser = guestUser;
+        this.contextID = contextID;
+        this.token = token;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @throws OXException
-     * @Override
      */
     @Override
-    public GuestInfo getGuest() {
-        return guestInfo;
+    public AuthenticationMode getAuthentication() {
+        return ShareTool.getAuthenticationMode(guestUser);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getBaseToken() {
+        return token;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getEmailAddress() {
+        if (RecipientType.GUEST == getRecipientType()) {
+            return guestUser.getMail();
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPassword() throws OXException {
+        if (AuthenticationMode.ANONYMOUS_PASSWORD == getAuthentication()) {
+            String cryptedPassword = guestUser.getUserPassword();
+            if (false == Strings.isEmpty(cryptedPassword)) {
+                return services.getService(ShareCryptoService.class).decrypt(cryptedPassword);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RecipientType getRecipientType() {
+        switch (getAuthentication()) {
+        case ANONYMOUS:
+        case ANONYMOUS_PASSWORD:
+            return RecipientType.ANONYMOUS;
+        case GUEST_PASSWORD:
+            return RecipientType.GUEST;
+        default:
+            throw new UnsupportedOperationException("Unknown authentication mode: " + getAuthentication());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getGuestID() {
+        return guestUser.getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getContextID() {
+        return contextID;
     }
 }

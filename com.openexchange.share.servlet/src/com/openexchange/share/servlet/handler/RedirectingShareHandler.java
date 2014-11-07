@@ -63,6 +63,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -190,8 +191,8 @@ public class RedirectingShareHandler extends HttpAuthShareHandler {
          * replace templates
          */
         String uiWebPath = loginConfig.getUiWebPath();
-//        uiWebPath = "/ox6/index.html";
-        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
+        //        uiWebPath = "/ox6/index.html";
+        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(ShareRedirectUtils.trimSlashes(uiWebPath)));
         redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
         redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
         redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));

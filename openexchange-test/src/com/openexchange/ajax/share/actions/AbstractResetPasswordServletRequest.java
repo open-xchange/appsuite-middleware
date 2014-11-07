@@ -47,61 +47,37 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.ajax.share.actions;
 
-import java.util.Collections;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link DefaultShareInfo}
+ * {@link AbstractResetPasswordServletRequest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
+ * @param <T>
  */
-public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
-
-    private final Share share;
-
-    private final GuestInfo guestInfo;
+public abstract class AbstractResetPasswordServletRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
-     * Initializes a new {@link DefaultShareInfo}.
-     *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestUser The guest user
-     * @param share The share
-     * @throws OXException
+     * URL of the tasks AJAX interface.
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share));
-        this.share = share;
-        this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, getBaseToken());
+    public static final String RESOURCE_URL = "/ajax/share/reset/password";
+
+    protected AbstractResetPasswordServletRequest() {
+        super();
     }
 
     @Override
-    public Share getShare() {
-        return share;
+    public String getServletPath() {
+        return RESOURCE_URL;
     }
 
     @Override
-    public String getToken() throws OXException {
-        return super.getToken(share.getTarget());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws OXException
-     * @Override
-     */
-    @Override
-    public GuestInfo getGuest() {
-        return guestInfo;
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 }

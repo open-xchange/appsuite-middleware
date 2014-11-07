@@ -89,24 +89,4 @@ public abstract class AbstractShareHandler implements ShareHandler {
     protected ShareLoginConfiguration getShareLoginConfiguration() {
         return SHARE_LOGIN_CONFIG.get();
     }
-
-    /**
-     * Trims trailing and leading slashes from the supplied path.
-     * 
-     * @param path The path
-     * @return The trimmed path
-     */
-    protected static String trimSlashes(String path) {
-        String pazz = path;
-        if (null != pazz && 0 < pazz.length()) {
-            if ('/' == pazz.charAt(0)) {
-                pazz = pazz.substring(1);
-            }
-            if (0 < pazz.length() && '/' == pazz.charAt(pazz.length() - 1)) {
-                pazz = pazz.substring(0, pazz.length() - 1);
-            }
-        }
-        return pazz;
-    }
-
 }

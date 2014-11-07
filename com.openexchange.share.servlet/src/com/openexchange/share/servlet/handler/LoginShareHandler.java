@@ -50,23 +50,14 @@
 package com.openexchange.share.servlet.handler;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.login.LoginConfiguration;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.user.UserService;
-
+import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 
 /**
  * {@link LoginShareHandler} - The share handler that redirects to standard login page.
@@ -75,8 +66,6 @@ import com.openexchange.user.UserService;
  * @since v7.8.0
  */
 public class LoginShareHandler extends AbstractShareHandler {
-
-    private static final Pattern P_UIWEBPATH = Pattern.compile("[uiwebpath]", Pattern.LITERAL);
 
     /**
      * Initializes a new {@link LoginShareHandler}.
@@ -87,78 +76,23 @@ public class LoginShareHandler extends AbstractShareHandler {
         super();
     }
 
-    private String getLoginPageLink(int userId, int contextId, HttpServletRequest request) {
-        /*
-         * get configured login link
-         */
-        String loginLink;
-        {
-            ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-            loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
-        }
-        /*
-         * replace templates
-         */
-        LoginConfiguration loginConfig = getShareLoginConfiguration().getLoginConfig();
-        String uiWebPath = loginConfig.getUiWebPath();
-        loginLink = P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
-        return loginLink;
-    }
-
     @Override
     public int getRanking() {
         return 10;
     }
 
-    /**
-     * Checks if this redirecting share handler fees responsible for passed share
-     *
-     * @param share The associated share
-     * @param target The share target within the share, or <code>null</code> if not addressed
-     * @return <code>true</code> if share can be handled; otherwise <code>false</code>
-     */
-    protected boolean handles(GuestShare share, ShareTarget target) {
-        AuthenticationMode authentication = share.getAuthentication();
-        return null != authentication &&
-            (AuthenticationMode.ANONYMOUS_PASSWORD == authentication || AuthenticationMode.GUEST_PASSWORD == authentication);
-    }
-
     @Override
     public ShareHandlerReply handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (false == handles(share, target)) {
+        if (false == handles(share)) {
             // No password prompt required
             return ShareHandlerReply.NEUTRAL;
         }
 
         try {
-            int contextId = share.getContextID();
-            int guestId = share.getGuestID();
-            String loginPageLink = getLoginPageLink(guestId, contextId, request);
-
-            // Build URL
-            StringBuilder url = new StringBuilder(loginPageLink);
-
-            // Start fragment portion
-            url.append('#').append("share=").append(urlEncode(share.getBaseToken()));
-            if (null != target) {
-                url.append('&').append("target=").append(urlEncode(target.getPath()));
-            }
-            if (AuthenticationMode.ANONYMOUS_PASSWORD == share.getAuthentication()) {
-                url.append('&').append("login_type=anonymous");
-            } else {
-                url.append('&').append("login_type=guest");
-                String mail;
-                {
-                    // Special anonymous guests do not have a E-Mail address applied
-                    UserService service = ShareServiceLookup.getService(UserService.class);
-                    User user = service.getUser(guestId, contextId);
-                    mail = user.getMail();
-                }
-                url.append('&').append("login_name=").append(urlEncode(mail));
-            }
+            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share, target, getShareLoginConfiguration().getLoginConfig());
 
             // Do the redirect
-            response.sendRedirect(url.toString());
+            response.sendRedirect(redirectUrl);
 
             return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
@@ -168,12 +102,14 @@ public class LoginShareHandler extends AbstractShareHandler {
         }
     }
 
-    private String urlEncode(final String s) {
-        try {
-            return URLEncoder.encode(s, "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return s;
-        }
+    /**
+     * Checks if this redirecting share handler feels responsible for passed share
+     *
+     * @param share The associated share
+     * @return <code>true</code> if share can be handled; otherwise <code>false</code>
+     */
+    private boolean handles(GuestShare share) {
+        AuthenticationMode authentication = share.getAuthentication();
+        return null != authentication && (AuthenticationMode.ANONYMOUS_PASSWORD == authentication || AuthenticationMode.GUEST_PASSWORD == authentication);
     }
-
 }

@@ -47,49 +47,82 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.ajax.share.actions;
 
-import java.security.SecureRandom;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AbstractRedirectParser;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link PasswordUtility}
+ * {@link ResetPasswordServletRequest}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class PasswordUtility {
+public final class ResetPasswordServletRequest extends AbstractResetPasswordServletRequest<ResetPasswordServletResponse> {
 
-    private static final int DEFAULT_PASSWORD_LENGTH = 8;
+    private final boolean failOnError;
 
-    private static final SecureRandom RANDOM = new SecureRandom();
-
-    private static final char[] PASSWORD_CHARS = new char[] {
-        /*'0',*/ /*'1',*/ '2', '3', '4', '5', '6', '7', '8', '9',
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', /*'I',*/ 'J', 'K', 'L', 'M', 'N', /*'O',*/ 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', /*'l',*/ 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
-    };
+    private final String token;
 
     /**
-     * Generates a random, alphanumeric password to be used initially for guest users.
+     * Initializes a new {@link ResetPasswordServletRequest}.
      *
-     * @return The password
+     * @param mailAddress
+     * @param token
+     * @param failOnError
      */
-    public static String generate() {
-        return generate(DEFAULT_PASSWORD_LENGTH);
+    public ResetPasswordServletRequest(final String token, final boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
+        this.token = token;
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    @Override
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter("share", token));
+        return params.toArray(new Parameter[params.size()]);
     }
 
     /**
-     * Generates a random, alphanumeric password to be used initially for guest users.
-     *
-     * @param length The password length
-     * @return The password
+     * {@inheritDoc}
      */
-    public static String generate(int length) {
-        StringBuilder stringBuilder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            stringBuilder.append(PASSWORD_CHARS[RANDOM.nextInt(PASSWORD_CHARS.length)]);
+    @Override
+    public ResetPasswordParser getParser() {
+        return new ResetPasswordParser(failOnError);
+    }
+
+    private static final class ResetPasswordParser extends AbstractRedirectParser<ResetPasswordServletResponse> {
+
+        /**
+         * Default constructor.
+         */
+        ResetPasswordParser(final boolean failOnError) {
+            super(failOnError);
         }
-        return stringBuilder.toString();
-    }
 
+        @Override
+        protected ResetPasswordServletResponse createResponse(String myLocation) throws JSONException {
+            return new ResetPasswordServletResponse(myLocation);
+        }
+    }
 }

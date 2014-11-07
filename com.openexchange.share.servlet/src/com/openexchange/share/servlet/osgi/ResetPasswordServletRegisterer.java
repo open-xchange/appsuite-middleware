@@ -57,6 +57,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.share.servlet.internal.ResetPasswordServlet;
+import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 
 /**
  * Dependently registers the share servlet.
@@ -76,16 +77,20 @@ public final class ResetPasswordServletRegisterer implements ServiceTrackerCusto
     private HttpService httpService;
     private DispatcherPrefixService prefixService;
 
+    private ShareLoginConfiguration loginConfig;
+
     /**
      * Initializes a new {@link ResetPasswordServletRegisterer}.
      *
      * @param shareHandlerRegistry The share handler registry
      * @param context The bundle context
+     * @param loginConfig
      */
-    public ResetPasswordServletRegisterer(BundleContext context) {
+    public ResetPasswordServletRegisterer(BundleContext context, ShareLoginConfiguration loginConfig) {
         super();
         this.context = context;
-        lock = new ReentrantLock();
+        this.loginConfig = loginConfig;
+        this.lock = new ReentrantLock();
     }
 
     @Override
@@ -144,7 +149,7 @@ public final class ResetPasswordServletRegisterer implements ServiceTrackerCusto
 
     private boolean registerServlet(String alias, HttpService httpService) {
         try {
-            httpService.registerServlet(alias, new ResetPasswordServlet(), null, null);
+            httpService.registerServlet(alias, new ResetPasswordServlet(this.loginConfig), null, null);
             LOG.info("Reset-password servlet successfully registered");
             return true;
         } catch (Exception e) {

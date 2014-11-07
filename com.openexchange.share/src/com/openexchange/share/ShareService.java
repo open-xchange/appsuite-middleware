@@ -154,4 +154,13 @@ public interface ShareService {
      */
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
 
+    /**
+     * Resolves the guest associated to the given token.
+     *
+     * @param token - the token the GuestInfo should be resolved for
+     * @return GuestInfo with information about the guest associated to the token
+     * @throws OXException
+     */
+    GuestInfo resolveGuest(String token) throws OXException;
+
 }

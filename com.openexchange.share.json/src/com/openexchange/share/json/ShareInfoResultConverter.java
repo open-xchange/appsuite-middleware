@@ -151,12 +151,13 @@ public class ShareInfoResultConverter implements ResultConverter {
     private JSONObject convert(ShareInfo share, TimeZone timeZone, String protocol, String hostname) throws OXException {
         try {
             JSONObject json = new JSONObject();
+
             /*
              * common share properties
              */
             json.putOpt("share_url", share.getShareURL(protocol, hostname));
             json.put("token", share.getToken());
-            json.putOpt("authentication", null != share.getAuthentication() ? share.getAuthentication().toString().toLowerCase() : null);
+            json.putOpt("authentication", null != share.getGuest().getAuthentication() ? share.getGuest().getAuthentication().toString().toLowerCase() : null);
             json.putOpt("created", null != share.getShare().getCreated() ? addTimeZoneOffset(share.getShare().getCreated().getTime(), timeZone) : null);
             json.put("created_by", share.getShare().getCreatedBy());
             json.putOpt("last_modified", null != share.getShare().getModified() ? addTimeZoneOffset(share.getShare().getModified().getTime(), timeZone) : null);
@@ -207,10 +208,10 @@ public class ShareInfoResultConverter implements ResultConverter {
      */
     private JSONObject serializeShareRecipient(ShareInfo share, TimeZone timeZone) throws JSONException, OXException {
         JSONObject jsonRecipient = new JSONObject(8);
-        jsonRecipient.put("type", share.getRecipientType().toString().toLowerCase());
-        jsonRecipient.put("base_token", share.getBaseToken());
-        jsonRecipient.putOpt("password", share.getPassword());
-        jsonRecipient.putOpt("email_address", share.getEmailAddress());
+        jsonRecipient.put("type", share.getGuest().getRecipientType().toString().toLowerCase());
+        jsonRecipient.put("base_token", share.getGuest().getBaseToken());
+        jsonRecipient.putOpt("password", share.getGuest().getPassword());
+        jsonRecipient.putOpt("email_address", share.getGuest().getEmailAddress());
         jsonRecipient.put("entity", String.valueOf(share.getShare().getGuest()));
         return jsonRecipient;
     }

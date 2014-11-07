@@ -58,20 +58,23 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang.RandomStringUtils;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.servlet.utils.ShareRedirectUtils;
+import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
@@ -87,13 +90,18 @@ public class ResetPasswordServlet extends HttpServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResetPasswordServlet.class);
 
+    private ShareLoginConfiguration loginConfig;
+
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Initializes a new {@link ResetPasswordServlet}.
+     *
+     * @param loginConfig
      */
-    public ResetPasswordServlet() {
+    public ResetPasswordServlet(ShareLoginConfiguration loginConfig) {
         super();
+        this.loginConfig = loginConfig;
     }
 
     @Override
@@ -109,59 +117,36 @@ public class ResetPasswordServlet extends HttpServlet {
                 return;
             }
 
-            // Read guest E-Mail address
-            String mail = request.getParameter("mail");
-            if (Strings.isEmpty(mail)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-
-            // Resolve to share
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
-            GuestShare share = null == token ? null : shareService.resolveToken(token);
-            if (null == share) {
-                LOG.debug("No share found for '{}'", null == token ? "null" : token);
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
+            GuestInfo guestInfo = shareService.resolveGuest(token);
 
-            // Check #1
-            if (AuthenticationMode.GUEST_PASSWORD != share.getAuthentication()) {
+            if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
                 LOG.debug("Bad attempt to reset password for share '{}'", token);
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
 
-            // Check #2
-            UserService userService = ShareServiceLookup.getService(UserService.class, true);
-            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(share.getContextID());
-            User guest = userService.getUser(share.getGuestID(), context);
-            if (false == guest.isGuest() || false == mail.equals(guest.getMail())) {
-                LOG.debug("Bad attempt to reset password for share '{}'", token);
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-
-            // Generate a new password
-            String newPassword = RandomStringUtils.random(10, true, true);
-            PasswordMech passwordMech = PasswordMech.getPasswordMechFor(guest.getPasswordMech());
-            // FIXME:
-            if (passwordMech == null) {
-                passwordMech = PasswordMech.BCRYPT;
-            }
+            String password = PasswordUtility.generate();
+            String encodedPassword = PasswordMech.BCRYPT.encode(password);
 
             // Update guest entry in database
-            update(passwordMech.encode(newPassword), share.getGuestID(), share.getContextID());
+            int contextID = guestInfo.getContextID();
+
+            update(encodedPassword, guestInfo.getGuestID(), contextID);
 
             // Invalidate
-            userService.invalidateUser(context, share.getGuestID());
+            UserService userService = ShareServiceLookup.getService(UserService.class, true);
+            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
+            userService.invalidateUser(context, guestInfo.getGuestID());
 
-            // Notify
+            // TODO: Notify
             ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-//            String url = shareService.generateShareURLs(Collections.singletonList(share), Tools.getProtocol(request), request.getServerName()).get(0);
-//
-//            MailNotification notification = new MailNotification(NotificationType.PASSWORD_RESET, share, url, null, mail);
-//            notificationService.notify(notification, new ResetPasswordSession(share.getGuestID(), share.getContextID(), newPassword, request));
+            // notificationService.notify(new MailNotification(NotificationType.PASSWORD_RESET, guestInfo.getEmailAddress(), targets, new
+            // DefaultLinkProvider(protocol, hostname, servletPrefix, shareToken, mailAddress), "TODO", guestInfo.getEmailAddress()), null);
+
+            GuestShare guestShare = shareService.resolveToken(token);
+            setRedirect(guestShare, null, request.getServerName(), response);
+
         } catch (RateLimitedException e) {
             response.setContentType("text/plain; charset=UTF-8");
             if(e.getRetryAfter() > 0) {
@@ -178,6 +163,29 @@ public class ResetPasswordServlet extends HttpServlet {
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Adds the redirect to the given response
+     *
+     * @param share - share to get the redirect to
+     * @param target - target to get the redirect to
+     * @param serverName - server name to redirect to
+     * @param response - response that should be enriched by the redirect
+     * @throws OXException
+     */
+    private void setRedirect(GuestShare share, ShareTarget target, String serverName, HttpServletResponse response) throws OXException {
+        try {
+            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share, target, this.loginConfig.getLoginConfig());
+
+            // Do the redirect
+            response.sendRedirect(redirectUrl);
+
+        } catch (IOException e) {
+            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
 
     private void update(String encodedPassword, int guestId, int contextId) throws OXException {
         // Update database

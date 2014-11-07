@@ -47,61 +47,49 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.tools;
 
-import java.util.Collections;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareInfo;
+import java.security.SecureRandom;
 
 /**
- * {@link DefaultShareInfo}
+ * {@link PasswordUtility}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
+public class PasswordUtility {
 
-    private final Share share;
+    private static final int DEFAULT_PASSWORD_LENGTH = 8;
 
-    private final GuestInfo guestInfo;
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    private static final char[] PASSWORD_CHARS = new char[] {
+        /*'0',*/ /*'1',*/ '2', '3', '4', '5', '6', '7', '8', '9',
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', /*'I',*/ 'J', 'K', 'L', 'M', 'N', /*'O',*/ 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', /*'l',*/ 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+    };
 
     /**
-     * Initializes a new {@link DefaultShareInfo}.
+     * Generates a random, alphanumeric password to be used initially for guest users.
      *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestUser The guest user
-     * @param share The share
-     * @throws OXException
+     * @return The password
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share));
-        this.share = share;
-        this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, getBaseToken());
-    }
-
-    @Override
-    public Share getShare() {
-        return share;
-    }
-
-    @Override
-    public String getToken() throws OXException {
-        return super.getToken(share.getTarget());
+    public static String generate() {
+        return generate(DEFAULT_PASSWORD_LENGTH);
     }
 
     /**
-     * {@inheritDoc}
+     * Generates a random, alphanumeric password to be used initially for guest users.
      *
-     * @throws OXException
-     * @Override
+     * @param length The password length
+     * @return The password
      */
-    @Override
-    public GuestInfo getGuest() {
-        return guestInfo;
+    public static String generate(int length) {
+        StringBuilder stringBuilder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            stringBuilder.append(PASSWORD_CHARS[RANDOM.nextInt(PASSWORD_CHARS.length)]);
+        }
+        return stringBuilder.toString();
     }
+
 }
