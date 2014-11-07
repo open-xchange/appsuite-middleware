@@ -67,6 +67,7 @@ import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ShareLoginMethod}
@@ -75,6 +76,49 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
  * @since v7.8.0
  */
 public class ShareLoginMethod implements LoginMethodClosure {
+
+    private static interface CredentialsAuthenticator {
+
+        boolean authenticate(Credentials credentials, User user) throws OXException;
+    }
+
+    private static final CredentialsAuthenticator ANONYMOUS_AUTHENTICATOR = new CredentialsAuthenticator() {
+
+        @Override
+        public boolean authenticate(Credentials credentials, User user) throws OXException {
+            // In case of anonymous guest user, only the password is relevant
+            String password = credentials.getPassword();
+            return (false == Strings.isEmpty(password) && password.equals(decrypt(user.getUserPassword())));
+        }
+    };
+
+    private static final CredentialsAuthenticator GUEST_AUTHENTICATOR = new CredentialsAuthenticator() {
+
+        @Override
+        public boolean authenticate(Credentials credentials, User user) throws OXException {
+            // In case of named guest user, both the password and name are relevant
+            String password = credentials.getPassword();
+            String login = credentials.getLogin();
+            if (Strings.isEmpty(password) || Strings.isEmpty(login)) {
+                return false;
+            }
+
+            // Authenticate the user
+            UserService userService = ShareServiceLookup.getService(UserService.class, true);
+            if (!userService.authenticate(user, password)) {
+                return false;
+            }
+
+            // Check against E-Mail address
+            if (!login.equals(user.getMail())) {
+                return false;
+            }
+
+            return true;
+        }
+    };
+
+    // ---------------------------------------------------------------------------------------------------------------------
 
     private final Context context;
     private final User user;
@@ -107,18 +151,34 @@ public class ShareLoginMethod implements LoginMethodClosure {
                 /*
                  * ... with password
                  */
-                authenticated = basic(loginResult, true);
+                authenticated = basic(loginResult, ANONYMOUS_AUTHENTICATOR);
             }
         } else {
             /*
              * named guest user with password
              */
-            authenticated = basic(loginResult, false);
+            authenticated = basic(loginResult, GUEST_AUTHENTICATOR);
         }
-        if (null == authenticated ||
-            null != authenticated.getContext() && false == authenticated.getContext().isEnabled() ||
-            null != authenticated.getUser() && false == authenticated.getUser().isMailEnabled()) {
+
+        // Check returned ShareAuthenticated instance
+        if (null == authenticated) {
             return null;
+        }
+
+        // Check associated context
+        {
+            Context context = authenticated.getContext();
+            if (null != context && false == context.isEnabled()) {
+                return null;
+            }
+        }
+
+        // Check associated user
+        {
+            User user = authenticated.getUser();
+            if (null != user && false == user.isMailEnabled()) {
+                return null;
+            }
         }
         return authenticated;
     }
@@ -127,38 +187,60 @@ public class ShareLoginMethod implements LoginMethodClosure {
         return new ShareAuthenticated(user, context);
     }
 
-    private ShareAuthenticated basic(LoginResultImpl loginResult, boolean ignoreUsername) throws OXException {
+    private ShareAuthenticated basic(LoginResultImpl loginResult, CredentialsAuthenticator authenticator) throws OXException {
+        // Get "Authorization" header
         String authHeader = getAuthHeader(loginResult);
+
+        // Check for "basic" authorization
         if (false == checkForBasicAuthorization(authHeader)) {
             return null;
         }
+
+        // Parse credentials from given "Authorization" header
         Credentials credentials = Authorization.decode(authHeader);
         if (null == credentials || false == Authorization.checkLogin(credentials.getPassword())) {
             return null;
         }
-        if (Strings.isEmpty(credentials.getPassword()) || false == credentials.getPassword().equals(decrypt(user.getUserPassword()))) {
+
+        // Verify credentials
+        if (false == authenticator.authenticate(credentials, user)) {
             return null;
         }
-        if (false == ignoreUsername &&
-            (Strings.isEmpty(credentials.getLogin()) || false == credentials.getLogin().equalsIgnoreCase(user.getMail()))) {
-            return null;
-        }
+
+        // Successfully authenticated
         return new ShareAuthenticated(user, context);
     }
 
-    private static String decrypt(String value) throws OXException {
+    /**
+     * Decrypts specified string value using {@link ShareCryptoService}.
+     *
+     * @param value The value to decrypt
+     * @return The decrypted value
+     * @throws OXException If decryption fails
+     */
+    public static String decrypt(String value) throws OXException {
         return ShareServiceLookup.getService(ShareCryptoService.class, true).decrypt(value);
     }
 
+    /**
+     * Puts the unauthorized information/data to given HTTP response
+     *
+     * @param request The associated HTTP request
+     * @param response The HTTP response
+     * @throws IOException If an I/O error occurs
+     */
     public void sendUnauthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (false == Strings.isEmpty(user.getMail()) || false == Strings.isEmpty(user.getPasswordMech())) {
-            response.setHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\", encoding=\"UTF-8\"");
+            StringBuilder builder = appendRealm(new StringBuilder(32).append("Basic realm=\""));
+            builder.append("\", encoding=\"UTF-8\"");
+            response.setHeader("WWW-Authenticate", builder.toString());
         }
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
     }
 
-    private String getRealm() {
-        return "Share/" + context + '/' + user;
+    private StringBuilder appendRealm(StringBuilder builder) {
+        builder.append("Share/").append(context.getContextId()).append('/').append(user.getId());
+        return builder;
     }
 
     private static String getAuthHeader(LoginResultImpl loginResult) {
