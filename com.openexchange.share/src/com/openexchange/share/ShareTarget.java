@@ -61,6 +61,8 @@ import java.util.Map;
  */
 public class ShareTarget implements Cloneable, Serializable {
 
+    private static final long serialVersionUID = 5128141075771075208L;
+
     private int module;
     private String folder;
     private String item;
@@ -100,8 +102,9 @@ public class ShareTarget implements Cloneable, Serializable {
     }
 
     /**
-     * Copy constructor
-     * @param target
+     * Initializes a new {@link ShareTarget}, taking over the values from the supplied share target.
+     *
+     * @param target The target to copy the properties from
      */
     public ShareTarget(ShareTarget target) {
         this(target.getModule(), target.getFolder(), target.getItem());
@@ -119,6 +122,11 @@ public class ShareTarget implements Cloneable, Serializable {
         return module;
     }
 
+    /**
+     * Sets the groupware module of the share's target folder.
+     *
+     * @param module The module
+     */
     public void setModule(int module) {
         this.module = module;
     }
@@ -132,10 +140,20 @@ public class ShareTarget implements Cloneable, Serializable {
         return folder;
     }
 
+    /**
+     * Sets the identifier of the share's folder.
+     *
+     * @param folder The folder ID
+     */
     public void setFolder(String folder) {
         this.folder = folder;
     }
 
+    /**
+     * Gets a value indicating whether this share target points to a folder, i.e. there is no item defined, or not.
+     *
+     * @return <code>true</code> if this target points to a folder, <code>false</code>, otherwise
+     */
     public boolean isFolder() {
         return item == null;
     }
