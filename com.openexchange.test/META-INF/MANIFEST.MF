@@ -16,7 +16,8 @@ Bundle-ClassPath: .,
  lib/awaitility-1.6.1.jar,
  lib/hamcrest-core-1.3.jar,
  lib/hamcrest-library-1.3.jar,
- lib/objenesis-2.1.jar
+ lib/objenesis-2.1.jar,
+ lib/dumbster1.6.jar
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
