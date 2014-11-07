@@ -47,55 +47,55 @@
  *
  */
 
-package com.openexchange.mobilenotifier.json;
+package com.openexchange.mobilenotifier.json.actions;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.json.actions.AbstractMobileNotifierAction;
-import com.openexchange.mobilenotifier.json.actions.ConfigGetAction;
-import com.openexchange.mobilenotifier.json.actions.ConfigPutAction;
-import com.openexchange.mobilenotifier.json.actions.GetAction;
-import com.openexchange.mobilenotifier.json.actions.SubscribeAction;
-import com.openexchange.mobilenotifier.json.actions.UnsubscribeAction;
-import com.openexchange.mobilenotifier.json.actions.UpdateAction;
+import com.openexchange.java.Strings;
+import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+
 
 /**
- * {@link MobileNotifierActionFactory} - The mobile notifier action factory.
+ * {@link UnsubscribeAction}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@Module(name = "mobilenotifier", description = "Provides access to mobile notifier module.")
-public class MobileNotifierActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractMobileNotifierAction> actions;
-
+public class UnsubscribeAction extends AbstractMobileNotifierAction {
     /**
-     * Initializes a new {@link MobileNotifierActionFactory}.
+     * Initializes a new {@link UnsubscribeAction}.
+     * @param services
      */
-    public MobileNotifierActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractMobileNotifierAction>(3);
-        actions.put("get", new GetAction(serviceLookup));
-        actions.put("configget", new ConfigGetAction(serviceLookup));
-        actions.put("configput", new ConfigPutAction(serviceLookup));
-        actions.put("subscribe", new SubscribeAction(serviceLookup));
-        actions.put("unsubscribe", new UnsubscribeAction(serviceLookup));
-        actions.put("resubscribe", new UpdateAction(serviceLookup));
+    public UnsubscribeAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException {
+        // the token
+        String token = req.getParameter("token");
+        if(Strings.isEmpty(token)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("token");
+        }
+
+        //the service id (mail, calendar, reminder...)
+        String serviceId = req.getParameter("serviceId");
+        if(Strings.isEmpty(serviceId)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("serviceId");
+        }
+
+        // the provider id (mail, calendar, reminder...)
+        String providerId = req.getParameter("providerId");
+        if(Strings.isEmpty(providerId)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("providerId");
+        }
+        /*
+         * return empty json object to indicate success
+         */
+        return new AJAXRequestResult(new JSONObject(0), "json");
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
 }
