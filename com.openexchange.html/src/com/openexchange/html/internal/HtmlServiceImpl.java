@@ -585,13 +585,7 @@ public final class HtmlServiceImpl implements HtmlService {
             // CSS- and tag-wise sanitizing
             try {
                 // Initialize the handler
-                FilterJerichoHandler handler;
-                if (null == optConfigName) {
-                    handler = new FilterJerichoHandler(html.length(), this);
-                } else {
-                    String definition = getConfiguration().getText(optConfigName.endsWith(".properties") ? optConfigName : optConfigName + ".properties");
-                    handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
-                }
+                FilterJerichoHandler handler = getHandlerFor(html.length(), optConfigName);
                 handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
 
                 // Parse the HTML content
@@ -621,6 +615,14 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.warn("HTML content will be returned un-sanitized.", e);
             return htmlSanitizeResult;
         }
+    }
+
+    private FilterJerichoHandler getHandlerFor(int initialCapacity, String optionalConfigName) {
+        if (null == optionalConfigName) {
+            return new FilterJerichoHandler(initialCapacity, this);
+        }
+        String definition = getConfiguration().getText(optionalConfigName.endsWith(".properties") ? optionalConfigName : optionalConfigName + ".properties");
+        return null == definition ? new FilterJerichoHandler(initialCapacity, this) : new FilterJerichoHandler(initialCapacity, definition, this);
     }
 
     private static final Pattern PATTERN_FIX_START_TAG = Pattern.compile("(<[a-zA-Z_0-9-]+)/+([a-zA-Z_0-9-][^>]+)");
