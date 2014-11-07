@@ -1,3 +1,7 @@
+* 2014-11-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35373: Only add transport properties if transport data has been set/inserted before
+
 * 2014-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 35374: Pass incoming request's IP address on redeem token call
