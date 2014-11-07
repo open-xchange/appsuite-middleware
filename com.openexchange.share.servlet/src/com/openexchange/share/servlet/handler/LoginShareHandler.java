@@ -124,10 +124,10 @@ public class LoginShareHandler extends AbstractShareHandler {
     }
 
     @Override
-    public boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public ShareHandlerReply handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         if (false == handles(share, target)) {
-            // no password prompt required
-            return false;
+            // No password prompt required
+            return ShareHandlerReply.NEUTRAL;
         }
 
         try {
@@ -160,7 +160,7 @@ public class LoginShareHandler extends AbstractShareHandler {
             // Do the redirect
             response.sendRedirect(url.toString());
 
-            return true;
+            return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {

@@ -61,6 +61,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.ShareHandler;
+import com.openexchange.share.servlet.handler.ShareHandlerReply;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
@@ -133,7 +134,8 @@ public class ShareServlet extends HttpServlet {
 
             // Determine appropriate ShareHandler and handle the share
             for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
-                if (handler.handle(share, target, request, response)) {
+                ShareHandlerReply reply = handler.handle(share, target, request, response);
+                if (ShareHandlerReply.NEUTRAL != reply) {
                     return;
                 }
             }

@@ -145,22 +145,58 @@ public final class Authorization {
         return true;
     }
 
+    /**
+     * The credentials providing login and password.
+     */
     public static class Credentials {
+
         private final String login;
         private final String password;
+
+        /**
+         * Initializes a new {@link Credentials}.
+         *
+         * @param login The login
+         * @param password The password
+         */
         public Credentials(final String login, final String password) {
             super();
             this.login = login;
             this.password = password;
         }
 
+        /**
+         * Gets the login
+         *
+         * @return The login
+         */
         public String getLogin() {
             return login;
         }
 
+        /**
+         * Gets the password
+         *
+         * @return The password
+         */
         public String getPassword() {
             return password;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(24);
+            builder.append("Credentials [");
+            if (login != null) {
+                builder.append("login=").append(login).append(", ");
+            }
+            if (password != null) {
+                builder.append("password=").append(password);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
+
     }
 
     /**

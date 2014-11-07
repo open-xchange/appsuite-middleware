@@ -109,9 +109,9 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
     protected abstract void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException;
 
     @Override
-    public boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public ShareHandlerReply handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         if (false == handles(share, target, request, response)) {
-            return false;
+            return ShareHandlerReply.NEUTRAL;
         }
         Session session = null;
         try {
@@ -122,11 +122,11 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
             LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
             LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions());
             if (null == loginResult) {
-                return false;
+                return ShareHandlerReply.DENY;
             }
             session = loginResult.getSession();
             handleResolvedShare(new ResolvedShare(share, target, loginResult, loginConfig, request, response));
-            return true;
+            return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {

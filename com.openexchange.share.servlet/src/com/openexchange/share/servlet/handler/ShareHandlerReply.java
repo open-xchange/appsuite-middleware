@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,45 +49,26 @@
 
 package com.openexchange.share.servlet.handler;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.ShareTarget;
 
 /**
- * {@link ShareHandler}
+ * {@link ShareHandlerReply} - An enumeration for replies as a share passes the {@link ShareHandler share handler} chain.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface ShareHandler {
+public enum ShareHandlerReply {
 
     /**
-     * Gets the ranking for this handler.
-     * <p>
-     * The default ranking is zero (<tt>0</tt>). A handler with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned as the
-     * appropriate handler, whereas a handler with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
-     *
-     * @return The ranking
+     * The handling for a share is denied. Further handling for that request is supposed to be aborted.
      */
-    int getRanking();
-
+    DENY,
     /**
-     * Handles the given share.
-     * <p>
-     * If this handler feels responsible for the given share <code>{@link ShareHandlerReply#ACCEPT}</code> is returned; otherwise <code>{@link ShareHandlerReply#NEUTRAL}</code> to let the share be handled by the next handler in chain.
-     * <p>
-     * In case this handler wants to abort further handling of the share, <code>{@link ShareHandlerReply#DENY}</code> is returned.
-     *
-     * @param share The share
-     * @param target The share target within the share, or <code>null</code> if not addressed
-     * @param request The associated HTTP request
-     * @param response The associated HTTP response
-     * @return One of <code>{@link ShareHandlerReply#DENY}</code>, <code>{@link ShareHandlerReply#NEUTRAL}</code>, or <code>{@link ShareHandlerReply#ACCEPT}</code>.
-     * @throws OXException If the attempt to resolve given share fails
+     * The handling for a share is supposed to get passed to the next handler in chain.
      */
-    ShareHandlerReply handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    NEUTRAL,
+    /**
+     * The handling for a share has been completed. No further handling is supposed to take place.
+     */
+    ACCEPT;
 
 }
