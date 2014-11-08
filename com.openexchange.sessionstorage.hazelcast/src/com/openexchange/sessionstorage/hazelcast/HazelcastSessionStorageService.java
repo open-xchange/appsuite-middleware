@@ -63,6 +63,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastException;
@@ -153,6 +154,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session lookupSession(String sessionId) throws OXException {
+        return lookupSession(sessionId, 0L);
+    }
+
+    @Override
+    public Session lookupSession(String sessionId, long timeoutMillis) throws OXException {
         if (null == sessionId) {
             return null;
         }
@@ -162,7 +168,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (acquiredLatch.acquired) {
             // Look-up that session in Hazelcast
             try {
-                Session session = fetchFromHz(sessionId);
+                Session session = fetchFromHz(sessionId, timeoutMillis);
                 acquiredLatch.result.set(session);
                 return session;
             } catch (OXException e) {
@@ -189,14 +195,28 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
     }
 
-    private Session fetchFromHz(String sessionId) throws OXException {
+    private Session fetchFromHz(String sessionId, long timeoutMillis) throws OXException {
         ensureActive();
         try {
-            PortableSession storedSession = sessions().get(sessionId);
-            if (null == storedSession) {
-                throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
+            // Fetch either synchronously or asynchronously
+            PortableSession storedSession;
+            if (timeoutMillis <= 0) {
+                storedSession = sessions().get(sessionId);
+            } else {
+                Future<PortableSession> f = sessions().getAsync(sessionId);
+                storedSession = getFrom(f, timeoutMillis);
+                if (null == storedSession) {
+                    LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, timeoutMillis);
+                }
             }
-            return storedSession;
+
+            // Check if not null
+            if (null != storedSession) {
+                return storedSession;
+            }
+
+            // Throw exception
+            throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
         } catch (HazelcastInstanceNotActiveException e) {
             throw handleNotActiveException(e);
         } catch (HazelcastException e) {
@@ -208,6 +228,33 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId);
             }
             throw e;
+        }
+    }
+
+    private <V> V getFrom(Future<V> f, long timeoutMillis) throws OXException {
+        try {
+            return f.get(timeoutMillis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw SessionStorageExceptionCodes.INTERRUPTED.create(e, e.getMessage());
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof HazelcastInstanceNotActiveException) {
+                throw (HazelcastInstanceNotActiveException) cause;
+            }
+            if (cause instanceof HazelcastException) {
+                throw (HazelcastException) cause;
+            }
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new RuntimeException(cause);
+        } catch (TimeoutException e) {
+            f.cancel(true);
+            return null;
         }
     }
 

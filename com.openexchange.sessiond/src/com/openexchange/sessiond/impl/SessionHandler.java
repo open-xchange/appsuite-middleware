@@ -1033,7 +1033,7 @@ public final class SessionHandler {
             SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    Session storedSession = getSessionFrom(sessionId, 10000, storageService);
+                    Session storedSession = getSessionFrom(sessionId, timeout(), storageService);
                     if (null != storedSession) {
                         SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
                         SessionControl retval = null == sc ? sessionToSessionControl(storedSession) : sc;
@@ -1587,37 +1587,12 @@ public final class SessionHandler {
         }
     }
 
-    private static final class GetStoredSessionTask extends AbstractTask<Session> {
-
-        private final SessionStorageService storageService;
-        private final String sessionId;
-
-        protected GetStoredSessionTask(String sessionId, final SessionStorageService storageService) {
-            super();
-            this.storageService = storageService;
-            this.sessionId = sessionId;
-        }
-
-        @Override
-        public Session call() throws Exception {
-            try {
-                return obfuscator.unwrap(storageService.lookupSession(sessionId));
-            } catch (OXException e) {
-                if (SessionStorageExceptionCodes.INTERRUPTED.equals(e)) {
-                    // Expected...
-                    return null;
-                }
-                throw e;
-            }
-        }
-    }
-
     private static volatile Integer timeout;
 
     /**
-     * Gets the timeout for session-storage operations.
+     * Gets the default timeout for session-storage operations.
      *
-     * @return The timeout in milliseconds
+     * @return The default timeout in milliseconds
      */
     public static int timeout() {
         Integer tmp = timeout;
@@ -1636,59 +1611,23 @@ public final class SessionHandler {
     }
 
     /**
-     * Gets the denoted session from session storage using {@link #timeout() default timeout}.
-     *
-     * @param sessionId The session identifier
-     * @param storageService The session storage instance
-     * @return The session or <code>null</code> if timeout elapsed
-     * @throws OXException If fetching session from session storage fails
-     */
-    private static Session getSessionFrom(String sessionId, SessionStorageService storageService) throws OXException {
-        return getSessionFrom(sessionId, timeout(), storageService);
-    }
-
-    /**
      * Gets the denoted session from session storage using given timeout.
      *
      * @param sessionId The session identifier
-     * @param timeoutMillis The timeout in milliseconds
+     * @param timeoutMillis The timeout in milliseconds; a value lower than or equal to zero is a synchronous call
      * @param storageService The session storage instance
      * @return The session or <code>null</code> if timeout elapsed
      * @throws OXException If fetching session from session storage fails
      */
     private static Session getSessionFrom(String sessionId, long timeoutMillis, SessionStorageService storageService) throws OXException {
-        Future<Session> f;
         try {
-            f = ThreadPools.getThreadPool().submit(new GetStoredSessionTask(sessionId, storageService));
-        } catch (Exception e) {
-            return null;
-        }
-
-        try {
-            return f.get(timeoutMillis, TimeUnit.MILLISECONDS);
-        } catch (RejectedExecutionException e) {
-            return storageService.lookupSession(sessionId);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (ExecutionException e) {
-            Throwable t = e.getCause();
-            if (t instanceof OXException) {
-                throw (OXException) t;
+            return obfuscator.unwrap(storageService.lookupSession(sessionId, timeoutMillis));
+        } catch (OXException e) {
+            if (SessionStorageExceptionCodes.INTERRUPTED.equals(e)) {
+                // Expected...
+                return null;
             }
-            if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            }
-            if (t instanceof Error) {
-                throw (Error) t;
-            }
-            throw new IllegalStateException("Not unchecked", t);
-        } catch (TimeoutException e) {
-            LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, timeoutMillis);
-            f.cancel(true);
-            return null;
-        } catch (CancellationException e) {
-            return null;
+            throw e;
         }
     }
 
