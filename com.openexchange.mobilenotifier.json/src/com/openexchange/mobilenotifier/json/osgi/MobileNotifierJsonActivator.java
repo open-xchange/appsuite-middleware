@@ -52,7 +52,7 @@ package com.openexchange.mobilenotifier.json.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
-import com.openexchange.mobilenotifier.events.MobileNotifierSubscriptionService;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierSubscriptionService;
 import com.openexchange.mobilenotifier.json.MobileNotifierActionFactory;
 
 /**

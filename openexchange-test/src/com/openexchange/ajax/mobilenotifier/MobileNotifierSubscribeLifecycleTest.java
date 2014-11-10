@@ -83,7 +83,7 @@ public class MobileNotifierSubscribeLifecycleTest extends AbstractAJAXSession {
         MobileNotifierSubscribeRequest msReq = new MobileNotifierSubscribeRequest(serviceId, providerId, startToken, true);
         AbstractAJAXResponse msResp = client.execute(msReq);
         assertNotNull(msResp);
-        MobileNotifierUpdateTokenRequest utReq = new MobileNotifierUpdateTokenRequest(serviceId, providerId, newToken, startToken, true);
+        MobileNotifierUpdateTokenRequest utReq = new MobileNotifierUpdateTokenRequest(serviceId, providerId, startToken, newToken, true);
         msResp = null;
         msResp = client.execute(utReq);
         assertNotNull(msResp);

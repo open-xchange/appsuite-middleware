@@ -16,8 +16,10 @@ Import-Package:
  com.openexchange.mobilenotifier,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.session,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  org.osgi.framework,
  org.slf4j
 Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.mobilenotifier.events.storage

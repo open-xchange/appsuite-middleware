@@ -7,16 +7,9 @@ Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.mobilenotifier.events.osgi.MobileNotifierEventsActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: 
- com.openexchange.database,
  com.openexchange.exception,
- com.openexchange.groupware.container,
- com.openexchange.mobilenotifier,
  com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.session,
- com.openexchange.tools.session,
- com.openexchange.tools.sql,
  org.osgi.framework,
  org.slf4j
 Bundle-ActivationPolicy: lazy
-Export-Package: com.openexchange.mobilenotifier.events

@@ -54,6 +54,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierSubscriptionService;
+import com.openexchange.mobilenotifier.events.storage.rdb.MobileNotifierSubscriptionServiceImpl;
 import com.openexchange.mobilenotifier.events.storage.rdb.MobileNotifierSubscriptionsCreateTableService;
 import com.openexchange.mobilenotifier.events.storage.rdb.MobileNotifierSubscriptionsCreateTableTask;
 import com.openexchange.mobilenotifier.events.storage.rdb.MobileNotifierSubscriptionsDeleteListener;
@@ -81,6 +83,8 @@ public class MobileNotifierStorageActivator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new MobileNotifierSubscriptionsCreateTableTask()));
         registerService(CreateTableService.class, new MobileNotifierSubscriptionsCreateTableService());
         registerService(DeleteListener.class, new MobileNotifierSubscriptionsDeleteListener());
+        //
+        registerService(MobileNotifierSubscriptionService.class, new MobileNotifierSubscriptionServiceImpl());
     }
 
     @Override

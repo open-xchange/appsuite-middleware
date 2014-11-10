@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mobilenotifier.events;
+package com.openexchange.mobilenotifier.events.storage;
 
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 

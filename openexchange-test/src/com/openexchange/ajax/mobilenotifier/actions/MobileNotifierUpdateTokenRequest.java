@@ -91,7 +91,7 @@ public class MobileNotifierUpdateTokenRequest extends AbstractMobileNotifierRequ
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "unsubscribe"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "updateToken"));
         params.add(new Parameter("providerId", providerId));
         params.add(new Parameter("serviceId", serviceId));
         params.add(new Parameter("token", token));

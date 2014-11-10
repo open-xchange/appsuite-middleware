@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mobilenotifier.events.impl;
+package com.openexchange.mobilenotifier.events.storage.rdb;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,9 +57,9 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
-import com.openexchange.mobilenotifier.events.MobileNotifierSubscriptionService;
-import com.openexchange.mobilenotifier.events.Subscription;
-import com.openexchange.mobilenotifier.events.osgi.Services;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierSubscriptionService;
+import com.openexchange.mobilenotifier.events.storage.Subscription;
+import com.openexchange.mobilenotifier.events.storage.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -79,7 +79,7 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
      */
     public MobileNotifierSubscriptionServiceImpl() throws OXException {
         super();
-        this.databaseService = Services.getService(DatabaseService.class, true);
+        this.databaseService = Services.getService(DatabaseService.class);
     }
 
     @Override
@@ -136,10 +136,10 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
             stmt.setString(1, newToken);
             stmt.setLong(2, subscription.getTimestamp());
             stmt.setInt(3, subscription.getContextId());
-            stmt.setInt(3, subscription.getUserId());
-            stmt.setString(4, subscription.getServiceId());
-            stmt.setString(5, subscription.getProviderName());
-            stmt.setString(6, subscription.getToken());
+            stmt.setInt(4, subscription.getUserId());
+            stmt.setString(5, subscription.getServiceId());
+            stmt.setString(6, subscription.getProviderName());
+            stmt.setString(7, subscription.getToken());
             return stmt.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -176,12 +176,12 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
     }
 
     @Override
-    public List<Subscription> getSubscriptions(int userId) throws OXException {
+    public List<Subscription> getSubscriptions(Session session, String serviceId) throws OXException {
         return null;
     }
 
     @Override
-    public Subscription getSubscription(int userId, String serviceId, MobileNotifierProviders provider) throws OXException {
+    public Subscription getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException {
         return null;
     }
 }
