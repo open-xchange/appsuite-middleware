@@ -86,7 +86,7 @@ public class MobileNotifierActionFactory implements AJAXActionServiceFactory {
         actions.put("configput", new ConfigPutAction(serviceLookup));
         actions.put("subscribe", new SubscribeAction(serviceLookup));
         actions.put("unsubscribe", new UnsubscribeAction(serviceLookup));
-        actions.put("resubscribe", new UpdateAction(serviceLookup));
+        actions.put("updateToken", new UpdateAction(serviceLookup));
     }
 
     @Override

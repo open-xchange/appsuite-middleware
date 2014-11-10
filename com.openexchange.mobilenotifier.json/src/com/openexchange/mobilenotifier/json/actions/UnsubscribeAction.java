@@ -54,6 +54,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mobilenotifier.MobileNotifierProviders;
+import com.openexchange.mobilenotifier.events.MobileNotifierSubscriptionService;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -92,6 +94,16 @@ public class UnsubscribeAction extends AbstractMobileNotifierAction {
         if(Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("providerId");
         }
+
+        MobileNotifierProviders provider = MobileNotifierProviders.parseProviderFromParam(providerId);
+
+        if(provider == null) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("providerId", providerId);
+        }
+
+        MobileNotifierSubscriptionService mnss = getService(MobileNotifierSubscriptionService.class);
+        mnss.deleteSubscription(req.getSession(), token, serviceId, provider);
+
         /*
          * return empty json object to indicate success
          */

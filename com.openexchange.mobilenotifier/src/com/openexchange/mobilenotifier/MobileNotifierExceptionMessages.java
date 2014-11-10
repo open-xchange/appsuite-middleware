@@ -54,7 +54,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link MobileNotifierExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since 7.6.0
  */
@@ -71,5 +71,4 @@ public class MobileNotifierExceptionMessages implements LocalizableStrings {
 
     // SQL error message
     public static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
-
 }

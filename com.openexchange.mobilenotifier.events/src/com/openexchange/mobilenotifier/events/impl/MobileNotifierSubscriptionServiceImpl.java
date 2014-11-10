@@ -49,14 +49,19 @@
 
 package com.openexchange.mobilenotifier.events.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.MobileNotifierSubscriptionService;
 import com.openexchange.mobilenotifier.events.Subscription;
 import com.openexchange.mobilenotifier.events.osgi.Services;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -78,32 +83,104 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
     }
 
     @Override
-    public Subscription createSubscription(ServerSession session, String token, String serviceId, MobileNotifierProviders providerId) throws OXException {
-        databaseService.backWritable(null);
-        return null;
+    public Subscription createSubscription(Session session, String token, String serviceId, MobileNotifierProviders providerId) throws OXException {
+        Subscription subscription = new Subscription(
+            session.getContextId(), session.getUserId(), token, serviceId, providerId, System.currentTimeMillis());
+        Connection connection = databaseService.getWritable(session.getContextId());
+        try {
+            if (0 == replaceSubscription(connection, subscription)) {
+                throw MobileNotifierExceptionCodes.DB_ERROR.create("Subscription not added: " + subscription);
+            }
+        } catch (SQLException e) {
+            throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(session.getContextId(), connection);
+        }
+        return subscription;
+    }
+
+    private static int replaceSubscription(Connection connection, Subscription subscription) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(Statements.REPLACE_SUBSCRIPTION);
+            stmt.setInt(1, subscription.getContextId());
+            stmt.setString(2, subscription.getServiceId());
+            stmt.setString(3, subscription.getToken());
+            stmt.setString(4, subscription.getProviderName());
+            stmt.setInt(5, subscription.getUserId());
+            stmt.setLong(6, subscription.getTimestamp());
+            return stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
     @Override
-    public boolean updateToken(int userId, MobileNotifierProviders providerId, String token, String newToken) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean updateToken(Session session, String token, String serviceId, MobileNotifierProviders providerId,  String newToken) throws OXException {
+        Connection connection = databaseService.getWritable(session.getContextId());
+        Subscription subscription = new Subscription(
+            session.getContextId(), session.getUserId(), token, serviceId, providerId, System.currentTimeMillis());
+        try {
+            return 0 < updateSubscription(connection, subscription, newToken);
+        } catch (SQLException e) {
+            throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(session.getContextId(), connection);
+        }
+    }
+
+    private static int updateSubscription(Connection connection, Subscription subscription, String newToken) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(Statements.UPDATE_TOKEN);
+            stmt.setString(1, newToken);
+            stmt.setLong(2, subscription.getTimestamp());
+            stmt.setInt(3, subscription.getContextId());
+            stmt.setString(4, subscription.getServiceId());
+            stmt.setString(5, subscription.getProviderName());
+            stmt.setString(6, subscription.getToken());
+            return stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
     @Override
-    public boolean deleteSubscription(int userId, String token, String serviceId) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean deleteSubscription(Session session, String token, String serviceId, MobileNotifierProviders providerId) throws OXException {
+        Connection connection = databaseService.getWritable(session.getContextId());
+        Subscription subscription = new Subscription(
+            session.getContextId(), session.getUserId(), token, serviceId, providerId, System.currentTimeMillis());
+        try {
+            return 0 < deleteSubscription(connection, subscription);
+        } catch (SQLException e) {
+            throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(session.getContextId(), connection);
+        }
+    }
+
+    private static int deleteSubscription(Connection connection, Subscription subscription) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(Statements.DELETE_TOKEN_BY_PROVIDER);
+            stmt.setInt(1, subscription.getContextId());
+            stmt.setInt(2, subscription.getUserId());
+            stmt.setString(3, subscription.getServiceId());
+            stmt.setString(4, subscription.getProviderName());
+            stmt.setString(5, subscription.getToken());
+            return stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
     @Override
     public List<Subscription> getSubscriptions(int userId) throws OXException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Subscription getSubscription(int userId, String serviceId, MobileNotifierProviders provider) throws OXException {
-        // TODO Auto-generated method stub
         return null;
     }
 }

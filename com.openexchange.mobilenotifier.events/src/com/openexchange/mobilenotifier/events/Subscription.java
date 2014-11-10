@@ -60,6 +60,7 @@ public class Subscription {
     private int contextId;
     private int userId;
     private String token;
+    private String serviceId;
     private MobileNotifierProviders mobileNotifierProviders;
     private long timestamp;
 
@@ -67,10 +68,11 @@ public class Subscription {
         super();
     }
 
-    public Subscription(int contextId, int userId, String token, MobileNotifierProviders mobileNotifierProviders, long timestamp) {
+    public Subscription(int contextId, int userId, String token, String serviceId, MobileNotifierProviders mobileNotifierProviders, long timestamp) {
         this.contextId = contextId;
         this.userId = userId;
         this.token = token;
+        this.serviceId = serviceId;
         this.mobileNotifierProviders = mobileNotifierProviders;
         this.timestamp = timestamp;
     }
@@ -99,8 +101,20 @@ public class Subscription {
         this.token = token;
     }
 
-    public MobileNotifierProviders getMobileNotifierProviders() {
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public MobileNotifierProviders getProvider() {
         return mobileNotifierProviders;
+    }
+
+    public String getProviderName() {
+        return mobileNotifierProviders.getProviderName();
     }
 
     public void setMobileNotifierProviders(MobileNotifierProviders mobileNotifierProviders) {

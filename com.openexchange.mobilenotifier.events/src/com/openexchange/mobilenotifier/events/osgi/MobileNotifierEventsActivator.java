@@ -50,6 +50,8 @@
 package com.openexchange.mobilenotifier.events.osgi;
 
 import com.openexchange.database.DatabaseService;
+import com.openexchange.mobilenotifier.events.MobileNotifierSubscriptionService;
+import com.openexchange.mobilenotifier.events.impl.MobileNotifierSubscriptionServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -70,6 +72,7 @@ public class MobileNotifierEventsActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         Services.set(this);
+        registerService(MobileNotifierSubscriptionService.class, new MobileNotifierSubscriptionServiceImpl());
     }
 
     @Override

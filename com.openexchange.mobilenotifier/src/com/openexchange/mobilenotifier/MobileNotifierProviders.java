@@ -52,7 +52,7 @@ package com.openexchange.mobilenotifier;
 
 /**
  * {@link MobileNotifierProviders} - Enumeration of values for the provider
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public enum MobileNotifierProviders {
@@ -66,17 +66,17 @@ public enum MobileNotifierProviders {
      * Enum field for appointment provider
      */
     APPOINTMENT("appointment", "io.ox/calendar", "Calendar", "Appointment.tmpl", 2),
-    
+
     /**
      * Enum field for task provider
      */
     TASKS("tasks", "io.ox/tasks", "Tasks", "Task.tmpl", 3),
-    
+
     /**
      * Enum field for reminder provider
      */
     REMINDER("reminder", "io.ox/reminder", "Reminder", "Reminder.tmpl", 4),
-    
+
     /**
      * Enum field for drive provider
      */
@@ -87,7 +87,7 @@ public enum MobileNotifierProviders {
     private final String frontendName;
 
     private final String title;
-    
+
     private final String templateFileName;
 
     private final int index;
@@ -118,5 +118,19 @@ public enum MobileNotifierProviders {
 
     public int getIndex() {
         return index;
+    }
+
+    /**
+     * Parses the provider from the parameter name
+     *
+     * @param providerName
+     * @return the provider or <code>null</code> if not found
+     */
+    public static MobileNotifierProviders parseProviderFromParam(String providerName) {
+        for(MobileNotifierProviders p : MobileNotifierProviders.values())
+            if(providerName.equals(p.getProviderName())) {
+                return p;
+            }
+        return null;
     }
 }

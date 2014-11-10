@@ -52,7 +52,7 @@ package com.openexchange.mobilenotifier.events;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * {@link MobileNotifierSubscriptionService}
@@ -66,26 +66,30 @@ public interface MobileNotifierSubscriptionService {
      * @param session
      * @param token
      * @param serviceId
-     * @param providerId
+     * @param provider
      */
-    Subscription createSubscription(ServerSession session, String token, String serviceId, MobileNotifierProviders providerId) throws OXException;
+    Subscription createSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
 
     /**
      * Updates a token to a new token
      *
-     * @param userId
+     * @param session
      * @param token
+     * @param serviceId
+     * @param provider
      * @param newToken
      */
-    boolean updateToken(int userId, MobileNotifierProviders providerId, String token, String newToken) throws OXException;
+    boolean updateToken(Session session, String token, String serviceId, MobileNotifierProviders provider, String newToken) throws OXException;
 
     /**
      * Deletes a subscription by the userId and token
      *
-     * @param userId
+     * @param session
      * @param token
+     * @param serviceId
+     * @param provider
      */
-    boolean deleteSubscription(int userId, String token, String serviceId) throws OXException;
+    boolean deleteSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
 
     /**
      * Gets all subscriptions of the specified userId
