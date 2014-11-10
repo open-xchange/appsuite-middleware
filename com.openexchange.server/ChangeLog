@@ -2,6 +2,10 @@
 
  - Fix for bug 35359: Improved special /ajax/mail?action=all request fired when loading portal page
 
+* 2014-10-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35023: Orderly deal with absent user permission bits
+
 * 2014-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 34510: Respond with common JavaScript call-back snippet for USM user agent

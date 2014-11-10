@@ -1,3 +1,9 @@
+open-xchange-indexing (7.4.2-38) stable; urgency=medium
+
+  * Build for patch 2014-11-03
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 24 Oct 2014 09:26:34 +0000
+
 open-xchange-indexing (7.4.2-37) stable; urgency=low
 
   * Build for patch 2014-10-20
