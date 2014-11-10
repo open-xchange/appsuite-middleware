@@ -86,32 +86,34 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
     }
 
     @Override
-    public void onEvent(final Object sender, final CacheEvent cacheEvent, final boolean fromRemote) {
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (fromRemote) {
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
             final String region = cacheEvent.getRegion();
             if ("GlobalFolderCache".equals(region)) {
-                final int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
+                int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
                 List<Serializable> cacheKeys = cacheEvent.getKeys();
                 if (null == cacheKeys || 0 == cacheKeys.size()) {
                     FolderMapManagement.getInstance().dropFor(contextId);
                 } else {
                     for (Serializable cacheKey : cacheKeys) {
-                        final Serializable[] keys = ((CacheKey) cacheKey).getKeys();
-                        if (keys.length > 1) {
-                            final String id = keys[1].toString();
-                            final String treeId = keys[0].toString();
-                            removeFromUserCache(id, treeId, contextId);
+                        if (cacheKey instanceof CacheKey) {
+                            Serializable[] keys = ((CacheKey) cacheKey).getKeys();
+                            if (keys.length > 1) {
+                                String id = keys[1].toString();
+                                String treeId = keys[0].toString();
+                                removeFromUserCache(id, treeId, contextId);
+                            }
                         }
                     }
                 }
             } else if ("OXFolderCache".equals(region)) {
                 for (Serializable key : cacheEvent.getKeys()) {
-                    final CacheKey cacheKey = (CacheKey) key;
-                    final String id = cacheKey.getKeys()[0].toString();
-                    final String treeId = FolderStorage.REAL_TREE_ID;
+                    CacheKey cacheKey = (CacheKey) key;
+                    String id = cacheKey.getKeys()[0].toString();
+                    String treeId = FolderStorage.REAL_TREE_ID;
                     removeFromUserCache(id, treeId, cacheKey.getContextId());
                 }
             }
