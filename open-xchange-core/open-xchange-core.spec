@@ -1117,6 +1117,9 @@ if [ ${1:-0} -eq 2 ]; then
     fi
 fi
 
+# SoftwareChange_Request-2245
+ox_add_property com.openexchange.sessiond.useDistributedTokenSessions false /opt/open-xchange/etc/sessiond.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
