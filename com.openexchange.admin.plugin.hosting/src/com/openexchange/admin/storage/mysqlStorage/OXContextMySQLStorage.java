@@ -1308,8 +1308,21 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @param configCon a write connection to the configuration database that is already in a transaction.
      */
     private void findOrCreateSchema(final Connection configCon, final Database db) throws StorageException {
+        if (CONTEXTS_PER_SCHEMA == 1) {
+            int schemaUnique;
+            try {
+                schemaUnique = IDGenerator.getId(configCon);
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            String schemaName = db.getName() + '_' + schemaUnique;
+            db.setScheme(schemaName);
+            OXUtilStorageInterface.getInstance().createDatabase(db);
+            return;
+        }
+
         String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
-        if (CONTEXTS_PER_SCHEMA == 1 || schemaName == null) {
+        if (schemaName == null) {
             int schemaUnique;
             try {
                 schemaUnique = IDGenerator.getId(configCon);
