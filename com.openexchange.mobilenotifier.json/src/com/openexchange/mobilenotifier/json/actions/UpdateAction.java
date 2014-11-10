@@ -87,7 +87,7 @@ public class UpdateAction extends AbstractMobileNotifierAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("newToken");
         }
 
-        //the service id
+        // the service id (apn, apn.macos, gcm)
         String serviceId = req.getParameter("serviceId");
         if(Strings.isEmpty(serviceId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("serviceId");
