@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Name: Open-Xchange Mobilenotifier Event Storage RDB Bundle
 Bundle-SymbolicName: com.openexchange.mobilenotifier.events.storage
-Bundle-Version: 7.6.0
+Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.mobilenotifier.events.storage.osgi.MobileNotifierStorageActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: 

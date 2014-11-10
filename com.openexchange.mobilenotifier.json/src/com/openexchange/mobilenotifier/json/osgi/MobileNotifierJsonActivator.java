@@ -52,14 +52,17 @@ package com.openexchange.mobilenotifier.json.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
+import com.openexchange.mobilenotifier.events.MobileNotifierSubscriptionService;
 import com.openexchange.mobilenotifier.json.MobileNotifierActionFactory;
 
 /**
  * {@link MobileNotifierJsonActivator}
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobileNotifierJsonActivator extends AJAXModuleActivator {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierJsonActivator.class);
 
     /**
      * Initializes a new {@link MobileNotifierJsonActivator}.
@@ -70,11 +73,17 @@ public class MobileNotifierJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MobileNotifierServiceRegistry.class, ConfigViewFactory.class };
+        return new Class<?>[] { MobileNotifierServiceRegistry.class, ConfigViewFactory.class, MobileNotifierSubscriptionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerModule(new MobileNotifierActionFactory(this), "mobilenotifier");
+    }
+
+    @Override
+    public void stopBundle() throws Exception {
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
     }
 }
