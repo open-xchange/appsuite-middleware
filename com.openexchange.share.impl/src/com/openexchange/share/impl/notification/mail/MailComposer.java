@@ -171,6 +171,9 @@ public class MailComposer {
         String title = translator.translate(NotificationStrings.TITLE_RESET_PASSWORD);
         Map<String, Object> vars = preparePasswordResetVars(notification, title, translator);
         MimeMessage mail = prepareEnvelope(title, null, notification.getTransportInfo());
+        mail.addHeader("X-Open-Xchange-Share-Type", "password-reset");
+        mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
+        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(notification.getUsername(), notification.getPassword()));
         mail.setContent(prepareContent(
             "notify.share.pwreset.mail.txt.tmpl",
             vars,
@@ -210,7 +213,9 @@ public class MailComposer {
         Map<String, Object> vars = prepareShareCreatedVars(notification, user, title, translator);
         String subject = String.format(translator.translate(NotificationStrings.SUBJECT), user.getDisplayName(), title);
         MimeMessage mail = prepareEnvelope(subject, new Address[] { getSenderAddress(notification.getSession(), user) }, notification.getTransportInfo());
-        mail.addHeader("X-Open-Xchange-Share", notification.getLinkProvider().getShareUrl());
+        mail.addHeader("X-Open-Xchange-Share-Type", "share-created");
+        mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
+        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(notification.getGuestInfo()));
         mail.setContent(prepareContent(
             "notify.share.create.mail.txt.tmpl",
             vars,
@@ -218,6 +223,35 @@ public class MailComposer {
             vars));
         mail.saveChanges();
         return new ContentAwareComposedMailMessage(mail, notification.getSession(), notification.getSession().getContextId());
+    }
+
+    private static String buildAccessHeader(GuestInfo guestInfo) throws OXException {
+        String username = null;
+        String password = null;
+        switch (guestInfo.getAuthentication()) {
+            case ANONYMOUS_PASSWORD:
+                username = "anonymous";
+                password = guestInfo.getPassword();
+                break;
+
+            case GUEST_PASSWORD:
+                username = guestInfo.getEmailAddress();
+                password = guestInfo.getPassword();
+                break;
+
+            default:
+                break;
+        }
+
+        return buildAccessHeader(username, password);
+    }
+
+    private static String buildAccessHeader(String username, String password) throws OXException {
+        if (!Strings.isEmpty(username) && !Strings.isEmpty(password)) {
+            return com.openexchange.tools.encoding.Base64.encode(username + ':' + password);
+        }
+
+        return null;
     }
 
     private static Map<String, Object> prepareShareCreatedVars(ShareCreatedNotification<InternetAddress> notification, User user, String title, Translator translator) throws OXException {
