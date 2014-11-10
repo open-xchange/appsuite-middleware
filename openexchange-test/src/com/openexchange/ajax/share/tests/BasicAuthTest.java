@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -62,6 +63,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -84,6 +86,7 @@ import com.openexchange.test.CalendarTestManager;
 public class BasicAuthTest extends ShareTest {
 
     private CalendarTestManager calendarManager;
+    private FolderObject folder;
 
     /**
      * Initializes a new {@link BasicAuthTest}.
@@ -109,6 +112,11 @@ public class BasicAuthTest extends ShareTest {
             this.calendarManager = null;
         }
 
+        if (null != folder) {
+            client.execute(new DeleteRequest(EnumAPI.OX_OLD, false, folder).setFailOnErrorParam(Boolean.FALSE));
+            folder = null;
+        }
+
         super.tearDown();
     }
 
@@ -119,6 +127,7 @@ public class BasicAuthTest extends ShareTest {
 
         // Create a calendar folder having a share permission
         FolderObject folder = insertSharedFolder(api, module, getDefaultFolder(module), guestPermission);
+        this.folder = folder;
 
         // Check permissions
         OCLPermission matchingPermission = null;
@@ -254,12 +263,21 @@ public class BasicAuthTest extends ShareTest {
         HttpGet httpGet = new HttpGet(share.getShareURL());
         httpGet.setHeader("Accept", "text/calendar");
         httpGet.setHeader("User-Agent", "Microsoft Outlook");
+
         HttpResponse httpResponse = httpClient.execute(httpGet);
         assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
+
+        Header contentTypeHeader = httpResponse.getFirstHeader("Content-Type");
+        assertNotNull("missing content-type header", contentTypeHeader);
+        assertEquals("Unexpected Content-Type header", "text/calendar", contentTypeHeader.getValue());
+
         HttpEntity entity = httpResponse.getEntity();
         assertNotNull("No file downloaded", entity);
         byte[] downloadedFile = EntityUtils.toByteArray(entity);
         Assert.assertNotNull(downloadedFile);
+
+        String ical = new String(downloadedFile, "UTF-8");
+        assertTrue("Received content seems not be an ICal: " + ical, ical.startsWith("BEGIN:VCALENDAR"));
     }
 
 }
