@@ -108,6 +108,19 @@ public abstract class AbstractContextMBeanCLI<R> extends AbstractMBeanCLI<R> {
         return true;
     }
 
+    /**
+     * Checks if authentication is enabled.
+     * <p>
+     * Property <code>"CONTEXT_AUTHENTICATION_DISABLED"</code> gets examined.
+     *
+     * @param authenticator The authenticator MBean
+     * @throws MBeanException If operation fails
+     */
+    @Override
+    protected boolean isAuthEnabled(AuthenticatorMBean authenticator) throws MBeanException {
+        return !authenticator.isContextAuthenticationDisabled();
+    }
+
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
         final String optionValue = cmd.getOptionValue('c');

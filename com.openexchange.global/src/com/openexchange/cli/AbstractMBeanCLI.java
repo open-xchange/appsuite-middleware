@@ -69,6 +69,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.java.Strings;
 
 /**
  * {@link AbstractMBeanCLI} - The abstract helper class for MBean-connecting command-line tools.
@@ -137,22 +138,6 @@ public abstract class AbstractMBeanCLI<R> {
                 jmxPassword = cmd.getOptionValue('s');
             }
 
-            // Options for administrative authentication
-            if (requiresAdministrativePermission && !cmd.hasOption('A')) {
-                System.out.println("You must provide administrative credentials to proceed.");
-                printHelp(options);
-                System.exit(-1);
-                return null;
-            }
-            if (requiresAdministrativePermission && !cmd.hasOption('P')) {
-                System.out.println("You must provide administrative credentials to proceed.");
-                printHelp(options);
-                System.exit(-1);
-                return null;
-            }
-            final String adminLogin = cmd.getOptionValue('A');
-            final String adminPassword = cmd.getOptionValue('P');
-
             // Check other mandatory options
             checkOptions(cmd, options);
 
@@ -171,11 +156,30 @@ public abstract class AbstractMBeanCLI<R> {
 
             R retval = null;
             try {
-                final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+                MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 try {
                     if (requiresAdministrativePermission) {
-                        final AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
-                        administrativeAuth(adminLogin, adminPassword, cmd, authenticator);
+                        AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
+                        if (isAuthEnabled(authenticator)) {
+                            // Options for administrative authentication
+                            String adminLogin = cmd.getOptionValue('A');
+                            if (Strings.isEmpty(adminLogin)) {
+                                System.out.println("You must provide administrative credentials to proceed.");
+                                printHelp(options);
+                                System.exit(-1);
+                                return null;
+                            }
+
+                            String adminPassword = cmd.getOptionValue('P');
+                            if (Strings.isEmpty(adminPassword)) {
+                                System.out.println("You must provide administrative credentials to proceed.");
+                                printHelp(options);
+                                System.exit(-1);
+                                return null;
+                            }
+
+                            administrativeAuth(adminLogin, adminPassword, cmd, authenticator);
+                        }
                     }
                     retval = invoke(options, cmd, mbsc);
                 } catch (final Exception e) {
@@ -301,6 +305,18 @@ public abstract class AbstractMBeanCLI<R> {
      */
     protected void checkOptions(CommandLine cmd, Options options) {
         checkOptions(cmd);
+    }
+
+    /**
+     * Checks if authentication is enabled.
+     * <p>
+     * By default property <code>"MASTER_AUTHENTICATION_DISABLED"</code> gets examined.
+     *
+     * @param authenticator The authenticator MBean
+     * @throws MBeanException If operation fails
+     */
+    protected boolean isAuthEnabled(AuthenticatorMBean authenticator) throws MBeanException {
+        return !authenticator.isMasterAuthenticationDisabled();
     }
 
     /**

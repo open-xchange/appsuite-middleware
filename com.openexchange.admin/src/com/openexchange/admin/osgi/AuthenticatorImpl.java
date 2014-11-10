@@ -57,6 +57,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.Credentials;
@@ -80,6 +81,24 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
      */
     public AuthenticatorImpl() {
         super();
+    }
+
+    @Override
+    public boolean isMasterAuthenticationDisabled() throws OXException {
+        ConfigurationService configService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == configService) {
+            return false;
+        }
+        return configService.getBoolProperty("MASTER_AUTHENTICATION_DISABLED", false);
+    }
+
+    @Override
+    public boolean isContextAuthenticationDisabled() throws OXException {
+        ConfigurationService configService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == configService) {
+            return false;
+        }
+        return configService.getBoolProperty("CONTEXT_AUTHENTICATION_DISABLED", false);
     }
 
     @Override

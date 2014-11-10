@@ -1,3 +1,7 @@
+* 2014-11-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35141: Do not require administrator credentials in case "MASTER_AUTHENTICATION_DISABLED" is set to true
+
 * 2014-11-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 35373: Only add transport properties if transport data has been set/inserted before
