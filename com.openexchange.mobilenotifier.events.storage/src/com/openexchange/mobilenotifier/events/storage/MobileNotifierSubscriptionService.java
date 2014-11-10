@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,65 @@
  *
  */
 
-package com.openexchange.mobilenotifier.events.impl;
+package com.openexchange.mobilenotifier.events.storage;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierProviders;
+import com.openexchange.session.Session;
 
 /**
- * {@link Statements}
+ * {@link MobileNotifierSubscriptionService}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Statements {
-    public static final String REPLACE_SUBSCRIPTION =
-        "REPLACE INTO mobileEventSubscriptions (cid,service,token,provider,user,timestamp) " +
-        "VALUES (?,?,?,?,?,?);";
+public interface MobileNotifierSubscriptionService {
+    /**
+     * Creates an subscription
+     *
+     * @param session
+     * @param token
+     * @param serviceId
+     * @param provider
+     */
+    Subscription createSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
 
-    public static final String UPDATE_TOKEN = "UPDATE mobileEventSubscriptions "
-        + "SET token=?, timestamp=? "
-        + "WHERE cid=? AND user=? AND service=? AND provider=? AND token=? ";
+    /**
+     * Updates a token to a new token
+     *
+     * @param session
+     * @param token
+     * @param serviceId
+     * @param provider
+     * @param newToken
+     */
+    boolean updateToken(Session session, String token, String serviceId, MobileNotifierProviders provider, String newToken) throws OXException;
 
-    public static final String DELETE_TOKEN_BY_PROVIDER = "DELETE FROM mobileEventSubscriptions "
-        + "WHERE cid=? AND user=? AND service=? AND provider=? AND token=?";
+    /**
+     * Deletes a subscription by the userId and token
+     *
+     * @param session
+     * @param token
+     * @param serviceId
+     * @param provider
+     */
+    boolean deleteSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
+
+    /**
+     * Gets all subscriptions of the specified userId
+     *
+     * @param userId
+     * @return
+     */
+    List<Subscription> getSubscriptions(Session session, String serviceId) throws OXException;
+
+    /**
+     * Gets a specific subscription from the user
+     *
+     * @param userId The userId
+     * @param serviceId The serviceId e.g. gcm, apn, apn.macos
+     * @param provider The provider
+     * @return a subscription
+     */
+    Subscription getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException;
 }

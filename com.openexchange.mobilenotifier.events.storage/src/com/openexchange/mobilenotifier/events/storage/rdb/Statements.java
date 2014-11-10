@@ -74,4 +74,16 @@ public class Statements {
 
     public static final String DELETE_SUBSCRIPTION_FOR_CONTEXT = "DELETE FROM mobileEventSubscriptions WHERE cid=?";
 
+
+    public static final String REPLACE_SUBSCRIPTION =
+        "REPLACE INTO mobileEventSubscriptions (cid,service,token,provider,user,timestamp) " +
+        "VALUES (?,?,?,?,?,?);";
+
+    public static final String UPDATE_TOKEN = "UPDATE mobileEventSubscriptions "
+        + "SET token=?, timestamp=? "
+        + "WHERE cid=? AND user=? AND service=? AND provider=? AND token=? ";
+
+    public static final String DELETE_TOKEN_BY_PROVIDER = "DELETE FROM mobileEventSubscriptions "
+        + "WHERE cid=? AND user=? AND service=? AND provider=? AND token=?";
+
 }
