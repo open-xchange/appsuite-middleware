@@ -265,7 +265,7 @@ public class Filestore implements Serializable {
      * <p>
      * &lt;average-filestore-space&gt; * &lt;number-of-filestore-contexts&gt;
      *
-     * @return the reserved
+     * @return The reserved space in MB
      */
     public final Long getReserved() {
         return reserved;
@@ -276,7 +276,7 @@ public class Filestore implements Serializable {
      * <p>
      * &lt;average-filestore-space&gt; * &lt;number-of-filestore-contexts&gt;
      *
-     * @param reserved the reserved to set
+     * @param reserved the reserved space in MB to set
      */
     public final void setReserved(Long reserved) {
         this.reserved = reserved;
