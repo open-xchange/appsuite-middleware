@@ -102,8 +102,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug("{} - {}", fstore.getUrl(), fstore.getSize());
 
-        if (!checkValidStoreURI(fstore.getUrl())) {
-            throw new InvalidDataException("Invalid url sent");
+        URI uri = checkValidStoreURI(fstore.getUrl());
+        if (null == uri) {
+            throw new InvalidDataException("Invalid URL sent");
         }
 
         if (null == fstore.getSize()) {
@@ -120,12 +121,6 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("Store already exists");
         }
 
-        URI uri = null;
-        try {
-            uri = new URI(fstore.getUrl());
-        } catch (URISyntaxException e) {
-            throw new InvalidDataException("Invalid filstore url: " + e.getMessage());
-        }
         if ("file".equalsIgnoreCase(uri.getScheme())) {
             try {
                 File file = new File(uri);
@@ -159,7 +154,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug("{} {} {} {}", fstore.getUrl(), fstore.getMaxContexts(), fstore.getSize(), fstore.getId());
 
-        if (null != fstore.getUrl() && !checkValidStoreURI(fstore.getUrl())) {
+        if (null != fstore.getUrl() && null == checkValidStoreURI(fstore.getUrl())) {
             throw new InvalidDataException("Invalid store url " + fstore.getUrl());
         }
 
@@ -592,20 +587,25 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         oxutil.deleteMaintenanceReason(del_ids);
     }
 
-    private boolean checkValidStoreURI( String uriToCheck ) {
-        boolean isOK = true;
-
+    /**
+     * Attempts to parse given URI into an {@link java.net.URI} instance.
+     *
+     * @param uriToCheck The URI string to check
+     * @return The parsed {@link java.net.URI} instance or <code>null</code> if URI string is invalid
+     */
+    private URI checkValidStoreURI(String uriToCheck) {
         try {
-            URI.create( uriToCheck );
-            isOK = true;
-        } catch ( IllegalArgumentException e ) {
+            return new URI(uriToCheck);
+        } catch (URISyntaxException e) {
             // given string violates RFC 2396
-            isOK = false;
-        } catch ( NullPointerException e ) {
+            return null;
+        } catch (NullPointerException e) {
             // given uri is null
-            isOK = false;
+            return null;
+        } catch (RuntimeException e) {
+            // Any unforeseen exception
+            return null;
         }
-
-        return isOK;
     }
+
 }
