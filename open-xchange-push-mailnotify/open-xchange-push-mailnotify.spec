@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 27
+%define        ox_release 29
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -53,6 +53,10 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_m
 %doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
+* Tue Nov 04 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-11-10
+* Tue Oct 28 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-11-03
 * Fri Oct 24 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-11-04
 * Fri Oct 24 2014 Carsten Hoeger <choeger@open-xchange.com>

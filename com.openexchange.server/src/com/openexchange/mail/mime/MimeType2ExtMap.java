@@ -282,7 +282,7 @@ public final class MimeType2ExtMap {
      *
      * @param fileName The file name; e.g. <code>"file.html"</code>
      * @param fallBack The fall-back value to return in case file extension is unknown
-     * @return The MIME type associated with given <code>fallBack</code> if none found
+     * @return The MIME type associated with given file name or <code>fallBack</code> if none found
      */
     public static String getContentType(final String fileName, final String fallBack) {
         init();
@@ -305,19 +305,32 @@ public final class MimeType2ExtMap {
     /**
      * Gets the MIME type associated with given file extension.
      *
+     * <p>
+     * This is a convenience method that invokes {@link #getContentTypeByExtension(String, String)} with latter argument set to <code>"application/octet-stream"</code>.
+     *
      * @param extension The file extension; e.g. <code>"txt"</code>
+     * @param fallBack The fall-back value to return in case file extension is unknown
      * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     * @see #getContentTypeByExtension(String, String)
      */
-    public static String getContentTypeByExtension(final String extension) {
+    public static String getContentTypeByExtension(String extension) {
+        return getContentTypeByExtension(extension, MIME_APPL_OCTET);
+    }
+
+    /**
+     * Gets the MIME type associated with given file extension.
+     *
+     * @param extension The file extension; e.g. <code>"txt"</code>
+     * @param fallBack The fall-back value to return in case file extension is unknown
+     * @return The MIME type associated with given file extension or <code>fallBack</code> if none found
+     */
+    public static String getContentTypeByExtension(String extension, String fallBack) {
         init();
         if (Strings.isEmpty(extension)) {
-            return MIME_APPL_OCTET;
+            return fallBack;
         }
         final String type = typeMap.get(toLowerCase(extension));
-        if (null == type) {
-            return MIME_APPL_OCTET;
-        }
-        return type;
+        return null == type ? fallBack : type;
     }
 
     private static final String DEFAULT_EXT = "dat";
