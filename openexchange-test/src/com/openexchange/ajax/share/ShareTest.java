@@ -723,4 +723,40 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return TESTED_OBJECT_PERMISSIONS[random.nextInt(TESTED_OBJECT_PERMISSIONS.length)];
     }
 
+    /**
+     * Gets the username to use for login from the supplied share recipient.
+     *
+     * @param recipient The recipient
+     * @return The username
+     */
+    public static String getUsername(ShareRecipient recipient) {
+        switch (recipient.getType()) {
+        case ANONYMOUS:
+            return recipient.getType().toString().toLowerCase();
+        case GUEST:
+            return ((GuestRecipient) recipient).getEmailAddress();
+        default:
+            Assert.fail("Unknown recipient: " + recipient.getType());
+            return null;
+        }
+    }
+
+    /**
+     * Gets the password to use for login from the supplied share recipient.
+     *
+     * @param recipient The recipient
+     * @return The password, or <code>null</code> if not needed
+     */
+    public static String getPassword(ShareRecipient recipient) {
+        switch (recipient.getType()) {
+        case ANONYMOUS:
+            return ((AnonymousRecipient) recipient).getPassword();
+        case GUEST:
+            return ((GuestRecipient) recipient).getPassword();
+        default:
+            Assert.fail("Unknown recipient: " + recipient.getType());
+            return null;
+        }
+    }
+
 }

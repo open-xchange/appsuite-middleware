@@ -106,7 +106,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
     @Override
     protected boolean handles(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         return null != target && Module.INFOSTORE.getFolderConstant() == target.getModule() && null != target.getItem() &&
-            indicatesDownload(request);
+            (indicatesDownload(request) || indicatesRaw(request));
     }
 
     @Override
@@ -166,17 +166,28 @@ public class DownloadHandler extends HttpAuthShareHandler {
         /*
          * render response via file response renderer
          */
+        if (indicatesRaw(resolvedShare.getRequest())) {
+            fileHolder.setDelivery("view");
+            fileHolder.setDisposition("inline");
+        } else {
+            fileHolder.setDelivery("download");
+            fileHolder.setDisposition("attachment");
+        }
         renderer.write(request, result, resolvedShare.getRequest(), resolvedShare.getResponse());
     }
 
     private static boolean indicatesDownload(HttpServletRequest request) {
-        String delivery = AJAXUtility.sanitizeParam(request.getParameter("delivery"));
-        if ("download".equalsIgnoreCase(delivery)) {
-            return true;
-        }
-        String contentDispositionHeader = request.getHeader("Content-Disposition");
-        return null != contentDispositionHeader &&
-            (contentDispositionHeader.trim().equals("attachment") || contentDispositionHeader.trim().startsWith("attachment;"));
+        return "download".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
+            isTrue(AJAXUtility.sanitizeParam(request.getParameter("dl")));
+    }
+
+    private static boolean indicatesRaw(HttpServletRequest request) {
+        return "view".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
+            isTrue(AJAXUtility.sanitizeParam(request.getParameter("raw")));
+    }
+
+    private static boolean isTrue(String value) {
+        return "1".equals(value) || "yes".equalsIgnoreCase(value) || Boolean.valueOf(value).booleanValue();
     }
 
 }

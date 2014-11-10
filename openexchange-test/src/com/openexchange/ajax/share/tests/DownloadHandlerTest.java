@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.UUID;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -69,8 +70,7 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.AuthenticationMode;
 
 /**
  * {@link DownloadHandlerTest}
@@ -134,39 +134,48 @@ public class DownloadHandlerTest extends ShareTest {
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
-         * check direct download
+         * prepare basic http client to access file directly
          */
         DefaultHttpClient httpClient = new DefaultHttpClient();
         httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
-        httpClient.getParams().setParameter("Content-Disposition", "attachment");
-        switch (share.getAuthentication()) {
-        case ANONYMOUS:
-            break;
-        case ANONYMOUS_PASSWORD:
-            AnonymousRecipient anonymousRecipient = ((AnonymousRecipient) guestPermission.getRecipient());
-            BasicCredentialsProvider anonymousCredentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials anonymousCredentials = new UsernamePasswordCredentials("guest", anonymousRecipient.getPassword());
-            anonymousCredentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, anonymousCredentials);
-            httpClient.setCredentialsProvider(anonymousCredentialsProvider);
-            break;
-        case GUEST_PASSWORD:
-            GuestRecipient guestRecipient = ((GuestRecipient) guestPermission.getRecipient());
-            BasicCredentialsProvider guestCredentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials guestCredentials = new UsernamePasswordCredentials(guestRecipient.getEmailAddress(), guestRecipient.getPassword());
-            guestCredentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, guestCredentials);
-            httpClient.setCredentialsProvider(guestCredentialsProvider);
-            break;
-        default:
-            Assert.fail("unknown authentication: " + share.getAuthentication());
-            break;
+        if (AuthenticationMode.ANONYMOUS != share.getAuthentication()) {
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
+                getUsername(guestPermission.getRecipient()), getPassword(guestPermission.getRecipient()));
+            credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, credentials);
+            httpClient.setCredentialsProvider(credentialsProvider);
         }
-        HttpGet httpGet = new HttpGet(share.getShareURL() + "?delivery=download");
-        HttpResponse httpResponse = httpClient.execute(httpGet);
-        assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
-        HttpEntity entity = httpResponse.getEntity();
-        assertNotNull("No file downloaded", entity);
-        byte[] downloadedFile = EntityUtils.toByteArray(entity);
-        Assert.assertArrayEquals("Different contents downloaded", contents, downloadedFile);
+        /*
+         * check direct download
+         */
+        for (String queryParameter : new String[] { "delivery=download", "dl=1", "dl=true" }) {
+            HttpGet httpGet = new HttpGet(share.getShareURL() + '?' + queryParameter);
+            HttpResponse httpResponse = httpClient.execute(httpGet);
+            assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
+            Header disposition = httpResponse.getFirstHeader("Content-Disposition");
+            assertTrue("Wrong content disposition",
+                null != disposition && null != disposition.getValue() && disposition.getValue().startsWith("attachment"));
+            HttpEntity entity = httpResponse.getEntity();
+            assertNotNull("No file downloaded", entity);
+            byte[] downloadedFile = EntityUtils.toByteArray(entity);
+            Assert.assertArrayEquals("Different contents downloaded", contents, downloadedFile);
+        }
+        /*
+         * check inline delivery
+         */
+        for (String queryParameter : new String[] { "delivery=view", "raw=1", "raw=true" }) {
+            HttpGet httpGet = new HttpGet(share.getShareURL() + '?' + queryParameter);
+            HttpResponse httpResponse = httpClient.execute(httpGet);
+            assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
+            Header disposition = httpResponse.getFirstHeader("Content-Disposition");
+            assertTrue("Wrong content disposition",
+                null != disposition && null != disposition.getValue() && disposition.getValue().startsWith("inline"));
+            HttpEntity entity = httpResponse.getEntity();
+            assertNotNull("No file downloaded", entity);
+            byte[] downloadedFile = EntityUtils.toByteArray(entity);
+            Assert.assertArrayEquals("Different contents downloaded", contents, downloadedFile);
+        }
+
     }
 
 }
