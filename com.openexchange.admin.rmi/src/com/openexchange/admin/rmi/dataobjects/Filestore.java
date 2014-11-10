@@ -261,6 +261,10 @@ public class Filestore implements Serializable {
     }
 
     /**
+     * Gets the reserved file store space in mega bytes (MB).
+     * <p>
+     * &lt;average-filestore-space&gt; * &lt;number-of-filestore-contexts&gt;
+     *
      * @return the reserved
      */
     public final Long getReserved() {
@@ -268,6 +272,10 @@ public class Filestore implements Serializable {
     }
 
     /**
+     * Sets the reserved file store space in mega bytes (MB).
+     * <p>
+     * &lt;average-filestore-space&gt; * &lt;number-of-filestore-contexts&gt;
+     *
      * @param reserved the reserved to set
      */
     public final void setReserved(Long reserved) {
