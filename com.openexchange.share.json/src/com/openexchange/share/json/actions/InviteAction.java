@@ -53,6 +53,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,7 +68,9 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.LinkProvider;
+import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -145,12 +149,22 @@ public class InviteAction extends AbstractShareAction {
 
                             User guest = userService.getUser(share.getGuest().getGuestID(), session.getContextId());
                             String mailAddress = guest.getMail();
-
                             if (!Strings.isEmpty(mailAddress)) {
                                 try {
                                     LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, mailAddress);
-                                    // FIXME:
-                                    // notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, recipient, share.getTargets(), linkProvider, message, mailAddress), session);
+                                    ShareCreatedNotification<InternetAddress> notification = MailNotifications.shareCreated()
+                                        .setTransportInfo(new InternetAddress(mailAddress, true))
+                                        .setLinkProvider(linkProvider)
+                                        .setContext(share.getGuest().getContextID())
+                                        .setLocale(guest.getLocale())
+                                        .setSession(session)
+                                        .setRecipient(recipient)
+                                        .setTargets(share.getTargets())
+                                        .setMessage(message)
+                                        .build();
+                                     notificationService.send(notification);
+                                } catch (AddressException e) {
+                                    warnings.add(ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress));
                                 } catch (Exception e) {
                                     if (e instanceof OXException) {
                                         warnings.add((OXException) e);

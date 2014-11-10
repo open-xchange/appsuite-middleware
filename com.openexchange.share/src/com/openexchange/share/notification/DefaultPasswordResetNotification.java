@@ -49,21 +49,44 @@
 
 package com.openexchange.share.notification;
 
-import com.openexchange.java.Rankable;
-
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
 /**
- * {@link ShareNotificationHandler}
+ * {@link DefaultPasswordResetNotification}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareNotificationHandler extends ShareNotificationService, Rankable {
+public class DefaultPasswordResetNotification<T> extends AbstractNotification<T> implements PasswordResetNotification<T> {
+
+    private String username;
+
+    private String password;
 
     /**
-     * Gets the transport supported by this handler.
+     * Initializes a new {@link DefaultPasswordResetNotification}.
      */
-    Transport getTransport();
+    public DefaultPasswordResetNotification(Transport transport) {
+        super(transport, NotificationType.PASSWORD_RESET);
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 }

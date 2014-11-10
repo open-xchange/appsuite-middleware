@@ -50,6 +50,8 @@
 package com.openexchange.share.notification;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Locale;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * Abstract convenience implementation that provides all common fields for {@link ShareNotification}s.
@@ -59,16 +61,29 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class AbstractNotification<T> implements ShareNotification<T> {
 
+    protected final Transport transport;
+
     protected final NotificationType type;
 
-    protected final LinkProvider linkProvider;
+    protected LinkProvider linkProvider;
 
-    public AbstractNotification(NotificationType type, LinkProvider linkProvider) {
+    protected T transportInfo;
+
+    protected int contextID;
+
+    protected Locale locale;
+
+    public AbstractNotification(Transport transport, NotificationType type) {
         super();
+        checkNotNull(transport);
         checkNotNull(type);
-        checkNotNull(linkProvider);
         this.type = type;
-        this.linkProvider = linkProvider;
+        this.transport = transport;
+    }
+
+    @Override
+    public Transport getTransport() {
+        return transport;
     }
 
     @Override
@@ -79,6 +94,44 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
     @Override
     public LinkProvider getLinkProvider() {
         return linkProvider;
+    }
+
+    @Override
+    public T getTransportInfo() {
+        return transportInfo;
+    }
+
+    @Override
+    public int getContextID() {
+        return contextID;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLinkProvider(LinkProvider linkProvider) {
+        this.linkProvider = linkProvider;
+    }
+
+    public void setTransportInfo(T transportInfo) {
+        this.transportInfo = transportInfo;
+    }
+
+    public void setContextID(int contextID) {
+        this.contextID = contextID;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    public void apply(AbstractNotificationBuilder<?, ?, T> builder) {
+        this.transportInfo = builder.transportInfo;
+        this.linkProvider = builder.linkProvider;
+        this.contextID = builder.contextID;
+        this.locale = builder.locale;
     }
 
 }

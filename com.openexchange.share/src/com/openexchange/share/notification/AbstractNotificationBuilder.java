@@ -49,21 +49,54 @@
 
 package com.openexchange.share.notification;
 
-import com.openexchange.java.Rankable;
-
+import java.util.Locale;
+import com.openexchange.exception.OXException;
+import com.openexchange.share.notification.ShareNotification.NotificationType;
 
 
 /**
- * {@link ShareNotificationHandler}
+ * {@link AbstractNotificationBuilder}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareNotificationHandler extends ShareNotificationService, Rankable {
+public abstract class AbstractNotificationBuilder<B extends AbstractNotificationBuilder<B, N, T>, N extends ShareNotification<T>, T> {
 
-    /**
-     * Gets the transport supported by this handler.
-     */
-    Transport getTransport();
+    protected final NotificationType type;
+
+    protected T transportInfo;
+
+    protected LinkProvider linkProvider;
+
+    protected int contextID;
+
+    protected Locale locale;
+
+    protected AbstractNotificationBuilder(NotificationType type) {
+        super();
+        this.type = type;
+    }
+
+    public B setTransportInfo(T transportInfo) {
+        this.transportInfo = transportInfo;
+        return (B) this;
+    }
+
+    public B setLinkProvider(LinkProvider linkProvider) {
+        this.linkProvider = linkProvider;
+        return (B) this;
+    }
+
+    public B setContext(int contextID) {
+        this.contextID = contextID;
+        return (B) this;
+    }
+
+    public B setLocale(Locale locale) {
+        this.locale = locale;
+        return (B) this;
+    }
+
+    public abstract N build() throws OXException;
 
 }

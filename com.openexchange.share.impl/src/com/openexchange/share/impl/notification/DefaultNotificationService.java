@@ -49,8 +49,9 @@
 
 package com.openexchange.share.impl.notification;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -112,14 +113,14 @@ public class DefaultNotificationService implements ShareNotificationService {
     // ------------------------------------------------------------------------------------------------------------- //
 
     /** The queue for additional handlers */
-    private final SortableConcurrentList<Wrapper> handlers;
+    private final ConcurrentMap<Transport, ShareNotificationHandler> handlers;
 
     /**
      * Initializes a new {@link DefaultNotificationService}.
      */
     public DefaultNotificationService() {
         super();
-        handlers = new SortableConcurrentList<Wrapper>();
+        handlers = new ConcurrentHashMap<Transport, ShareNotificationHandler>();
     }
 
     /**
@@ -128,7 +129,7 @@ public class DefaultNotificationService implements ShareNotificationService {
      * @param handler The handler to add
      */
     public void add(ShareNotificationHandler handler) {
-        handlers.addAndSort(new Wrapper(handler));
+        handlers.put(handler.getTransport(), handler);
     }
 
     /**
@@ -137,20 +138,17 @@ public class DefaultNotificationService implements ShareNotificationService {
      * @param handler The handler to remove
      */
     public void remove(ShareNotificationHandler handler) {
-        handlers.remove(new Wrapper(handler));
+        handlers.remove(handler.getTransport(), handler);
     }
 
     @Override
-    public <T extends ShareNotification<?>> void notify(T notification) throws OXException {
-        for (Wrapper wrapper : handlers) {
-            ShareNotificationHandler currentHandler = wrapper.handler;
-            if (currentHandler.handles(notification)) {
-                currentHandler.notify(notification);
-                return;
-            }
+    public <T extends ShareNotification<?>> void send(T notification) throws OXException {
+        ShareNotificationHandler handler = handlers.get(notification.getTransport());
+        if (handler == null) {
+            throw new OXException(new IllegalArgumentException("No provider exists to handle notifications of type " + notification.getClass().getName()));
         }
 
-        throw new OXException(new IllegalArgumentException("No provider exists to handle notifications of type " + notification.getClass().getName()));
+        handler.send(notification);
     }
 
 }

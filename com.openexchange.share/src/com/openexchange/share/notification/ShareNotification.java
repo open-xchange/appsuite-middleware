@@ -50,6 +50,7 @@
 package com.openexchange.share.notification;
 
 import java.util.Locale;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
 /**
@@ -86,6 +87,13 @@ public interface ShareNotification<T> {
          */
         PASSWORD_REMINDER;
     }
+
+    /**
+     * Gets the transport that shall be used to deliver this notification.
+     *
+     * @return The {@link Transport}, never <code>null</code>
+     */
+    Transport getTransport();
 
     /**
      * Gets the type of this notification (e.g. "a share has been created").

@@ -51,6 +51,8 @@ package com.openexchange.share.json.actions;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.List;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -62,10 +64,12 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.ShareCreatedNotification;
+import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -85,7 +89,6 @@ public class NotifyAction extends AbstractShareAction {
      * Initializes a new {@link NotifyAction}.
      *
      * @param services The service lookup
-     * @param translatorFactory
      */
     public NotifyAction(ServiceLookup services) {
         super(services);
@@ -111,6 +114,38 @@ public class NotifyAction extends AbstractShareAction {
         List<ShareTarget> targets = TokenParser.resolveTargets(share, token);
 
         User guest = getUserService().getUser(share.getGuest().getGuestID(), share.getGuest().getContextID());
+        ShareRecipient recipient = getRecipient(share, guest);
+
+        String shareToken;
+        if (share.isMultiTarget()) {
+            shareToken = share.getGuest().getBaseToken();
+        } else {
+            shareToken = share.getGuest().getBaseToken() + '/' + share.getSingleTarget().getPath();
+        }
+
+        InternetAddress internetAddress;
+        try {
+            internetAddress = new InternetAddress(mailAddress, true);
+        } catch (AddressException e) {
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
+        }
+
+        LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, mailAddress);
+        ShareCreatedNotification<InternetAddress> notification = MailNotifications.shareCreated()
+            .setTransportInfo(internetAddress)
+            .setLinkProvider(linkProvider)
+            .setContext(share.getGuest().getContextID())
+            .setLocale(guest.getLocale())
+            .setSession(session)
+            .setRecipient(recipient)
+            .setTargets(targets)
+            .setMessage(message)
+            .build();
+        getNotificationService().send(notification);
+        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+    }
+
+    private ShareRecipient getRecipient(GuestShare share, User guest) throws OXException {
         ShareRecipient recipient = null;
         if (share.getGuest().getAuthentication() == AuthenticationMode.ANONYMOUS) {
             AnonymousRecipient ar = new AnonymousRecipient();
@@ -128,18 +163,7 @@ public class NotifyAction extends AbstractShareAction {
             recipient = gr;
         }
 
-        String shareToken;
-        if (share.isMultiTarget()) {
-            shareToken = share.getGuest().getBaseToken();
-        } else {
-            shareToken = share.getGuest().getBaseToken() + '/' + share.getSingleTarget().getPath();
-        }
-
-        ShareNotificationService notificationService = getNotificationService();
-        LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, mailAddress);
-        // FIXME:
-        // notificationService.notify(new MailNotification(NotificationType.SHARE_CREATED, recipient, targets, linkProvider, message, mailAddress), session);
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return recipient;
     }
 
 }

@@ -54,6 +54,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +65,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
@@ -72,7 +75,9 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -106,6 +111,7 @@ public class ResetPasswordServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String mailAddress = "";
         try {
             // Create a new HttpSession if it is missing
             request.getSession(true);
@@ -119,6 +125,7 @@ public class ResetPasswordServlet extends HttpServlet {
 
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
             GuestInfo guestInfo = shareService.resolveGuest(token);
+            mailAddress = guestInfo.getEmailAddress();
 
             if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
                 LOG.debug("Bad attempt to reset password for share '{}'", token);
@@ -140,9 +147,19 @@ public class ResetPasswordServlet extends HttpServlet {
             userService.invalidateUser(context, guestInfo.getGuestID());
 
             // TODO: Notify
+            User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
             ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-            // notificationService.notify(new MailNotification(NotificationType.PASSWORD_RESET, guestInfo.getEmailAddress(), targets, new
-            // DefaultLinkProvider(protocol, hostname, servletPrefix, shareToken, mailAddress), "TODO", guestInfo.getEmailAddress()), null);
+
+            ShareNotification<InternetAddress> notification = MailNotifications.passwordReset()
+                .setTransportInfo(new InternetAddress(mailAddress, true))
+                .setLinkProvider(null) // FIXME
+                .setContext(guestInfo.getContextID())
+                .setLocale(guest.getLocale())
+                .setUsername(guestInfo.getEmailAddress())
+                .setPassword(password)
+                .build();
+             notificationService.send(notification);
+//             DefaultLinkProvider(protocol, hostname, servletPrefix, shareToken, mailAddress), "TODO", guestInfo.getEmailAddress()), null);
 
             GuestShare guestShare = shareService.resolveToken(token);
             setRedirect(guestShare, null, request.getServerName(), response);
@@ -159,6 +176,10 @@ public class ResetPasswordServlet extends HttpServlet {
         } catch (NoSuchAlgorithmException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (AddressException e) {
+            OXException oxe = ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
+            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), oxe.getMessage(), oxe);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, oxe.getMessage());
         }
     }
 

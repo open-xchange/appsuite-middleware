@@ -73,6 +73,6 @@ public interface ShareNotificationService {
      *
      * @param notification The notification
      */
-    <T extends ShareNotification<?>> void notify(T notification) throws OXException;
+    <T extends ShareNotification<?>> void send(T notification) throws OXException;
 
 }

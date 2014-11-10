@@ -47,74 +47,75 @@
  *
  */
 
-package com.openexchange.share.notification.mail;
+package com.openexchange.share.notification;
 
 import java.util.List;
-import java.util.Locale;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareService;
+import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.AbstractNotification;
-import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareNotification;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.ShareRecipient;
 
-
 /**
- * A {@link ShareNotification} that uses E-Mail as notification mechanism.
+ * {@link DefaultShareCreatedNotification}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class MailNotification extends AbstractNotification<InternetAddress> {
+public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> implements ShareCreatedNotification<T> {
 
-    public static final String TYPE = MailNotification.class.getName();
+    private Session session;
 
-    private final InternetAddress mailAddress;
+    private ShareRecipient recipient;
+
+    private List<ShareTarget> targets;
+
+    private String message;
 
     /**
-     * Initializes a new {@link MailNotification}.
-     *
-     * @param type The notification type
-     * @param recipient The recipient
-     * @param targets The share targets
-     * @param url The URL that points to the share. See {@link ShareService#generateShareURLs(java.util.List, String, String)}.
-     * @param message The message (optional)
-     * @param recipientAddress The mail address of the recipient
-     * @throws OXException If the recipient address is not a valid mail address
+     * Initializes a new {@link DefaultShareCreatedNotification}.
      */
-    public MailNotification(NotificationType type, ShareRecipient recipient, List<ShareTarget> targets, LinkProvider linkProvider, String message, String recipientAddress) throws OXException {
-        super(type, linkProvider);
-        if (Strings.isEmpty(recipientAddress)) {
-            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create("");
-        }
-
-        try {
-            this.mailAddress = new InternetAddress(recipientAddress);
-        } catch (AddressException e) {
-            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(recipientAddress);
-        }
+    public DefaultShareCreatedNotification(Transport transport) {
+        super(transport, NotificationType.SHARE_CREATED);
     }
 
     @Override
-    public InternetAddress getTransportInfo() {
-        return mailAddress;
+    public Session getSession() {
+        return session;
     }
 
     @Override
-    public int getContextID() {
-        // TODO Auto-generated method stub
-        return 0;
+    public ShareRecipient getRecipient() {
+        return recipient;
     }
 
     @Override
-    public Locale getLocale() {
-        // TODO Auto-generated method stub
-        return null;
+    public List<ShareTarget> getShareTargets() {
+        return targets;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    public List<ShareTarget> getTargets() {
+        return targets;
+    }
+
+    public void setTargets(List<ShareTarget> targets) {
+        this.targets = targets;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    public void setRecipient(ShareRecipient recipient) {
+        this.recipient = recipient;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 }

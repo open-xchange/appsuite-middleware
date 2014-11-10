@@ -60,10 +60,10 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.notification.PasswordResetNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationHandler;
-import com.openexchange.share.notification.mail.MailNotification;
 
 
 /**
@@ -85,7 +85,12 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     }
 
     @Override
-    public <T extends ShareNotification<?>> void notify(T notification) throws OXException {
+    public Transport getTransport() {
+        return Transport.MAIL;
+    }
+
+    @Override
+    public <T extends ShareNotification<?>> void send(T notification) throws OXException {
         TransportProvider transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
         ComposedMailMessage mail = null;
         MailTransport transport = null;
@@ -93,10 +98,20 @@ public class MailNotificationHandler implements ShareNotificationHandler {
         try {
             switch (notification.getType()) {
                 case SHARE_CREATED:
+                {
                     ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
                     transport = transportProvider.createNewMailTransport(casted.getSession());
                     mail = composer.buildShareCreatedMail(casted);
                     break;
+                }
+
+                case PASSWORD_RESET:
+                {
+                    PasswordResetNotification<InternetAddress> casted = (PasswordResetNotification<InternetAddress>) notification;
+                    transport = transportProvider.createNewNoReplyTransport(casted.getContextID());
+                    mail = composer.buildPasswordResetMail(casted);
+                    break;
+                }
 
                 default: // TODO exception
             }
@@ -120,11 +135,6 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     @Override
     public int getRanking() {
         return 0;
-    }
-
-    @Override
-    public <T extends ShareNotification<?>> boolean handles(T notification) {
-        return (MailNotification.class.isAssignableFrom(notification.getClass()));
     }
 
 }
