@@ -74,14 +74,18 @@ import com.openexchange.share.notification.ShareNotificationHandler;
  */
 public class MailNotificationHandler implements ShareNotificationHandler {
 
-    private final ServiceLookup services;
+    private final TransportProvider transportProvider;
+
+    private final MailComposer composer;
 
     /**
      * Initializes a new {@link MailNotificationHandler}.
+     * @throws OXException
      */
-    public MailNotificationHandler(ServiceLookup services) {
+    public MailNotificationHandler(ServiceLookup services) throws OXException {
         super();
-        this.services = services;
+        this.transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
+        this.composer = new MailComposer(services);
     }
 
     @Override
@@ -91,36 +95,39 @@ public class MailNotificationHandler implements ShareNotificationHandler {
 
     @Override
     public <T extends ShareNotification<?>> void send(T notification) throws OXException {
-        TransportProvider transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
-        ComposedMailMessage mail = null;
-        MailTransport transport = null;
-        MailSender composer = new MailSender(services);
         try {
             switch (notification.getType()) {
                 case SHARE_CREATED:
-                {
-                    ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
-                    transport = transportProvider.createNewMailTransport(casted.getSession());
-                    mail = composer.buildShareCreatedMail(casted);
+                    sendShareCreated(notification);
                     break;
-                }
 
                 case PASSWORD_RESET:
-                {
-                    PasswordResetNotification<InternetAddress> casted = (PasswordResetNotification<InternetAddress>) notification;
-                    transport = transportProvider.createNewNoReplyTransport(casted.getContextID());
-                    mail = composer.buildPasswordResetMail(casted);
+                    sendPasswordReset(notification);
                     break;
-                }
 
-                default: // TODO exception
+                default:
+                    throw new OXException(new IllegalArgumentException("MailNotificationHandler cannot handle notifications of type " + notification.getType().toString()));
             }
         } catch (UnsupportedEncodingException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (MessagingException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
 
+    private void sendShareCreated(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
+        ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
+        ComposedMailMessage mail = composer.buildShareCreatedMail(casted);
+        sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
+    }
+
+    private void sendPasswordReset(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
+        PasswordResetNotification<InternetAddress> casted = (PasswordResetNotification<InternetAddress>) notification;
+        ComposedMailMessage mail = composer.buildPasswordResetMail(casted);
+        sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
+    }
+
+    private static void sendMail(MailTransport transport, ComposedMailMessage mail) throws OXException {
         try {
             transport.sendMailMessage(mail, ComposeType.NEW);
         } finally {
@@ -130,11 +137,6 @@ public class MailNotificationHandler implements ShareNotificationHandler {
                 // ignore
             }
         }
-    }
-
-    @Override
-    public int getRanking() {
-        return 0;
     }
 
 }

@@ -49,17 +49,20 @@
 
 package com.openexchange.share.notification;
 
+import java.util.Collection;
 import java.util.Locale;
-import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
 /**
- * {@link AbstractNotificationBuilder}
+ * An abstract superclass for builders of {@link ShareNotification}s.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractNotificationBuilder<B extends AbstractNotificationBuilder<B, N, T>, N extends ShareNotification<T>, T> {
 
     protected final NotificationType type;
@@ -77,26 +80,79 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
         this.type = type;
     }
 
+    /**
+     * Sets the transport info according to the notifications {@link Transport}
+     *
+     * @param transportInfo
+     */
     public B setTransportInfo(T transportInfo) {
         this.transportInfo = transportInfo;
         return (B) this;
     }
 
+    /**
+     * Sets the {@link LinkProvider}
+     *
+     * @param linkProvider
+     */
     public B setLinkProvider(LinkProvider linkProvider) {
         this.linkProvider = linkProvider;
         return (B) this;
     }
 
+    /**
+     * Sets the context ID
+     *
+     * @param contextID
+     */
     public B setContext(int contextID) {
         this.contextID = contextID;
         return (B) this;
     }
 
+    /**
+     * Sets the locale to be used for string translations in notification messages
+     *
+     * @param locale
+     */
     public B setLocale(Locale locale) {
         this.locale = locale;
         return (B) this;
     }
 
-    public abstract N build() throws OXException;
+    /**
+     * Builds the {@link ShareNotification} with all the values set for this builder.
+     *
+     * @return The share notification
+     * @throws IllegalStateException if a necessary field has not been initialized or an invalid value was set
+     */
+    public N build() {
+        checkNotNull(transportInfo, "transportInfo");
+        checkNotNull(linkProvider, "linkProvider");
+        checkNotNull(contextID, "contextID");
+        checkNotNull(locale, "locale");
+        return doBuild();
+    }
 
+    /**
+     * Builds the final {@link ShareNotification}. Must be implemented by all inheritors.
+     *
+     * @return The ShareNotification
+     * @throws IllegalStateException if a necessary field has not been initialized or an invalid value was set
+     */
+    protected abstract N doBuild();
+
+    protected static final void checkNotNull(Object value, String fieldName) {
+        if (value == null) {
+            throw new IllegalStateException("Field '" + fieldName + "' must be set before calling build()!");
+        }
+    }
+
+    protected static final void checkNotEmpty(Object value, String fieldName) {
+        if (value instanceof String && Strings.isEmpty((String) value)) {
+            throw new IllegalStateException("Field '" + fieldName + "' must be set to a valid String before calling build()!");
+        } else if (value instanceof Collection<?> && ((Collection<?>)value).isEmpty()) {
+            throw new IllegalStateException("Collection '" + fieldName + "' must contain at least one element before calling build()!");
+        }
+    }
 }

@@ -49,17 +49,13 @@
 
 package com.openexchange.share.notification;
 
-import com.openexchange.java.Rankable;
-
-
-
 /**
  * {@link ShareNotificationHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface ShareNotificationHandler extends ShareNotificationService, Rankable {
+public interface ShareNotificationHandler extends ShareNotificationService {
 
     /**
      * Gets the transport supported by this handler.

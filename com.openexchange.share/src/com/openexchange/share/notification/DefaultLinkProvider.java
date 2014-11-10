@@ -52,7 +52,8 @@ package com.openexchange.share.notification;
 
 
 /**
- * {@link DefaultLinkProvider}
+ * A default implementation of {@link LinkProvider}. All necessary data has to be
+ * set via the constructor.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -61,21 +62,26 @@ public class DefaultLinkProvider implements LinkProvider {
 
     private final String protocol;
 
-    private final String hostname;
+    private final String domain;
 
     private final String servletPrefix;
 
     private final String shareToken;
 
-    private final String mailAddress;
-
-    public DefaultLinkProvider(String protocol, String hostname, String servletPrefix, String shareToken, String mailAddress) {
+    /**
+     * Initializes a new {@link DefaultLinkProvider}.
+     *
+     * @param protocol The protocol to use for the URLs, i.e. "http" or "https"
+     * @param domain The domain to use within the URLs
+     * @param servletPrefix The servlet prefix, i.e. "/ajax/" or "/appsuite/api/". Leading and trailing slashes must be contained!
+     * @param shareToken The share token, can be a base token or a concrete one
+     */
+    public DefaultLinkProvider(String protocol, String domain, String servletPrefix, String shareToken) {
         super();
         this.protocol = protocol;
-        this.hostname = hostname;
+        this.domain = domain;
         this.servletPrefix = servletPrefix;
         this.shareToken = shareToken;
-        this.mailAddress = mailAddress;
     }
 
     @Override
@@ -85,11 +91,11 @@ public class DefaultLinkProvider implements LinkProvider {
 
     @Override
     public String getPasswordResetUrl() {
-        return baseUrl() + "share/reset/password?share=" + shareToken + "&mail=" + mailAddress;
+        return baseUrl() + "share/reset/password?share=" + shareToken;
     }
 
     private String baseUrl() {
-        return protocol + hostname + servletPrefix;
+        return protocol + domain + servletPrefix;
     }
 
 }

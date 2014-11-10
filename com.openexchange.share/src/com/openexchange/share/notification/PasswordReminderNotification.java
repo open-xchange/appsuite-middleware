@@ -51,11 +51,18 @@ package com.openexchange.share.notification;
 
 
 /**
- * {@link PasswordReminderNotification}
+ * A notification to re-send the password of an anonymous share to a certain recipient.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
 public interface PasswordReminderNotification<T> extends ShareNotification<T> {
+
+    /**
+     * Gets the password to notify the recipient about.
+     *
+     * @return The password, never <code>null</code>
+     */
+    String getPassword();
 
 }

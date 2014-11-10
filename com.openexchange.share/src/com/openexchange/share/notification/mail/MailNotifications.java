@@ -49,13 +49,12 @@
 
 package com.openexchange.share.notification.mail;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.AbstractNotificationBuilder;
 import com.openexchange.share.notification.DefaultPasswordResetNotification;
@@ -64,7 +63,6 @@ import com.openexchange.share.notification.PasswordResetNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -75,10 +73,18 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class MailNotifications {
 
+    /**
+     * Creates a new builder for {@link ShareCreatedNotification}s.
+     * @return The builder instance.
+     */
     public static ShareCreatedBuilder shareCreated() {
         return new ShareCreatedBuilder();
     }
 
+    /**
+     * Creates a new builder for {@link PasswordResetNotification}s.
+     * @return The builder instance.
+     */
     public static PasswordResetBuilder passwordReset() {
         return new PasswordResetBuilder();
     }
@@ -89,31 +95,34 @@ public class MailNotifications {
 
         private String password;
 
-        /**
-         * Initializes a new {@link PasswordResetBuilder}.
-         */
         protected PasswordResetBuilder() {
             super(NotificationType.PASSWORD_RESET);
         }
 
+        /**
+         * Sets the username of the guest that must be used for logging in.
+         *
+         * @param username The username
+         */
         public PasswordResetBuilder setUsername(String username) {
             this.username = username;
             return this;
         }
 
+        /**
+         * Sets the new password about that the recipient shall be notified.
+         *
+         * @param password The password
+         */
         public PasswordResetBuilder setPassword(String password) {
             this.password = password;
             return this;
         }
 
         @Override
-        public PasswordResetNotification<InternetAddress> build() throws OXException {
-            checkNotNull(transportInfo);
-            checkNotNull(linkProvider);
-            checkNotNull(contextID);
-            checkNotNull(locale);
-            checkNotNull(username);
-            checkNotNull(password);
+        protected PasswordResetNotification<InternetAddress> doBuild() {
+            checkNotNull(username, "username");
+            checkNotNull(password, "password");
 
             DefaultPasswordResetNotification<InternetAddress> notification = new DefaultPasswordResetNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
@@ -128,7 +137,7 @@ public class MailNotifications {
 
         private Session session;
 
-        private ShareRecipient recipient;
+        private GuestInfo guestInfo;
 
         private String message;
 
@@ -151,20 +160,21 @@ public class MailNotifications {
 
 
         /**
-         * Sets the recipient
+         * Sets the {@link GuestInfo} used to get the {@link AuthenticationMode} and credentials
+         * from, that will be contained in the notification message
          *
-         * @param recipient The recipient to set
+         * @param guestInfo The guest info to set
          */
-        public ShareCreatedBuilder setRecipient(ShareRecipient recipient) {
-            this.recipient = recipient;
+        public ShareCreatedBuilder setGuestInfo(GuestInfo guestInfo) {
+            this.guestInfo = guestInfo;
             return this;
         }
 
 
         /**
-         * Sets the targets
+         * Sets the share targets to inform the recipient about
          *
-         * @param targets The targets to set
+         * @param targets The targets
          */
         public ShareCreatedBuilder setTargets(List<ShareTarget> targets) {
             this.targets.clear();
@@ -172,15 +182,19 @@ public class MailNotifications {
             return this;
         }
 
+        /**
+         * Adds a target to the list of targets to inform the recipient about
+         * @param target The target
+         */
         public ShareCreatedBuilder addTarget(ShareTarget target) {
             targets.add(target);
             return this;
         }
 
         /**
-         * Sets the message
+         * Sets the custom message to be contained in the notification
          *
-         * @param message The message to set
+         * @param message The message
          */
         public ShareCreatedBuilder setMessage(String message) {
             this.message = message;
@@ -188,19 +202,15 @@ public class MailNotifications {
         }
 
         @Override
-        public ShareCreatedNotification<InternetAddress> build() throws OXException {
-            checkNotNull(transportInfo);
-            checkNotNull(linkProvider);
-            checkNotNull(contextID);
-            checkNotNull(locale);
-            checkNotNull(session);
-            checkNotNull(recipient);
-            checkState(targets.size() > 0, "At least one share target must be set!");
+        protected ShareCreatedNotification<InternetAddress> doBuild() {
+            checkNotNull(session, "session");
+            checkNotNull(guestInfo, "guestInfo");
+            checkNotEmpty(targets, "targets");
 
             DefaultShareCreatedNotification<InternetAddress> notification = new DefaultShareCreatedNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
             notification.setSession(session);
-            notification.setRecipient(recipient);
+            notification.setGuestInfo(guestInfo);
             notification.setTargets(targets);
             notification.setMessage(message);
             return notification;

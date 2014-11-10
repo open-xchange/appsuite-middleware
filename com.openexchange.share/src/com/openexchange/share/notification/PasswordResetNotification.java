@@ -51,7 +51,8 @@ package com.openexchange.share.notification;
 
 
 /**
- * {@link PasswordResetNotification}
+ * A notification to send a new password to a guest user who made use of the password reset
+ * mechanism.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -59,7 +60,7 @@ package com.openexchange.share.notification;
 public interface PasswordResetNotification<T> extends ShareNotification<T> {
 
     /**
-     * Gets the username of the guest that is used for logging in.
+     * Gets the username of the guest that must be used for logging in.
      *
      * @return The username
      */

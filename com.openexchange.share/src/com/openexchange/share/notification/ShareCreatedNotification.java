@@ -51,12 +51,12 @@ package com.openexchange.share.notification;
 
 import java.util.List;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
- * {@link ShareCreatedNotification}
+ * A notification to inform externals about created shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -71,17 +71,17 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
     Session getSession();
 
     /**
-     * Gets the recipient that shall receive the notification. If a password
-     * is necessary to access the share the notification is about, this
-     * password must be set un-encoded within the recipient object. Otherwise
+     * Gets the guest info of the recipient that shall get the notification. If a
+     * password is necessary to access the share the notification is about, this
+     * password must be set un-encoded within the guest info object. Otherwise
      * the notification will contain a hint that the existing password has to
-     * be re-used and a link to reset that password will be provided, if the
-     * recipient is a guest. If the recipient is anonymous it is assumed, that
+     * be re-used and a link to reset that password will be provided if the
+     * recipient is a guest. If the recipient is anonymous, it is assumed that
      * no password is necessary to log in.
      *
-     * @return The {@link ShareRecipient}, never <code>null</code>
+     * @return The {@link GuestInfo}, never <code>null</code>
      */
-    ShareRecipient getRecipient();
+    GuestInfo getGuestInfo();
 
     /**
      * Gets the share targets to notify the recipient about.

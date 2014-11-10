@@ -51,12 +51,13 @@ package com.openexchange.share.notification;
 
 import java.util.List;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * {@link DefaultShareCreatedNotification}
+ * A default implementation of {@link ShareCreatedNotification} that contains all
+ * necessary data as fields. Plain setters can be used to initialize an instance.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -65,7 +66,7 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     private Session session;
 
-    private ShareRecipient recipient;
+    private GuestInfo guestInfo;
 
     private List<ShareTarget> targets;
 
@@ -84,8 +85,8 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     }
 
     @Override
-    public ShareRecipient getRecipient() {
-        return recipient;
+    public GuestInfo getGuestInfo() {
+        return guestInfo;
     }
 
     @Override
@@ -110,8 +111,8 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
         this.session = session;
     }
 
-    public void setRecipient(ShareRecipient recipient) {
-        this.recipient = recipient;
+    public void setGuestInfo(GuestInfo guestInfo) {
+        this.guestInfo = guestInfo;
     }
 
     public void setMessage(String message) {

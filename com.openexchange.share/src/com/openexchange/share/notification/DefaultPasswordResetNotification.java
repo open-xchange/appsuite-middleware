@@ -51,9 +51,9 @@ package com.openexchange.share.notification;
 
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
-
 /**
- * {@link DefaultPasswordResetNotification}
+ * A default implementation of {@link PasswordResetNotification} that contains all
+ * necessary data as fields. Plain setters can be used to initialize an instance.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

@@ -51,15 +51,26 @@ package com.openexchange.share.notification;
 
 
 /**
- * {@link LinkProvider}
+ * A {@link LinkProvider} is used to build the hyperlinks that are contained in notification messages.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
 public interface LinkProvider {
 
+    /**
+     * Gets the URL to the share the recipient is notified about.
+     *
+     * @return The URL
+     */
     String getShareUrl();
 
+    /**
+     * Gets the URL to the password reset servlet, containing the guest users token
+     * to reset his password.
+     *
+     * @return The URL
+     */
     String getPasswordResetUrl();
 
 }

@@ -73,6 +73,12 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
 
     protected Locale locale;
 
+    /**
+     * Initializes a new {@link AbstractNotification}.
+     *
+     * @param transport The transport used for delivering the notification
+     * @param type The type of the notification
+     */
     public AbstractNotification(Transport transport, NotificationType type) {
         super();
         checkNotNull(transport);
@@ -111,22 +117,47 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
         return locale;
     }
 
+    /**
+     * Sets the {@link LinkProvider}
+     *
+     * @param linkProvider
+     */
     public void setLinkProvider(LinkProvider linkProvider) {
         this.linkProvider = linkProvider;
     }
 
+    /**
+     * Sets the transport info according to the notifications {@link Transport}
+     *
+     * @param transportInfo
+     */
     public void setTransportInfo(T transportInfo) {
         this.transportInfo = transportInfo;
     }
 
+    /**
+     * Sets the context ID
+     *
+     * @param contextID
+     */
     public void setContextID(int contextID) {
         this.contextID = contextID;
     }
 
+    /**
+     * Sets the locale to be used for string translations in notification messages
+     *
+     * @param locale
+     */
     public void setLocale(Locale locale) {
         this.locale = locale;
     }
 
+    /**
+     * Applies all common fields at once by extracting them from the given builder.
+     *
+     * @param builder
+     */
     public void apply(AbstractNotificationBuilder<?, ?, T> builder) {
         this.transportInfo = builder.transportInfo;
         this.linkProvider = builder.linkProvider;

@@ -69,7 +69,7 @@ public interface ShareNotificationService {
     }
 
     /**
-     * Notifies the recipient of {@link ShareNotification} about the according share.
+     * Notifies the recipient of a {@link ShareNotification} about the according share.
      *
      * @param notification The notification
      */
