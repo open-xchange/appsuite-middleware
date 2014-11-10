@@ -71,7 +71,7 @@ public interface ShareInfo {
      *
      * @return The guest information
      */
-    GuestInfo getGuest() throws OXException;
+    GuestInfo getGuest();
 
     /**
      * Gets the (absolute) token for the share target, i.e. the base token plus the target path.

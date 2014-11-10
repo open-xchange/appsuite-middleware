@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.recipient.RecipientType;
 
@@ -115,5 +116,12 @@ public interface GuestInfo {
      * @return The identifier of the user who initially created the guest
      */
     int getCreatedBy();
+
+    /**
+     * Gets the guest user's configured locale.
+     *
+     * @return The locale
+     */
+    Locale getLocale();
 
 }

@@ -117,7 +117,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -832,10 +832,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 String fileID = new FileID(service, account, document.getFolderId(), document.getId()).toUniqueID();
                 ShareTarget shareTarget = new ShareTarget(8, folderID, fileID);
                 shareTarget.setOwnedBy(owner);
-                List<GuestShare> shares = shareService.addTargets(session, Collections.singletonList(shareTarget), shareRecipients);
+                List<ShareInfo> shares = shareService.addTarget(session, shareTarget, shareRecipients);
                 for (int i = 0; i < guestPermissions.size(); i++) {
                     FileStorageGuestObjectPermission guestPermission = guestPermissions.get(0);
-                    GuestShare share = shares.get(i);
+                    ShareInfo share = shares.get(i);
                     allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuest().getGuestID(), false, guestPermission.getPermissions()));
                 }
 

@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -76,9 +76,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetLinkAction extends AbstractShareAction {
 
+    /** The default permission bits to use if not supplied by the client */
+    private static final int DEFAULT_PERMISSION_BITS = Permissions.createPermissionBits(
+        Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
+
     /**
      * Initializes a new {@link GetLinkAction}.
-     * @param services
+     *
+     * @param services A service lookup reference
      */
     public GetLinkAction(ServiceLookup services) {
         super(services);
@@ -89,36 +94,26 @@ public class GetLinkAction extends AbstractShareAction {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
             List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"), getTimeZone(requestData, session));
-
-            int permissionBits;
-            if (json.hasAndNotNull("bits")) {
-                permissionBits = json.getInt("bits");
-            } else {
-                permissionBits = Permissions.createPermissionBits(
-                    Permission.READ_FOLDER,
-                    Permission.READ_ALL_OBJECTS,
-                    Permission.NO_PERMISSIONS,
-                    Permission.NO_PERMISSIONS,
-                    false);
-            }
-
-            String password = null;
-            if (json.hasAndNotNull("password")) {
-                password = json.getString("password");
-            }
-
+            int permissionBits = json.hasAndNotNull("bits") ? json.getInt("bits") : DEFAULT_PERMISSION_BITS;
+            String password = json.hasAndNotNull("password") ? json.getString("password") : null;
+            /*
+             * prepare anonymous recipient
+             */
             AnonymousRecipient recipient = new AnonymousRecipient();
             recipient.setBits(permissionBits);
             recipient.setPassword(password);
+            /*
+             * create share
+             */
             CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient>singletonList(recipient), targets, session, services);
-            GuestShare share = createPerformer.perform().get(0);
-
+            ShareInfo share = createPerformer.perform().get(recipient).get(0);
+            /*
+             * wrap share token & url into JSON result & return
+             */
             JSONObject jResult = new JSONObject();
             jResult.put("url", share.getShareURL(determineProtocol(requestData), determineHostname(requestData)));
             jResult.put("token", share.getGuest().getBaseToken());
-            AJAXRequestResult result = new AJAXRequestResult(jResult, "json");
-            result.setTimestamp(new Date());
-            return result;
+            return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         } catch (ClassCastException e) {

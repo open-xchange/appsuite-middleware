@@ -51,6 +51,7 @@ package com.openexchange.share;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -104,9 +105,27 @@ public interface ShareService {
      * @param session The session
      * @param targets The share targets to add
      * @param recipients The recipients for the shares
-     * @return The new or updated shares, where each share corresponds to a recipient, in the same order as the supplied recipient list
+     * @return The created shares for each recipient, where each share corresponds to a target, in the same order as the supplied target list
      */
-    List<GuestShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
+    Map<ShareRecipient, List<ShareInfo>> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
+
+    /**
+     * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated permissions of the guest users on the share target are not updated implicitly, so that it's up to the
+     * caller to take care of the referenced share target on his own</li>
+     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share target
+     * or not, so again it's up to the caller to perform the necessary checks</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param target The share target to add
+     * @param recipients The recipients for the shares
+     * @return The created shares for each recipient, in the same order as the supplied recipient list
+     */
+    List<ShareInfo> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Deletes a list of share targets for all shares that belong to a certain list of guests.

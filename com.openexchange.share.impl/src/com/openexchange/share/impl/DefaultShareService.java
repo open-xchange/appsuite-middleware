@@ -193,38 +193,54 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<GuestShare> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
+    public List<ShareInfo> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
+        List<ShareInfo> createdShares = new ArrayList<ShareInfo>(recipients.size());
+        Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = addTargets(session, Collections.singletonList(target), recipients);
+        for (ShareRecipient recipient : recipients) {
+            List<ShareInfo> shares = sharesPerRecipient.get(recipient);
+            if (null == shares || 1 != shares.size()) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unexpected number of shares created for recipient " + recipient);
+            }
+            createdShares.add(shares.get(0));
+        }
+        return createdShares;
+    }
+
+    @Override
+    public Map<ShareRecipient, List<ShareInfo>> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         int contextID = session.getContextId();
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
-        List<GuestShare> guestShares = new ArrayList<GuestShare>(recipients.size());
+        Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>(recipients.size());
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-
-            int newShares = targets.size() * recipients.size();
-            checkQuota(connectionHelper, session, newShares);
+            /*
+             * check quota restrictions
+             */
+            int expectedShares = targets.size() * recipients.size();
+            checkQuota(connectionHelper, session, expectedShares);
             /*
              * prepare guest users and resulting shares
              */
             Connection connection = connectionHelper.getConnection();
             User sharingUser = services.getService(UserService.class).getUser(connection, session.getUserId(), context);
-            List<Share> sharesToStore = new ArrayList<Share>(newShares);
+            List<Share> sharesToStore = new ArrayList<Share>(expectedShares);
             for (ShareRecipient recipient : recipients) {
                 int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
                 User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient);
-                List<Share> sharesForGuest = new ArrayList<Share>(targets.size());
+                List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
                 for (ShareTarget target : targets) {
                     Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
-                    sharesForGuest.add(share);
+                    sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share));
                     sharesToStore.add(share);
                 }
-                guestShares.add(new ResolvedGuestShare(services, contextID, guestUser, sharesForGuest));
+                sharesPerRecipient.put(recipient, sharesForGuest);
             }
             /*
              * store shares
@@ -232,7 +248,7 @@ public class DefaultShareService implements ShareService {
             shareStorage.storeShares(contextID, sharesToStore, connectionHelper.getParameters());
             connectionHelper.commit();
             LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
-            return guestShares;
+            return sharesPerRecipient;
         } finally {
             connectionHelper.finish();
         }

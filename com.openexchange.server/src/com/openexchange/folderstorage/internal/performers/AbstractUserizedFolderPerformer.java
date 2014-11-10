@@ -89,7 +89,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -472,7 +472,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 for (GuestPermission permission : permissions) {
                     recipients.add(permission.getRecipient());
                 }
-                List<GuestShare> shares = shareService.addTargets(session, Collections.singletonList(entry.getKey()), recipients);
+                List<ShareInfo> shares = shareService.addTarget(session, entry.getKey(), recipients);
                 if (null == shares || shares.size() != permissions.size()) {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
                 }

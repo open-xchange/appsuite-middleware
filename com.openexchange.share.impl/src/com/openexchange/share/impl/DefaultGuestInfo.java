@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl;
 
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
@@ -176,5 +177,10 @@ public class DefaultGuestInfo implements GuestInfo {
     @Override
     public int getCreatedBy() {
         return guestUser.getCreatedBy();
+    }
+
+    @Override
+    public Locale getLocale() {
+        return guestUser.getLocale();
     }
 }

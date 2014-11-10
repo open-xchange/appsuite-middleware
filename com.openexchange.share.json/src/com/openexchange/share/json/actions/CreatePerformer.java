@@ -55,14 +55,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
@@ -79,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
+public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<ShareInfo>>> {
 
     private final List<ShareRecipient> recipients;
 
@@ -87,7 +86,11 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
 
     /**
      * Initializes a new {@link CreatePerformer}.
-     * @param services
+     *
+     * @param recipients The share recipients to add for each target
+     * @param targets The targets to add shares for
+     * @param session The session of the sharing user
+     * @param services A service lookup reference
      */
     protected CreatePerformer(List<ShareRecipient> recipients, List<ShareTarget> targets, ServerSession session, ServiceLookup services) {
         super(session, services);
@@ -96,15 +99,20 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
     }
 
     @Override
-    protected List<GuestShare> perform() throws OXException {
-        Map<Integer, ShareRecipient> recipientsByIndex = new HashMap<Integer, ShareRecipient>();
-        int c = 0;
-        for (ShareRecipient recipient : recipients) {
-            recipientsByIndex.put(c++, recipient);
+    protected Map<ShareRecipient, List<ShareInfo>> perform() throws OXException {
+        /*
+         * distinguish between internal and external recipients
+         */
+        List<ShareRecipient> internalRecipients = filterRecipients(recipients, RecipientType.USER, RecipientType.GROUP);
+        List<ShareRecipient> externalRecipients = filterRecipients(recipients, RecipientType.ANONYMOUS, RecipientType.GUEST);
+        List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(internalRecipients.size() + externalRecipients.size());
+        for (ShareRecipient recipient : internalRecipients) {
+            InternalRecipient internal = (InternalRecipient) recipient;
+            targetPermissions.add(new TargetPermission(internal.getEntity(), internal.isGroup(), internal.getBits()));
         }
-
-        Map<Integer, ShareRecipient> internalRecipients = filterRecipients(recipientsByIndex, RecipientType.USER, RecipientType.GROUP);
-        Map<Integer, ShareRecipient> externalRecipients = filterRecipients(recipientsByIndex, RecipientType.ANONYMOUS, RecipientType.GUEST);
+        /*
+         * prepare transaction
+         */
         DatabaseService dbService = services.getService(DatabaseService.class);
         Context context = session.getContext();
         Connection writeCon = dbService.getWritable(context);
@@ -112,44 +120,52 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
         TargetUpdate update = null;
         try {
             Databases.startTransaction(writeCon);
-            /*
-             * distinguish between internal and external recipients
-             */
-            List<TargetPermission> permissions = new ArrayList<TargetPermission>(internalRecipients.size() + externalRecipients.size());
-            for (ShareRecipient recipient : internalRecipients.values()) {
-                InternalRecipient internal = (InternalRecipient) recipient;
-                permissions.add(new TargetPermission(internal.getEntity(), internal.isGroup(), internal.getBits()));
-            }
-
             update = getModuleSupport().prepareUpdate(session, writeCon);
+            /*
+             * pre-fetch targets to add owner information to targets
+             */
             update.fetch(targets);
             for (ShareTarget target : targets) {
                 TargetProxy proxy = update.get(target);
                 target.setOwnedBy(proxy.getOwner());
             }
-
-            List<GuestShare> createdShares;
-            if (externalRecipients.isEmpty()) {
-                createdShares = new ArrayList<GuestShare>(recipients.size());
-                for (int i = 0; i < recipients.size(); i++) {
-                    createdShares.add(null);
+            /*
+             * create shares & corresponding guest user entities for external recipients first
+             */
+            Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient;
+            if (0 < externalRecipients.size()) {
+                sharesPerRecipient = getShareService().addTargets(session, targets, externalRecipients);
+                /*
+                 * add appropriate target permissions for corresponding guest entities
+                 * (only need to consider the first share per recipient, since the guest's permissions will be equal for each target
+                 */
+                for (Map.Entry<ShareRecipient, List<ShareInfo>> entry : sharesPerRecipient.entrySet()) {
+                    ShareRecipient shareRecipient = entry.getKey();
+                    ShareInfo shareInfo = entry.getValue().get(0);
+                    targetPermissions.add(new TargetPermission(shareInfo.getGuest().getGuestID(), false, shareRecipient.getBits()));
                 }
             } else {
-                createdShares = addTargets(externalRecipients, permissions);
+                sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>();
             }
-
             /*
              * adjust folder & object permissions of share targets
              */
             for (ShareTarget target : targets) {
                 TargetProxy proxy = update.get(target);
-                proxy.applyPermissions(permissions);
+                proxy.applyPermissions(targetPermissions);
             }
-
+            /*
+             * execute
+             */
             update.run();
             writeCon.commit();
-
-            return createdShares;
+            /*
+             * add internal users (not affected by sharing) to the resulting list for completeness
+             */
+            for (ShareRecipient recipient : internalRecipients) {
+                sharesPerRecipient.put(recipient, null);
+            }
+            return sharesPerRecipient;
         } catch (OXException e) {
             Databases.rollback(writeCon);
             throw e;
@@ -166,46 +182,19 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
         }
     }
 
-    private List<GuestShare> addTargets(Map<Integer, ShareRecipient> externalRecipients, List<TargetPermission> permissions) throws OXException {
-        /*
-         * create shares & corresponding guest user entities for external recipients first
-         */
-        List<Integer> indices = new ArrayList<Integer>(externalRecipients.size());
-        List<ShareRecipient> shareRecipients = new ArrayList<ShareRecipient>(externalRecipients.size());
-        for (Entry<Integer, ShareRecipient> entry : externalRecipients.entrySet()) {
-            indices.add(entry.getKey());
-            shareRecipients.add(entry.getValue());
-        }
-
-        List<GuestShare> shares = getShareService().addTargets(session, targets, shareRecipients);
-        List<GuestShare> resultList = new ArrayList<GuestShare>(recipients.size());
-        for (int i = 0; i < recipients.size(); i++) {
-            resultList.add(null);
-        }
-        for (int j = 0; j < shares.size(); j++) {
-            GuestShare share = shares.get(j);
-            Integer index = indices.get(j);
-            permissions.add(new TargetPermission(share.getGuest().getGuestID(), false, shareRecipients.get(j).getBits()));
-            resultList.set(index, share);
-        }
-        return resultList;
-    }
-
     /**
      * Gets a filtered map only containing the share recipients of the specified type.
      *
      * @param recipients The recipients to filter
-     * @param types The allowed type
+     * @param types The allowed types
      * @return The filtered recipients
      */
-    private static Map<Integer, ShareRecipient> filterRecipients(Map<Integer, ShareRecipient> recipientsByIndex, RecipientType...types) {
-        Map<Integer, ShareRecipient> filteredRecipients = new HashMap<Integer, ShareRecipient>();
-        for (Entry<Integer, ShareRecipient> entry : recipientsByIndex.entrySet()) {
-            ShareRecipient recipient = entry.getValue();
-            RecipientType type = RecipientType.of(recipient);
+    private static List<ShareRecipient> filterRecipients(List<ShareRecipient> recipients, RecipientType...types) {
+        List<ShareRecipient> filteredRecipients = new ArrayList<ShareRecipient>();
+        for (ShareRecipient recipient : recipients) {
             for (RecipientType allowedType : types) {
-                if (allowedType == type) {
-                    filteredRecipients.put(entry.getKey(), recipient);
+                if (allowedType == recipient.getType()) {
+                    filteredRecipients.add(recipient);
                     break;
                 }
             }
