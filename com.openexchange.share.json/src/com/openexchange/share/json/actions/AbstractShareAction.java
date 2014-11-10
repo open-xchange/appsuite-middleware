@@ -146,8 +146,8 @@ public abstract class AbstractShareAction implements AJAXActionService {
         return prefixService.getPrefix();
     }
 
-    protected LinkProvider buildLinkProvider(AJAXRequestData requestData, String shareToken, String mailAddress) {
-        return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(requestData), getServletPrefix(), shareToken, mailAddress);
+    protected LinkProvider buildLinkProvider(AJAXRequestData requestData, String shareToken) {
+        return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(requestData), getServletPrefix(), shareToken);
     }
 
     protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {

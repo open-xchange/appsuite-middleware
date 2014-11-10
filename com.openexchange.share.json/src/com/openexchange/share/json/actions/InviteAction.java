@@ -172,14 +172,14 @@ public class InviteAction extends AbstractShareAction {
     private void sendNotification(GuestInfo guest, List<ShareInfo> createdShares, String message, AJAXRequestData requestData, ServerSession session) throws OXException {
         String shareToken = 1 == createdShares.size() ? createdShares.get(0).getToken() : guest.getBaseToken();
         try {
-            LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, guest.getEmailAddress());
+            LinkProvider linkProvider = buildLinkProvider(requestData, shareToken);
             ShareCreatedNotification<InternetAddress> notification = MailNotifications.shareCreated()
                 .setTransportInfo(new InternetAddress(guest.getEmailAddress(), true))
                 .setLinkProvider(linkProvider)
                 .setContext(guest.getContextID())
                 .setLocale(guest.getLocale())
                 .setSession(session)
-                .setRecipient(null)
+                .setGuestInfo(guest)
                 .setTargets(getTargets(createdShares))
                 .setMessage(message)
             .build();

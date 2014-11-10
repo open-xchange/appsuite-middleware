@@ -49,7 +49,6 @@
 
 package com.openexchange.share.json.actions;
 
-import static com.openexchange.osgi.Tools.requireService;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -58,21 +57,15 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.mail.MailNotifications;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
-import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -112,9 +105,7 @@ public class NotifyAction extends AbstractShareAction {
         ShareService shareService = getShareService();
         GuestShare share = TokenParser.resolveShare(token, shareService);
         List<ShareTarget> targets = TokenParser.resolveTargets(share, token);
-
-        User guest = getUserService().getUser(share.getGuest().getGuestID(), share.getGuest().getContextID());
-        ShareRecipient recipient = getRecipient(share, guest);
+        GuestInfo guestInfo = shareService.resolveGuest(token);
 
         String shareToken;
         if (share.isMultiTarget()) {
@@ -130,40 +121,19 @@ public class NotifyAction extends AbstractShareAction {
             throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
         }
 
-        LinkProvider linkProvider = buildLinkProvider(requestData, shareToken, mailAddress);
+        LinkProvider linkProvider = buildLinkProvider(requestData, shareToken);
         ShareCreatedNotification<InternetAddress> notification = MailNotifications.shareCreated()
             .setTransportInfo(internetAddress)
             .setLinkProvider(linkProvider)
             .setContext(share.getGuest().getContextID())
-            .setLocale(guest.getLocale())
+            .setLocale(guestInfo.getLocale())
             .setSession(session)
-            .setRecipient(recipient)
+            .setGuestInfo(guestInfo)
             .setTargets(targets)
             .setMessage(message)
             .build();
         getNotificationService().send(notification);
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
-    }
-
-    private ShareRecipient getRecipient(GuestShare share, User guest) throws OXException {
-        ShareRecipient recipient = null;
-        if (share.getGuest().getAuthentication() == AuthenticationMode.ANONYMOUS) {
-            AnonymousRecipient ar = new AnonymousRecipient();
-            recipient = ar;
-        } else if (share.getGuest().getAuthentication() == AuthenticationMode.ANONYMOUS_PASSWORD) {
-            AnonymousRecipient ar = new AnonymousRecipient();
-            ar.setPassword(requireService(ShareCryptoService.class, services).decrypt(guest.getUserPassword()));
-            recipient = ar;
-        } else if (share.getGuest().getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
-            GuestRecipient gr = new GuestRecipient();
-            gr.setContactFolder(Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID));
-            gr.setContactID(Integer.toString(guest.getContactId()));
-            gr.setEmailAddress(guest.getLoginInfo());
-            gr.setDisplayName(guest.getDisplayName());
-            recipient = gr;
-        }
-
-        return recipient;
     }
 
 }
