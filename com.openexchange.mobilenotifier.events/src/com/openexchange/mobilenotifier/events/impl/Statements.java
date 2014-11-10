@@ -56,13 +56,14 @@ package com.openexchange.mobilenotifier.events.impl;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Statements {
-    public static final String CREATE_SUBSCRIPTION = "INSERT INTO mobileNotifierSubscriptions (cid, service, token, provider, user, timestamp) VALUES(?, ?, ?, ?, ?, ?)";
+    public static final String REPLACE_SUBSCRIPTION =
+        "REPLACE INTO mobileEventSubscriptions (cid,service,token,provider,user,timestamp) " +
+        "VALUES (?,?,?,?,?,?);";
 
-    //TODO: token identical on one device?
-    public static final String UPDATE_TOKEN = "UPDATE mobileNotifierSubscriptions SET token=? WHERE cid=? AND service=? AND token=? AND provider=?";
+    public static final String UPDATE_TOKEN = "UPDATE mobileEventSubscriptions "
+        + "SET token=?, timestamp=? "
+        + "WHERE cid=? AND service=? AND provider=? AND token=? ";
 
-    public static final String DELETE_TOKENS = "DELETE FROM mobileNotifierSubscriptions WHERE cid=? AND service=? AND token=?";
-
-    public static final String DELETE_TOKEN_BY_PROVIDER = "DELETE FROM mobileNotifierSubscriptions WHERE cid=? AND service=? AND token=? AND provider=?";
-
+    public static final String DELETE_TOKEN_BY_PROVIDER = "DELETE FROM mobileEventSubscriptions "
+        + "WHERE cid=? AND userid=? AND service=? AND provider=? AND token=?";
 }
