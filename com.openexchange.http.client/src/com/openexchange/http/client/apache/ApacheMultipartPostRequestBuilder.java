@@ -55,7 +55,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
@@ -64,7 +63,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePartSource;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.PartSource;
-
+import org.apache.commons.httpclient.methods.multipart.StringPart;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -76,14 +75,14 @@ public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<H
 
 	private ManagedFileManagement fileManager;
 	private List<Part> parts = new ArrayList<Part>();
-	
+
 	private List<ManagedFile> managedFiles = new ArrayList<ManagedFile>();
-	
+
 	public ApacheMultipartPostRequestBuilder(
 			ApacheClientRequestBuilder coreBuilder, ManagedFileManagement fileManager) {
 		super(coreBuilder);
 		this.fileManager = fileManager;
-		
+
 	}
 
 	@Override
@@ -131,15 +130,21 @@ public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<H
 	}
 
 	@Override
+    public HTTPMultipartPostRequestBuilder stringPart(String fieldName, String fieldValue) {
+        parts.add(new StringPart(fieldName, fieldValue, "UTF-8"));
+        return this;
+    }
+
+	@Override
 	protected HttpMethodBase createMethod(String encodedSite) {
 		PostMethod m = new PostMethod(encodedSite);
-		
+
 		MultipartRequestEntity multipart = new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), m.getParams());
 		m.setRequestEntity( multipart );
-		
+
 		return m;
 	}
-	
+
 	private PartSource partSource(String filename, InputStream is) throws OXException {
 		try {
 			ManagedFile managedFile = fileManager.createManagedFile(is);
@@ -149,7 +154,7 @@ public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<H
 			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 		}
 	}
-	
+
 	@Override
 	public void done() {
 		for (ManagedFile managedFile : managedFiles) {
