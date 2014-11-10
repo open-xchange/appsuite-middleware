@@ -56,6 +56,8 @@ import com.openexchange.tools.file.external.FileStorageFactory;
 
 /**
  * {@link LocalFileStorageFactory} - The local file storage factory.
+ * <p>
+ * Currently only used for testing.
  */
 public class LocalFileStorageFactory implements FileStorageFactory {
 
