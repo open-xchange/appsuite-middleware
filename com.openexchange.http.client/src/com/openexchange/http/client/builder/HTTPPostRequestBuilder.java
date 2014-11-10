@@ -49,6 +49,12 @@
 
 package com.openexchange.http.client.builder;
 
+
 public interface HTTPPostRequestBuilder extends HTTPGenericRequestBuilder<HTTPPostRequestBuilder> {
+
+    /**
+     * @param requestEntity
+     */
+    void setRequestEntity(String requestEntity, String contentType);
 
 }

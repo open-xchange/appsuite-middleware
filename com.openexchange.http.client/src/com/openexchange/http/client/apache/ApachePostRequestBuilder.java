@@ -49,12 +49,17 @@
 
 package com.openexchange.http.client.apache;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
 
 public class ApachePostRequestBuilder extends CommonApacheHTTPRequest<HTTPPostRequestBuilder>implements HTTPPostRequestBuilder {
+
+    private RequestEntity requestEntity = null;;
 
 	public ApachePostRequestBuilder(final ApacheClientRequestBuilder coreBuilder) {
 		super(coreBuilder);
@@ -62,7 +67,11 @@ public class ApachePostRequestBuilder extends CommonApacheHTTPRequest<HTTPPostRe
 
 	@Override
 	protected HttpMethodBase createMethod(final String encodedSite) {
-		return new PostMethod(encodedSite);
+	    PostMethod method = new PostMethod(encodedSite);
+	    if (null != requestEntity) {
+	        method.setRequestEntity(requestEntity);
+	    }
+		return method;
 	}
 
 	@Override
@@ -73,6 +82,15 @@ public class ApachePostRequestBuilder extends CommonApacheHTTPRequest<HTTPPostRe
 			pm.setParameter(entry.getKey(), entry.getValue());
 		}
 	}
+
+	@Override
+    public void setRequestEntity(String requestEntity, String contentType) {
+        try {
+            this.requestEntity = new StringRequestEntity(requestEntity, contentType, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Won't happen
+        }
+    }
 
 
 }
