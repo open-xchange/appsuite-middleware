@@ -67,9 +67,6 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageGuestObjectPermission;
-import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -82,7 +79,7 @@ import com.openexchange.test.CalendarTestManager;
 /**
  * {@link BasicAuthTest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class BasicAuthTest extends ShareTest {
 
@@ -263,80 +260,6 @@ public class BasicAuthTest extends ShareTest {
         assertNotNull("No file downloaded", entity);
         byte[] downloadedFile = EntityUtils.toByteArray(entity);
         Assert.assertNotNull(downloadedFile);
-    }
-
-    private void testCreateSharedFolder(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
-        testCreateSharedFolder(api, module, getDefaultFolder(module), guestPermission);
-    }
-
-    private void testCreateSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
-        /*
-         * create folder shared to guest user
-         */
-        FolderObject folder = insertSharedFolder(api, module, parent, guestPermission);
-        /*
-         * check permissions
-         */
-        OCLPermission matchingPermission = null;
-        for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
-                matchingPermission = permission;
-                break;
-            }
-        }
-        assertNotNull("No matching permission in created folder found", matchingPermission);
-        checkPermissions(guestPermission, matchingPermission);
-
-
-
-
-
-        /*
-         * discover & check share
-         */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
-        /*
-         * check access to share
-         */
-        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
-        guestClient.checkShareModuleAvailable();
-        guestClient.checkShareAccessible(guestPermission);
-    }
-
-    private void testCreateSharedFile(EnumAPI api, FileStorageGuestObjectPermission guestPermission) throws Exception {
-        testCreateSharedFile(api, getDefaultFolder(FolderObject.INFOSTORE), guestPermission);
-    }
-
-    private void testCreateSharedFile(EnumAPI api, int parent, FileStorageGuestObjectPermission guestPermission) throws Exception {
-        /*
-         * create folder and a shared file inside
-         */
-        FolderObject folder = insertPrivateFolder(api, FolderObject.INFOSTORE, parent);
-        File file = insertSharedFile(folder.getObjectID(), guestPermission);
-        /*
-         * check permissions
-         */
-        FileStorageObjectPermission matchingPermission = null;
-        for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
-                matchingPermission = permission;
-                break;
-            }
-        }
-        assertNotNull("No matching permission in created file found", matchingPermission);
-        checkPermissions(guestPermission, matchingPermission);
-        /*
-         * discover & check share
-         */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
-        checkShare(guestPermission, share);
-        /*
-         * check access to share
-         */
-        GuestClient guestClient =  resolveShare(share, guestPermission.getRecipient());
-        guestClient.checkShareModuleAvailable();
-        guestClient.checkShareAccessible(guestPermission);
     }
 
 }
