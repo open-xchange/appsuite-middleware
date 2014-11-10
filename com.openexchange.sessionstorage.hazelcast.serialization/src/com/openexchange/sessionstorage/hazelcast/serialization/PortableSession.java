@@ -49,18 +49,12 @@
 
 package com.openexchange.sessionstorage.hazelcast.serialization;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.lang.SerializationException;
-import org.apache.commons.lang.SerializationUtils;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -121,10 +115,6 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_ALT_ID = "altId";
     public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
-    public static final String PARAMETER_SERIALIZABLE_PARAMETER_NAMES = "remoteSerializableParameterNames";
-
-    // must not contain a colon in every name!
-    private static final String[] PORTABLE_PARAMETERS = new String[] { "kerberosSubject", "kerberosPrincipal" };
 
     /**
      * Initializes a new {@link PortableSession}.
@@ -178,38 +168,32 @@ public class PortableSession extends StoredSession implements CustomPortable {
             writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
         }
         {
-            List<String> remoteParameterNames = new ArrayList<String>();
-            remoteParameterNames.addAll(SessionStorageConfiguration.getInstance().getRemoteParameterNames());
-            remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
+            List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
             if (remoteParameterNames.isEmpty()) {
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
             } else {
-                StringAppender names = new StringAppender(':');
-                StringAppender values = new StringAppender(':');
-                StringAppender serializableNames = new StringAppender(':');
+                StringAppender names = null;
+                StringAppender values = null;
                 for (String parameterName : remoteParameterNames) {
                     Object value = parameters.get(parameterName);
                     if (value instanceof String) {
+                        String sValue = value.toString();
+                        if (null == names) {
+                            int capacity = remoteParameterNames.size() << 4;
+                            names = new StringAppender(':', capacity);
+                            values = new StringAppender(':', capacity);
+                        }
                         names.append(parameterName);
-                        values.append(getSafeValue(value.toString()));
-                    } else if (value instanceof Serializable) {
-                        serializableNames.append(parameterName);
-                        byte[] bytes = SerializationUtils.serialize((Serializable) value);
-                        writer.writeByteArray(parameterName, bytes);
+                        values.append(getSafeValue(sValue));
                     }
                 }
-                if (0 == names.length()) {
+                if (null == names) {
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
                 } else {
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
-                }
-                if (0 == serializableNames.length()) {
-                    writer.writeUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES, null);
-                } else {
-                    writer.writeUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES, serializableNames.toString());
                 }
             }
         }
@@ -252,36 +236,6 @@ public class PortableSession extends StoredSession implements CustomPortable {
                         parameters.put(names.get(i), decodeSafeValue(values.get(i)));
                     } catch (DecoderException e) {
                         // Ignore
-                    }
-                }
-            }
-        }
-        {
-            String serializableNames = reader.readUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES);
-            if (null != serializableNames) {
-                List<String> names = parseColonString(serializableNames);
-                for (String name : names) {
-                    ByteArrayInputStream bais = null;
-                    ObjectInputStream ois = null;
-                    try {
-                        byte[] bytes = reader.readByteArray(name);
-                        bais = new ByteArrayInputStream(bytes);
-                        ois = new ObjectInputStream(bais);
-                        Object value = ois.readObject();
-                        parameters.put(name, value);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (SerializationException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (null != ois) {
-                            ois.close();
-                        }
-                        if (null != bais) {
-                            bais.close();
-                        }
                     }
                 }
             }
