@@ -7,3 +7,6 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Fragment-Host: ch.qos.logback.classic;bundle-version="[1.0.13,2.0.0)"
 Bundle-ClassPath: .
+Import-Package: com.fasterxml.jackson.core,
+ org.apache.commons.io,
+ org.apache.commons.lang.time
