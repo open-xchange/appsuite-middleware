@@ -136,6 +136,7 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
             stmt.setString(1, newToken);
             stmt.setLong(2, subscription.getTimestamp());
             stmt.setInt(3, subscription.getContextId());
+            stmt.setInt(3, subscription.getUserId());
             stmt.setString(4, subscription.getServiceId());
             stmt.setString(5, subscription.getProviderName());
             stmt.setString(6, subscription.getToken());

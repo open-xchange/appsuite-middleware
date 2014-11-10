@@ -62,8 +62,8 @@ public class Statements {
 
     public static final String UPDATE_TOKEN = "UPDATE mobileEventSubscriptions "
         + "SET token=?, timestamp=? "
-        + "WHERE cid=? AND service=? AND provider=? AND token=? ";
+        + "WHERE cid=? AND user=? AND service=? AND provider=? AND token=? ";
 
     public static final String DELETE_TOKEN_BY_PROVIDER = "DELETE FROM mobileEventSubscriptions "
-        + "WHERE cid=? AND userid=? AND service=? AND provider=? AND token=?";
+        + "WHERE cid=? AND user=? AND service=? AND provider=? AND token=?";
 }
