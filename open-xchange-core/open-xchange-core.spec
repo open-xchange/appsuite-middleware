@@ -1109,6 +1109,14 @@ ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/op
 ox_add_property com.openexchange.ajax.login.maxRateTimeWindow 300000 /opt/open-xchange/etc/login.properties
 ox_add_property com.openexchange.ajax.login.maxRate 50 /opt/open-xchange/etc/login.properties
 
+# SoftwareChange_Request-2243
+if [ ${1:-0} -eq 2 ]; then
+    VALUE=$(ox_read_property com.openexchange.servlet.maxRate $PFILE)
+    if [ "500" = "$VALUE" ]; then
+        ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
+    fi
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
