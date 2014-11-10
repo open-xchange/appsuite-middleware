@@ -66,7 +66,7 @@ public class Statements {
         "provider VARCHAR(64) NOT NULL, " +
         "user INT4 UNSIGNED NOT NULL, " +
         "timestamp BIGINT(20) NOT NULL, " +
-        "PRIMARY KEY (cid,service,token), " +
+        "PRIMARY KEY (cid,service,token,provider), " +
         "INDEX (cid,service,token,provider) " +
     ") ENGINE=InnoDB DEFAULT CHARSET=ascii; ";
 

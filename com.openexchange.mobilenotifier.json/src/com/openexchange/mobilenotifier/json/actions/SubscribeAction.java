@@ -83,7 +83,7 @@ public class SubscribeAction extends AbstractMobileNotifierAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("token");
         }
 
-        //the service id
+        //the service id (apn, apn.macos, gcm)
         String serviceId = req.getParameter("serviceId");
         if(Strings.isEmpty(serviceId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("serviceId");
