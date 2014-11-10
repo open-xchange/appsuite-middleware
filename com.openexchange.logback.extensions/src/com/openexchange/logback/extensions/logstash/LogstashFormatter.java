@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.util.Map;
 import org.apache.commons.lang.time.FastDateFormat;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.spi.LifeCycle;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -105,6 +106,11 @@ public class LogstashFormatter implements LifeCycle {
         generator.writeStringField(LogstashFieldName.loggerName.getLogstashName(), event.getLoggerName());
         generator.writeStringField(LogstashFieldName.threadName.getLogstashName(), event.getThreadName());
         generator.writeStringField(LogstashFieldName.message.getLogstashName(), event.getFormattedMessage());
+        if (event.getThrowableProxy() != null) {
+            generator.writeStringField(
+                LogstashFieldName.stacktrace.getLogstashName(),
+                ThrowableProxyUtil.asString(event.getThrowableProxy()));
+        }
         Map<String, String> mdc = event.getMDCPropertyMap();
         for (String key : mdc.keySet()) {
             generator.writeFieldName(key);
