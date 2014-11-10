@@ -1120,6 +1120,9 @@ fi
 # SoftwareChange_Request-2245
 ox_add_property com.openexchange.sessiond.useDistributedTokenSessions false /opt/open-xchange/etc/sessiond.properties
 
+# SoftwareChange_Request-2110
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
