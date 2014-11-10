@@ -109,7 +109,7 @@ public class InviteAction extends AbstractShareAction {
                 if (share == null) {
                     jTokens.put(JSONObject.NULL);
                 } else {
-                    jTokens.put(share.getBaseToken());
+                    jTokens.put(share.getGuest().getBaseToken());
                 }
             }
 
@@ -138,12 +138,12 @@ public class InviteAction extends AbstractShareAction {
                         {
                             String shareToken;
                             if (share.isMultiTarget()) {
-                                shareToken = share.getBaseToken();
+                                shareToken = share.getGuest().getBaseToken();
                             } else {
-                                shareToken = share.getBaseToken() + '/' + share.getSingleTarget().getPath();
+                                shareToken = share.getGuest().getBaseToken() + '/' + share.getSingleTarget().getPath();
                             }
 
-                            User guest = userService.getUser(share.getGuestID(), session.getContextId());
+                            User guest = userService.getUser(share.getGuest().getGuestID(), session.getContextId());
                             String mailAddress = guest.getMail();
 
                             if (!Strings.isEmpty(mailAddress)) {

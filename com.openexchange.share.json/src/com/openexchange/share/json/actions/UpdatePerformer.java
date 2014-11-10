@@ -124,16 +124,16 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
             Databases.startTransaction(writeCon);
             List<ShareTarget> modifiedTargets = buildModifiedTargets(share, targetsToUpdate);
             updatePermissions(share, modifiedTargets, writeCon);
-            getShareService().updateTargets(session, modifiedTargets, share.getGuestID(), clientLastModified);
+            getShareService().updateTargets(session, modifiedTargets, share.getGuest().getGuestID(), clientLastModified);
             boolean invalidateGuestUser = false;
-            if (updateRecipient(writeCon, share.getGuestID())) {
+            if (updateRecipient(writeCon, share.getGuest().getGuestID())) {
                 invalidateGuestUser = true;
             }
 
             writeCon.commit();
 
             if (invalidateGuestUser) {
-                getUserService().invalidateUser(context, share.getGuestID());
+                getUserService().invalidateUser(context, share.getGuest().getGuestID());
             }
 
             return null;
@@ -214,7 +214,7 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
                     }
                 }
 
-                List<TargetPermission> targetPermissions = Collections.singletonList(new TargetPermission(share.getGuestID(), false, permissions));
+                List<TargetPermission> targetPermissions = Collections.singletonList(new TargetPermission(share.getGuest().getGuestID(), false, permissions));
                 ShareTargetDiff targetDiff = new ShareTargetDiff(origTargets, modifiedTargets);
                 if (targetDiff.hasDifferences()) {
                     TargetUpdate update = getModuleSupport().prepareUpdate(session, writeCon);

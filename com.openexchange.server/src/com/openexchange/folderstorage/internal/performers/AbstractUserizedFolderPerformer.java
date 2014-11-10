@@ -477,7 +477,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
                 }
                 for (int i = 0; i < shares.size(); i++) {
-                    permissions.get(i).setEntity(shares.get(i).getGuestID());
+                    permissions.get(i).setEntity(shares.get(i).getGuest().getGuestID());
                 }
             }
         } finally {

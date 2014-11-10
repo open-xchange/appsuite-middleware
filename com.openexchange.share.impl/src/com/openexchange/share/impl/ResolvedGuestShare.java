@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
@@ -71,10 +71,9 @@ import com.openexchange.share.groupware.ModuleSupport;
  */
 public class ResolvedGuestShare implements GuestShare {
 
-    protected final int contextID;
-    protected final User guestUser;
     protected final List<ShareTarget> targets;
     protected ServiceLookup services;
+    private final DefaultGuestInfo guestInfo;
 
     /**
      * Initializes a new {@link ResolvedGuestShare}.
@@ -103,8 +102,7 @@ public class ResolvedGuestShare implements GuestShare {
     public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares, boolean adjustTargets) throws OXException {
         super();
         this.services = services;
-        this.contextID = contextID;
-        this.guestUser = guestUser;
+        this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser);
         ModuleSupport moduleSupport = adjustTargets ? services.getService(ModuleSupport.class) : null;;
         this.targets = new ArrayList<ShareTarget>(shares.size());
         for (Share share : shares) {
@@ -120,13 +118,8 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
-    public int getGuestID() {
-        return guestUser.getId();
-    }
-
-    @Override
-    public int getContextID() {
-        return contextID;
+    public GuestInfo getGuest() {
+        return guestInfo;
     }
 
     @Override
@@ -135,18 +128,8 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
-    public AuthenticationMode getAuthentication() {
-        return ShareTool.getAuthenticationMode(guestUser);
-    }
-
-    @Override
-    public String getBaseToken() throws OXException {
-        return new ShareToken(contextID, guestUser).getToken();
-    }
-
-    @Override
     public String getToken(ShareTarget target) throws OXException {
-        return getBaseToken() + '/' + target.getPath();
+        return guestInfo.getBaseToken() + '/' + target.getPath();
     }
 
     @Override
@@ -213,10 +196,10 @@ public class ResolvedGuestShare implements GuestShare {
     public String getShareURL(String protocol, String fallbackHostname, ShareTarget target) throws OXException {
         StringBuilder stringBuilder = new StringBuilder()
             .append(null == protocol ? "https://" : protocol)
-            .append(getHostname(guestUser.getCreatedBy(), contextID, fallbackHostname))
+            .append(getHostname(guestInfo.getCreatedBy(), guestInfo.getContextID(), fallbackHostname))
             .append(getServletPrefix())
             .append(ShareTool.SHARE_SERVLET).append('/')
-            .append(getBaseToken());
+            .append(guestInfo.getBaseToken());
         if (null != target) {
             stringBuilder.append('/').append(target.getPath());
         }
@@ -243,7 +226,7 @@ public class ResolvedGuestShare implements GuestShare {
 
     @Override
     public String toString() {
-        return "ResolvedGuestShare [contextID=" + contextID + ", guestUser=" + guestUser + ", targets=" + targets + "]";
+        return "ResolvedGuestShare [contextID=" + guestInfo.getContextID() + ", guestUser=" + guestInfo.getGuestID() + ", targets=" + targets + "]";
     }
 
 }

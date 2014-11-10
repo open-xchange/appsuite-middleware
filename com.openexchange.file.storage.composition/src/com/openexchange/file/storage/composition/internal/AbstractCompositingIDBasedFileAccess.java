@@ -836,7 +836,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 for (int i = 0; i < guestPermissions.size(); i++) {
                     FileStorageGuestObjectPermission guestPermission = guestPermissions.get(0);
                     GuestShare share = shares.get(i);
-                    allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuestID(), false, guestPermission.getPermissions()));
+                    allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuest().getGuestID(), false, guestPermission.getPermissions()));
                 }
 
                 List<FileStorageObjectPermission> objectPermissions = document.getObjectPermissions();

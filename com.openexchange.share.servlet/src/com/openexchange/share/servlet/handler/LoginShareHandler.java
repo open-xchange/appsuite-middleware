@@ -109,7 +109,7 @@ public class LoginShareHandler extends AbstractShareHandler {
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      */
     private boolean handles(GuestShare share) {
-        AuthenticationMode authentication = share.getAuthentication();
+        AuthenticationMode authentication = share.getGuest().getAuthentication();
         return null != authentication && (AuthenticationMode.ANONYMOUS_PASSWORD == authentication || AuthenticationMode.GUEST_PASSWORD == authentication);
     }
 }

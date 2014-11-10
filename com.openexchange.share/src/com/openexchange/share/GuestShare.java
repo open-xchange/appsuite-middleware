@@ -61,32 +61,11 @@ import com.openexchange.exception.OXException;
 public interface GuestShare {
 
     /**
-     * Gets the identifier of the guest user.
+     * Gets additional information about the guest user the share is associated with.
      *
-     * @return The guest user ID
+     * @return The guest information
      */
-    int getGuestID();
-
-    /**
-     * Gets the identifier of the context of the guest.
-     *
-     * @return The context ID
-     */
-    int getContextID();
-
-    /**
-     * Gets the authentication mode used for the guest user.
-     *
-     * @return The authentication mode
-     */
-    AuthenticationMode getAuthentication();
-
-    /**
-     * Gets the base token associated with the share's guest user.
-     *
-     * @return The base token
-     */
-    String getBaseToken() throws OXException;
+    GuestInfo getGuest();
 
     /**
      * Gets the (absolute) token for one of the guest share's targets, i.e. the base token plus the target path.

@@ -146,7 +146,7 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
         }
 
         // Resolve user...
-        User user = userService.getUser(share.getGuestID(), context);
+        User user = userService.getUser(share.getGuest().getGuestID(), context);
         // ... and obtain user's decrypted password
         String decryptedPassword = cryptoService.decrypt(user.getUserPassword());
 

@@ -165,7 +165,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
 
                     // Check for matching authentication mode
-                    if (false == checkAuthenticationMode(share.getAuthentication())) {
+                    if (false == checkAuthenticationMode(share.getGuest().getAuthentication())) {
                         throw INVALID_CREDENTIALS.create();
                     }
 
@@ -185,14 +185,14 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                             throw ServiceExceptionCode.absentService(ContextService.class);
                         }
 
-                        context = contextService.getContext(share.getContextID());
+                        context = contextService.getContext(share.getGuest().getContextID());
                     }
 
                     // Resolve & authenticate user
                     User user = authenticateUser(share, loginInfo, context);
 
                     // Pass to basic authentication service in case more handling needed
-                    Authenticated  authenticated = basicService.handleLoginInfo(share.getGuestID(), share.getContextID());
+                    Authenticated  authenticated = basicService.handleLoginInfo(share.getGuest().getGuestID(), share.getGuest().getContextID());
                     if (null == authenticated) {
                         return null;
                     }

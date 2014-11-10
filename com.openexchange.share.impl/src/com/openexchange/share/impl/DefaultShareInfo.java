@@ -53,7 +53,6 @@ import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 
@@ -67,8 +66,6 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
 
     private final Share share;
 
-    private final GuestInfo guestInfo;
-
     /**
      * Initializes a new {@link DefaultShareInfo}.
      *
@@ -81,7 +78,6 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
     public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share) throws OXException {
         super(services, contextID, guestUser, Collections.singletonList(share));
         this.share = share;
-        this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, getBaseToken());
     }
 
     @Override
@@ -94,14 +90,4 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
         return super.getToken(share.getTarget());
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws OXException
-     * @Override
-     */
-    @Override
-    public GuestInfo getGuest() {
-        return guestInfo;
-    }
 }

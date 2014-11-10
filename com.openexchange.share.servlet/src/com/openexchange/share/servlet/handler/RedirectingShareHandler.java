@@ -140,7 +140,7 @@ public class RedirectingShareHandler extends HttpAuthShareHandler {
              * construct & send redirect
              */
             String url = getRedirectURL(resolvedShare.getSession(), resolvedShare.getUser(), resolvedShare.getShare(), resolvedShare.getTarget(), resolvedShare.getLoginConfig());
-            LOG.info("Redirecting share {} to {}...", resolvedShare.getShare().getBaseToken(), url);
+            LOG.info("Redirecting share {} to {}...", resolvedShare.getShare().getGuest().getBaseToken(), url);
             response.sendRedirect(url);
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

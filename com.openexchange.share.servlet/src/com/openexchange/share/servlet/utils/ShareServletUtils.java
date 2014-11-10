@@ -69,6 +69,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
@@ -107,8 +108,9 @@ public final class ShareServletUtils {
         /*
          * parse login request
          */
-        Context context = ShareServiceLookup.getService(UserService.class, true).getContext(share.getContextID());
-        User user = ShareServiceLookup.getService(UserService.class, true).getUser(share.getGuestID(), context);
+        GuestInfo guestInfo = share.getGuest();
+        Context context = ShareServiceLookup.getService(UserService.class, true).getContext(guestInfo.getContextID());
+        User user = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getGuestID(), context);
         String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
         LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
             loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false, additionalsForHash);
@@ -123,7 +125,7 @@ public final class ShareServletUtils {
             loginMethod.sendUnauthorized(request, response);
             return null;
         }
-        LOG.debug("Successful login for share {} with guest user {} in context {}.", share.getBaseToken(), share.getGuestID(), share.getContextID());
+        LOG.debug("Successful login for share {} with guest user {} in context {}.", guestInfo.getBaseToken(), guestInfo.getGuestID(), guestInfo.getContextID());
         loginResult.getSession().setParameter(Session.PARAM_GUEST, Boolean.TRUE);
         return loginResult;
     }

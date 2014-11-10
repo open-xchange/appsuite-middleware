@@ -770,6 +770,6 @@ public class DefaultShareService implements ShareService {
             }
             throw e;
         }
-        return new DefaultGuestInfo(services, contextID, guestUser, token);
+        return new DefaultGuestInfo(services, guestUser, shareToken);
     }
 }

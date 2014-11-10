@@ -67,10 +67,9 @@ public interface ShareInfo {
     Share getShare();
 
     /**
-     * Returns the information to the guest this ShareInfo is based on.
+     * Gets additional information about the guest user the share is associated with.
      *
-     * @return
-     * @throws OXException
+     * @return The guest information
      */
     GuestInfo getGuest() throws OXException;
 

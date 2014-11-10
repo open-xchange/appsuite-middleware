@@ -185,7 +185,7 @@ public class CreatePerformer extends AbstractPerformer<List<GuestShare>> {
         for (int j = 0; j < shares.size(); j++) {
             GuestShare share = shares.get(j);
             Integer index = indices.get(j);
-            permissions.add(new TargetPermission(share.getGuestID(), false, shareRecipients.get(j).getBits()));
+            permissions.add(new TargetPermission(share.getGuest().getGuestID(), false, shareRecipients.get(j).getBits()));
             resultList.set(index, share);
         }
         return resultList;

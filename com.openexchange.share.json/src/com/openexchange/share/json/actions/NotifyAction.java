@@ -110,16 +110,16 @@ public class NotifyAction extends AbstractShareAction {
         GuestShare share = TokenParser.resolveShare(token, shareService);
         List<ShareTarget> targets = TokenParser.resolveTargets(share, token);
 
-        User guest = getUserService().getUser(share.getGuestID(), share.getContextID());
+        User guest = getUserService().getUser(share.getGuest().getGuestID(), share.getGuest().getContextID());
         ShareRecipient recipient = null;
-        if (share.getAuthentication() == AuthenticationMode.ANONYMOUS) {
+        if (share.getGuest().getAuthentication() == AuthenticationMode.ANONYMOUS) {
             AnonymousRecipient ar = new AnonymousRecipient();
             recipient = ar;
-        } else if (share.getAuthentication() == AuthenticationMode.ANONYMOUS_PASSWORD) {
+        } else if (share.getGuest().getAuthentication() == AuthenticationMode.ANONYMOUS_PASSWORD) {
             AnonymousRecipient ar = new AnonymousRecipient();
             ar.setPassword(requireService(ShareCryptoService.class, services).decrypt(guest.getUserPassword()));
             recipient = ar;
-        } else if (share.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
+        } else if (share.getGuest().getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
             GuestRecipient gr = new GuestRecipient();
             gr.setContactFolder(Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID));
             gr.setContactID(Integer.toString(guest.getContactId()));
@@ -130,9 +130,9 @@ public class NotifyAction extends AbstractShareAction {
 
         String shareToken;
         if (share.isMultiTarget()) {
-            shareToken = share.getBaseToken();
+            shareToken = share.getGuest().getBaseToken();
         } else {
-            shareToken = share.getBaseToken() + '/' + share.getSingleTarget().getPath();
+            shareToken = share.getGuest().getBaseToken() + '/' + share.getSingleTarget().getPath();
         }
 
         ShareNotificationService notificationService = getNotificationService();

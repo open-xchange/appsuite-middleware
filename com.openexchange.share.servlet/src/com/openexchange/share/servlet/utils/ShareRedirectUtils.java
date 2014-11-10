@@ -58,6 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
@@ -80,19 +81,18 @@ public class ShareRedirectUtils {
      * @throws OXException
      */
     public static String getRedirectUrl(final GuestShare share, final ShareTarget target, final LoginConfiguration loginConfiguration) throws OXException {
-        int contextId = share.getContextID();
-        int guestId = share.getGuestID();
+        GuestInfo guestInfo = share.getGuest();
         String loginPageLink = getLoginPageUrl(loginConfiguration);
 
         // Build URL
         StringBuilder url = new StringBuilder(loginPageLink);
 
         // Start fragment portion
-        url.append('#').append("share=").append(urlEncode(share.getBaseToken()));
+        url.append('#').append("share=").append(urlEncode(guestInfo.getBaseToken()));
         if (null != target) {
             url.append('&').append("target=").append(urlEncode(target.getPath()));
         }
-        if (AuthenticationMode.ANONYMOUS_PASSWORD == share.getAuthentication()) {
+        if (AuthenticationMode.ANONYMOUS_PASSWORD == guestInfo.getAuthentication()) {
             url.append('&').append("login_type=anonymous");
         } else {
             url.append('&').append("login_type=guest");
@@ -100,7 +100,7 @@ public class ShareRedirectUtils {
             {
                 // Special anonymous guests do not have a E-Mail address applied
                 UserService service = ShareServiceLookup.getService(UserService.class);
-                User user = service.getUser(guestId, contextId);
+                User user = service.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
                 mail = user.getMail();
             }
             url.append('&').append("login_name=").append(urlEncode(mail));

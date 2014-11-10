@@ -61,14 +61,14 @@ import com.openexchange.share.recipient.RecipientType;
 public interface GuestInfo {
 
     /**
-     * Gets the authentication mode used for the share's guest user.
+     * Gets the authentication mode used for the guest user.
      *
      * @return The authentication mode
      */
     AuthenticationMode getAuthentication();
 
     /**
-     * Gets the base token associated with the share's guest user.
+     * Gets the base token associated with the guest user.
      *
      * @return The base token
      */
@@ -95,8 +95,25 @@ public interface GuestInfo {
      */
     RecipientType getRecipientType();
 
+    /**
+     * Gets the user identifier of the guest.
+     *
+     * @return The guest user identifier
+     */
     int getGuestID();
 
+    /**
+     * Gets the identifier of the context this guest user belongs to.
+     *
+     * @return The context identifier
+     */
     int getContextID();
+
+    /**
+     * Gets the identifier of the user who initially created the guest user.
+     *
+     * @return The identifier of the user who initially created the guest
+     */
+    int getCreatedBy();
 
 }

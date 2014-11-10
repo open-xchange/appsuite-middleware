@@ -120,10 +120,10 @@ public class DeletePerformer extends AbstractPerformer<Void> {
             for (String token : tokens) {
                 GuestShare guestShare = TokenParser.resolveShare(token, shareService);
                 List<ShareTarget> targets = TokenParser.resolveTargets(guestShare, token);
-                List<ShareTarget> targetsToDelete = targetsByGuest.get(guestShare.getGuestID());
+                List<ShareTarget> targetsToDelete = targetsByGuest.get(guestShare.getGuest().getGuestID());
                 if (targetsToDelete == null) {
                     targetsToDelete = new ArrayList<ShareTarget>(guestShare.getTargets().size());
-                    targetsByGuest.put(guestShare.getGuestID(), targetsToDelete);
+                    targetsByGuest.put(guestShare.getGuest().getGuestID(), targetsToDelete);
                 }
 
                 for (ShareTarget target : targets) {
@@ -134,7 +134,7 @@ public class DeletePerformer extends AbstractPerformer<Void> {
                         guestsByTarget.put(target, guestIDs);
                     }
 
-                    guestIDs.add(guestShare.getGuestID());
+                    guestIDs.add(guestShare.getGuest().getGuestID());
                 }
             }
 

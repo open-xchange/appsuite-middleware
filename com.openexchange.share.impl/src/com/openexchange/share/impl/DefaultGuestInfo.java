@@ -70,23 +70,34 @@ public class DefaultGuestInfo implements GuestInfo {
 
     private final User guestUser;
 
-    private int contextID;
+    private final int contextID;
 
-    private String token;
+    private final String token;
 
     /**
      * Initializes a new {@link DefaultGuestInfo}.
      *
-     * @param services - the ServiceLookup
-     * @param contextID - the contextID
-     * @param guestUser - the user
-     * @param token - the token
+     * @param services A servie lookup reference
+     * @param contextID The identifier of the context this guest user belongs to
+     * @param guestUser The guest user
      */
-    public DefaultGuestInfo(ServiceLookup services, int contextID, User guestUser, String token) {
+    public DefaultGuestInfo(ServiceLookup services, int contextID, User guestUser) throws OXException {
+        this(services, guestUser, new ShareToken(contextID, guestUser));
+    }
+
+    /**
+     * Initializes a new {@link DefaultGuestInfo}.
+     *
+     * @param services A servie lookup reference
+     * @param guestUser The guest user
+     * @param shareToken The share token
+     */
+    public DefaultGuestInfo(ServiceLookup services, User guestUser, ShareToken shareToken) {
+        super();
         this.services = services;
         this.guestUser = guestUser;
-        this.contextID = contextID;
-        this.token = token;
+        this.contextID = shareToken.getContextID();
+        this.token = shareToken.getToken();
     }
 
     /**
@@ -160,5 +171,10 @@ public class DefaultGuestInfo implements GuestInfo {
     @Override
     public int getContextID() {
         return contextID;
+    }
+
+    @Override
+    public int getCreatedBy() {
+        return guestUser.getCreatedBy();
     }
 }
