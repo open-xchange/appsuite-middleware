@@ -1385,7 +1385,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     /**
      * Loads all filestore information. BEWARE! If loadRealUsage is set to <code>true</code> this operation may be very expensive because
      * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
-     * the read usage of the filestore to 0.
+     * the real usage of the filestore to 0.
      *
      * @param id unique identifier of the filestore.
      * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
