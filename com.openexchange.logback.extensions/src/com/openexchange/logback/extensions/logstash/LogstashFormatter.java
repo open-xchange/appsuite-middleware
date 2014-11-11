@@ -100,22 +100,35 @@ public class LogstashFormatter implements LifeCycle {
     public void writeToStream(ILoggingEvent event, OutputStream outputStream) throws IOException {
         JsonGenerator generator = new JsonFactory().createGenerator(outputStream);
         generator.writeStartObject();
+        
         generator.writeStringField(LogstashFieldName.timestamp.getLogstashName(), LOGSTASH_TIMEFORMAT.format(event.getTimeStamp()));
         generator.writeNumberField(LogstashFieldName.version.getLogstashName(), 1);
+        
+        // Logger
         generator.writeStringField(LogstashFieldName.level.getLogstashName(), event.getLevel().levelStr);
         generator.writeStringField(LogstashFieldName.loggerName.getLogstashName(), event.getLoggerName());
+        
+        // App specific
         generator.writeStringField(LogstashFieldName.threadName.getLogstashName(), event.getThreadName());
         generator.writeStringField(LogstashFieldName.message.getLogstashName(), event.getFormattedMessage());
+        if (event.getMarker() != null) {
+            generator.writeStringField(LogstashFieldName.marker.getLogstashName(), event.getMarker().getName());
+        }
+        
+        // Stacktraces
         if (event.getThrowableProxy() != null) {
             generator.writeStringField(
                 LogstashFieldName.stacktrace.getLogstashName(),
                 ThrowableProxyUtil.asString(event.getThrowableProxy()));
         }
+        
+        // MDC
         Map<String, String> mdc = event.getMDCPropertyMap();
         for (String key : mdc.keySet()) {
             generator.writeFieldName(key);
             generator.writeObject(mdc.get(key));
         }
+        
         generator.writeEndObject();
         generator.flush();
     }
