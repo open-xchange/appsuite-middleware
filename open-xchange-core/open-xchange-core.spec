@@ -181,7 +181,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 mkdir -p %{buildroot}/var/log/open-xchange
 mkdir -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}

@@ -7,7 +7,7 @@ PKGNAME = open-xchange-xerces-sun
 ROOT = $(CURDIR)/debian/$(PKGNAME)
 
 override_dh_auto_install:
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(ROOT) -DpackageName=$(PKGNAME) -f build/build.xml build
+	ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=$(ROOT) -DpackageName=$(PKGNAME) -f build/build.xml build
 
 override_dh_auto_clean:
 	ant -lib build/lib -Dbasedir=build -f build/build.xml clean

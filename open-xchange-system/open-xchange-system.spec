@@ -40,7 +40,7 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -p %{buildroot}/opt/open-xchange/lib
 
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
 
