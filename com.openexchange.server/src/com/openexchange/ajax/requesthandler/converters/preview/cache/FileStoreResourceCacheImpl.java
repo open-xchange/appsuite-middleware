@@ -72,6 +72,7 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
@@ -81,7 +82,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
  * {@link FileStoreResourceCacheImpl} - The filestore-backed preview cache implementation for documents.

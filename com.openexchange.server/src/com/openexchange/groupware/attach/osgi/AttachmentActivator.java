@@ -54,6 +54,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.attach.AttachmentFilestoreLocationUpdater;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentQuotaProvider;
@@ -62,7 +63,6 @@ import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 /**
  * {@link AttachmentActivator}
@@ -95,7 +95,7 @@ public final class AttachmentActivator extends AJAXModuleActivator {
             DatabaseService.class,
             ContextService.class,
             ConfigViewFactory.class,
-            QuotaFileStorageFactory.class) {
+            QuotaFileStorageService.class) {
 
             @Override
             protected void register() {

@@ -78,17 +78,17 @@ import com.amazonaws.services.s3.model.Region;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
 /**
  * {@link S3FileStorageFactory}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class S3FileStorageFactory implements FileStorageFactoryCandidate {
+public class S3FileStorageFactory implements FileStorageProvider {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3FileStorageFactory.class);
 

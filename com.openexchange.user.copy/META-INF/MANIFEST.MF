@@ -4,12 +4,13 @@ Bundle-Name: Core implementation for copying users between contexts
 Bundle-SymbolicName: com.openexchange.user.copy
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.user.copy.osgi.Activator
-Bundle-Vendor: Open-Xchange, Inc.
+Bundle-Vendor: Open-Xchange
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.file.storage,
+ com.openexchange.filestore,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.contact,
@@ -39,7 +40,6 @@ Import-Package: com.openexchange.context,
  com.openexchange.osgi,
  com.openexchange.tools.arrays,
  com.openexchange.tools.file,
- com.openexchange.tools.file.external,
  com.openexchange.tools.global,
  com.openexchange.tools.id,
  com.openexchange.tools.iterator,

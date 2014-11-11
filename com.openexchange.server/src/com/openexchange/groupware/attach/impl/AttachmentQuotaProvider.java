@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.attach.impl;
 
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,8 +60,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
@@ -71,8 +70,6 @@ import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.session.Session;
-import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 
 /**
@@ -89,10 +86,10 @@ public class AttachmentQuotaProvider implements QuotaProvider {
 
     private final ConfigViewFactory viewFactory;
 
-    private final QuotaFileStorageFactory fsFactory;
+    private final QuotaFileStorageService fsFactory;
 
 
-    public AttachmentQuotaProvider(DatabaseService dbService, ContextService contextService, ConfigViewFactory viewFactory, QuotaFileStorageFactory fsFactory) {
+    public AttachmentQuotaProvider(DatabaseService dbService, ContextService contextService, ConfigViewFactory viewFactory, QuotaFileStorageService fsFactory) {
         super();
         this.dbService = dbService;
         this.contextService = contextService;
@@ -137,9 +134,7 @@ public class AttachmentQuotaProvider implements QuotaProvider {
     }
 
     Quota getSizeQuota(Session session) throws OXException {
-        Context context = contextService.getContext(session.getContextId());
-        URI uri = FilestoreStorage.createURI(context);
-        QuotaFileStorage quotaFileStorage = fsFactory.getQuotaFileStorage(context, uri);
+        QuotaFileStorage quotaFileStorage = fsFactory.getQuotaFileStorage(session.getContextId());
         long limit = quotaFileStorage.getQuota();
         long usage = quotaFileStorage.getUsage();
         return new Quota(QuotaType.SIZE, limit, usage);
@@ -147,13 +142,11 @@ public class AttachmentQuotaProvider implements QuotaProvider {
 
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
-        if ("0".equals(accountID)) {
-            return new DefaultAccountQuota(accountID, getDisplayName())
-                .addQuota(getAmountQuota(session))
-                .addQuota(getSizeQuota(session));
-        } else {
+        if (false == "0".equals(accountID)) {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
         }
+
+        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(getAmountQuota(session)).addQuota(getSizeQuota(session));
     }
 
     @Override

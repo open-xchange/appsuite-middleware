@@ -64,8 +64,6 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator(),
         new com.openexchange.json.cache.impl.osgi.JsonCacheActivator(),
         new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.DefaultFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
         new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
         new com.openexchange.groupware.filestore.osgi.FilestoreActivator(),
         new com.openexchange.context.osgi.ContextActivator(),

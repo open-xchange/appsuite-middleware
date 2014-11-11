@@ -52,7 +52,7 @@ package com.openexchange.user.copy.internal.attachment.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
+import com.openexchange.filestore.QuotaFileStorageService;
 
 
 /**
@@ -62,8 +62,7 @@ import com.openexchange.tools.file.external.QuotaFileStorageFactory;
  */
 public class AttachmentCopyActivator implements BundleActivator {
 
-    private ServiceTracker<QuotaFileStorageFactory, QuotaFileStorageFactory> tracker;
-
+    private ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> tracker;
 
     public AttachmentCopyActivator() {
         super();
@@ -71,7 +70,7 @@ public class AttachmentCopyActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker<QuotaFileStorageFactory, QuotaFileStorageFactory>(context, QuotaFileStorageFactory.class, new AttachmentCopyRegisterer(context));
+        tracker = new ServiceTracker<QuotaFileStorageService, QuotaFileStorageService>(context, QuotaFileStorageService.class, new AttachmentCopyRegisterer(context));
         tracker.open();
     }
 

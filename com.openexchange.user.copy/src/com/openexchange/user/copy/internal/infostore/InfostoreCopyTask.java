@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.user.copy.internal.CopyTools.replaceIdsInQuery;
 import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
 import java.io.InputStream;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,16 +64,15 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -135,10 +133,10 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private final QuotaFileStorageFactory qfsf;
+    private final QuotaFileStorageService qfsf;
 
 
-    public InfostoreCopyTask(final QuotaFileStorageFactory qfsf) {
+    public InfostoreCopyTask(final QuotaFileStorageService qfsf) {
         super();
         this.qfsf = qfsf;
     }
@@ -183,10 +181,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         final Map<DocumentMetadata, List<DocumentMetadata>> originDocuments = loadInfostoreDocumentsFromDB(infostoreFolders, srcCon, i(srcCtxId));
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
-        final URI srcFilestoreUri = FilestoreStorage.createURI(srcCtx);
-        final URI dstFilestoreUri = FilestoreStorage.createURI(dstCtx);
-        srcFileStorage = qfsf.getQuotaFileStorage(srcCtx, srcFilestoreUri);
-        dstFileStorage = qfsf.getQuotaFileStorage(dstCtx, dstFilestoreUri);
+        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId(), srcCtxId);
+        dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId);
 
         copyFiles(originDocuments, srcFileStorage, dstFileStorage);
         exchangeFolderIds(originDocuments, folderMapping, dstCon, i(dstCtxId));

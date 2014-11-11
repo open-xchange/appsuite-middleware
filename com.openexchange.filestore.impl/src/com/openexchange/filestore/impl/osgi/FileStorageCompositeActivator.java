@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,30 @@
  *
  */
 
-package com.openexchange.tools.file.external;
+package com.openexchange.filestore.impl.osgi;
 
-import java.net.URI;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import org.osgi.framework.BundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
+
 
 /**
- * {@link QuotaFileStorageFactory}
+ * {@link FileStorageCompositeActivator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public interface QuotaFileStorageFactory {
+public final class FileStorageCompositeActivator extends CompositeBundleActivator {
 
     /**
-     * Creates a {@link QuotaFileStorage} instance from specified URI and context.
-     *
-     * @param context The associated context
-     * @param uri The file store URI; e.g. <code>"file:/var/open-xchange/filestore/"</code>
-     * @return An appropriate {@code QuotaFileStorage} instance
-     * @throws OXException If an appropriate {@code QuotaFileStorage} instance cannot be returned
+     * Initializes a new {@link FileStorageCompositeActivator}.
      */
-    QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws OXException;
+    public FileStorageCompositeActivator() {
+        super();
+    }
+
+    @Override
+    protected BundleActivator[] getActivators() {
+        return new BundleActivator[] { new DefaultFileStorageActivator(), new DBQuotaFileStorageActivator() };
+    }
 
 }

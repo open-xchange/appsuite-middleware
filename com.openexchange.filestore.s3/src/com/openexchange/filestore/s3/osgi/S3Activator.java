@@ -50,9 +50,9 @@
 package com.openexchange.filestore.s3.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
 /**
  * {@link S3Activator}
@@ -60,8 +60,6 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class S3Activator extends HousekeepingActivator {
-
-    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
 
     /**
      * Initializes a new {@link S3Activator}.
@@ -77,15 +75,17 @@ public class S3Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.filestore.s3");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
+        logger.info("Starting bundle: com.openexchange.filestore.s3");
         ConfigurationService configService = getService(ConfigurationService.class);
         S3FileStorageFactory factory = new S3FileStorageFactory(configService);
-        registerService(FileStorageFactoryCandidate.class, factory);
+        registerService(FileStorageProvider.class, factory);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.filestore.s3");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
+        logger.info("Stopping bundle: com.openexchange.filestore.s3");
         super.stopBundle();
     }
 }

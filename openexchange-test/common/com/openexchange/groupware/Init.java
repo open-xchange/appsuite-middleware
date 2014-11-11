@@ -118,6 +118,9 @@ import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.impl.CompositeFileStorageService;
+import com.openexchange.filestore.impl.DBQuotaFileStorageFactory;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
@@ -188,9 +191,6 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
-import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
@@ -723,10 +723,17 @@ public final class Init {
         /*
          * May be invoked multiple times
          */
-        final FileStorageFactory fileStorageStarter = new CompositeFileStorageFactory();
+        final FileStorageService fileStorageStarter = new CompositeFileStorageService(null);
         FileStorage.setFileStorageStarter(fileStorageStarter);
         final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
-        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        serviceLookup.add(DatabaseService.class, dbService);
+        ContextService contextService = (ContextService) services.get(ContextService.class);
+        UserService userService = (UserService) services.get(UserService.class);
+        com.openexchange.filestore.impl.osgi.Services.setServiceLookup(serviceLookup);
+
+        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(fileStorageStarter));
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {

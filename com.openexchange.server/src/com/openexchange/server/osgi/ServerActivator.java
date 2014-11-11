@@ -216,8 +216,6 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
-import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
@@ -566,9 +564,8 @@ public final class ServerActivator extends HousekeepingActivator {
         track(IndexFacadeService.class, new IndexFacadeCustomizer(context));
 
         /*
-         * Track candidates for file storage
+         * Track ManagedFileManagement
          */
-        track(FileStorageFactoryCandidate.class, new CompositeFileStorageFactory());
         track(ManagedFileManagement.class, new RegistryCustomizer<ManagedFileManagement>(context, ManagedFileManagement.class));
 
         /*

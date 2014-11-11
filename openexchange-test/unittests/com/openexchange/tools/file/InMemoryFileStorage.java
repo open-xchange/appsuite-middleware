@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.file;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.B;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -62,8 +61,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.impl.LocalFileStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.internal.LocalFileStorage;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

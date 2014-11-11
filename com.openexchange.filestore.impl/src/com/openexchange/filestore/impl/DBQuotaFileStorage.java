@@ -83,12 +83,12 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
      */
     public DBQuotaFileStorage(int contextId, long quota, FileStorage fs) throws OXException {
         super();
+        if (fs == null) {
+            throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
+        }
         this.contextId = contextId;
         this.quota = quota;
         fileStorage = fs;
-        if (fileStorage == null) {
-            throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
-        }
     }
 
     private DatabaseService getDatabaseService() throws OXException {
@@ -101,7 +101,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     }
 
     @Override
-    public boolean deleteFile(final String identifier) throws OXException {
+    public boolean deleteFile(String identifier) throws OXException {
         final long fileSize = fileStorage.getFileSize(identifier);
         final boolean deleted = fileStorage.deleteFile(identifier);
         if (!deleted) {
@@ -118,7 +118,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
      * @return true if Quota is full
      * @throws OXException on Database errors
      */
-    protected boolean incUsage(final long usage) throws OXException {
+    protected boolean incUsage(long usage) throws OXException {
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
 
@@ -285,12 +285,12 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     }
 
     @Override
-    public String saveNewFile(final InputStream is) throws OXException {
+    public String saveNewFile(InputStream is) throws OXException {
         return saveNewFile(is, -1);
     }
 
     @Override
-    public String saveNewFile(final InputStream is, long sizeHint) throws OXException {
+    public String saveNewFile(InputStream is, long sizeHint) throws OXException {
         if (0 < sizeHint) {
             checkAvailable(sizeHint);
         }
@@ -380,17 +380,17 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     }
 
     @Override
-    public InputStream getFile(final String file) throws OXException {
+    public InputStream getFile(String file) throws OXException {
         return fileStorage.getFile(file);
     }
 
     @Override
-    public long getFileSize(final String name) throws OXException {
+    public long getFileSize(String name) throws OXException {
         return fileStorage.getFileSize(name);
     }
 
     @Override
-    public String getMimeType(final String name) throws OXException {
+    public String getMimeType(String name) throws OXException {
         return fileStorage.getMimeType(name);
     }
 

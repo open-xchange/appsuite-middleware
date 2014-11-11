@@ -62,8 +62,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**

@@ -53,7 +53,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.internal.infostore.InfostoreCopyTask;
 
@@ -63,7 +63,7 @@ import com.openexchange.user.copy.internal.infostore.InfostoreCopyTask;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class InfostoreCopyTaskRegisterer implements ServiceTrackerCustomizer<QuotaFileStorageFactory, QuotaFileStorageFactory> {
+public class InfostoreCopyTaskRegisterer implements ServiceTrackerCustomizer<QuotaFileStorageService, QuotaFileStorageService> {
 
     private final BundleContext context;
 
@@ -81,8 +81,8 @@ public class InfostoreCopyTaskRegisterer implements ServiceTrackerCustomizer<Quo
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public QuotaFileStorageFactory addingService(final ServiceReference<QuotaFileStorageFactory> reference) {
-        final QuotaFileStorageFactory service = context.getService(reference);
+    public QuotaFileStorageService addingService(final ServiceReference<QuotaFileStorageService> reference) {
+        final QuotaFileStorageService service = context.getService(reference);
         copyTask = new InfostoreCopyTask(service);
         registration = context.registerService(CopyUserTaskService.class, copyTask, null);
         return service;
@@ -92,14 +92,14 @@ public class InfostoreCopyTaskRegisterer implements ServiceTrackerCustomizer<Quo
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    public void modifiedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
+    public void modifiedService(final ServiceReference<QuotaFileStorageService> reference, final QuotaFileStorageService service) {
     }
 
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    public void removedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
+    public void removedService(final ServiceReference<QuotaFileStorageService> reference, final QuotaFileStorageService service) {
         registration.unregister();
         context.ungetService(reference);
         copyTask = null;

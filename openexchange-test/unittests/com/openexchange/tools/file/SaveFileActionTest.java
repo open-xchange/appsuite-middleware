@@ -55,9 +55,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.impl.LocalFileStorageFactory;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.tx.UndoableAction;
 
 public class SaveFileActionTest extends AbstractActionTest {

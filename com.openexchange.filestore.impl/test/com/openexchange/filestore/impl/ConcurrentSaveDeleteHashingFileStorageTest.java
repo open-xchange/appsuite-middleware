@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.file.internal;
+package com.openexchange.filestore.impl;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

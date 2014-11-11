@@ -47,26 +47,28 @@
  *
  */
 
-package com.openexchange.tools.file.osgi;
+package com.openexchange.filestore.impl;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
-public class DefaultFileStorageActivator implements BundleActivator {
+/**
+ * Suite for integrated unit tests of the com.openexchange.filestore.impl bundle.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+@RunWith(Suite.class)
+@SuiteClasses({
+    com.openexchange.filestore.impl.CompositingFileStorageTest.class,
+    com.openexchange.filestore.impl.ConcurrentSaveDeleteHashingFileStorageTest.class,
+    /*com.openexchange.filestore.impl.HashingFileStorageMultithreadingTest.class,*/
+    com.openexchange.filestore.impl.HashingFileStorageTest.class,
+})
+public class UnitTests {
 
-    private ServiceRegistration<FileStorageFactory> reg;
-
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        reg = context.registerService(FileStorageFactory.class, new CompositeFileStorageFactory(), null);
-    }
-
-    @Override
-    public void stop(final BundleContext context) throws Exception {
-        reg.unregister();
+    public UnitTests() {
+        super();
     }
 
 }

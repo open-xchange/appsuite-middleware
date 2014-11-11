@@ -47,33 +47,40 @@
  *
  */
 
-package com.openexchange.tools.file.internal;
+package com.openexchange.filestore.impl;
 
-import java.net.URI;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import junit.framework.TestCase;
 
-public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
 
-    private final FileStorageFactory fss;
+/**
+ * {@link AbstractHashingFileStorageTest}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class AbstractHashingFileStorageTest extends TestCase {
 
-    private final DatabaseService dbs;
+    protected File tmpFile;
+    protected HashingFileStorage fs;
 
-    public DBQuotaFileStorageFactory(final DatabaseService dbs, final FileStorageFactory fss) {
-        this.fss = fss;
-        this.dbs = dbs;
+    @Override
+    protected void setUp() throws Exception {
+        tmpFile = new File("/tmp/"+getName()+"_"+System.currentTimeMillis());
+        tmpFile.mkdirs();
+        fs = new HashingFileStorage(tmpFile);
     }
 
     @Override
-    public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws OXException {
-        if (fss == null || dbs == null) {
-            throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
-        }
-        return new DBQuotaFileStorage(ctx, fss.getFileStorage(uri), dbs);
+    protected void tearDown() throws Exception {
+        fs.remove();
+        tmpFile.delete();
+    }
+
+
+    protected InputStream IS(String data) throws UnsupportedEncodingException {
+        return new ByteArrayInputStream(data.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 }

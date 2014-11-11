@@ -28,3 +28,4 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Bundle-Activator: com.openexchange.filestore.impl.osgi.FileStorageCompositeActivator

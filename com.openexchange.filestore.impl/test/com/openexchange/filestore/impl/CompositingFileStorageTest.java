@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.file.internal;
+package com.openexchange.filestore.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -60,8 +60,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.sim.SimBuilder;
-import com.openexchange.tools.file.external.FileStorage;
 
 /**
  * {@link CompositingFileStorageTest}

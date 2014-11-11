@@ -62,7 +62,7 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
-import com.openexchange.tools.file.external.FileStorageCodes;
+import com.openexchange.filestore.FileStorageCodes;
 
 /**
  * {@link S3ExceptionCode} - Enumeration of all {@link OXException}s known in S3 module.
@@ -559,7 +559,7 @@ public enum S3ExceptionCode implements DisplayableOXExceptionCode {
     private final int detailNumber;
 
     private final String message;
-    
+
     private final String displayMessage;
 
     private S3ExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
@@ -568,7 +568,7 @@ public enum S3ExceptionCode implements DisplayableOXExceptionCode {
         this.category = category;
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
-    
+
     private S3ExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
@@ -595,7 +595,7 @@ public enum S3ExceptionCode implements DisplayableOXExceptionCode {
     public String getPrefix() {
         return PREFIX;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

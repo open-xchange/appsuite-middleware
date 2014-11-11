@@ -55,13 +55,19 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageCodes;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.external.FileStorageCodes;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
+/**
+ * {@link QuotaFileStorage} - The quota-aware file storage delegating to new <code>com.openexchange.filestore</code> API.
+ *
+ * @deprecated Please use new <code>com.openexchange.filestore</code> API
+ */
+@Deprecated
 public final class QuotaFileStorage extends FileStorage {
 
-    private static volatile QuotaFileStorageFactory qfss;
+    private static volatile QuotaFileStorageService qfss;
 
     /**
      * Gets the <tt>QuotaFileStorage</tt> instance for specified URI and context.
@@ -72,7 +78,7 @@ public final class QuotaFileStorage extends FileStorage {
      * @throws OXException If a <tt>QuotaFileStorage</tt> instance cannot be returned
      */
     public static final QuotaFileStorage getInstance(final URI uri, final Context ctx) throws OXException {
-        QuotaFileStorageFactory factory = qfss;
+        QuotaFileStorageService factory = qfss;
         if (factory == null) {
             throw FileStorageCodes.INSTANTIATIONERROR.create("No quota file storage starter registered.");
         }
@@ -84,22 +90,22 @@ public final class QuotaFileStorage extends FileStorage {
      *
      * @param qfss The factory instance to set
      */
-    public static void setQuotaFileStorageStarter(final QuotaFileStorageFactory qfss) {
+    public static void setQuotaFileStorageStarter(final QuotaFileStorageService qfss) {
         QuotaFileStorage.qfss = qfss;
     }
 
     // ----------------------------------------------------------------------------------------------------------- //
 
-    private com.openexchange.tools.file.external.QuotaFileStorage delegateQuotaFileStorage;
+    private com.openexchange.filestore.QuotaFileStorage delegateQuotaFileStorage;
 
-    private QuotaFileStorage(URI uri, Context ctx, QuotaFileStorageFactory qfss) throws OXException {
+    private QuotaFileStorage(URI uri, Context ctx, QuotaFileStorageService qfss) throws OXException {
         super();
-        delegateQuotaFileStorage = qfss.getQuotaFileStorage(ctx, uri);
+        delegateQuotaFileStorage = qfss.getQuotaFileStorage(ctx.getContextId());
     }
 
-    private com.openexchange.tools.file.external.QuotaFileStorage getDelegateQuotaFileStorage() {
+    private com.openexchange.filestore.QuotaFileStorage getDelegateQuotaFileStorage() {
         // Helper method to ensure QuotaFileStorage instance is not null
-        com.openexchange.tools.file.external.QuotaFileStorage tmp = this.delegateQuotaFileStorage;
+        com.openexchange.filestore.QuotaFileStorage tmp = this.delegateQuotaFileStorage;
         if (null == tmp) {
             throw new IllegalStateException("QuotaFileStorage has already been closed.");
         }

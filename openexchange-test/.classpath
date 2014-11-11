@@ -129,5 +129,7 @@
 	<classpathentry kind="src" path="/com.openexchange.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.composition"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore.impl"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
