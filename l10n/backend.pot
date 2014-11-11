@@ -2473,7 +2473,6 @@ msgstr ""
 
 #. * The allowed Quota is reached.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:62
 msgid ""
 "The allowed quota is reached. Please delete some items in order to create "
 "new ones."
