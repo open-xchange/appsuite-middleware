@@ -57,7 +57,6 @@ import java.util.Random;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
-import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
@@ -66,10 +65,8 @@ import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ParsedShareTarget;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
-import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -125,13 +122,13 @@ public class FileStorageTransactionTest extends ShareTest {
     }
 
     public void testShareItemsInFolder() throws Exception {
+        DefaultFileStorageGuestObjectPermission permission = new DefaultFileStorageGuestObjectPermission();
+        permission.setPermissions(ObjectPermission.READ);
+        permission.setRecipient(new AnonymousRecipient());
         Random r = new Random();
         List<DefaultFile> sharedFiles = new ArrayList<DefaultFile>(files.size());
         for (DefaultFile file : files) {
             if (r.nextBoolean()) {
-                DefaultFileStorageGuestObjectPermission permission = new DefaultFileStorageGuestObjectPermission();
-                permission.setPermissions(ObjectPermission.READ);
-                permission.setRecipient(new AnonymousRecipient());
                 file.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(permission));
                 itm.updateAction(file, new Field[] { Field.OBJECT_PERMISSIONS }, new Date());
                 sharedFiles.add(file);
@@ -157,12 +154,16 @@ public class FileStorageTransactionTest extends ShareTest {
         assertEquals("Wrong number of shares", sharedFiles.size(), fileShares.size());
 
         for (ParsedShare share : fileShares) {
-            ParsedShareTarget target = share.getTarget();
-            //TODO: guest client needs to use folder 10 (not the folder as seen by the sharing user)
-            //      probably best to list the available items via guest client here
-            GuestClient guestClient = new GuestClient(share.getShareURL(), null, null);
-            File file = guestClient.execute(new GetInfostoreRequest(target.getItem())).getDocumentMetadata();
-            assertEquals(target.getItem(), new FileID(file.getId()).getFileId());
+            /*
+             * check access to share
+             */
+            checkShare(permission, share);
+            GuestClient guestClient =  resolveShare(share, permission.getRecipient());
+            guestClient.checkShareModuleAvailable();
+            guestClient.checkShareAccessible(permission);
+            /*
+             * check file listing in folder 10 contains share target
+             */
             AbstractColumnsResponse allResp = guestClient.execute(new AllInfostoreRequest(
                 FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
                 Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY),
@@ -171,7 +172,7 @@ public class FileStorageTransactionTest extends ShareTest {
 
             Object[][] docs = allResp.getArray();
             assertEquals(1, docs.length);
-            assertEquals(target.getItem(), new FileID((String) docs[0][allResp.getColumnPos(Metadata.ID)]).getFileId());
+            assertEquals(guestClient.getItem(), docs[0][allResp.getColumnPos(Metadata.ID)]);
         }
 
     }
