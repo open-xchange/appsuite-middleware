@@ -644,7 +644,7 @@ public class UserImpl implements User, Cloneable {
     }
 
     /**
-     * Sets the file storage name serving as appendeix to base URI.
+     * Sets the file storage name serving as appendix to base URI.
      *
      * @param filestoreName The name
      */
@@ -663,7 +663,7 @@ public class UserImpl implements User, Cloneable {
 
     @Override
     public String[] getFileStorageAuth() {
-        return filestorageAuth.clone();
+        return null != filestorageAuth ? filestorageAuth.clone() : null;
     }
 
     @Override
