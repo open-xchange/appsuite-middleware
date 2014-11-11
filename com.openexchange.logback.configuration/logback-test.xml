@@ -37,13 +37,12 @@
     </appender>
     
     <!-- Logstash appender -->
-    <!-- 
+    <!--
     <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
         <remoteHost>localhost</remoteHost>
         <port>31337</port>
         <reconnectionDelay>10000</reconnectionDelay>
         <eventDelayLimit>30000</eventDelayLimit>
-        <appender-ref ref="CONSOLE" />
         <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder"/>
     </appender>
 	-->
