@@ -49,7 +49,6 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import org.json.JSONException;
@@ -83,52 +82,43 @@ public class UpdateLinkAction extends AbstractShareAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * extract parameters
-         */
-        Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
-
-        /*
-         * Parse recipient and targets
-         */
         try {
+            /*
+             * initialize update performer for supplied token
+             */
+            Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
             JSONObject json = (JSONObject) requestData.requireData();
             String token = json.getString("token");
-            Date expiry = null;
-            String expires = json.optString("expiry_date", null);
-            if (expires != null) {
-                expiry = new Date(ShareJSONParser.removeTimeZoneOffset(Long.parseLong(expires), getTimeZone(requestData, session)));
-            }
-
-            int permissionBits = -1;
-            if (json.hasAndNotNull("bits")) {
-                permissionBits = json.getInt("bits");
-            }
-
-            String password = null;
-            if (json.hasAndNotNull("password")) {
-                password = json.getString("password");
-            }
-
-            Map<String, Object> meta = null;
-            if (json.hasAndNotNull("meta")) {
-                if (json.isNull("meta")) {
-                    meta = Collections.<String, Object> emptyMap();
-                } else {
-                    meta = (Map<String, Object>)JSONCoercion.coerceToNative(json.getJSONObject("meta"));
+            UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session, services);
+            /*
+             * apply changes based on present data in update request
+             */
+            if (json.has("expiry_date")) {
+                String expiry = json.getString("expiry_date");
+                try {
+                    updatePerformer.setExpiry(null == expiry ? null :
+                        new Date(ShareJSONParser.removeTimeZoneOffset(Long.valueOf(expiry), getTimeZone(requestData, session))));
+                } catch (NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", expiry, e);
                 }
             }
-
-            AnonymousRecipient recipient = null;
-            if (permissionBits >= 0 || password != null) {
-                recipient = new AnonymousRecipient();
-                recipient.setBits(permissionBits);
-                recipient.setPassword(password);
+            if (json.has("meta")) {
+                if (json.isNull("meta")) {
+                    updatePerformer.setMeta(null);
+                } else {
+                    updatePerformer.setMeta((Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta")));
+                }
             }
-
-            UpdatePerformer updatePerformer = new UpdatePerformer(token, recipient, expiry, meta, clientTimestamp, session, services);
+            if (json.has("password") || json.has("bits")) {
+                AnonymousRecipient recipient = new AnonymousRecipient();
+                recipient.setPassword(json.optString("password", null));
+                recipient.setBits(json.optInt("bits", -1));
+                updatePerformer.setRecipient(recipient);
+            }
+            /*
+             * perform the update, return empty result in case of success
+             */
             updatePerformer.perform();
-
             /*
              * return empty result in case of success
              */
