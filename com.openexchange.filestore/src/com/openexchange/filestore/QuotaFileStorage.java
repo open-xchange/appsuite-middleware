@@ -47,77 +47,67 @@
  *
  */
 
-package com.openexchange.groupware.contexts;
+package com.openexchange.filestore;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import java.io.InputStream;
+import java.util.Set;
+import com.openexchange.exception.OXException;
 
 /**
- * The context stores all attributes that are necessary for components dealing with context specific data. This are especially which
- * database stores the data of the context, the unique numerical identifier used in the relational database to assign persistent stored data
- * to their contexts and is the base distinguished name used in the directory service to separate contexts. Objects implementing this
- * interface must implement {@link java.lang.Object#equals(java.lang.Object)} and {@link java.lang.Object#hashCode()} because this interface
- * is used as key for maps.
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link QuotaFileStorage} - A {@link FileStorage file storage} that is quota aware.
  */
-public interface Context extends FileStorageInfo, Serializable {
+public interface QuotaFileStorage extends FileStorage {
 
     /**
-     * Returns the unique identifier of the context.
+     * Gets the total available quota
      *
-     * @return unique identifier of the context.
+     * @return The total quota
      */
-    int getContextId();
+    long getQuota();
 
     /**
-     * @return the name of the context.
-     */
-    String getName();
-
-    /**
-     * @return the login information of a context.
-     */
-    String[] getLoginInfo();
-
-    /**
-     * Returns the unique identifier of context's admin.
+     * Gets the currently used quota
      *
-     * @return unique identifier of the context's admin
+     * @return The currently used quota
+     * @throws OXException
      */
-    int getMailadmin();
+    long getUsage() throws OXException;
 
     /**
-     * Returns if a context is enabled. All sessions that belong to a disabled context have to die as fast as possible to be able to
-     * maintain these contexts.
+     * Recalculates the used quota
      *
-     * @return <code>true</code> if the context is enabled, <code>false</code> otherwise.
+     * @throws OXException If calculation fails
      */
-    boolean isEnabled();
+    void recalculateUsage() throws OXException;
 
     /**
-     * Returns if a context is being updated. This will be <code>true</code> if the schema is being updated the context is stored in.
+     * Recalculates the used quota ignoring specified files.
      *
-     * @return <code>true</code> if an update takes place.
+     * @param filesToIgnore The files to ignore
+     * @throws OXException If calculation fails
      */
-    boolean isUpdating();
+    void recalculateUsage(Set<String> filesToIgnore) throws OXException;
 
     /**
-     * Contexts can be put into read only mode if the master database server is not reachable. This method indicates if currently the master
-     * is not reachable.
+     * Saves a new file
      *
-     * @return <code>true</code> if the master database server is not reachable.
+     * @param file The file to save
+     * @param sizeHint The appr. file size
+     * @return The identifier of the newly saved file
+     * @throws OXException If save operation fails
      */
-    boolean isReadOnly();
+    String saveNewFile(InputStream file, long sizeHint) throws OXException;
 
     /**
-     * Gets the context attributes as an unmodifiable map.
-     * <p>
-     * Each attribute may point to multiple values.
+     * Appends specified stream to the supplied file.
      *
-     * @return The context attributes
+     * @param file The stream to append to the file
+     * @param name The existing file's path in associated file storage
+     * @param offset The offset in bytes where to append the data, must be equal to the file's current length
+     * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
+     * @return The updated length of the file
+     * @throws OXException If appending file fails
      */
-    Map<String, List<String>> getAttributes();
+    long appendToFile(InputStream file, String name, long offset, long sizeHint) throws OXException;
 
 }

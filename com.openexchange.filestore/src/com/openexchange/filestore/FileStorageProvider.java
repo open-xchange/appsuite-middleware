@@ -47,77 +47,55 @@
  *
  */
 
-package com.openexchange.groupware.contexts;
+package com.openexchange.filestore;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import java.net.URI;
+import com.openexchange.exception.OXException;
 
 /**
- * The context stores all attributes that are necessary for components dealing with context specific data. This are especially which
- * database stores the data of the context, the unique numerical identifier used in the relational database to assign persistent stored data
- * to their contexts and is the base distinguished name used in the directory service to separate contexts. Objects implementing this
- * interface must implement {@link java.lang.Object#equals(java.lang.Object)} and {@link java.lang.Object#hashCode()} because this interface
- * is used as key for maps.
+ * {@link FileStorageProvider} - A provider for a file storage.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Context extends FileStorageInfo, Serializable {
+public interface FileStorageProvider {
+
+    public static final int DEFAULT_RANKING = 0;
 
     /**
-     * Returns the unique identifier of the context.
+     * Gets the file storage
      *
-     * @return unique identifier of the context.
+     * @param uri The URI to create the file storage from
+     * @return The file storage
+     * @throws OXException If storage cannot be returned
      */
-    int getContextId();
+    FileStorage getFileStorage(URI uri) throws OXException;
 
     /**
-     * @return the name of the context.
-     */
-    String getName();
-
-    /**
-     * @return the login information of a context.
-     */
-    String[] getLoginInfo();
-
-    /**
-     * Returns the unique identifier of context's admin.
-     *
-     * @return unique identifier of the context's admin
-     */
-    int getMailadmin();
-
-    /**
-     * Returns if a context is enabled. All sessions that belong to a disabled context have to die as fast as possible to be able to
-     * maintain these contexts.
-     *
-     * @return <code>true</code> if the context is enabled, <code>false</code> otherwise.
-     */
-    boolean isEnabled();
-
-    /**
-     * Returns if a context is being updated. This will be <code>true</code> if the schema is being updated the context is stored in.
-     *
-     * @return <code>true</code> if an update takes place.
-     */
-    boolean isUpdating();
-
-    /**
-     * Contexts can be put into read only mode if the master database server is not reachable. This method indicates if currently the master
-     * is not reachable.
-     *
-     * @return <code>true</code> if the master database server is not reachable.
-     */
-    boolean isReadOnly();
-
-    /**
-     * Gets the context attributes as an unmodifiable map.
+     * Gets the internal (if any) file storage.
      * <p>
-     * Each attribute may point to multiple values.
+     * If there is no internal representation, this method does the same as {@link #getFileStorage(URI)}.
      *
-     * @return The context attributes
+     * @param uri The URI to create the file storage from
+     * @return The internal file storage
+     * @throws OXException If storage cannot be returned
      */
-    Map<String, List<String>> getAttributes();
+    FileStorage getInternalFileStorage(URI uri) throws OXException;
+
+    /**
+     * Signals whether specified URI is supported or not.
+     *
+     * @param uri The URI to check
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean supports(URI uri) throws OXException;
+
+    /**
+     * Gets the ranking.
+     *
+     * @return The ranking
+     * @see #DEFAULT_RANKING
+     */
+    int getRanking();
 
 }

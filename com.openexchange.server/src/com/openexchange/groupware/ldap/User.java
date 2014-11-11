@@ -53,12 +53,13 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.contexts.FileStorageInfo;
 
 /**
  * Interface for the user object.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface User extends Serializable {
+public interface User extends FileStorageInfo, Serializable {
 
     /**
      * Getter for userPassword.

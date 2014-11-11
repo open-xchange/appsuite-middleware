@@ -47,77 +47,72 @@
  *
  */
 
-package com.openexchange.groupware.contexts;
+package com.openexchange.filestore.impl.osgi;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * The context stores all attributes that are necessary for components dealing with context specific data. This are especially which
- * database stores the data of the context, the unique numerical identifier used in the relational database to assign persistent stored data
- * to their contexts and is the base distinguished name used in the directory service to separate contexts. Objects implementing this
- * interface must implement {@link java.lang.Object#equals(java.lang.Object)} and {@link java.lang.Object#hashCode()} because this interface
- * is used as key for maps.
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Context extends FileStorageInfo, Serializable {
+public final class Services {
 
     /**
-     * Returns the unique identifier of the context.
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
      *
-     * @return unique identifier of the context.
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    int getContextId();
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * @return the name of the context.
-     */
-    String getName();
-
-    /**
-     * @return the login information of a context.
-     */
-    String[] getLoginInfo();
-
-    /**
-     * Returns the unique identifier of context's admin.
+     * Gets the service lookup.
      *
-     * @return unique identifier of the context's admin
+     * @return The service lookup or <code>null</code>
      */
-    int getMailadmin();
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
 
     /**
-     * Returns if a context is enabled. All sessions that belong to a disabled context have to die as fast as possible to be able to
-     * maintain these contexts.
+     * Gets the service of specified type
      *
-     * @return <code>true</code> if the context is enabled, <code>false</code> otherwise.
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException If no such service is available
      */
-    boolean isEnabled();
+    public static <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        return service;
+    }
 
     /**
-     * Returns if a context is being updated. This will be <code>true</code> if the schema is being updated the context is stored in.
+     * (Optionally) Gets the service of specified type
      *
-     * @return <code>true</code> if an update takes place.
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
      */
-    boolean isUpdating();
-
-    /**
-     * Contexts can be put into read only mode if the master database server is not reachable. This method indicates if currently the master
-     * is not reachable.
-     *
-     * @return <code>true</code> if the master database server is not reachable.
-     */
-    boolean isReadOnly();
-
-    /**
-     * Gets the context attributes as an unmodifiable map.
-     * <p>
-     * Each attribute may point to multiple values.
-     *
-     * @return The context attributes
-     */
-    Map<String, List<String>> getAttributes();
+    public static <S extends Object> S optService(Class<? extends S> clazz) {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
 
 }

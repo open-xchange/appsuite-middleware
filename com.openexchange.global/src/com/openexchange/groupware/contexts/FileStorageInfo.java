@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,74 +50,41 @@
 package com.openexchange.groupware.contexts;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
 /**
- * The context stores all attributes that are necessary for components dealing with context specific data. This are especially which
- * database stores the data of the context, the unique numerical identifier used in the relational database to assign persistent stored data
- * to their contexts and is the base distinguished name used in the directory service to separate contexts. Objects implementing this
- * interface must implement {@link java.lang.Object#equals(java.lang.Object)} and {@link java.lang.Object#hashCode()} because this interface
- * is used as key for maps.
+ * {@link FileStorageInfo} - Provides information to access a certain file storage.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public interface Context extends FileStorageInfo, Serializable {
+public interface FileStorageInfo extends Serializable {
 
     /**
-     * Returns the unique identifier of the context.
+     * Gets the file storage credentials.
      *
-     * @return unique identifier of the context.
+     * @return A string array with login and password for the file storage.
      */
-    int getContextId();
+    String[] getFileStorageAuth();
 
     /**
-     * @return the name of the context.
-     */
-    String getName();
-
-    /**
-     * @return the login information of a context.
-     */
-    String[] getLoginInfo();
-
-    /**
-     * Returns the unique identifier of context's admin.
+     * Gets the file storage quota
      *
-     * @return unique identifier of the context's admin
+     * @return The quota for the file storage or <code>0</code> if there is no quota.
      */
-    int getMailadmin();
+    long getFileStorageQuota();
 
     /**
-     * Returns if a context is enabled. All sessions that belong to a disabled context have to die as fast as possible to be able to
-     * maintain these contexts.
+     * Gets the file storage identifier
      *
-     * @return <code>true</code> if the context is enabled, <code>false</code> otherwise.
+     * @return The file storage identifier
      */
-    boolean isEnabled();
+    int getFilestoreId();
 
     /**
-     * Returns if a context is being updated. This will be <code>true</code> if the schema is being updated the context is stored in.
+     * Gets the entity-specific location inside the file storage.
      *
-     * @return <code>true</code> if an update takes place.
+     * @return The entity-specific location inside the file storage.
      */
-    boolean isUpdating();
-
-    /**
-     * Contexts can be put into read only mode if the master database server is not reachable. This method indicates if currently the master
-     * is not reachable.
-     *
-     * @return <code>true</code> if the master database server is not reachable.
-     */
-    boolean isReadOnly();
-
-    /**
-     * Gets the context attributes as an unmodifiable map.
-     * <p>
-     * Each attribute may point to multiple values.
-     *
-     * @return The context attributes
-     */
-    Map<String, List<String>> getAttributes();
+    String getFilestoreName();
 
 }

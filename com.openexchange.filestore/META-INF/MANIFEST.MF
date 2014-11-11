@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The interface bundle for file I/O
+Bundle-SymbolicName: com.openexchange.filestore
+Bundle-Version: 7.6.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n
+Export-Package: com.openexchange.filestore
