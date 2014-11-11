@@ -5,6 +5,7 @@
 * 2014-11-11 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35150: don't skip the '"' literal if it is preceded by a backslash '/'
+ - Fix for bug 35416: use the correct 'FilterType' flag when listing custom mail filters
 
 * 2014-11-11 - marcus.klein@open-xchange.com
 
