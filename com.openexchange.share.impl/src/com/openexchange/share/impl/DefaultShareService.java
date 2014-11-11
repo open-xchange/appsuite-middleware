@@ -534,7 +534,7 @@ public class DefaultShareService implements ShareService {
                 /*
                  * base token with path
                  */
-                Set<String> paths = pathsPerBaseToken.get(baseToken);
+                Set<String> paths = pathsPerBaseToken.get(shareToken);
                 if (null == paths) {
                     paths = new HashSet<String>();
                     pathsPerBaseToken.put(shareToken, paths);
