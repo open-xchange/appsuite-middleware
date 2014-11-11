@@ -50,8 +50,10 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
@@ -158,8 +160,17 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     private void addAuthorPermissions(FolderObject folder, int userId, FolderTestManager actor) {
         OCLPermission authorPermissions = getAuthorPermissions(userId, folder.getObjectID());
-        folder.getPermissions().remove(authorPermissions);
-        folder.addPermission(authorPermissions);
+        List<OCLPermission> newPermissions = new ArrayList<OCLPermission>();
+        for (OCLPermission ocl : folder.getPermissions()) {
+            if (ocl.getEntity() != userId) {
+                newPermissions.add(ocl);
+            }
+        }
+        newPermissions.add(authorPermissions);
+        folder.removePermissions();
+        for (OCLPermission ocl : newPermissions) {
+            folder.addPermission(ocl);
+        }
         folder.setLastModified(new Date(Long.MAX_VALUE));
         actor.updateFolderOnServer(folder);
     }
