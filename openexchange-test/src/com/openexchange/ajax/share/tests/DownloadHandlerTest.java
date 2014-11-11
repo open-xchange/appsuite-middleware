@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.util.UUID;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -69,7 +68,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.AuthenticationMode;
 
 /**
@@ -106,7 +104,8 @@ public class DownloadHandlerTest extends ShareTest {
         /*
          * create folder and a shared file inside
          */
-        byte[] contents = UUIDs.toByteArray(UUID.randomUUID());
+        byte[] contents = new byte[64 + random.nextInt(256)];
+        random.nextBytes(contents);
         String filename = randomUID();
         FolderObject folder = insertPrivateFolder(api, FolderObject.INFOSTORE, parent);
         File file = insertSharedFile(folder.getObjectID(), filename, guestPermission, contents);

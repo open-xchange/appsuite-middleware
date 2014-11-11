@@ -215,9 +215,14 @@ public class RdbShareStorage implements ShareStorage {
 
     @Override
     public int deleteTargets(int contextID, List<ShareTarget> targets, StorageParameters parameters) throws OXException {
+        return deleteTargets(contextID, targets, false, parameters);
+    }
+
+    @Override
+    public int deleteTargets(int contextID, List<ShareTarget> targets, boolean includeItems, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getWriteProvider(contextID, parameters);
         try {
-            return SQL.sumUpdateCount(deleteTargets(provider.get(), contextID, targets));
+            return SQL.sumUpdateCount(deleteTargets(provider.get(), contextID, targets, includeItems));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -312,15 +317,21 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
-    private static int[] deleteTargets(Connection connection, int contextID, List<ShareTarget> targets) throws SQLException, OXException {
+    private static int[] deleteTargets(Connection connection, int contextID, List<ShareTarget> targets, boolean includeItems) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder()
-        .append("DELETE FROM share WHERE ")
-        .append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
-        .append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=? AND ")
-        .append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=? AND ")
-        .append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;")
+            .append("DELETE FROM share WHERE ")
+            .append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=?")
         ;
-        ShareField[] fields = { ShareField.CONTEXT_ID, ShareField.MODULE, ShareField.FOLDER, ShareField.ITEM };
+        ShareField[] fields;
+        if (includeItems) {
+            fields = new ShareField[] { ShareField.CONTEXT_ID, ShareField.MODULE, ShareField.FOLDER };
+            stringBuilder.append(';');
+        } else {
+            fields = new ShareField[] { ShareField.CONTEXT_ID, ShareField.MODULE, ShareField.FOLDER, ShareField.ITEM };
+            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=?;");
+        }
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());

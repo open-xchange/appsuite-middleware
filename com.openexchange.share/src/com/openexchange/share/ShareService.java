@@ -136,6 +136,8 @@ public interface ShareService {
      * caller to take care of the referenced share targets on his own</li>
      * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
      * or not, so again it's up to the caller to perform the necessary checks</li>
+     * <li>Shares targeting items located in a folder whose target is deleted are not removed implicitly; this can be achieved via
+     * {@link #deleteTargets(Session, List, List, boolean)}</li>
      * </ul>
      *
      * @param session The session
@@ -143,6 +145,24 @@ public interface ShareService {
      * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
      */
     void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
+
+    /**
+     * Deletes a list of share targets for all shares of to any guest user, optionally including item targets in case the parent folder
+     * target is removed.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated permissions of the guest users on the share targets are not updated implicitly, so that it's up to the
+     * caller to take care of the referenced share targets on his own</li>
+     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
+     * or not, so again it's up to the caller to perform the necessary checks</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param targets The share targets to delete
+     * @param includeItems <code>true</code> to remove item targets upon parent folder target removal, <code>false</code>, otherwise
+     */
+    void deleteTargets(Session session, List<ShareTarget> targets, boolean includeItems) throws OXException;
 
     /**
      * Updates multiple targets shared to a specific guest user. This currently includes updating the "meta" information or adjusting the

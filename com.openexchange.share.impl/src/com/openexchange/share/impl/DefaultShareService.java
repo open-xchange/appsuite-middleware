@@ -286,6 +286,32 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public void deleteTargets(Session session, List<ShareTarget> targets, boolean includeItems) throws OXException {
+        if (null == targets || 0 == targets.size()) {
+            return;
+        }
+        /*
+         * delete targets from storage
+         */
+        int affectedShares = 0;
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            affectedShares = services.getService(ShareStorage.class).deleteTargets(
+                session.getContextId(), targets, includeItems, connectionHelper.getParameters());
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (0 < affectedShares) {
+            scheduleGuestCleanup(session.getContextId(), null);
+        }
+    }
+
+    @Override
     public void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
         if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
             return;

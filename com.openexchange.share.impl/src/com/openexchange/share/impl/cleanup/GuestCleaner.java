@@ -69,8 +69,8 @@ import com.openexchange.share.impl.ConnectionHelper;
 public class GuestCleaner {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuestCleaner.class);
-    private static final long DELAY_DURATION = 1000;
-    private static final long MAX_DELAY_DURATION = 20000;
+    private static final long DELAY_DURATION = 2000;
+//    private static final long MAX_DELAY_DURATION = 20000;
 
     private final ServiceLookup services;
     private final BufferingQueue<GuestCleanupTask> cleanupTasks;
@@ -81,13 +81,13 @@ public class GuestCleaner {
      *
      * @param services A service lookup reference
      */
-    public GuestCleaner(final ServiceLookup services) {
+    public GuestCleaner(ServiceLookup services) {
         super();
         this.services = services;
         /*
          * prepare background task queue and worker thread
          */
-        cleanupTasks = new BufferingQueue<GuestCleanupTask>(DELAY_DURATION, MAX_DELAY_DURATION);
+        cleanupTasks = new BufferingQueue<GuestCleanupTask>(DELAY_DURATION);
         backgroundCleaner = new BackgroundGuestCleaner(cleanupTasks);
         services.getService(ExecutorService.class).submit(backgroundCleaner);
     }

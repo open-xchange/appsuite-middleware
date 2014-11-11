@@ -53,13 +53,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
@@ -99,33 +97,75 @@ public class OXFolderDependentDeleter {
         }
 
         deletePublicationsAndSubscriptions(con, context, folder, subfolderIDs);
+        deleteObjectPermissions(con, context, folder, subfolderIDs);
         deleteShares(con, serverSession, folder, subfolderIDs);
     }
 
+    /**
+     * Deletes all object permission assigned to any item in the supplied folder (and subfolders, if set).
+     *
+     * @param con The (writable) database connection to use
+     * @param context The context
+     * @param folder The folder
+     * @param subfolderIDs The identifiers of subfolders to include when cleaning up, or <code>null</code> if not needed
+     * @throws OXException
+     */
+    private static void deleteObjectPermissions(Connection con, Context context, FolderObject folder, List<Integer> subfolderIDs) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            /*
+             * prepare clause for folder IDs
+             */
+            String whereFolderID;
+            if (null == subfolderIDs || 0 == subfolderIDs.size()) {
+                whereFolderID = "=?;";
+            } else {
+                StringBuilder StringBuilder = new StringBuilder(" IN (?");
+                for (int i = 0; i < subfolderIDs.size(); i++) {
+                    StringBuilder.append(",?");
+                }
+                StringBuilder.append(");");
+                whereFolderID = StringBuilder.toString();
+            }
+            /*
+             * delete object permisssions
+             */
+            stmt = con.prepareStatement("DELETE FROM object_permission WHERE cid=? AND module=? AND folder_id" + whereFolderID);
+            stmt.setInt(1, context.getContextId());
+            int folderID = folder.getObjectID();
+            stmt.setInt(2, folder.getModule());
+            stmt.setInt(3, folderID);
+            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
+                for (int i = 0; i < subfolderIDs.size(); i++) {
+                    stmt.setInt(i + 4, subfolderIDs.get(i));
+                }
+            }
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
     private static void deleteShares(Connection con, ServerSession session, FolderObject folder, List<Integer> subfolderIDs) throws OXException {
+        /*
+         * determine share targets
+         */
+        List<ShareTarget> targets = new ArrayList<ShareTarget>();
+        targets.add(new ShareTarget(folder.getModule(), String.valueOf(folder.getObjectID())));
+        if (null != subfolderIDs && 0 < subfolderIDs.size()) {
+            for (Integer subfolderID : subfolderIDs) {
+                targets.add(new ShareTarget(folder.getModule(), String.valueOf(subfolderID)));
+            }
+        }
+        /*
+         * delete targets via share service
+         */
         ShareService shareService = ServerServiceRegistry.getServize(ShareService.class, true);
         session.setParameter(Connection.class.getName(), con);
         try {
-            List<OCLPermission> permissions = folder.getPermissions();
-            List<Integer> userIDs = new ArrayList<Integer>(permissions.size());
-            for (OCLPermission permission : permissions) {
-                if (!permission.isGroupPermission()) {
-                    userIDs.add(permission.getEntity());
-                }
-            }
-
-            final int module = folder.getModule();
-            final int folderID = folder.getObjectID();
-            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-                final List<ShareTarget> targets = new ArrayList<ShareTarget>(subfolderIDs.size() + 1);
-                targets.add(new ShareTarget(module, Integer.toString(folderID)));
-                for (Integer subfolderID : subfolderIDs) {
-                    targets.add(new ShareTarget(module, Integer.toString(subfolderID)));
-                }
-                shareService.deleteTargets(session, targets, null);
-            } else {
-                shareService.deleteTargets(session, Collections.singletonList(new ShareTarget(module, Integer.toString(folderID))), null);
-            }
+            shareService.deleteTargets(session, targets, true);
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
