@@ -84,7 +84,10 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 
     @Override
     public int removeShare(String token, String path) throws OXException {
-        return removeShare(token, path, -1);
+        if (null != path && !path.isEmpty() && !"".equals(path)) {
+            token = token + "/" + path;
+        }
+        return shareService.removeShares(Collections.singletonList(token));
     }
 
     @Override
@@ -92,7 +95,7 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
         if (null != path && !path.isEmpty() && !"".equals(path)) {
             token = token + "/" + path;
         }
-        return shareService.removeShares(Collections.singletonList(token));
+        return shareService.removeShares(Collections.singletonList(token), contextId);
     }
 
     @Override
