@@ -69,7 +69,7 @@ public abstract class FileStreamAction extends AbstractUndoable implements Undoa
 
     private static final String CHECKSUM_ALGORITHM = "MD5";
 
-    private final FileStorage storage;
+    private final com.openexchange.filestore.FileStorage storage;
     private final InputStream data;
     private String checksum;
     private long bytesRead;
@@ -84,7 +84,7 @@ public abstract class FileStreamAction extends AbstractUndoable implements Undoa
      * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
      * @param calculateChecksum <code>true</code> to calculate a checksum for the saved data, <code>false</code>, otherwise
      */
-    protected FileStreamAction(FileStorage storage, InputStream data, long sizeHint, boolean calculateChecksum) {
+    protected FileStreamAction(com.openexchange.filestore.FileStorage storage, InputStream data, long sizeHint, boolean calculateChecksum) {
         super();
         this.storage = storage;
         this.data = data;
@@ -92,15 +92,15 @@ public abstract class FileStreamAction extends AbstractUndoable implements Undoa
         this.calculateChecksum = calculateChecksum;
     }
 
-    protected abstract void store(FileStorage storage, InputStream stream) throws OXException;
+    protected abstract void store(com.openexchange.filestore.FileStorage storage, InputStream stream) throws OXException;
 
-    protected abstract void store(QuotaFileStorage storage, InputStream stream, long sizeHint) throws OXException;
+    protected abstract void store(com.openexchange.filestore.QuotaFileStorage storage, InputStream stream, long sizeHint) throws OXException;
 
-    protected abstract void undo(FileStorage storage) throws OXException;
+    protected abstract void undo(com.openexchange.filestore.FileStorage storage) throws OXException;
 
     private void store(InputStream stream) throws OXException {
-        if (0 < sizeHint && QuotaFileStorage.class.isInstance(storage)) {
-            store((QuotaFileStorage)storage, stream, sizeHint);
+        if (0 < sizeHint && com.openexchange.filestore.QuotaFileStorage.class.isInstance(storage)) {
+            store((com.openexchange.filestore.QuotaFileStorage)storage, stream, sizeHint);
         } else {
             store(storage, stream);
         }

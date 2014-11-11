@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -72,14 +74,42 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
 
     private static final Logger LOG = LoggerFactory.getLogger(InfostoreSecurityImpl.class);
+
+    /**
+     * Initializes a new {@link InfostoreSecurityImpl}.
+     */
+    public InfostoreSecurityImpl() {
+        super();
+    }
+
+    /**
+     * Determines the identifier of the folder administrator with the lowest numeric identifier
+     *
+     * @param folder The folder examine
+     * @return The folder administrator identifier or <code>-1</code>
+     */
+    public static int getFirstFolderAdmin(FolderObject folder) {
+        int entity = -1;
+        if (null != folder) {
+            for (OCLPermission p : folder.getPermissions()) {
+                if (p.isFolderAdmin() && !p.isGroupPermission() && !p.isSystem()) {
+                    int cur = p.getEntity();
+                    entity = entity < 0 ? cur : (entity > cur ? cur : entity);
+                }
+            }
+        }
+        return entity;
+    }
 
     @Override
     public EffectiveInfostorePermission getInfostorePermission(final int id, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
@@ -96,10 +126,12 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         Connection con = null;
         try {
             con = getReadConnection(ctx);
-            final EffectivePermission isperm = new OXFolderAccess(con, ctx).getFolderPermission((int)document.getFolderId(), user.getId(), userPermissions);
-            final EffectiveObjectPermission effectiveObjectPermission = getEffectiveObjectPermission(ctx, user, userPermissions, document, con);
-            //final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
-            return new EffectiveInfostorePermission(isperm, effectiveObjectPermission, document,user);
+            FolderObject folder = new OXFolderAccess(con, ctx).getFolderObject((int) document.getFolderId());
+            EffectivePermission isperm = folder.getEffectiveUserPermission(user.getId(), userPermissions, con);
+            EffectiveObjectPermission effectiveObjectPermission = getEffectiveObjectPermission(ctx, user, userPermissions, document, con);
+            return new EffectiveInfostorePermission(isperm, effectiveObjectPermission, document, user, getFirstFolderAdmin(folder));
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             releaseReadConnection(ctx, con);
             LOG.debug("Loaded effective permission for one document in {}ms.", System.currentTimeMillis() - start);
@@ -117,18 +149,22 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     @Override
-    public EffectivePermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
+    public EffectiveInfostoreFolderPermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
     	return getFolderPermission(folderId, ctx, user, userPermissions, null);
     }
 
     @Override
-    public EffectivePermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissions, Connection readConArg) throws OXException {
+    public EffectiveInfostoreFolderPermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissions, Connection readConArg) throws OXException {
         long start = System.currentTimeMillis();
         Connection readCon = null;
         try {
             readCon = readConArg != null ? readConArg : getReadConnection(ctx);
-            return new OXFolderAccess(readCon, ctx).getFolderPermission((int) folderId, user.getId(), userPermissions);
-            //return OXFolderTools.getEffectiveFolderOCL((int)folderId, user.getId(), user.getGroups(),ctx, userConfig, readCon);
+
+            FolderObject folder = new OXFolderAccess(readCon, ctx).getFolderObject((int) folderId);
+            EffectivePermission isperm = folder.getEffectiveUserPermission(user.getId(), userPermissions, readCon);
+            return new EffectiveInfostoreFolderPermission(isperm, getFirstFolderAdmin(folder));
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
         	if (readConArg == null) {
                 releaseReadConnection(ctx, readCon);
@@ -180,6 +216,8 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             con = getReadConnection(ctx);
             OXFolderAccess oxFolderAccess = new OXFolderAccess(con, ctx);
             Map<Long, EffectivePermission> folderPermissions = new HashMap<Long, EffectivePermission>(documents.size() * 2);
+            Map<Long, FolderObject> folders = new HashMap<Long, FolderObject>(documents.size() * 2);
+
             List<Pair<Integer, Integer>> foldersAndDocuments = new ArrayList<Pair<Integer, Integer>>(documents.size());
             Map<Integer, Map<Integer, EffectiveObjectPermission>> objectPermissionsByFolder = EffectiveObjectPermissions.load(ctx, user, userPermissions, FolderObject.INFOSTORE, foldersAndDocuments, con);
             for (DocumentMetadata document : documents) {
@@ -204,8 +242,10 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
 
                 EffectivePermission folderPermission = folderPermissions.get(folderId);
                 if (folderPermission == null) {
-                    folderPermission = oxFolderAccess.getFolderPermission((int)folderId, user.getId(), userPermissions);
+                    FolderObject folder = oxFolderAccess.getFolderObject((int) folderId);
+                    folderPermission = folder.getEffectiveUserPermission(user.getId(), userPermissions, oxFolderAccess.getReadCon());
                     folderPermissions.put(folderId, folderPermission);
+                    folders.put(folderId, folder);
                 }
             }
 
@@ -232,6 +272,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             for (DocumentMetadata document : documents) {
                 long folderId = document.getFolderId();
                 EffectivePermission folderPermission = folderPermissions.get(folderId);
+                FolderObject folder = folders.get(folderId);
                 EffectiveObjectPermission objectPermission = null;
                 Map<Integer, EffectiveObjectPermission> objectPermissionsByDocument = objectPermissionsByFolder.get((int)folderId);
                 if (objectPermissionsByDocument != null) {
@@ -242,10 +283,13 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
                     folderPermission,
                     objectPermission,
                     document,
-                    user));
+                    user,
+                    getFirstFolderAdmin(folder)));
             }
 
             return permissions;
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             releaseReadConnection(ctx, con);
         }

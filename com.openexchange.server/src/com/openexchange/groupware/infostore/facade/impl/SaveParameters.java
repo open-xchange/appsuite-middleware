@@ -54,8 +54,11 @@ import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.tools.session.ServerSession;
 
 class SaveParameters {
+
+    private final ServerSession session;
     private final Context context;
     private final DocumentMetadata document;
     private final DocumentMetadata oldDocument;
@@ -67,17 +70,28 @@ class SaveParameters {
     private int fileCreatedBy = -1;
     private boolean ignoreVersion = false;
 
-    SaveParameters(Context context, DocumentMetadata document, DocumentMetadata oldDocument, long sequenceNumber, Set<Metadata> updatedCols) {
+    SaveParameters(ServerSession session, DocumentMetadata document, DocumentMetadata oldDocument, long sequenceNumber, Set<Metadata> updatedCols) {
         super();
-        this.context = context;
+        this.context = session.getContext();
+        this.session = session;
         this.document = document;
         this.oldDocument = oldDocument;
         this.sequenceNumber = sequenceNumber;
         this.updatedCols = updatedCols;
     }
 
-    Context getContext() {
-        return context;
+    SaveParameters(Context context, DocumentMetadata document, DocumentMetadata oldDocument, long sequenceNumber, Set<Metadata> updatedCols) {
+        super();
+        this.context = context;
+        this.session = null;
+        this.document = document;
+        this.oldDocument = oldDocument;
+        this.sequenceNumber = sequenceNumber;
+        this.updatedCols = updatedCols;
+    }
+
+    ServerSession getSession() {
+        return session;
     }
 
     DocumentMetadata getDocument() {
@@ -121,6 +135,10 @@ class SaveParameters {
 
     boolean isIgnoreVersion() {
         return ignoreVersion;
+    }
+
+    Context getContext() {
+        return context;
     }
 
 }

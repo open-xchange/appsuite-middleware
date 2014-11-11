@@ -54,10 +54,10 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.collections.Injector;
 
 public interface InfostoreSecurity {
@@ -68,9 +68,9 @@ public interface InfostoreSecurity {
 
     List<EffectiveInfostorePermission> getInfostorePermissions(List<DocumentMetadata> documents, Context context, User user, UserPermissionBits permissionBits) throws OXException;
 
-    EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+    EffectiveInfostoreFolderPermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 
-    EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions, Connection readConArg) throws OXException;
+    EffectiveInfostoreFolderPermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions, Connection readConArg) throws OXException;
 
     <L> L injectInfostorePermissions(int[] ids, Context ctx, User user, UserPermissionBits userPermissions, L list, Injector<L, EffectiveInfostorePermission> injector) throws OXException;
 

@@ -68,7 +68,7 @@ public class SaveFileAction extends FileStreamAction {
      * @param data The input stream
      * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
      */
-    public SaveFileAction(FileStorage storage, InputStream data, long sizeHint) {
+    public SaveFileAction(com.openexchange.filestore.FileStorage storage, InputStream data, long sizeHint) {
         this(storage, data, sizeHint, true);
     }
 
@@ -80,7 +80,7 @@ public class SaveFileAction extends FileStreamAction {
      * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
      * @param calculateChecksum <code>true</code> to calculate a checksum for the saved data, <code>false</code>, otherwise
      */
-    public SaveFileAction(FileStorage storage, InputStream data, long sizeHint, boolean calculateChecksum) {
+    public SaveFileAction(com.openexchange.filestore.FileStorage storage, InputStream data, long sizeHint, boolean calculateChecksum) {
         super(storage, data, sizeHint, calculateChecksum);
     }
 
@@ -90,17 +90,17 @@ public class SaveFileAction extends FileStreamAction {
     }
 
     @Override
-    protected void store(FileStorage storage, InputStream stream) throws OXException {
+    protected void store(com.openexchange.filestore.FileStorage storage, InputStream stream) throws OXException {
         fileStorageID = storage.saveNewFile(stream);
     }
 
     @Override
-    protected void store(QuotaFileStorage storage, InputStream stream, long sizeHint) throws OXException {
+    protected void store(com.openexchange.filestore.QuotaFileStorage storage, InputStream stream, long sizeHint) throws OXException {
         fileStorageID = storage.saveNewFile(stream, sizeHint);
     }
 
     @Override
-    protected void undo(FileStorage storage) throws OXException {
+    protected void undo(com.openexchange.filestore.FileStorage storage) throws OXException {
         storage.deleteFile(fileStorageID);
     }
 

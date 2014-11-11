@@ -57,25 +57,34 @@ import com.openexchange.server.impl.OCLPermission;
 public class EffectiveInfostorePermission {
 
     private final EffectiveObjectPermission objectPermission;
-
     private final EffectivePermission permission;
-
     private final User user;
-
     private final DocumentMetadata document;
+    private final int optFolderAdmin;
 
-    public EffectiveInfostorePermission(final EffectivePermission permission, final DocumentMetadata document, final User user) {
+    public EffectiveInfostorePermission(EffectivePermission permission, DocumentMetadata document, User user, int optFolderAdmin) {
         this.document = document;
         this.user = user;
         this.permission = permission;
         objectPermission = null;
+        this.optFolderAdmin = optFolderAdmin;
     }
 
-    public EffectiveInfostorePermission(final EffectivePermission permission, final EffectiveObjectPermission objectPermission, final DocumentMetadata document, final User user) {
+    public EffectiveInfostorePermission(EffectivePermission permission, EffectiveObjectPermission objectPermission, DocumentMetadata document, User user, int optFolderAdmin) {
         this.document = document;
         this.user = user;
         this.permission = permission;
         this.objectPermission = objectPermission;
+        this.optFolderAdmin = optFolderAdmin;
+    }
+
+    /**
+     * Gets the optional folder administrator identifier
+     *
+     * @return The folder administrator identifier or <code>-1</code>
+     */
+    public int getOptFolderAdmin() {
+        return optFolderAdmin;
     }
 
     public boolean canReadObject() {
@@ -146,7 +155,7 @@ public class EffectiveInfostorePermission {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         return permission.equals(obj);
     }
 
@@ -187,7 +196,7 @@ public class EffectiveInfostorePermission {
         return permission.hashCode();
     }
 
-    public boolean hasModuleAccess(final int folderModule) {
+    public boolean hasModuleAccess(int folderModule) {
         return permission.hasModuleAccess(folderModule);
     }
 
@@ -203,47 +212,47 @@ public class EffectiveInfostorePermission {
         return permission.isGroupPermission();
     }
 
-    public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
+    public boolean setAllObjectPermission(int pr, int pw, int pd) {
         return permission.setAllObjectPermission(pr, pw, pd);
     }
 
-    public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
+    public boolean setAllPermission(int fp, int opr, int opw, int opd) {
         return permission.setAllPermission(fp, opr, opw, opd);
     }
 
-    public boolean setDeleteObjectPermission(final int p) {
+    public boolean setDeleteObjectPermission(int p) {
         return permission.setDeleteObjectPermission(p);
     }
 
-    public void setEntity(final int entity) {
+    public void setEntity(int entity) {
         permission.setEntity(entity);
     }
 
-    public void setFolderAdmin(final boolean folderAdmin) {
+    public void setFolderAdmin(boolean folderAdmin) {
         permission.setFolderAdmin(folderAdmin);
     }
 
-    public boolean setFolderPermission(final int p) {
+    public boolean setFolderPermission(int p) {
         return permission.setFolderPermission(p);
     }
 
-    public void setFuid(final int pid) {
+    public void setFuid(int pid) {
         permission.setFuid(pid);
     }
 
-    public void setGroupPermission(final boolean groupPermission) {
+    public void setGroupPermission(boolean groupPermission) {
         permission.setGroupPermission(groupPermission);
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         permission.setName(name);
     }
 
-    public boolean setReadObjectPermission(final int p) {
+    public boolean setReadObjectPermission(int p) {
         return permission.setReadObjectPermission(p);
     }
 
-    public boolean setWriteObjectPermission(final int p) {
+    public boolean setWriteObjectPermission(int p) {
         return permission.setWriteObjectPermission(p);
     }
 

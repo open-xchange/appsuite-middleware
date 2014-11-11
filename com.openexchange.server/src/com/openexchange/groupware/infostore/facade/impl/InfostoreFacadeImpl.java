@@ -67,6 +67,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -76,6 +77,9 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.AttachmentUUID;
@@ -84,7 +88,6 @@ import com.openexchange.groupware.container.EffectiveObjectPermissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -146,13 +149,12 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.groupware.AmountQuotas;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.file.AppendFileAction;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -183,6 +185,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     private static final boolean INDEXING_ENABLED = false; //TODO: remove switch once we index infoitems
 
     public static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
+
+    private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<QuotaFileStorageService>();
+
+    /**
+     * Applies the given <code>QuotaFileStorageService</code> instance
+     *
+     * @param service The instance or <code>null</code>
+     */
+    public static void setQuotaFileStorageService(QuotaFileStorageService service) {
+        QFS_REF.set(service);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
 
     private final DatabaseImpl db = new DatabaseImpl();
 
@@ -294,7 +309,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         final DocumentMetadata dm = load(id, version, session.getContext());
-        final FileStorage fs = getFileStorage(session.getContext());
+        final FileStorage fs = getFileStorage(infoPerm.getOptFolderAdmin(), session.getContextId());
         if (null == dm.getFilestoreLocation()) {
             return Streams.EMPTY_INPUT_STREAM;
         }
@@ -397,12 +412,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         long limit = com.openexchange.file.storage.Quota.UNLIMITED;
         long usage = com.openexchange.file.storage.Quota.UNLIMITED;
         try {
-            limit = getFileStorage(session.getContext()).getQuota();
+            limit = getFileStorage(session.getUserId(), session.getContextId()).getQuota();
         } catch (OXException e) {
             LOG.warn("Error getting file storage quota for context {}", session.getContextId(), e);
         }
         if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
-            usage = getFileStorage(session.getContext()).getUsage();
+            usage = getFileStorage(session.getUserId(), session.getContextId()).getUsage();
         }
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
     }
@@ -561,7 +576,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0)), true);
 
                 if (data != null) {
-                    SaveFileAction saveFile = new SaveFileAction(getFileStorage(context), data, document.getFileSize());
+                    SaveFileAction saveFile = new SaveFileAction(getFileStorage(session), data, document.getFileSize());
                     perform(saveFile, false);
                     document.setVersion(1);
                     document.setFilestoreLocation(saveFile.getFileStorageID());
@@ -684,8 +699,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return reservation;
     }
 
-    protected QuotaFileStorage getFileStorage(final Context ctx) throws OXException {
-        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+    protected QuotaFileStorage getFileStorage0(int folderAdmin, int contextId) throws OXException {
+        QuotaFileStorageService storageService = QFS_REF.get();
+        if (null == storageService) {
+            throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
+        }
+
+        return storageService.getQuotaFileStorage(folderAdmin, contextId);
     }
 
     private Metadata[] nonNull(final DocumentMetadata document) {
@@ -775,7 +795,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         VALIDATION.validate(document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
-        SaveParameters saveParameters = new SaveParameters(context, document, oldDocument, sequenceNumber, updatedCols);
+        SaveParameters saveParameters = new SaveParameters(session, document, oldDocument, sequenceNumber, updatedCols);
         saveParameters.setData(data, offset, session.getUserId(), ignoreVersion);
         saveModifiedDocument(saveParameters);
 
@@ -903,7 +923,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     private void storeNewData(SaveParameters parameters) throws OXException {
-        QuotaFileStorage qfs = getFileStorage(parameters.getContext());
+        QuotaFileStorage qfs = getFileStorage(parameters.get);
         if (0 < parameters.getOffset()) {
             AppendFileAction appendFile = new AppendFileAction(
                 qfs, parameters.getData(), parameters.getOldDocument().getFilestoreLocation(), parameters.getDocument().getFileSize(), parameters.getOffset());
@@ -1726,7 +1746,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 /*
                  * check read permissions, trying the folder permissions first
                  */
-                if (false == new EffectiveInfostorePermission(folderPermission, document, user).canReadObject()) {
+                if (false == new EffectiveInfostorePermission(folderPermission, document, user, -1).canReadObject()) {
                     /*
                      * check object permissions, too
                      */
@@ -1738,7 +1758,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         if (null != matchingPermission) {
                             EffectiveObjectPermission objectPermission = EffectiveObjectPermissions.convert(FolderObject.INFOSTORE,
                                 (int) document.getFolderId(), document.getId(), matchingPermission, session.getUserPermissionBits());
-                            infostorePermission = new EffectiveInfostorePermission(folderPermission, objectPermission, document, user);
+                            infostorePermission = new EffectiveInfostorePermission(folderPermission, objectPermission, document, user, -1);
                         }
                     }
                     if (null == infostorePermission || false == infostorePermission.canReadObject()) {

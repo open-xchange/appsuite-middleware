@@ -131,6 +131,15 @@ public class OXFolderAccess {
     }
 
     /**
+     * Gets the connection with "read-only" capability
+     *
+     * @return The connection with "read-only" capability or <code>null</code>
+     */
+    public Connection getReadCon() {
+        return readCon;
+    }
+
+    /**
      * Tests if the folder associated with specified folder ID exists.
      *
      * @param folderId The folder ID

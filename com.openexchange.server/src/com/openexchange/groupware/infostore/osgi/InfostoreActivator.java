@@ -69,12 +69,14 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.InfostoreAvailable;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.infostore.database.InfostoreFilestoreLocationUpdater;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
@@ -101,19 +103,20 @@ public class InfostoreActivator implements BundleActivator {
     private volatile Queue<ServiceRegistration<?>> registrations;
     private volatile ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
     private volatile ServiceTracker<ConfigurationService, ConfigurationService> configTracker;
+    private volatile ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
 
     @Override
     public void start(final BundleContext context) throws Exception {
         try {
 
-            final LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
-            final PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
+            PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
             /*
              * Service registrations
              */
-            final Queue<ServiceRegistration<?>> registrations = new LinkedList<ServiceRegistration<?>>();
+            Queue<ServiceRegistration<?>> registrations = new LinkedList<ServiceRegistration<?>>();
 //            registrations.offer(context.registerService(CreateTableService.class.getName(), task, null));
 //            registrations.offer(
             registrations.offer(context.registerService(EventHandler.class, lockCleaner, serviceProperties));
@@ -128,7 +131,7 @@ public class InfostoreActivator implements BundleActivator {
             /*
              * Service trackers
              */
-            final class AvailableTracker extends ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> {
+            class AvailableTracker extends ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> {
 
                 AvailableTracker(final BundleContext context) {
                     super(context, FileStorageServiceRegistry.class, null);
@@ -153,7 +156,7 @@ public class InfostoreActivator implements BundleActivator {
                     super.removedService(reference, service);
                 }
             }
-            final AvailableTracker tracker = new AvailableTracker(context);
+            AvailableTracker tracker = new AvailableTracker(context);
             tracker.open();
             this.tracker = tracker;
 
@@ -166,7 +169,7 @@ public class InfostoreActivator implements BundleActivator {
                 }
             }, null);
 
-            final ServiceTracker<ConfigurationService, ConfigurationService> configTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
+            ServiceTracker<ConfigurationService, ConfigurationService> configTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
 
                 /*
                  * Register quotas as SharedJSLob
@@ -196,6 +199,24 @@ public class InfostoreActivator implements BundleActivator {
             this.configTracker = configTracker;
             configTracker.open();
 
+            ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = new ServiceTracker<QuotaFileStorageService, QuotaFileStorageService>(context, QuotaFileStorageService.class, null) {
+
+                @Override
+                public QuotaFileStorageService addingService(ServiceReference<QuotaFileStorageService> reference) {
+                    QuotaFileStorageService service = super.addingService(reference);
+                    InfostoreFacadeImpl.setQuotaFileStorageService(service);
+                    return service;
+                }
+
+                @Override
+                public void removedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
+                    InfostoreFacadeImpl.setQuotaFileStorageService(null);
+                    super.removedService(reference, service);
+                }
+            };
+            this.qfsTracker = qfsTracker;
+            qfsTracker.open();
+
         } catch (final Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Starting InfostoreActivator failed.", e);
@@ -206,17 +227,25 @@ public class InfostoreActivator implements BundleActivator {
     @Override
     public void stop(final BundleContext context) throws Exception {
         try {
-            final ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker = this.tracker;
+            ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker = this.tracker;
             if (null != tracker) {
                 tracker.close();
                 this.tracker = null;
             }
-            final ServiceTracker<ConfigurationService, ConfigurationService> configTracker = this.configTracker;
+
+            ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = this.qfsTracker;
+            if (null != qfsTracker) {
+                qfsTracker.close();
+                this.qfsTracker = null;
+            }
+
+            ServiceTracker<ConfigurationService, ConfigurationService> configTracker = this.configTracker;
             if (null != configTracker) {
                 configTracker.close();
                 this.configTracker = null;
             }
-            final Queue<ServiceRegistration<?>> registrations = this.registrations;
+
+            Queue<ServiceRegistration<?>> registrations = this.registrations;
             if (null != registrations) {
                 ServiceRegistration<?> polled;
                 while ((polled = registrations.poll()) != null) {

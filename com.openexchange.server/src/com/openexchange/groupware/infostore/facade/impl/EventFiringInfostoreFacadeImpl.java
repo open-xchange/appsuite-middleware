@@ -69,7 +69,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -106,7 +105,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         final DocumentMetadata dm = load(id, version, session.getContext());
-        final FileStorage fs = getFileStorage(session.getContext());
+        final com.openexchange.filestore.FileStorage fs = getFileStorage(session);
         InputStream document;
         if (dm.getFilestoreLocation() == null) {
             document = Streams.newByteArrayInputStream(new byte[0]);
