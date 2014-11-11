@@ -1063,22 +1063,22 @@ ox_add_property com.openexchange.preview.thumbnail.blockingWorker false /opt/ope
 # SoftwareChange_Request-2190
 pfile=/opt/open-xchange/etc/cache.ccf
 if ! grep "jcs.region.UserPermissionBits=LTCP" > /dev/null $pfile; then
-    echo -e "\n# # Pre-defined cache for user configuration\n" >> $pfile
-    echo "jcs.region.UserPermissionBits=LTCP\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false\n" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile
+    echo -e "\n# Pre-defined cache for user configuration" >> $pfile
+    echo "jcs.region.UserPermissionBits=LTCP" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60" >> $pfile
+    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false" >> $pfile
+    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false" >> $pfile
+    echo -e "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile
 fi
 
 # SoftwareChange_Request-2197
