@@ -450,6 +450,15 @@ public class DefaultShareService implements ShareService {
         return affectedShares;
     }
 
+    public int removeShares(List<String> tokens, int contextID) throws OXException {
+        for (String token : tokens) {
+            if (contextID != new ShareToken(token).getContextID()) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+            }
+        }
+        return removeShares(tokens);
+    }
+
     /**
      * Removes share targets for specific guest users in a context.
      *
@@ -532,7 +541,7 @@ public class DefaultShareService implements ShareService {
         TokenCollection tokenCollection = new TokenCollection(services, contextID, tokens);
         List<Share> shares;
         ConnectionHelper connectionHelper = null != session ?
-            new ConnectionHelper(contextID, services, true) : new ConnectionHelper(session, services, true);
+            new ConnectionHelper(session, services, true) : new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
             /*
