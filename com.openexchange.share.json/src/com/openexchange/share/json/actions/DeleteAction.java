@@ -97,7 +97,7 @@ public class DeleteAction extends AbstractShareAction {
          * delete shares
          */
         if (0 < tokens.size()) {
-            new DeletePerformer(tokens, session, services).perform();
+            getShareService().deleteShares(session, tokens);
         }
         /*
          * return empty results in case of success

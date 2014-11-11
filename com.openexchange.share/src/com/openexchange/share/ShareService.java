@@ -157,6 +157,25 @@ public interface ShareService {
     GuestShare updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientTimestamp) throws OXException;
 
     /**
+     * Removes all shares identified by the supplied tokens. The tokens might either be in their absolute format (i.e. base token plus
+     * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being
+     * removed.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated guest permission entities from the referenced share targets are removed implicitly, so there's no need to take care
+     * of those for the caller</li>
+     * <li>Since the referenced share targets are are updated accordingly, depending permissions checks are performed, especially
+     * regarding the session's user being able to update the referenced share targets or not, throwing an appropriate exception if the
+     * permissions are not sufficient</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param tokens The tokens to delete the shares for
+     */
+    void deleteShares(Session session, List<String> tokens) throws OXException;
+
+    /**
      * Gets all shares that were created by the supplied session's user.
      *
      * @param session The session

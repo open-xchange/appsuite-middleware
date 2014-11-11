@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -311,6 +310,11 @@ public class DefaultShareService implements ShareService {
         }
     }
 
+    @Override
+    public void deleteShares(Session session, List<String> tokens) throws OXException {
+        removeShares(session, session.getContextId(), tokens);
+    }
+
     /**
      * Gets all shares created in a specific context.
      *
@@ -355,7 +359,7 @@ public class DefaultShareService implements ShareService {
             shares = shareStorage.loadSharesForContext(contextID, connectionHelper.getParameters());
             if (0 < shares.size()) {
                 shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                removeTargetPermissions(connectionHelper, shares);
+                removeTargetPermissions(null, connectionHelper, shares);
             }
             connectionHelper.commit();
         } finally {
@@ -394,7 +398,7 @@ public class DefaultShareService implements ShareService {
             shares = shareStorage.loadSharesCreatedBy(contextID, userID, connectionHelper.getParameters());
             if (0 < shares.size()) {
                 shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                removeTargetPermissions(connectionHelper, shares);
+                removeTargetPermissions(null, connectionHelper, shares);
             }
             connectionHelper.commit();
         } finally {
@@ -441,7 +445,7 @@ public class DefaultShareService implements ShareService {
          */
         int affectedShares = 0;
         for (Map.Entry<Integer, List<String>> entry : tokensByContextID.entrySet()) {
-            affectedShares += removeShares(entry.getKey().intValue(), entry.getValue());
+            affectedShares += removeShares(null, entry.getKey().intValue(), entry.getValue());
         }
         return affectedShares;
     }
@@ -513,76 +517,34 @@ public class DefaultShareService implements ShareService {
      * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
      * as needed.
      * <p/>
-     * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
+     * Depending on the session, the removal is done in terms of an administrative update with no further permission checks, or regular
+     * update as performed by the session's user, checking permissions on the share targets implicitly.
      *
+     * @param session The session, or <code>null</code> to perform an administrative update
+     * @param contextID The context ID
      * @param tokens The tokens to delete the shares for
      * @return The number of affected shares
      */
-    private int removeShares(int contextID, List<String> tokens) throws OXException {
+    private int removeShares(Session session, int contextID, List<String> tokens) throws OXException {
         /*
-         * distinguish between base tokens only or base token with specific paths
+         * prepare a token collection to distinguish between base tokens only or base token with specific paths
          */
-        Set<ShareToken> baseTokensOnly = new HashSet<ShareToken>();
-        Map<ShareToken, Set<String>> pathsPerBaseToken = new HashMap<ShareToken, Set<String>>();
-        for (String token : tokens) {
-            ShareToken shareToken = new ShareToken(token);
-            if (contextID != shareToken.getContextID()) {
-                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-            }
-            String baseToken = shareToken.getToken();
-            if (token.length() > baseToken.length() + 1 && '/' == token.charAt(baseToken.length())) {
-                /*
-                 * base token with path
-                 */
-                Set<String> paths = pathsPerBaseToken.get(shareToken);
-                if (null == paths) {
-                    paths = new HashSet<String>();
-                    pathsPerBaseToken.put(shareToken, paths);
-                }
-                paths.add(token.substring(baseToken.length() + 1));
-            } else {
-                /*
-                 * base token only
-                 */
-                baseTokensOnly.add(shareToken);
-            }
-        }
-        /*
-         * proceed with deletion
-         */
-        List<Share> shares = new ArrayList<Share>();
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
+        TokenCollection tokenCollection = new TokenCollection(services, contextID, tokens);
+        List<Share> shares;
+        ConnectionHelper connectionHelper = null != session ?
+            new ConnectionHelper(contextID, services, true) : new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
             /*
-             * gather all shares for guest users with base token only (removing redundant tokens with paths implicitly)
+             * load all shares referenced by the supplied tokens
              */
-            for (ShareToken baseToken : baseTokensOnly) {
-                pathsPerBaseToken.remove(baseToken);
-                shares.addAll(shareStorage.loadSharesForGuest(contextID, baseToken.getUserID(), connectionHelper.getParameters()));
-            }
-            /*
-             * pick specific shares for guest users with base tokens and paths
-             */
-            for (Map.Entry<ShareToken, Set<String>> entry : pathsPerBaseToken.entrySet()) {
-                List<Share> sharesForGuest = shareStorage.loadSharesForGuest(
-                    contextID, entry.getKey().getUserID(), connectionHelper.getParameters());
-                for (String path : entry.getValue()) {
-                    for (Share share : sharesForGuest) {
-                        if (null != share.getTarget() && path.equals(share.getTarget().getPath())) {
-                            shares.add(share);
-                            break;
-                        }
-                    }
-                }
-            }
+            shares = tokenCollection.loadShares(connectionHelper.getParameters());
             /*
              * delete the shares in storage, removing the associated target permissions as well
              */
             if (0 < shares.size()) {
-                shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                removeTargetPermissions(connectionHelper, shares);
+                services.getService(ShareStorage.class).deleteShares(contextID, shares, connectionHelper.getParameters());
+                removeTargetPermissions(session, connectionHelper, shares);
             }
             connectionHelper.commit();
         } finally {
@@ -592,7 +554,7 @@ public class DefaultShareService implements ShareService {
          * schedule cleanup tasks as needed
          */
         if (0 < shares.size()) {
-            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
+            scheduleGuestCleanup(contextID, tokenCollection.getGuestUserIDs());
         }
         return shares.size();
     }
@@ -614,7 +576,7 @@ public class DefaultShareService implements ShareService {
             try {
                 connectionHelper.start();
                 affectedShares = shareStorage.deleteShares(contextID, expiredShares, connectionHelper.getParameters());
-                removeTargetPermissions(connectionHelper, expiredShares);
+                removeTargetPermissions(null, connectionHelper, expiredShares);
                 connectionHelper.commit();
             } finally {
                 connectionHelper.finish();
@@ -631,15 +593,21 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Removes any permissions that are directly associated with the supplied shares, i.e. the permissions in the share targets for the
-     * guest entities.
+     * guest entities. Depending on the session, the removal is done in an administrative or regular update.
      *
+     * @param session The session, or <code>null</code> to perform an administrative update
      * @param connectionHelper A (started) connection helper
      * @param shares The share to remove the associated permissions for
      * @throws OXException
      */
-    private void removeTargetPermissions(ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
+    private void removeTargetPermissions(Session session, ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
-        TargetUpdate targetUpdate = moduleSupport.prepareAdministrativeUpdate(connectionHelper.getContextID(), connectionHelper.getConnection());
+        TargetUpdate targetUpdate;
+        if (null == session) {
+            targetUpdate = moduleSupport.prepareAdministrativeUpdate(connectionHelper.getContextID(), connectionHelper.getConnection());
+        } else {
+            targetUpdate = moduleSupport.prepareUpdate(session, connectionHelper.getConnection());
+        }
         try {
             Map<ShareTarget, Set<Integer>> guestsByTarget = ShareTool.mapGuestsByTarget(shares);
             targetUpdate.fetch(guestsByTarget.keySet());
