@@ -1,3 +1,7 @@
+* 2014-11-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 35419: Useless mail notification on state changes.
+ 
 * 2014-11-11 - marcus.klein@open-xchange.com
 
  - Fix for bug 35408: corrected post install script for adding UserPermissionBits cache region to cache.ccf configuration file.
