@@ -56,7 +56,8 @@ import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.encoder.EncoderBase;
 
 /**
- * {@link LogstashEncoder}
+ * {@link LogstashEncoder}. Uses the {@link LogstashFormatter} to format {@link ILoggingEvent} objects as JSON objects and flushes them to
+ * the stream.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */

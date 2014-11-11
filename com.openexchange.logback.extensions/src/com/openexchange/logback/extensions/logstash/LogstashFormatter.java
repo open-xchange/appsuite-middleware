@@ -60,7 +60,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 /**
- * {@link LogstashFormatter}
+ * {@link LogstashFormatter}. Formats {@link ILoggingEvent} objects as JSON objects.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */

@@ -75,7 +75,9 @@ import ch.qos.logback.core.util.CloseUtil;
 import ch.qos.logback.core.util.Duration;
 
 /**
- * {@link LogstashSocketAppender}
+ * {@link LogstashSocketAppender}. Replica class of {@link AbstractSocketAppender}. The method {@link #dispatchEvents()} does the actual
+ * work and is rewritten. Instead of sending serialized objects to the stream, a special {@link LogstashEncoder} is used to format all
+ * logging events as JSON objects before sending them over the wire.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
