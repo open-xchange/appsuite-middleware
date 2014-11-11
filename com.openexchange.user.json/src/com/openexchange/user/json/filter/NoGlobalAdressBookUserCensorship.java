@@ -70,7 +70,8 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
     }
 
     private static final class FilteredUser implements User {
-        private User delegate = null;
+
+        private final User delegate;
 
         private FilteredUser(final User delegate) {
             super();
@@ -222,7 +223,25 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
             return delegate.getCreatedBy();
         }
 
+        @Override
+        public String[] getFileStorageAuth() {
+            return delegate.getFileStorageAuth();
+        }
 
+        @Override
+        public long getFileStorageQuota() {
+            return delegate.getFileStorageQuota();
+        }
+
+        @Override
+        public int getFilestoreId() {
+            return delegate.getFilestoreId();
+        }
+
+        @Override
+        public String getFilestoreName() {
+            return delegate.getFilestoreName();
+        }
     }
 
 }
