@@ -1445,6 +1445,7 @@ public final class MimeMessageUtility {
             final char c = phrase.charAt(i);
             needQuoting = (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || (!allowNonAscii && c >= 127) || RFC822.indexOf(c) >= 0);
         }
+        needQuoting = !phrase.endsWith("\\");
         try {
             if (!needQuoting) {
                 return encode ? MimeUtility.encodeWord(phrase) : phrase;
