@@ -50,87 +50,71 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.ajax.framework.Params;
 
 
 /**
- * {@link InviteRequest}
+ * {@link StopSMTPRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class InviteRequest implements AJAXRequest<InviteResponse> {
+public class StopSMTPRequest implements AJAXRequest<ShareTestResponse> {
 
-    private final boolean failOnError;
+    private final boolean restoreAccount;
 
-    private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
+    private boolean failOnError = true;
 
-    private final List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
-
-    public InviteRequest() {
-        this(Collections.<ShareTarget>emptyList(), Collections.<ShareRecipient>emptyList(), true);
+    public StopSMTPRequest() {
+        this(true);
     }
 
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(targets, recipients, true);
-    }
-
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
+    public StopSMTPRequest(boolean updateAccount) {
         super();
-        this.targets.addAll(targets);
-        this.recipients.addAll(recipients);
+        this.restoreAccount = updateAccount;
+    }
+
+    public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
 
-    public void addTarget(ShareTarget target) {
-        targets.add(target);
-    }
-
-    public void addRecipient(ShareRecipient recipient) {
-        recipients.add(recipient);
-    }
-
     @Override
-    public Method getMethod() {
-        return Method.PUT;
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
 
     @Override
     public String getServletPath() {
-        return "/ajax/share/management";
+        return "/ajax/share/test";
     }
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, "invite") };
+        return new Params(
+            AJAXServlet.PARAMETER_ACTION, "stopSMTP",
+            "restoreAccount", Boolean.toString(restoreAccount)
+            ).toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends InviteResponse> getParser() {
-        return new AbstractAJAXParser<InviteResponse>(failOnError) {
+    public AbstractAJAXParser<? extends ShareTestResponse> getParser() {
+        return new AbstractAJAXParser<ShareTestResponse>(failOnError) {
             @Override
-            protected InviteResponse createResponse(Response response) throws JSONException {
-                return new InviteResponse(response);
+            protected ShareTestResponse createResponse(Response response) throws JSONException {
+                return new ShareTestResponse(response);
             }
         };
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject json = new JSONObject();
-        json.put("targets", ShareWriter.writeTargets(targets));
-        json.put("recipients", ShareWriter.writeRecipients(recipients));
-        return json;
+        return null;
     }
 
     @Override

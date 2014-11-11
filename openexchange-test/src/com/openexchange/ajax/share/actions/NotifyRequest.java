@@ -50,9 +50,6 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -60,44 +57,42 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.ajax.framework.Params;
 
 
 /**
- * {@link InviteRequest}
+ * {@link NotifyRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class InviteRequest implements AJAXRequest<InviteResponse> {
+public class NotifyRequest implements AJAXRequest<NotifyResponse> {
 
-    private final boolean failOnError;
+    private boolean failOnError = true;
 
-    private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
+    private String token;
 
-    private final List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
+    private String mailAddress;
 
-    public InviteRequest() {
-        this(Collections.<ShareTarget>emptyList(), Collections.<ShareRecipient>emptyList(), true);
-    }
+    private String message;
 
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(targets, recipients, true);
-    }
-
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
+    /**
+     * Initializes a new {@link NotifyRequest}.
+     */
+    public NotifyRequest(String token, String mailAddress) {
         super();
-        this.targets.addAll(targets);
-        this.recipients.addAll(recipients);
-        this.failOnError = failOnError;
+        this.token = token;
+        this.mailAddress = mailAddress;
     }
 
-    public void addTarget(ShareTarget target) {
-        targets.add(target);
-    }
 
-    public void addRecipient(ShareRecipient recipient) {
-        recipients.add(recipient);
+    /**
+     * Sets the message
+     *
+     * @param message The message to set
+     */
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     @Override
@@ -112,15 +107,17 @@ public class InviteRequest implements AJAXRequest<InviteResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, "invite") };
+        return new Params(
+            AJAXServlet.PARAMETER_ACTION, "notify"
+        ).toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends InviteResponse> getParser() {
-        return new AbstractAJAXParser<InviteResponse>(failOnError) {
+    public AbstractAJAXParser<? extends NotifyResponse> getParser() {
+        return new AbstractAJAXParser<NotifyResponse>(failOnError ) {
             @Override
-            protected InviteResponse createResponse(Response response) throws JSONException {
-                return new InviteResponse(response);
+            protected NotifyResponse createResponse(Response response) throws JSONException {
+                return new NotifyResponse(response);
             }
         };
     }
@@ -128,8 +125,9 @@ public class InviteRequest implements AJAXRequest<InviteResponse> {
     @Override
     public Object getBody() throws IOException, JSONException {
         JSONObject json = new JSONObject();
-        json.put("targets", ShareWriter.writeTargets(targets));
-        json.put("recipients", ShareWriter.writeRecipients(recipients));
+        json.put("token", token);
+        json.put("mail_address", mailAddress);
+        json.put("message", message);
         return json;
     }
 

@@ -148,7 +148,7 @@ public class NotifyAction extends AbstractShareAction {
         }
 
         getNotificationService().send(builder.build());
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return new AJAXRequestResult(new JSONObject(), "json");
     }
 
 }
