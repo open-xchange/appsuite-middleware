@@ -99,6 +99,13 @@ if [ ${1:-0} -eq 2 ]; then
     if [ "$VALUE" = "false" ]; then
         ox_set_property com.openexchange.oauth.xing true $PFILE
     fi
+
+    # SoftwareChange_Request-2275
+    ox_set_property com.openexchange.oauth.boxcom false /opt/open-xchange/etc/boxcomoauth.properties
+    ox_set_property com.openexchange.oauth.dropbox false /opt/open-xchange/etc/dropboxoauth.properties
+    ox_set_property com.openexchange.oauth.google false /opt/open-xchange/etc/googleoauth.properties
+    ox_set_property com.openexchange.oauth.msliveconnect false /opt/open-xchange/etc/msliveconnectoauth.properties
+    ox_set_property com.openexchange.oauth.xing false /opt/open-xchange/etc/xingoauth.properties
 fi
 
 %clean
