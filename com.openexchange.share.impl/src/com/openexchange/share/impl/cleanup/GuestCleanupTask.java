@@ -117,6 +117,10 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
     }
 
     private void cleanGuest(Context context, User guestUser) throws OXException {
+        if (false == guestUser.isGuest()) {
+            LOG.warn("Cancelling cleanup task for non-guest user {}.", guestUser);
+            return;
+        }
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
