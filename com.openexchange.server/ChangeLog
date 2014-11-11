@@ -20,6 +20,10 @@
 
  - Fix for bug 35470: Fixed check whether parent folder is a public PIM folder
 
+* 2014-11-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35408: corrected post install script for adding UserPermissionBits cache region to cache.ccf configuration file.
+
 * 2014-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 35359: Improved special /ajax/mail?action=all request fired when loading portal page
