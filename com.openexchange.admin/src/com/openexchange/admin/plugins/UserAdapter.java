@@ -214,4 +214,24 @@ public class UserAdapter implements User {
         return 0;
     }
 
+    @Override
+    public String[] getFileStorageAuth() {
+        return new String[2];
+    }
+
+    @Override
+    public long getFileStorageQuota() {
+        return 0;
+    }
+
+    @Override
+    public int getFilestoreId() {
+        return -1;
+    }
+
+    @Override
+    public String getFilestoreName() {
+        return null;
+    }
+
 }

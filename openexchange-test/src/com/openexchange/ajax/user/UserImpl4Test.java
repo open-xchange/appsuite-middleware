@@ -216,4 +216,24 @@ public class UserImpl4Test implements User {
     public boolean isGuest() {
         return false;
     }
+
+    @Override
+    public String[] getFileStorageAuth() {
+        return new String[2];
+    }
+
+    @Override
+    public long getFileStorageQuota() {
+        return 0;
+    }
+
+    @Override
+    public int getFilestoreId() {
+        return -1;
+    }
+
+    @Override
+    public String getFilestoreName() {
+        return null;
+    }
 }

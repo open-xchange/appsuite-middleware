@@ -240,6 +240,26 @@ public class UserAnonymizerService implements AnonymizerService<User> {
             return delegate.getLoginInfo();
         }
 
+        @Override
+        public String[] getFileStorageAuth() {
+            return delegate.getFileStorageAuth();
+        }
+
+        @Override
+        public long getFileStorageQuota() {
+            return delegate.getFileStorageQuota();
+        }
+
+        @Override
+        public int getFilestoreId() {
+            return delegate.getFilestoreId();
+        }
+
+        @Override
+        public String getFilestoreName() {
+            return delegate.getFilestoreName();
+        }
+
     }
 
 }
