@@ -58,14 +58,15 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.mail.MailNotifications;
+import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -105,7 +106,7 @@ public class NotifyAction extends AbstractShareAction {
         ShareService shareService = getShareService();
         GuestShare share = TokenParser.resolveShare(token, shareService);
         List<ShareTarget> targets = TokenParser.resolveTargets(share, token);
-        GuestInfo guestInfo = shareService.resolveGuest(token);
+        GuestInfo guest = shareService.resolveGuest(token);
 
         String shareToken;
         if (share.isMultiTarget()) {
@@ -122,17 +123,31 @@ public class NotifyAction extends AbstractShareAction {
         }
 
         LinkProvider linkProvider = buildLinkProvider(requestData, shareToken);
-        ShareCreatedNotification<InternetAddress> notification = MailNotifications.shareCreated()
+        ShareCreatedBuilder builder = MailNotifications.shareCreated()
             .setTransportInfo(internetAddress)
             .setLinkProvider(linkProvider)
-            .setContext(share.getGuest().getContextID())
-            .setLocale(guestInfo.getLocale())
+            .setContext(guest.getContextID())
+            .setLocale(guest.getLocale())
             .setSession(session)
-            .setGuestInfo(guestInfo)
             .setTargets(targets)
-            .setMessage(message)
-            .build();
-        getNotificationService().send(notification);
+            .setMessage(message);
+
+        AuthenticationMode authMode = guest.getAuthentication();
+        switch (authMode) {
+            case ANONYMOUS:
+                builder.setAuthMode(AuthenticationMode.ANONYMOUS);
+                break;
+            case ANONYMOUS_PASSWORD:
+                builder.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
+                builder.setPassword(guest.getPassword());
+                break;
+            case GUEST_PASSWORD:
+                builder.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
+                builder.setUsername(guest.getEmailAddress());
+                break;
+        }
+
+        getNotificationService().send(builder.build());
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
 

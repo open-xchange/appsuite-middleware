@@ -54,7 +54,6 @@ import java.util.List;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.AbstractNotificationBuilder;
 import com.openexchange.share.notification.DefaultPasswordResetNotification;
@@ -63,7 +62,6 @@ import com.openexchange.share.notification.PasswordResetNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
-
 
 /**
  * {@link MailNotifications}
@@ -75,6 +73,7 @@ public class MailNotifications {
 
     /**
      * Creates a new builder for {@link ShareCreatedNotification}s.
+     *
      * @return The builder instance.
      */
     public static ShareCreatedBuilder shareCreated() {
@@ -82,7 +81,9 @@ public class MailNotifications {
     }
 
     /**
-     * Creates a new builder for {@link PasswordResetNotification}s.
+     * Creates a new builder for {@link PasswordResetNotification}s. Such notifications must only be used
+     * for shares with {@link AuthenticationMode#GUEST_PASSWORD}.
+     *
      * @return The builder instance.
      */
     public static PasswordResetBuilder passwordReset() {
@@ -137,7 +138,11 @@ public class MailNotifications {
 
         private Session session;
 
-        private GuestInfo guestInfo;
+        private AuthenticationMode authMode;
+
+        private String username;
+
+        private String password;
 
         private String message;
 
@@ -146,7 +151,6 @@ public class MailNotifications {
         private ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);
         }
-
 
         /**
          * Sets the session
@@ -158,18 +162,40 @@ public class MailNotifications {
             return this;
         }
 
-
         /**
-         * Sets the {@link GuestInfo} used to get the {@link AuthenticationMode} and credentials
-         * from, that will be contained in the notification message
+         * Sets the {@link AuthenticationMode} of the shares guest user.
          *
-         * @param guestInfo The guest info to set
+         * @param authMode The authentication mode
          */
-        public ShareCreatedBuilder setGuestInfo(GuestInfo guestInfo) {
-            this.guestInfo = guestInfo;
+        public ShareCreatedBuilder setAuthMode(AuthenticationMode authMode) {
+            this.authMode = authMode;
             return this;
         }
 
+        /**
+         * Sets the username that must be used for logging in. The value is ignored if {@link AuthenticationMode} has been set to
+         * {@link AuthenticationMode#ANONYMOUS} or {@link AuthenticationMode#ANONYMOUS_PASSWORD}. A username must be set in case
+         * {@link AuthenticationMode#GUEST_PASSWORD} has been set as authentication mode
+         *
+         * @param username The username
+         */
+        public ShareCreatedBuilder setUsername(String username) {
+            this.username = username;
+            return this;
+        }
+
+        /**
+         * Sets the password that must be used for logging in. The value is ignored if {@link AuthenticationMode} has been set to
+         * {@link AuthenticationMode#ANONYMOUS}. If the authentication mode is {@link AuthenticationMode#GUEST_PASSWORD} and no password was
+         * set, a hint to re-use existing credentials and a link to reset the guest users password is contained within the notification
+         * instead of the password itself. For {@link AuthenticationMode#ANONYMOUS_PASSWORD} a password must always be set.
+         *
+         * @param password The password
+         */
+        public ShareCreatedBuilder setPassword(String password) {
+            this.password = password;
+            return this;
+        }
 
         /**
          * Sets the share targets to inform the recipient about
@@ -184,6 +210,7 @@ public class MailNotifications {
 
         /**
          * Adds a target to the list of targets to inform the recipient about
+         *
          * @param target The target
          */
         public ShareCreatedBuilder addTarget(ShareTarget target) {
@@ -204,13 +231,18 @@ public class MailNotifications {
         @Override
         protected ShareCreatedNotification<InternetAddress> doBuild() {
             checkNotNull(session, "session");
-            checkNotNull(guestInfo, "guestInfo");
+            checkNotNull(authMode, "authMode");
+            if (authMode == AuthenticationMode.GUEST_PASSWORD) {
+                checkNotNull(username, "username");
+            }
             checkNotEmpty(targets, "targets");
 
             DefaultShareCreatedNotification<InternetAddress> notification = new DefaultShareCreatedNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
             notification.setSession(session);
-            notification.setGuestInfo(guestInfo);
+            notification.setAuthMode(authMode);
+            notification.setUsername(username);
+            notification.setPassword(password);
             notification.setTargets(targets);
             notification.setMessage(message);
             return notification;

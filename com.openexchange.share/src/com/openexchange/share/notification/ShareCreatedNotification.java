@@ -51,9 +51,8 @@ package com.openexchange.share.notification;
 
 import java.util.List;
 import com.openexchange.session.Session;
-import com.openexchange.share.GuestInfo;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
-
 
 /**
  * A notification to inform externals about created shares.
@@ -71,17 +70,36 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
     Session getSession();
 
     /**
-     * Gets the guest info of the recipient that shall get the notification. If a
-     * password is necessary to access the share the notification is about, this
-     * password must be set un-encoded within the guest info object. Otherwise
-     * the notification will contain a hint that the existing password has to
-     * be re-used and a link to reset that password will be provided if the
-     * recipient is a guest. If the recipient is anonymous, it is assumed that
-     * no password is necessary to log in.
+     * Gets the {@link AuthenticationMode} of the shares guest user.
      *
-     * @return The {@link GuestInfo}, never <code>null</code>
+     * @return The authentication mode
      */
-    GuestInfo getGuestInfo();
+    AuthenticationMode getAuthMode();
+
+    /**
+     * Gets the username of the guest that must be used for logging in. The return value is ignored if {@link AuthenticationMode} has been
+     * set to {@link AuthenticationMode#ANONYMOUS}. If the authentication mode is {@link AuthenticationMode#GUEST_PASSWORD} and this method
+     * returns <code>null</code>, a hint to re-use existing credentials and a link to reset the guest users password is contained within the
+     * notification instead of the password itself.
+     *
+     * @return The username or <code>null</code> in case {@link AuthenticationMode#GUEST_PASSWORD} has not been set as authentication mode
+     */
+    String getUsername();
+
+    /**
+     * Gets the password that must be used for logging in.
+     *
+     * @return The password
+     */
+    /**
+     * Gets the password that must be used for logging in. The value is ignored if {@link AuthenticationMode} returns
+     * {@link AuthenticationMode#ANONYMOUS}. If the authentication mode is {@link AuthenticationMode#GUEST_PASSWORD} and <code>null</code>
+     * is returned, a hint to re-use existing credentials and a link to reset the guest users password is contained within the notification
+     * instead of the password itself. For {@link AuthenticationMode#ANONYMOUS_PASSWORD} a password must always be returned.
+     *
+     * @param password The password
+     */
+    String getPassword();
 
     /**
      * Gets the share targets to notify the recipient about.
@@ -91,8 +109,8 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
     List<ShareTarget> getShareTargets();
 
     /**
-     * Gets an optional message that will be shown to the recipient if appropriate.
-     * Whether a message is shown or not depends on the {@link NotificationType}.
+     * Gets an optional message that will be shown to the recipient if appropriate. Whether a message is shown or not depends on the
+     * {@link NotificationType}.
      *
      * @return The message or <code>null</code>, if nothing was provided
      */

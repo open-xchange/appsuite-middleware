@@ -695,6 +695,11 @@ public class DefaultShareService implements ShareService {
                     services, connection, context, existingGuestUser.getId(), permissionBits, true);
                 LOG.debug("Using existing guest user {} with permissions {} in context {}: {}",
                     existingGuestUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
+                /*
+                 * As the recipient already belongs to an existing user, its password must be set to null, to avoid
+                 * wrong notification messages
+                 */
+                guestRecipient.setPassword(null);
                 return existingGuestUser;
             }
         }

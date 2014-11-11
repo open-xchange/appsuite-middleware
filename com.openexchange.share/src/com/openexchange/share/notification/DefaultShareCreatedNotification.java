@@ -51,7 +51,7 @@ package com.openexchange.share.notification;
 
 import java.util.List;
 import com.openexchange.session.Session;
-import com.openexchange.share.GuestInfo;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
@@ -66,7 +66,11 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     private Session session;
 
-    private GuestInfo guestInfo;
+    private AuthenticationMode authMode;
+
+    private String username;
+
+    private String password;
 
     private List<ShareTarget> targets;
 
@@ -85,8 +89,18 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     }
 
     @Override
-    public GuestInfo getGuestInfo() {
-        return guestInfo;
+    public AuthenticationMode getAuthMode() {
+        return authMode;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
@@ -111,8 +125,16 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
         this.session = session;
     }
 
-    public void setGuestInfo(GuestInfo guestInfo) {
-        this.guestInfo = guestInfo;
+    public void setAuthMode(AuthenticationMode authMode) {
+        this.authMode = authMode;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setMessage(String message) {

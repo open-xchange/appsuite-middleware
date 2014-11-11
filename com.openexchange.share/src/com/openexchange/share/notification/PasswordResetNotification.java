@@ -49,10 +49,11 @@
 
 package com.openexchange.share.notification;
 
+import com.openexchange.share.AuthenticationMode;
 
 /**
- * A notification to send a new password to a guest user who made use of the password reset
- * mechanism.
+ * A notification to send a new password to a guest user who made use of the password reset mechanism. Such notifications must only be used
+ * for shares with {@link AuthenticationMode#GUEST_PASSWORD}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

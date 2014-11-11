@@ -50,11 +50,10 @@
 package com.openexchange.share.json.actions;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -65,13 +64,16 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.mail.MailNotifications;
+import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -106,8 +108,8 @@ public class InviteAction extends AbstractShareAction {
              */
             CreatePerformer createPerformer = new CreatePerformer(recipients, targets, session, services);
             Map<ShareRecipient, List<ShareInfo>> createdShares = createPerformer.perform();
-            Map<GuestInfo, List<ShareInfo>> sharesByGuest = getSharesByGuest(createdShares.values());
-            List<OXException> warnings = sendNotifications(sharesByGuest, message, requestData, session);
+            List<NotificationInfo> notificationInfos = getNotificationInfos(createdShares);
+            List<OXException> warnings = sendNotifications(notificationInfos, message, requestData, session);
             /*
              * construct & return appropriate json result
              */
@@ -139,19 +141,18 @@ public class InviteAction extends AbstractShareAction {
     /**
      * Sends notifications about one or more created shares to multiple guest user recipients.
      *
-     * @param sharesByGuest The receiving guest users mapped to the shares to notify about; each one needs to have a valid e-mail address
+     * @param notificationInfos The notification infos; each one needs to have valid credentials according to its authentication mode
      * @param message The (optional) additional message for the notification
      * @param requestData Data of the underlying servlet request
      * @param session The session of the notifying user
      * @return Any exceptions occurred during notification, or an empty list if all was fine
      */
-    private List<OXException> sendNotifications(Map<GuestInfo, List<ShareInfo>> sharesByGuest, String message, AJAXRequestData requestData, ServerSession session) {
+    private List<OXException> sendNotifications(List<NotificationInfo> notificationInfos, String message, AJAXRequestData requestData, ServerSession session) {
         List<OXException> warnings = new ArrayList<OXException>();
-        for (Map.Entry<GuestInfo, List<ShareInfo>> entry : sharesByGuest.entrySet()) {
-            GuestInfo guestInfo = entry.getKey();
-            if (false == Strings.isEmpty(guestInfo.getEmailAddress())) {
+        for (NotificationInfo notificationInfo : notificationInfos) {
+            if (false == Strings.isEmpty(notificationInfo.getGuestInfo().getEmailAddress())) {
                 try {
-                    sendNotification(guestInfo, entry.getValue(), message, requestData, session);
+                    sendNotification(notificationInfo, message, requestData, session);
                 } catch (OXException e) {
                     warnings.add(e);
                 }
@@ -163,27 +164,44 @@ public class InviteAction extends AbstractShareAction {
     /**
      * Sends a notification about one or more created shares to a guest user recipient.
      *
-     * @param guest The guest user to send the notification to; needs to have a valid e-mail address
-     * @param createdShares The shares to notify about
+     * @param notificationInfo The notification infos; needs to have valid credentials according to its authentication mode
      * @param message The (optional) additional message for the notification
      * @param requestData Data of the underlying servlet request
      * @param session The session of the notifying user
      */
-    private void sendNotification(GuestInfo guest, List<ShareInfo> createdShares, String message, AJAXRequestData requestData, ServerSession session) throws OXException {
+    private void sendNotification(NotificationInfo notificationInfo, String message, AJAXRequestData requestData, ServerSession session) throws OXException {
+        List<ShareInfo> createdShares = notificationInfo.getShareInfos();
+        GuestInfo guest = notificationInfo.getGuestInfo();
+        ShareRecipient recipient = notificationInfo.getRecipient();
         String shareToken = 1 == createdShares.size() ? createdShares.get(0).getToken() : guest.getBaseToken();
         try {
             LinkProvider linkProvider = buildLinkProvider(requestData, shareToken);
-            ShareCreatedNotification<InternetAddress> notification = MailNotifications.shareCreated()
+            ShareCreatedBuilder builder = MailNotifications.shareCreated()
                 .setTransportInfo(new InternetAddress(guest.getEmailAddress(), true))
                 .setLinkProvider(linkProvider)
                 .setContext(guest.getContextID())
                 .setLocale(guest.getLocale())
                 .setSession(session)
-                .setGuestInfo(guest)
                 .setTargets(getTargets(createdShares))
-                .setMessage(message)
-            .build();
-            getNotificationService().send(notification);
+                .setMessage(message);
+
+            AuthenticationMode authMode = guest.getAuthentication();
+            switch (authMode) {
+                case ANONYMOUS:
+                    builder.setAuthMode(AuthenticationMode.ANONYMOUS);
+                    break;
+                case ANONYMOUS_PASSWORD:
+                    builder.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
+                    builder.setPassword(((AnonymousRecipient)recipient).getPassword());
+                    break;
+                case GUEST_PASSWORD:
+                    builder.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
+                    builder.setUsername(guest.getEmailAddress());
+                    builder.setPassword(((GuestRecipient)recipient).getPassword());
+                    break;
+            }
+
+            getNotificationService().send(builder.build());
         } catch (AddressException e) {
             throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(guest.getEmailAddress());
         } catch (Exception e) {
@@ -213,27 +231,51 @@ public class InviteAction extends AbstractShareAction {
     }
 
     /**
-     * Extracts all shares associated with a specific guest user from the supplied shares lists.
-     *
-     * @param shareLists A collection holding multiple share lists
-     * @return A map holding all shares associated with each guest user
+     * Builds {@link NotificationInfo} instances for the passed map entries
+     * @param createdShares The created shares as mappings from recipients to share infos
+     * @return The notification infos
      */
-    private static Map<GuestInfo, List<ShareInfo>> getSharesByGuest(Collection<List<ShareInfo>> shareLists) throws OXException {
-        Map<GuestInfo, List<ShareInfo>> sharesByGuest = new HashMap<GuestInfo, List<ShareInfo>>();
-        for (List<ShareInfo> shares : shareLists) {
-            if (null != shares) {
-                for (ShareInfo share : shares) {
-                    GuestInfo guest = share.getGuest();
-                    List<ShareInfo> shareInfos = sharesByGuest.get(guest);
-                    if (null == shareInfos) {
-                        shareInfos = new ArrayList<ShareInfo>();
-                        sharesByGuest.put(guest, shareInfos);
-                    }
-                    shareInfos.add(share);
-                }
+    private static List<NotificationInfo> getNotificationInfos(Map<ShareRecipient, List<ShareInfo>> createdShares) {
+        List<NotificationInfo> notificationInfos = new ArrayList<NotificationInfo>(createdShares.size());
+        for (Entry<ShareRecipient, List<ShareInfo>> entry : createdShares.entrySet()) {
+            ShareRecipient recipient = entry.getKey();
+            List<ShareInfo> shareInfos = entry.getValue();
+            if (shareInfos != null && !shareInfos.isEmpty()) {
+                notificationInfos.add(new NotificationInfo(recipient, shareInfos.get(0).getGuest(), shareInfos));
             }
         }
-        return sharesByGuest;
+
+        return notificationInfos;
+    }
+
+    /**
+     * A simple container holding all necessary information to send out a notification about the shares creation
+     */
+    private static final class NotificationInfo {
+
+        private final ShareRecipient recipient;
+        private final GuestInfo guestInfo;
+        private final List<ShareInfo> shareInfos;
+
+        public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos) {
+            super();
+            this.recipient = recipient;
+            this.guestInfo = guestInfo;
+            this.shareInfos = shareInfos;
+        }
+
+        public ShareRecipient getRecipient() {
+            return recipient;
+        }
+
+        public GuestInfo getGuestInfo() {
+            return guestInfo;
+        }
+
+        public List<ShareInfo> getShareInfos() {
+            return shareInfos;
+        }
+
     }
 
 }

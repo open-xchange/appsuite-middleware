@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -100,6 +101,9 @@ public interface ShareService {
      * caller to take care of the referenced share targets on his own</li>
      * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
      * or not, so again it's up to the caller to perform the necessary checks</li>
+     * <li>Recipients of type {@link GuestRecipient} always need a password. If a new guest user is created for a guest recipient and the
+     * recipient object had no password set, a new password is generated and set by the service implementation. It is guaranteed that the
+     * passed recipients contain valid passwords after this call returns.</li>
      * </ul>
      *
      * @param session The session
@@ -118,6 +122,9 @@ public interface ShareService {
      * caller to take care of the referenced share target on his own</li>
      * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share target
      * or not, so again it's up to the caller to perform the necessary checks</li>
+     *  <li>Recipients of type {@link GuestRecipient} always need a password. If a new guest user is created for a guest recipient and the
+     * recipient object had no password set, a new password is generated and set by the service implementation. It is guaranteed that the
+     * passed recipients contain valid passwords after this call returns.</li>
      * </ul>
      *
      * @param session The session

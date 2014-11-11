@@ -87,7 +87,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.GuestInfo;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -173,7 +173,7 @@ public class MailComposer {
         MimeMessage mail = prepareEnvelope(title, null, notification.getTransportInfo());
         mail.addHeader("X-Open-Xchange-Share-Type", "password-reset");
         mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
-        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(notification.getUsername(), notification.getPassword()));
+        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(AuthenticationMode.GUEST_PASSWORD, notification.getUsername(), notification.getPassword()));
         mail.setContent(prepareContent(
             "notify.share.pwreset.mail.txt.tmpl",
             vars,
@@ -215,7 +215,7 @@ public class MailComposer {
         MimeMessage mail = prepareEnvelope(subject, new Address[] { getSenderAddress(notification.getSession(), user) }, notification.getTransportInfo());
         mail.addHeader("X-Open-Xchange-Share-Type", "share-created");
         mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
-        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(notification.getGuestInfo()));
+        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(notification.getAuthMode(), notification.getUsername(), notification.getPassword()));
         mail.setContent(prepareContent(
             "notify.share.create.mail.txt.tmpl",
             vars,
@@ -225,33 +225,15 @@ public class MailComposer {
         return new ContentAwareComposedMailMessage(mail, notification.getSession(), notification.getSession().getContextId());
     }
 
-    private static String buildAccessHeader(GuestInfo guestInfo) throws OXException {
-        String username = null;
-        String password = null;
-        switch (guestInfo.getAuthentication()) {
-            case ANONYMOUS_PASSWORD:
-                username = "anonymous";
-                password = guestInfo.getPassword();
-                break;
-
-            case GUEST_PASSWORD:
-                username = guestInfo.getEmailAddress();
-                password = guestInfo.getPassword();
-                break;
-
-            default:
-                break;
+    private static String buildAccessHeader(AuthenticationMode authMode, String username, String password) throws OXException {
+        String accessHeader = null;
+        if (authMode == AuthenticationMode.GUEST_PASSWORD && !Strings.isEmpty(username) && !Strings.isEmpty(password)) {
+            accessHeader = com.openexchange.tools.encoding.Base64.encode(username + ':' + password);
+        } else if (authMode == AuthenticationMode.ANONYMOUS_PASSWORD && !Strings.isEmpty(password)) {
+            accessHeader = com.openexchange.tools.encoding.Base64.encode(password);
         }
 
-        return buildAccessHeader(username, password);
-    }
-
-    private static String buildAccessHeader(String username, String password) throws OXException {
-        if (!Strings.isEmpty(username) && !Strings.isEmpty(password)) {
-            return com.openexchange.tools.encoding.Base64.encode(username + ':' + password);
-        }
-
-        return null;
+        return accessHeader;
     }
 
     private static Map<String, Object> prepareShareCreatedVars(ShareCreatedNotification<InternetAddress> notification, User user, String title, Translator translator) throws OXException {
@@ -266,8 +248,7 @@ public class MailComposer {
         vars.put(FIELD_LINK_INTRO, String.format(translator.translate(NotificationStrings.LINK_INTRO), title));
         vars.put(FIELD_LINK, linkProvider.getShareUrl());
 
-        GuestInfo guestInfo = notification.getGuestInfo();
-        switch (guestInfo.getAuthentication()) {
+        switch (notification.getAuthMode()) {
             case ANONYMOUS:
             {
                 vars.put(FIELD_RECIPIENT_TYPE, "anonymous");
@@ -279,14 +260,14 @@ public class MailComposer {
                 vars.put(FIELD_RECIPIENT_TYPE, "anonymous");
                 vars.put(FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.ANONYMOUS_PASSWORD_INTRO));
                 vars.put(FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
-                vars.put(FIELD_PASSWORD, guestInfo.getPassword());
+                vars.put(FIELD_PASSWORD, notification.getPassword());
                 break;
             }
 
             case GUEST_PASSWORD:
             {
                 vars.put(FIELD_RECIPIENT_TYPE, "guest");
-                String password = guestInfo.getPassword();
+                String password = notification.getPassword();
                 if (password == null) {
                     vars.put(FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.GUEST_EXISTING_CREDENTIALS_INTRO));
                     vars.put(FIELD_RESET_PW_LINK_INTRO, translator.translate(NotificationStrings.RESET_PW_LINK_INTRO));
@@ -294,7 +275,7 @@ public class MailComposer {
                 } else {
                     vars.put(FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.GUEST_CREDENTIALS_INTRO));
                     vars.put(FIELD_USERNAME_FIELD, translator.translate(NotificationStrings.USERNAME_FIELD));
-                    vars.put(FIELD_USERNAME, guestInfo.getEmailAddress());
+                    vars.put(FIELD_USERNAME, notification.getUsername());
                     vars.put(FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
                     vars.put(FIELD_PASSWORD, password);
                 }
