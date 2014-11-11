@@ -35,7 +35,19 @@
             <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%message%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
-
+    
+    <!-- Logstash appender -->
+    <!-- 
+    <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
+        <remoteHost>localhost</remoteHost>
+        <port>31337</port>
+        <reconnectionDelay>10000</reconnectionDelay>
+        <eventDelayLimit>30000</eventDelayLimit>
+        <appender-ref ref="CONSOLE" />
+        <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder"/>
+    </appender>
+	-->
+	
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
         <discardingThreshold>0</discardingThreshold>
@@ -45,6 +57,7 @@
 
     <root level="INFO">
         <appender-ref ref="ASYNC" />
+        <appender-ref ref="LOGSTASH" />
     </root>
 
     <!--
