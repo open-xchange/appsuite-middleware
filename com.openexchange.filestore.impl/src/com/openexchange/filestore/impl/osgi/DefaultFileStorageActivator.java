@@ -52,6 +52,8 @@ package com.openexchange.filestore.impl.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.impl.CompositeFileStorageService;
 
@@ -64,18 +66,31 @@ import com.openexchange.filestore.impl.CompositeFileStorageService;
 public class DefaultFileStorageActivator implements BundleActivator {
 
     private volatile ServiceRegistration<FileStorageService> reg;
+    private volatile ServiceTracker<FileStorageProvider, FileStorageProvider> tracker;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        reg = context.registerService(FileStorageService.class, new CompositeFileStorageService(context), null);
+    public void start(BundleContext context) throws Exception {
+        CompositeFileStorageService service = new CompositeFileStorageService(context);
+
+        ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = new ServiceTracker<FileStorageProvider, FileStorageProvider>(context, FileStorageProvider.class, service);
+        this.tracker = tracker;
+        tracker.open();
+
+        reg = context.registerService(FileStorageService.class, service, null);
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stop(BundleContext context) throws Exception {
         ServiceRegistration<FileStorageService> reg = this.reg;
         if (null != reg) {
             reg.unregister();
             this.reg = null;
+        }
+
+        ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = this.tracker;
+        if (null != tracker) {
+            tracker.close();
+            this.tracker = null;
         }
     }
 
