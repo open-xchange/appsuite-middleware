@@ -316,6 +316,9 @@ public class NotificationMail {
         if (!getRecipient().getConfiguration().interestedInChanges() && (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly())) {
             return false;
         }
+        if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly()) {
+            return false;
+        }
         return true;
     }
 
