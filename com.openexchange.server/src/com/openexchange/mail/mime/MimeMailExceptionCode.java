@@ -265,11 +265,11 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Message could not be sent: %1$s
      */
-    SEND_FAILED_MSG_ERROR(MimeMailExceptionCode.SEND_FAILED_MSG, CATEGORY_ERROR, 1028, MimeMailExceptionMessage.SEND_FAILED_MSG_DISPLAY),
+    SEND_FAILED_MSG_ERROR("Message could not be sent: %1$s", CATEGORY_ERROR, 1028, MimeMailExceptionMessage.SEND_FAILED_MSG_ERROR_MSG_DISPLAY),
     /**
-     * Message could not be sent: %1$s %2$s (arbitrary server information)
+     * Message could not be sent: %1$s (%2$s) (<i>arbitrary server information</i>)
      */
-    SEND_FAILED_MSG_EXT_ERROR(MimeMailExceptionCode.SEND_FAILED_EXT_MSG, CATEGORY_ERROR, 1028, MimeMailExceptionMessage.SEND_FAILED_EXT_MSG_DISPLAY),
+    SEND_FAILED_MSG_EXT_ERROR("Message could not be sent: %1$s (%2$s)", CATEGORY_ERROR, 1028, MimeMailExceptionMessage.SEND_FAILED_EXT_MSG_ERROR_MSG_DISPLAY),
     /**
      * Message cannot be displayed.
      */
