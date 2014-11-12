@@ -100,7 +100,7 @@ public final class PasswordResetServletTest extends ShareTest {
 
         OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
-         * ° create folder shared to guest user
+         * \u00b0 create folder shared to guest user
          */
         int module = randomModule();
         folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), lGuestPermission);
