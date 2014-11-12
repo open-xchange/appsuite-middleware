@@ -90,7 +90,7 @@ public final class ResetPasswordServletTest extends ShareTest {
 
         OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
-         * create folder shared to guest user
+         * ° create folder shared to guest user
          */
         int module = randomModule();
         FolderObject folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), lGuestPermission);
@@ -137,6 +137,10 @@ public final class ResetPasswordServletTest extends ShareTest {
         // Try to get share with obsolete password
         GuestClient guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) guestPermission.getRecipient()).getPassword());
         Assert.assertNotNull("LoginException not avaiable! Login still possible. Password reset did not happen!", guestClient.getLoginResponse().getException());
+
+        // TODO add one of the assertions below
+        // Assert.assertTrue("Login still possible; password reset did not happen!", CryptoErrorMessage.BadPassword.getNumber() ==
+        // guestClient.getLoginResponse().getException().getCode());
         Assert.assertEquals("Login still possible; password reset did not happen!", LoginExceptionCodes.INVALID_CREDENTIALS.getNumber(), guestClient.getLoginResponse().getException().getCode());
     }
 

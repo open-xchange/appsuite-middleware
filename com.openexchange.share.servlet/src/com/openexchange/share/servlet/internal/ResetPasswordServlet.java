@@ -51,22 +51,16 @@ package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
@@ -110,8 +104,9 @@ public class ResetPasswordServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String mailAddress = "";
+
         try {
             // Create a new HttpSession if it is missing
             request.getSession(true);
@@ -125,7 +120,6 @@ public class ResetPasswordServlet extends HttpServlet {
 
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
             GuestInfo guestInfo = shareService.resolveGuest(token);
-            mailAddress = guestInfo.getEmailAddress();
 
             if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
                 LOG.debug("Bad attempt to reset password for share '{}'", token);
@@ -133,40 +127,38 @@ public class ResetPasswordServlet extends HttpServlet {
                 return;
             }
 
+            int contextID = guestInfo.getContextID();
+
+            UserService userService = ShareServiceLookup.getService(UserService.class, true);
+            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
+
+            int guestID = guestInfo.getGuestID();
+            User storageUser = userService.getUser(guestID, context);
+
             String password = PasswordUtility.generate();
             String encodedPassword = PasswordMech.BCRYPT.encode(password);
 
-            // Update guest entry in database
-            int contextID = guestInfo.getContextID();
+            UserImpl updatedUser = new UserImpl(storageUser);
+            updatedUser.setUserPassword(encodedPassword);
 
-            update(encodedPassword, guestInfo.getGuestID(), contextID);
-
+            userService.updateUser(updatedUser, context);
             // Invalidate
-            UserService userService = ShareServiceLookup.getService(UserService.class, true);
-            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
-            userService.invalidateUser(context, guestInfo.getGuestID());
+            userService.invalidateUser(context, guestID);
 
             // TODO: Notify
-            User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
             ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
+            mailAddress = guestInfo.getEmailAddress();
 
-            ShareNotification<InternetAddress> notification = MailNotifications.passwordReset()
-                .setTransportInfo(new InternetAddress(mailAddress, true))
-                .setLinkProvider(null) // FIXME
-                .setContext(guestInfo.getContextID())
-                .setLocale(guest.getLocale())
-                .setUsername(guestInfo.getEmailAddress())
-                .setPassword(password)
-                .build();
-             notificationService.send(notification);
-//             DefaultLinkProvider(protocol, hostname, servletPrefix, shareToken, mailAddress), "TODO", guestInfo.getEmailAddress()), null);
+            ShareNotification<InternetAddress> notification = MailNotifications.passwordReset().setTransportInfo(new InternetAddress(mailAddress, true)).setLinkProvider(null) // FIXME
+            .setContext(guestInfo.getContextID()).setLocale(storageUser.getLocale()).setUsername(mailAddress).setPassword(password).build();
+            notificationService.send(notification);
 
             GuestShare guestShare = shareService.resolveToken(token);
-            setRedirect(guestShare, null, request.getServerName(), response);
+            setRedirect(guestShare, null, response);
 
         } catch (RateLimitedException e) {
             response.setContentType("text/plain; charset=UTF-8");
-            if(e.getRetryAfter() > 0) {
+            if (e.getRetryAfter() > 0) {
                 response.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
             }
             response.sendError(429, "Too Many Requests - Your request is being rate limited.");
@@ -183,8 +175,6 @@ public class ResetPasswordServlet extends HttpServlet {
         }
     }
 
-    // --------------------------------------------------------------------------------------------------------------------------------- //
-
     /**
      * Adds the redirect to the given response
      *
@@ -194,73 +184,14 @@ public class ResetPasswordServlet extends HttpServlet {
      * @param response - response that should be enriched by the redirect
      * @throws OXException
      */
-    private void setRedirect(GuestShare share, ShareTarget target, String serverName, HttpServletResponse response) throws OXException {
+    private void setRedirect(GuestShare share, ShareTarget target, HttpServletResponse response) throws OXException {
         try {
             String redirectUrl = ShareRedirectUtils.getRedirectUrl(share, target, this.loginConfig.getLoginConfig());
-
-            // Do the redirect
             response.sendRedirect(redirectUrl);
-
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-
-    private void update(String encodedPassword, int guestId, int contextId) throws OXException {
-        // Update database
-        DatabaseService databaseService = ShareServiceLookup.getService(DatabaseService.class, true);
-
-        Connection writeCon = databaseService.getWritable(contextId);
-        boolean rollback = false;
-        try {
-            writeCon.setAutoCommit(false);
-            rollback = true;
-            update(writeCon, encodedPassword,guestId, contextId);
-            deleteAttr(writeCon, guestId, contextId);
-            writeCon.commit();
-            rollback = false;
-        } catch (final SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
-            }
-            Databases.autocommit(writeCon);
-            databaseService.backWritable(contextId, writeCon);
-        }
-    }
-
-    private void update(Connection writeCon, String encodedPassword, int userId, int contextId) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = writeCon.prepareStatement("UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?");
-            int pos = 1;
-            stmt.setString(pos++, encodedPassword);
-            stmt.setInt(pos++,(int)(System.currentTimeMillis()/1000));
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.executeUpdate();
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
-
-    private void deleteAttr(Connection writeCon, int userId, int contextId) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = writeCon.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setString(pos++, "passcrypt");
-            stmt.executeUpdate();
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
-
 }
