@@ -86,11 +86,17 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
             rememberTracker(tracker);
         }
 
+        Services.setServiceLookup(this);
         trackService(DatabaseService.class);
         trackService(ContextService.class);
         trackService(UserService.class);
 
         openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
     }
 
 }
