@@ -55,6 +55,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
+import com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTable;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -92,7 +93,7 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         trackService(ContextService.class);
         trackService(UserService.class);
 
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddUserColumnToFilestoreUsageTable()));
 
         openTrackers();
     }
