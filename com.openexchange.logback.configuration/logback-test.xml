@@ -52,11 +52,11 @@
         <discardingThreshold>0</discardingThreshold>
         <includeCallerData>true</includeCallerData>
         <appender-ref ref="CONSOLE" />
+        <!-- <appender-ref ref="LOGSTASH" /> -->
     </appender>
 
     <root level="INFO">
         <appender-ref ref="ASYNC" />
-        <!-- <appender-ref ref="LOGSTASH" /> -->
     </root>
 
     <!--
