@@ -140,6 +140,16 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     public final static String SEND_FAILED_EXT_MSG_DISPLAY = "Message could not be sent to the following recipients: %1$s (%2$s)";
 
     /**
+     * Message could not be sent. Error message from mail transport server: %1$s
+     */
+    public static final String SEND_FAILED_MSG_ERROR_MSG_DISPLAY = "Message could not be sent. Error message from mail transport server: %1$s";
+
+    /**
+     * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
+     */
+    public static final String SEND_FAILED_EXT_MSG_ERROR_MSG_DISPLAY = "Message could not be sent. Error message from mail transport server: %1$s (%2$s)";
+
+    /**
      * Lost connection to mail server.
      */
     public final static String STORE_CLOSED_MSG_DISPLAY = "Lost connection to mail server.";
