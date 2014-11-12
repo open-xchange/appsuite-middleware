@@ -898,7 +898,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
             // (Asynchronously) Add to cache if possible
             final int size = transformed.length;
-            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
+            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
             final ServerSession session = request.getSession();
             final String fileName = file.getName();
             final String contentType = fileContentType;
