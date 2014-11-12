@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.context.ContextService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -69,11 +70,14 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.DefaultLinkProvider;
+import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 import com.openexchange.share.tools.PasswordUtility;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
@@ -106,7 +110,6 @@ public class PasswordResetServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String mailAddress = "";
-
         try {
             // Create a new HttpSession if it is missing
             request.getSession(true);
@@ -145,17 +148,22 @@ public class PasswordResetServlet extends HttpServlet {
             // Invalidate
             userService.invalidateUser(context, guestID);
 
-            // TODO: Notify
-            ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-            mailAddress = guestInfo.getEmailAddress();
-
-            ShareNotification<InternetAddress> notification = MailNotifications.passwordReset().setTransportInfo(new InternetAddress(mailAddress, true)).setLinkProvider(null) // FIXME
-            .setContext(guestInfo.getContextID()).setLocale(storageUser.getLocale()).setUsername(mailAddress).setPassword(password).build();
-            notificationService.send(notification);
-
             GuestShare guestShare = shareService.resolveToken(token);
-            setRedirect(guestShare, null, response);
+            User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
+            ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
+            LinkProvider linkProvider = new DefaultLinkProvider(Tools.getProtocol(request), request.getServerName(), DispatcherPrefixService.DEFAULT_PREFIX, token); // FIXME
+            mailAddress = guestShare.getGuest().getEmailAddress();
+            ShareNotification<InternetAddress> notification = MailNotifications.passwordReset()
+                .setTransportInfo(new InternetAddress(mailAddress, true))
+                .setLinkProvider(linkProvider)
+                .setContext(guestInfo.getContextID())
+                .setLocale(guest.getLocale())
+                .setUsername(guestInfo.getEmailAddress())
+                .setPassword(password)
+                .build();
+             notificationService.send(notification);
 
+             setRedirect(guestShare, null, response);
         } catch (RateLimitedException e) {
             response.setContentType("text/plain; charset=UTF-8");
             if (e.getRetryAfter() > 0) {
@@ -178,7 +186,7 @@ public class PasswordResetServlet extends HttpServlet {
     /**
      * Adds the redirect to the given response
      *
-     * @param share - share to get the redirect to
+     * @param guest - the guest info
      * @param target - target to get the redirect to
      * @param serverName - server name to redirect to
      * @param response - response that should be enriched by the redirect
@@ -186,7 +194,7 @@ public class PasswordResetServlet extends HttpServlet {
      */
     private void setRedirect(GuestShare share, ShareTarget target, HttpServletResponse response) throws OXException {
         try {
-            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share, target, this.loginConfig.getLoginConfig());
+            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, this.loginConfig.getLoginConfig());
             response.sendRedirect(redirectUrl);
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());

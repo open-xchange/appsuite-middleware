@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
@@ -75,13 +74,12 @@ public class ShareRedirectUtils {
     /**
      * Generates a redirect url
      *
-     * @param share - the share to generate a redirect for
+     * @param guestInfo - the guest info
      * @param target - target item or null if not defined
      * @return String with a redirect url
      * @throws OXException
      */
-    public static String getRedirectUrl(final GuestShare share, final ShareTarget target, final LoginConfiguration loginConfiguration) throws OXException {
-        GuestInfo guestInfo = share.getGuest();
+    public static String getRedirectUrl(final GuestInfo guestInfo, final ShareTarget target, final LoginConfiguration loginConfiguration) throws OXException {
         String loginPageLink = getLoginPageUrl(loginConfiguration);
 
         // Build URL

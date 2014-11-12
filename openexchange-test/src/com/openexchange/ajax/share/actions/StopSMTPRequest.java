@@ -67,7 +67,7 @@ import com.openexchange.ajax.framework.Params;
  */
 public class StopSMTPRequest implements AJAXRequest<ShareTestResponse> {
 
-    private final boolean restoreAccount;
+    private final boolean restoreTransports;
 
     private boolean failOnError = true;
 
@@ -75,9 +75,9 @@ public class StopSMTPRequest implements AJAXRequest<ShareTestResponse> {
         this(true);
     }
 
-    public StopSMTPRequest(boolean updateAccount) {
+    public StopSMTPRequest(boolean restoreTransports) {
         super();
-        this.restoreAccount = updateAccount;
+        this.restoreTransports = restoreTransports;
     }
 
     public void setFailOnError(boolean failOnError) {
@@ -98,7 +98,7 @@ public class StopSMTPRequest implements AJAXRequest<ShareTestResponse> {
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Params(
             AJAXServlet.PARAMETER_ACTION, "stopSMTP",
-            "restoreAccount", Boolean.toString(restoreAccount)
+            "restoreTransports", Boolean.toString(restoreTransports)
             ).toArray();
     }
 

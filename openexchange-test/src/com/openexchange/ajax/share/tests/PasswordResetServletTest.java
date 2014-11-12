@@ -50,18 +50,26 @@
 package com.openexchange.ajax.share.tests;
 
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.actions.GetMailsRequest;
+import com.openexchange.ajax.share.actions.GetMailsResponse.Message;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.PasswordResetServletRequest;
 import com.openexchange.ajax.share.actions.PasswordResetServletResponse;
+import com.openexchange.ajax.share.actions.StartSMTPRequest;
+import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * {@link PasswordResetServletTest}
@@ -74,6 +82,8 @@ public final class PasswordResetServletTest extends ShareTest {
     private OCLGuestPermission guestPermission;
 
     private ParsedShare share;
+
+    private FolderObject folder;
 
     /**
      * Initializes a new {@link PasswordResetServletTest}
@@ -93,7 +103,7 @@ public final class PasswordResetServletTest extends ShareTest {
          * ° create folder shared to guest user
          */
         int module = randomModule();
-        FolderObject folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), lGuestPermission);
+        folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), lGuestPermission);
         /*
          * check permissions
          */
@@ -118,6 +128,19 @@ public final class PasswordResetServletTest extends ShareTest {
         guestClient.checkShareModuleAvailable();
         this.share = lShare;
         this.guestPermission = lGuestPermission;
+
+        /*
+         * start dummy smtp to catch password-reset mail
+         */
+        StartSMTPRequest startSMTPReqeuest = new StartSMTPRequest(false);
+        startSMTPReqeuest.setUpdateNoReplyForContext(client.getValues().getContextId());
+        client.execute(startSMTPReqeuest);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new StopSMTPRequest());
+        super.tearDown();
     }
 
     public void testResetPassword_retrievedRedirectLocation() throws Exception {
@@ -142,6 +165,37 @@ public final class PasswordResetServletTest extends ShareTest {
         // Assert.assertTrue("Login still possible; password reset did not happen!", CryptoErrorMessage.BadPassword.getNumber() ==
         // guestClient.getLoginResponse().getException().getCode());
         Assert.assertEquals("Login still possible; password reset did not happen!", LoginExceptionCodes.INVALID_CREDENTIALS.getNumber(), guestClient.getLoginResponse().getException().getCode());
+
+        // expect that a pw-reset mail was sent
+        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        assertEquals(1, messages.size());
+        Message message = messages.get(0);
+
+        /*
+         * assert magic headers and content
+         */
+        Map<String, String> headers = message.getHeaders();
+        assertEquals("password-reset", headers.get("X-Open-Xchange-Share-Type"));
+        String url = headers.get("X-Open-Xchange-Share-URL");
+        assertNotNull(url);
+        String access = headers.get("X-Open-Xchange-Share-Access");
+        assertNotNull(access);
+        String[] credentials = new String(Base64.decode(access), Charset.forName("UTF-8")).split(":");
+        assertEquals(2, credentials.length);
+        String username = credentials[0];
+        String password = credentials[1];
+
+        String plainText = message.getPlainText();
+        assertNotNull(plainText);
+        assertTrue(plainText.contains(username));
+        assertTrue(plainText.contains(password));
+
+        /*
+         * check received link and credentials
+         */
+        guestClient = new GuestClient(url, username, password);
+        guestClient.checkFolderAccessible(Integer.toString(folder.getObjectID()), guestPermission);
+        guestClient.logout();
     }
 
 }

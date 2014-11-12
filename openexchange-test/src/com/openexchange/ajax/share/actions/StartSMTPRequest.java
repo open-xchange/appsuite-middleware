@@ -69,6 +69,8 @@ public class StartSMTPRequest implements AJAXRequest<ShareTestResponse> {
 
     private final boolean updateAccount;
 
+    private int updateNoReplyForContext = -1;
+
     private boolean failOnError = true;
 
     public StartSMTPRequest() {
@@ -82,6 +84,10 @@ public class StartSMTPRequest implements AJAXRequest<ShareTestResponse> {
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
+    }
+
+    public void setUpdateNoReplyForContext(int updateNoReplyForContext) {
+        this.updateNoReplyForContext = updateNoReplyForContext;
     }
 
     @Override
@@ -98,7 +104,8 @@ public class StartSMTPRequest implements AJAXRequest<ShareTestResponse> {
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Params(
             AJAXServlet.PARAMETER_ACTION, "startSMTP",
-            "updateAccount", Boolean.toString(updateAccount)
+            "updateAccount", Boolean.toString(updateAccount),
+            "updateNoReplyForContext", Integer.toString(updateNoReplyForContext)
             ).toArray();
     }
 

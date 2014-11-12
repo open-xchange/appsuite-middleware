@@ -89,7 +89,7 @@ public class LoginShareHandler extends AbstractShareHandler {
         }
 
         try {
-            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share, target, getShareLoginConfiguration().getLoginConfig());
+            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, getShareLoginConfiguration().getLoginConfig());
 
             // Do the redirect
             response.sendRedirect(redirectUrl);

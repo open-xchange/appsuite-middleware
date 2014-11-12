@@ -146,6 +146,7 @@ public abstract class AbstractShareAction implements AJAXActionService {
         return prefixService.getPrefix();
     }
 
+    // FIXME: hostname service or share service or whatever, but we need a single point to generate those URLs
     protected LinkProvider buildLinkProvider(AJAXRequestData requestData, String shareToken) {
         return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(requestData), getServletPrefix(), shareToken);
     }

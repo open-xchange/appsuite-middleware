@@ -49,13 +49,9 @@
 
 package com.openexchange.mail.transport.config.impl;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -79,31 +75,14 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
 
     private final ServiceLookup services;
 
-    private final Cache<Integer, NoReplyConfig> cache;
-
     public DefaultNoReplyConfigFactory(ServiceLookup services) {
         super();
         this.services = services;
-        cache = CacheBuilder.newBuilder().maximumSize(1000L).build();
     }
 
     @Override
     public NoReplyConfig getNoReplyConfig(final int contextId) throws OXException {
-        try {
-            return cache.get(contextId, new Callable<NoReplyConfig>() {
-                @Override
-                public NoReplyConfig call() throws Exception {
-                    return loadNoReplyConfig(contextId);
-                }
-            });
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof OXException) {
-                throw (OXException) cause;
-            }
-
-            throw new OXException(cause);
-        }
+        return loadNoReplyConfig(contextId);
     }
 
     public NoReplyConfig loadNoReplyConfig(int contextId) throws OXException {
