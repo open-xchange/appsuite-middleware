@@ -257,7 +257,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                     if (null != content) {
                         final int size = content.size();
                         if (size > 0) {
-                            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
+                            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, previewLanguage);
                             final byte[] bytes;
                             if (1 == content.size()) {
                                 bytes = toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8))));
