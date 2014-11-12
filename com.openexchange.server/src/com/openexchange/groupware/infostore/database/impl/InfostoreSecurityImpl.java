@@ -59,8 +59,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.EffectiveObjectPermission;
@@ -85,8 +83,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
-
-    private static final Logger LOG = LoggerFactory.getLogger(InfostoreSecurityImpl.class);
 
     /**
      * Initializes a new {@link InfostoreSecurityImpl}.
@@ -173,20 +169,9 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
 
     @Override
     public EffectiveInfostoreFolderPermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissions, Connection readConArg) throws OXException {
-        Connection readCon = null;
-        try {
-            readCon = readConArg != null ? readConArg : getReadConnection(ctx);
-
-            FolderObject folder = new OXFolderAccess(readCon, ctx).getFolderObject((int) folderId);
-            EffectivePermission isperm = folder.getEffectiveUserPermission(user.getId(), userPermissions, readCon);
-            return new EffectiveInfostoreFolderPermission(isperm, getFirstFolderAdmin(folder));
-        } catch (SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-        	if (readConArg == null) {
-                releaseReadConnection(ctx, readCon);
-        	}
-        }
+        FolderObject folder = new OXFolderAccess(ctx).getFolderObject((int) folderId);
+        EffectivePermission isperm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
+        return new EffectiveInfostoreFolderPermission(isperm, getFirstFolderAdmin(folder));
     }
 
     @Override
@@ -198,16 +183,8 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
 
     @Override
     public void checkFolderId(final long folderId, final Context ctx) throws OXException {
-        final FolderObject fo;
-        Connection readCon = null;
-        try {
-            readCon = getReadConnection(ctx);
-            final OXFolderAccess access = new OXFolderAccess(readCon, ctx);
-            fo = access.getFolderObject((int)folderId);
-        } finally {
-            releaseReadConnection(ctx, readCon);
-        }
-        if(fo.getModule() != FolderObject.INFOSTORE) {
+        FolderObject fo = new OXFolderAccess(ctx).getFolderObject((int) folderId);
+        if (fo.getModule() != FolderObject.INFOSTORE) {
             throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
         }
     }
