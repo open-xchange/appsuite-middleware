@@ -196,17 +196,17 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-            perform(new BoxClosure<Void>() {
+            return perform(new BoxClosure<IDTuple>() {
 
                 @Override
-                protected Void doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                protected IDTuple doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                     try {
                         BoxClient boxClient = boxAccess.getBoxClient();
                         BoxFile boxfile = boxClient.getFilesManager().getFile(file.getId(), null);
@@ -214,15 +214,15 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                         BoxFileRequestObject requestObject = BoxFileRequestObject.getRequestObject();
                         requestObject.setName(file.getFileName());
-                        boxClient.getFilesManager().updateFileInfo(file.getId(), requestObject);
-
-                        return null;
+                        boxfile = boxClient.getFilesManager().updateFileInfo(file.getId(), requestObject);
+                        return new IDTuple(file.getFolderId(), boxfile.getId());
                     } catch (final BoxServerException e) {
                         throw handleHttpResponseError(file.getId(), e);
                     }
                 }
             });
         }
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
@@ -385,16 +385,16 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, null);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        perform(new BoxClosure<Void>() {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        return perform(new BoxClosure<IDTuple>() {
 
             @Override
-            protected Void doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected IDTuple doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
 
@@ -403,7 +403,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, file.getFileName(), data);
-                        boxClient.getFilesManager().uploadFile(reqObj);
+                        BoxFile boxFile = boxClient.getFilesManager().uploadFile(reqObj);
+                        return new IDTuple(file.getFolderId(), boxFile.getId());
                     } else {
                         BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
                         checkFileValidity(boxfile);
@@ -411,10 +412,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         //String prevVersion = boxfile.getVersionNumber();
 
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, id, data);
-                        boxClient.getFilesManager().uploadNewVersion(id, reqObj);
+                        BoxFile boxFile = boxClient.getFilesManager().uploadNewVersion(id, reqObj);
+                        return new IDTuple(file.getFolderId(), boxFile.getId());
                     }
-
-                    return null;
                 } catch (BoxJSONException e) {
                     throw BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
                 } catch (InterruptedException e) {

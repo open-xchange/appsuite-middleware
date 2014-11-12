@@ -327,17 +327,17 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
         checkUrl(file);
-        getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, sessionObj);
+        return getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, sessionObj);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocument(
+        return getInfostore(file.getFolderId()).saveDocument(
             new FileMetadata(file),
             data,
             sequenceNumber,
@@ -346,11 +346,11 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocument(
+        return getInfostore(file.getFolderId()).saveDocument(
             new FileMetadata(file),
             data,
             sequenceNumber,
@@ -360,11 +360,11 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocument(
+        return getInfostore(file.getFolderId()).saveDocument(
             new FileMetadata(file),
             data,
             sequenceNumber,
@@ -374,17 +374,17 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
         checkUrl(file);
-        getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, sessionObj);
+        return getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, sessionObj);
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocumentMetadata(
+        return getInfostore(file.getFolderId()).saveDocumentMetadata(
             new FileMetadata(file),
             sequenceNumber,
             FieldMapping.getMatching(modifiedFields),

@@ -175,12 +175,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         if (FileStorageFileAccess.NEW == file.getId()) {
             /*
              * create new, empty file ("touch")
@@ -190,6 +190,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 Entry entry = dropboxAPI.putFile(path, Streams.EMPTY_INPUT_STREAM, 0, null, null);
                 file.setId(entry.fileName());
                 file.setVersion(entry.rev);
+                return new IDTuple(toId(entry.path), entry.fileName());
             } catch (Exception e) {
                 throw handle(e, path);
             }
@@ -210,11 +211,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         Entry entry = dropboxAPI.move(path, toPath);
                         file.setId(entry.fileName());
                         file.setVersion(entry.rev);
+                        return new IDTuple(toId(entry.path), entry.fileName());
                     } catch (Exception e) {
                         throw handle(e, path);
                     }
                 }
             }
+            return new IDTuple(file.getFolderId(), file.getId());
         }
     }
 
@@ -281,12 +284,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, null);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
         try {
             final long fileSize = file.getFileSize();
@@ -302,12 +305,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     null);
                 file.setId(entry.fileName());
                 file.setVersion(entry.rev);
+                return new IDTuple(toId(entry.path), entry.fileName());
             } else {
                 // Update, adjust metadata as needed
                 entry = dropboxAPI.putFileOverwrite(path, data, length, null);
                 file.setId(entry.fileName());
                 file.setVersion(entry.rev);
-                saveFileMetadata(file, sequenceNumber);
+                return saveFileMetadata(file, sequenceNumber);
             }
         } catch (Exception e) {
             throw handle(e, path);

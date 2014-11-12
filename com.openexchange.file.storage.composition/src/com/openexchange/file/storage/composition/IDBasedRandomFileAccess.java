@@ -82,9 +82,10 @@ public interface IDBasedRandomFileAccess extends IDBasedIgnorableVersionFileAcce
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @param offset The start offset in bytes where to append the data to the document, must be equal to the actual document's length
+     * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
-    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, long offset) throws OXException;
+    String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, long offset) throws OXException;
 
     /**
      * Gets a value indicating whether random file access is supported for the supplied service/account or not.

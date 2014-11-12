@@ -76,16 +76,16 @@ import com.openexchange.tx.TransactionAware;
 public interface InfostoreFacade extends TransactionAware {
 
     /** Special Version used if you want to retrieve the latest version of an infostore document */
-    public static int CURRENT_VERSION = -1;
+    static int CURRENT_VERSION = -1;
 
     /** The identifier marking a new infostore document. */
-    public static int NEW = -1;
+    static int NEW = -1;
 
     /** Ascending sort order */
-    public static final int ASC = 1;
+    static final int ASC = 1;
 
     /** Descending sort order */
-    public static final int DESC = -1;
+    static final int DESC = -1;
 
     /**
      * Checks if denoted document exists.
@@ -97,7 +97,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If checking for existence fails
      * @see #CURRENT_VERSION
      */
-    public boolean exists(int id, int version, ServerSession session) throws OXException;
+    boolean exists(int id, int version, ServerSession session) throws OXException;
 
     /**
      * Gets the denoted document's meta data information.
@@ -109,7 +109,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If operation fails
      * @see #CURRENT_VERSION
      */
-    public DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException;
+    DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException;
 
     /**
      * Gets the denoted document's meta data information.<br>
@@ -122,7 +122,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If operation fails
      * @see #CURRENT_VERSION
      */
-    public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException;
+    DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException;
 
     /**
      * Saves given document meta data.
@@ -134,7 +134,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException;
+    IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data
@@ -145,7 +145,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+    IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data. This is currently only meant for updating existing documents. Trying to create a new one will throw
@@ -158,7 +158,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param context The context
      * @throws OXException If save operation fails
      */
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException;
+    IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException;
 
     /**
      * Gets the document's binary content.
@@ -172,7 +172,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If retrieving binary content fails
      * @see #CURRENT_VERSION
      */
-    public InputStream getDocument(int id, int version, ServerSession session) throws OXException;
+    InputStream getDocument(int id, int version, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
@@ -183,7 +183,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException;
+    IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
@@ -195,7 +195,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+    IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
@@ -208,7 +208,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException;
+    IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException;
 
     /**
      * Removes all documents contained in specified folder.
@@ -218,7 +218,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If remove operation fails
      */
-    public void removeDocument(long folderId, long date, ServerSession session) throws OXException;
+    void removeDocument(long folderId, long date, ServerSession session) throws OXException;
 
     /**
      * Removes denoted documents.
@@ -229,7 +229,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The identifiers of those documents that could <b>not</b> be deleted successfully
      * @throws OXException If remove operation fails
      */
-    public List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException;
+    List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException;
 
     /**
      * Removes denoted documents.<br>
@@ -239,7 +239,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param context The context
      * @throws OXException If remove operation fails
      */
-    public void removeDocuments(List<IDTuple> ids, Context context) throws OXException;
+    void removeDocuments(List<IDTuple> ids, Context context) throws OXException;
 
     /**
      * Moves denoted documents to another folder. Colliding filenames in the target folder may be renamed automatically.
@@ -263,7 +263,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The identifiers of those versions that could <b>not</b> be deleted successfully
      * @throws OXException If remove operation fails
      */
-    public int[] removeVersion(int id, int[] versionIds, ServerSession session) throws OXException;
+    int[] removeVersion(int id, int[] versionIds, ServerSession session) throws OXException;
 
     /**
      * Gets the folder's documents.
@@ -275,7 +275,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(long folderId, ServerSession session) throws OXException;
+    TimedResult<DocumentMetadata> getDocuments(long folderId, ServerSession session) throws OXException;
 
     /**
      * Gets the folder's documents.
@@ -288,7 +288,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, ServerSession session) throws OXException;
+    TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, ServerSession session) throws OXException;
 
     /**
      * Gets the sorted folder's documents.
@@ -303,7 +303,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException;
+    TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException;
 
     /**
      * Gets the document's versions.
@@ -315,7 +315,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The document's version
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getVersions(int id, ServerSession session) throws OXException;
+    TimedResult<DocumentMetadata> getVersions(int id, ServerSession session) throws OXException;
 
     /**
      * Gets the document's versions.
@@ -328,7 +328,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, ServerSession session) throws OXException;
+    TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, ServerSession session) throws OXException;
 
     /**
      * Gets the document's versions.
@@ -343,7 +343,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException;
+    TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException;
 
     /**
      * Gets the specified documents.
@@ -356,7 +356,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(List<IDTuple> ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException;
+    TimedResult<DocumentMetadata> getDocuments(List<IDTuple> ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException;
 
     /**
      * Gets the folder's updated & deleted documents.
@@ -371,7 +371,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The matching changed/deleted documents
      * @throws OXException If retrieval fails
      */
-    public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, ServerSession session) throws OXException;
+    Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, ServerSession session) throws OXException;
 
     /**
      * Gets the folder's updated & deleted documents.
@@ -388,7 +388,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The matching changed/deleted documents
      * @throws OXException If retrieval fails
      */
-    public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, ServerSession session) throws OXException;
+    Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, ServerSession session) throws OXException;
 
     /**
      * Gets the sequence numbers for the contents of the supplied folders to quickly determine which folders contain changes. An updated
@@ -414,7 +414,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The number of documents
      * @throws OXException If operation fails
      */
-    public int countDocuments(long folderId, ServerSession session) throws OXException;
+    int countDocuments(long folderId, ServerSession session) throws OXException;
 
     /**
      * Signals if denoted folder contains documents not owned by specified user.
@@ -426,7 +426,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return <code>true</code> if folder contains documents not owned by specified user; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    public boolean hasFolderForeignObjects(long folderId, ServerSession session) throws OXException;
+    boolean hasFolderForeignObjects(long folderId, ServerSession session) throws OXException;
 
     /**
      * Checks if denoted folder is empty.
@@ -436,7 +436,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return <code>true</code> if empty; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    public boolean isFolderEmpty(long folderId, Context ctx) throws OXException;
+    boolean isFolderEmpty(long folderId, Context ctx) throws OXException;
 
     /**
      * Performs necessary clean-up operations if specified user has been deleted.
@@ -446,7 +446,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If clean-up fails
      */
-    public void removeUser(int userId, Context context, ServerSession session) throws OXException;
+    void removeUser(int userId, Context context, ServerSession session) throws OXException;
 
     /**
      * Unlocks specified document.
@@ -455,7 +455,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If operation fails
      */
-    public void unlock(int id, ServerSession session) throws OXException;
+    void unlock(int id, ServerSession session) throws OXException;
 
     /**
      * Locks specified document.
@@ -464,7 +464,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If operation fails
      */
-    public void lock(int id, long diff, ServerSession session) throws OXException;
+    void lock(int id, long diff, ServerSession session) throws OXException;
 
     /**
      * Touches specified document.
@@ -473,14 +473,14 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If operation fails
      */
-    public void touch(int id, ServerSession session) throws OXException;
+    void touch(int id, ServerSession session) throws OXException;
 
     /**
      * Sets this facade's session holder.
      *
      * @param sessionHolder The session holder
      */
-    public void setSessionHolder(SessionHolder sessionHolder);
+    void setSessionHolder(SessionHolder sessionHolder);
 
     /**
      * Gets the quota restrictions and current usage of {@link Type#FILE} for the supplied session.
@@ -526,5 +526,5 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If operation fails
      */
-    void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException;
+    IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException;
 }

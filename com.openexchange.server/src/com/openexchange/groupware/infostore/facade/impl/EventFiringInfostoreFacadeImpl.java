@@ -58,6 +58,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -121,9 +122,9 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
         boolean wasCreation = InfostoreFacade.NEW == document.getId();
-        super.saveDocument(document, data, sequenceNumber, session);
+        IDTuple result = super.saveDocument(document, data, sequenceNumber, session);
         if (wasCreation) {
             fireEvent(FileStorageEventHelper.buildCreateEvent(
                 session, SERVICE_ID, ACCOUNT_ID, getFolderID(document), getFileID(document), document.getFileName()));
@@ -137,12 +138,13 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
              * being called from super class
              */
         }
+        return result;
     }
 
     @Override
-    protected void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
+    protected IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
         boolean wasCreation = InfostoreFacade.NEW == document.getId();
-        super.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, offset, session);
+        IDTuple result = super.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, offset, session);
         if (wasCreation) {
             /*
              * leads to
@@ -155,6 +157,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             fireEvent(FileStorageEventHelper.buildUpdateEvent(
                 session, SERVICE_ID, ACCOUNT_ID, getFolderID(document), getFileID(document), document.getFileName()));
         }
+        return result;
     }
 
     @Override

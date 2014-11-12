@@ -189,12 +189,12 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
             try {
                 Drive drive = googleDriveAccess.getDrive(session);
@@ -203,7 +203,8 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 modFile.setId(file.getId());
                 modFile.setTitle(file.getFileName());
 
-                drive.files().patch(file.getId(), modFile).execute();
+                modFile = drive.files().patch(file.getId(), modFile).execute();
+                return new IDTuple(file.getFolderId(), modFile.getId());
             } catch (final HttpResponseException e) {
                 throw handleHttpResponseError(file.getId(), e);
             } catch (final IOException e) {
@@ -212,6 +213,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
@@ -371,12 +373,12 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, null);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         String id = file.getId();
         try {
             Drive drive = googleDriveAccess.getDrive(session);
@@ -394,6 +396,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 uploader.setDirectUploadEnabled(true);
                 String newId = insert.execute().getId();
                 file.setId(newId);
+                return new IDTuple(folderId, newId);
             } else {
                 // Update
                 com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
@@ -406,7 +409,8 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 Drive.Files.Update update = drive.files().update(id, fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
                 MediaHttpUploader uploader = update.getMediaHttpUploader();
                 uploader.setDirectUploadEnabled(true);
-                update.execute();
+                fileMetadata = update.execute();
+                return new IDTuple(folderId, fileMetadata.getId());
             }
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);

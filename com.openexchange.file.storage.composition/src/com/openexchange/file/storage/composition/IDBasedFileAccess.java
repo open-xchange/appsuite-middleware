@@ -72,40 +72,45 @@ import com.openexchange.tx.TransactionAware;
 public interface IDBasedFileAccess extends TransactionAware {
 
     /**
-     * Find out whether the file with a given ID exists or not.
+     * Gets a value indicating whether a file with the given identifier and version exists or not.
+     *
      * @param id The ID to check for
      * @param version The version to check for
-     *
-     * @return true when the file exists and is readable, false otherwise.
+     * @return <code>true</code> if the file exists and is readable, <code>false</code>, otherwise.
      * @throws OXException If operation fails
      */
     boolean exists(String id, String version) throws OXException;
 
     /**
-     * Load the metadata about a file
+     * Loads metadata for specific file version.
+     *
      * @param id The id of the file
      * @param version The version number of the file. May pass in CURRENT_VERSION to load the current version
-     * @return The File Metadata
+     * @return The file metadata
      * @throws OXException If operation fails
      */
     File getFileMetadata(String id, String version) throws OXException;
 
     /**
-     * Save the file metadata.
+     * Saves metadata for a file.
+     *
      * @param document The metadata to save
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
-    void saveFileMetadata(File document, long sequenceNumber) throws OXException ; // No modifiedColumns means all columns
+    String saveFileMetadata(File document, long sequenceNumber) throws OXException ; // No modifiedColumns means all columns
 
     /**
-     * Save the file metadata.
+     * Saves metadata for a file.
+     *
      * @param document The metadata to save
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
-    void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
+    String saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
 
     /**
      * Copies a file from the source to the destination.
@@ -116,6 +121,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @param update Optional updates to the copy. May be null
      * @param newData Optional new binary data. May be null
      * @param The fields to use from the update.
+     * @return The (fully qualified) unique identifier of the copied file
      * @throws OXException If operation fails
      */
     String copy(String sourceId, String version, String destFolderId, File update, InputStream newData, List<File.Field> modifiedFields) throws OXException;
@@ -143,6 +149,7 @@ public interface IDBasedFileAccess extends TransactionAware {
 
     /**
      * Tries to load the documents content and associated metadata. Returns null if the underlying implementation cannot satisfy this call
+     *
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
      * @return An InputStream Source and metadata or null if the underlying filestore does not implement this feature
@@ -154,6 +161,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * Tries to load the documents content and associated metadata. Only retrieves
      * the document if the given eTag does not match, otherwise returns a document instance with the
      * etag set and no input stream. Returns null if the underlying implementation cannot satisfy this call
+     *
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
      * @param clientEtag The eTag supplied by the client, only fill in the input stream if the
@@ -165,28 +173,40 @@ public interface IDBasedFileAccess extends TransactionAware {
     Document getDocumentAndMetadata(String id, String version, String clientEtag) throws OXException;
 
     /**
-     * Save the file metadata and binary content
+     * Saves file metadata and binary content. To update an existing file, the file's identifier must be set accordingly. For new files,
+     * the file ID should be set to <code>FileStorageFileAccess#NEW</code> (i.e. <code>null</code>).
+     *
      * @param document The metadata to save
-     * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @param data The binary content, or <code>null</code> when saving metadata only
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
+     *        <code>FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER</code> for new files or
+     *        <code>FileStorageFileAccess#DISTANT_FUTURE</code> to circumvent the check
+     * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
-    void saveDocument(File document, InputStream data, long sequenceNumber) throws OXException ;
+    String saveDocument(File document, InputStream data, long sequenceNumber) throws OXException ;
 
     /**
-     * Save the file metadata.
+     * Saves file and binary content. To update an existing file, the file's identifier must be set accordingly. For new files,
+     * the file ID should be set to <code>FileStorageFileAccess#NEW</code> (i.e. <code>null</code>).
+     *
      * @param document The metadata to save
-     * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param data The binary content, or <code>null</code> when saving metadata only
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
+     *        <code>FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER</code> for new files or
+     *        <code>FileStorageFileAccess#DISTANT_FUTURE</code> to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
-    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
+    String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
 
     /**
-     * Remove all documents in the given folder.
+     * Removes all documents in the given folder.
+     *
      * @param folderId The folder to clear
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
+     *        <code>FileStorageFileAccess#DISTANT_FUTURE</code> to circumvent the check
      * @throws OXException If operation fails
      */
     void removeDocument(String folderId, long sequenceNumber) throws OXException;
@@ -226,13 +246,14 @@ public interface IDBasedFileAccess extends TransactionAware {
      * Remove a certain version of a file
      * @param id The file id whose version is to be removed
      * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
-     * @return
+     * @return The IDs of versions that could not be deleted due to an edit-delete conflict
      * @throws OXException If operation fails
      */
     String[] removeVersion(String id, String[] versions) throws OXException;
 
     /**
      * Unlocks a given file.
+     *
      * @param id The file to unlock
      * @throws OXException If operation fails
      */

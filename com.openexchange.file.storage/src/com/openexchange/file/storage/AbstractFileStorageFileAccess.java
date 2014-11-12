@@ -142,13 +142,14 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, Arrays.asList(File.Field.values()));
+    public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, Arrays.asList(File.Field.values()));
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
@@ -170,13 +171,14 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, ALL_FIELDS);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, ALL_FIELDS);
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
