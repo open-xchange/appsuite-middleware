@@ -236,28 +236,33 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
         // Nothing to do
+        return null;
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
+        return null;
     }
 
     @Override
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException {
+    public IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException {
         // Nothing to do
+        return null;
     }
 
     @Override
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
+    public IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
+        return null;
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException {
         // Nothing to do
+        return null;
     }
 
     @Override
@@ -337,8 +342,9 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
         // Nothing to do
+        return null;
     }
 
     @Override
@@ -353,9 +359,9 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
+    public IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
         // TODO Auto-generated method stub
-
+        return null;
     }
 
     @Override
