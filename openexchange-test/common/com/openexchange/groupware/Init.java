@@ -120,7 +120,7 @@ import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.impl.CompositeFileStorageService;
-import com.openexchange.filestore.impl.DBQuotaFileStorageFactory;
+import com.openexchange.filestore.impl.DBQuotaFileStorageService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
@@ -733,7 +733,7 @@ public final class Init {
         UserService userService = (UserService) services.get(UserService.class);
         com.openexchange.filestore.impl.osgi.Services.setServiceLookup(serviceLookup);
 
-        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(fileStorageStarter));
+        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageService(fileStorageStarter));
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {

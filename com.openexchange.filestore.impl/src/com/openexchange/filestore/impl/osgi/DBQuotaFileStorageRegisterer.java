@@ -57,7 +57,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.impl.DBQuotaFileStorageFactory;
+import com.openexchange.filestore.impl.DBQuotaFileStorageService;
 
 /**
  * {@link DBQuotaFileStorageRegisterer} - Registers the {@link QuotaFileStorageService} service if all required services are available.
@@ -95,7 +95,7 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
                 isRegistered = true;
             }
             if (needsRegistration) {
-                QuotaFileStorageService qfss = new DBQuotaFileStorageFactory(service);
+                QuotaFileStorageService qfss = new DBQuotaFileStorageService(service);
                 registration = context.registerService(QuotaFileStorageService.class, qfss, null);
                 return service;
             }

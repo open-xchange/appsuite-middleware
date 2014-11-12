@@ -112,11 +112,6 @@ public class RdbUserStorage extends UserStorage {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbUserStorage.class);
 
-    private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
-        "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy FROM user WHERE user.cid=?";
-
-    private static final String SELECT_USER = SELECT_ALL_USER + " AND id IN (";
-
     private static final String SELECT_ATTRS = "SELECT id,uuid,name,value FROM user_attribute WHERE cid=? AND id IN (";
 
     private static final String SELECT_CONTACT = "SELECT intfield01,field03,field02,field01 FROM prg_contacts WHERE cid=? AND intfield01 IN (";
@@ -436,7 +431,9 @@ public class RdbUserStorage extends UserStorage {
                 ResultSet result = null;
                 try {
                     final int[] currentUserIds = Arrays.extract(userIds, i, IN_LIMIT);
-                    stmt = con.prepareStatement(getIN(SELECT_USER, currentUserIds.length));
+                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
+                        "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy," +
+                        "filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM user WHERE user.cid=?" + " AND id IN (", currentUserIds.length));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     for (final int userId : currentUserIds) {
@@ -462,7 +459,17 @@ public class RdbUserStorage extends UserStorage {
                         user.setPreferredLanguage(result.getString(pos++));
                         user.setPasswordMech(result.getString(pos++));
                         user.setContactId(result.getInt(pos++));
+                        // 'guestCreatedBy'
                         user.setCreatedBy(result.getInt(pos++));
+                        // File storage stuff
+                        user.setFilestoreId(result.getInt(pos++));
+                        user.setFilestoreName(result.getString(pos++));
+                        {
+                            String login = result.getString(pos++);
+                            String passwd = result.getString(pos++);
+                            user.setFilestoreAuth(new String[] {login, passwd});
+                        }
+                        user.setFileStorageQuota(result.getLong(pos++));
 
                         users.put(user.getId(), user);
                         if (false == user.isGuest()) {

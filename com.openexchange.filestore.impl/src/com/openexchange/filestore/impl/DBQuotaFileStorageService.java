@@ -70,23 +70,23 @@ import com.openexchange.java.Key;
 import com.openexchange.user.UserService;
 
 /**
- * {@link DBQuotaFileStorageFactory} - The database-backed {@link QuotaFileStorageService}.
+ * {@link DBQuotaFileStorageService} - The database-backed {@link QuotaFileStorageService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DBQuotaFileStorageFactory implements QuotaFileStorageService {
+public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
     private static final Cache<Key, DBQuotaFileStorage> CACHE_STORAGES = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(30, TimeUnit.MINUTES).build();
 
     private final FileStorageService fileStorageService;
 
     /**
-     * Initializes a new {@link DBQuotaFileStorageFactory}.
+     * Initializes a new {@link DBQuotaFileStorageService}.
      *
      * @param fileStorageService The file storage service
      */
-    public DBQuotaFileStorageFactory(FileStorageService fileStorageService) {
+    public DBQuotaFileStorageService(FileStorageService fileStorageService) {
         super();
         this.fileStorageService = fileStorageService;
     }
@@ -110,10 +110,10 @@ public class DBQuotaFileStorageFactory implements QuotaFileStorageService {
             FileStorageInfo info = getFileStorageInfoFor(userId, contextId);
 
             // Determine file storage's base URI
-            URI fileStorageUri = FilestoreStorage.getInstance().getFilestore(info.getFilestoreId()).getUri();
+            URI baseUri = FilestoreStorage.getInstance().getFilestore(info.getFilestoreId()).getUri();
             try {
                 // Generate full URI
-                URI uri = new URI(fileStorageUri.getScheme(), fileStorageUri.getAuthority(), fileStorageUri.getPath() + '/' + info.getFilestoreName(), fileStorageUri.getQuery(), fileStorageUri.getFragment());
+                URI uri = new URI(baseUri.getScheme(), baseUri.getAuthority(), baseUri.getPath() + '/' + info.getFilestoreName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
                 storage = new DBQuotaFileStorage(contextId, info.getFileStorageQuota(), fileStorageService.getFileStorage(uri));
@@ -121,7 +121,7 @@ public class DBQuotaFileStorageFactory implements QuotaFileStorageService {
                 // Put it into cache
                 CACHE_STORAGES.put(key, storage);
             } catch (final URISyntaxException e) {
-                throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, fileStorageUri.toString() + '/' + info.getFilestoreName());
+                throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, baseUri.toString() + '/' + info.getFilestoreName());
             }
         }
 

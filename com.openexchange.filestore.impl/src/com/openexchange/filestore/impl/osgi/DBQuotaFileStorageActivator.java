@@ -54,6 +54,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -74,22 +77,22 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        BundleContext context = this.context;
+        Services.setServiceLookup(this);
 
+        BundleContext context = this.context;
         {
             ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(context));
             rememberTracker(tracker);
         }
-
-        Services.setServiceLookup(this);
-        trackService(DatabaseService.class);
         trackService(ContextService.class);
         trackService(UserService.class);
+
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable()));
 
         openTrackers();
     }
