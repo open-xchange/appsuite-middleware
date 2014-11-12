@@ -57,25 +57,25 @@ import com.openexchange.ajax.framework.AbstractRedirectParser;
 import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link ResetPasswordServletRequest}
+ * {@link PasswordResetServletRequest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public final class ResetPasswordServletRequest extends AbstractResetPasswordServletRequest<ResetPasswordServletResponse> {
+public final class PasswordResetServletRequest extends AbstractResetPasswordServletRequest<PasswordResetServletResponse> {
 
     private final boolean failOnError;
 
     private final String token;
 
     /**
-     * Initializes a new {@link ResetPasswordServletRequest}.
+     * Initializes a new {@link PasswordResetServletRequest}.
      *
      * @param mailAddress
      * @param token
      * @param failOnError
      */
-    public ResetPasswordServletRequest(final String token, final boolean failOnError) {
+    public PasswordResetServletRequest(final String token, final boolean failOnError) {
         super();
         this.failOnError = failOnError;
         this.token = token;
@@ -107,22 +107,22 @@ public final class ResetPasswordServletRequest extends AbstractResetPasswordServ
      * {@inheritDoc}
      */
     @Override
-    public ResetPasswordParser getParser() {
-        return new ResetPasswordParser(failOnError);
+    public PasswordResetParser getParser() {
+        return new PasswordResetParser(failOnError);
     }
 
-    private static final class ResetPasswordParser extends AbstractRedirectParser<ResetPasswordServletResponse> {
+    private static final class PasswordResetParser extends AbstractRedirectParser<PasswordResetServletResponse> {
 
         /**
          * Default constructor.
          */
-        ResetPasswordParser(final boolean failOnError) {
+        PasswordResetParser(final boolean failOnError) {
             super(failOnError);
         }
 
         @Override
-        protected ResetPasswordServletResponse createResponse(String myLocation) throws JSONException {
-            return new ResetPasswordServletResponse(myLocation);
+        protected PasswordResetServletResponse createResponse(String myLocation) throws JSONException {
+            return new PasswordResetServletResponse(myLocation);
         }
     }
 }

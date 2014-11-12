@@ -78,27 +78,27 @@ import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
 /**
- * {@link ResetPasswordServlet}
+ * {@link PasswordResetServlet}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class ResetPasswordServlet extends HttpServlet {
+public class PasswordResetServlet extends HttpServlet {
 
     private static final long serialVersionUID = -598655895873570676L;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResetPasswordServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
     private ShareLoginConfiguration loginConfig;
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
-     * Initializes a new {@link ResetPasswordServlet}.
+     * Initializes a new {@link PasswordResetServlet}.
      *
      * @param loginConfig
      */
-    public ResetPasswordServlet(ShareLoginConfiguration loginConfig) {
+    public PasswordResetServlet(ShareLoginConfiguration loginConfig) {
         super();
         this.loginConfig = loginConfig;
     }

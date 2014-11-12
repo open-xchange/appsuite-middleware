@@ -56,31 +56,31 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.ResetPasswordServletRequest;
-import com.openexchange.ajax.share.actions.ResetPasswordServletResponse;
+import com.openexchange.ajax.share.actions.PasswordResetServletRequest;
+import com.openexchange.ajax.share.actions.PasswordResetServletResponse;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
 
 /**
- * {@link ResetPasswordServletTest}
+ * {@link PasswordResetServletTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public final class ResetPasswordServletTest extends ShareTest {
+public final class PasswordResetServletTest extends ShareTest {
 
     private OCLGuestPermission guestPermission;
 
     private ParsedShare share;
 
     /**
-     * Initializes a new {@link ResetPasswordServletTest}
+     * Initializes a new {@link PasswordResetServletTest}
      *
      * @param name The test name
      */
-    public ResetPasswordServletTest(final String name) {
+    public PasswordResetServletTest(final String name) {
         super(name);
     }
 
@@ -121,7 +121,7 @@ public final class ResetPasswordServletTest extends ShareTest {
     }
 
     public void testResetPassword_retrievedRedirectLocation() throws Exception {
-        ResetPasswordServletResponse response = Executor.execute(getSession(), new ResetPasswordServletRequest(share.getToken(), false));
+        PasswordResetServletResponse response = Executor.execute(getSession(), new PasswordResetServletRequest(share.getToken(), false));
         String location = response.getLocation();
 
         Assert.assertNotNull("Redirect URL cannot be null", location);
@@ -132,7 +132,7 @@ public final class ResetPasswordServletTest extends ShareTest {
     }
 
     public void testResetPassword_loginNotPossibleAnyMore() throws Exception {
-        Executor.execute(getSession(), new ResetPasswordServletRequest(share.getToken(), false));
+        Executor.execute(getSession(), new PasswordResetServletRequest(share.getToken(), false));
 
         // Try to get share with obsolete password
         GuestClient guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) guestPermission.getRecipient()).getPassword());

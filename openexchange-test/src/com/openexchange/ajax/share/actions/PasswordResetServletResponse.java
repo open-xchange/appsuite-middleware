@@ -52,16 +52,16 @@ package com.openexchange.ajax.share.actions;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link ResetPasswordServletResponse}
+ * {@link PasswordResetServletResponse}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public final class ResetPasswordServletResponse extends AbstractAJAXResponse {
+public final class PasswordResetServletResponse extends AbstractAJAXResponse {
 
     private final String location;
 
-    ResetPasswordServletResponse(final String location) {
+    PasswordResetServletResponse(final String location) {
         super(null);
         this.location = location;
     }

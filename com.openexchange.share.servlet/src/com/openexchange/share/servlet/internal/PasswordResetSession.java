@@ -57,13 +57,13 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.session.Session;
 
 /**
- * {@link ResetPasswordSession}
+ * {@link PasswordResetSession}
  *
  * Simulated session used to read internal free/busy data.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ResetPasswordSession implements Session {
+public class PasswordResetSession implements Session {
 
     private final int contextId;
     private final int userId;
@@ -71,13 +71,13 @@ public class ResetPasswordSession implements Session {
     private final ConcurrentMap<String, Object> parameters;
 
     /**
-     * Initializes a new {@link ResetPasswordSession}.
+     * Initializes a new {@link PasswordResetSession}.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param request The associated HTTP request
      */
-    public ResetPasswordSession(int userId, int contextId, String password, HttpServletRequest request) {
+    public PasswordResetSession(int userId, int contextId, String password, HttpServletRequest request) {
         super();
         this.contextId = contextId;
         this.userId = userId;

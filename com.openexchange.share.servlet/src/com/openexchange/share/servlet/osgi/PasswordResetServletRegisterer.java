@@ -56,7 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.share.servlet.internal.ResetPasswordServlet;
+import com.openexchange.share.servlet.internal.PasswordResetServlet;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 
 /**
@@ -64,9 +64,9 @@ import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ResetPasswordServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
+public final class PasswordResetServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResetPasswordServletRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServletRegisterer.class);
 
     private static final String ALIAS_APPENDIX = "share/reset/password";
 
@@ -80,13 +80,13 @@ public final class ResetPasswordServletRegisterer implements ServiceTrackerCusto
     private ShareLoginConfiguration loginConfig;
 
     /**
-     * Initializes a new {@link ResetPasswordServletRegisterer}.
+     * Initializes a new {@link PasswordResetServletRegisterer}.
      *
      * @param shareHandlerRegistry The share handler registry
      * @param context The bundle context
      * @param loginConfig
      */
-    public ResetPasswordServletRegisterer(BundleContext context, ShareLoginConfiguration loginConfig) {
+    public PasswordResetServletRegisterer(BundleContext context, ShareLoginConfiguration loginConfig) {
         super();
         this.context = context;
         this.loginConfig = loginConfig;
@@ -149,7 +149,7 @@ public final class ResetPasswordServletRegisterer implements ServiceTrackerCusto
 
     private boolean registerServlet(String alias, HttpService httpService) {
         try {
-            httpService.registerServlet(alias, new ResetPasswordServlet(this.loginConfig), null, null);
+            httpService.registerServlet(alias, new PasswordResetServlet(this.loginConfig), null, null);
             LOG.info("Reset-password servlet successfully registered");
             return true;
         } catch (Exception e) {
