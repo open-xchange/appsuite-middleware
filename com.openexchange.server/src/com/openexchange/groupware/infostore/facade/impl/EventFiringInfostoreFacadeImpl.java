@@ -106,7 +106,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         DocumentMetadata dm = load(id, version, session.getContext());
-        com.openexchange.filestore.FileStorage fs = getFileStorage(security.getFolderAdmin(dm, session.getContext()), session.getContextId());
+        com.openexchange.filestore.FileStorage fs = getFileStorage(security.getFolderOwner(dm, session.getContext()), session.getContextId());
 
         InputStream document;
         if (dm.getFilestoreLocation() == null) {

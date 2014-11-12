@@ -78,33 +78,33 @@ public interface InfostoreSecurity {
     void checkFolderId(long folderId, Context ctx) throws OXException;
 
     /**
-     * Determines the identifier of the folder administrator with the lowest numeric identifier
+     * Determines the identifier of the folder owner
      *
      * @param folderId The folder identifier
      * @param ctx The context
-     * @return The folder administrator identifier or <code>-1</code>
+     * @return The folder owner identifier or <code>-1</code>
      * @throws OXException If operation fails
      */
-    int getFolderAdmin(long folderId, Context ctx) throws OXException;
+    int getFolderOwner(long folderId, Context ctx) throws OXException;
 
     /**
-     * Gets the folder administrators for specified documents
+     * Gets the folder owners for specified documents
      *
      * @param documents The documents
      * @param ctx The associated context
-     * @return The folder administrators
+     * @return The folder owners
      * @throws OXException If operation fails
      */
-    int[] getFolderAdmins(Collection<DocumentMetadata> documents, Context ctx) throws OXException;
+    int[] getFolderOwners(Collection<DocumentMetadata> documents, Context ctx) throws OXException;
 
     /**
-     * Gets the folder administrator for specified document
+     * Gets the folder owner for specified document
      *
      * @param document The document
      * @param ctx The associated context
-     * @return The folder administrator
+     * @return The folder owner
      * @throws OXException If operation fails
      */
-    int getFolderAdmin(DocumentMetadata document, Context ctx) throws OXException;
+    int getFolderOwner(DocumentMetadata document, Context ctx) throws OXException;
 
 }

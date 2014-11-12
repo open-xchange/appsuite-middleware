@@ -62,18 +62,18 @@ import com.openexchange.server.impl.OCLPermission;
 public class EffectiveInfostoreFolderPermission {
 
     private final EffectivePermission permission;
-    private final int optFolderAdmin;
+    private final int folderOwner;
 
     /**
      * Initializes a new {@link EffectiveInfostoreFolderPermission}.
      *
      * @param permission The permission
-     * @param optFolderAdmin The optiona folder administrator identifier
+     * @param folderOwner The folder owner
      */
-    public EffectiveInfostoreFolderPermission(EffectivePermission permission, int optFolderAdmin) {
+    public EffectiveInfostoreFolderPermission(EffectivePermission permission, int folderOwner) {
         super();
         this.permission = permission;
-        this.optFolderAdmin = optFolderAdmin;
+        this.folderOwner = folderOwner;
     }
 
     /**
@@ -86,12 +86,12 @@ public class EffectiveInfostoreFolderPermission {
     }
 
     /**
-     * Gets the optional folder administrator identifier
+     * Gets the optional folder owner identifier
      *
-     * @return The folder administrator identifier or <code>-1</code>
+     * @return The folder owner identifier or <code>-1</code>
      */
-    public int getOptFolderAdmin() {
-        return optFolderAdmin;
+    public int getFolderOwner() {
+        return folderOwner;
     }
 
     public boolean hasModuleAccess(int folderModule) {

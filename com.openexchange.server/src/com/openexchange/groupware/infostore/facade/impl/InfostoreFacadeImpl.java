@@ -326,7 +326,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         final DocumentMetadata dm = load(id, version, session.getContext());
-        final FileStorage fs = getFileStorage(infoPerm.getOptFolderAdmin(), session.getContextId());
+        final FileStorage fs = getFileStorage(infoPerm.getFolderOwner(), session.getContextId());
         if (null == dm.getFilestoreLocation()) {
             return Streams.EMPTY_INPUT_STREAM;
         }
@@ -593,7 +593,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0)), true);
 
                 if (data != null) {
-                    SaveFileAction saveFile = new SaveFileAction(getFileStorage(isperm.getOptFolderAdmin(), session.getContextId()), data, document.getFileSize());
+                    SaveFileAction saveFile = new SaveFileAction(getFileStorage(isperm.getFolderOwner(), session.getContextId()), data, document.getFileSize());
                     perform(saveFile, false);
                     document.setVersion(1);
                     document.setFilestoreLocation(saveFile.getFileStorageID());
@@ -718,13 +718,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return reservation;
     }
 
-    protected QuotaFileStorage getFileStorage(int folderAdmin, int contextId) throws OXException {
+    protected QuotaFileStorage getFileStorage(int folderOwner, int contextId) throws OXException {
         QuotaFileStorageService storageService = QFS_REF.get();
         if (null == storageService) {
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
 
-        return storageService.getQuotaFileStorage(folderAdmin, contextId);
+        return storageService.getQuotaFileStorage(folderOwner, contextId);
     }
 
     private Metadata[] nonNull(final DocumentMetadata document) {
@@ -814,7 +814,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         VALIDATION.validate(document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
-        SaveParameters saveParameters = new SaveParameters(context, document, oldDocument, sequenceNumber, updatedCols, infoPerm.getOptFolderAdmin());
+        SaveParameters saveParameters = new SaveParameters(context, document, oldDocument, sequenceNumber, updatedCols, infoPerm.getFolderOwner());
         saveParameters.setData(data, offset, session.getUserId(), ignoreVersion);
         saveModifiedDocument(saveParameters);
 
@@ -854,7 +854,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         VALIDATION.validate(document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(load(document.getId(), context), context, null);
-        return saveModifiedDocument(new SaveParameters(context, document, oldDocument, sequenceNumber, updatedCols, security.getFolderAdmin(folderId, context)));
+        return saveModifiedDocument(new SaveParameters(context, document, oldDocument, sequenceNumber, updatedCols, security.getFolderOwner(folderId, context)));
     }
 
     private IDTuple saveModifiedDocument(SaveParameters parameters) throws OXException {
@@ -991,7 +991,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             // Remove old file "version" if not appended
             if (0 >= parameters.getOffset()) {
-                removeFile(parameters.getContext(), parameters.getOldDocument().getFilestoreLocation(), security.getFolderAdmin(parameters.getOldDocument(), parameters.getContext()));
+                removeFile(parameters.getContext(), parameters.getOldDocument().getFilestoreLocation(), security.getFolderOwner(parameters.getOldDocument(), parameters.getContext()));
             }
         } else {
             Connection con = null;
@@ -1070,7 +1070,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 m.setLastModified(now);
                 if (null != m.getFilestoreLocation()) {
                     filestoreLocations.add(m.getFilestoreLocation());
-                    folderAdmins.add(security.getFolderAdmins(Collections.singletonList(m), context));
+                    folderAdmins.add(security.getFolderOwners(Collections.singletonList(m), context));
                 }
             }
         }
@@ -1473,7 +1473,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         for (final DocumentMetadata m : allVersions) {
             if (null != m.getFilestoreLocation()) {
                 filestoreLocations.add(m.getFilestoreLocation());
-                folderAdmins.add(security.getFolderAdmins(Collections.singletonList(m), context));
+                folderAdmins.add(security.getFolderOwners(Collections.singletonList(m), context));
             }
         }
         removeFiles(context, filestoreLocations, folderAdmins.toArray());
@@ -1547,7 +1547,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
             versionSet.remove(Integer.valueOf(v.getVersion()));
             v.setLastModified(now);
-            removeFile(context, v.getFilestoreLocation(), security.getFolderAdmin(v, context));
+            removeFile(context, v.getFilestoreLocation(), security.getFolderOwner(v, context));
         }
 
         // update version number if needed
@@ -2390,7 +2390,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                 String filestoreLocation = document.getFilestoreLocation();
                 if (filestoreLocation != null) {
-                    FileStorage fileStorage = getFileStorage(security.getFolderAdmin(document, context), context.getContextId());
+                    FileStorage fileStorage = getFileStorage(security.getFolderOwner(document, context), context.getContextId());
                     InputStream file = fileStorage.getFile(filestoreLocation);
                     Attachment attachment = new Attachment();
                     attachment.setModule(Types.INFOSTORE);

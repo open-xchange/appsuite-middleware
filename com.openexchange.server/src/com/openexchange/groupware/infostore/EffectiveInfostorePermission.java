@@ -60,31 +60,31 @@ public class EffectiveInfostorePermission {
     private final EffectivePermission permission;
     private final User user;
     private final DocumentMetadata document;
-    private final int optFolderAdmin;
+    private final int folderOwner;
 
-    public EffectiveInfostorePermission(EffectivePermission permission, DocumentMetadata document, User user, int optFolderAdmin) {
+    public EffectiveInfostorePermission(EffectivePermission permission, DocumentMetadata document, User user, int folderOwner) {
         this.document = document;
         this.user = user;
         this.permission = permission;
         objectPermission = null;
-        this.optFolderAdmin = optFolderAdmin;
+        this.folderOwner = folderOwner;
     }
 
-    public EffectiveInfostorePermission(EffectivePermission permission, EffectiveObjectPermission objectPermission, DocumentMetadata document, User user, int optFolderAdmin) {
+    public EffectiveInfostorePermission(EffectivePermission permission, EffectiveObjectPermission objectPermission, DocumentMetadata document, User user, int folderOwner) {
         this.document = document;
         this.user = user;
         this.permission = permission;
         this.objectPermission = objectPermission;
-        this.optFolderAdmin = optFolderAdmin;
+        this.folderOwner = folderOwner;
     }
 
     /**
-     * Gets the optional folder administrator identifier
+     * Gets the folder owner identifier
      *
-     * @return The folder administrator identifier or <code>-1</code>
+     * @return The folder administrator owner or <code>-1</code>
      */
-    public int getOptFolderAdmin() {
-        return optFolderAdmin;
+    public int getFolderOwner() {
+        return folderOwner;
     }
 
     public boolean canReadObject() {

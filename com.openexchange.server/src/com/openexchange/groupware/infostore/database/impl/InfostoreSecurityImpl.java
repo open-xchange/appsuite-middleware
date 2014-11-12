@@ -75,7 +75,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -92,32 +91,23 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     /**
-     * Determines the identifier of the folder administrator with the lowest numeric identifier
+     * Determines the identifier of the folder owner
      *
      * @param folder The folder to examine
-     * @return The folder administrator identifier or <code>-1</code>
+     * @return The folder owner identifier or <code>-1</code>
      */
-    public static int getFirstFolderAdmin(FolderObject folder) {
-        int entity = -1;
-        if (null != folder) {
-            for (OCLPermission p : folder.getPermissions()) {
-                if (p.isFolderAdmin() && !p.isGroupPermission() && !p.isSystem()) {
-                    int cur = p.getEntity();
-                    entity = entity < 0 ? cur : (entity > cur ? cur : entity);
-                }
-            }
-        }
-        return entity;
+    public static int getFolderOwner(FolderObject folder) {
+        return null == folder ? -1 : folder.getCreatedBy();
     }
 
     @Override
-    public int getFolderAdmin(long folderId, Context ctx) throws OXException {
+    public int getFolderOwner(long folderId, Context ctx) throws OXException {
         FolderObject folder = new OXFolderAccess(ctx).getFolderObject((int) folderId);
-        return getFirstFolderAdmin(folder);
+        return getFolderOwner(folder);
     }
 
     @Override
-    public int[] getFolderAdmins(Collection<DocumentMetadata> documents, Context ctx) throws OXException {
+    public int[] getFolderOwners(Collection<DocumentMetadata> documents, Context ctx) throws OXException {
         Connection readCon = null;
         try {
             readCon = getReadConnection(ctx);
@@ -126,7 +116,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             TIntList admins = new TIntArrayList();
             for (DocumentMetadata document : documents) {
                 FolderObject folder = folderAccess.getFolderObject((int) document.getFolderId());
-                admins.add(getFirstFolderAdmin(folder));
+                admins.add(getFolderOwner(folder));
             }
             return admins.toArray();
         } finally {
@@ -135,9 +125,9 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     @Override
-    public int getFolderAdmin(DocumentMetadata document, Context ctx) throws OXException {
+    public int getFolderOwner(DocumentMetadata document, Context ctx) throws OXException {
         FolderObject folder = new OXFolderAccess(ctx).getFolderObject((int) document.getFolderId());
-        return getFirstFolderAdmin(folder);
+        return getFolderOwner(folder);
     }
 
     @Override
@@ -154,7 +144,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         FolderObject folder = new OXFolderAccess(ctx).getFolderObject((int) document.getFolderId());
         EffectivePermission isperm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
         EffectiveObjectPermission effectiveObjectPermission = getEffectiveObjectPermission(ctx, user, userPermissions, document, null);
-        return new EffectiveInfostorePermission(isperm, effectiveObjectPermission, document, user, getFirstFolderAdmin(folder));
+        return new EffectiveInfostorePermission(isperm, effectiveObjectPermission, document, user, getFolderOwner(folder));
     }
 
     @Override
@@ -171,7 +161,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     public EffectiveInfostoreFolderPermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissions, Connection readConArg) throws OXException {
         FolderObject folder = new OXFolderAccess(ctx).getFolderObject((int) folderId);
         EffectivePermission isperm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
-        return new EffectiveInfostoreFolderPermission(isperm, getFirstFolderAdmin(folder));
+        return new EffectiveInfostoreFolderPermission(isperm, getFolderOwner(folder));
     }
 
     @Override
@@ -266,7 +256,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
                     objectPermission = objectPermissionsByDocument.get(document.getId());
                 }
 
-                permissions.add(new EffectiveInfostorePermission(folderPermission, objectPermission, document, user, getFirstFolderAdmin(folder)));
+                permissions.add(new EffectiveInfostorePermission(folderPermission, objectPermission, document, user, getFolderOwner(folder)));
             }
 
             return permissions;
