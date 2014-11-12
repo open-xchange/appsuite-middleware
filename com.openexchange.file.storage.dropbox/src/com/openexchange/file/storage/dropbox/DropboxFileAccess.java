@@ -491,12 +491,45 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws OXException {
         try {
-            final List<File> files = new ArrayList<File>(ids.size());
-            for (final IDTuple id : ids) {
-                String path = toPath(id.getFolder(), id.getId());
-                final Entry entry = dropboxAPI.metadata(path, 1, null, false, null);
-                if (!entry.isDeleted && !entry.isDir) {
-                    files.add(new DropboxFile(entry, userId));
+            List<File> files = new ArrayList<File>(ids.size());
+            Map<String, List<String>> filesPerFolder = getFilesPerFolder(ids);
+            if (1 == filesPerFolder.size() && 2 < filesPerFolder.values().iterator().next().size()) {
+                /*
+                 * seems like a "list" request for multiple items from one folder, get metadata via common folder
+                 */
+                String folderID  = filesPerFolder.keySet().iterator().next();
+                String path = toPath(folderID);
+                Entry directoryEntry = dropboxAPI.metadata(path, 0, null, true, null);
+                if (false == directoryEntry.isDir) {
+                    throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderID);
+                }
+                for (IDTuple id : ids) {
+                    for (Entry entry : directoryEntry.contents) {
+                        if (id.getId().equals(entry.fileName()) && false == entry.isDeleted && false == entry.isDir) {
+                            files.add(new DropboxFile(entry, userId));
+                            break;
+                        }
+                    }
+                }
+                return new FileTimedResult(files);
+            } else {
+                /*
+                 * load metadata one-by-one
+                 */
+                for (IDTuple id : ids) {
+                    String path = toPath(id.getFolder(), id.getId());
+                    try {
+                        Entry entry = dropboxAPI.metadata(path, 1, null, false, null);
+                        if (!entry.isDeleted && !entry.isDir) {
+                            files.add(new DropboxFile(entry, userId));
+                        }
+                    } catch (Exception e) {
+                        // skip non-existing file in result
+                        OXException x = handle(e, path);
+                        if (false == DropboxExceptionCodes.NOT_FOUND.equals(x)) {
+                            throw x;
+                        }
+                    }
                 }
             }
             return new FileTimedResult(files);
@@ -739,6 +772,25 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             hash = 31 * hash + entry.hash.charAt(i);
         }
         return hash;
+    }
+
+    /**
+     * Maps the file identifiers of the supplied ID tuples to their parent folder identifiers.
+     *
+     * @param ids The ID tuples to map
+     * @return The mapped identifiers
+     */
+    private static Map<String, List<String>> getFilesPerFolder(List<IDTuple> ids) {
+        Map<String, List<String>> filesPerFolder = new HashMap<String, List<String>>();
+        for (IDTuple id : ids) {
+            List<String> files = filesPerFolder.get(id.getFolder());
+            if (null == files) {
+                files = new ArrayList<String>();
+                filesPerFolder.put(id.getFolder(), files);
+            }
+            files.add(id.getId());
+        }
+        return filesPerFolder;
     }
 
 }
