@@ -83,6 +83,6 @@ public interface FileStorageRandomFileAccess extends FileStorageIgnorableVersion
      * @param offset The start offset in bytes where to append the data to the document, must be equal to the actual document's length
      * @throws OXException If operation fails
      */
-    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, long offset) throws OXException;
+    IDTuple saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, long offset) throws OXException;
 
 }

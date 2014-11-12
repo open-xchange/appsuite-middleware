@@ -229,13 +229,15 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        createCmisFile(file, null, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        Document cmisFile = createCmisFile(file, null, null);
+        return new IDTuple(file.getFolderId(), cmisFile.getId());
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        createCmisFile(file, modifiedFields, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        Document cmisFile = createCmisFile(file, modifiedFields, null);
+        return new IDTuple(file.getFolderId(), cmisFile.getId());
     }
 
     private Document createCmisFile(final File file, final List<Field> modifiedFields, final ContentStreamImpl contentStream) throws OXException {
@@ -521,22 +523,23 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
-        saveDocument0(file, data, null);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+        return saveDocument0(file, data, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        saveDocument0(file, data, modifiedFields);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        return saveDocument0(file, data, modifiedFields);
     }
 
-    private void saveDocument0(final File file, final InputStream data, final List<Field> modifiedFields) throws OXException {
+    private IDTuple saveDocument0(final File file, final InputStream data, final List<Field> modifiedFields) throws OXException {
         try {
             /*
              * Save document
              */
             final ContentStreamImpl contentStream = new ContentStreamImpl(file.getFileName(), null, file.getFileMIMEType(), data);
-            createCmisFile(file, modifiedFields, contentStream);
+            Document cmisFile = createCmisFile(file, modifiedFields, contentStream);
+            return new IDTuple(file.getFolderId(), cmisFile.getId());
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
         } catch (final RuntimeException e) {

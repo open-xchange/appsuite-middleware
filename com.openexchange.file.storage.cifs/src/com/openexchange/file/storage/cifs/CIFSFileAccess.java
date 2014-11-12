@@ -204,13 +204,15 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        createSmbFile(file, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        SmbFile smbFile = createSmbFile(file, null);
+        return new IDTuple(file.getFolderId(), smbFile.getName());
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        createSmbFile(file, modifiedFields);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        SmbFile smbFile = createSmbFile(file, modifiedFields);
+        return new IDTuple(file.getFolderId(), smbFile.getName());
     }
 
     private SmbFile createSmbFile(final File file, final List<Field> modifiedFields) throws OXException {
@@ -446,22 +448,22 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
-        saveDocument0(file, data, null);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+        return saveDocument0(file, data, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        saveDocument0(file, data, modifiedFields);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        return saveDocument0(file, data, modifiedFields);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
         // CIFS/SMB does not support versioning
-        saveDocument0(file, data, modifiedFields);
+        return saveDocument0(file, data, modifiedFields);
     }
 
-    private void saveDocument0(final File file, final InputStream data, final List<Field> modifiedFields) throws OXException {
+    private IDTuple saveDocument0(final File file, final InputStream data, final List<Field> modifiedFields) throws OXException {
         try {
             /*
              * Save metadata
@@ -490,6 +492,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Invalidate
              */
             SmbFileMapManagement.getInstance().dropFor(session);
+            return new IDTuple(file.getFolderId(), file.getId());
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {

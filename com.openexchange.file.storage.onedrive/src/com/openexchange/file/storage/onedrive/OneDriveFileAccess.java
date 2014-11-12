@@ -203,17 +203,17 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-            perform(new OneDriveClosure<Void>() {
+            return perform(new OneDriveClosure<IDTuple>() {
 
                 @Override
-                protected Void doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
                     HttpRequestBase request = null;
                     try {
                         HttpPost method = new HttpPost(buildUri(file.getId(), null));
@@ -222,8 +222,9 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         method.setHeader("Content-Type", "application/json");
                         method.setEntity(asHttpEntity(new JSONObject(2).put("name", file.getFileName())));
 
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        return null;
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
+                        String newFileId = jResponse.getString("id");
+                        return new IDTuple(file.getFolderId(), newFileId);
                     } catch (HttpResponseException e) {
                         throw handleHttpResponseError(file.getId(), e);
                     } finally {
@@ -232,6 +233,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 }
             });
         }
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
@@ -414,18 +416,18 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, null);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         final String id = file.getId();
         final String oneDriveFolderId = toOneDriveFolderId(file.getFolderId());
-        perform(new OneDriveClosure<Void>() {
+        return perform(new OneDriveClosure<IDTuple>() {
 
             @Override
-            protected Void doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
@@ -440,6 +442,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                         reset(request);
                         request = null;
+                        return new IDTuple(file.getFolderId(), file.getId());
                     } else {
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair("overwrite", "true"));
@@ -454,9 +457,8 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                         reset(request);
                         request = null;
+                        return new IDTuple(file.getFolderId(), file.getId());
                     }
-
-                    return null;
                 } finally {
                     reset(request);
                     Streams.close(data);

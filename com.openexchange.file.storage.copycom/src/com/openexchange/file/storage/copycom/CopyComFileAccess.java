@@ -200,17 +200,17 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-            perform(new CopyComClosure<Void>() {
+            return perform(new CopyComClosure<IDTuple>() {
 
                 @Override
-                protected Void doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
+                protected IDTuple doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                     HttpRequestBase request = null;
                     try {
                         List<NameValuePair> qparams = new LinkedList<NameValuePair>();
@@ -221,8 +221,12 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
                         request = method;
                         access.sign(request);
 
+                        JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
+                        JSONArray jObjects = jResponse.getJSONArray("objects");
+                        file.setId(jObjects.getJSONObject(0).getString("id"));
+
                         handleHttpResponse(access.getHttpClient().execute(method), Void.class);
-                        return null;
+                        return new IDTuple(file.getFolderId(), file.getId());
                     } catch (HttpResponseException e) {
                         throw handleHttpResponseError(file.getId(), e);
                     } finally {
@@ -231,6 +235,7 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
                 }
             });
         }
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
@@ -370,18 +375,18 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, null);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         final String id = file.getId();
         final String copyComFolderId = toCopyComFolderId(file.getFolderId());
-        perform(new CopyComClosure<Void>() {
+        return perform(new CopyComClosure<IDTuple>() {
 
             @Override
-            protected Void doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
+            protected IDTuple doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
@@ -412,6 +417,7 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
 
                         reset(request);
                         request = null;
+                        return new IDTuple(file.getFolderId(), file.getId());
                     } else {
                         HttpPost method = new HttpPost(buildUri("files/" + copyComFolderId, null));
                         request = method;
@@ -440,9 +446,8 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
 
                         reset(request);
                         request = null;
+                        return new IDTuple(file.getFolderId(), file.getId());
                     }
-
-                    return null;
                 } finally {
                     reset(request);
                 }

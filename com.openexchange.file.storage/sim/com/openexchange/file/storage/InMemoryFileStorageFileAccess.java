@@ -126,26 +126,26 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber) throws OXException {
-        save(file, null);
+    public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
+        return save(file, null);
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        save(file, null);
+    public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        return save(file, null);
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        save(file, data);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+        return save(file, data);
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        save(file, data);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        return save(file, data);
     }
 
-    private void save(File file, InputStream data) throws OXException {
+    private IDTuple save(File file, InputStream data) throws OXException {
         String folderId = file.getFolderId();
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
@@ -167,6 +167,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             int version = versionContainer.addVersion(holder);
             file.setVersion(Integer.toString(version));
             map.put(id, versionContainer);
+            return new IDTuple(folderId, id);
         } else {
 
             VersionContainer versionContainer = map.get(id);
@@ -191,6 +192,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             for(FileHolder fh: versionContainer.getAllVersions()) {
                 fh.getInternalFile().setId(id);
             }
+            return new IDTuple(folderId, id);
         }
 
     }

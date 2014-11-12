@@ -288,9 +288,10 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param file The metadata to save
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *            DISTANT_FUTURE to circumvent the check
+     * @return An ID tuple holding the folder- and file identifiers of the saved file
      * @throws OXException If operation fails
      */
-    void saveFileMetadata(File file, long sequenceNumber) throws OXException; // No modifiedColumns means all columns
+    IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException; // No modifiedColumns means all columns
 
     /**
      * Saves the file metadata.
@@ -299,9 +300,10 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *            DISTANT_FUTURE to circumvent the check
      * @param modifiedFields The fields to save. All other fields will be ignored
+     * @return An ID tuple holding the folder- and file identifiers of the saved file
      * @throws OXException If operation fails
      */
-    void saveFileMetadata(File file, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
+    IDTuple saveFileMetadata(File file, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
 
     /**
      * Copies a file from a given source to a given destination. Changes to the metadata can be applied and a new file attachment
@@ -351,9 +353,10 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *            DISTANT_FUTURE to circumvent the check
+     * @return An ID tuple holding the folder- and file identifiers of the saved file
      * @throws OXException If operation fails
      */
-    void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException;
+    IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException;
 
     /**
      * Saves the file metadata and binary content.
@@ -362,9 +365,10 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @param modifiedFields The fields to save. All other fields will be ignored
+     * @return An ID tuple holding the folder- and file identifiers of the saved file
      * @throws OXException If operation fails
      */
-    void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
+    IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
 
     /**
      * Removes all files in the given folder.
@@ -385,7 +389,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      *
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
-     * @return
+     * @return The IDs of documents that could not be deleted due to an edit-delete conflict
      * @throws OXException If operation fails
      */
     List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException;
@@ -412,7 +416,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param folderId The folder identifier
      * @param id The file id whose version is to be removed
      * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
-     * @return
+     * @return The IDs of versions that could not be deleted due to an edit-delete conflict
      * @throws OXException If operation fails
      */
     String[] removeVersion(String folderId, String id, String[] versions) throws OXException;

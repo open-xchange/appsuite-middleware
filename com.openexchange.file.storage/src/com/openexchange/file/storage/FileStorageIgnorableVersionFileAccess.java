@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 /**
  * {@link FileStorageIgnorableVersionFileAccess} - Extends {@link FileStorageFileAccess} by a <tt>saveDocument()</tt> method that allows to
  * specify whether a document's version shall be set to a new value or not.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FileStorageIgnorableVersionFileAccess extends FileStorageFileAccess {
@@ -65,7 +65,7 @@ public interface FileStorageIgnorableVersionFileAccess extends FileStorageFileAc
      * Save the file metadata and binary content.
      * <p>
      * It is allowed to specify whether that document's version shall be set to a new value or not
-     * 
+     *
      * @param file The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
@@ -73,5 +73,5 @@ public interface FileStorageIgnorableVersionFileAccess extends FileStorageFileAc
      * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
      * @throws OXException If operation fails
      */
-    void saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields, boolean ignoreVersion) throws OXException;
+    IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields, boolean ignoreVersion) throws OXException;
 }

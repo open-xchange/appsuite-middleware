@@ -57,14 +57,14 @@ import com.openexchange.file.storage.File;
 /**
  * {@link IDBasedIgnorableVersionFileAccess} - Extends {@link IDBasedFileAccess} by a <tt>saveDocument()</tt> method that allows to
  * specify whether a document's version shall be set to a new value or not.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IDBasedIgnorableVersionFileAccess extends IDBasedFileAccess {
 
     /**
      * Indicates whether it is supported to <b><small>NOT</small></b> set a new version when saving/updating a document's binary content
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @return <code>true</code> if supported; otherwise <code>false</code>
@@ -74,14 +74,15 @@ public interface IDBasedIgnorableVersionFileAccess extends IDBasedFileAccess {
 
     /**
      * Save the file metadata.
-     * 
+     *
      * @param document The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
+     * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
-    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException;
+    String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException;
 
 }

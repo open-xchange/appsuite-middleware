@@ -213,12 +213,12 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, Arrays.asList(Field.values()));
+    public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, Arrays.asList(Field.values()));
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (modifiedFields.contains(Field.FILENAME) || modifiedFields.contains(Field.TITLE)) {
             String origName = file.getId();
             String title = file.getTitle();
@@ -237,7 +237,9 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                 toFile(file.getFolderId(), origName).renameTo(toFile(file.getFolderId(), renameTo));
                 file.setId(renameTo);
             }
+            return new IDTuple(file.getFolderId(), file.getId());
         }
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
@@ -329,14 +331,15 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
         save(toFile(file.getFolderId(), file.getFileName()), data);
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         saveFileMetadata(file, sequenceNumber);
-        saveDocument(file, data, sequenceNumber);
+        return saveDocument(file, data, sequenceNumber);
     }
 
     @Override
