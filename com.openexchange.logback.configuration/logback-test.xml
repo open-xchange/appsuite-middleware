@@ -18,60 +18,60 @@
     <property scope="context" name="com.openexchange.logging.filter.loggerWhitelist" value="com.openexchange" />
 
     <!--
-    Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. 
+    Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework.
     If this listener will be deleted, ox backend will add it programmatically.
     -->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
-    
-    <!-- 
-    Adds the required PatternLayouts if not yet done by another Open-Xchange PatternLayoutEncoder. This is 
-    especially required when using SYSLOG appender. If you remove this definition and no PatternLayout can be 
+
+    <!--
+    Adds the required PatternLayouts if not yet done by another Open-Xchange PatternLayoutEncoder. This is
+    especially required when using SYSLOG appender. If you remove this definition and no PatternLayout can be
     found a PARSER_ERROR will be thrown within the log.
     -->
     <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator" />
- 	
+
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
             <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%message%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
-    
+
     <!-- Logstash appender -->
     <!--
     <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
-        <remoteHost>localhost</remoteHost>
+        <remoteHost>log.devel.open-xchange.com</remoteHost>
         <port>31337</port>
         <reconnectionDelay>10000</reconnectionDelay>
         <eventDelayLimit>30000</eventDelayLimit>
         <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder"/>
     </appender>
-	-->
-	
+    -->
+
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
         <discardingThreshold>0</discardingThreshold>
         <includeCallerData>true</includeCallerData>
         <appender-ref ref="CONSOLE" />
+        <!-- <appender-ref ref="LOGSTASH" /> -->
     </appender>
 
     <root level="INFO">
         <appender-ref ref="ASYNC" />
-        <!-- <appender-ref ref="LOGSTASH" /> -->
     </root>
 
     <!--
     Important note:
     The following option ensures, that all login relevant information is logged correctly. Such information is essential to detect
     and to address session issues, potentially caused by 3rd parties.
-    
+
     Open-Xchange strongly suggests NOT to modify the configuration for the classes 'com.openexchange.login.internal.LoginPerformer'
     and 'com.openexchange.sessiond.impl.SessionHandler' to coarser logging settings (like WARN, ERROR and OFF). If you do so
-    the Open-Xchange server will revert your change and set the log level for these classes to INFO. Finer settings (like TRACE, DEBUG 
+    the Open-Xchange server will revert your change and set the log level for these classes to INFO. Finer settings (like TRACE, DEBUG
     and ALL) are allowed and will not be overridden.
     -->
     <logger name="com.openexchange.login.internal.LoginPerformer" level="INFO"/>
     <logger name="com.openexchange.sessiond.impl.SessionHandler" level="INFO"/>
-    
+
     <!-- Package based logging. Possible levels: TRACE, DEBUG, INFO, WARN and ERROR -->
     <logger name="sun.rmi" level="INFO"/>
     <logger name="org.apache" level="WARN"/>
