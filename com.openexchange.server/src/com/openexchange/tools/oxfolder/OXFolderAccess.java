@@ -133,7 +133,7 @@ public class OXFolderAccess {
     /**
      * Gets the connection with "read-only" capability
      *
-     * @return The connection with "read-only" capability or <code>null</code>
+     * @return The connection with "read-only" capability or <code>null</code> if this {@link OXFolderAccess} instance was created w/o a connection
      */
     public Connection getReadCon() {
         return readCon;
