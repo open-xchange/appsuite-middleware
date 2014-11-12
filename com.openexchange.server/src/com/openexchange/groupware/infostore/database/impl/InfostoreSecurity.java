@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -76,5 +77,34 @@ public interface InfostoreSecurity {
 
     void checkFolderId(long folderId, Context ctx) throws OXException;
 
+    /**
+     * Determines the identifier of the folder administrator with the lowest numeric identifier
+     *
+     * @param folderId The folder identifier
+     * @param ctx The context
+     * @return The folder administrator identifier or <code>-1</code>
+     * @throws OXException If operation fails
+     */
+    int getFolderAdmin(long folderId, Context ctx) throws OXException;
+
+    /**
+     * Gets the folder administrators for specified documents
+     *
+     * @param documents The documents
+     * @param ctx The associated context
+     * @return The folder administrators
+     * @throws OXException If operation fails
+     */
+    int[] getFolderAdmins(Collection<DocumentMetadata> documents, Context ctx) throws OXException;
+
+    /**
+     * Gets the folder administrator for specified document
+     *
+     * @param document The document
+     * @param ctx The associated context
+     * @return The folder administrator
+     * @throws OXException If operation fails
+     */
+    int getFolderAdmin(DocumentMetadata document, Context ctx) throws OXException;
 
 }

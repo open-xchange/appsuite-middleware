@@ -77,6 +77,15 @@ public class EffectiveInfostoreFolderPermission {
     }
 
     /**
+     * Gets the permission
+     *
+     * @return The permission
+     */
+    public EffectivePermission getPermission() {
+        return permission;
+    }
+
+    /**
      * Gets the optional folder administrator identifier
      *
      * @return The folder administrator identifier or <code>-1</code>

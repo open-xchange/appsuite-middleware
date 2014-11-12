@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,87 +47,70 @@
  *
  */
 
-package com.openexchange.groupware.infostore.facade.impl;
+package com.openexchange.tools.file;
 
-import java.io.InputStream;
-import java.util.Set;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.Metadata;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.QuotaFileStorageService;
 
-class SaveParameters {
 
-    private final Context context;
-    private final DocumentMetadata document;
-    private final DocumentMetadata oldDocument;
-    private final long sequenceNumber;
-    private final Set<Metadata> updatedCols;
-    private final int optFolderAdmin;
+/**
+ * {@link FileStorages} - Utility class for file storages.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
+ */
+public final class FileStorages {
 
-    private InputStream data = null;
-    private long offset = -1L;
-    private int fileCreatedBy = -1;
-    private boolean ignoreVersion = false;
-
-    SaveParameters(Context context, DocumentMetadata document, DocumentMetadata oldDocument, long sequenceNumber, Set<Metadata> updatedCols, int optFolderAdmin) {
+    /**
+     * Initializes a new {@link FileStorages}.
+     */
+    private FileStorages() {
         super();
-        this.context = context;
-        this.document = document;
-        this.oldDocument = oldDocument;
-        this.sequenceNumber = sequenceNumber;
-        this.updatedCols = updatedCols;
-        this.optFolderAdmin = optFolderAdmin;
     }
 
-    int getOptFolderAdmin() {
-        return optFolderAdmin;
+    // -------------------------------------------------------------------------------------------------------------------------
+
+    private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<QuotaFileStorageService>();
+
+    /**
+     * Sets the quota-aware file storage service.
+     *
+     * @param qfsService The quota-aware file storage service
+     */
+    public static void setQuotaFileStorageService(QuotaFileStorageService qfsService) {
+        QFS_REF.set(qfsService);
     }
 
-    DocumentMetadata getDocument() {
-        return document;
+    /**
+     * Gets the quota-aware file storage service
+     *
+     * @return The quota-aware file storage service or <code>null</code> if absent
+     */
+    public static QuotaFileStorageService getQuotaFileStorageService() {
+        return QFS_REF.get();
     }
 
-    DocumentMetadata getOldDocument() {
-        return oldDocument;
+    // -------------------------------------------------------------------------------------------------------------------------
+
+    private static final AtomicReference<FileStorageService> FS_REF = new AtomicReference<FileStorageService>();
+
+    /**
+     * Sets the file storage service.
+     *
+     * @param fsService The file storage service
+     */
+    public static void setFileStorageService(FileStorageService fsService) {
+        FS_REF.set(fsService);
     }
 
-    long getSequenceNumber() {
-        return sequenceNumber;
-    }
-
-    Set<Metadata> getUpdatedCols() {
-        return updatedCols;
-    }
-
-    void setData(InputStream data, long offset, int createdBy, boolean ignoreVersion) {
-        this.data = data;
-        this.offset = offset;
-        this.fileCreatedBy = createdBy;
-        this.ignoreVersion = ignoreVersion;
-    }
-
-    boolean hasData() {
-        return data != null;
-    }
-
-    InputStream getData() {
-        return data;
-    }
-
-    long getOffset() {
-        return offset;
-    }
-
-    int getFileCreatedBy() {
-        return fileCreatedBy;
-    }
-
-    boolean isIgnoreVersion() {
-        return ignoreVersion;
-    }
-
-    Context getContext() {
-        return context;
+    /**
+     * Gets the file storage service
+     *
+     * @return The file storage service or <code>null</code> if absent
+     */
+    public static FileStorageService getFileStorageService() {
+        return FS_REF.get();
     }
 
 }

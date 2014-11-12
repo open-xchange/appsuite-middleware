@@ -75,6 +75,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -129,7 +130,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     }
 
     @Override
-    public SearchIterator<DocumentMetadata> search(final int[] folderIds, final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
+    public SearchIterator<DocumentMetadata> search(int[] folderIds, SearchTerm<?> searchTerm, Metadata[] cols, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException {
         Connection con = getReadConnection(ctx);
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
@@ -137,7 +138,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             gatherVisibleFolders(con, ctx, user, userPermissions, all, own);
         } else {
             for (int folderId : folderIds) {
-                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
+                EffectiveInfostoreFolderPermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
                 if (perm.canReadAllObjects()) {
                     all.add(Integer.valueOf(folderId));
                 } else if (perm.canReadOwnObjects()) {
@@ -184,7 +185,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     }
 
     @Override
-    public SearchIterator<DocumentMetadata> search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
+    public SearchIterator<DocumentMetadata> search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException {
 
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
@@ -196,7 +197,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 if (NOT_SET == folderId || NO_FOLDER == folderId) {
                     gatherVisibleFolders(con, ctx, user, userPermissions, all, own);
                 } else {
-                    final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
+                    EffectiveInfostoreFolderPermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
                     if (perm.canReadAllObjects()) {
                         all.add(Integer.valueOf(folderId));
                     } else if (perm.canReadOwnObjects()) {

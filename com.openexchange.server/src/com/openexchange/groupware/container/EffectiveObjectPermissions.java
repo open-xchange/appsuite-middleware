@@ -237,6 +237,10 @@ public class EffectiveObjectPermissions {
      * @throws OXException
      */
     public static EffectiveObjectPermission load(Context ctx, User user, UserPermissionBits permissionBits, int module, int folderId, int id, Connection con) throws OXException {
+        if (null == con) {
+            return load(ctx, user, permissionBits, module, folderId, id);
+        }
+
         StringBuilder sb = new StringBuilder(128).append("SELECT bits, permission_id, group_flag FROM object_permission WHERE cid = ").append(ctx.getContextId()).append(" AND module = ").append(module);
         sb.append(" AND folder_id = ").append(folderId).append(" AND object_id = ").append(id);
         appendEntityConstraint(sb, user.getId(), user.getGroups());

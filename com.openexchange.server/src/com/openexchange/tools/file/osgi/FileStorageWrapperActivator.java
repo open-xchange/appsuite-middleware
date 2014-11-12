@@ -57,6 +57,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorages;
 import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
@@ -106,20 +107,22 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
         @Override
-        public FileStorageService addingService(final ServiceReference<FileStorageService> reference) {
+        public FileStorageService addingService(ServiceReference<FileStorageService> reference) {
             final FileStorageService service = context.getService(reference);
             FileStorage.setFileStorageStarter(service);
+            FileStorages.setFileStorageService(service);
             return service;
         }
 
         @Override
-        public void modifiedService(final ServiceReference<FileStorageService> reference, final FileStorageService service) {
+        public void modifiedService(ServiceReference<FileStorageService> reference, FileStorageService service) {
             // Nothing to do here
 
         }
 
         @Override
-        public void removedService(final ServiceReference<FileStorageService> reference, final FileStorageService service) {
+        public void removedService(ServiceReference<FileStorageService> reference, FileStorageService service) {
+            FileStorages.setFileStorageService(null);
             FileStorage.setFileStorageStarter(null);
             context.ungetService(reference);
         }
@@ -135,20 +138,22 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
         @Override
-        public QuotaFileStorageService addingService(final ServiceReference<QuotaFileStorageService> reference) {
-            final QuotaFileStorageService service = context.getService(reference);
+        public QuotaFileStorageService addingService(ServiceReference<QuotaFileStorageService> reference) {
+            QuotaFileStorageService service = context.getService(reference);
             QuotaFileStorage.setQuotaFileStorageStarter(service);
+            FileStorages.setQuotaFileStorageService(service);
             return service;
         }
 
         @Override
-        public void modifiedService(final ServiceReference<QuotaFileStorageService> reference, final QuotaFileStorageService service) {
+        public void modifiedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
             // Nothing to do here
 
         }
 
         @Override
-        public void removedService(final ServiceReference<QuotaFileStorageService> reference, final QuotaFileStorageService service) {
+        public void removedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
+            FileStorages.setQuotaFileStorageService(null);
             QuotaFileStorage.setQuotaFileStorageStarter(null);
             context.ungetService(reference);
         }

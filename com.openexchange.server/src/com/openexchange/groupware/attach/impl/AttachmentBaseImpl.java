@@ -75,7 +75,10 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -88,7 +91,6 @@ import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.attach.util.SetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
@@ -100,8 +102,7 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.tools.file.FileStorages;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -1030,9 +1031,14 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         super.startTransaction();
     }
 
-    protected QuotaFileStorage getFileStorage(final Context ctx) throws OXException, OXException {
+    protected QuotaFileStorage getFileStorage(Context ctx) throws OXException, OXException {
         try {
-            return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+            QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+            if (null == storageService) {
+                throw AttachmentExceptionCodes.FILESTORE_DOWN.create();
+            }
+
+            return storageService.getQuotaFileStorage(ctx.getContextId());
         } catch (final OXException e) {
             throw AttachmentExceptionCodes.FILESTORE_DOWN.create(e);
         }

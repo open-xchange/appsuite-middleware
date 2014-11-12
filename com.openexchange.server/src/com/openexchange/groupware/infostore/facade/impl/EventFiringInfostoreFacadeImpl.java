@@ -104,8 +104,9 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
         if (!infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
-        final DocumentMetadata dm = load(id, version, session.getContext());
-        final com.openexchange.filestore.FileStorage fs = getFileStorage(session);
+        DocumentMetadata dm = load(id, version, session.getContext());
+        com.openexchange.filestore.FileStorage fs = getFileStorage(security.getFolderAdmin(dm, session.getContext()), session.getContextId());
+
         InputStream document;
         if (dm.getFilestoreLocation() == null) {
             document = Streams.newByteArrayInputStream(new byte[0]);
@@ -115,8 +116,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             document = fs.getFile(dm.getFilestoreLocation(), offset, length);
         }
 
-        fireEvent(FileStorageEventHelper.buildAccessEvent(
-            session, SERVICE_ID, ACCOUNT_ID, getFolderID(dm), getFileID(dm), dm.getFileName()));
+        fireEvent(FileStorageEventHelper.buildAccessEvent(session, SERVICE_ID, ACCOUNT_ID, getFolderID(dm), getFileID(dm), dm.getFileName()));
         return document;
     }
 

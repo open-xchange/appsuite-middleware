@@ -65,6 +65,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
@@ -414,7 +415,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			dumpToDB();
             if(propertyHelper.mustWrite()) {
                 final ServerSession session = getSession();
-                final EffectivePermission perm = security.getFolderPermission(getId(),session.getContext(), UserStorage.getInstance().getUser(session.getUserId(), session.getContext()),
+                final EffectiveInfostoreFolderPermission perm = security.getFolderPermission(getId(),session.getContext(), UserStorage.getInstance().getUser(session.getUserId(), session.getContext()),
 					UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext()));
                 if(!perm.isFolderAdmin()) {
                     throw WebdavProtocolException.Code.NO_WRITE_PERMISSION.create(getUrl(), HttpServletResponse.SC_FORBIDDEN);
