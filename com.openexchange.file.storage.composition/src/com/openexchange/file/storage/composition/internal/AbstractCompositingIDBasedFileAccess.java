@@ -1544,9 +1544,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
      */
     protected Map<FileStorageFileAccess, List<IDTuple>> getFilesPerFileAccesses(List<String> ids) throws OXException {
         Map<FileStorageFileAccess, List<IDTuple>> fileAccesses = new HashMap<FileStorageFileAccess, List<IDTuple>>();
+        Map<String, FileStorageFileAccess> identifiedFileAccesses = new HashMap<String, FileStorageFileAccess>();
         for (String id : ids) {
             FileID fileID = new FileID(id);
-            FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+            String fileAccessID = fileID.getService() + '/' + fileID.getAccountId();
+            FileStorageFileAccess fileAccess = identifiedFileAccesses.get(fileAccessID);
+            if (null == fileAccess) {
+                fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+                identifiedFileAccesses.put(fileAccessID, fileAccess);
+            }
             List<IDTuple> gets = fileAccesses.get(fileAccess);
             if (null == gets) {
                 gets = new ArrayList<IDTuple>();
