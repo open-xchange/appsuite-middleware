@@ -51,7 +51,10 @@ package com.openexchange.push.imapidle.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -65,6 +68,7 @@ import com.openexchange.push.imapidle.ImapIdleConfiguration;
 import com.openexchange.push.imapidle.ImapIdleDeleteListener;
 import com.openexchange.push.imapidle.ImapIdleMailAccountDeleteListener;
 import com.openexchange.push.imapidle.ImapIdlePushManagerService;
+import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -78,6 +82,100 @@ import com.openexchange.timer.TimerService;
  */
 public class ImapIdleActivator extends HousekeepingActivator {
 
+    private static final class HzConfigTracker implements ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> {
+
+        final BundleContext context;
+        final ImapIdleActivator activator;
+        final ImapIdleConfiguration configuration;
+        private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
+
+        HzConfigTracker(BundleContext context, ImapIdleConfiguration configuration, ImapIdleActivator activator) {
+            super();
+            this.context = context;
+            this.configuration = configuration;
+            this.activator = activator;
+        }
+
+        @Override
+        public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
+            HazelcastConfigurationService hzConfigService = context.getService(reference);
+
+            try {
+                boolean hzEnabled = hzConfigService.isEnabled();
+                if (false == hzEnabled) {
+                    Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleActivator.class);
+                    String msg = "IMAP-IDLE is configured to use Hazelcast-based locking, but Hazelcast is disabled as per configuration! Start of IMAP-IDLE aborted!";
+                    logger.error(msg, new Exception(msg));
+
+                    context.ungetService(reference);
+                    return null;
+                }
+
+                final BundleContext context = this.context;
+                ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> stc = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+
+                    private volatile ServiceRegistration<PushManagerService> reg;
+
+                    @Override
+                    public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+                        HazelcastInstance hzInstance = context.getService(reference);
+                        activator.addService(HazelcastInstance.class, hzInstance);
+
+                        reg = context.registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, activator), null);
+
+                        return hzInstance;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                        // Nothing
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                        ServiceRegistration<PushManagerService> reg = this.reg;
+                        if (null != reg) {
+                            reg.unregister();
+                            this.reg = null;
+                        }
+
+                        activator.removeService(HazelcastInstance.class);
+                        context.ungetService(reference);
+                    }
+                };
+                ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, stc);
+                this.hzInstanceTracker = hzInstanceTracker;
+                hzInstanceTracker.open();
+
+                return hzConfigService;
+            } catch (Exception e) {
+                Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleActivator.class);
+                logger.warn("Failed to start IMAP-IDLE!", e);
+            }
+
+            context.ungetService(reference);
+            return null;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
+            // Ignore
+        }
+
+        @Override
+        public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
+            ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = this.hzInstanceTracker;
+            if (null != hzInstanceTracker) {
+                hzInstanceTracker.close();
+                this.hzInstanceTracker = null;
+            }
+
+            context.ungetService(reference);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link ImapIdleActivator}.
      */
@@ -87,43 +185,23 @@ public class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, HazelcastConfigurationService.class, SessiondService.class, ThreadPoolService.class };
+        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
-
-        final boolean hzEnabled = hzConfigService.isEnabled();
-        if (hzEnabled) {
-            final BundleContext context = this.context;
-            ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> stc = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
-
-                @Override
-                public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                    HazelcastInstance hzInstance = context.getService(reference);
-                    addService(HazelcastInstance.class, hzInstance);
-                    return hzInstance;
-                }
-
-                @Override
-                public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                    // Nothing
-                }
-
-                @Override
-                public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                    removeService(HazelcastInstance.class);
-                    context.ungetService(reference);
-                }
-            };
-            track(HazelcastInstance.class, stc);
-            openTrackers();
-        }
-
         ImapIdleConfiguration configuration = new ImapIdleConfiguration();
         configuration.init(this);
-        registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, this));
+
+        // Check Hazelcast-based locking is enabled
+        if (ImapIdleClusterLock.Type.HAZELCAST.equals(configuration.getClusterLock().getType())) {
+            // Start tracking for Hazelcast
+            track(HazelcastConfigurationService.class, new HzConfigTracker(context, configuration, this));
+            openTrackers();
+        } else {
+
+            registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, this));
+        }
 
         registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener());
         registerService(DeleteListener.class, new ImapIdleDeleteListener());

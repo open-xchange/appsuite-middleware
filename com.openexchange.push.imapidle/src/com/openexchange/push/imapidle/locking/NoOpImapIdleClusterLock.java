@@ -68,6 +68,11 @@ public class NoOpImapIdleClusterLock implements ImapIdleClusterLock {
     }
 
     @Override
+    public Type getType() {
+        return Type.NONE;
+    }
+
+    @Override
     public boolean acquireLock(Session session) throws OXException {
         return true;
     }
