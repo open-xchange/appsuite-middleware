@@ -51,9 +51,9 @@ package com.openexchange.filestore.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.TimeUnit;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import org.slf4j.Logger;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageService;
@@ -67,7 +67,6 @@ import com.openexchange.groupware.filestore.FilestoreExceptionCodes;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.IntReference;
-import com.openexchange.java.Key;
 import com.openexchange.user.UserService;
 
 /**
@@ -78,9 +77,8 @@ import com.openexchange.user.UserService;
  */
 public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
-    private static final Cache<Key, DBQuotaFileStorage> CACHE_STORAGES = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(30, TimeUnit.MINUTES).build();
-
     private final FileStorageService fileStorageService;
+    private final String regionName = "QuotaFileStorages";
 
     /**
      * Initializes a new {@link DBQuotaFileStorageService}.
@@ -90,6 +88,55 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
     public DBQuotaFileStorageService(FileStorageService fileStorageService) {
         super();
         this.fileStorageService = fileStorageService;
+    }
+
+    private Cache optCache() {
+        try {
+            CacheService optService = Services.optService(CacheService.class);
+            return null == optService ? null : optService.getCache(regionName);
+        } catch (Exception e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(DBQuotaFileStorageService.class);
+            logger.warn("Could not return cache instance", e);
+            return null;
+        }
+    }
+
+    private DBQuotaFileStorage getCachedFileStorage(int userId, int contextId) {
+        Cache cache = optCache();
+        if (null == cache) {
+            return null;
+        }
+
+        Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
+        return object instanceof DBQuotaFileStorage ? (DBQuotaFileStorage) object : null;
+    }
+
+    private void putCachedFileStorage(int userId, int contextId, DBQuotaFileStorage fileStorage) {
+        Cache cache = optCache();
+        if (null != cache) {
+            try {
+                cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), fileStorage, false);
+            } catch (Exception e) {
+                Logger logger = org.slf4j.LoggerFactory.getLogger(DBQuotaFileStorageService.class);
+                logger.warn("Could not put into cache", e);
+            }
+        }
+    }
+
+    @Override
+    public void invalidateCacheFor(int contextId) {
+        Cache cache = optCache();
+        if (null != cache) {
+            cache.invalidateGroup(Integer.toString(contextId));
+        }
+    }
+
+    @Override
+    public void invalidateCacheFor(int userId, int contextId) {
+        Cache cache = optCache();
+        if (null != cache) {
+            cache.removeFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
+        }
     }
 
     @Override
@@ -104,8 +151,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
 
-        Key key = new Key(userId, contextId);
-        DBQuotaFileStorage storage = CACHE_STORAGES.getIfPresent(key);
+        DBQuotaFileStorage storage = getCachedFileStorage(userId, contextId);
         if (null == storage) {
             // Get the file storage info
             IntReference fsOwner = new IntReference(0);
@@ -121,7 +167,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
                 storage = new DBQuotaFileStorage(contextId, fsOwner.getValue(), info.getFileStorageQuota(), fileStorageService.getFileStorage(uri));
 
                 // Put it into cache
-                CACHE_STORAGES.put(key, storage);
+                putCachedFileStorage(userId, contextId, storage);
             } catch (final URISyntaxException e) {
                 throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, baseUri.toString() + '/' + info.getFilestoreName());
             }

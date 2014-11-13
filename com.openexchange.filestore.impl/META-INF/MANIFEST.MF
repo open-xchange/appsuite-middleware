@@ -5,12 +5,7 @@ Bundle-SymbolicName: com.openexchange.filestore.impl
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.annotations,
- com.google.common.base,
- com.google.common.cache,
- com.google.common.io,
- com.google.common.net,
- com.google.common.util.concurrent,
+Import-Package: com.openexchange.caching,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,

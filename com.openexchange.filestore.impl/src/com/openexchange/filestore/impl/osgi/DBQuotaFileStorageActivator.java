@@ -49,8 +49,13 @@
 
 package com.openexchange.filestore.impl.osgi;
 
+import java.io.ByteArrayInputStream;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageService;
@@ -83,24 +88,102 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(DBQuotaFileStorageActivator.class);
+        final BundleContext context = this.context;
+
         Services.setServiceLookup(this);
 
-        BundleContext context = this.context;
+        // Service trackers
         {
             ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(context));
             rememberTracker(tracker);
-        }
-        trackService(ContextService.class);
-        trackService(UserService.class);
+            trackService(ContextService.class);
+            trackService(UserService.class);
 
+            {
+                ServiceTrackerCustomizer<CacheService, CacheService> customizer = new ServiceTrackerCustomizer<CacheService, CacheService>() {
+
+                    private final String regionName = "QuotaFileStorages";
+
+                    @Override
+                    public CacheService addingService(ServiceReference<CacheService> reference) {
+                        try {
+                            CacheService cacheService = context.getService(reference);
+
+                            int idleSeconds = 7200; // 2 hours
+                            int shrinkInterval = 600; // Every 10 minutes
+                            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleSeconds+"\n" +
+                                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkInterval+"\n" +
+                                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                                "jcs.region."+regionName+".elementattributes.IdleTime="+idleSeconds+"\n" +
+                                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+
+                            cacheService.loadConfiguration(new ByteArrayInputStream(ccf), true);
+                            addService(CacheService.class, cacheService);
+                            return cacheService;
+                        } catch (Exception e) {
+                            // Failed to initialize cache region
+                            logger.warn("Failed to initialize cache region {}", regionName, e);
+                        }
+
+                        context.ungetService(reference);
+                        return null;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<CacheService> reference, CacheService service) {
+                        // Ignore
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<CacheService> reference, CacheService service) {
+                        try {
+                            service.freeCache(regionName);
+                        } catch (Exception e) {
+                            // Ignore
+                        }
+                        removeService(CacheService.class);
+                        context.ungetService(reference);
+                    }
+                };
+
+                track(CacheService.class, customizer);
+            }
+
+            openTrackers();
+        }
+
+        // Update tasks
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddUserColumnToFilestoreUsageTable()));
 
-        openTrackers();
+        logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        super.stopBundle();
         Services.setServiceLookup(null);
+        Logger logger = org.slf4j.LoggerFactory.getLogger(DBQuotaFileStorageActivator.class);
+        logger.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
 }

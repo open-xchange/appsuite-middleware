@@ -79,4 +79,19 @@ public interface QuotaFileStorageService {
      */
     QuotaFileStorage getQuotaFileStorage(int userId, int contextId) throws OXException;
 
+    /**
+     * Invalidates the cache entries bound to given context
+     *
+     * @param contextId The context identifier
+     */
+    void invalidateCacheFor(int contextId);
+
+    /**
+     * Invalidates the cache entries bound to given user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    void invalidateCacheFor(int userId, int contextId);
+
 }

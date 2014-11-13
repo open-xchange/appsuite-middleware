@@ -52,6 +52,7 @@ package com.openexchange.filestore.impl;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -70,12 +71,14 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.impl.osgi.Services;
 
-public class DBQuotaFileStorage implements QuotaFileStorage {
+public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For cache service */ {
+
+    private static final long serialVersionUID = -4048657112670657310L;
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
     private final int contextId;
-    private final FileStorage fileStorage;
+    private final transient FileStorage fileStorage;
     private final long quota;
     private final int userId;
 
