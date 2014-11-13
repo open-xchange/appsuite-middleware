@@ -72,21 +72,41 @@ import com.openexchange.filestore.impl.osgi.Services;
 
 public class DBQuotaFileStorage implements QuotaFileStorage {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
     private final int contextId;
     private final FileStorage fileStorage;
     private final long quota;
+    private final int userId;
 
     /**
-     * Initializes the QuotaFileStorage
+     * Initializes a new {@link DBQuotaFileStorage} for a context.
+     *
+     * @param contextId The context identifier
+     * @param quota The assigned quota
+     * @param fs The file storage associated with the context
+     * @throws OXException If initialization fails
      */
     public DBQuotaFileStorage(int contextId, long quota, FileStorage fs) throws OXException {
+        this(contextId, 0, quota, fs);
+    }
+
+    /**
+     * Initializes a new {@link DBQuotaFileStorage} for a user.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier or <code>0</code> (zero)
+     * @param quota The assigned quota
+     * @param fs The file storage associated with the user
+     * @throws OXException If initialization fails
+     */
+    public DBQuotaFileStorage(int contextId, int userId, long quota, FileStorage fs) throws OXException {
         super();
         if (fs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
         this.contextId = contextId;
+        this.userId = userId;
         this.quota = quota;
         fileStorage = fs;
     }
@@ -129,13 +149,17 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         try {
             con.setAutoCommit(false);
             rollback = true;
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=? FOR UPDATE");
             sstmt.setInt(1, contextId);
+            sstmt.setInt(2, userId);
             rs = sstmt.executeQuery();
             final long oldUsage;
             if (rs.next()) {
                 oldUsage = rs.getLong(1);
             } else {
+                if (userId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(userId), I(contextId));
+                }
                 throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
             final long newUsage = oldUsage + usage;
@@ -143,11 +167,15 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             if (quota > 0 && newUsage > quota) {
                 return true;
             }
-            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             ustmt.setLong(1, newUsage);
             ustmt.setInt(2, contextId);
+            ustmt.setInt(3, userId);
             final int rows = ustmt.executeUpdate();
             if (1 != rows) {
+                if (userId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(userId), I(contextId));
+                }
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
             con.commit();
@@ -182,33 +210,41 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         ResultSet rs = null;
         boolean rollback = false;
         try {
-
             con.setAutoCommit(false);
             rollback = true;
 
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=? FOR UPDATE");
             sstmt.setInt(1, contextId);
+            sstmt.setInt(2, userId);
             rs = sstmt.executeQuery();
 
             long oldUsage;
             if (rs.next()) {
                 oldUsage = rs.getLong("used");
             } else {
+                if (userId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(userId), I(contextId));
+                }
                 throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
             long newUsage = oldUsage - usage;
 
             if (newUsage < 0) {
                 newUsage = 0;
-                final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(contextId));
-                LOG.error("", e);
+                final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(userId), I(contextId));
+                LOGGER.error("", e);
             }
 
-            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             ustmt.setLong(1, newUsage);
             ustmt.setInt(2, contextId);
-            final int rows = ustmt.executeUpdate();
+            ustmt.setInt(3, userId);
+
+            int rows = ustmt.executeUpdate();
             if (1 != rows) {
+                if (userId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(userId), I(contextId));
+                }
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
 
@@ -267,14 +303,18 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         ResultSet result = null;
         final long usage;
         try {
-            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=?");
+            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
             stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                usage = result.getLong(1);
-            } else {
+            if (!result.next()) {
+                if (userId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(userId), I(contextId));
+                }
                 throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
+
+            usage = result.getLong(1);
         } catch (final SQLException e) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
         } finally {
@@ -332,7 +372,11 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     @Override
     public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
-        LOG.info("Recalculating usage for Context {}", contextId);
+        if (userId > 0) {
+            LOGGER.info("Recalculating usage for owner {} in context {}", userId, contextId);
+        } else {
+            LOGGER.info("Recalculating usage forcontext {}", contextId);
+        }
 
         SortedSet<String> filenames = fileStorage.getFileList();
         long entireFileSize = 0;
@@ -350,11 +394,15 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             con.setAutoCommit(false);
             rollback = true;
 
-            stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
+            stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             stmt.setLong(1, entireFileSize);
             stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
             final int rows = stmt.executeUpdate();
             if (1 != rows) {
+                if (userId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(userId), I(contextId));
+                }
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
 
@@ -436,7 +484,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
                 try {
                     fileStorage.setFileLength(offset, name);
                 } catch (OXException e) {
-                    LOG.warn("Error rolling back 'append' operation", e);
+                    LOGGER.warn("Error rolling back 'append' operation", e);
                 }
             }
         }

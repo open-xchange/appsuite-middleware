@@ -74,17 +74,30 @@ public enum QuotaFileStorageExceptionCodes implements DisplayableOXExceptionCode
      */
     STORE_FULL("The allowed Quota is reached.", QuotaFileStorageExceptionMessage.STORE_FULL_MSG, Category.CATEGORY_USER_INPUT, 24),
     /**
-     * Quota seems to be inconsistent. Please use consistency tool on context %1$d.
+     * Quota seems to be inconsistent. Please use consistency tool for context %1$s.
      */
-    QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool on context %1$d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_TRUNCATED, 25),
+    QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool for context %1$s.", OXExceptionStrings.MESSAGE, Category.CATEGORY_TRUNCATED, 25),
     /**
-     * Quota usage is missing for context %1$d.
+     * Quota seems to be inconsistent. Please use consistency tool for owner %1$s in context %2$s.
      */
-    NO_USAGE("Quota usage is missing for context %1$d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 26),
+    QUOTA_UNDERRUN_USER("Quota seems to be inconsistent. Please use consistency tool for owner %1$s in context %2$s.", OXExceptionStrings.MESSAGE, Category.CATEGORY_TRUNCATED, 25),
     /**
-     * Update of quota usage for context %1$d failed.
+     * Quota usage is missing for context %1$s.
      */
-    UPDATE_FAILED("Updating quota usage for context %1$d failed.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 27);
+    NO_USAGE("Quota usage is missing for context %1$s.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 26),
+    /**
+     * Quota usage is missing for owner %1$s in context %2$s.
+     */
+    NO_USAGE_USER("Quota usage is missing for owner %1$s in context %2$s.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 26),
+    /**
+     * Update of quota usage for context %1$s failed.
+     */
+    UPDATE_FAILED("Update of quota usage for context %1$s failed.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 27),
+    /**
+     * Update of quota usage for owner %1$s context %2$s failed.
+     */
+    UPDATE_FAILED_USER("Update of quota usage for owner %1$s in context %2$s failed.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 27),
+    ;
 
     private final String message;
     private final String displayMessage;

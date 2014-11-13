@@ -66,6 +66,7 @@ import com.openexchange.groupware.contexts.FileStorageInfo;
 import com.openexchange.groupware.filestore.FilestoreExceptionCodes;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.IntReference;
 import com.openexchange.java.Key;
 import com.openexchange.user.UserService;
 
@@ -107,7 +108,8 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         DBQuotaFileStorage storage = CACHE_STORAGES.getIfPresent(key);
         if (null == storage) {
             // Get the file storage info
-            FileStorageInfo info = getFileStorageInfoFor(userId, contextId);
+            IntReference fsOwner = new IntReference(0);
+            FileStorageInfo info = getFileStorageInfoFor(userId, contextId, fsOwner);
 
             // Determine file storage's base URI
             URI baseUri = FilestoreStorage.getInstance().getFilestore(info.getFilestoreId()).getUri();
@@ -116,7 +118,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
                 URI uri = new URI(baseUri.getScheme(), baseUri.getAuthority(), baseUri.getPath() + '/' + info.getFilestoreName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
-                storage = new DBQuotaFileStorage(contextId, info.getFileStorageQuota(), fileStorageService.getFileStorage(uri));
+                storage = new DBQuotaFileStorage(contextId, fsOwner.getValue(), info.getFileStorageQuota(), fileStorageService.getFileStorage(uri));
 
                 // Put it into cache
                 CACHE_STORAGES.put(key, storage);
@@ -128,7 +130,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         return storage;
     }
 
-    private FileStorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
+    private FileStorageInfo getFileStorageInfoFor(int userId, int contextId, IntReference fsOwner) throws OXException {
         ContextService contextService = Services.requireService(ContextService.class);
         if (userId <= 0) {
             return contextService.getContext(contextId);
@@ -137,7 +139,14 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         UserService userService = Services.requireService(UserService.class);
         Context context = contextService.getContext(contextId);
         User user = userService.getUser(userId, context);
-        return user.getFilestoreId() > 0 ? user : context;
+        if (user.getFilestoreId() <= 0) {
+            // No user-specific file storage
+            return context;
+        }
+
+        // A user-specific file storage
+        fsOwner.setValue(userId);
+        return user;
     }
 
 }
