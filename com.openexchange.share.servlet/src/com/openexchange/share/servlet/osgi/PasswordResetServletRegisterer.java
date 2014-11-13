@@ -150,17 +150,17 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
     private boolean registerServlet(String alias, HttpService httpService) {
         try {
             httpService.registerServlet(alias, new PasswordResetServlet(this.loginConfig), null, null);
-            LOG.info("Reset-password servlet successfully registered");
+            LOG.info("PasswordResetServlet successfully registered");
             return true;
         } catch (Exception e) {
-            LOG.info("Failed to register reset-password servlet", e);
+            LOG.info("Failed to register PasswordResetServlet", e);
             return false;
         }
     }
 
     private void unregisterServlet(String alias, HttpService httpService) {
         httpService.unregister(alias);
-        LOG.info("Reset-password servlet successfully unregistered");
+        LOG.info("PasswordResetServlet successfully unregistered");
     }
 
 }
