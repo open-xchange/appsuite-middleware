@@ -76,13 +76,12 @@ public interface MobileNotifierSubscriptionService {
      * @param session
      * @param token
      * @param serviceId
-     * @param provider
      * @param newToken
      */
-    boolean updateToken(Session session, String token, String serviceId, MobileNotifierProviders provider, String newToken) throws OXException;
+    boolean updateToken(Session session, String token, String serviceId, String newToken) throws OXException;
 
     /**
-     * Deletes a subscription by the userId and token
+     * Deletes a subscription by the userId, token, serviceId and provider
      *
      * @param session
      * @param token
@@ -92,20 +91,20 @@ public interface MobileNotifierSubscriptionService {
     boolean deleteSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
 
     /**
-     * Gets all subscriptions of the specified userId
+     * Deletes a subscription by the userId, token and serviceId
      *
-     * @param userId
-     * @return
+     * @param session
+     * @param token
+     * @param serviceId
      */
-    List<Subscription> getSubscriptions(Session session, String serviceId) throws OXException;
+    boolean deleteSubscriptions(Session session, String token, String serviceId) throws OXException;
 
     /**
-     * Gets a specific subscription from the user
+     * Gets all subscriptions of the specified userId
      *
-     * @param userId The userId
      * @param serviceId The serviceId e.g. gcm, apn, apn.macos
      * @param provider The provider
-     * @return a subscription
+     * @return
      */
-    Subscription getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException;
+    List<Subscription> getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException;
 }

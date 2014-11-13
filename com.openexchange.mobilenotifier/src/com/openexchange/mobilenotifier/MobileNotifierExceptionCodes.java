@@ -86,7 +86,6 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
      * Unexpected database error: %1$s
      */
     DB_ERROR("Unexpected database error: %1$s", CATEGORY_WARNING, 6, MobileNotifierExceptionMessages.SQL_ERROR_MSG),
-
     ;
 
     /**
