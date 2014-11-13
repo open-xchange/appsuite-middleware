@@ -51,23 +51,17 @@ package com.openexchange.mail.json.actions;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -78,7 +72,6 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -87,15 +80,11 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.search.ComparisonType;
 import com.openexchange.mail.search.ReceivedDateTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
@@ -110,7 +99,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "folder", description = "Object ID of the source folder.")
 },
 responseDescription = "A JSON true response.")
-public final class ArchiveFolderAction extends AbstractMailAction {
+public final class ArchiveFolderAction extends AbstractArchiveMailAction {
 
     /**
      * Initializes a new {@link ArchiveFolderAction}.
@@ -143,90 +132,15 @@ public final class ArchiveFolderAction extends AbstractMailAction {
             final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(sourceFolder);
             final int accountId = fa.getAccountId();
             final MailAccount mailAccount = service.getMailAccount(accountId, session.getUserId(), session.getContextId());
+
             // Connect mail access
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-            // Check archive full name
-            char separator;
-            String archiveFullname = mailAccount.getArchiveFullname();
-            final String parentFullName;
-            String archiveName;
-            if (isEmpty(archiveFullname)) {
-                archiveName = mailAccount.getArchive();
-                boolean updateAccount = false;
-                if (isEmpty(archiveName)) {
-                    final User user = session.getUser();
-                    if (!AJAXRequestDataTools.parseBoolParameter("useDefaultName", req.getRequest(), true)) {
-                        final String i18nArchive = StringHelper.valueOf(user.getLocale()).getString(MailStrings.ARCHIVE);
-                        throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(Category.CATEGORY_USER_INPUT, i18nArchive);
-                    }
-                    // Select default name for archive folder
-                    archiveName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DEFAULT_ARCHIVE);
-                    updateAccount = true;
-                }
-                final String prefix = mailAccess.getFolderStorage().getDefaultFolderPrefix();
-                if (isEmpty(prefix)) {
-                    separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-                    archiveFullname = archiveName;
-                    parentFullName = MailFolder.DEFAULT_FOLDER_ID;
-                } else {
-                    separator = prefix.charAt(prefix.length() - 1);
-                    archiveFullname = new StringBuilder(prefix).append(archiveName).toString();
-                    parentFullName = prefix.substring(0, prefix.length() - 1);
-                }
-                // Update mail account
-                if (updateAccount) {
-                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                    if (null != mass) {
-                        final String af = archiveFullname;
-                        ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
-                            @Override
-                            public Void call() throws Exception {
-                                final MailAccountDescription mad = new MailAccountDescription();
-                                mad.setId(accountId);
-                                mad.setArchiveFullname(af);
-                                mass.updateMailAccount(mad, EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL), session.getUserId(), session.getContextId(), session);
-                                return null;
-                            }
-                        });
-                    }
-                }
-            } else {
-                separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-                final int pos = archiveFullname.lastIndexOf(separator);
-                if (pos > 0) {
-                    parentFullName = archiveFullname.substring(0, pos);
-                    archiveName = archiveFullname.substring(pos + 1);
-                } else {
-                    parentFullName = MailFolder.DEFAULT_FOLDER_ID;
-                    archiveName = archiveFullname;
-                }
-            }
-            if (!mailAccess.getFolderStorage().exists(archiveFullname)) {
-                if (!AJAXRequestDataTools.parseBoolParameter("createIfAbsent", req.getRequest(), true)) {
-                    throw MailExceptionCode.FOLDER_NOT_FOUND.create(archiveFullname);
-                }
-                final MailFolderDescription toCreate = new MailFolderDescription();
-                toCreate.setAccountId(accountId);
-                toCreate.setParentAccountId(accountId);
-                toCreate.setParentFullname(parentFullName);
-                toCreate.setExists(false);
-                toCreate.setFullname(archiveFullname);
-                toCreate.setName(archiveName);
-                toCreate.setSeparator(separator);
-                {
-                    final DefaultMailPermission mp = new DefaultMailPermission();
-                    mp.setEntity(session.getUserId());
-                    final int p = MailPermission.ADMIN_PERMISSION;
-                    mp.setAllPermission(p, p, p, p);
-                    mp.setFolderAdmin(true);
-                    mp.setGroupPermission(false);
-                    toCreate.addPermission(mp);
-                }
-                mailAccess.getFolderStorage().createFolder(toCreate);
-                CacheFolderStorage.getInstance().removeFromCache(parentFullName, "0", true, session);
-            }
+            // Check archive full name
+            int[] separatorRef = new int[1];
+            String archiveFullname = checkArchiveFullNameFor(mailAccess, req, separatorRef);
+            char separator = (char) separatorRef[0];
 
             // Move to archive folder
             Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
