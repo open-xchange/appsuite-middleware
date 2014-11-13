@@ -80,7 +80,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
@@ -188,20 +187,8 @@ public final class ConditionTreeMap {
                 /* + " ORDER BY default_flag DESC, fname" */);
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
-            int pos;
             while (rs.next()) {
-                final Permission p = new Permission();
-                pos = 1;
-                p.fuid = rs.getInt(pos++);
-                p.entity = rs.getInt(pos++);
-                p.admin = rs.getInt(pos++) > 0;
-                p.readFolder = rs.getInt(pos++) >= OCLPermission.READ_FOLDER;
-                p.module = rs.getInt(pos++);
-                p.type = rs.getInt(pos++);
-                p.creator = rs.getInt(pos++);
-                p.lastModified = rs.getLong(pos++);
-                p.parent = rs.getInt(pos);
-                insert(p);
+                insert(new Permission(rs.getInt(1), rs.getInt(2), rs.getInt(3) > 0, rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getLong(8), rs.getInt(9)));
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -227,27 +214,15 @@ public final class ConditionTreeMap {
         try {
             connection = service.getReadOnly(contextId);
             stmt =
-                connection.prepareStatement("SELECT ot.fuid, op.permission_id, op.admin_flag, op.fp, ot.module, ot.type, ot.created_from, ot.changing_date, ot.parent" +
+                connection.prepareStatement("SELECT ot.fuid, op.admin_flag, op.fp, ot.module, ot.type, ot.created_from, ot.changing_date, ot.parent" +
                     " FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.cid = op.cid AND ot.fuid = op.fuid WHERE ot.cid=? AND op.permission_id=?"
                 /* + " ORDER BY default_flag DESC, fname" */);
             stmt.setInt(1, contextId);
             stmt.setInt(2, entity);
             rs = stmt.executeQuery();
-            int pos;
             final ConditionTree tree = new ConditionTree();
             while (rs.next()) {
-                final Permission p = new Permission();
-                pos = 1;
-                p.fuid = rs.getInt(pos++);
-                p.entity = entity;
-                p.admin = rs.getInt(pos++) > 0;
-                p.readFolder = rs.getInt(pos++) >= OCLPermission.READ_FOLDER;
-                p.module = rs.getInt(pos++);
-                p.type = rs.getInt(pos++);
-                p.creator = rs.getInt(pos++);
-                p.lastModified = rs.getLong(pos++);
-                p.parent = rs.getInt(pos);
-                tree.insert(p);
+                tree.insert(new Permission(rs.getInt(1), entity, rs.getInt(2) > 0, rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getLong(7), rs.getInt(8)));
             }
             return tree;
         } catch (final SQLException e) {
@@ -282,10 +257,10 @@ public final class ConditionTreeMap {
      * @param permission The permission
      */
     public void insert(final Permission permission) throws OXException {
-        final Integer entity = Integer.valueOf(permission.entity);
+        Integer entity = Integer.valueOf(permission.entity);
         Future<ConditionTree> f = entity2tree.get(entity);
         if (null == f) {
-            final FutureTask<ConditionTree> ft = new FutureTask<ConditionTree>(new NewTreeCallable());
+            FutureTask<ConditionTree> ft = new FutureTask<ConditionTree>(new NewTreeCallable());
             f = entity2tree.putIfAbsent(entity, ft);
             if (null == f) {
                 ft.run();

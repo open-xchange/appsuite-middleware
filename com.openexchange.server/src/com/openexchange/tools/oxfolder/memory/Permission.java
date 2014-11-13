@@ -59,34 +59,37 @@ import com.openexchange.server.impl.OCLPermission;
  */
 final class Permission {
 
-    int fuid;
+    private static final int READ_FOLDER = OCLPermission.READ_FOLDER;
 
-    int entity;
+    final int fuid;
 
-    boolean admin;
+    final int entity;
 
-    boolean readFolder;
+    final boolean admin;
 
-    int module;
+    final boolean readFolder;
 
-    int type;
+    final int module;
 
-    int creator;
+    final int type;
 
-    long lastModified;
+    final int creator;
 
-    int parent;
+    final long lastModified;
 
-    /**
-     * Initializes a new {@link Permission}.
-     */
-    Permission() {
+    final int parent;
+
+    Permission(int fuid, int entity, boolean admin, int fp, int module, int type, int creator, long lastModified, int parent) {
         super();
-    }
-
-    Permission setFolderPermission(final int fp) {
-        readFolder = fp >= OCLPermission.READ_FOLDER;
-        return this;
+        this.fuid = fuid;
+        this.entity = entity;
+        this.admin = admin;
+        this.readFolder = fp >= READ_FOLDER;
+        this.module = module;
+        this.type = type;
+        this.creator = creator;
+        this.lastModified = lastModified;
+        this.parent = parent;
     }
 
 }
