@@ -47,69 +47,61 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage;
+
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.groupware.results.TimedResult;
 
 /**
- * {@link FileStorageCapability}
+ * {@link FileStorageVersionedFileAccess}.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum FileStorageCapability {
+public interface FileStorageVersionedFileAccess {
 
     /**
-     * Support for sequence numbers of files and folders.
+     * Removes a certain version of a file
+     *
+     * @param folderId The folder identifier
+     * @param id The file id whose version is to be removed
+     * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
+     * @return The IDs of versions that could not be deleted due to an edit-delete conflict
+     * @throws OXException If operation fails
      */
-    SEQUENCE_NUMBERS,
+    String[] removeVersion(String folderId, String id, String[] versions) throws OXException;
 
     /**
-     * Support for saving files without creating a new version.
+     * Lists all versions of a file
+     *
+     * @param folderId The folder identifier
+     * @param id The file's identifier
+     * @return All versions of a file
+     * @throws OXException If operation fails
      */
-    IGNORABLE_VERSION,
+    TimedResult<File> getVersions(String folderId, String id) throws OXException;
 
     /**
-     * Support for storing multiple versions of a document.
+     * List all versions of a file loading the given fields
+     *
+     * @param folderId The folder identifier
+     * @param id The file's identifier
+     * @param fields The fields to load
+     * @return All versions of a file with given fields loaded
+     * @throws OXException If operation fails
      */
-    FILE_VERSIONS,
+    TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields) throws OXException;
 
     /**
-     * Support for reading and writing files at specific offsets.
+     * Lists all versions of a file loading the given fields sorted according to the given field in a given order
+     *
+     * @param folderId The folder identifier
+     * @param id The file's identifier
+     * @param fields The fields to load
+     * @return All sorted versions of a file with given fields loaded
+     * @throws OXException If operation fails
      */
-    RANDOM_FILE_ACCESS,
+    TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields, File.Field sort, SortDirection order) throws OXException;
 
-    /**
-     * Support for searching files by advanced search terms.
-     */
-    SEARCH_BY_TERM,
-
-    /**
-     * Support for E-Tags of folders.
-     */
-    FOLDER_ETAGS,
-
-    /**
-     * Support for recursive E-Tags of folders.
-     */
-    RECURSIVE_FOLDER_ETAGS,
-
-    /**
-     * Support for thumbnail images of files.
-     */
-    THUMBNAIL_IMAGES,
-
-    /**
-     * Support for persistent folder- and file-IDs, i.e. identifiers don't change during rename operations.
-     */
-    PERSISTENT_IDS,
-
-    /**
-     * Support for efficient retrieval of file metadata and contents considering a client-supplied E-Tag.
-     */
-    EFFICIENT_RETRIEVAL,
-
-    /**
-     * Support for locking/unlocking files.
-     */
-    LOCKS,
-
-    ;
 }

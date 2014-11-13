@@ -73,6 +73,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
@@ -92,7 +93,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageIgnorableVersionFileAccess/*, FileStorageSequenceNumberProvider*/ {
+public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageIgnorableVersionFileAccess, FileStorageAdvancedSearchFileAccess/*, FileStorageSequenceNumberProvider*/ {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class);
 
@@ -604,62 +605,6 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
-            }
-        }
-        try {
-            final String fid = checkFolderId(folderId, rootUrl);
-            final String url = (fid + id);
-            /*
-             * Check validity
-             */
-            final SmbFile smbFile = getSmbFile(url);
-            if (!exists(smbFile)) {
-                /*
-                 * NO-OP for us
-                 */
-                return new String[0];
-            }
-            if (!smbFile.isFile()) {
-                throw CIFSExceptionCodes.NOT_A_FILE.create(url);
-            }
-            /*
-             * Delete
-             */
-            smbFile.delete();
-            /*
-             * Invalidate
-             */
-            SmbFileMapManagement.getInstance().dropFor(session);
-            /*
-             * Return empty array
-             */
-            return new String[0];
-        } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public void unlock(final String folderId, final String id) throws OXException {
-        // Nothing to do
-
-    }
-
-    @Override
-    public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // Nothing to do
-
-    }
-
-    @Override
     public void touch(final String folderId, final String id) throws OXException {
         try {
             /*
@@ -763,21 +708,6 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
          * Return sorted result
          */
         return new FileTimedResult(files);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
     @Override

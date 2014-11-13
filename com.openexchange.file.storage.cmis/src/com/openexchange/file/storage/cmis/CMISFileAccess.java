@@ -81,6 +81,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -103,7 +104,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CMISFileAccess extends AbstractCMISAccess implements FileStorageFileAccess {
+public final class CMISFileAccess extends AbstractCMISAccess implements FileStorageFileAccess, FileStorageAdvancedSearchFileAccess {
 
     private final CMISAccountAccess accountAccess;
 
@@ -641,65 +642,6 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw CMISExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
-            }
-        }
-        try {
-            final ObjectId folderObjectId;
-            CmisObject object;
-            if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
-                object = cmisSession.getRootFolder();
-                folderObjectId = cmisSession.createObjectId(object.getId());
-            } else {
-                folderObjectId = cmisSession.createObjectId(folderId);
-                object = cmisSession.getObject(folderObjectId);
-            }
-            if (null == object) {
-                throw CMISExceptionCodes.NOT_FOUND.create(folderId);
-            }
-            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
-            }
-            /*
-             * Check document
-             */
-            final ObjectId documentId = cmisSession.createObjectId(id);
-            object = cmisSession.getObject(documentId);
-            if (null == object) {
-                throw CMISExceptionCodes.NOT_FOUND.create(id);
-            }
-            if (!ObjectType.DOCUMENT_BASETYPE_ID.equals(object.getType().getId())) {
-                throw CMISExceptionCodes.NOT_A_FILE.create(id);
-            }
-            final Document document = (Document) object;
-            document.deleteAllVersions();
-            /*
-             * Return empty array
-             */
-            return new String[0];
-        } catch (final CmisBaseException e) {
-            throw handleCmisException(e);
-        } catch (final RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public void unlock(final String folderId, final String id) throws OXException {
-        // Nothing to do
-
-    }
-
-    @Override
-    public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // Nothing to do
-
-    }
-
-    @Override
     public void touch(final String folderId, final String id) throws OXException {
         try {
             final ObjectId folderObjectId;
@@ -826,21 +768,6 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
          * Return sorted result
          */
         return new FileTimedResult(files);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
     @Override

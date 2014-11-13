@@ -49,27 +49,50 @@
 
 package com.openexchange.file.storage.composition;
 
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IDBasedRandomFileAccess}
+ * {@link IDBasedETagProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- *
- * @deprecated Use {@link IDBasedFileAccess#supports(String, String, FileStorageCapability...)} with
- *             {@link FileStorageCapability#RANDOM_FILE_ACCESS} instead.
  */
 @Deprecated
-public interface IDBasedRandomFileAccess extends IDBasedIgnorableVersionFileAccess {
+public interface IDBasedETagProvider {
 
     /**
-     * Gets a value indicating whether random file access is supported for the supplied service/account or not.
+     * Gets a value indicating whether the ETags delivered by this storage can be assumed to be recursive or not. When being "recursive",
+     * a changed ETag of a subfolder will result in changed ETags of all parent folders recursively.
+     * <p/>
+     * <b>Note: </b>Only available if {@link IDBasedETagProvider#supportsETags} is <code>true</code>.
      *
-     * @param serviceId The service ID
-     * @param accountId The account ID
-     * @return <code>true</code> if random access file operations are supported, <code>false</code>, otherwise
+     * @param folderId The folder to check
+     * @return <code>true</code> if ETags delivered by this storage are recursive, <code>false</code>, otherwise.
      * @throws OXException
      */
-    boolean supportsRandomFileAccess(String serviceId, String accountId) throws OXException;
+    boolean isRecursive(String folderId) throws OXException;
+
+    /**
+     * Gets the ETags for the supplied folders to quickly determine which folders contain changes. An updated ETag in a folder indicates a
+     * change, for example a new, modified or deleted file. If {@link IDBasedETagProvider#isRecursive()} is <code>true</code>, an
+     * updated ETag may also indicate a change in one of the folder's subfolders.
+     * <p/>
+     * <b>Note: </b>Only available if {@link IDBasedETagProvider#supportsETags} is <code>true</code>.
+     *
+     * @param folderIds A list of folder IDs to get the ETags for
+     * @return A map holding the resulting ETags to each requested folder ID
+     * @throws OXException
+     */
+    Map<String, String> getETags(List<String> folderIds) throws OXException;
+
+    /**
+     * Gets a value indicating whether sequence numbers are supported by the given folder.
+     *
+     * @param folderId The folder to check
+     * @return <code>true</code> if sequence numbers are supported, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    boolean supportsETags(String folderId) throws OXException;
 
 }

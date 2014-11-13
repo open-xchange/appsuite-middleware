@@ -51,6 +51,7 @@ package com.openexchange.file.storage.composition;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
@@ -70,6 +71,17 @@ import com.openexchange.tx.TransactionAware;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface IDBasedFileAccess extends TransactionAware {
+
+    /**
+     * Gets a value indicating whether a specific account supports one or more capabilities.
+     *
+     * @param serviceID The service identifier for the account to query the capabilities for
+     * @param accountID The account identifier for the account to query the capabilities for
+     * @param capabilities The capabilities to check
+     * @return <code>true</code> if all capabilities are supported, <code>false</code>, otherwise
+     * @throws OXException If operation fails
+     */
+    boolean supports(String serviceID, String accountID, FileStorageCapability...capabilities) throws OXException;
 
     /**
      * Gets a value indicating whether a file with the given identifier and version exists or not.
@@ -137,6 +149,20 @@ public interface IDBasedFileAccess extends TransactionAware {
     InputStream getDocument(String id, String version) throws OXException;
 
     /**
+     * Loads (part of) a document's content.
+     * <p/>
+     * <b>Note:</b> Only available if the underlying account supports the {@link FileStorageCapability#RANDOM_FILE_ACCESS} capability.
+     *
+     * @param id The ID of the document
+     * @param version The version of the document. Pass {@link FileStorageFileAccess#CURRENT_VERSION} for the current version.
+     * @param offset The start offset in bytes to read from the document, or <code>0</code> to start from the beginning
+     * @param length The number of bytes to read from the document, or <code>-1</code> to read the stream until the end
+     * @return An input stream for the content
+     * @throws OXException If operation fails
+     */
+    InputStream getDocument(String id, String version, long offset, long length) throws OXException;
+
+    /**
      * (Optionally) Loads the thumbnail content
      *
      * @param folderId The folder identifier
@@ -148,7 +174,9 @@ public interface IDBasedFileAccess extends TransactionAware {
     InputStream optThumbnailStream(String id, String version) throws OXException;
 
     /**
-     * Tries to load the documents content and associated metadata. Returns null if the underlying implementation cannot satisfy this call
+     * Tries to load the documents content and associated metadata. Returns null if the underlying implementation cannot satisfy this call.
+     *
+     * <b>Note:</b> Only available if the underlying account supports the {@link FileStorageCapability#EFFICIENT_RETRIEVAL} capability.
      *
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
@@ -161,6 +189,8 @@ public interface IDBasedFileAccess extends TransactionAware {
      * Tries to load the documents content and associated metadata. Only retrieves
      * the document if the given eTag does not match, otherwise returns a document instance with the
      * etag set and no input stream. Returns null if the underlying implementation cannot satisfy this call
+     *
+     * <b>Note:</b> Only available if the underlying account supports the {@link FileStorageCapability#EFFICIENT_RETRIEVAL} capability.
      *
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
@@ -200,6 +230,36 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
+
+    /**
+     * Save the file metadata, optionally without creating a new version.
+     * <p/>
+     * <b>Note:</b> Only available if the underlying account supports the {@link FileStorageCapability#IGNORABLE_VERSION} capability.
+     *
+     * @param document The metadata to save
+     * @param data The binary content
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
+     * @return The (fully qualified) unique identifier of the saved file
+     * @throws OXException If operation fails
+     */
+    String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException;
+
+    /**
+     * Save file metadata and content. Since the actual version is modified, the version number is not increased.
+     * <p/>
+     * <b>Note:</b> Only available if the underlying account supports the {@link FileStorageCapability#RANDOM_FILE_ACCESS} capability.
+     *
+     * @param document The metadata to save
+     * @param data The binary content
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @param offset The start offset in bytes where to append the data to the document, must be equal to the actual document's length
+     * @return The (fully qualified) unique identifier of the saved file
+     * @throws OXException If operation fails
+     */
+    String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, long offset) throws OXException;
 
     /**
      * Removes all documents in the given folder.
@@ -391,5 +451,31 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
+
+    /**
+     * Gets the sequence numbers for the contents of the supplied folders to quickly determine which folders contain changes. An updated
+     * sequence number in a folder indicates a change, for example a new, modified or deleted file.
+     * <p/>
+     * <b>Note:</b> Only available if the underlying account supports the {@link FileStorageCapability#SEQUENCE_NUMBERS} capability.
+     *
+     * @param folderIds A list of folder IDs to get the sequence numbers for
+     * @return A map holding the resulting sequence numbers mapped to the corresponding folder ID. Not all folders may be present in
+     *         the result.
+     * @throws OXException
+     */
+    Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException;
+
+    /**
+     * Gets the ETags for the supplied folders to quickly determine which folders contain changes. An updated ETag in a folder indicates a
+     * change, for example a new, modified or deleted file. If {@link FileStorageCapability#RECURSIVE_FOLDER_ETAGS} is supported, an
+     * updated ETag may also indicate a change in one of the folder's subfolders.
+     * <p/>
+     * <b>Note:</b> Only available if the underlying account supports the {@link FileStorageCapability#FOLDER_ETAGS} capability.
+     *
+     * @param folderIds A list of folder IDs to get the ETags for
+     * @return A map holding the resulting ETags to each requested folder ID
+     * @throws OXException
+     */
+    Map<String, String> getETags(List<String> folderIds) throws OXException;
 
 }

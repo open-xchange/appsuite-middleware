@@ -82,8 +82,6 @@ import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.copycom.access.CopyComAccess;
 import com.openexchange.file.storage.copycom.osgi.Services;
-import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.FileKnowingInputStream;
@@ -534,49 +532,6 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
     }
 
     @Override
-    public String[] removeVersion(String folderId, final String id, String[] versions) throws OXException {
-        /*
-         * No versioning support
-         */
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw CopyComExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
-            }
-        }
-        return perform(new CopyComClosure<String[]>() {
-
-            @Override
-            protected String[] doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    HttpDelete method = new HttpDelete(buildUri("files/" + id, null));
-                    request = method;
-                    access.sign(request);
-
-                    handleHttpResponse(access.getHttpClient().execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
-                    reset(request);
-                    request = null;
-
-                    return new String[0];
-                } finally {
-                    reset(request);
-                }
-            }
-
-        });
-    }
-
-    @Override
-    public void unlock(String folderId, String id) throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void lock(String folderId, String id, long diff) throws OXException {
-        // Nope
-    }
-
-    @Override
     public void touch(String folderId, String id) throws OXException {
         exists(folderId, id, CURRENT_VERSION);
     }
@@ -665,35 +620,6 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
     }
 
     @Override
-    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        return perform(new CopyComClosure<TimedResult<File>>() {
-
-            @Override
-            protected TimedResult<File> doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
-                File file = getFileMetadata(folderId, id, CURRENT_VERSION);
-                return new FileTimedResult(Collections.<File> singletonList(file));
-            }
-        });
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return getVersions(folderId, id);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        return perform(new CopyComClosure<TimedResult<File>>() {
-
-            @Override
-            protected TimedResult<File> doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
-                File file = getFileMetadata(folderId, id, CURRENT_VERSION);
-                return new FileTimedResult(Collections.<File> singletonList(file));
-            }
-        });
-    }
-
-    @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, List<Field> fields) throws OXException {
         return perform(new CopyComClosure<TimedResult<File>>() {
 
@@ -720,15 +646,6 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
-    }
-
-    @Override
-    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, final SortDirection order, int start, int end) throws OXException {
-        if (FileNameTerm.class.isInstance(searchTerm) && (null == folderIds || 1 == folderIds.size())) {
-            String pattern = ((FileNameTerm) searchTerm).getPattern();
-            return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
-        }
-        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
 
     @Override

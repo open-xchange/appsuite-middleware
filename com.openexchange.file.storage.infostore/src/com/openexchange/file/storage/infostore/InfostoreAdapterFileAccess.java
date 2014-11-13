@@ -64,11 +64,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
+import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.container.FolderObject;
@@ -88,7 +92,8 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider {
+public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider,
+FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess {
 
     private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
     private static final Set<Long> VIRTUAL_FOLDERS;

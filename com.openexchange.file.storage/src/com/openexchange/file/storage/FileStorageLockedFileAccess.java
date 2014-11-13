@@ -47,69 +47,34 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage;
+
+import com.openexchange.exception.OXException;
 
 /**
- * {@link FileStorageCapability}
+ * {@link FileStorageLockedFileAccess}.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum FileStorageCapability {
+public interface FileStorageLockedFileAccess extends FileStorageFileAccess {
 
     /**
-     * Support for sequence numbers of files and folders.
+     * Unlocks a given file.
+     *
+     * @param folderId The folder identifier
+     * @param id The file to unlock
+     * @throws OXException If operation fails
      */
-    SEQUENCE_NUMBERS,
+    void unlock(String folderId, String id) throws OXException;
 
     /**
-     * Support for saving files without creating a new version.
+     * Locks a given file for the given duration (in milliseconds)
+     *
+     * @param folderId The folder identifier
+     * @param id The file to lock
+     * @param diff The duration in milliseconds
+     * @throws OXException If operation fails
      */
-    IGNORABLE_VERSION,
+    void lock(String folderId, String id, long diff) throws OXException;
 
-    /**
-     * Support for storing multiple versions of a document.
-     */
-    FILE_VERSIONS,
-
-    /**
-     * Support for reading and writing files at specific offsets.
-     */
-    RANDOM_FILE_ACCESS,
-
-    /**
-     * Support for searching files by advanced search terms.
-     */
-    SEARCH_BY_TERM,
-
-    /**
-     * Support for E-Tags of folders.
-     */
-    FOLDER_ETAGS,
-
-    /**
-     * Support for recursive E-Tags of folders.
-     */
-    RECURSIVE_FOLDER_ETAGS,
-
-    /**
-     * Support for thumbnail images of files.
-     */
-    THUMBNAIL_IMAGES,
-
-    /**
-     * Support for persistent folder- and file-IDs, i.e. identifiers don't change during rename operations.
-     */
-    PERSISTENT_IDS,
-
-    /**
-     * Support for efficient retrieval of file metadata and contents considering a client-supplied E-Tag.
-     */
-    EFFICIENT_RETRIEVAL,
-
-    /**
-     * Support for locking/unlocking files.
-     */
-    LOCKS,
-
-    ;
 }
