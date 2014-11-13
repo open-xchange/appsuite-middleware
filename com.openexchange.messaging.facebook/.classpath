@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="lib/htmlunit-2.5.jar" sourcepath="lib/source/htmlunit_2.5_sources.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit-core-js-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/runtime-0.4.1.5.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
