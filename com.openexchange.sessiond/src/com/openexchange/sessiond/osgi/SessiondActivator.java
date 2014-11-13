@@ -226,8 +226,6 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
         }
     }
 
-
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class };
