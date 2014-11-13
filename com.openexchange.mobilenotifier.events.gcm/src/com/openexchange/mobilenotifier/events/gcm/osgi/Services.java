@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.mobilenotifier;
+package com.openexchange.mobilenotifier.events.gcm.osgi;
 
-import java.io.IOException;
-import org.json.JSONException;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.mobilenotifier.actions.MobileNotifierSubscribeRequest;
-import com.openexchange.ajax.mobilenotifier.actions.MobileNotifierUnsubscribeRequest;
-import com.openexchange.ajax.mobilenotifier.actions.MobileNotifierUpdateTokenRequest;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MobileNotifierSubscribeLifecycleTest}
+ * {@link SubscribeServiceLookup}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class MobileNotifierSubscribeLifecycleTest extends AbstractAJAXSession {
+public final class Services {
 
     /**
-     * Initializes a new {@link MobileNotifierSubscribeLifecycleTest}.
-     * @param name
+     * Initializes a new {@link SubscribeServiceLookup}.
      */
-    public MobileNotifierSubscribeLifecycleTest(String name) {
-        super(name);
+    private Services() {
+        super();
     }
 
-    public void testSubscriptionLifecycle() throws OXException, IOException, JSONException {
-        String startToken = "ADE9219010FD3DEAD9211384129";
-        String serviceId = "gcm";
-        String providerId = "mail";
-        String newToken = "ACCCDDDDEEEAAA000111155";
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-        MobileNotifierSubscribeRequest msReq = new MobileNotifierSubscribeRequest(serviceId, providerId, startToken, true);
-        AbstractAJAXResponse msResp = client.execute(msReq);
-        assertNotNull(msResp);
-        MobileNotifierUpdateTokenRequest utReq = new MobileNotifierUpdateTokenRequest(serviceId, providerId, startToken, newToken, true);
-        msResp = null;
-        msResp = client.execute(utReq);
-        assertNotNull(msResp);
-        MobileNotifierUnsubscribeRequest musReq = new MobileNotifierUnsubscribeRequest(serviceId, providerId, newToken, true);
-        msResp = null;
-        msResp = client.execute(musReq);
-        assertNotNull(msResp);
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
+
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
+
 }
