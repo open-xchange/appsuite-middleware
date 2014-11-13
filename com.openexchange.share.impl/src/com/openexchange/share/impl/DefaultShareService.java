@@ -347,8 +347,9 @@ public class DefaultShareService implements ShareService {
      * @param contextID The context identifier
      * @return The shares, or an empty list if there are none
      */
-    public List<Share> getAllShares(int contextID) throws OXException {
-        return services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS);
+    public List<ShareInfo> getAllShares(int contextID) throws OXException {
+        return ShareTool.toShareInfos(services, contextID,
+            services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS));
     }
 
     /**
@@ -358,8 +359,9 @@ public class DefaultShareService implements ShareService {
      * @param userID The user identifier
      * @return The shares, or an empty list if there are none
      */
-    public List<Share> getAllShares(int contextID, int userID) throws OXException {
-        return services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, StorageParameters.NO_PARAMETERS);
+    public List<ShareInfo> getAllShares(int contextID, int userID) throws OXException {
+        return ShareTool.toShareInfos(services, contextID,
+            services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, StorageParameters.NO_PARAMETERS));
     }
 
     /**

@@ -49,9 +49,7 @@
 
 package com.openexchange.share.impl.mbean;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
 
 
 /**
@@ -71,7 +69,7 @@ public interface ShareMBean {
      * @return The shares
      * @throws OXException On error
      */
-    List<Share> listShares(int contextId) throws OXException;
+    String listShares(int contextId) throws OXException;
 
     /**
      * Lists all shares in supplied context created by supplied user.
@@ -81,7 +79,7 @@ public interface ShareMBean {
      * @return The shares
      * @throws OXException On error
      */
-    List<Share> listShares(int contextId, int userId) throws OXException;
+    String listShares(int contextId, int userId) throws OXException;
 
     /**
      * Removes all targets identified by supplied token.

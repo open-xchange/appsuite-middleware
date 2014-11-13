@@ -50,12 +50,11 @@
 package com.openexchange.share.impl.mbean;
 
 import java.util.Collections;
-import java.util.List;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
 import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.impl.ShareTool;
 
 /**
  * {@link ShareMBeanImpl}
@@ -73,13 +72,13 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public List<Share> listShares(int contextId) throws OXException {
-        return shareService.getAllShares(contextId);
+    public String listShares(int contextId) throws OXException {
+        return ShareTool.formatForCLT(shareService.getAllShares(contextId));
     }
 
     @Override
-    public List<Share> listShares(int contextId, int userId) throws OXException {
-        return shareService.getAllShares(contextId, userId);
+    public String listShares(int contextId, int userId) throws OXException {
+        return ShareTool.formatForCLT(shareService.getAllShares(contextId, userId));
     }
 
     @Override

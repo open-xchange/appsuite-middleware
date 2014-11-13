@@ -49,7 +49,6 @@
 
 package com.openexchange.share.clt;
 
-import java.util.List;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -60,7 +59,6 @@ import org.apache.commons.cli.Options;
 import org.apache.http.ParseException;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.share.Share;
 import com.openexchange.share.impl.mbean.ShareMBean;
 
 /**
@@ -130,7 +128,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
         if (null == contextId || contextId.isEmpty()) {
             throw new MissingOptionException("ContextId is missing.");
         }
-        List<Share> result;
+        String result;
         ObjectName objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {
@@ -142,11 +140,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
         } catch (NumberFormatException e) {
             throw new ParseException("Cannot parse value: " + e.getMessage());
         }
-        for (Share share : result) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(share.toString());
-            System.out.println(sb.toString());
-        }
+        System.out.println(result);
         return null;
     }
 

@@ -637,4 +637,14 @@ public class ShareTool {
         return shareInfos;
     }
 
+    public static String formatForCLT(List<ShareInfo> shareInfo) throws OXException {
+        StringBuilder sb = new StringBuilder();
+        for (ShareInfo info : shareInfo) {
+            sb.append("Token: ").append(info.getToken()).append(" (");
+            sb.append(info.getShare()).append(")");
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
 }
