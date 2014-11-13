@@ -96,7 +96,6 @@ public class SubscribeAction extends AbstractMobileNotifierAction {
         }
 
         MobileNotifierProviders provider = MobileNotifierProviders.parseProviderFromParam(providerId);
-
         if(provider == null) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("providerId", providerId);
         }

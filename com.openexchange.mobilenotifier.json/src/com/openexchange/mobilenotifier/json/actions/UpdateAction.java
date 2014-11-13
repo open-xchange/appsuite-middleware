@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.storage.MobileNotifierSubscriptionService;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
 import com.openexchange.server.ServiceLookup;
@@ -93,19 +92,8 @@ public class UpdateAction extends AbstractMobileNotifierAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("serviceId");
         }
 
-        // the provider id (mail, calendar, reminder...)
-        String providerId = req.getParameter("providerId");
-        if(Strings.isEmpty(providerId)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("providerId");
-        }
-
-        MobileNotifierProviders provider = MobileNotifierProviders.parseProviderFromParam(providerId);
-        if(provider == null) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("providerId", providerId);
-        }
-
         MobileNotifierSubscriptionService mnss = getService(MobileNotifierSubscriptionService.class);
-        mnss.updateToken(req.getSession(), token, serviceId, provider, newToken);
+        mnss.updateToken(req.getSession(), token, serviceId, newToken);
 
         /*
          * return empty json object to indicate success

@@ -67,17 +67,15 @@ public class MobileNotifierUpdateTokenRequest extends AbstractMobileNotifierRequ
 
     private boolean failOnError;
     private String serviceId;
-    private String providerId;
     private String token;
     private String newToken;
 
     /**
      * Initializes a new {@link MobileNotifierUpdateTokenRequest}.
      */
-    public MobileNotifierUpdateTokenRequest(String serviceId, String providerId, String token, String newToken, boolean failOnError) {
+    public MobileNotifierUpdateTokenRequest(String serviceId, String token, String newToken, boolean failOnError) {
         super();
         this.serviceId = serviceId;
-        this.providerId = providerId;
         this.token = token;
         this.newToken = newToken;
         this.failOnError = failOnError;
@@ -92,7 +90,6 @@ public class MobileNotifierUpdateTokenRequest extends AbstractMobileNotifierRequ
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "updateToken"));
-        params.add(new Parameter("providerId", providerId));
         params.add(new Parameter("serviceId", serviceId));
         params.add(new Parameter("token", token));
         params.add(new Parameter("newToken", newToken));

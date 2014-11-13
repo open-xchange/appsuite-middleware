@@ -51,7 +51,9 @@ package com.openexchange.mobilenotifier.events.storage.rdb;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -102,7 +104,7 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
     private static int replaceSubscription(Connection connection, Subscription subscription) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(Statements.REPLACE_SUBSCRIPTION);
+            stmt = connection.prepareStatement(Statements.REPLACE_OR_ADD_SUBSCRIPTION);
             stmt.setInt(1, subscription.getContextId());
             stmt.setString(2, subscription.getServiceId());
             stmt.setString(3, subscription.getToken());
@@ -116,10 +118,10 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
     }
 
     @Override
-    public boolean updateToken(Session session, String token, String serviceId, MobileNotifierProviders providerId,  String newToken) throws OXException {
+    public boolean updateToken(Session session, String token, String serviceId, String newToken) throws OXException {
         Connection connection = databaseService.getWritable(session.getContextId());
         Subscription subscription = new Subscription(
-            session.getContextId(), session.getUserId(), token, serviceId, providerId, System.currentTimeMillis());
+            session.getContextId(), session.getUserId(), token, serviceId, null, System.currentTimeMillis());
         try {
             return 0 < updateSubscription(connection, subscription, newToken);
         } catch (SQLException e) {
@@ -138,8 +140,7 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
             stmt.setInt(3, subscription.getContextId());
             stmt.setInt(4, subscription.getUserId());
             stmt.setString(5, subscription.getServiceId());
-            stmt.setString(6, subscription.getProviderName());
-            stmt.setString(7, subscription.getToken());
+            stmt.setString(6, subscription.getToken());
             return stmt.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -160,6 +161,34 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
         }
     }
 
+    @Override
+    public boolean deleteSubscriptions(Session session, String token, String serviceId) throws OXException {
+        Connection connection = databaseService.getWritable(session.getContextId());
+        Subscription subscription = new Subscription(
+            session.getContextId(), session.getUserId(), token, serviceId, null, System.currentTimeMillis());
+        try {
+            return 0 < deleteSubscriptions(connection, subscription);
+        } catch (SQLException e) {
+            throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(session.getContextId(), connection);
+        }
+    }
+
+    private static int deleteSubscriptions(Connection connection, Subscription subscription) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(Statements.DELETE_TOKEN_BY_SERVICE_ID);
+            stmt.setInt(1, subscription.getContextId());
+            stmt.setInt(2, subscription.getUserId());
+            stmt.setString(3, subscription.getServiceId());
+            stmt.setString(4, subscription.getToken());
+            return stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
     private static int deleteSubscription(Connection connection, Subscription subscription) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
@@ -176,12 +205,46 @@ public class MobileNotifierSubscriptionServiceImpl implements MobileNotifierSubs
     }
 
     @Override
-    public List<Subscription> getSubscriptions(Session session, String serviceId) throws OXException {
-        return null;
+    public List<Subscription> getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException {
+        Connection connection = databaseService.getReadOnly(session.getContextId());
+        List<Subscription> subscriptions = new ArrayList<Subscription>();
+        try {
+            subscriptions.addAll(selectSubscriptions(connection, session.getContextId(), session.getUserId(), serviceId, provider.getProviderName()));
+        } catch (SQLException e) {
+            if ("42S02".equals(e.getSQLState())) {
+                // "Table 'mobileEventSubscriptions' doesn't exist" => no update task for tables in this schema yet, so ignore
+            } else {
+                throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            }
+        } finally {
+            databaseService.backReadOnly(session.getContextId(), connection);
+        }
+        return subscriptions;
     }
 
-    @Override
-    public Subscription getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException {
-        return null;
+    private static List<Subscription> selectSubscriptions(Connection connection, int contextId, int user, String service, String providerName) throws SQLException {
+        List<Subscription> subscriptions = new ArrayList<Subscription>();
+        PreparedStatement stmt = null;
+        try {
+            int index = 0;
+            stmt = connection.prepareStatement(Statements.SELECT_SUBSCRIPTIONS);
+            stmt.setInt(++index, contextId);
+            stmt.setString(++index, service);
+            stmt.setString(++index, providerName);
+            stmt.setInt(++index, user);
+            ResultSet results = stmt.executeQuery();
+            while(results.next()) {
+                int cid = results.getInt(1);
+                String retService = results.getString(2);
+                String token = results.getString(3);
+                String provider = results.getString(4);
+                int userId = results.getInt(5);
+                long timestamp = results.getLong(6);
+                subscriptions.add(new Subscription(cid, userId, token, retService, MobileNotifierProviders.parseProviderFromParam(provider), timestamp));
+            }
+            return subscriptions;
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 }
