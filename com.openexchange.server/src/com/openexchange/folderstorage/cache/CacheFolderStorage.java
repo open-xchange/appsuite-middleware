@@ -135,16 +135,16 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {
 
-            @Override
-            public Class<OXException> getType() {
-                return OXException.class;
-            }
+        @Override
+        public Class<OXException> getType() {
+            return OXException.class;
+        }
 
-            @Override
-            public OXException newUnexpectedError(final Throwable t) {
-                return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
-            }
-        };
+        @Override
+        public OXException newUnexpectedError(final Throwable t) {
+            return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
+        }
+    };
 
     private static final CacheFolderStorage INSTANCE = new CacheFolderStorage();
 
@@ -1891,7 +1891,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                 i = maxWaitMillis;
                 if (null == i) {
                     final ConfigurationService service = CacheServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-                    final int millis = null == service ? 60000 : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
+                    final int millis = null == service ? 60000 : service.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
                     i = Integer.valueOf(millis << 1);
                     maxWaitMillis = i;
                 }

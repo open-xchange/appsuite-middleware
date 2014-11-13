@@ -10,7 +10,6 @@ Package: open-xchange-grizzly
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Conflicts: open-xchange-ajp
 Provides: open-xchange-httpservice
 Description: The Open-Xchange HTTP Server and Servlet Container
  This package implements an HTTP Server and provides the OSGi HTTP service.

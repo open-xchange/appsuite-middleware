@@ -91,7 +91,7 @@ public final class UnifiedInboxUtility {
         if (null == service) {
             return 60000L;
         }
-        return service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
+        return service.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
     }
 
     /**

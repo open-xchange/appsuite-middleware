@@ -517,29 +517,6 @@
 "USR";"USER";"10";"SETUP_ERROR";"1";"Cannot find property %s.";"TODO";"com.openexchange.groupware.ldap.UserException";
 "USR";"USER";"10";"SETUP_ERROR";"3";"Class %s can not be loaded.";"TODO";"com.openexchange.groupware.ldap.UserException";
 "USR";"USER";"10";"SETUP_ERROR";"4";"Cannot instantiate class %s.";"TODO";"com.openexchange.groupware.ldap.UserException";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"2";"Corrupt AJP package #%d: First two bytes do not indicate a package from server to container: %s %s
-Wrong AJP package's data:
-%s";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"3";"Socket closed by web server";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"4";"No data provided from web server: input stream returned "-1" while reading AJP magic bytes in package #%d";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"7";"Unknown Request Prefix Code: %s";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"8";"Missing payload data in client's body chunk package";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"12";"Unparseable header field %s in forward request package";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"13";"String parse exception: No ending 0x00 found";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"16";"An I/O error occurred: %s";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"19";"Cookie JSESSIONID contains non-matching JVM route: %s not equal to %s";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"20";"Unexpected empty body package received from web server. Total-Received: %d | Content-Length: %d";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"6";"SOCKET_CONNECTION";"21";"AJP server socket could not be bound to port %d. Probably another process is already listening on this port.";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"7";"INTERNAL_ERROR";"1";"";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"8";"CODE_ERROR";"5";"AJP connection is not set to status "ASSIGNED"";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"8";"CODE_ERROR";"6";"Response package exceeds max package size value of 8192k: %s";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"8";"CODE_ERROR";"9";"Empty SEND_BODY_CHUNK package MUST NOT be sent";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"8";"CODE_ERROR";"10";"Integer value exceeds max allowed value (65535): %d";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"8";"CODE_ERROR";"11";"Invalid content-type header value: %s";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"8";"CODE_ERROR";"14";"Unsupported encoding: %s";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"8";"CODE_ERROR";"15";"No attribute name could be found for code: %d";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"8";"CODE_ERROR";"17";"A messaging error occurred: %s";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
-"AJP";"AJP";"10";"SETUP_ERROR";"18";"Missing property AJP_JVM_ROUTE in file "ajp.properties"";"TODO";"com.openexchange.tools.ajp13.AJPv13Exception";
 "IFO";"INFOSTORE";"1";"USER_INPUT";"300";"The requested item does not exist.";"The infoitem does not exist, so the permissions cannot be loaded.";"";
 "IFO";"INFOSTORE";"1";"USER_INPUT";"301";"Could not load documents to check the permissions";"To check permissions infoitems must be loaded to find their folderId and creator.";"";
 "IFO";"INFOSTORE";"1";"USER_INPUT";"400";"You do not have sufficient read permissions.";"The User does not have read permissions on the requested Infoitem. ";"";

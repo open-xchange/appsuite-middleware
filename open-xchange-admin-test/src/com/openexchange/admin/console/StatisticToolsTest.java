@@ -88,10 +88,6 @@ public class StatisticToolsTest extends AbstractRMITest {
 
     private int returnCluster;
 
-    private int returnAjpthreads;
-
-    private int returnAjptasks;
-
     private int returnGeneral;
 
     private int returnMailinterface;
@@ -299,32 +295,6 @@ public class StatisticToolsTest extends AbstractRMITest {
         };
         statisticTools.start(new String[] { "-c", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCluster);
-    }
-
-    @Test
-    public void testAjpThreadsstats() {
-        final StatisticTools statisticTools = new StatisticTools() {
-
-            @Override
-            protected void sysexit(int exitCode) {
-                StatisticToolsTest.this.returnAjpthreads = exitCode;
-            }
-        };
-        statisticTools.start(new String[] { "--ajpthreadsstats", "-H", getRMIHost() }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnAjpthreads);
-    }
-
-    @Test
-    public void testAjpTasksstats() {
-        final StatisticTools statisticTools = new StatisticTools() {
-
-            @Override
-            protected void sysexit(int exitCode) {
-                StatisticToolsTest.this.returnAjptasks = exitCode;
-            }
-        };
-        statisticTools.start(new String[] { "--ajptasksstats", "-H", getRMIHost() }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnAjptasks);
     }
 
     @Test

@@ -521,9 +521,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final String CONTENTTYPE_UPLOAD = "multipart/form-data";
 
     /**
-     * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
-     * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
-     * session.
+     * The service method of HttpServlet is extended to catch bad exceptions and keep the socket alive. Otherwise Apache thinks in a
+     * balancer environment this container is temporarily dead and redirects requests to other containers. This will kill the users session.
      */
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {

@@ -63,7 +63,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -89,11 +88,9 @@ import org.jolokia.client.J4pClient;
 import org.jolokia.client.exception.J4pConnectException;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
-import org.jolokia.client.request.J4pExecRequest;
 import org.jolokia.client.request.J4pExecResponse;
 import org.jolokia.client.request.J4pListRequest;
 import org.jolokia.client.request.J4pListResponse;
-import org.jolokia.client.request.J4pReadRequest;
 import org.jolokia.client.request.J4pReadResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -101,7 +98,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * {@link JolokiaCLT}
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 public class JolokiaCLT {
@@ -166,10 +163,6 @@ public class JolokiaCLT {
 
     private static final String OPT_CACHE_STATS_LONG = "cachestats";
 
-    private static final String OPT_AJPTHREADS_STATS_LONG = "ajpthreadsstats";
-
-    private static final String OPT_AJPTASKS_STATS_LONG = "ajptasksstats";
-
     private static final String OPT_GENERAL_STATS_LONG = "generalstats";
 
     private static final String OPT_MAILINTERFACE_STATS_LONG = "mailinterfacestats";
@@ -221,10 +214,6 @@ public class JolokiaCLT {
     private Option officestats = null;
 
     private Option eventadminstats = null;
-
-    private Option ajpthreadsstats = null;
-
-    private Option ajptasksstats = null;
 
     private Option generalstats = null;
 
@@ -390,10 +379,6 @@ public class JolokiaCLT {
             "shows the OSGi EventAdmin stats",
             false);
         options.addOption(eventadminstats);
-        this.ajpthreadsstats = createLongOption(OPT_AJPTHREADS_STATS_LONG, "shows the AJP Thread stats", false);
-        options.addOption(ajpthreadsstats);
-        this.ajptasksstats = createLongOption(OPT_AJPTASKS_STATS_LONG, "shows the AJP Tasks stats", false);
-        options.addOption(ajpthreadsstats);
         this.generalstats = createLongOption(OPT_GENERAL_STATS_LONG, "shows the open-xchange general stats", false);
         options.addOption(generalstats);
         this.mailinterfacestats = createLongOption(OPT_MAILINTERFACE_STATS_LONG, "shows the open-xchange mailinterface stats", false);
@@ -488,7 +473,7 @@ public class JolokiaCLT {
             System.out.print(showOperations(j4pClient));
             count++;
         }
-        final String operation = (String) cmd.getOptionValue(getUsableOptionRepresentation(this.dooperation));
+        final String operation = cmd.getOptionValue(getUsableOptionRepresentation(this.dooperation));
         if (null != operation && 0 == count) {
             final Object result = doOperation(j4pClient, operation);
             if (null != result) {
@@ -510,14 +495,6 @@ public class JolokiaCLT {
         }
         if (cmd.hasOption(getUsableOptionRepresentation(this.officestats)) && 0 == count) {
             System.out.print(showOfficeData(j4pClient));
-            count++;
-        }
-        if (cmd.hasOption(getUsableOptionRepresentation(this.ajpthreadsstats)) && 0 == count) {
-            System.out.print(showAJPv13ServerThreadsMonitor(j4pClient));
-            count++;
-        }
-        if (cmd.hasOption(getUsableOptionRepresentation(this.ajptasksstats)) && 0 == count) {
-            System.out.print(showAJPv13TaskMonitor(j4pClient));
             count++;
         }
         if (cmd.hasOption(getUsableOptionRepresentation(this.generalstats)) && 0 == count) {
@@ -550,7 +527,7 @@ public class JolokiaCLT {
         if (0 == count) {
             System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(OPT_RUNTIME_STATS_LONG).append(
                 ", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(
-                ", sessionstats)"));
+                    ", sessionstats)"));
             printHelp();
         } else if (count > 1) {
             System.err.println("More than one of the stat options given. Using the first one only");
@@ -774,14 +751,6 @@ public class JolokiaCLT {
         return getStats(j4pClient, "com.openexchange.monitoring:name=GeneralMonitor");
     }
 
-    private static String showAJPv13TaskMonitor(J4pClient j4pClient) throws MalformedObjectNameException, J4pException {
-        return getStats(j4pClient, "com.openexchange.monitoring:name=AJPv13TaskMonitor");
-    }
-
-    private static String showAJPv13ServerThreadsMonitor(J4pClient j4pClient) throws MalformedObjectNameException, J4pException {
-        return getStats(j4pClient, "com.openexchange.monitoring:name=AJPv13ServerThreadsMonitor");
-    }
-
     private static String showCallMonitor(J4pClient j4pClient) throws MalformedObjectNameException, J4pException {
         return getStats(j4pClient, "com.openexchange.admin.monitor:name=CallMonitor");
     }
@@ -836,22 +805,19 @@ public class JolokiaCLT {
         J4pListResponse listResponse = j4pClient.execute(listRequest);
         JSONObject list = listResponse.getValue();
         @SuppressWarnings("unchecked") Set<Map.Entry<String, JSONObject>> entrySet = list.entrySet();
-        for (Iterator<Entry<String, JSONObject>> classIterator = entrySet.iterator(); classIterator.hasNext();) {
-            Entry<String, JSONObject> classEntry = classIterator.next();
+        for (Entry<String, JSONObject> classEntry : entrySet) {
             String className = classEntry.getKey();
             JSONObject classJsonObject = classEntry.getValue();
             @SuppressWarnings("unchecked")
             Set<Map.Entry<String, JSONObject>> classEntrySet = classJsonObject.entrySet();
-            for (Iterator<Entry<String, JSONObject>> innerIterator = classEntrySet.iterator(); innerIterator.hasNext();) {
-                Entry<String, JSONObject> innerE = innerIterator.next();
+            for (Entry<String, JSONObject> innerE : classEntrySet) {
                 String name = innerE.getKey();
                 JSONObject innerJo = innerE.getValue();
                 JSONObject operations = (JSONObject) innerJo.get("op");
                 if (operations != null) {
                     @SuppressWarnings("unchecked")
                     final Set<Map.Entry<String, ?>> operationsEntrySet = operations.entrySet();
-                    for (Iterator<Entry<String, ?>> operationsIterator = operationsEntrySet.iterator(); operationsIterator.hasNext();) {
-                        final Entry<String, ?> operationE = operationsIterator.next();
+                    for (Entry<String, ?> operationE : operationsEntrySet) {
                         final String operationName = operationE.getKey();
                         sb.append(writeOperation(className, name, operationE, operationName));
                     }
@@ -878,7 +844,7 @@ public class JolokiaCLT {
 
     /**
      * Print Grizzly related management info to given PrintStream if Grizzly's MBeans can be found.
-     * 
+     *
      * @param j4pClient The MBeanServerConnection to be used for querying MBeans.
      * @param out the {@link PrintStream} to write the output to.
      * @throws J4pException
@@ -909,7 +875,7 @@ public class JolokiaCLT {
 
     /**
      * Method to prepare and display the garbage collection information.
-     * 
+     *
      * @param j4pClient - The MBeanServerConnection to be used for querying MBeans.
      * @throws J4pException
      * @throws MalformedObjectNameException - thrown while creating {@link ObjectName}

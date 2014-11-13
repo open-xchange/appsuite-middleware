@@ -71,7 +71,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.crawler"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.html"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tx"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.ajp"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.folder.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chat"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chat.json"/>
@@ -131,5 +130,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.composition"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore.impl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.grizzly"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

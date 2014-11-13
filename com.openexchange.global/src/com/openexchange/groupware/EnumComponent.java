@@ -124,10 +124,6 @@ public enum EnumComponent implements Component {
      */
     GROUP("GRP"),
     /**
-     * Module AJP
-     */
-    AJP("AJP"),
-    /**
      * Module PRINCIPAL
      */
     PRINCIPAL("PRP"),

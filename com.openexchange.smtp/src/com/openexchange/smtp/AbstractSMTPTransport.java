@@ -143,9 +143,13 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
     private static final class SaslSmtpLoginAction implements PrivilegedExceptionAction<Object> {
 
         private final Transport transport;
+
         private final String server;
+
         private final int port;
+
         private final String login;
+
         private final String pw;
 
         protected SaslSmtpLoginAction(final Transport transport, final String server, final int port, final String login, final String pw) {
@@ -363,7 +367,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     smtpProps.put("mail.smtp.class", JavaSMTPTransport.class.getName());
                     smtpProps.put("com.openexchange.mail.maxMailSize", Long.toString(getMaxMailSize()));
 
-
                     /*
                      * Set properties
                      */
@@ -476,12 +479,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, sPort);
                     smtpSession = javax.mail.Session.getInstance(smtpProps, null);
-                    smtpSession.addProvider(new Provider(
-                        Provider.Type.TRANSPORT,
-                        "smtp",
-                        JavaSMTPTransport.class.getName(),
-                        "Open-Xchange, Inc.",
-                        "7.2.2"));
+                    smtpSession.addProvider(new Provider(Provider.Type.TRANSPORT, "smtp", JavaSMTPTransport.class.getName(), "Open-Xchange, Inc.", "7.2.2"));
                 }
             }
         }
@@ -978,9 +976,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
-
     private String getFallbackHostname() {
-        final String serverName = LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME);
+        final String serverName = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }

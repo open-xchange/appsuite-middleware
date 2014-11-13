@@ -152,7 +152,7 @@ public class AJAXRequestData {
     /** The Servlet's request URI */
     private @Nullable String servletRequestUri;
 
-    /** The AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt; */
+    /** The route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt; */
     private @Nullable String route;
 
     /** The upload event */
@@ -1348,9 +1348,9 @@ public class AJAXRequestData {
     }
 
     /**
-     * Gets the AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
+     * Gets the route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
      *
-     * @return The AJP route
+     * @return The route
      */
     public String getRoute() {
         return route;
@@ -1375,9 +1375,9 @@ public class AJAXRequestData {
     }
 
     /**
-     * Sets the AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
+     * Sets the route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
      *
-     * @param route The AJP route
+     * @param route The route
      */
     public void setRoute(final String route) {
         this.route = route;

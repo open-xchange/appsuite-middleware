@@ -123,34 +123,7 @@ public class RequestDBProvider implements DBProvider {
     }
 
     public void commit() throws OXException{
-        checkThreadDeath();
         commit(getActiveTransaction());
-    }
-
-    private void checkThreadDeath() {
-        /*-
-         * TODO:
-         *
-        final Thread current = Thread.currentThread();
-        if (current instanceof AJPv13ListenerThread) {
-            final AJPv13ListenerThread ajpv13Thread = (AJPv13ListenerThread) current;
-            if(ajpv13Thread.isDead()) {
-                try {
-                    rollback();
-                } catch (final OXException x) {
-                    LOG.debug("",x);
-                }
-                try {
-                    finish();
-                } catch (final OXException x) {
-                    LOG.debug("",x);
-                }
-
-                throw new ThreadDeath();
-
-            }
-        }
-        */
     }
 
     public void rollback() throws OXException{
@@ -199,7 +172,6 @@ public class RequestDBProvider implements DBProvider {
 
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException{
-        checkThreadDeath();
         final DBTransaction tx = getActiveTransaction();
         int rc = readCount.get();
         if(tx != null && tx.ctx == null) {
@@ -232,7 +204,6 @@ public class RequestDBProvider implements DBProvider {
 
     @Override
     public Connection getWriteConnection(final Context ctx) throws OXException{
-        checkThreadDeath();
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {
             return getProvider().getWriteConnection(ctx);

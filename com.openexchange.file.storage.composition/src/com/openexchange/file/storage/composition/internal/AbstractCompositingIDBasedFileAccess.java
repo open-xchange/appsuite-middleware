@@ -1926,9 +1926,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     private EventProperty extractRemoteAddress() {
         Object serverName = LogProperties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-        if (null == serverName) {
-            serverName = LogProperties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
-        }
         if (null != serverName) {
             return new EventProperty("remoteAddress", serverName.toString());
         }

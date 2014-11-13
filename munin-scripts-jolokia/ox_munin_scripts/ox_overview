@@ -20,8 +20,6 @@ if ($ARGV[0] and $ARGV[0] eq "config") {
     print "graph_vlabel Number\n";
     print "nbofdbc.label NumberOfDBConnections\n";
     print "nbofdbc.draw LINE1\n";
-    print "nbofajp.label NumberOfOpenAJPSockets\n";
-    print "nbofajp.draw LINE1\n";
     print "nboffile.label OpenFileDescriptorCount\n";
     print "nboffile.draw LINE1\n";
     exit 0
@@ -32,18 +30,17 @@ my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
 callUrl("nbofdbc","/read/com.openexchange.pooling:name=Overview/NumConnections");
-callUrl("nbofajp","/read/com.openexchange.monitoring:name=GeneralMonitor/NumberOfOpenAJPSockets");
 callUrl("nboffile","/read/java.lang:type=OperatingSystem/OpenFileDescriptorCount");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();
 	my $req = HTTP::Request->new(GET => "$url$_[1]");
 	$req->authorization_basic($username,$password);
-	
+
 	$req->header('Accept', => 'text/html');
-	
+
 	my $response = $ua->request($req);
-	
+
 	if ($response->is_success) {
 		my $json = decode_json($response->decoded_content);
 		if (defined $json->{value}){

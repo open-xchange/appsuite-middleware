@@ -54,63 +54,60 @@ import junit.framework.TestSuite;
 
 
 /**
- * A collection of unit tests that were found by find_tests_without_suites.rb
- * There may be a more appropriate place for these, but at least now they'll
- * run when the server is built.
+ * A collection of unit tests that were found by find_tests_without_suites.rb There may be a more appropriate place for these, but at least
+ * now they'll run when the server is built. Script: ruby find_tests_without_suites.rb ~/git/backend/openexchange-test/unittests
+ * com.openexchange.test.UnitTests com.openexchange.test.I18nTests
  *
- * Script: ruby find_tests_without_suites.rb ~/git/backend/openexchange-test/unittests com.openexchange.test.UnitTests com.openexchange.test.I18nTests
- * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class LostAndFoundUnitTests {
-	
+
     public static Test suite() {
         final TestSuite tests = new TestSuite();
 
-    	tests.addTest(com.openexchange.database.ConfigDBUniqueIDTest.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug7470Test.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug7732Test.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug8475.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug8527.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug8653.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug8654.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug8681forCSV.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug8681forICAL.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.Bug8681forVCard.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.CSVContactExportTest.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.CSVContactImportTest.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.CSVParserTest.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.ICalImportTest.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.OutlookCSVContactImportTest.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.SizedInputStreamTest.suite());
-    	tests.addTest(com.openexchange.groupware.importexport.VCardImportTest.suite());
-    	tests.addTestSuite(com.openexchange.folder.FolderTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-    	tests.addTestSuite(com.openexchange.groupware.calendar.CalendarMoveTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.contexts.LoginTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.reminder.ReminderTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.update.ClearLeftoverAttachmentsTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.update.ClearOrphanedInfostoreDocumentsTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.update.CreateGenconfTablesTaskTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.update.CreatePublishTablesTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.update.CreateSubscribeTableTest.class);
-    	tests.addTestSuite(com.openexchange.groupware.update.RenamePersonalInfostoreFoldersTest.class);
-    	tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
-    	tests.addTestSuite(com.openexchange.mail.MailFolderTest.class);
-    	tests.addTestSuite(com.openexchange.mail.MailJSONHandlerTest.class);
-    	tests.addTestSuite(com.openexchange.mail.MailLogicToolsTest.class);
-    	tests.addTestSuite(com.openexchange.mail.MailMessageTest.class);
-    	tests.addTestSuite(com.openexchange.mail.MailParserWriterTest.class);
-    	tests.addTestSuite(com.openexchange.mail.folderstorage.MailFolderSpecialCharsTest.class);
-    	tests.addTestSuite(com.openexchange.mail.messagestorage.MailRFC2231Test.class);
-    	tests.addTestSuite(com.openexchange.resource.ResourceCreateTest.class);
-    	tests.addTestSuite(com.openexchange.resource.ResourceDeleteTest.class);
-    	tests.addTestSuite(com.openexchange.resource.ResourceUpdateTest.class);
-    	tests.addTestSuite(com.openexchange.server.ComplexDBPoolTest.class);
-    	tests.addTestSuite(com.openexchange.server.SimpleDBPoolTest.class);
-    	tests.addTestSuite(com.openexchange.tools.oxfolder.OXFolderDeleteListenerTest.class);
-    	tests.addTestSuite(com.openexchange.tools.regex.ParseCookiesTest.class);
-    	tests.addTestSuite(com.openexchange.tools.servlet.ServletConfigLoaderTest.class);
+        tests.addTest(com.openexchange.database.ConfigDBUniqueIDTest.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug7470Test.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug7732Test.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug8475.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug8527.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug8653.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug8654.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug8681forCSV.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug8681forICAL.suite());
+        tests.addTest(com.openexchange.groupware.importexport.Bug8681forVCard.suite());
+        tests.addTest(com.openexchange.groupware.importexport.CSVContactExportTest.suite());
+        tests.addTest(com.openexchange.groupware.importexport.CSVContactImportTest.suite());
+        tests.addTest(com.openexchange.groupware.importexport.CSVParserTest.suite());
+        tests.addTest(com.openexchange.groupware.importexport.ICalImportTest.suite());
+        tests.addTest(com.openexchange.groupware.importexport.OutlookCSVContactImportTest.suite());
+        tests.addTest(com.openexchange.groupware.importexport.SizedInputStreamTest.suite());
+        tests.addTest(com.openexchange.groupware.importexport.VCardImportTest.suite());
+        tests.addTestSuite(com.openexchange.folder.FolderTest.class);
+        tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
+        tests.addTestSuite(com.openexchange.groupware.calendar.CalendarMoveTest.class);
+        tests.addTestSuite(com.openexchange.groupware.contexts.LoginTest.class);
+        tests.addTestSuite(com.openexchange.groupware.reminder.ReminderTest.class);
+        tests.addTestSuite(com.openexchange.groupware.update.ClearLeftoverAttachmentsTest.class);
+        tests.addTestSuite(com.openexchange.groupware.update.ClearOrphanedInfostoreDocumentsTest.class);
+        tests.addTestSuite(com.openexchange.groupware.update.CreateGenconfTablesTaskTest.class);
+        tests.addTestSuite(com.openexchange.groupware.update.CreatePublishTablesTest.class);
+        tests.addTestSuite(com.openexchange.groupware.update.CreateSubscribeTableTest.class);
+        tests.addTestSuite(com.openexchange.groupware.update.RenamePersonalInfostoreFoldersTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailFolderTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailJSONHandlerTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailLogicToolsTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailMessageTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailParserWriterTest.class);
+        tests.addTestSuite(com.openexchange.mail.folderstorage.MailFolderSpecialCharsTest.class);
+        tests.addTestSuite(com.openexchange.mail.messagestorage.MailRFC2231Test.class);
+        tests.addTestSuite(com.openexchange.resource.ResourceCreateTest.class);
+        tests.addTestSuite(com.openexchange.resource.ResourceDeleteTest.class);
+        tests.addTestSuite(com.openexchange.resource.ResourceUpdateTest.class);
+        tests.addTestSuite(com.openexchange.server.ComplexDBPoolTest.class);
+        tests.addTestSuite(com.openexchange.server.SimpleDBPoolTest.class);
+        tests.addTestSuite(com.openexchange.tools.oxfolder.OXFolderDeleteListenerTest.class);
+        tests.addTestSuite(com.openexchange.tools.regex.ParseCookiesTest.class);
         return tests;
     }
 }

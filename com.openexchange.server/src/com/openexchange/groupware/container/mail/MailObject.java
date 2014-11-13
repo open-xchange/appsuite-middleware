@@ -608,7 +608,7 @@ public class MailObject {
     }
 
     private static String getHostName() {
-        final String serverName = LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME);
+        final String serverName = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }

@@ -196,7 +196,7 @@ public final class ImageUtility {
      * @param session The session
      * @param imageDataSource The data source
      * @param preferRelativeUrl Whether to prefer a relative image URL
-     * @param addRoute <code>true</code> to add AJP route; otherwise <code>false</code>
+     * @param addRoute <code>true</code> to add route; otherwise <code>false</code>
      * @param sb The string builder to write to
      */
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final boolean addRoute, final StringBuilder sb) {
@@ -224,8 +224,7 @@ public final class ImageUtility {
                         optImageHostSet = true;
                     }
                 }
-                final String ajpRoute = LogProperties.getLogProperty(LogProperties.Name.AJP_HTTP_SESSION);
-                route = null == ajpRoute ? LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
+                route = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION);
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred

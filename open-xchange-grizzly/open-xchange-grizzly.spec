@@ -25,7 +25,6 @@ Summary:       The Open-Xchange HTTP Server and Servlet Container
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-httpservice
-Conflicts:     open-xchange-ajp
 
 %description
 This package implements an HTTP Server and provides the OSGi HTTP service.

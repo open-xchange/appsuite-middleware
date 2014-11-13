@@ -97,50 +97,6 @@ public final class LogProperties {
          */
         THREAD_ID("__threadId"),
         /**
-         * com.openexchange.ajpv13.requestURI
-         */
-        AJP_REQUEST_URI("com.openexchange.ajpv13.requestURI"),
-        /**
-         * com.openexchange.ajpv13.servletPath
-         */
-        AJP_SERVLET_PATH("com.openexchange.ajpv13.servletPath"),
-        /**
-         * com.openexchange.ajpv13.pathInfo
-         */
-        AJP_PATH_INFO("com.openexchange.ajpv13.pathInfo"),
-        /**
-         * com.openexchange.ajpv13.requestIp
-         */
-        AJP_REQUEST_IP("com.openexchange.ajpv13.requestIp"),
-        /**
-         * com.openexchange.ajpv13.requestId
-         */
-        AJP_REQUEST_ID("com.openexchange.ajpv13.requestId"),
-        /**
-         * com.openexchange.ajpv13.serverName
-         */
-        AJP_SERVER_NAME("com.openexchange.ajpv13.serverName"),
-        /**
-         * com.openexchange.ajpv13.threadName
-         */
-        AJP_THREAD_NAME("com.openexchange.ajpv13.threadName"),
-        /**
-         * com.openexchange.ajpv13.remotePort
-         */
-        AJP_REMOTE_PORT("com.openexchange.ajpv13.remotePort"),
-        /**
-         * com.openexchange.ajpv13.remoteAddres
-         */
-        AJP_REMOTE_ADDRESS("com.openexchange.ajpv13.remoteAddress"),
-        /**
-         * com.openexchange.ajp13.httpSession
-         */
-        AJP_HTTP_SESSION("com.openexchange.ajp13.httpSession"),
-        /**
-         * com.openexchange.ajp13.userAgent
-         */
-        AJP_USER_AGENT("com.openexchange.ajp13.userAgent"),
-        /**
          * com.openexchange.session.authId
          */
         SESSION_AUTH_ID("com.openexchange.session.authId"),

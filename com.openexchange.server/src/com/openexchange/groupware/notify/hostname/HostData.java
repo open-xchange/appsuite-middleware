@@ -57,7 +57,7 @@ package com.openexchange.groupware.notify.hostname;
 public interface HostData {
 
     /**
-     * Gets the AJP route: : &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
+     * Gets the route: : &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
      *
      * @return The route
      */

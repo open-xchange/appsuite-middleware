@@ -327,7 +327,7 @@ public class AJAXRequestDataTools {
     }
 
     /**
-     * Parses host name, secure and AJP route.
+     * Parses host name, secure and route.
      *
      * @param request The AJAX request data
      * @param req The HTTP Servlet request

@@ -62,10 +62,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.servlet.ServletConfigLoader;
-import com.openexchange.ajp13.servlet.http.HttpManagersInit;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
@@ -141,6 +137,7 @@ import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
@@ -257,26 +254,32 @@ public final class Init {
 
             @Override
             public void start() throws OXException {
-                AJPv13Config.getInstance().start();
-                ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
-                if (null == AJPv13Server.getInstance()) {
-                    AJPv13Server.setInstance(new com.openexchange.ajp13.AJPv13ServerImpl());
-                }
-                try {
-                    AJPv13Server.startAJPServer();
-                    HttpManagersInit.getInstance().start();
-                } catch (OXException e) {
-                    LOG.error("", e);
-                }
+                GrizzlyConfig.getInstance().start();
+
+                // TODO replace with grizzly
+                // AJPv13Config.getInstance().start();
+                // ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
+                // if (null == AJPv13Server.getInstance()) {
+                // AJPv13Server.setInstance(new com.openexchange.ajp13.AJPv13ServerImpl());
+                // }
+                // try {
+                // AJPv13Server.startAJPServer();
+                // HttpManagersInit.getInstance().start();
+                // } catch (OXException e) {
+                // LOG.error("", e);
+                // }
             }
 
             @Override
             public void stop() throws OXException {
-                HttpManagersInit.getInstance().stop();
-                AJPv13Server.stopAJPServer();
-                AJPv13Server.releaseInstrance();
-                ServletConfigLoader.resetDefaultInstance();
-                AJPv13Config.getInstance().stop();
+                // TODO replace with grizzly
+                // HttpManagersInit.getInstance().stop();
+                // AJPv13Server.stopAJPServer();
+                // AJPv13Server.releaseInstrance();
+                // ServletConfigLoader.resetDefaultInstance();
+                // AJPv13Config.getInstance().stop();
+
+                GrizzlyConfig.getInstance().stop();
             }
         },
         /**
@@ -451,7 +454,7 @@ public final class Init {
         final ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
-        com.openexchange.ajp13.Services.setServiceLookup(LOOKUP);
+        com.openexchange.http.grizzly.osgi.Services.setServiceLookup(LOOKUP);
     }
 
     private static void startAndInjectThreadPoolBundle() {

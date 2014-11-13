@@ -130,7 +130,7 @@ public final class StorageUtility {
         if (null == service) {
             return 60000L;
         }
-        return service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
+        return service.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
     }
 
     public static String getAllAddresses(final InternetAddress[] internetAddrs) {

@@ -2423,7 +2423,6 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*-
          * On socket layer characters are casted to byte values.
          *
-         * See AJPv13Response.writeString():
          * sink.write((byte) chars[i]);
          *
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
