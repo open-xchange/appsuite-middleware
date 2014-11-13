@@ -506,113 +506,114 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         security.checkFolderId(document.getFolderId(), context);
 
         boolean wasCreation = false;
-        if (document.getId() == InfostoreFacade.NEW) {
-            wasCreation = true;
-            final EffectiveInfostoreFolderPermission isperm = security.getFolderPermission(
-                document.getFolderId(),
-                context,
-                session.getUser(),
-                session.getUserPermissionBits());
-            if (!isperm.canCreateObjects()) {
-                throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
-            }
-
-            {
-                com.openexchange.file.storage.Quota storageQuota = getFileQuota(session);
-                long limit = storageQuota.getLimit();
-                if (limit > 0) {
-                    long usage = storageQuota.getUsage();
-                    if (usage >= limit) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_FILES.create(Long.valueOf(usage), Long.valueOf(limit));
-                    }
-                }
-            }
-
-            setDefaults(document);
-
-            VALIDATION.validate(document);
-            CheckSizeSwitch.checkSizes(document, getProvider(), context);
-
-            final boolean titleAlso = document.getFileName() != null && document.getTitle() != null && document.getFileName().equals(document.getTitle());
-
-            final InfostoreFilenameReservation reservation = reserve(
-                document.getFileName(),
-                document.getFolderId(),
-                document.getId(),
-                context, true);
-
-            document.setFileName(reservation.getFilename());
-            if(titleAlso) {
-                document.setTitle(reservation.getFilename());
-            }
-
-            try {
-                Connection writeCon = null;
-                try {
-                    startDBTransaction();
-                    writeCon = getWriteConnection(context);
-                    document.setId(getId(context, writeCon));
-                    commitDBTransaction();
-                } catch (final SQLException e) {
-                    throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
-                } finally {
-                    releaseWriteConnection(context, writeCon);
-                    finishDBTransaction();
-                }
-
-                Date now = new Date();
-                if (null == document.getLastModified()) {
-                    document.setLastModified(now);
-                }
-                if (null == document.getCreationDate()) {
-                    document.setCreationDate(now);
-                }
-                document.setCreatedBy(session.getUserId());
-                document.setModifiedBy(session.getUserId());
-
-                // db.createDocument(document, data, sessionObj.getContext(),
-                // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
-
-                if (null != data) {
-                    document.setVersion(1);
-                } else {
-                    document.setVersion(0);
-                }
-
-                perform(new CreateDocumentAction(this, QUERIES, context, Collections.singletonList(document)), true);
-                perform(new CreateObjectPermissionAction(this, context, document), true);
-
-                final DocumentMetadata version0 = new DocumentMetadataImpl(document);
-                version0.setFileName(null);
-                version0.setFileSize(0);
-                version0.setFileMD5Sum(null);
-                version0.setFileMIMEType(null);
-                version0.setVersion(0);
-                version0.setFilestoreLocation(null);
-
-                perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0)), true);
-
-                if (data != null) {
-                    SaveFileAction saveFile = new SaveFileAction(getFileStorage(isperm.getFolderOwner(), session.getContextId()), data, document.getFileSize());
-                    perform(saveFile, false);
-                    document.setVersion(1);
-                    document.setFilestoreLocation(saveFile.getFileStorageID());
-                    document.setFileMD5Sum(saveFile.getChecksum());
-                    document.setFileSize(saveFile.getByteCount());
-
-                    perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document)), true);
-                }
-
-                indexDocument(context, session.getUserId(), document.getId(), -1L, wasCreation);
-
-                return new IDTuple(String.valueOf(document.getFolderId()), String.valueOf(document.getId()));
-            } finally {
-                if (reservation != null) {
-                    reservation.destroySilently();
-                }
-            }
-        } else {
+        if (document.getId() != InfostoreFacade.NEW) {
             return saveDocument(document, data, sequenceNumber, nonNull(document), session);
+        }
+
+        // Insert NEW document
+        wasCreation = true;
+        final EffectiveInfostoreFolderPermission isperm = security.getFolderPermission(
+            document.getFolderId(),
+            context,
+            session.getUser(),
+            session.getUserPermissionBits());
+        if (!isperm.canCreateObjects()) {
+            throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        }
+
+        {
+            com.openexchange.file.storage.Quota storageQuota = getFileQuota(session);
+            long limit = storageQuota.getLimit();
+            if (limit > 0) {
+                long usage = storageQuota.getUsage();
+                if (usage >= limit) {
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_FILES.create(Long.valueOf(usage), Long.valueOf(limit));
+                }
+            }
+        }
+
+        setDefaults(document);
+
+        VALIDATION.validate(document);
+        CheckSizeSwitch.checkSizes(document, getProvider(), context);
+
+        final boolean titleAlso = document.getFileName() != null && document.getTitle() != null && document.getFileName().equals(document.getTitle());
+
+        final InfostoreFilenameReservation reservation = reserve(
+            document.getFileName(),
+            document.getFolderId(),
+            document.getId(),
+            context, true);
+
+        document.setFileName(reservation.getFilename());
+        if(titleAlso) {
+            document.setTitle(reservation.getFilename());
+        }
+
+        try {
+            Connection writeCon = null;
+            try {
+                startDBTransaction();
+                writeCon = getWriteConnection(context);
+                document.setId(getId(context, writeCon));
+                commitDBTransaction();
+            } catch (final SQLException e) {
+                throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
+            } finally {
+                releaseWriteConnection(context, writeCon);
+                finishDBTransaction();
+            }
+
+            Date now = new Date();
+            if (null == document.getLastModified()) {
+                document.setLastModified(now);
+            }
+            if (null == document.getCreationDate()) {
+                document.setCreationDate(now);
+            }
+            document.setCreatedBy(session.getUserId());
+            document.setModifiedBy(session.getUserId());
+
+            // db.createDocument(document, data, sessionObj.getContext(),
+            // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
+
+            if (null != data) {
+                document.setVersion(1);
+            } else {
+                document.setVersion(0);
+            }
+
+            perform(new CreateDocumentAction(this, QUERIES, context, Collections.singletonList(document)), true);
+            perform(new CreateObjectPermissionAction(this, context, document), true);
+
+            final DocumentMetadata version0 = new DocumentMetadataImpl(document);
+            version0.setFileName(null);
+            version0.setFileSize(0);
+            version0.setFileMD5Sum(null);
+            version0.setFileMIMEType(null);
+            version0.setVersion(0);
+            version0.setFilestoreLocation(null);
+
+            perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0)), true);
+
+            if (data != null) {
+                SaveFileAction saveFile = new SaveFileAction(getFileStorage(isperm.getFolderOwner(), session.getContextId()), data, document.getFileSize());
+                perform(saveFile, false);
+                document.setVersion(1);
+                document.setFilestoreLocation(saveFile.getFileStorageID());
+                document.setFileMD5Sum(saveFile.getChecksum());
+                document.setFileSize(saveFile.getByteCount());
+
+                perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document)), true);
+            }
+
+            indexDocument(context, session.getUserId(), document.getId(), -1L, wasCreation);
+
+            return new IDTuple(String.valueOf(document.getFolderId()), String.valueOf(document.getId()));
+        } finally {
+            if (reservation != null) {
+                reservation.destroySilently();
+            }
         }
     }
 
