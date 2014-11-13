@@ -80,11 +80,7 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.search.ComparisonType;
 import com.openexchange.mail.search.ReceivedDateTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
@@ -123,15 +119,9 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
                 days = Strings.isEmpty(sDays) ? MailProperties.getInstance().getDefaultArchiveDays() : Strings.parsePositiveInt(sDays.trim());
             }
             String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            // Check service
-            final MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            if (null == service) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class.getName());
-            }
-            final ServerSession session = req.getSession();
-            final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(sourceFolder);
-            final int accountId = fa.getAccountId();
-            final MailAccount mailAccount = service.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            ServerSession session = req.getSession();
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(sourceFolder);
+            int accountId = fa.getAccountId();
 
             // Connect mail access
             mailAccess = MailAccess.getInstance(session, accountId);
