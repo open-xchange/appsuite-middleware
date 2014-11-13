@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSpecificContainerRetrievalService.CleanUp;
@@ -103,7 +103,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         final String sessionID = session.getSessionID();
         Queue<String> tokenList = tokensPerSession.get(sessionID);
         if(tokenList == null) {
-            final Queue<String> tmp = new Java7ConcurrentLinkedQueue<String>();
+            final Queue<String> tmp = new ConcurrentLinkedQueue<String>();
             tokenList = tokensPerSession.putIfAbsent(sessionID, tmp);
             if(tokenList == null) {
                 tokenList = tmp;

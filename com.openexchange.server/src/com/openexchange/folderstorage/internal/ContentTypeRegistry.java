@@ -58,6 +58,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
@@ -65,7 +66,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.folderstorage.virtual.VirtualFolderType;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 
 /**
  * {@link ContentTypeRegistry} - A registry for a tree's content types.
@@ -96,7 +96,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
         public Element() {
             super();
             concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
-            generalStorages = new Java7ConcurrentLinkedQueue<FolderStorage>();
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>();
         }
 
         public ConcurrentMap<ContentType, FolderStorage> getConcreteStorages() {
@@ -113,7 +113,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
          * @param replacement The replacement
          */
         public void replaceGeneralStorages(final List<FolderStorage> replacement) {
-            generalStorages = new Java7ConcurrentLinkedQueue<FolderStorage>(replacement);
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>(replacement);
         }
 
     }

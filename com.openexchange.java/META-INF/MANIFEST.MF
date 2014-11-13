@@ -31,7 +31,5 @@ Import-Package: com.fasterxml.jackson.core,
 Export-Package: com.damienmiller,
  com.davekoelle,
  com.openexchange.java,
- com.openexchange.java.forkjoin,
- com.openexchange.java.misc,
  com.openexchange.java.util,
  it.geosolutions.imageio.stream.eraf

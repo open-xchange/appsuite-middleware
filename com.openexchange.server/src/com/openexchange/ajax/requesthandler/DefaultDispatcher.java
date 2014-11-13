@@ -59,6 +59,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
@@ -69,7 +70,6 @@ import com.openexchange.continuation.ContinuationExceptionCodes;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.continuation.ContinuationResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -104,7 +104,7 @@ public class DefaultDispatcher implements Dispatcher {
         noSecretCallbackCache = new ConcurrentHashMap<StrPair, Boolean>(128);
 
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
-        customizerFactories = new Java7ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
+        customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
     }
 
     @Override

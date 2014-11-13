@@ -60,12 +60,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.Streams;
 import com.openexchange.messaging.ByteArrayContent;
 import com.openexchange.messaging.CaptchaParams;
@@ -115,8 +115,8 @@ public class MessagingMessageParser {
      */
     public MessagingMessageParser() {
         super();
-        headerParsers = new Java7ConcurrentLinkedQueue<MessagingHeaderParser>();
-        contentParsers = new Java7ConcurrentLinkedQueue<MessagingContentParser>();
+        headerParsers = new ConcurrentLinkedQueue<MessagingHeaderParser>();
+        contentParsers = new ConcurrentLinkedQueue<MessagingContentParser>();
         // Header parsers
         headerParsers.add(new AddressHeaderParser());
         headerParsers.add(new ContentTypeParser());
