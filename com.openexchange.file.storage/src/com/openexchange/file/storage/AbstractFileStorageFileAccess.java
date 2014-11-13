@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -199,24 +198,6 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void unlock(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void lock(String folderId, String id, long diff) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void touch(String folderId, String id) throws OXException {
         // TODO Auto-generated method stub
 
@@ -234,22 +215,6 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
 
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        return getVersions(folderId, id, ALL_FIELDS);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return getVersions(folderId, id, ALL_FIELDS, null, SortDirection.DEFAULT);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -273,12 +238,6 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

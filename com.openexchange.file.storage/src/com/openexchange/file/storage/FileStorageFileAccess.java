@@ -54,9 +54,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileComparator;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -421,36 +419,6 @@ public interface FileStorageFileAccess extends TransactionAware {
     List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException;
 
     /**
-     * Removes a certain version of a file
-     *
-     * @param folderId The folder identifier
-     * @param id The file id whose version is to be removed
-     * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
-     * @return The IDs of versions that could not be deleted due to an edit-delete conflict
-     * @throws OXException If operation fails
-     */
-    String[] removeVersion(String folderId, String id, String[] versions) throws OXException;
-
-    /**
-     * Unlocks a given file.
-     *
-     * @param folderId The folder identifier
-     * @param id The file to unlock
-     * @throws OXException If operation fails
-     */
-    void unlock(String folderId, String id) throws OXException;
-
-    /**
-     * Locks a given file for the given duration (in milliseconds)
-     *
-     * @param folderId The folder identifier
-     * @param id The file to lock
-     * @param diff The duration in milliseconds
-     * @throws OXException If operation fails
-     */
-    void lock(String folderId, String id, long diff) throws OXException;
-
-    /**
      * Updates a files sequence number
      *
      * @param folderId The folder identifier
@@ -489,38 +457,6 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     TimedResult<File> getDocuments(String folderId, List<File.Field> fields, File.Field sort, SortDirection order) throws OXException;
-
-    /**
-     * Lists all versions of a file
-     *
-     * @param folderId The folder identifier
-     * @param id The file's identifier
-     * @return All versions of a file
-     * @throws OXException If operation fails
-     */
-    TimedResult<File> getVersions(String folderId, String id) throws OXException;
-
-    /**
-     * List all versions of a file loading the given fields
-     *
-     * @param folderId The folder identifier
-     * @param id The file's identifier
-     * @param fields The fields to load
-     * @return All versions of a file with given fields loaded
-     * @throws OXException If operation fails
-     */
-    TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields) throws OXException;
-
-    /**
-     * Lists all versions of a file loading the given fields sorted according to the given field in a given order
-     *
-     * @param folderId The folder identifier
-     * @param id The file's identifier
-     * @param fields The fields to load
-     * @return All sorted versions of a file with given fields loaded
-     * @throws OXException If operation fails
-     */
-    TimedResult<File> getVersions(String folderId, String id, List<File.Field> fields, File.Field sort, SortDirection order) throws OXException;
 
     /**
      * Loads the file metadata with the given identifiers.
@@ -572,21 +508,6 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     SearchIterator<File> search(String pattern, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws OXException;
-
-    /**
-     * Searches for a given file.
-     *
-     * @param folderIds The optional folder identifiers
-     * @param searchTerm The search term
-     * @param fields The fields to load
-     * @param sort Which field to sort by. May be <code>null</code>.
-     * @param order The order in which to sort
-     * @param start A start index (inclusive) for the search results. Useful for paging.
-     * @param end An end index (exclusive) for the search results. Useful for paging.
-     * @return The search results
-     * @throws OXException If operation fails
-     */
-    SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
     /**
      * Retrieves the parent account access.

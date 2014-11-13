@@ -73,7 +73,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -367,21 +366,6 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     }
 
     @Override
-    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        return versions;
-    }
-
-    @Override
-    public void unlock(String folderId, String id) throws OXException {
-
-    }
-
-    @Override
-    public void lock(String folderId, String id, long diff) throws OXException {
-
-    }
-
-    @Override
     public void touch(String folderId, String id) throws OXException {
 
     }
@@ -418,21 +402,6 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
         List<File> files = list(folderId);
         Collections.sort(files, order.comparatorBy(sort));
         return new FileTimedResult(files);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        return new FileTimedResult(Arrays.asList(getFileMetadata(folderId, id, "")));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return new FileTimedResult(Arrays.asList(getFileMetadata(folderId, id, "")));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        return new FileTimedResult(Arrays.asList(getFileMetadata(folderId, id, "")));
     }
 
     @Override
@@ -497,11 +466,6 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
             Collections.<File> emptyList(),
             Collections.<File> emptyList(),
             UNDEFINED_SEQUENCE_NUMBER);
-    }
-
-    @Override
-    public SearchIterator<File> search(List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        return SearchIteratorAdapter.emptyIterator();
     }
 
     @Override

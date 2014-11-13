@@ -69,17 +69,13 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
-import com.openexchange.file.storage.search.AndTerm;
-import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.file.storage.search.OrTerm;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
@@ -93,7 +89,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess {
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
@@ -388,16 +384,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     @Override
-    public void unlock(final String folderId, final String id) throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // Nope
-    }
-
-    @Override
     public void touch(final String folderId, final String id) throws OXException {
         exists(folderId, id, CURRENT_VERSION);
     }
@@ -548,64 +534,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
-    }
-
-    @Override
-    public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        /*
-         * search in one or all folders only
-         */
-        if (null != folderIds && 1 != folderIds.size()) {
-            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Can only search in one or all folders");
-        }
-        String folderID = null == folderIds ? null : folderIds.get(0);
-        /*
-         * search by one or more filename patterns
-         */
-        List<String> patterns = extractPatterns(searchTerm);
-        List<File> files = new LinkedList<File>();
-        for (String pattern : patterns) {
-            files.addAll(searchInFolder(folderID, pattern));
-        }
-        return getSearchIterator(files, sort, order, start, end);
-    }
-
-    private static List<String> extractPatterns(SearchTerm<?> searchTerm) throws OXException {
-        if (FileNameTerm.class.isInstance(searchTerm)) {
-            /*
-             * single filename pattern
-             */
-            return Collections.singletonList(((FileNameTerm) searchTerm).getPattern());
-        } else if (OrTerm.class.isInstance(searchTerm)) {
-            /*
-             * try multiple filename patterns
-             */
-            List<SearchTerm<?>> nestedTerms = ((OrTerm) searchTerm).getPattern();
-            List<String> patterns = new ArrayList<String>(nestedTerms.size());
-            for (SearchTerm<?> nestedTerm : nestedTerms) {
-                if (FileNameTerm.class.isInstance(nestedTerm)) {
-                    patterns.add(((FileNameTerm) nestedTerm).getPattern());
-                } else {
-                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
-                }
-            }
-            return patterns;
-        } else if (AndTerm.class.isInstance(searchTerm)) {
-            /*
-             * construct single filename pattern
-             */
-            List<SearchTerm<?>> nestedTerms = ((AndTerm) searchTerm).getPattern();
-            StringBuilder patternBuilder = new StringBuilder();
-            for (SearchTerm<?> nestedTerm : nestedTerms) {
-                if (FileNameTerm.class.isInstance(nestedTerm)) {
-                    patternBuilder.append(((FileNameTerm) nestedTerm).getPattern()).append(' ');
-                } else {
-                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
-                }
-            }
-            return Collections.singletonList(patternBuilder.toString().trim());
-        }
-        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
 
     @Override

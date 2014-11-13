@@ -47,69 +47,13 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage;
 
 /**
- * {@link FileStorageCapability}
+ * {@link FileStoragePersistentIDs}.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum FileStorageCapability {
+public interface FileStoragePersistentIDs {
 
-    /**
-     * Support for sequence numbers of files and folders.
-     */
-    SEQUENCE_NUMBERS,
-
-    /**
-     * Support for saving files without creating a new version.
-     */
-    IGNORABLE_VERSION,
-
-    /**
-     * Support for storing multiple versions of a document.
-     */
-    FILE_VERSIONS,
-
-    /**
-     * Support for reading and writing files at specific offsets.
-     */
-    RANDOM_FILE_ACCESS,
-
-    /**
-     * Support for searching files by advanced search terms.
-     */
-    SEARCH_BY_TERM,
-
-    /**
-     * Support for E-Tags of folders.
-     */
-    FOLDER_ETAGS,
-
-    /**
-     * Support for recursive E-Tags of folders.
-     */
-    RECURSIVE_FOLDER_ETAGS,
-
-    /**
-     * Support for thumbnail images of files.
-     */
-    THUMBNAIL_IMAGES,
-
-    /**
-     * Support for persistent folder- and file-IDs, i.e. identifiers don't change during rename operations.
-     */
-    PERSISTENT_IDS,
-
-    /**
-     * Support for efficient retrieval of file metadata and contents considering a client-supplied E-Tag.
-     */
-    EFFICIENT_RETRIEVAL,
-
-    /**
-     * Support for locking/unlocking files.
-     */
-    LOCKS,
-
-    ;
 }

@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@Deprecated
 public interface IDBasedETagProvider {
 
     /**

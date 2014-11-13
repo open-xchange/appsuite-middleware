@@ -97,9 +97,11 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.search.FieldCollectorVisitor;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -117,7 +119,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageIgnorableVersionFileAccess {
+public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageIgnorableVersionFileAccess, FileStorageLockedFileAccess, FileStorageAdvancedSearchFileAccess {
 
     private static final class LockTokenKey {
 
@@ -832,43 +834,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
-    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
-            }
-        }
-        try {
-            final String fid = checkFolderId(folderId, rootUri);
-            final URI uri = new URI(fid + id, true);
-            final DeleteMethod deleteMethod = new DeleteMethod(uri.toString());
-            try {
-                initMethod(fid, id, deleteMethod);
-                client.executeMethod(deleteMethod);
-                /*
-                 * Check if request was successfully executed
-                 */
-                if (HttpServletResponse.SC_NOT_FOUND == deleteMethod.getStatusCode()) {
-                    /*
-                     * No-op for us...
-                     */
-                } else if (HttpServletResponse.SC_OK != deleteMethod.getStatusCode()) {
-                    throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(deleteMethod.getStatusText());
-                }
-            } finally {
-                closeHttpMethod(deleteMethod);
-            }
-            return new String[0];
-        } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
     public void unlock(final String folderId, final String id) throws OXException {
         final String fid = checkFolderId(folderId, rootUri);
         final LockTokenKey lockTokenKey = new LockTokenKey(fid, id);
@@ -1086,21 +1051,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
          * Return sorted result
          */
         return new FileTimedResult(files);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
     @Override

@@ -47,69 +47,34 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage;
+
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.search.SearchTerm;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link FileStorageCapability}
+ * {@link FileStorageAdvancedSearchFileAccess}.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum FileStorageCapability {
+public interface FileStorageAdvancedSearchFileAccess extends FileStorageFileAccess {
 
     /**
-     * Support for sequence numbers of files and folders.
+     * Searches for a given file.
+     *
+     * @param folderIds The optional folder identifiers
+     * @param searchTerm The search term
+     * @param fields The fields to load
+     * @param sort Which field to sort by. May be <code>null</code>.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return The search results
+     * @throws OXException If operation fails
      */
-    SEQUENCE_NUMBERS,
+    SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
-    /**
-     * Support for saving files without creating a new version.
-     */
-    IGNORABLE_VERSION,
-
-    /**
-     * Support for storing multiple versions of a document.
-     */
-    FILE_VERSIONS,
-
-    /**
-     * Support for reading and writing files at specific offsets.
-     */
-    RANDOM_FILE_ACCESS,
-
-    /**
-     * Support for searching files by advanced search terms.
-     */
-    SEARCH_BY_TERM,
-
-    /**
-     * Support for E-Tags of folders.
-     */
-    FOLDER_ETAGS,
-
-    /**
-     * Support for recursive E-Tags of folders.
-     */
-    RECURSIVE_FOLDER_ETAGS,
-
-    /**
-     * Support for thumbnail images of files.
-     */
-    THUMBNAIL_IMAGES,
-
-    /**
-     * Support for persistent folder- and file-IDs, i.e. identifiers don't change during rename operations.
-     */
-    PERSISTENT_IDS,
-
-    /**
-     * Support for efficient retrieval of file metadata and contents considering a client-supplied E-Tag.
-     */
-    EFFICIENT_RETRIEVAL,
-
-    /**
-     * Support for locking/unlocking files.
-     */
-    LOCKS,
-
-    ;
 }

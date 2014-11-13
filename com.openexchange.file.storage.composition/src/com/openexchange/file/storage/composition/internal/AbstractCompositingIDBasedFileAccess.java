@@ -88,6 +88,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
+import com.openexchange.file.storage.FileStorageETagProvider;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper;
@@ -99,20 +101,26 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FileStreamHandler;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.composition.IDBasedETagProvider;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.log.LogProperties;
@@ -139,24 +147,12 @@ import com.openexchange.tx.TransactionState;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider {
+public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider, IDBasedETagProvider {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFileAccess.class);
 
     /** The empty {@link TimedResult} */
-    private static final TimedResult<File> EMPTY_TIMED_RESULT = new TimedResult<File>() {
-
-        @Override
-        public SearchIterator<File> results() throws OXException {
-            return SearchIteratorAdapter.emptyIterator();
-        }
-
-        @Override
-        public long sequenceNumber() throws OXException {
-            return 0;
-        }
-
-    };
+    private static final TimedResult<File> EMPTY_TIMED_RESULT = Results.emptyTimedResult();
 
     /** The handler registry */
     private static final AtomicReference<FileStreamHandlerRegistry> HANDLER_REGISTRY = new AtomicReference<FileStreamHandlerRegistry>();
@@ -221,6 +217,78 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 return 0;
             }
         };
+    }
+
+    @Override
+    public boolean supports(String serviceID, String accountID, FileStorageCapability...capabilities) throws OXException {
+        if (null == capabilities || 0 == capabilities.length) {
+            return true;
+        }
+        FileStorageFileAccess fileAccess = getFileAccess(serviceID, accountID);
+        for (FileStorageCapability capability : capabilities) {
+            switch (capability) {
+            case FILE_VERSIONS:
+                if (false == FileStorageVersionedFileAccess.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case FOLDER_ETAGS:
+                if (false == FileStorageETagProvider.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case IGNORABLE_VERSION:
+                if (false == FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case PERSISTENT_IDS:
+                if (false == FileStoragePersistentIDs.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case RANDOM_FILE_ACCESS:
+                if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case RECURSIVE_FOLDER_ETAGS:
+                if (false == FileStorageETagProvider.class.isInstance(fileAccess) ||
+                    false == ((FileStorageETagProvider) fileAccess).isRecursive()) {
+                    return false;
+                }
+                break;
+            case SEARCH_BY_TERM:
+                if (false == FileStorageAdvancedSearchFileAccess.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case SEQUENCE_NUMBERS:
+                if (false == FileStorageSequenceNumberProvider.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case THUMBNAIL_IMAGES:
+                if (false == ThumbnailAware.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case EFFICIENT_RETRIEVAL:
+                if (false == FileStorageEfficientRetrieval.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case LOCKS:
+                if (false == FileStorageLockedFileAccess.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            default:
+                LOG.warn("Unknown capability: {}", capability);
+                return false;
+            }
+        }
+        return true; // all supported
     }
 
     @Override
@@ -303,10 +371,44 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     @Override
+    @Deprecated
     public boolean supportsSequenceNumbers(String folderId) throws OXException {
         FolderID folderID = new FolderID(folderId);
         FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
         return FileStorageSequenceNumberProvider.class.isInstance(fileAccess);
+    }
+
+    @Override
+    @Deprecated
+    public boolean isRecursive(String folderId) throws OXException {
+        FolderID folderID = new FolderID(folderId);
+        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+        if (FileStorageETagProvider.class.isInstance(fileAccess)) {
+            return ((FileStorageETagProvider) fileAccess).isRecursive();
+        }
+        return false;
+    }
+
+    @Override
+    public Map<String, String> getETags(List<String> folderIds) throws OXException {
+        Map<String, String> eTags = new HashMap<String, String>();
+        Map<FileStorageFileAccess, List<String>> foldersByFileAccess = getFoldersByFileAccess(folderIds);
+        for (Map.Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
+            FileStorageFileAccess fileAccess = entry.getKey();
+            if (false == FileStorageETagProvider.class.isInstance(fileAccess)) {
+                throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(fileAccess.getAccountAccess().getService());
+            }
+            eTags.putAll(((FileStorageETagProvider) fileAccess).getETags(entry.getValue()));
+        }
+        return eTags;
+    }
+
+    @Override
+    @Deprecated
+    public boolean supportsETags(String folderId) throws OXException {
+        FolderID folderID = new FolderID(folderId);
+        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+        return FileStorageETagProvider.class.isInstance(fileAccess);
     }
 
     @Override
@@ -558,47 +660,59 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public TimedResult<File> getVersions(final String id) throws OXException {
-        final FileID fileID = new FileID(id);
-        final TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
-            fileID.getFolderId(),
-            fileID.getFileId());
+        FileID fileID = new FileID(id);
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        TimedResult<File> result;
+        if (false == FileStorageVersionedFileAccess.class.isInstance(fileAccess)) {
+            result = fileAccess.getDocuments(Collections.singletonList(new IDTuple(fileID.getFolderId(), fileID.getFileId())), null);
+        } else {
+            result = ((FileStorageVersionedFileAccess) fileAccess).getVersions(fileID.getFolderId(), fileID.getFileId());
+        }
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
     @Override
     public TimedResult<File> getVersions(final String id, final List<Field> columns) throws OXException {
-        final FileID fileID = new FileID(id);
-        final TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
-            fileID.getFolderId(),
-            fileID.getFileId(),
-            addIDColumns(columns));
+        FileID fileID = new FileID(id);
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        List<Field> fields = addIDColumns(columns);
+        TimedResult<File> result;
+        if (false == FileStorageVersionedFileAccess.class.isInstance(fileAccess)) {
+            result = fileAccess.getDocuments(Collections.singletonList(new IDTuple(fileID.getFolderId(), fileID.getFileId())), fields);
+        } else {
+            result = ((FileStorageVersionedFileAccess) fileAccess).getVersions(fileID.getFolderId(), fileID.getFileId(), fields);
+        }
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
     @Override
     public TimedResult<File> getVersions(final String id, final List<Field> columns, final Field sort, final SortDirection order) throws OXException {
-        final FileID fileID = new FileID(id);
-        final TimedResult<File> result = getFileAccess(fileID.getService(), fileID.getAccountId()).getVersions(
-            fileID.getFolderId(),
-            fileID.getFileId(),
-            addIDColumns(columns),
-            sort,
-            order);
+        FileID fileID = new FileID(id);
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        List<Field> fields = addIDColumns(columns);
+        TimedResult<File> result;
+        if (false == FileStorageVersionedFileAccess.class.isInstance(fileAccess)) {
+            result = fileAccess.getDocuments(Collections.singletonList(new IDTuple(fileID.getFolderId(), fileID.getFileId())), fields);
+        } else {
+            result = ((FileStorageVersionedFileAccess) fileAccess).getVersions(fileID.getFolderId(), fileID.getFileId(), fields, sort, order);
+        }
         return fixIDs(result, fileID.getService(), fileID.getAccountId());
     }
 
     @Override
     public void lock(final String id, final long diff) throws OXException {
         final FileID fileID = new FileID(id);
-        final TransactionAwareFileAccessDelegation<Void> lockDelegation = new TransactionAwareFileAccessDelegation<Void>() {
+        final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        if (FileStorageLockedFileAccess.class.isInstance(fileAccess)) {
+            new TransactionAwareFileAccessDelegation<Void>() {
 
-            @Override
-            protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
-                access.lock(fileID.getFolderId(), fileID.getFileId(), diff);
-                return null;
-            }
-        };
-        lockDelegation.call(getFileAccess(fileID.getService(), fileID.getAccountId()));
+                @Override
+                protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
+                    ((FileStorageLockedFileAccess) fileAccess).lock(fileID.getFolderId(), fileID.getFileId(), diff);
+                    return null;
+                }
+            }.call(fileAccess);
+        }
     }
 
     @Override
@@ -670,27 +784,33 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public String[] removeVersion(final String id, final String[] versions) throws OXException {
         final FileID fileID = new FileID(id);
-        final FileStorageFileAccess access = getFileAccess(fileID.getService(), fileID.getAccountId());
-        final TransactionAwareFileAccessDelegation<String[]> removeVersionDelegation = new TransactionAwareFileAccessDelegation<String[]>() {
+        String serviceId = fileID.getService();
+        String accountId = fileID.getAccountId();
+        FileStorageFileAccess access = getFileAccess(serviceId, accountId);
+        String[] notRemoved;
+        if (FileStorageVersionedFileAccess.class.isInstance(access)) {
+            notRemoved = new TransactionAwareFileAccessDelegation<String[]>() {
 
-            @Override
-            protected String[] callInTransaction(FileStorageFileAccess access) throws OXException {
-                return access.removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
-            }
-        };
-        final String[] notRemoved = removeVersionDelegation.call(access);
+                @Override
+                protected String[] callInTransaction(FileStorageFileAccess access) throws OXException {
+                    return ((FileStorageVersionedFileAccess) access).removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
+                }
+            }.call(access);
+        } else if (1 == versions.length && FileStorageFileAccess.CURRENT_VERSION == versions[0]) {
+            List<IDTuple> result = access.removeDocument(Collections.singletonList(
+                new IDTuple(fileID.getFolderId(), fileID.getFileId())), FileStorageFileAccess.DISTANT_FUTURE);
+            notRemoved = 0 < result.size() ? versions : new String[0];
+        } else {
+            notRemoved = versions;
+        }
 
-        String serviceId = access.getAccountAccess().getService().getId();
-        String accountId = access.getAccountAccess().getAccountId();
         Set<String> removed = new HashSet<String>(versions.length);
         for (String i : versions) {
             removed.add(i);
         }
-
         for (String i : notRemoved) {
             removed.remove(i);
         }
-
         /*
          * prepare event if needed
          */
@@ -1137,11 +1257,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     @Override
+    @Deprecated
     public boolean supportsIgnorableVersion(final String serviceId, final String accountId) throws OXException {
         return (getFileAccess(serviceId, accountId) instanceof FileStorageIgnorableVersionFileAccess);
     }
 
     @Override
+    @Deprecated
     public boolean supportsRandomFileAccess(final String serviceId, final String accountId) throws OXException {
         return FileStorageRandomFileAccess.class.isInstance(getFileAccess(serviceId, accountId));
     }
@@ -1271,11 +1393,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
              * perform search in single storage
              */
             Entry<FileStorageFileAccess, List<String>> entry = foldersByFileAccess.entrySet().iterator().next();
-            SearchIterator<File> searchIterator = entry.getKey().search(entry.getValue(), searchTerm, fields, sort, order, start, end);
+            FileStorageFileAccess fileAccess = entry.getKey();
+            if (false == FileStorageAdvancedSearchFileAccess.class.isInstance(fileAccess)) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            SearchIterator<File> searchIterator = ((FileStorageAdvancedSearchFileAccess) fileAccess).search(
+                entry.getValue(), searchTerm, fields, sort, order, start, end);
             if (null == searchIterator) {
                 return SearchIteratorAdapter.emptyIterator();
             }
-            FileStorageAccountAccess accountAccess = entry.getKey().getAccountAccess();
+            FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
             return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
         } else {
             /*
@@ -1284,13 +1411,18 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             ThreadPoolService threadPool = ThreadPools.getThreadPool();
             CompletionService<SearchIterator<File>> completionService = null != threadPool ?
                 new ThreadPoolCompletionService<SearchIterator<File>>(threadPool) : new CallerRunsCompletionService<SearchIterator<File>>();
-            for (final Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
-                completionService.submit(getSearchCallable(entry.getKey(), entry.getValue(), searchTerm, fields, sort, order));
+            int count = 0;
+            for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
+                if (FileStorageAdvancedSearchFileAccess.class.isInstance(entry.getKey())) {
+                    FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
+                    completionService.submit(getSearchCallable(fileAccess, entry.getValue(), searchTerm, fields, sort, order));
+                    count++;
+                }
             }
             /*
              * collect & filter results
              */
-            return new FilteringSearchIterator<File>(collectSearchResults(completionService, foldersByFileAccess.size(), sort, order)) {
+            return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
 
                 int index = 0;
 
@@ -1497,15 +1629,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public void unlock(final String id) throws OXException {
         final FileID fileID = new FileID(id);
-        final TransactionAwareFileAccessDelegation<Void> unlockDelegation = new TransactionAwareFileAccessDelegation<Void>() {
+        final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        if (FileStorageLockedFileAccess.class.isInstance(fileAccess)) {
+            new TransactionAwareFileAccessDelegation<Void>() {
 
-            @Override
-            protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
-                access.unlock(fileID.getFolderId(), fileID.getFileId());
-                return null;
-            }
-        };
-        unlockDelegation.call(getFileAccess(fileID.getService(), fileID.getAccountId()));
+                @Override
+                protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
+                    ((FileStorageLockedFileAccess) fileAccess).unlock(fileID.getFolderId(), fileID.getFileId());
+                    return null;
+                }
+            }.call(fileAccess);
+        }
     }
 
     protected List<File.Field> addIDColumns(List<File.Field> columns) {
@@ -1886,7 +2020,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
      * @param order The sort order to pass to the storage
      * @return The callable
      */
-    private static Callable<SearchIterator<File>> getSearchCallable(final FileStorageFileAccess fileAccess, final List<String> folderIds, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order) {
+    private static Callable<SearchIterator<File>> getSearchCallable(final FileStorageAdvancedSearchFileAccess fileAccess, final List<String> folderIds, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order) {
         return new Callable<SearchIterator<File>>() {
 
             @Override
