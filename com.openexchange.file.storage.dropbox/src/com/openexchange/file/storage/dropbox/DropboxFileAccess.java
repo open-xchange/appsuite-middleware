@@ -164,7 +164,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (entry.isDeleted) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(path);
             }
-            return new DropboxFile(entry, userId);
+            DropboxFile file = new DropboxFile(entry, userId);
+            //TODO fetching all revisions just to get the number of versions is quite expensive;
+            //     maybe we can introduce sth like "-1" for "unknown number of versions"
+            List<Entry> revisions = dropboxAPI.revisions(path, 0);
+            if (null != revisions) {
+                file.setNumberOfVersions(revisions.size());
+            }
+            return file;
         } catch (Exception e) {
             throw handle(e, path);
         }
@@ -191,11 +198,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 throw handle(e, path);
             }
         } else {
+            String path = toPath(file.getFolderId(), file.getId());
             /*
-             * only rename possible
+             * rename?
              */
             if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-                String path = toPath(file.getFolderId(), file.getId());
                 String toPath = toPath(file.getFolderId(), file.getFileName());
                 if (false == path.equals(toPath)) {
                     try {
@@ -207,7 +214,22 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         Entry entry = dropboxAPI.move(path, toPath);
                         file.setId(entry.fileName());
                         file.setVersion(entry.rev);
-                        return new IDTuple(toId(entry.path), entry.fileName());
+                        return new IDTuple(toId(entry.parentPath()), entry.fileName());
+                    } catch (Exception e) {
+                        throw handle(e, path);
+                    }
+                }
+            }
+            /*
+             * restore version?
+             */
+            if (null == modifiedFields || modifiedFields.contains(Field.VERSION)) {
+                if (null != file.getVersion()) {
+                    try {
+                        Entry entry = dropboxAPI.restore(path, file.getVersion());
+                        file.setId(entry.fileName());
+                        file.setVersion(entry.rev);
+                        return new IDTuple(toId(entry.parentPath()), entry.fileName());
                     } catch (Exception e) {
                         throw handle(e, path);
                     }
@@ -439,22 +461,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        String path = toPath(folderId, id);
-        try {
-            final List<Entry> revisions = dropboxAPI.revisions(path, 0);
-            final List<File> files = new ArrayList<File>(revisions.size());
-            for (final Entry revisionEntry : revisions) {
-                files.add(new DropboxFile(revisionEntry, userId));
-            }
-            return new FileTimedResult(files);
-        } catch (Exception e) {
-            throw handle(e, path);
-        }
+        return getVersions(folderId, id, null);
     }
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
-        return getVersions(folderId, id);
+        return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
     }
 
     @Override
@@ -463,8 +475,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final List<Entry> revisions = dropboxAPI.revisions(path, 0);
             final List<File> files = new ArrayList<File>(revisions.size());
-            for (final Entry revisionEntry : revisions) {
-                files.add(new DropboxFile(revisionEntry, userId));
+            for (int i = 0; i < revisions.size(); i++) {
+                DropboxFile file = new DropboxFile(revisions.get(i), userId);
+                file.setNumberOfVersions(revisions.size());
+                file.setIsCurrentVersion(0 == i);
+                files.add(file);
             }
             // Sort collection
             sort(files, sort, order);
