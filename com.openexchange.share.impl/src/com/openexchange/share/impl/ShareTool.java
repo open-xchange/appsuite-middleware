@@ -641,7 +641,11 @@ public class ShareTool {
         StringBuilder sb = new StringBuilder();
         for (ShareInfo info : shareInfo) {
             sb.append("Token: ").append(info.getToken()).append(" (");
-            sb.append(info.getShare()).append(")");
+            Share share = info.getShare();
+            ShareTarget target = share.getTarget();
+            sb.append("Share [created by ").append(share.getCreatedBy()).append(", guest=").append(share.getGuest())
+              .append(", target=").append("ShareTarget [module=").append(target.getModule()).append(", folder=").append(target.getFolder())
+              .append((null != target.getItem() ? (", item=" + target.getItem()) : "") + "]").append("]").append(")");
             sb.append("\n");
         }
         return sb.toString();
