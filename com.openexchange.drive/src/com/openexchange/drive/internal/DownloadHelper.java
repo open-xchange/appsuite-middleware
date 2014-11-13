@@ -58,8 +58,8 @@ import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 
 /**
  * {@link DownloadHelper}
@@ -122,8 +122,8 @@ public class DownloadHelper {
             /*
              * offset or maximum length is requested, get partial stream
              */
-            if (session.getStorage().isRandomFileAccess()) {
-                inputStream = ((IDBasedRandomFileAccess)fileAccess).getDocument(file.getId(), file.getVersion(), offset, length);
+            if (session.getStorage().supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
+                inputStream = fileAccess.getDocument(file.getId(), file.getVersion(), offset, length);
             } else {
                 try {
                     inputStream = new PartialInputStream(fileAccess.getDocument(file.getId(), file.getVersion()), offset, length);

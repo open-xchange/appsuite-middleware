@@ -79,6 +79,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.search.FileMd5SumTerm;
 import com.openexchange.file.storage.search.OrTerm;
@@ -234,7 +235,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
      */
     private static Map<String, ServerFileVersion> searchMatchingFileVersions(final SyncSession session, final List<String> folderIDs, final List<String> checksums) throws OXException {
         Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
-        if (0 < checksums.size()) {
+        if (0 < checksums.size() && session.getStorage().supports(FileStorageCapability.SEARCH_BY_TERM)) {
             List<FileChecksum> checksumsToInsert = new ArrayList<FileChecksum>();
             SearchIterator<File> searchIterator = null;
             try {
