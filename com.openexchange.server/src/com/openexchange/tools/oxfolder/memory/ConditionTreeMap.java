@@ -239,7 +239,7 @@ public final class ConditionTreeMap {
                 final Permission p = new Permission();
                 pos = 1;
                 p.fuid = rs.getInt(pos++);
-                p.entity = rs.getInt(pos++);
+                p.entity = entity;
                 p.admin = rs.getInt(pos++) > 0;
                 p.readFolder = rs.getInt(pos++) >= OCLPermission.READ_FOLDER;
                 p.module = rs.getInt(pos++);
