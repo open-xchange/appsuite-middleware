@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,43 @@
  *
  */
 
-package com.openexchange.mobilenotifier.events.osgi;
+package com.openexchange.mobilenotifier.events;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
-import com.openexchange.mobilenotifier.events.mail.impl.MobileNotifyMailEventImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.push.PushEventConstants;
+import java.util.Map;
+import com.openexchange.mobilenotifier.MobileNotifierProviders;
+import com.openexchange.session.Session;
 
 /**
- * {@link MobileNotifierEventsActivator}
+ * {@link MobileNotifyEvent}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class MobileNotifierEventsActivator extends HousekeepingActivator {
+public interface MobileNotifyEvent {
+    /**
+     * A map containing the payload of the message
+     *
+     * @return a map containing the key/value pairs for the message
+     */
+    Map<String, String> getMessageData();
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierEventsActivator.class);
+    /**
+     * Returns the collapse key to summarize new messages
+     *
+     * @return the collapse key
+     */
+    String getCollapseKey();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { };
-    }
+    /**
+     * The session
+     *
+     * @return The session
+     */
+    Session getSession();
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
-        Services.set(this);
-        final MobileNotifyMailEventImpl service = new MobileNotifyMailEventImpl();
-
-        //register event handler to listen on push events
-        registerService(MobileNotifyEventService.class, service);
-        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] {
-            PushEventConstants.TOPIC,
-            PushEventConstants.PROPERTY_IMMEDIATELY,
-        });
-
-        registerService(EventHandler.class, service, serviceProperties);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
-        Services.set(null);
-    }
-
+    /**
+     * The provider
+     *
+     * @return the provider of the subscription
+     */
+    MobileNotifierProviders getProvider();
 }
