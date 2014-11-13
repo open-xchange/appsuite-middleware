@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-Name: Open-Xchange Mobilenotifier Event GCM Bundle
+Bundle-SymbolicName: com.openexchange.mobilenotifier.events.gcm
+Bundle-Version: 7.8.0
+Bundle-Activator: com.openexchange.mobilenotifier.events.gcm.osgi.MobileNotifierEventsGCMActivator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: 
+ com.google.android.gcm,
+ com.openexchange.exception,
+ com.openexchange.mobilenotifier,
+ com.openexchange.mobilenotifier.events,
+ com.openexchange.mobilenotifier.events.storage,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework,
+ org.slf4j
+Bundle-ActivationPolicy: lazy
