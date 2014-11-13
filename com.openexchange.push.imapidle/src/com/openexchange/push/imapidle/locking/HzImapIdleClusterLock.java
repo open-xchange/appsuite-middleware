@@ -98,6 +98,11 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     @Override
+    public Type getType() {
+        return Type.HAZELCAST;
+    }
+
+    @Override
     public boolean acquireLock(Session session) throws OXException {
         if (notActive.get()) {
             return true;

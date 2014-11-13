@@ -81,6 +81,11 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     @Override
+    public Type getType() {
+        return Type.DATABASE;
+    }
+
+    @Override
     public boolean acquireLock(Session session) throws OXException {
         DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
         if (null == databaseService) {
