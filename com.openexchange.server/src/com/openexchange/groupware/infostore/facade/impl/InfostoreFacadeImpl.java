@@ -729,7 +729,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     private Metadata[] nonNull(final DocumentMetadata document) {
-        final List<Metadata> nonNull = new ArrayList<Metadata>();
+        final List<Metadata> nonNull = new ArrayList<>();
         final GetSwitch get = new GetSwitch(document);
         for (final Metadata metadata : Metadata.HTTPAPI_VALUES) {
             if (null != metadata.doSwitch(get)) {
