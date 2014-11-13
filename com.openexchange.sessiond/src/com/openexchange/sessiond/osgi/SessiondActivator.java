@@ -61,6 +61,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
@@ -104,6 +105,110 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
     /** The logger instance */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondActivator.class);
 
+    // ------------------------------------------------------------------------------------------------------------------------
+
+    private static class HazelcastConfTracker implements ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> {
+
+        final BundleContext context;
+        final SessiondActivator activator;
+        private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
+
+        HazelcastConfTracker(BundleContext context, SessiondActivator activator) {
+            super();
+            this.context = context;
+            this.activator = activator;
+        }
+
+        @Override
+        public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
+            final HazelcastConfigurationService hzConfig = context.getService(reference);
+
+            try {
+                if (hzConfig.isEnabled()) {
+                    // Track HazelcastInstance service
+                    ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> customizer = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+
+                        @Override
+                        public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+                            HazelcastInstance hzInstance = context.getService(reference);
+                            try {
+                                String hzMapName = discoverHzMapName(hzConfig.getConfig(), TokenSessionContainer.getInstance().getServerTokenMapName());
+                                if (null == hzMapName) {
+                                    context.ungetService(reference);
+                                    return null;
+                                }
+                                activator.addService(HazelcastInstance.class, hzInstance);
+                                TokenSessionContainer.getInstance().changeBackingMapToHz();
+                                return hzInstance;
+                            } catch (OXException e) {
+                                LOG.warn("Couldn't initialize distributed token-session map.", e);
+                            } catch (RuntimeException e) {
+                                LOG.warn("Couldn't initialize distributed token-session map.", e);
+                            }
+                            context.ungetService(reference);
+                            return null;
+                        }
+
+                        @Override
+                        public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
+                            // Ignore
+                        }
+
+                        @Override
+                        public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
+                            activator.removeService(HazelcastInstance.class);
+                            TokenSessionContainer.getInstance().changeBackingMapToLocalMap();
+                            context.ungetService(reference);
+                        }
+                    };
+                    ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, customizer);
+                    this.hzInstanceTracker = hzInstanceTracker;
+                    hzInstanceTracker.open();
+                }
+
+                return hzConfig;
+            } catch (Exception e) {
+                // Failed
+                LOG.error("SessiondActivator: start: ", e);
+            }
+
+            context.ungetService(reference);
+            return null;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
+            // Ignore
+        }
+
+        @Override
+        public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
+            ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = this.hzInstanceTracker;
+            if (null != hzInstanceTracker) {
+                hzInstanceTracker.close();
+                this.hzInstanceTracker = null;
+            }
+
+            context.ungetService(reference);
+        }
+
+        String discoverHzMapName(final Config config, String mapPrefix) throws IllegalStateException {
+            final Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+            if (null != mapConfigs && !mapConfigs.isEmpty()) {
+                for (final String mapName : mapConfigs.keySet()) {
+                    if (mapName.startsWith(mapPrefix)) {
+                        LOG.info("Using distributed token-session map '{}'.", mapName);
+                        return mapName;
+                    }
+                }
+            }
+            LOG.info("No distributed token-session map with mapPrefix {} in hazelcast configuration", mapPrefix);
+            return null;
+        }
+    } // End of class HazelcastConfTracker
+
+    // ------------------------------------------------------------------------------------------------------------------------
+
     private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
     /**
@@ -121,19 +226,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
         }
     }
 
-    String discoverHzMapName(final Config config, String mapPrefix) throws IllegalStateException {
-        final Map<String, MapConfig> mapConfigs = config.getMapConfigs();
-        if (null != mapConfigs && !mapConfigs.isEmpty()) {
-            for (final String mapName : mapConfigs.keySet()) {
-                if (mapName.startsWith(mapPrefix)) {
-                    LOG.info("Using distributed token-session map '{}'.", mapName);
-                    return mapName;
-                }
-            }
-        }
-        LOG.info("No distributed token-session map with mapPrefix {} in hazelcast configuration", mapPrefix);
-        return null;
-    }
+
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -159,47 +252,8 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
                 // Check if distributed token-sessions are enabled
                 ConfigurationService configService = getService(ConfigurationService.class);
                 if (configService.getBoolProperty("com.openexchange.sessiond.useDistributedTokenSessions", false)) {
-                    // Check if enabled per configuration
-                    final HazelcastConfigurationService hzConfig = getService(HazelcastConfigurationService.class);
-                    if (hzConfig.isEnabled()) {
-                        // Track HazelcastInstance service
-                        ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> customizer = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
-
-                            @Override
-                            public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                                removeService(HazelcastInstance.class);
-                                TokenSessionContainer.getInstance().changeBackingMapToLocalMap();
-                                context.ungetService(reference);
-                            }
-
-                            @Override
-                            public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                                // Ignore
-                            }
-
-                            @Override
-                            public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                                HazelcastInstance hazelcastInstance = context.getService(reference);
-                                try {
-                                    String hzMapName = discoverHzMapName(hzConfig.getConfig(), TokenSessionContainer.getInstance().getServerTokenMapName());
-                                    if (null == hzMapName) {
-                                        context.ungetService(reference);
-                                        return null;
-                                    }
-                                    addService(HazelcastInstance.class, hazelcastInstance);
-                                    TokenSessionContainer.getInstance().changeBackingMapToHz();
-                                    return hazelcastInstance;
-                                } catch (OXException e) {
-                                    LOG.warn("Couldn't initialize distributed token-session map.", e);
-                                } catch (RuntimeException e) {
-                                    LOG.warn("Couldn't initialize distributed token-session map.", e);
-                                }
-                                context.ungetService(reference);
-                                return null;
-                            }
-                        };
-                        track(HazelcastInstance.class, customizer);
-                    }
+                    // Start tracking
+                    track(HazelcastConfigurationService.class, new HazelcastConfTracker(context, this));
                 }
             }
 
