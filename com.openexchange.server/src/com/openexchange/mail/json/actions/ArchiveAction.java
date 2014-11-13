@@ -49,50 +49,45 @@
 
 package com.openexchange.mail.json.actions;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Reference;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.Attribute;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -106,7 +101,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "folder", description = "Object ID of the source folder.")
 }, requestBody = "A JSON object containing the id of the destination folder inside the \"folder_id\" field: e.g.: {\"folder_id\": 1376}.",
 responseDescription = "A JSON true response.")
-public final class ArchiveAction extends AbstractMailAction {
+public final class ArchiveAction extends AbstractArchiveMailAction {
 
     /**
      * Initializes a new {@link ArchiveAction}.
@@ -119,93 +114,172 @@ public final class ArchiveAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-            /*
-             * Read in parameters
-             */
-            final JSONArray uids = ((JSONArray) req.getRequest().getData());
-            final String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            // Check service
-            final MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            // Read in parameters
+            final ServerSession session = req.getSession();
+
+            MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null == service) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class.getName());
             }
-            final ServerSession session = req.getSession();
-            final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(sourceFolder);
-            final int accountId = fa.getAccountId();
-            final MailAccount mailAccount = service.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            // Connect mail access
-            mailAccess = MailAccess.getInstance(session, accountId);
-            mailAccess.connect();
-            // Check archive full name
-            char separator;
-            String archiveFullname = mailAccount.getArchiveFullname();
-            final String parentFullName;
-            String archiveName;
-            if (isEmpty(archiveFullname)) {
-                archiveName = mailAccount.getArchive();
-                boolean updateAccount = false;
-                if (isEmpty(archiveName)) {
-                    final User user = session.getUser();
-                    if (!AJAXRequestDataTools.parseBoolParameter("useDefaultName", req.getRequest(), true)) {
-                        final String i18nArchive = StringHelper.valueOf(user.getLocale()).getString(MailStrings.ARCHIVE);
-                        throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(Category.CATEGORY_USER_INPUT, i18nArchive);
-                    }
-                    // Select default name for archive folder
-                    archiveName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DEFAULT_ARCHIVE);
-                    updateAccount = true;
-                }
-                final String prefix = mailAccess.getFolderStorage().getDefaultFolderPrefix();
-                if (isEmpty(prefix)) {
-                    separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-                    archiveFullname = archiveName;
-                    parentFullName = MailFolder.DEFAULT_FOLDER_ID;
-                } else {
-                    separator = prefix.charAt(prefix.length() - 1);
-                    archiveFullname = new StringBuilder(prefix).append(archiveName).toString();
-                    parentFullName = prefix.substring(0, prefix.length() - 1);
-                }
-                // Update mail account
-                if (updateAccount) {
-                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                    if (null != mass) {
-                        final String af = archiveFullname;
-                        ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
-                            @Override
-                            public Void call() throws Exception {
-                                final MailAccountDescription mad = new MailAccountDescription();
-                                mad.setId(accountId);
-                                mad.setArchiveFullname(af);
-                                mass.updateMailAccount(mad, EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL), session.getUserId(), session.getContextId(), session);
-                                return null;
-                            }
-                        });
+            JSONArray jArray = ((JSONArray) req.getRequest().getData());
+            if (null == jArray) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
+
+            String sourceFolder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+
+            if (null == sourceFolder) {
+                // Expect array of objects
+                TIntObjectMap<Map<String, List<String>>> m = new TIntObjectHashMap<Map<String, List<String>>>(2);
+
+                // Parse JSON body
+                int length = jArray.length();
+                for (int i = 0; i < length; i++) {
+                    JSONObject jObject = jArray.getJSONObject(i);
+
+                    String folder = jObject.getString(AJAXServlet.PARAMETER_FOLDERID);
+                    String id = jObject.getString(AJAXServlet.PARAMETER_ID);
+
+                    FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folder);
+                    int accountId = fa.getAccountId();
+
+                    Map<String, List<String>> map = m.get(accountId);
+                    if (null == map) {
+                        map = new HashMap<String, List<String>>();
+                        m.put(accountId, map);
                     }
+
+                    String fullName = fa.getFullname();
+                    List<String> list = map.get(fullName);
+                    if (null == list) {
+                        list = new LinkedList<String>();
+                        map.put(fullName, list);
+                    }
+
+                    list.add(id);
                 }
+
+                // Iterate map
+                final Reference<Exception> exceptionRef = new Reference<Exception>();
+                final Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+                m.forEachEntry(new TIntObjectProcedure<Map<String, List<String>>>() {
+
+                    @Override
+                    public boolean execute(int accountId, Map<String, List<String>> mapping) {
+                        boolean proceed = false;
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                        try {
+                            // Connect mail access
+                            mailAccess = MailAccess.getInstance(session, accountId);
+                            mailAccess.connect();
+
+                            // Check archive full name
+                            int[] separatorRef = new int[1];
+                            String archiveFullname = checkArchiveFullNameFor(mailAccess, req, separatorRef);
+                            char separator = (char) separatorRef[0];
+
+                            // Move to archive folder
+                            for (Map.Entry<String, List<String>> mappingEntry : mapping.entrySet()) {
+                                String fullName = mappingEntry.getKey();
+                                List<String> mailIds = mappingEntry.getValue();
+
+                                MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fullName, mailIds.toArray(new String[mailIds.size()]), new MailField[] { MailField.ID, MailField.RECEIVED_DATE});
+                                if (null == msgs || msgs.length <= 0) {
+                                    return true;
+                                }
+
+                                move2Archive(msgs, fullName, archiveFullname, separator, cal, mailAccess);
+                            }
+
+                            proceed = true;
+                        } catch (Exception e) {
+                            exceptionRef.setValue(e);
+                        } finally {
+                            if (null != mailAccess) {
+                                mailAccess.close(true);
+                            }
+                        }
+                        return proceed;
+                    }
+                });
             } else {
-                separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-                final int pos = archiveFullname.lastIndexOf(separator);
-                if (pos > 0) {
-                    parentFullName = archiveFullname.substring(0, pos);
-                    archiveName = archiveFullname.substring(pos + 1);
-                } else {
-                    parentFullName = MailFolder.DEFAULT_FOLDER_ID;
-                    archiveName = archiveFullname;
+                // Expect array of identifiers
+                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(sourceFolder);
+                int accountId = fa.getAccountId();
+
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                try {
+                    // Connect mail access
+                    mailAccess = MailAccess.getInstance(session, accountId);
+                    mailAccess.connect();
+
+                    // Check archive full name
+                    int[] separatorRef = new int[1];
+                    String archiveFullname = checkArchiveFullNameFor(mailAccess, req, separatorRef);
+                    char separator = (char) separatorRef[0];
+
+                    int length = jArray.length();
+                    String[] mailIds = new String[length];
+                    for (int i = 0; i < length; i++) {
+                        mailIds[i] = jArray.getString(i);
+                    }
+
+                    String fullName = fa.getFullname();
+                    MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fullName, mailIds, new MailField[] { MailField.ID, MailField.RECEIVED_DATE});
+                    if (null == msgs || msgs.length <= 0) {
+                        return new AJAXRequestResult(Boolean.TRUE, "native");
+                    }
+
+                    move2Archive(msgs, fullName, archiveFullname, separator, mailAccess);
+                } finally {
+                    if (null != mailAccess) {
+                        mailAccess.close(true);
+                    }
                 }
             }
-            if (!mailAccess.getFolderStorage().exists(archiveFullname)) {
-                if (!AJAXRequestDataTools.parseBoolParameter("createIfAbsent", req.getRequest(), true)) {
-                    throw MailExceptionCode.FOLDER_NOT_FOUND.create(archiveFullname);
-                }
+
+            return new AJAXRequestResult(Boolean.TRUE, "native");
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+        move2Archive(msgs, fullName, archiveFullname, separator, cal, mailAccess);
+    }
+
+    protected void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, Calendar cal, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
+        for (MailMessage mailMessage : msgs) {
+            Date receivedDate = mailMessage.getReceivedDate();
+            cal.setTime(receivedDate);
+            Integer year = Integer.valueOf(cal.get(Calendar.YEAR));
+            List<String> ids = map.get(year);
+            if (null == ids) {
+                ids = new LinkedList<String>();
+                map.put(year, ids);
+            }
+            ids.add(mailMessage.getMailId());
+        }
+
+        int accountId = mailAccess.getAccountId();
+        Session session = mailAccess.getSession();
+        for (Map.Entry<Integer, List<String>> entry : map.entrySet() ) {
+            String sYear = entry.getKey().toString();
+            String fn = archiveFullname + separator + sYear;
+            if (!mailAccess.getFolderStorage().exists(fn)) {
                 final MailFolderDescription toCreate = new MailFolderDescription();
                 toCreate.setAccountId(accountId);
                 toCreate.setParentAccountId(accountId);
-                toCreate.setParentFullname(parentFullName);
+                toCreate.setParentFullname(archiveFullname);
                 toCreate.setExists(false);
-                toCreate.setFullname(archiveFullname);
-                toCreate.setName(archiveName);
+                toCreate.setFullname(fn);
+                toCreate.setName(sYear);
                 toCreate.setSeparator(separator);
                 {
                     final DefaultMailPermission mp = new DefaultMailPermission();
@@ -217,73 +291,11 @@ public final class ArchiveAction extends AbstractMailAction {
                     toCreate.addPermission(mp);
                 }
                 mailAccess.getFolderStorage().createFolder(toCreate);
-                CacheFolderStorage.getInstance().removeFromCache(parentFullName, "0", true, session);
-            }
-            // Move to archive folder
-            Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
-
-            int length = uids.length();
-            String[] mailIds = new String[length];
-            for (int i = 0; i < length; i++) {
-                mailIds[i] = uids.getString(i);
+                CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
             }
 
-            MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, new MailField[] { MailField.ID, MailField.RECEIVED_DATE});
-            if (null == msgs || msgs.length <= 0) {
-                return new AJAXRequestResult(Boolean.TRUE, "native");
-            }
-
-            Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
-            for (MailMessage mailMessage : msgs) {
-                Date receivedDate = mailMessage.getReceivedDate();
-                cal.setTime(receivedDate);
-                Integer year = Integer.valueOf(cal.get(Calendar.YEAR));
-                List<String> ids = map.get(year);
-                if (null == ids) {
-                    ids = new LinkedList<String>();
-                    map.put(year, ids);
-                }
-                ids.add(mailMessage.getMailId());
-            }
-
-            for (Map.Entry<Integer, List<String>> entry : map.entrySet() ) {
-                String sYear = entry.getKey().toString();
-                String fn = archiveFullname + separator + sYear;
-                if (!mailAccess.getFolderStorage().exists(fn)) {
-                    final MailFolderDescription toCreate = new MailFolderDescription();
-                    toCreate.setAccountId(accountId);
-                    toCreate.setParentAccountId(accountId);
-                    toCreate.setParentFullname(archiveFullname);
-                    toCreate.setExists(false);
-                    toCreate.setFullname(fn);
-                    toCreate.setName(sYear);
-                    toCreate.setSeparator(separator);
-                    {
-                        final DefaultMailPermission mp = new DefaultMailPermission();
-                        mp.setEntity(session.getUserId());
-                        final int p = MailPermission.ADMIN_PERMISSION;
-                        mp.setAllPermission(p, p, p, p);
-                        mp.setFolderAdmin(true);
-                        mp.setGroupPermission(false);
-                        toCreate.addPermission(mp);
-                    }
-                    mailAccess.getFolderStorage().createFolder(toCreate);
-                    CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
-                }
-
-                List<String> ids = entry.getValue();
-                mailAccess.getMessageStorage().moveMessages(fa.getFullname(), fn, ids.toArray(new String[ids.size()]), true);
-            }
-
-            return new AJAXRequestResult(Boolean.TRUE, "native");
-        } catch (final JSONException e) {
-            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (null != mailAccess) {
-                mailAccess.close(true);
-            }
+            List<String> ids = entry.getValue();
+            mailAccess.getMessageStorage().moveMessages(fullName, fn, ids.toArray(new String[ids.size()]), true);
         }
     }
 
