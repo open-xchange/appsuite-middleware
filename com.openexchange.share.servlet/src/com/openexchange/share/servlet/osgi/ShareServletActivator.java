@@ -62,6 +62,7 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.servlet.handler.AbstractShareHandler;
 import com.openexchange.share.servlet.handler.LoginShareHandler;
@@ -83,7 +84,7 @@ public class ShareServletActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ShareService.class, UserService.class, ContextService.class, SessiondService.class, ShareCryptoService.class,
-            ConfigurationService.class };
+            ConfigurationService.class, ModuleSupport.class };
     }
 
     @Override

@@ -52,6 +52,7 @@ package com.openexchange.ajax.login;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -75,7 +76,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
@@ -93,6 +93,7 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -246,14 +247,17 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                         protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
                             int module = null != target ? target.getModule() : share.getCommonModule();
                             if (0 != module) {
-                                Module folderModule = Module.getForFolderConstant(module);
-                                jLoginResult.put("module", null != folderModule ? folderModule.getName() : String.valueOf(module));
+                                String folderModule = ServerServiceRegistry.getInstance().getService(ModuleSupport.class).getShareModule(module);
+                                jLoginResult.put("module", folderModule);
                             }
                             String folder = null != target ? target.getFolder() : share.getCommonFolder();
                             jLoginResult.putOpt("folder", folder);
                             String item = null != target ? target.getItem() :
                                 null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
                             jLoginResult.putOpt("item", item);
+                            Map<String, Object> meta = null != target ? target.getMeta() :
+                                null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getMeta() : null;
+                            jLoginResult.putOpt("meta", meta);
                         }
                     };
                     retval.setContext(context);

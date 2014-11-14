@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,62 @@
  *
  */
 
-package com.openexchange.share.json.osgi;
+package com.openexchange.share.impl.groupware;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.share.json.ShareInfoResultConverter;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.user.UserService;
+import java.util.List;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.groupware.TargetPermission;
+
 
 /**
- * {@link ShareJsonActivator}
+ * {@link VirtualTargetProxy}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class ShareJsonActivator extends AJAXModuleActivator {
+public class VirtualTargetProxy extends AbstractTargetProxy {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareJsonActivator.class);
+    private final User user;
+    private final String folderId;
+    private final String item;
+    private final String title;
 
-    /**
-     * Initializes a new {@link ShareJsonActivator}.
-     */
-    public ShareJsonActivator() {
+    public VirtualTargetProxy(User user, String folderId, String item, String title) {
         super();
+        this.user = user;
+        this.folderId = folderId;
+        this.item = item;
+        this.title = title;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class };
+    public String getID() {
+        return item;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.share.json\"");
-        trackService(IDBasedFileAccessFactory.class);
-        trackService(FolderService.class);
-        trackService(TranslatorFactory.class);
-        trackService(DispatcherPrefixService.class);
-        openTrackers();
+    public String getFolderID() {
+        return folderId;
+    }
 
-        registerModule(new ShareActionFactory(this), "share/management");
-        registerService(ResultConverter.class, new ShareInfoResultConverter(getService(ModuleSupport.class)));
+    @Override
+    public int getOwner() {
+        return user.getId();
+    }
 
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public void applyPermissions(List<TargetPermission> permissions) {
+        //
+    }
+
+    @Override
+    public void removePermissions(List<TargetPermission> permissions) {
+        //
     }
 
 }

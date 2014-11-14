@@ -58,11 +58,12 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -198,8 +199,7 @@ public class RedirectingShareHandler extends HttpAuthShareHandler {
         redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
         redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
         if (0 != module) {
-            Module folderModule = Module.getForFolderConstant(module);
-            String name = null != folderModule ? folderModule.getName() : String.valueOf(module);
+            String name = ShareServiceLookup.getService(ModuleSupport.class).getShareModule(module);
             redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(name));
         }
         if (null != folder) {

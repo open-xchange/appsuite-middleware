@@ -82,6 +82,7 @@ import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
+import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.impl.notification.DefaultNotificationService;
 import com.openexchange.share.impl.notification.mail.MailNotificationHandler;
@@ -219,6 +220,9 @@ public class ShareActivator extends HousekeepingActivator {
         trackService(FolderService.class);
         trackService(TranslatorFactory.class);
         openTrackers();
+
+        //initialize share module mapping
+        ShareModuleMapping.init(getService(ConfigurationService.class));
     }
 
     @Override

@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -68,7 +69,6 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link TargetUpdateImpl}
@@ -123,7 +123,11 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
             List<ShareTarget> targetList = objectsByModule.get(module);
             for (ShareTarget target : targetList) {
                 if (!foldersById.containsKey(target.getFolder())) {
-                    UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), parameters.getSession(), parameters.getFolderServiceDecorator());
+                    UserizedFolder folder = folderService.getFolder(
+                        FolderStorage.REAL_TREE_ID,
+                        target.getFolder(),
+                        parameters.getSession(),
+                        parameters.getFolderServiceDecorator());
                     foldersById.put(folder.getID(), folder);
                 }
             }
@@ -134,7 +138,10 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                 ShareTarget target = tlit.next();
                 UserizedFolder parentFolder = foldersById.get(target.getFolder());
                 if (checkPermissions && !canShareObject(parentFolder, proxy, handler)) {
-                    throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(parameters.getUser().getId(), proxy.getTitle(), parameters.getContext().getContextId());
+                    throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
+                        parameters.getUser().getId(),
+                        proxy.getTitle(),
+                        parameters.getContext().getContextId());
                 }
 
                 proxies.put(target, proxy);
@@ -146,14 +153,27 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         Map<String, UserizedFolder> foldersById = new HashMap<String, UserizedFolder>();
         FolderService folderService = getFolderService();
         for (ShareTarget folderTarget : folderTargets) {
-            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderTarget.getFolder(), parameters.getSession(), parameters.getFolderServiceDecorator());
-            FolderTargetProxy proxy = new FolderTargetProxy(folder, parameters.getUser());
-            if (checkPermissions && !canShareFolder(folder)) {
-                throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(parameters.getUser().getId(), proxy.getTitle(), parameters.getContext().getContextId());
-            }
+            if (null != Module.getForFolderConstant(folderTarget.getModule())) {
+                UserizedFolder folder = folderService.getFolder(
+                    FolderStorage.REAL_TREE_ID,
+                    folderTarget.getFolder(),
+                    parameters.getSession(),
+                    parameters.getFolderServiceDecorator());
+                FolderTargetProxy proxy = new FolderTargetProxy(folder, parameters.getUser());
+                if (checkPermissions && !canShareFolder(folder)) {
+                    throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
+                        parameters.getUser().getId(),
+                        proxy.getTitle(),
+                        parameters.getContext().getContextId());
+                }
 
-            foldersById.put(folder.getID(), folder);
-            proxies.put(folderTarget, proxy);
+                foldersById.put(folder.getID(), folder);
+                proxies.put(folderTarget, proxy);
+            } else {
+                VirtualTargetProxy proxy = new VirtualTargetProxy(parameters.getUser(), folderTarget.getFolder(), folderTarget.getItem(),
+                    folderTarget.getMeta().get("title").toString());
+                proxies.put(folderTarget, proxy);
+            }
         }
 
         return foldersById;

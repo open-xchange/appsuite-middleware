@@ -60,9 +60,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Enums;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -86,13 +86,13 @@ public class ShareJSONParser {
      * @param timeZone
      * @return The share targets
      */
-    public static List<ShareTarget> parseTargets(JSONArray jsonTargets, TimeZone timeZone) throws OXException, JSONException {
+    public static List<ShareTarget> parseTargets(JSONArray jsonTargets, TimeZone timeZone, ModuleSupport service) throws OXException, JSONException {
         if (null == jsonTargets || 0 == jsonTargets.length()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("targets");
         }
         List<ShareTarget> targets = new ArrayList<ShareTarget>();
         for (int i = 0; i < jsonTargets.length(); i++) {
-            targets.add(parseTarget(jsonTargets.getJSONObject(i), timeZone));
+            targets.add(parseTarget(jsonTargets.getJSONObject(i), timeZone, service));
         }
         return targets;
     }
@@ -104,12 +104,12 @@ public class ShareJSONParser {
      * @return The share target
      * @throws OXException
      */
-    public static ShareTarget parseTarget(JSONObject jsonTarget, TimeZone timeZone) throws JSONException, OXException {
+    public static ShareTarget parseTarget(JSONObject jsonTarget, TimeZone timeZone, ModuleSupport service) throws JSONException, OXException {
         if (false == jsonTarget.hasAndNotNull("module")) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("module");
         }
 
-        int module = Module.getModuleInteger(jsonTarget.getString("module"));
+        int module = service.getShareModuleId(jsonTarget.getString("module"));
         if (false == jsonTarget.hasAndNotNull("folder")) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
         }

@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
@@ -106,8 +107,12 @@ public class ModuleSupportImpl implements ModuleSupport {
 
         if (target.isFolder()) {
             User user = requireService(UserService.class, services).getUser(session.getUserId(), session.getContextId());
-            UserizedFolder userizedFolder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
-            return new FolderTargetProxy(userizedFolder, user);
+            if (null != Module.getForFolderConstant(target.getModule())) {
+                UserizedFolder userizedFolder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
+                return new FolderTargetProxy(userizedFolder, user);
+            } else {
+                return new VirtualTargetProxy(user, target.getFolder(), target.getItem(), target.getMeta().get("title").toString());
+            }
         } else {
             return handlers.get(target.getModule()).loadTarget(target, session);
         }
@@ -146,6 +151,17 @@ public class ModuleSupportImpl implements ModuleSupport {
             return handler.adjustTarget(target, contextID, userID, isGuest);
         }
         return target;
+    }
+
+
+    @Override
+    public String getShareModule(int moduleId) {
+        return ShareModuleMapping.moduleMapping2String(moduleId);
+    }
+
+    @Override
+    public int getShareModuleId(String module) {
+        return ShareModuleMapping.moduleMapping2int(module);
     }
 
 }

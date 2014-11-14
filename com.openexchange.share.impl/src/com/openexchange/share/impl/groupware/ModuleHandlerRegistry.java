@@ -52,9 +52,11 @@ package com.openexchange.share.impl.groupware;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.infostore.Services;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.groupware.ModuleSupport;
 
 
 /**
@@ -86,8 +88,8 @@ public class ModuleHandlerRegistry {
     public ModuleHandler get(int module) throws OXException {
         ModuleHandler handler = opt(module);
         if (handler == null) {
-            Module m = Module.getForFolderConstant(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m.getName());
+            String m = Services.getService(ModuleSupport.class).getShareModule(module);
+            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m);
         }
         return handler;
     }

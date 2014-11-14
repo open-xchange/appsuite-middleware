@@ -68,6 +68,7 @@ import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tokenlogin.TokenLoginService;
 
 /**
@@ -120,6 +121,7 @@ public class LoginActivator extends HousekeepingActivator {
         track(OAuth2ProviderService.class, new ServerServiceRegistryTracker<OAuth2ProviderService>(OAuth2ProviderService.class));
         track(ShareService.class, new ServerServiceRegistryTracker<ShareService>(ShareService.class));
         track(ShareCryptoService.class, new ServerServiceRegistryTracker<ShareCryptoService>(ShareCryptoService.class));
+        track(ModuleSupport.class, new ServerServiceRegistryTracker<ModuleSupport>(ModuleSupport.class));
 
         ServiceSet<LoginRampUpService> rampUp = new ServiceSet<LoginRampUpService>();
         track(LoginRampUpService.class, rampUp);

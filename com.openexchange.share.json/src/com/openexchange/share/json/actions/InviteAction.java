@@ -69,6 +69,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
@@ -101,7 +102,8 @@ public class InviteAction extends AbstractShareAction {
         try {
             JSONObject data = (JSONObject) requestData.requireData();
             List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"), getTimeZone(requestData, session));
+            List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"), getTimeZone(requestData, session),
+                services.getService(ModuleSupport.class));
             String message = data.optString("message", null);
             /*
              * create the shares, notify recipients

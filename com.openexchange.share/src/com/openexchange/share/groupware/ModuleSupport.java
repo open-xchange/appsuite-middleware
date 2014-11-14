@@ -124,4 +124,20 @@ public interface ModuleSupport {
      */
     ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException;
 
+    /**
+     * Resolves the module id to module name
+     *
+     * @param moduleId The module id
+     * @return The module name
+     */
+    String getShareModule(int moduleId);
+
+    /**
+     * Resolves the module name to module id
+     *
+     * @param module The module name
+     * @return The module id
+     */
+    int getShareModuleId(String module);
+
 }

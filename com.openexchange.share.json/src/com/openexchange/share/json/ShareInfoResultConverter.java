@@ -63,9 +63,9 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -76,11 +76,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ShareInfoResultConverter implements ResultConverter {
 
+    private final ModuleSupport service;
+
     /**
      * Initializes a new {@link ShareInfoResultConverter}.
      */
-    public ShareInfoResultConverter() {
+    public ShareInfoResultConverter(ModuleSupport service) {
         super();
+        this.service = service;
     }
 
     @Override
@@ -183,8 +186,8 @@ public class ShareInfoResultConverter implements ResultConverter {
      */
     private JSONObject serializeShareTarget(ShareTarget target, TimeZone timeZone) throws JSONException {
         JSONObject jsonTarget = new JSONObject(8);
-        Module module = Module.getForFolderConstant(target.getModule());
-        jsonTarget.put("module", null == module ? String.valueOf(target.getModule()) : module.getName());
+        String module = service.getShareModule(target.getModule());
+        jsonTarget.put("module", module.isEmpty() ? String.valueOf(target.getModule()) : module);
         jsonTarget.putOpt("folder", target.getFolder());
         jsonTarget.putOpt("item", target.getItem());
         Date expiryDate = target.getExpiryDate();

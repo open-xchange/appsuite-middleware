@@ -243,14 +243,13 @@ public class ShareTool {
      */
     private static Set<Permission> addModulePermissions(Set<Permission> perms, int module) throws OXException {
         Module matchingModule = Module.getForFolderConstant(module);
-        if (null == matchingModule) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unknwon module: " + module);
+        if (null != matchingModule) {
+            Permission modulePermission = matchingModule.getPermission();
+            if (null == modulePermission) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No module permission for module " + matchingModule);
+            }
+            perms.add(modulePermission);
         }
-        Permission modulePermission = matchingModule.getPermission();
-        if (null == modulePermission) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No module permission for module " + matchingModule);
-        }
-        perms.add(modulePermission);
         return perms;
     }
 
