@@ -1,3 +1,7 @@
+* 2014-11-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35470: Fixed check whether parent folder is a public PIM folder
+
 * 2014-11-11 - martin.herfurth@open-xchange.com
 
  - Fix for bug 35419: Useless mail notification on state changes.
