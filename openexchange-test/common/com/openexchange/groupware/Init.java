@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.CacheService;
@@ -137,7 +138,6 @@ import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
-import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
@@ -180,6 +180,7 @@ import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.internal.DelegateExecutorService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
@@ -247,41 +248,6 @@ public final class Init {
          * Initialization for alias charset provider
          */
         new com.openexchange.charset.CustomCharsetProviderInit(),
-        /**
-         * Starts HTTP servlet manager
-         */
-        new Initialization() {
-
-            @Override
-            public void start() throws OXException {
-                GrizzlyConfig.getInstance().start();
-
-                // TODO replace with grizzly
-                // AJPv13Config.getInstance().start();
-                // ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
-                // if (null == AJPv13Server.getInstance()) {
-                // AJPv13Server.setInstance(new com.openexchange.ajp13.AJPv13ServerImpl());
-                // }
-                // try {
-                // AJPv13Server.startAJPServer();
-                // HttpManagersInit.getInstance().start();
-                // } catch (OXException e) {
-                // LOG.error("", e);
-                // }
-            }
-
-            @Override
-            public void stop() throws OXException {
-                // TODO replace with grizzly
-                // HttpManagersInit.getInstance().stop();
-                // AJPv13Server.stopAJPServer();
-                // AJPv13Server.releaseInstrance();
-                // ServletConfigLoader.resetDefaultInstance();
-                // AJPv13Config.getInstance().stop();
-
-                GrizzlyConfig.getInstance().stop();
-            }
-        },
         /**
          * Setup of ContextStorage and LoginInfo.
          */
@@ -473,6 +439,11 @@ public final class Init {
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
             ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
+
+            DelegateExecutorService delegateExecutorService = new DelegateExecutorService(threadPool.getThreadPoolExecutor());
+            services.put(ExecutorService.class, delegateExecutorService);
+            TestServiceRegistry.getInstance().addService(ExecutorService.class, delegateExecutorService);
+
             final TimerService timer = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             services.put(TimerService.class, timer);
             TestServiceRegistry.getInstance().addService(TimerService.class, timer);
