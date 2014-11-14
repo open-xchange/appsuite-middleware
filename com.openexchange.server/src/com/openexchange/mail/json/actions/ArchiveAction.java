@@ -131,7 +131,7 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
             String sourceFolder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
 
             if (null == sourceFolder) {
-                // Expect array of objects
+                // Expect array of objects: [{"folder":"INBOX/foo", "id":"1234"},{"folder":"INBOX/foo", "id":"1235"},...,{"folder":"INBOX/bar", "id":"1299"}]
                 TIntObjectMap<Map<String, List<String>>> m = new TIntObjectHashMap<Map<String, List<String>>>(2);
 
                 // Parse JSON body
@@ -209,7 +209,7 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                     }
                 });
             } else {
-                // Expect array of identifiers
+                // Expect array of identifiers: ["1234","1235",...,"1299"]
                 FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(sourceFolder);
                 int accountId = fa.getAccountId();
 
