@@ -183,14 +183,18 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                             // Move to archive folder
                             for (Map.Entry<String, List<String>> mappingEntry : mapping.entrySet()) {
                                 String fullName = mappingEntry.getKey();
-                                List<String> mailIds = mappingEntry.getValue();
 
-                                MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fullName, mailIds.toArray(new String[mailIds.size()]), new MailField[] { MailField.ID, MailField.RECEIVED_DATE});
-                                if (null == msgs || msgs.length <= 0) {
-                                    return true;
+                                // Check location
+                                if (!fullName.equals(archiveFullname) && !fullName.startsWith(archiveFullname + separator)) {
+                                    List<String> mailIds = mappingEntry.getValue();
+
+                                    MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fullName, mailIds.toArray(new String[mailIds.size()]), new MailField[] { MailField.ID, MailField.RECEIVED_DATE});
+                                    if (null == msgs || msgs.length <= 0) {
+                                        return true;
+                                    }
+
+                                    move2Archive(msgs, fullName, archiveFullname, separator, cal, mailAccess);
                                 }
-
-                                move2Archive(msgs, fullName, archiveFullname, separator, cal, mailAccess);
                             }
 
                             proceed = true;
@@ -219,6 +223,14 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                     int[] separatorRef = new int[1];
                     String archiveFullname = checkArchiveFullNameFor(mailAccess, req, separatorRef);
                     char separator = (char) separatorRef[0];
+
+                    // Check location
+                    {
+                        String fullName = fa.getFullname();
+                        if (fullName.equals(archiveFullname) || fullName.startsWith(archiveFullname + separator)) {
+                            return new AJAXRequestResult(Boolean.TRUE, "native");
+                        }
+                    }
 
                     int length = jArray.length();
                     String[] mailIds = new String[length];
