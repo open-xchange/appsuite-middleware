@@ -58,10 +58,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
+import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -72,6 +74,7 @@ import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
@@ -88,7 +91,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider,
-    FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess {
+    FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess, FileStorageEfficientRetrieval {
 
     private final InfostoreSearchEngine search;
     private final Context ctx;
@@ -199,6 +202,25 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
             return new InfostoreFile(documentMetadata);
         } catch (final NumberFormatException e) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
+        }
+    }
+
+    @Override
+    public Document getDocumentAndMetadata(String folderId, String id, String version) throws OXException {
+        return getDocumentAndMetadata(folderId, id, version, null);
+    }
+
+    @Override
+    public Document getDocumentAndMetadata(String folderId, String id, String version, String clientETag) throws OXException {
+        try {
+            DocumentAndMetadata document = getInfostore(folderId).getDocumentAndMetadata(
+                ID(id), null == version ? -1 : ID(version), clientETag, sessionObj);
+            if (null != folderId && 0 < document.getFolderId() && false == folderId.equals(String.valueOf(document.getFolderId()))) {
+                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+            }
+            return new InfostoreDocument(document);
+        } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
     }

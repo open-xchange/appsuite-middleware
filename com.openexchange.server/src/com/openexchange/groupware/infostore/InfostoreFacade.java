@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
@@ -173,6 +174,18 @@ public interface InfostoreFacade extends TransactionAware {
      * @see #CURRENT_VERSION
      */
     InputStream getDocument(int id, int version, ServerSession session) throws OXException;
+
+    /**
+     * Gets a doucment's stream including associated metadata, depending on the supplied client E-Tag, i.e. the document data is only
+     * included in the result in case the client has a stale E-Tag.
+     *
+     * @param id The identifier of the document to retrieve
+     * @param version The version of the document to retrieve
+     * @param clientETag The client E-Tag to compare the current E-Tag to
+     * @param session The session
+     * @return The document metadata, including the document's input stream in case the client E-Tag is outdated
+     */
+    DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).

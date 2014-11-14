@@ -49,8 +49,6 @@
 
 package com.openexchange.file.storage.infostore.internal;
 
-
-
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -60,16 +58,14 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.results.DeltaImpl;
+import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 
@@ -87,14 +83,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final boolean ignoreDeleted, ServerSession session) throws OXException {
-        final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
-        return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
+        return Results.emptyDelta();
     }
 
     @Override
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, ServerSession session) throws OXException {
-        final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
-        return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
+        return Results.emptyDelta();
     }
 
     @Override
@@ -108,61 +102,62 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public InputStream getDocument(final int id, final int version, ServerSession session) throws OXException {
-        virtualFolder(); return null;
+        throw virtualFolder();
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException {
+        throw virtualFolder();
     }
 
     @Override
     public InputStream getDocument(int id, int version, long offset, long length, ServerSession sessions) throws OXException {
-        virtualFolder();
-        return null;
+        throw virtualFolder();
     }
 
     @Override
-    public DocumentMetadata getDocumentMetadata(final int id, final int version,
-            ServerSession session)
-            throws OXException {
-        virtualFolder(); return null;
+    public DocumentMetadata getDocumentMetadata(final int id, final int version, ServerSession session) throws OXException {
+        throw virtualFolder();
     }
 
     @Override
     public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException {
-        virtualFolder();
-        return null;
+        throw virtualFolder();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final Metadata sort, final int order, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final List<IDTuple> ids, final Metadata[] columns, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
@@ -176,14 +171,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void lock(final int id, final long diff, final ServerSession session)
-            throws OXException {
+    public void lock(final int id, final long diff, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public void removeDocument(final long folderId, final long date,
-            final ServerSession session) throws OXException {
+    public void removeDocument(final long folderId, final long date, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
@@ -289,59 +282,6 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     private OXException virtualFolder() throws OXException{
         throw InfostoreExceptionCodes.NO_DOCUMENTS_IN_VIRTUAL_FOLDER.create();
-    }
-
-    private class EmptyTimedResult extends AbstractTimedResult<DocumentMetadata> {
-
-        public EmptyTimedResult() {
-            super(new SearchIterator<DocumentMetadata>() {
-
-                @Override
-                public void addWarning(final OXException warning) {
-                    // Nothing to to.
-                }
-
-                @Override
-                public void close() {
-                    // Nothing to do.
-                }
-
-                @Override
-                public OXException[] getWarnings() {
-                    return new OXException[0];
-                }
-
-                @Override
-                public boolean hasNext() throws OXException {
-                    return false;
-                }
-
-                public boolean hasSize() {
-                    return true;
-                }
-
-                @Override
-                public boolean hasWarnings() {
-                    return false;
-                }
-
-                @Override
-                public DocumentMetadata next() throws OXException {
-                    return null;
-                }
-
-                @Override
-                public int size() {
-                    return 0;
-                }
-            });
-        }
-
-        @Override
-        protected long extractTimestamp(final DocumentMetadata object) {
-            return 0;
-        }
-
     }
 
     @Override

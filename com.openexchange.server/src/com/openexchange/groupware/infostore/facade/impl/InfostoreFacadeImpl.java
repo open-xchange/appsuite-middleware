@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,6 +72,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.ajax.container.IFileHolder.InputStreamClosure;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -80,6 +82,7 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -92,6 +95,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -321,20 +325,75 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public InputStream getDocument(int id, int version, long offset, long length, final ServerSession session) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, session.getContext(), session.getUser(), session.getUserPermissionBits());
-        if (!infoPerm.canReadObject()) {
+        /*
+         * get needed metadata & check read permissions
+         */
+        DocumentMetadata metadata = load(id, version, session.getContext());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(
+            metadata, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
-        final DocumentMetadata dm = load(id, version, session.getContext());
-        final FileStorage fs = getFileStorage(infoPerm.getFolderOwner(), session.getContextId());
-        if (null == dm.getFilestoreLocation()) {
+        /*
+         * get & return file from storage
+         */
+        if (null == metadata.getFilestoreLocation()) {
             return Streams.EMPTY_INPUT_STREAM;
         }
-        if (0 == offset && -1 == length) {
-            return fs.getFile(dm.getFilestoreLocation());
-        } else {
-            return fs.getFile(dm.getFilestoreLocation(), offset, length);
+        if (null == metadata.getFilestoreLocation()) {
+            return Streams.EMPTY_INPUT_STREAM;
         }
+        FileStorage fileStorage = getFileStorage(permission.getFolderOwner(), session.getContextId());
+        if (0 == offset && -1 == length) {
+            return fileStorage.getFile(metadata.getFilestoreLocation());
+        } else {
+            return fileStorage.getFile(metadata.getFilestoreLocation(), offset, length);
+        }
+    }
+
+    /**
+     * Generates an E-Tag based on the supplied document metadata.
+     *
+     * @param metadata The metadata
+     * @return The E-Tag
+     */
+    private static String getETag(DocumentMetadata metadata) {
+        FileID fileID = new FileID(String.valueOf(metadata.getId()));
+        fileID.setFolderId(String.valueOf(metadata.getFolderId()));
+        return FileStorageUtility.getETagFor(fileID.toUniqueID(), String.valueOf(metadata.getVersion()), metadata.getLastModified());
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException {
+        /*
+         * get needed metadata & check read permissions
+         */
+        DocumentMetadata metadata = load(id, version, session.getContext());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(
+            metadata, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        if (false == permission.canReadObject()) {
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+        }
+        /*
+         * check client E-Tag if supplied
+         */
+        String eTag = getETag(metadata);
+        if (false == Strings.isEmpty(clientETag) && clientETag.equals(eTag)) {
+            return new DocumentAndMetadataImpl(metadata, null, eTag);
+        }
+        /*
+         * add file to result, otherwise
+         */
+        final FileStorage fileStorage = getFileStorage(permission.getFolderOwner(), session.getContextId());
+        final String filestoreLocation = metadata.getFilestoreLocation();
+        InputStreamClosure isClosure = new InputStreamClosure() {
+
+            @Override
+            public InputStream newStream() throws OXException, IOException {
+                return null == filestoreLocation ? Streams.EMPTY_INPUT_STREAM : fileStorage.getFile(filestoreLocation);
+            }
+        };
+        return new DocumentAndMetadataImpl(metadata, isClosure, eTag);
     }
 
     @Override

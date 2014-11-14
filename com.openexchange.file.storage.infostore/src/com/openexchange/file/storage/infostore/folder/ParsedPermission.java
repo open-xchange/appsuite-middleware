@@ -58,20 +58,15 @@ import com.openexchange.folderstorage.Permission;
  */
 public final class ParsedPermission implements Permission {
 
+    private static final long serialVersionUID = -7559316827913206957L;
+
     private int system;
-
     private int deletePermission;
-
     private int folderPermission;
-
     private int readPermission;
-
     private int writePermission;
-
     private boolean admin;
-
     private int entity;
-
     private boolean group;
 
     /**

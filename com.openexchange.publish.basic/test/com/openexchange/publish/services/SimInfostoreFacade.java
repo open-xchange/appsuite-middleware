@@ -59,6 +59,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -368,6 +369,12 @@ public class SimInfostoreFacade implements InfostoreFacade {
     public void removeDocuments(List<IDTuple> ids, Context context) throws OXException {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
