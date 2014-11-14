@@ -68,7 +68,6 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
-import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -171,7 +170,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                     throw AjaxExceptionCodes.MISSING_FIELD.create("module");
                 }
                 cts = contentType.toString();
-                if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && CONTENT_TYPE_MAIL.equals(cts)) {
+                if (isPublicPimFolder(parent) && CONTENT_TYPE_MAIL.equals(cts)) {
                     throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
                 }
             }
