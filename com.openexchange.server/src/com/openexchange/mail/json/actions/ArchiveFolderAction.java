@@ -132,6 +132,14 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
             String archiveFullname = checkArchiveFullNameFor(mailAccess, req, separatorRef);
             char separator = (char) separatorRef[0];
 
+            // Check location
+            {
+                String fullName = fa.getFullname();
+                if (fullName.equals(archiveFullname) || fullName.startsWith(archiveFullname + separator)) {
+                    return new AJAXRequestResult(Boolean.TRUE, "native");
+                }
+            }
+
             // Move to archive folder
             Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
             cal.set(Calendar.MILLISECOND, 0);
