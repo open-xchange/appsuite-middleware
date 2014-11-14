@@ -116,6 +116,7 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.impl.CompositeFileStorageService;
 import com.openexchange.filestore.impl.DBQuotaFileStorageService;
 import com.openexchange.folder.FolderService;
@@ -133,6 +134,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
@@ -346,13 +348,13 @@ public final class Init {
         startAndInjectCache();
         startAndInjectCalendarServices();
         startAndInjectDatabaseBundle();
-        startAndInjectFileStorage();
         startAndInjectDatabaseUpdate();
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
         startAndInjectSessiondBundle();
         startAndInjectEventBundle();
         startAndInjectContextService();
+        startAndInjectFileStorage();
         startAndInjectGroupService();
         startAndInjectFolderService();
         startAndInjectResourceService();
@@ -705,10 +707,16 @@ public final class Init {
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         serviceLookup.add(DatabaseService.class, dbService);
         ContextService contextService = (ContextService) services.get(ContextService.class);
+        serviceLookup.add(ContextService.class, contextService);
         UserService userService = (UserService) services.get(UserService.class);
+        serviceLookup.add(UserService.class, userService);
         com.openexchange.filestore.impl.osgi.Services.setServiceLookup(serviceLookup);
 
-        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageService(fileStorageStarter));
+        DBQuotaFileStorageService qfss = new DBQuotaFileStorageService(fileStorageStarter);
+        QuotaFileStorage.setQuotaFileStorageStarter(qfss);
+        InfostoreFacadeImpl.setQuotaFileStorageService(qfss);
+        services.put(QuotaFileStorageService.class, qfss);
+        TestServiceRegistry.getInstance().addService(QuotaFileStorageService.class, qfss);
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
