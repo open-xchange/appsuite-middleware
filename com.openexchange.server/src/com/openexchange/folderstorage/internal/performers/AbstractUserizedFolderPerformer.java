@@ -85,6 +85,7 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.osgi.ShareServiceHolder;
 import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -166,6 +167,30 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         super(user, context, folderStorageDiscoverer);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
+    }
+
+    /** The PIM content types */
+    protected static final Set<String> PIM_CONTENT_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CalendarContentType.getInstance().toString(), ContactContentType.getInstance().toString(), TaskContentType.getInstance().toString(), InfostoreContentType.getInstance().toString())));
+
+    /**
+     * Checks if denoted folder is a public PIM folder
+     *
+     * @param parent The folder to check
+     * @return
+     */
+    protected static boolean isPublicPimFolder(Folder folder) {
+        if (FolderStorage.PUBLIC_ID.equals(folder.getID())) {
+            return true;
+        }
+
+        if (PublicType.getInstance().equals(folder.getType())) {
+            ContentType contentType = folder.getContentType();
+            if (null != contentType && PIM_CONTENT_TYPES.contains(contentType.toString())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
