@@ -166,6 +166,7 @@ import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.internal.RdbShareStorage;
@@ -896,14 +897,14 @@ public final class Init {
     }
 
     public static void startAndInjectDefaultShareService() {
-        if (null == TestServiceRegistry.getInstance().getService(DefaultShareService.class)) {
+        if (null == TestServiceRegistry.getInstance().getService(ShareService.class)) {
             DatabaseService dbService = TestServiceRegistry.getInstance().getService(DatabaseService.class);
             ShareStorage storage = new RdbShareStorage(dbService);
             services.put(ShareStorage.class, storage);
             TestServiceRegistry.getInstance().addService(ShareStorage.class, storage);
             DefaultShareService service = new DefaultShareService(LOOKUP);
-            services.put(DefaultShareService.class, service);
-            TestServiceRegistry.getInstance().addService(DefaultShareService.class, service);
+            services.put(ShareService.class, service);
+            TestServiceRegistry.getInstance().addService(ShareService.class, service);
         }
     }
 
