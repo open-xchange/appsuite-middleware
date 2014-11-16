@@ -194,6 +194,12 @@ public class AJAXRequestData {
     /** The request's last-modified time stamp as parsed from <code>"If-Modified-Since"</code> request header */
     private @Nullable Long lastModified;
 
+    /** The maximum allowed size of a single uploaded file or <code>-1</code> */
+    private long maxUploadFileSize = -1L;
+
+    /** The maximum allowed size of a complete request or <code>-1</code> */
+    private long maxUploadSize = -1L;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      *
@@ -268,6 +274,24 @@ public class AJAXRequestData {
         copy.uploadEvent = null;
         copy.uploadStreamProvider = null;
         return copy;
+    }
+
+    /**
+     * Sets the maximum allowed size of a single uploaded file or <code>-1</code>
+     *
+     * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     */
+    public void setMaxUploadFileSize(long maxUploadFileSize) {
+        this.maxUploadFileSize = maxUploadFileSize;
+    }
+
+    /**
+     * Sets the maximum allowed size of a complete request or <code>-1</code>
+     *
+     * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
+     */
+    public void setMaxUploadSize(long maxUploadSize) {
+        this.maxUploadSize = maxUploadSize;
     }
 
     /**
@@ -1144,9 +1168,26 @@ public class AJAXRequestData {
      *
      * @return <code>true</code> if one or more files were uploaded, <code>false</code> otherwise.
      * @throws OXException If upload files cannot be processed
+     * @see #hasUploads(long, long)
      */
     public boolean hasUploads() throws OXException {
-        processUpload();
+        processUpload(maxUploadFileSize, maxUploadSize);
+        return !files.isEmpty();
+    }
+
+    /**
+     * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
+     * multiple module.
+     *
+     * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
+     * @return <code>true</code> if one or more files were uploaded, <code>false</code> otherwise.
+     * @throws OXException If upload files cannot be processed
+     */
+    public boolean hasUploads(long maxUploadFileSize, long maxUploadSize) throws OXException {
+        this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
+        this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
+        processUpload(maxUploadFileSize, maxUploadSize);
         return !files.isEmpty();
     }
 
@@ -1155,9 +1196,25 @@ public class AJAXRequestData {
      *
      * @return A list of file uploads.
      * @throws OXException If upload files cannot be processed
+     * @see #getFiles(long, long)
      */
     public List<UploadFile> getFiles() throws OXException {
-        processUpload();
+        processUpload(maxUploadFileSize, maxUploadSize);
+        return Collections.unmodifiableList(files);
+    }
+
+    /**
+     * Retrieve file uploads.
+     *
+     * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
+     * @return A list of file uploads.
+     * @throws OXException If upload files cannot be processed
+     */
+    public List<UploadFile> getFiles(long maxUploadFileSize, long maxUploadSize) throws OXException {
+        this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
+        this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
+        processUpload(maxUploadFileSize, maxUploadSize);
         return Collections.unmodifiableList(files);
     }
 
@@ -1167,9 +1224,10 @@ public class AJAXRequestData {
      * @param name The name of the form field that include the file
      * @return The file, or null if no file field of this name was found
      * @throws OXException If upload files cannot be processed
+     * @see #getFile(String, long, long)
      */
-    public @Nullable UploadFile getFile(final String name) throws OXException {
-        processUpload();
+    public @Nullable UploadFile getFile(String name) throws OXException {
+        processUpload(maxUploadFileSize, maxUploadSize);
         for (final UploadFile file : files) {
             if (file.getFieldName().equals(name)) {
                 return file;
@@ -1178,7 +1236,55 @@ public class AJAXRequestData {
         return null;
     }
 
-    private void processUpload() throws OXException {
+    /**
+     * Retrieve a file with a given form name.
+     *
+     * @param name The name of the form field that include the file
+     * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
+     * @return The file, or <code>null</code> if no file field of this name was found
+     * @throws OXException If upload files cannot be processed
+     */
+    public @Nullable UploadFile getFile(String name, long maxUploadFileSize, long maxUploadSize) throws OXException {
+        this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
+        this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
+        processUpload(maxUploadFileSize, maxUploadSize);
+        for (final UploadFile file : files) {
+            if (file.getFieldName().equals(name)) {
+                return file;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the associated upload event.
+     *
+     * @return The upload event
+     * @throws OXException If upload files cannot be processed
+     * @see #getUploadEvent(long, long)
+     */
+    public UploadEvent getUploadEvent() throws OXException {
+        processUpload(maxUploadFileSize, maxUploadSize);
+        return uploadEvent;
+    }
+
+    /**
+     * Gets the associated upload event.
+     *
+     * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
+     * @return The upload event
+     * @throws OXException If upload files cannot be processed
+     */
+    public UploadEvent getUploadEvent(long maxUploadFileSize, long maxUploadSize) throws OXException {
+        this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
+        this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
+        processUpload(maxUploadFileSize, maxUploadSize);
+        return uploadEvent;
+    }
+
+    private void processUpload(long maxFileSize, long maxOverallSize) throws OXException {
         if (!multipart || null == httpServletRequest) {
             return;
         }
@@ -1186,7 +1292,7 @@ public class AJAXRequestData {
         synchronized (thisFiles) {
             UploadEvent uploadEvent = this.uploadEvent;
             if (null == uploadEvent) {
-                uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest);
+                uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest, maxFileSize, maxOverallSize);
                 this.uploadEvent = uploadEvent;
                 final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
                 while (iterator.hasNext()) {
@@ -1381,17 +1487,6 @@ public class AJAXRequestData {
      */
     public void setRoute(final String route) {
         this.route = route;
-    }
-
-    /**
-     * Gets the associated upload event.
-     *
-     * @return The upload event
-     * @throws OXException If upload files cannot be processed
-     */
-    public UploadEvent getUploadEvent() throws OXException {
-        processUpload();
-        return uploadEvent;
     }
 
     /**

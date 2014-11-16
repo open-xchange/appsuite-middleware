@@ -77,6 +77,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.AttachmentUtility;
@@ -122,9 +123,10 @@ public final class AttachAction extends AbstractAttachmentAction {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final User user = session.getUser();
-            final UserConfiguration userConfiguration = session.getUserConfiguration();
-            if (requestData.hasUploads()) {
+            User user = session.getUser();
+            UserConfiguration userConfiguration = session.getUserConfiguration();
+            long maxUploadSize = AttachmentConfig.getMaxUploadSize();
+            if (requestData.hasUploads(-1, maxUploadSize > 0 ? maxUploadSize : -1L)) {
                 final UploadEvent upload = requestData.getUploadEvent();
                 final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
                 final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();

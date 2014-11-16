@@ -49,44 +49,36 @@
 
 package com.openexchange.groupware.upload.impl;
 
-import java.util.Collection;
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.exception.OXException;
+import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 
 /**
- * An interface that defines a method to register instances of <code>com.openexchange.groupware.upload.UploadListener</code>
+ * {@link UploadFileSizeExceededException} - The upload error with code MAX_UPLOAD_FILE_SIZE_EXCEEDED providing the possibility to convert bytes to a
+ * human readable string; e.g. <code>88.3 MB</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface UploadRegistry {
+public final class UploadFileSizeExceededException extends UploadException {
 
     /**
-     * Fires the upload event by delegating this event to all registered listeners. Finally the <code>UploadEvent.cleanUp()</code> method is
-     * invoked to delete temporary files from disk.
-     *
-     * @param uploadEvent The upload event
-     * @param uploadListeners The upload listeners for current upload event
-     * @throws OXException If an error like over quota occurs
+     * No instance.
      */
-    void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners) throws OXException;
+    private UploadFileSizeExceededException(final int code, final String displayMessage, final Throwable cause, final Object[] displayArgs) {
+        super(code, displayMessage, cause, displayArgs);
+    }
+
+    private static final long serialVersionUID = -6166524953168225923L;
 
     /**
-     * Create an <code>UpdateEvent</code> object from incoming multipart form data
+     * Initializes a new {@link UploadException} for exceeded upload file size.
      *
-     * @param req The corresponding instance of <code>HttpServletRequest</code>
-     * @return An <code>UpdateEvent</code> object from incoming multipart form data
-     * @throws OXException If an error like over quota occurs
+     * @param size The actual file size in bytes
+     * @param maxSize The max. allowed file size in bytes
+     * @param humanReadable <code>true</code> to convert bytes to a human readable string; otherwise <code>false</code>
      */
-    UploadEvent processUpload(HttpServletRequest req) throws OXException;
+    public static UploadException create(final long size, final long maxSize, final boolean humanReadable) {
+        return UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.create(
+            humanReadable ? getSize(size, 2, false, true) : Long.valueOf(size),
+            humanReadable ? getSize(maxSize, 2, false, true) : Long.valueOf(maxSize)).setAction(null);
+    }
 
-    /**
-     * Create an <code>UpdateEvent</code> object from incoming multipart form data
-     *
-     * @param req The corresponding instance of <code>HttpServletRequest</code>
-     * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
-     * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
-     * @return An <code>UpdateEvent</code> object from incoming multipart form data
-     * @throws OXException If an error like over quota occurs
-     */
-    UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException;
 }

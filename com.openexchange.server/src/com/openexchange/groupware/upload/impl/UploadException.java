@@ -130,6 +130,16 @@ public class UploadException extends OXException {
          * Connection has been closed unexpectedly. Please try again.
          */
         UNEXPECTED_EOF("Connection has been closed unexpectedly. Please try again.", UploadExceptionMessage.UNEXPECTED_EOF_MSG, CATEGORY_TRY_AGAIN, 13),
+        /**
+         * Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s
+         */
+        MAX_UPLOAD_FILE_SIZE_EXCEEDED("Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s",
+            UploadExceptionMessage.MAX_UPLOAD_FILE_SIZE_EXCEEDED_MSG, CATEGORY_USER_INPUT, 14),
+        /**
+         * Request rejected because file size exceeds the maximum configured file size of %1$s
+         */
+        MAX_UPLOAD_FILE_SIZE_EXCEEDED_UNKNOWN("Request rejected because file size exceeds the maximum configured file size of %1$s",
+            UploadExceptionMessage.MAX_UPLOAD_FILE_SIZE_EXCEEDED_UNKNOWN_MSG, CATEGORY_USER_INPUT, 14),
 
         ;
 

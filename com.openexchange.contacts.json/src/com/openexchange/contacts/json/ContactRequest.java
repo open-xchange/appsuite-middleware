@@ -63,6 +63,7 @@ import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchTermFields;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -479,14 +480,16 @@ public class ContactRequest {
     }
 
     public boolean containsImage() throws OXException {
-        return request.hasUploads();
+        long maxSize = sysconfMaxUpload();
+        return request.hasUploads(-1L, maxSize > 0 ? maxSize : -1L);
     }
 
     public JSONObject getContactJSON(final boolean isUpload) throws OXException {
         if (!isUpload) {
             return (JSONObject) request.requireData();
         }
-        final String jsonField = request.getUploadEvent().getFormField("json");
+        long maxSize = sysconfMaxUpload();
+        String jsonField = request.getUploadEvent(-1L, maxSize > 0 ? maxSize : -1L).getFormField("json");
         try {
             return new JSONObject(jsonField);
         } catch (final JSONException e) {
@@ -495,7 +498,8 @@ public class ContactRequest {
     }
 
     public UploadEvent getUploadEvent() throws OXException {
-        return request.getUploadEvent();
+        long maxSize = sysconfMaxUpload();
+        return request.getUploadEvent(-1L, maxSize > 0 ? maxSize : -1L);
     }
 
     public int[] getDeleteRequestData() throws OXException {
@@ -567,6 +571,14 @@ public class ContactRequest {
             ContactField field = ContactMapper.getInstance().getMappedField(operand.optString(SearchTermFields.FIELD));
             return new ContactFieldOperand(field);
         }
+    }
+
+    private static long sysconfMaxUpload() {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if(null == sizeS) {
+            return 0;
+        }
+        return Long.parseLong(sizeS);
     }
 
 }

@@ -93,6 +93,7 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTrackableTask;
@@ -160,8 +161,9 @@ public final class ImportAction extends AbstractMailAction {
             /*
              * Iterate upload files
              */
-            final ServerSession session = mailRequest.getSession();
-            final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
+            ServerSession session = mailRequest.getSession();
+            UserSettingMail usm = session.getUserSettingMail();
+            QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(usm.getSendAddr(), false);
             MailServletInterface mailInterface = MailServletInterface.getInstance(session);
             final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;
@@ -169,7 +171,18 @@ public final class ImportAction extends AbstractMailAction {
                 final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 final AppenderTask task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
-                    final Iterator<UploadFile> iter = request.getFiles().iterator();
+                    Iterator<UploadFile> iter;
+                    {
+                        long maxFileSize = usm.getUploadQuotaPerFile();
+                        if (maxFileSize <= 0) {
+                            maxFileSize = -1L;
+                        }
+                        long maxSize = usm.getUploadQuota();
+                        if (maxSize <= 0) {
+                            maxSize = -1L;
+                        }
+                        iter = request.getFiles(maxFileSize, maxSize).iterator();
+                    }
                     if (iter.hasNext()) {
                         uploadEvent = request.getUploadEvent();
                         future = service.submit(task);
