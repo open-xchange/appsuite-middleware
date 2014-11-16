@@ -53,9 +53,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -123,7 +123,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
     public static final String PARAMETER_SERIALIZABLE_PARAMETER_NAMES = "remoteSerializableParameterNames";
 
-    // must not contain a colon in every name!
+    // Must not contain a colon in any name!
     private static final String[] PORTABLE_PARAMETERS = new String[] { "kerberosSubject", "kerberosPrincipal" };
 
     /**
@@ -178,7 +178,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
             writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
         }
         {
-            List<String> remoteParameterNames = new ArrayList<String>();
+            List<String> remoteParameterNames = new LinkedList<String>();
             remoteParameterNames.addAll(SessionStorageConfiguration.getInstance().getRemoteParameterNames());
             remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
             if (remoteParameterNames.isEmpty()) {

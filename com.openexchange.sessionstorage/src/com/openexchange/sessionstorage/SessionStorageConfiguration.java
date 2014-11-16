@@ -132,7 +132,7 @@ public class SessionStorageConfiguration {
                     prev = pos + 1;
                 }
 
-                remoteParameterNames = new ArrayList<String>(names);
+                remoteParameterNames = Collections.unmodifiableList(new ArrayList<String>(names));
             }
         }
     }
