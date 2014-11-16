@@ -106,4 +106,10 @@ public class UploadExceptionMessage implements LocalizableStrings {
     // Connection has been closed unexpectedly. Please try again.
     public static final String UNEXPECTED_EOF_MSG = "Connection has been closed unexpectedly. Please try again.";
 
+    // Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
+    public static final String MAX_UPLOAD_FILE_SIZE_EXCEEDED_MSG = "Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.";
+
+    // Request rejected because file size exceeds the maximum configured file size of %1$s.
+    public static final String MAX_UPLOAD_FILE_SIZE_EXCEEDED_UNKNOWN_MSG = "Request rejected because file size exceeds the maximum configured file size of %1$s.";
+
 }

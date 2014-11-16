@@ -56,6 +56,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -93,7 +94,8 @@ public final class NewAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        if (!requestData.hasUploads()) {
+        long maxSize = sysconfMaxUpload();
+        if (!requestData.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
         }
         final UploadEvent upload = requestData.getUploadEvent();
@@ -121,6 +123,14 @@ public final class NewAction implements AJAXActionService {
             jArray.put(processFileItem(uploadFile, management));
         }
         return new AJAXRequestResult(jArray, "json");
+    }
+
+    private static long sysconfMaxUpload() {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if (null == sizeS) {
+            return 0;
+        }
+        return Long.parseLong(sizeS);
     }
 
     private static String processFileItem(final UploadFile fileItem, final ManagedFileManagement management) throws OXException {

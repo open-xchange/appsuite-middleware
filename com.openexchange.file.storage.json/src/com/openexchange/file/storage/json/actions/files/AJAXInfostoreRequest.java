@@ -83,6 +83,7 @@ import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
@@ -414,9 +415,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public InputStream getUploadedFileData() throws OXException {
-        if (data.hasUploads()) {
+        long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+        if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
             try {
-                final UploadFile uploadFile = data.getFiles().get(0);
+                final UploadFile uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
                 checkSize(uploadFile.getSize());
                 java.io.File tmpFile = uploadFile.getTmpFile();
                 return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
@@ -472,7 +474,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public boolean hasUploads() throws OXException {
-        return data.hasUploads() || contentData != null;
+        long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+        return data.hasUploads(-1, maxSize > 0 ? maxSize : -1L) || contentData != null;
     }
 
     @Override
@@ -495,8 +498,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public InfostoreRequest requireBody() throws OXException {
-        if (data.getData() == null && !data.hasUploads() && data.getParameter("json") == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
+        if (data.getData() == null) {
+            long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+            if (!data.hasUploads(-1, maxSize > 0 ? maxSize : -1L) && data.getParameter("json") == null) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
+            }
         }
         return this;
     }
@@ -580,8 +586,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         UploadFile uploadFile = null;
-        if (data.hasUploads()) {
-            uploadFile = data.getFiles().get(0);
+        {
+            long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+            if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
+                uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
+            }
         }
 
         if (data.getUploadEvent() != null) {

@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
@@ -99,20 +100,28 @@ public class ImportRequest {
 		}
 		this.folders = Arrays.asList(request.getParameter(AJAXServlet.PARAMETER_FOLDERID).split(","));
 
-		if(! request.hasUploads()){
+		long maxSize = sysconfMaxUpload();
+		if(!request.hasUploads(-1, maxSize > 0 ? maxSize : -1L)){
 			throw ImportExportExceptionCodes.NO_FILE_UPLOADED.create();
 		}
-		if(request.getFiles().size() > 1){
+		if(request.getFiles(-1, maxSize > 0 ? maxSize : -1L).size() > 1){
 			throw ImportExportExceptionCodes.ONLY_ONE_FILE.create();
 		}
 		UploadFile uploadFile = request.getFiles().get(0);
-		//TODO check allowed upload size
 		try {
 			inputStream = new FileInputStream(uploadFile.getTmpFile());
 		} catch (FileNotFoundException e) {
 			throw ImportExportExceptionCodes.TEMP_FILE_NOT_FOUND.create();
 		}
 	}
+
+	private static long sysconfMaxUpload() {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if (null == sizeS) {
+            return 0;
+        }
+        return Long.parseLong(sizeS);
+    }
 
 	public int getContextId() {
 		return session.getContextId();

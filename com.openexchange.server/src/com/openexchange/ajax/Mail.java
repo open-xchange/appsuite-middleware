@@ -3980,7 +3980,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
-                    final FileItemIterator iter = newFileUploadBase().getItemIterator(req);
+                    UserSettingMail usm = session.getUserSettingMail();
+                    long maxFileSize = usm.getUploadQuotaPerFile();
+                    if (maxFileSize <= 0) {
+                        maxFileSize = -1L;
+                    }
+                    long maxSize = usm.getUploadQuota();
+                    if (maxSize <= 0) {
+                        maxSize = -1L;
+                    }
+                    final FileItemIterator iter = newFileUploadBase(maxFileSize, maxSize).getItemIterator(req);
                     if (iter.hasNext()) {
                         future = service.submit(task);
                     }
@@ -4771,7 +4780,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Create and fire upload event
                  */
-                final UploadEvent uploadEvent = processUpload(req);
+                UserSettingMail usm = session.getUserSettingMail();
+                long maxFileSize = usm.getUploadQuotaPerFile();
+                long maxSize = usm.getUploadQuota();
+                final UploadEvent uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
                 uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
                 uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
                 uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);

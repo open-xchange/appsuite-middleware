@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
@@ -123,7 +124,8 @@ public final class UpdateAction extends AbstractUserAction {
             /*
              * Parse parameters
              */
-            boolean containsImage = request.hasUploads();
+            long maxSize = sysconfMaxUpload();
+            boolean containsImage = request.hasUploads(-1, maxSize > 0 ? maxSize : -1L);
 
             final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
             final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
@@ -304,6 +306,14 @@ public final class UpdateAction extends AbstractUserAction {
 
     private static boolean isImageContentType(String contentType) {
         return null != contentType && contentType.toLowerCase().startsWith("image");
+    }
+
+    private static long sysconfMaxUpload() {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if(null == sizeS) {
+            return 0;
+        }
+        return Long.parseLong(sizeS);
     }
 
 }
