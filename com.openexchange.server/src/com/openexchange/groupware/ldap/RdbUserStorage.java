@@ -842,11 +842,16 @@ public class RdbUserStorage extends UserStorage {
 
     /**
      * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#UPDATE_ATTRIBUTES_FAILED} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
      * @param name Name of the attribute.
      * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
      * @param userId Identifier of the user that attribute should be set.
      * @param context Context the user resides in.
      * @throws OXException if writing the attribute fails.
+     * @see UserExceptionCode#UPDATE_ATTRIBUTES_FAILED
      */
     @Override
     public void setAttribute(String name, String value, int userId, Context context) throws OXException {
