@@ -53,6 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -121,7 +122,11 @@ public class LastLoginRecorder implements LoginHandlerService {
         try {
             userService.setAttribute("client:" + client, Long.toString(System.currentTimeMillis()), origUser.getId(), context);
         } catch (final OXException e) {
-            throw e;
+            if (false == UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.equals(e)) {
+                throw e;
+            }
+
+            // Another thread already applied the new value
         }
     }
 

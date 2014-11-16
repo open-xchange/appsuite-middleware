@@ -1,6 +1,7 @@
 * 2014-11-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 35471: Set NULL if Unified Mail is absent when serving 'io.ox/mail/unifiedInboxIdentifier' setting
+ - Fix for bug 35445: Introduced retry mechanism for the compare-and-set operation while awaiting randomly prior to next attempt
 
 * 2014-11-14 - thorben.betten@open-xchange.com
 
