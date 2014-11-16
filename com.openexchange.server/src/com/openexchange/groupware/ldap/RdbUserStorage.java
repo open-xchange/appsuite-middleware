@@ -134,7 +134,6 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
 
-
     /**
      * Default constructor.
      */
@@ -740,24 +739,24 @@ public class RdbUserStorage extends UserStorage {
                     }
                 } while (condition.checkRetry());
             } else {
-                    boolean autoCommit = con.getAutoCommit();
-                    if (autoCommit) {
-                        try {
-                            startTransaction(con);
-                            updateUserInDB(con, user, context);
-                            con.commit();
-                        } catch (OXException e) {
-                            rollback(con);
-                            throw e;
-                        } catch (SQLException e) {
-                            rollback(con);
-                            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
-                        } finally {
-                            autocommit(con);
-                        }
-                    } else {
+                boolean autoCommit = con.getAutoCommit();
+                if (autoCommit) {
+                    try {
+                        startTransaction(con);
                         updateUserInDB(con, user, context);
+                        con.commit();
+                    } catch (OXException e) {
+                        rollback(con);
+                        throw e;
+                    } catch (SQLException e) {
+                        rollback(con);
+                        throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                    } finally {
+                        autocommit(con);
                     }
+                } else {
+                    updateUserInDB(con, user, context);
+                }
             }
         } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
@@ -850,7 +849,7 @@ public class RdbUserStorage extends UserStorage {
      * @throws OXException if writing the attribute fails.
      */
     @Override
-    public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
+    public void setAttribute(String name, String value, int userId, Context context) throws OXException {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
@@ -866,7 +865,7 @@ public class RdbUserStorage extends UserStorage {
             	stmt.setString(3, name);
             	stmt.executeUpdate();
             } else {
-            	insertOrUpdateAttribute(name, value, userId, context, con);
+                insertOrUpdateAttribute(name, value, userId, context, con);
             }
         } catch (SQLException e) {
         	throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
@@ -878,37 +877,51 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void insertOrUpdateAttribute(final String name, final String value, final int userId, final Context context, final Connection con) throws OXException {
+    private void insertOrUpdateAttribute(String name, String value, int userId, Context context, Connection con) throws OXException {
+        int contextId = context.getContextId();
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        boolean doRollback = false;
         try {
 	    	Databases.startTransaction(con);
-	    	stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
-	    	stmt.setInt(1, context.getContextId());
-	    	stmt.setInt(2, userId);
-	    	stmt.setString(3, name);
-	    	rs = stmt.executeQuery();
-	    	List<UUID> toUpdate = new LinkedList<UUID>();
-	    	while (rs.next()) {
-	    		toUpdate.add(UUIDs.toUUID(rs.getBytes(1)));
+	    	doRollback = true;
+
+	    	List<UUID> toUpdate;
+            {
+    	    	stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
+    	    	stmt.setInt(1, contextId);
+    	    	stmt.setInt(2, userId);
+    	    	stmt.setString(3, name);
+    	    	rs = stmt.executeQuery();
+    	    	toUpdate = new LinkedList<UUID>();
+    	    	while (rs.next()) {
+    	    		toUpdate.add(UUIDs.toUUID(rs.getBytes(1)));
+    	    	}
+    	    	Databases.closeSQLStuff(rs, stmt);
+    			rs = null;
+    			stmt = null;
 	    	}
 
-	    	Databases.closeSQLStuff(rs, stmt);
-			rs = null;
 	    	if (toUpdate.isEmpty()) {
 	    		stmt = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
-	        	stmt.setInt(1, context.getContextId());
+	        	stmt.setInt(1, contextId);
 	        	stmt.setInt(2, userId);
 	        	stmt.setString(3, name);
 	        	stmt.setString(4, value);
 	            stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
-	            stmt.executeUpdate();
+	            try {
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    // Concurrent INSERT in the meantime
+                    LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, contextId, value);
+                    throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(e, contextId, userId);
+                }
 	    	} else {
 	    		stmt = con.prepareStatement("UPDATE user_attribute SET value = ?, uuid = ? WHERE cid = ? AND id = ? AND name = ? AND uuid = ?");
 	    		for (UUID uuid : toUpdate) {
 	    			stmt.setString(1, value);
 	    			stmt.setBytes(2, UUIDs.toByteArray(UUID.randomUUID()));
-	            	stmt.setInt(3, context.getContextId());
+	            	stmt.setInt(3, contextId);
 	            	stmt.setInt(4, userId);
 	            	stmt.setString(5, name);
 	            	stmt.setBytes(6, UUIDs.toByteArray(uuid));
@@ -918,20 +931,23 @@ public class RdbUserStorage extends UserStorage {
 	    		for (int updateCount : updateCounts) {
 	    			// Concurrent modification of at least one attribute. We lost the race...
 	    			if (updateCount != 1) {
-	    				LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, context.getContextId(), value);
-	    				throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(context.getContextId(), userId);
+	    				LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, contextId, value);
+	    				throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(contextId, userId);
 	    			}
 	    		}
 	    	}
 
 	    	con.commit();
-        } catch (OXException e) {
-        	Databases.rollback(con);
-        	throw e;
+	    	doRollback = false;
         } catch (SQLException e) {
-        	Databases.rollback(con);
-        	throw UserExceptionCode.SQL_ERROR.create(e.getMessage());
+        	throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
+            if (doRollback) {
+                // An error occurred, thus do the roll-back
+                Databases.rollback(con);
+            }
         	Databases.closeSQLStuff(stmt);
         	Databases.autocommit(con);
         }
