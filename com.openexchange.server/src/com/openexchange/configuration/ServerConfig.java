@@ -99,7 +99,7 @@ public final class ServerConfig implements Reloadable {
 
     private final Properties props;
     private String uploadDirectory = "/tmp/";
-    private int maxFileUploadSize = 10000;
+    private int maxFileUploadSize = 104857600;
     private int maxUploadIdleTimeMillis = 300000;
     private boolean prefetchEnabled;
     private String defaultEncoding;
