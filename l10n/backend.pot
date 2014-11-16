@@ -6809,6 +6809,20 @@ msgstr ""
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr ""
 
+#. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+msgid ""
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
+msgstr ""
+
+#. Request rejected because file size exceeds the maximum configured file size of %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+msgid ""
+"Request rejected because file size exceeds the maximum configured file size "
+"of %1$s."
+msgstr ""
+
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
