@@ -103,7 +103,7 @@ public class PhishingHeaders implements PreferencesItemService {
                     final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final String[] phishingHeaders = MailProperties.getInstance().getPhishingHeaders();
                 if (null == phishingHeaders || phishingHeaders.length == 0) {
-                    setting.setSingleValue("null");
+                    setting.setSingleValue(null);
                 } else {
                     final JSONArray jArray = new JSONArray();
                     for (final String phishingHeader : phishingHeaders) {
