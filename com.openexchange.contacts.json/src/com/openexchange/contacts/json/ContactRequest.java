@@ -574,11 +574,11 @@ public class ContactRequest {
     }
 
     private static long sysconfMaxUpload() {
-        try {
-            return ServerConfig.getInt(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        } catch (OXException e) {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if(null == sizeS) {
             return 0;
         }
+        return Long.parseLong(sizeS);
     }
 
 }

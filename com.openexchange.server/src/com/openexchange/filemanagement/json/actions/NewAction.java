@@ -126,11 +126,11 @@ public final class NewAction implements AJAXActionService {
     }
 
     private static long sysconfMaxUpload() {
-        try {
-            return ServerConfig.getInt(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        } catch (OXException e) {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if (null == sizeS) {
             return 0;
         }
+        return Long.parseLong(sizeS);
     }
 
     private static String processFileItem(final UploadFile fileItem, final ManagedFileManagement management) throws OXException {

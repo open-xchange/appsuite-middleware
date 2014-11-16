@@ -157,9 +157,14 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
     }
 
     private static long sysconfMaxUpload() {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if (Strings.isEmpty(sizeS)) {
+            return 0;
+        }
         try {
-            return ServerConfig.getInt(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        } catch (OXException e) {
+            return Long.parseLong(sizeS.trim());
+        } catch (final NumberFormatException e) {
+            LOG.warn("{} is not a number: {}. Fall-back to no upload limitation for InfoStore module.", com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE.name(), sizeS);
             return 0;
         }
     }
