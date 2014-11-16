@@ -102,10 +102,11 @@ public final class AttachmentUtility {
      * @throws OXException If attaching upload files fails
      */
     public static List<Integer> attachTo(final int objectId, final int module, final int folderId, final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        if (!requestData.hasUploads()) {
+        long maxUploadSize = AttachmentConfig.getMaxUploadSize();
+        if (!requestData.hasUploads(-1, maxUploadSize > 0 ? maxUploadSize : -1L)) {
             return Collections.emptyList();
         }
-        final UploadEvent upload = requestData.getUploadEvent();
+        final UploadEvent upload = requestData.getUploadEvent(-1, maxUploadSize > 0 ? maxUploadSize : -1L);
         if (null == upload) {
             return Collections.emptyList();
         }

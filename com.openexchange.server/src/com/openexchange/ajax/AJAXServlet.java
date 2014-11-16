@@ -80,7 +80,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
@@ -102,8 +104,10 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
+import com.openexchange.groupware.upload.impl.UploadFileSizeExceededException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
+import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -988,7 +992,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     @Override
     public UploadEvent processUpload(final HttpServletRequest req) throws OXException {
-        return processUploadStatic(req);
+        return processUpload(req, -1, -1);
+    }
+
+    @Override
+    public UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException {
+        return processUploadStatic(req, maxFileSize, maxOverallSize);
     }
 
     /**
@@ -1002,6 +1011,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return A new {@code ServletFileUpload} instance
      */
     public static ServletFileUpload newFileUploadBase() {
+        return newFileUploadBase(-1,  -1);
+    }
+
+    /**
+     * Creates a new {@code ServletFileUpload} instance.
+     *
+     * @param maxFileSize The maximum allowed size of a single uploaded file
+     * @param maxOverallSize The maximum allowed size of a complete request
+     * @return A new {@code ServletFileUpload} instance
+     */
+    public static ServletFileUpload newFileUploadBase(long maxFileSize, long maxOverallSize) {
         // Create the upload event
         final DiskFileItemFactory factory = new DiskFileItemFactory();
         // Set factory constraints; threshold for single files
@@ -1009,8 +1029,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
         // Create a new file upload handler
         final ServletFileUpload sfu = new ServletFileUpload(factory);
+        // Set the maximum allowed size of a single uploaded file
+        sfu.setFileSizeMax(maxFileSize);
         // Set overall request size constraint
-        sfu.setSizeMax(-1);
+        sfu.setSizeMax(maxOverallSize);
         return sfu;
     }
 
@@ -1024,7 +1046,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
      */
-    public static final UploadEvent processUploadStatic(final HttpServletRequest req) throws OXException {
+    public static final UploadEvent processUploadStatic(HttpServletRequest req) throws OXException {
+        return processUploadStatic(req, -1, -1);
+    }
+
+    /**
+     * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
+     *
+     * @param req The request whose upload shall be processed
+     * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @return The processed instance of {@link UploadEvent}
+     * @throws OXException Id processing the upload fails
+     */
+    public static final UploadEvent processUploadStatic(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException {
         if (!Tools.isMultipartContent(req)) {
             // No multipart content
             throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
@@ -1049,7 +1084,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
         }
         // Get file upload
-        final ServletFileUpload upload = newFileUploadBase();
+        final ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize);
         List<FileItem> items = null;
         try {
             /*
@@ -1069,7 +1104,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 }
                 // Parse multipart request
                 items = upload.parseRequest(new ServletRequestContext(req));
-            } catch (final FileUploadException e) {
+            } catch (FileSizeLimitExceededException e) {
+                throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+            } catch (SizeLimitExceededException e) {
+                throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+            } catch (FileUploadException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof IOException) {
                     final String message = cause.getMessage();

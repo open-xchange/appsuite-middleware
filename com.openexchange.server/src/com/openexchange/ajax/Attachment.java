@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -130,7 +129,7 @@ public class Attachment extends PermissionServlet {
     private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Attachment.class);
 
 
-    private long maxUploadSize = -2;
+    private volatile long maxUploadSize = -2;
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
@@ -291,7 +290,10 @@ public class Attachment extends PermissionServlet {
             if (ACTION_ATTACH.equals(action)) {
                 UploadEvent upload = null;
                 try {
-                    upload = processUpload(req);
+                    {
+                        long maxSize = getMaxUploadSize();
+                        upload = processUpload(req, -1L, maxSize > 0 ? maxSize : -1L);
+                    }
                     final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
                     final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
 
@@ -562,11 +564,23 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void checkSize(final long size) throws OXException {
-        if (maxUploadSize == -2) {
-            maxUploadSize = AttachmentConfig.getMaxUploadSize();
+    private long getMaxUploadSize() {
+        long tmp = maxUploadSize;
+        if (tmp == -2) {
+            synchronized (this) {
+                tmp = maxUploadSize;
+                if (tmp == -2) {
+                    tmp = AttachmentConfig.getMaxUploadSize();
+                    maxUploadSize = tmp;
+                }
+            }
         }
-        if(maxUploadSize == 0) {
+        return tmp;
+    }
+
+    private void checkSize(final long size) throws OXException {
+        long maxUploadSize = getMaxUploadSize();
+        if (maxUploadSize == 0) {
             return;
         }
         if (size > maxUploadSize) {

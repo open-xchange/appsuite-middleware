@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -292,7 +291,10 @@ public class Infostore extends PermissionServlet {
             if (action.equals(ACTION_NEW) || action.equals(ACTION_UPDATE) || action.equals(ACTION_COPY)) {
                 UploadEvent upload = null;
                 try {
-                    upload = processUpload(req);
+                    {
+                        long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+                        upload = processUpload(req, -1, maxSize > 0 ? maxSize : -1L);
+                    }
                     final UploadFile uploadFile;
                     {
                         final List<UploadFile> list = upload.getUploadFilesByFieldName("file");

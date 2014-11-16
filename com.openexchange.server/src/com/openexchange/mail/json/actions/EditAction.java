@@ -70,6 +70,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -100,10 +101,19 @@ public final class EditAction extends AbstractMailAction {
         List<OXException> warnings = new ArrayList<OXException>();
 
         try {
-            if (!request.hasUploads()) {
+            ServerSession session = req.getSession();
+            UserSettingMail usm = session.getUserSettingMail();
+            long maxFileSize = usm.getUploadQuotaPerFile();
+            if (maxFileSize <= 0) {
+                maxFileSize = -1L;
+            }
+            long maxSize = usm.getUploadQuota();
+            if (maxSize <= 0) {
+                maxSize = -1L;
+            }
+            if (!request.hasUploads(maxFileSize, maxSize)) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create("edit");
             }
-            ServerSession session = req.getSession();
             String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
             UploadEvent uploadEvent = request.getUploadEvent();
             /*
