@@ -162,7 +162,7 @@ public enum UserExceptionCode implements DisplayableOXExceptionCode {
         Category.CATEGORY_CONFIGURATION, 18),
 
     /**
-     * Updating attributes failed in context %1$d for user %2$d.
+     * Updating attributes failed in context %1$d for user %2$d. Likely due to a concurrent modification.
      */
     UPDATE_ATTRIBUTES_FAILED("Updating attributes failed in context %1$d for user %2$d.",
         UserExceptionMessage.UPDATE_ATTRIBUTES_FAILED_DISPLAY, Category.CATEGORY_ERROR, 19),
