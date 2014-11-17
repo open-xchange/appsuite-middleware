@@ -1,3 +1,7 @@
+* 2014-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35255: Also consider file extension if mail part claims to be HTML by Content-Type
+
 * 2014-10-23 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35168: Consider '#' as literals and not as comments when inside of double quotes
