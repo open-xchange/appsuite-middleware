@@ -71,7 +71,14 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.impl.osgi.Services;
 
-public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For cache service */ {
+/**
+ * {@link DBQuotaFileStorage} - Delegates file storage operations to associated {@link FileStorage} instance while accounting quota in
+ * <code>'filestore_usage'</code> database table.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
+ */
+public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For cache service */{
 
     private static final long serialVersionUID = -4048657112670657310L;
 
@@ -80,7 +87,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
     private final int contextId;
     private final transient FileStorage fileStorage;
     private final long quota;
-    private final int userId;
+    private final int ownerId;
 
     /**
      * Initializes a new {@link DBQuotaFileStorage} for a context.
@@ -95,21 +102,22 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
     }
 
     /**
-     * Initializes a new {@link DBQuotaFileStorage} for a user.
+     * Initializes a new {@link DBQuotaFileStorage} for an owner.
      *
      * @param contextId The context identifier
-     * @param userId The user identifier or <code>0</code> (zero)
+     * @param ownerId The file storage owner or <code>0</code> (zero); the owner determines to what 'filestore_usage' entry the quota gets
+     *            accounted
      * @param quota The assigned quota
-     * @param fs The file storage associated with the user
+     * @param fs The file storage associated with the owner
      * @throws OXException If initialization fails
      */
-    public DBQuotaFileStorage(int contextId, int userId, long quota, FileStorage fs) throws OXException {
+    public DBQuotaFileStorage(int contextId, int ownerId, long quota, FileStorage fs) throws OXException {
         super();
         if (fs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
         this.contextId = contextId;
-        this.userId = userId;
+        this.ownerId = ownerId;
         this.quota = quota;
         fileStorage = fs;
     }
@@ -154,14 +162,14 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
             rollback = true;
             sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=? FOR UPDATE");
             sstmt.setInt(1, contextId);
-            sstmt.setInt(2, userId);
+            sstmt.setInt(2, ownerId);
             rs = sstmt.executeQuery();
             final long oldUsage;
             if (rs.next()) {
                 oldUsage = rs.getLong(1);
             } else {
-                if (userId > 0) {
-                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(userId), I(contextId));
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(ownerId), I(contextId));
                 }
                 throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
@@ -173,11 +181,11 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             ustmt.setLong(1, newUsage);
             ustmt.setInt(2, contextId);
-            ustmt.setInt(3, userId);
+            ustmt.setInt(3, ownerId);
             final int rows = ustmt.executeUpdate();
             if (1 != rows) {
-                if (userId > 0) {
-                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(userId), I(contextId));
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
                 }
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
@@ -218,15 +226,15 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
 
             sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=? FOR UPDATE");
             sstmt.setInt(1, contextId);
-            sstmt.setInt(2, userId);
+            sstmt.setInt(2, ownerId);
             rs = sstmt.executeQuery();
 
             long oldUsage;
             if (rs.next()) {
                 oldUsage = rs.getLong("used");
             } else {
-                if (userId > 0) {
-                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(userId), I(contextId));
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(ownerId), I(contextId));
                 }
                 throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
@@ -234,19 +242,19 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
 
             if (newUsage < 0) {
                 newUsage = 0;
-                final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(userId), I(contextId));
+                final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(ownerId), I(contextId));
                 LOGGER.error("", e);
             }
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             ustmt.setLong(1, newUsage);
             ustmt.setInt(2, contextId);
-            ustmt.setInt(3, userId);
+            ustmt.setInt(3, ownerId);
 
             int rows = ustmt.executeUpdate();
             if (1 != rows) {
-                if (userId > 0) {
-                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(userId), I(contextId));
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
                 }
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
@@ -308,11 +316,11 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
         try {
             stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
             stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
+            stmt.setInt(2, ownerId);
             result = stmt.executeQuery();
             if (!result.next()) {
-                if (userId > 0) {
-                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(userId), I(contextId));
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(ownerId), I(contextId));
                 }
                 throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
@@ -353,9 +361,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
                 fileStorage.deleteFile(file);
             }
         } catch (final OXException q) {
-        	if (file != null) {
+            if (file != null) {
                 fileStorage.deleteFile(file);
-        	}
+            }
             throw q;
         }
         if (full) {
@@ -375,8 +383,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
 
     @Override
     public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
-        if (userId > 0) {
-            LOGGER.info("Recalculating usage for owner {} in context {}", userId, contextId);
+        if (ownerId > 0) {
+            LOGGER.info("Recalculating usage for owner {} in context {}", ownerId, contextId);
         } else {
             LOGGER.info("Recalculating usage forcontext {}", contextId);
         }
@@ -400,11 +408,11 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /*For 
             stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             stmt.setLong(1, entireFileSize);
             stmt.setInt(2, contextId);
-            stmt.setInt(3, userId);
+            stmt.setInt(3, ownerId);
             final int rows = stmt.executeUpdate();
             if (1 != rows) {
-                if (userId > 0) {
-                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(userId), I(contextId));
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
                 }
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }

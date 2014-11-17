@@ -153,8 +153,10 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
         DBQuotaFileStorage storage = getCachedFileStorage(userId, contextId);
         if (null == storage) {
-            // Get the file storage info
+            // The owner determines to what 'filestore_usage' entry the quota gets accounted
             IntReference fsOwner = new IntReference(0);
+
+            // Get the file storage info
             FileStorageInfo info = getFileStorageInfoFor(userId, contextId, fsOwner);
 
             // Determine file storage's base URI
@@ -168,7 +170,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
                 // Put it into cache
                 putCachedFileStorage(userId, contextId, storage);
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, baseUri.toString() + '/' + info.getFilestoreName());
             }
         }

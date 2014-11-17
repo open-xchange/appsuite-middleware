@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 public interface QuotaFileStorageService {
 
     /**
-     * Gets a {@link QuotaFileStorage} instance for specified arguments.
+     * Gets a {@link QuotaFileStorage} instance for specified context.
      * <p>
      * This the same as calling {@link #getQuotaFileStorage(int, int)} with the first parameter set to <code>-1</code>.
      *
@@ -70,7 +70,7 @@ public interface QuotaFileStorageService {
     QuotaFileStorage getQuotaFileStorage(int contextId) throws OXException;
 
     /**
-     * Gets a {@link QuotaFileStorage} instance for specified arguments.
+     * Gets a {@link QuotaFileStorage} instance for specified user (or context in case <tt>userId</tt> is <code>-1</code>).
      *
      * @param userId The user identifier; pass <code>-1</code> to access context-specific file storage
      * @param contextId The context identifier
