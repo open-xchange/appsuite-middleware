@@ -1,3 +1,7 @@
+* 2014-11-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35490: Synchronize calls when checking mail standard folders
+
 * 2014-11-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 35471: Set NULL if Unified Mail is absent when serving 'io.ox/mail/unifiedInboxIdentifier' setting
