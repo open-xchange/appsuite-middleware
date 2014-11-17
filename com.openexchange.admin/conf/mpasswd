@@ -1,8 +1,8 @@
 # Supported algorithms are:
 # - crypt (standard UNIX crypt using the DES hashing algorithm)
 # - sha (SHA-1)
-# - brcypt (Blowfish)
+# - bcrypt (Blowfish)
 #
 # Blowfish should be used by default
-# Syntax
+# Syntax:
 # masteradmin:algorithm:hashed_password
