@@ -2,7 +2,7 @@ open-xchange-drive-comet (7.6.2-1) stable; urgency=medium
 
   * First candidate for 7.6.2 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 31 Oct 2014 12:32:44 +0000
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 31 Oct 2014 13:32:44 +0100
 
 open-xchange-drive-comet (7.6.2-0) unstable; urgency=medium
 
@@ -20,7 +20,7 @@ open-xchange-drive-comet (7.6.1-6) stable; urgency=medium
 
   * Build for patch 2014-10-24
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 17 Oct 2014 10:07:39 +0000
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 17 Oct 2014 12:07:39 +0200
 
 open-xchange-drive-comet (7.6.1-5) stable; urgency=low
 
@@ -57,6 +57,36 @@ open-xchange-drive-comet (7.6.1-0) unstable; urgency=medium
   * prepare for 7.6.1
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Jun 2014 11:39:40 +0200
+
+open-xchange-drive-comet (7.6.0-29) stable; urgency=medium
+
+  * Build for patch 2014-11-10
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Nov 2014 12:11:59 +0100
+
+open-xchange-drive-comet (7.6.0-28) stable; urgency=low
+
+  * Build for patch 2014-11-03
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 28 Oct 2014 13:59:31 +0100
+
+open-xchange-drive-comet (7.6.0-27) stable; urgency=medium
+
+  * Build for patch 2014-11-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 24 Oct 2014 16:49:24 +0200
+
+open-xchange-drive-comet (7.6.0-26) stable; urgency=medium
+
+  * Build for patch 2014-10-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 24 Oct 2014 08:55:51 +0200
+
+open-xchange-drive-comet (7.6.0-25) stable; urgency=low
+
+  * Build for patch 2014-10-20
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 10 Oct 2014 12:12:33 +0200
 
 open-xchange-drive-comet (7.6.0-24) stable; urgency=low
 

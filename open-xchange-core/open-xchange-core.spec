@@ -1120,6 +1120,9 @@ ox_add_property com.openexchange.sessiond.useDistributedTokenSessions false /opt
 # SoftwareChange_Request-2110
 ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-2224
+ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1162,10 +1165,18 @@ exit 0
 %changelog
 * Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.6.2 release
+* Tue Nov 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-10
 * Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.6.2 release
+* Tue Oct 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-03
 * Mon Oct 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-30
+* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-04
+* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-22
 * Fri Oct 17 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1174,6 +1185,8 @@ Fifth candidate for 7.6.1 release
 Build for patch 2014-10-20
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.6.1 release
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-20
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
