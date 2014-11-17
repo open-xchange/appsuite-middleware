@@ -192,6 +192,7 @@ public class UserImpl implements User, Cloneable {
     private String filestoreName;
     private String[] filestorageAuth;
     private long fileStorageQuota;
+    private int fileStorageOwner;
 
     /**
      * Default constructor.
@@ -678,6 +679,20 @@ public class UserImpl implements User, Cloneable {
      */
     public void setFileStorageQuota(long fileStorageQuota) {
         this.fileStorageQuota = fileStorageQuota;
+    }
+
+    @Override
+    public int getFileStorageOwner() {
+        return fileStorageOwner;
+    }
+
+    /**
+     * Sets the file storage owner
+     *
+     * @param fileStorageOwner The file storage owner to set
+     */
+    public void setFileStorageOwner(int fileStorageOwner) {
+        this.fileStorageOwner = fileStorageOwner;
     }
 
 }

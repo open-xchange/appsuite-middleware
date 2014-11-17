@@ -60,6 +60,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
+import com.openexchange.filestore.impl.groupware.AddFilestoreOwnerColumnToUserTable;
 import com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTable;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -163,7 +164,7 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         }
 
         // Update tasks
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddUserColumnToFilestoreUsageTable()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddFilestoreOwnerColumnToUserTable(), new AddUserColumnToFilestoreUsageTable()));
 
         logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
     }

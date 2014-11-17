@@ -234,4 +234,9 @@ public class UserAdapter implements User {
         return null;
     }
 
+    @Override
+    public int getFileStorageOwner() {
+        return -1;
+    }
+
 }

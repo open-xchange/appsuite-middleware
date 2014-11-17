@@ -238,4 +238,9 @@ public final class ParsedUser implements User {
         return null;
     }
 
+    @Override
+    public int getFileStorageOwner() {
+        return -1;
+    }
+
 }

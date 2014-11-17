@@ -242,6 +242,11 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
         public String getFilestoreName() {
             return delegate.getFilestoreName();
         }
+
+        @Override
+        public int getFileStorageOwner() {
+            return delegate.getFileStorageOwner();
+        }
     }
 
 }

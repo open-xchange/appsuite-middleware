@@ -236,4 +236,9 @@ public class UserImpl4Test implements User {
     public String getFilestoreName() {
         return null;
     }
+
+    @Override
+    public int getFileStorageOwner() {
+        return -1;
+    }
 }

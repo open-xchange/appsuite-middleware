@@ -201,6 +201,17 @@ public interface User extends FileStorageInfo, Serializable {
     int getContactId();
 
     /**
+     * Gets the identifier for the owner of the file storage associated with this user.
+     * <p>
+     * Provided that {@link #getFilestoreId()} returns a positive, valid file storage identifier:<br>
+     * If a value less than/equal to zero is returned, then {@link #getId()} is supposed to be considered as the file storage owner;
+     * otherwise the returned value itself
+     *
+     * @return The identifier of the owner or a value less than/equal to zero if there is none
+     */
+    int getFileStorageOwner();
+
+    /**
      * TODO a user can have multiple logins.
      * @return the login information of the user.
      */

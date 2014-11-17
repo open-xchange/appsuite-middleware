@@ -169,6 +169,7 @@ public class MockUser implements User {
     private String filestoreName;
     private String[] filestorageAuth;
     private long fileStorageQuota;
+    private int fileStorageOwner;
 
     private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
 
@@ -639,6 +640,20 @@ public class MockUser implements User {
      */
     public void setFileStorageQuota(long fileStorageQuota) {
         this.fileStorageQuota = fileStorageQuota;
+    }
+
+    @Override
+    public int getFileStorageOwner() {
+        return fileStorageOwner;
+    }
+
+    /**
+     * Sets the file storage owner
+     *
+     * @param fileStorageOwner The file storage owner to set
+     */
+    public void setFileStorageOwner(int fileStorageOwner) {
+        this.fileStorageOwner = fileStorageOwner;
     }
 
 }

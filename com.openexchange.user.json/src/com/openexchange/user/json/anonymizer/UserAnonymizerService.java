@@ -260,6 +260,11 @@ public class UserAnonymizerService implements AnonymizerService<User> {
             return delegate.getFilestoreName();
         }
 
+        @Override
+        public int getFileStorageOwner() {
+            return delegate.getFileStorageOwner();
+        }
+
     }
 
 }
