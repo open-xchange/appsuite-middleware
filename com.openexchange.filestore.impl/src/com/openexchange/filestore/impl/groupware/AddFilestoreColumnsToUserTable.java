@@ -65,7 +65,7 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AddFilestoreColumnsToUserTable} - Extends "user"/"del_user" tables by the columns <code>`filestore_id`, `filestore_name`, `filestore_login`, `filestore_passwd`, `quota_max`</code>.
+ * {@link AddFilestoreColumnsToUserTable} - Extends "user"/"del_user" tables by the columns <code>`filestore_id`, `filestore_owner`, `filestore_name`, `filestore_login`, `filestore_passwd`, `quota_max`</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
