@@ -173,6 +173,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return session;
             } catch (OXException e) {
                 acquiredLatch.result.set(e);
+                throw e;
             } finally {
                 latch.countDown();
                 releaseFor(sessionId);
