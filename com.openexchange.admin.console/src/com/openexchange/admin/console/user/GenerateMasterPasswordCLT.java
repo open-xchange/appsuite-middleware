@@ -138,6 +138,7 @@ public class GenerateMasterPasswordCLT {
                 parameters.put("mpasswdfile", cl.getOptionValue("f"));
             }
             invoke(parameters);
+            System.out.println("saved password for user " + parameters.get("adminuser") + " in " + parameters.get("mpasswdfile"));
         } catch (ParseException | NoSuchAlgorithmException | IOException e) {
             System.out.println(e.getMessage());
             printUsage(-1);
