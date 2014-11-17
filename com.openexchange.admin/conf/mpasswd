@@ -5,6 +5,4 @@
 #
 # Blowfish should be used by default
 # Syntax
-# masteradmin:algorithm:password
-# e.g.
-# masteradmin:bcrypt:password
+# masteradmin:algorithm:hashed_password
