@@ -1,6 +1,8 @@
 * 2014-11-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 35490: Synchronize calls when checking mail standard folders
+ - Fix for bug 35426: Let session obfuscator properly maintain such parameters that are supposed to be taken over from session to stored
+                      session representation
 
 * 2014-11-16 - thorben.betten@open-xchange.com
 

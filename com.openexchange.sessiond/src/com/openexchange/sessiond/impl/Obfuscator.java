@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
@@ -68,6 +69,8 @@ public class Obfuscator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
 
+    private static final String[] WRAPPED_PARMETERS = { Session.PARAM_ALTERNATIVE_ID };
+
     private final String obfuscationKey;
 
     /**
@@ -84,15 +87,26 @@ public class Obfuscator {
      * Wraps a session before putting it to the storage.
      *
      * @param session The session
+     * @param remoteParameterNames The names of such parameters that are supposed to be taken over from session to stored session representation
      * @return the wrapped session
      */
-    public Session wrap(Session session) {
+    public Session wrap(Session session, List<String> remoteParameterNames) {
         if (null == session) {
             return null;
         }
         Map<String, Object> parameters = new HashMap<String, Object>(2);
-        for (String name : session.getParameterNames()) {
-            parameters.put(name, session.getParameter(name));
+        for (String param : WRAPPED_PARMETERS) {
+            if (session.containsParameter(param)) {
+                parameters.put(param, session.getParameter(param));
+            }
+        }
+        if (null != remoteParameterNames) {
+            for (String parameterName : remoteParameterNames) {
+                Object value = session.getParameter(parameterName);
+                if (null != value) {
+                    parameters.put(parameterName, value);
+                }
+            }
         }
         return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(),
             session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(),
@@ -103,17 +117,28 @@ public class Obfuscator {
      * Unwraps a session after getting it from the storage.
      *
      * @param session The session
+     * @param remoteParameterNames The names of such parameters that are supposed to be taken over from session to stored session representation
      * @return The unwrapped session
      */
-    public Session unwrap(Session session) {
+    public Session unwrap(Session session, List<String> remoteParameterNames) {
         if (null == session) {
             return null;
         }
         SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(),
             session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(),
             session.getAuthId(), session.getHash(), session.getClient(), false);
-        for (String name : session.getParameterNames()) {
-            sessionImpl.setParameter(name, session.getParameter(name));
+        if (null != remoteParameterNames) {
+            for (String parameterName : remoteParameterNames) {
+                Object value = session.getParameter(parameterName);
+                if (null != value) {
+                    sessionImpl.setParameter(parameterName, value);
+                }
+            }
+        }
+        for (String param : WRAPPED_PARMETERS) {
+            if (session.containsParameter(param)) {
+                sessionImpl.setParameter(param, session.getParameter(param));
+            }
         }
         return sessionImpl;
     }

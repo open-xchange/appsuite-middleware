@@ -186,6 +186,16 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets the names of such parameters that are supposed to be taken over from session to stored session representation.
+     *
+     * @return The parameter names
+     */
+    public static List<String> getRemoteParameterNames() {
+        SessiondConfigInterface conf = config;
+        return null == conf ? Collections.<String> emptyList() : conf.getRemoteParameterNames();
+    }
+
+    /**
      * Removes all sessions associated with given user in specified context
      *
      * @param userId The user ID
@@ -383,7 +393,7 @@ public final class SessionHandler {
                             return storageService.getAnyActiveSessionForUser(userId, contextId);
                         }
                     };
-                    Session storedSession = obfuscator.unwrap(getFrom(c, null));
+                    Session storedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
                     if (null != storedSession) {
                         retval = sessionToSessionControl(storedSession);
                     }
@@ -410,7 +420,7 @@ public final class SessionHandler {
 
                         @Override
                         public Session call() throws Exception {
-                            return obfuscator.unwrap(storageService.findFirstSessionForUser(userId, contextId));
+                            return obfuscator.unwrap(storageService.findFirstSessionForUser(userId, contextId), getRemoteParameterNames());
                         }
                     };
                     retval = getFrom(c, null);
@@ -754,7 +764,7 @@ public final class SessionHandler {
 
                 @Override
                 public Void call() throws Exception {
-                    Session wrappedSession = obfuscator.wrap(currentSession);
+                    Session wrappedSession = obfuscator.wrap(currentSession, getRemoteParameterNames());
                     sessionStorage.changePassword(sessionid, wrappedSession.getPassword());
                     return null;
                 }
@@ -956,7 +966,7 @@ public final class SessionHandler {
                             return storageService.getSessionByRandomToken(randomToken, newIP);
                         }
                     };
-                    Session s = obfuscator.unwrap(getFrom(c, null));
+                    Session s = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
                     if (null != s) {
                         return s;
                     }
@@ -1099,7 +1109,7 @@ public final class SessionHandler {
                             return storageService.getSessionByAlternativeId(altId);
                         }
                     };
-                    Session session = obfuscator.unwrap(getFrom(c, null));
+                    Session session = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
                     if (null != session) {
                         return sessionToSessionControl(session);
                     }
@@ -1131,7 +1141,7 @@ public final class SessionHandler {
                         return storageService.getCachedSession(sessionId);
                     }
                 };
-                Session session = obfuscator.unwrap(getFrom(c, null));
+                Session session = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
                 if (null != session) {
                     return sessionToSessionControl(session);
                 }
@@ -1169,7 +1179,7 @@ public final class SessionHandler {
                 if (null != list && !list.isEmpty()) {
                     List<SessionControl> result = new ArrayList<SessionControl>();
                     for (Session s : list) {
-                        result.add(sessionToSessionControl(obfuscator.unwrap(s)));
+                        result.add(sessionToSessionControl(obfuscator.unwrap(s, getRemoteParameterNames())));
                     }
                     return result;
                 }
@@ -1571,12 +1581,12 @@ public final class SessionHandler {
         public Void call() {
             try {
                 if (addIfAbsent) {
-                    if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session))) {
+                    if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session, config.getRemoteParameterNames()))) {
                         LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                         postSessionStored(session);
                     }
                 } else {
-                    sessionStorageService.addSession(obfuscator.wrap(session));
+                    sessionStorageService.addSession(obfuscator.wrap(session, config.getRemoteParameterNames()));
                     LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                     postSessionStored(session);
                 }
@@ -1621,7 +1631,7 @@ public final class SessionHandler {
      */
     private static Session getSessionFrom(String sessionId, long timeoutMillis, SessionStorageService storageService) throws OXException {
         try {
-            return obfuscator.unwrap(storageService.lookupSession(sessionId, timeoutMillis));
+            return obfuscator.unwrap(storageService.lookupSession(sessionId, timeoutMillis), getRemoteParameterNames());
         } catch (OXException e) {
             if (SessionStorageExceptionCodes.INTERRUPTED.equals(e)) {
                 // Expected...
