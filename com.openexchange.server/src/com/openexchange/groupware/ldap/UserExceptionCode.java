@@ -207,23 +207,29 @@ public enum UserExceptionCode implements DisplayableOXExceptionCode {
     NOT_ALLOWED_PASSWORD("The entered password is illegal and can't be saved. Allowed characters are: %1$s",
         UserExceptionMessage.NOT_ALLOWED_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 26),
 
-        /**
-         * The current password is incorrect. Please enter your correct current password and try again.
-         */
-        INCORRECT_CURRENT_PASSWORD("The current password is incorrect.",
-            UserExceptionMessage.INCORRECT_CURRENT_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 27),
+    /**
+     * The current password is incorrect. Please enter your correct current password and try again.
+     */
+    INCORRECT_CURRENT_PASSWORD("The current password is incorrect.",
+        UserExceptionMessage.INCORRECT_CURRENT_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 27),
 
-        /**
-         * The current password is incorrect. Please enter your correct current password and try again.
-         */
-        MISSING_CURRENT_PASSWORD("The current password is missing.",
-            UserExceptionMessage.MISSING_CURRENT_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 28),
+    /**
+     * The current password is incorrect. Please enter your correct current password and try again.
+     */
+    MISSING_CURRENT_PASSWORD("The current password is missing.",
+        UserExceptionMessage.MISSING_CURRENT_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 28),
 
-        /**
-         * The current password is incorrect. Please enter your correct current password and try again.
-         */
-        MISSING_NEW_PASSWORD("The new password is incorrect.",
-        UserExceptionMessage.MISSING_NEW_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 29),
+    /**
+     * The current password is incorrect. Please enter your correct current password and try again.
+     */
+    MISSING_NEW_PASSWORD("The new password is incorrect.",
+    UserExceptionMessage.MISSING_NEW_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 29),
+
+    /**
+     * Denied concurrent update for attributes in context %1$d for user %2$d.
+     */
+    CONCURRENT_ATTRIBUTES_UPDATE("Denied concurrent update for attributes in context %1$d for user %2$d.",
+        UserExceptionMessage.CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY, Category.CATEGORY_ERROR, 30),
 
     ;
 

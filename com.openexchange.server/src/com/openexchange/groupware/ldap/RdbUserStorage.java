@@ -920,7 +920,7 @@ public class RdbUserStorage extends UserStorage {
                 } catch (SQLException e) {
                     // Concurrent INSERT in the meantime
                     LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, contextId, value);
-                    throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(e, contextId, userId);
+                    throw UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.create(e, contextId, userId);
                 }
 	    	} else {
 	    		stmt = con.prepareStatement("UPDATE user_attribute SET value = ?, uuid = ? WHERE cid = ? AND id = ? AND name = ? AND uuid = ?");
@@ -938,7 +938,7 @@ public class RdbUserStorage extends UserStorage {
 	    			// Concurrent modification of at least one attribute. We lost the race...
 	    			if (updateCount != 1) {
 	    				LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, contextId, value);
-	    				throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(contextId, userId);
+	    				throw UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.create(contextId, userId);
 	    			}
 	    		}
 	    	}
