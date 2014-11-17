@@ -49,16 +49,15 @@
 
 package com.openexchange.admin.storage.fileStorage;
 
-
 import java.io.UnsupportedEncodingException;
-
-
+import java.security.NoSuchAlgorithmException;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
-import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.passwordmechs.PasswordMech;
 
 /**
  * Default file implementation for admin auth.
@@ -74,9 +73,7 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
     }
 
     /**
-     *
      * Authenticates against a textfile
-     *
      */
     @Override
     public boolean authenticate(final Credentials authdata) {
@@ -85,20 +82,20 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
            master.getLogin() != null && authdata.getLogin() != null &&
            master.getPassword() != null && authdata.getPassword() != null &&
            master.getLogin().equals(authdata.getLogin())) {
-                try {
-                    return UnixCrypt.matches(master.getPassword(), authdata.getPassword());
-                } catch (UnsupportedEncodingException e) {
-                    log.error("", e);
-                    return false;
-                }
-        }else{
+            try {
+                PasswordMech passwordMech = PasswordMech.getPasswordMechFor(master.getPasswordMech());
+                return GenericChecks.authByMech(master.getPassword(), authdata.getPassword(), passwordMech.getIdentifier());
+            } catch (UnsupportedEncodingException | NoSuchAlgorithmException | IllegalArgumentException e) {
+                log.error("", e);
+                return false;
+            }
+        } else {
             return false;
         }
     }
 
     @Override
-    public boolean authenticate(final Credentials authdata, final Context ctx)
-            throws StorageException {
+    public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
         return false;
     }
 
