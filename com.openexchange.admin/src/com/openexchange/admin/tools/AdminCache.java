@@ -611,7 +611,8 @@ public class AdminCache {
                             // ok seems to be a line with user:pass entry
                             final String[] user_pass_combination = line.split(":");
                             if (user_pass_combination.length > 0) {
-                                this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[1]);
+                                this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[2]);
+                                this.masterCredentials.setPasswordMech(user_pass_combination[1]);
                                 this.log.debug("Master credentials successfully set!");
                             }
                         }

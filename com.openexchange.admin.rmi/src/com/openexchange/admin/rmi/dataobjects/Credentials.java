@@ -58,7 +58,8 @@ import java.io.Serializable;
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public class Credentials implements Serializable{
+public class Credentials implements Serializable {
+
     /**
      *
      */
@@ -68,16 +69,19 @@ public class Credentials implements Serializable{
 
     private String password;
 
+    private String passwordMech;
+
     /**
      * Creates a new instance of the object
      */
-    public Credentials () {
+    public Credentials() {
         super();
         init();
     }
 
     /**
      * Creates a new instance of the object and sets login and password
+     * 
      * @param login
      * @param password
      */
@@ -89,34 +93,56 @@ public class Credentials implements Serializable{
 
     /**
      * Returns the login of this credentials object
+     * 
      * @return Returns the login of this credentials object
      */
-    public final String getLogin () {
+    public final String getLogin() {
         return this.login;
     }
 
     /**
      * Set the login attribute of this credentials object
+     * 
      * @param login Set the login attribute of this credentials object
      */
-    public final void setLogin (final String login) {
+    public final void setLogin(final String login) {
         this.login = login;
     }
 
     /**
      * Returns the password in clear text
+     * 
      * @return Returns the password in cleartext
      */
-    public final String getPassword () {
+    public final String getPassword() {
         return this.password;
     }
 
     /**
      * Sets this password for this credentials object
+     * 
      * @param passwd Sets this password for this credentials object
      */
-    public final void setPassword (final String passwd) {
+    public final void setPassword(final String passwd) {
         this.password = passwd;
+    }
+
+    /**
+     * Gets the passwordMech
+     *
+     * @return The passwordMech
+     */
+    public String getPasswordMech() {
+        return passwordMech;
+    }
+
+    /**
+     * Sets the passwordMech
+     *
+     * @param passwordMech The passwordMech to set
+     */
+    public void setPasswordMech(String passwordMech) {
+        this.passwordMech = passwordMech;
     }
 
     /**
@@ -125,27 +151,21 @@ public class Credentials implements Serializable{
     private void init() {
         this.login = null;
         this.password = null;
-
     }
 
     /**
-     * Constructs a <code>String</code> with all attributes
-     * in name = value format.
+     * Constructs a <code>String</code> with all attributes in name = value format.
      *
-     * @return a <code>String</code> representation
-     * of this object.
+     * @return a <code>String</code> representation of this object.
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         final String TAB = "\n  ";
 
         final StringBuilder retValue = new StringBuilder();
 
-        retValue.append("Credentials ( ")
-            .append(super.toString()).append(TAB)
-            .append("login = ").append(this.login).append(TAB)
-            .append(" )");
+        retValue.append("Credentials ( ").append(super.toString()).append(TAB).append("login = ").append(this.login).append(TAB).append(
+            "passwordMech = ").append(this.passwordMech).append(" )");
 
         return retValue.toString();
     }
@@ -156,6 +176,7 @@ public class Credentials implements Serializable{
         int result = 1;
         result = prime * result + ((login == null) ? 0 : login.hashCode());
         result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
         return result;
     }
 
@@ -183,6 +204,13 @@ public class Credentials implements Serializable{
                 return false;
             }
         } else if (!password.equals(other.password)) {
+            return false;
+        }
+        if (passwordMech == null) {
+            if (other.passwordMech != null) {
+                return false;
+            }
+        } else if (!passwordMech.equals(other.passwordMech)) {
             return false;
         }
         return true;

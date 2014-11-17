@@ -1,2 +1,10 @@
-# Syntax:
-# masteradmin:password
+# Supported algorithms are:
+# - crypt (standard UNIX crypt using the DES hashing algorithm)
+# - sha (SHA-1)
+# - brcypt (Blowfish)
+#
+# Blowfish should be used by default
+# Syntax
+# masteradmin:algorithm:password
+# e.g.
+# masteradmin:bcrypt:password
