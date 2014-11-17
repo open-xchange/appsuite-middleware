@@ -59,6 +59,8 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 prepare for 7.8.0 release
 * Wed Nov 05 2014 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.8.0 release
+* Tue Nov 04 2014 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2014-11-10
 * Fri Oct 31 2014 Thorben Betten <thorben.betten@open-xchange.com>
 First candidate for 7.6.2 release
 * Thu Oct 30 2014 Thorben Betten <thorben.betten@open-xchange.com>

@@ -72,6 +72,8 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %changelog
 * Wed Nov 05 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 prepare for 7.8.0 release
+* Tue Nov 04 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2014-11-10
 * Fri Oct 31 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First candidate for 7.6.2 release
 * Tue Oct 28 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
