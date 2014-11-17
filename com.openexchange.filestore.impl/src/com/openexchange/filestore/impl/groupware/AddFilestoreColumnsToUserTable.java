@@ -96,6 +96,7 @@ public class AddFilestoreColumnsToUserTable extends UpdateTaskAdapter {
             {
                 List<Column> l = new LinkedList<Column>();
                 l.add(new Column("filestore_id", "INT4 unsigned NOT NULL DEFAULT 0"));
+                l.add(new Column("filestore_owner", "INT4 unsigned NOT NULL DEFAULT 0"));
                 l.add(new Column("filestore_name", "VARCHAR(32) DEFAULT NULL"));
                 l.add(new Column("filestore_login", "VARCHAR(32) DEFAULT NULL"));
                 l.add(new Column("filestore_passwd", "VARCHAR(32) DEFAULT NULL"));
