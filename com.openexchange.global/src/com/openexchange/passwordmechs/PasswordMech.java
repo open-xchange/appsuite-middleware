@@ -164,7 +164,7 @@ public enum PasswordMech {
      */
     public static PasswordMech getPasswordMechFor(String identifier) {
         if (Strings.isEmpty(identifier)) {
-            return null;
+            throw new IllegalArgumentException("The password mechanism identifier cannot be neither 'null' nor empty!");
         }
         String id = Strings.toUpperCase(identifier);
         if (false == id.startsWith("{")) {
@@ -179,8 +179,8 @@ public enum PasswordMech {
                 return pm;
             }
         }
-
-        return null;
+        
+        throw new IllegalArgumentException("Unsupported password mechanism '" + identifier + "'");
     }
 
     // --------------------------------------------------------------------------------------- //
