@@ -82,7 +82,6 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -112,52 +111,42 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "flags", optional = true, description = "In case the mail should be stored with status \"read\" (e.g. mail has been read already in the client inbox), the parameter \"flags\" has to be included. If no \"folder\" parameter is specified, this parameter must not be included. For infos about mail flags see Detailed mail data spec.") }, requestBody = "The MIME Data Block.", responseDescription = "Object ID of the newly created/moved mail.")
 public final class ImportAction extends AbstractMailAction {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(ImportAction.class);
-
     /**
      * Initializes a new {@link ImportAction}.
      *
      * @param services
      */
-    public ImportAction(final ServiceLookup services) {
+    public ImportAction(ServiceLookup services) {
         super(services);
     }
 
     private static final String PLAIN_JSON = "plainJson";
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest mailRequest) throws OXException {
-        final AJAXRequestData request = mailRequest.getRequest();
-        final List<OXException> warnings = new ArrayList<OXException>();
-        UploadEvent uploadEvent = null;
+    protected AJAXRequestResult perform(MailRequest mailRequest) throws OXException {
+        AJAXRequestData request = mailRequest.getRequest();
+        List<OXException> warnings = new ArrayList<OXException>();
         try {
-            final String folder = mailRequest.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final int flags;
+            String folder = mailRequest.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            int flags;
             {
-                final String tmp = mailRequest.getParameter("flags");
+                String tmp = mailRequest.getParameter("flags");
                 if (null == tmp) {
                     flags = 0;
                 } else {
-                    int f;
                     try {
-                        f = Integer.parseInt(tmp.trim());
-                    } catch (final NumberFormatException e) {
-                        f = 0;
+                        flags = Integer.parseInt(tmp.trim());
+                    } catch (NumberFormatException e) {
+                        flags = 0;
                     }
-                    flags = f;
                 }
             }
-            final boolean force;
+            boolean force;
             {
-                final String tmp = mailRequest.getParameter("force");
-                if (null == tmp) {
-                    force = false;
-                } else {
-                    force = AJAXRequestDataTools.parseBoolParameter(tmp.trim());
-                }
+                String tmp = mailRequest.getParameter("force");
+                force = null == tmp ? false : AJAXRequestDataTools.parseBoolParameter(tmp.trim());
             }
-            final boolean preserveReceivedDate = mailRequest.optBool("preserveReceivedDate", false);
+            boolean preserveReceivedDate = mailRequest.optBool("preserveReceivedDate", false);
             /*
              * Iterate upload files
              */
@@ -165,34 +154,22 @@ public final class ImportAction extends AbstractMailAction {
             UserSettingMail usm = session.getUserSettingMail();
             QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(usm.getSendAddr(), false);
             MailServletInterface mailInterface = MailServletInterface.getInstance(session);
-            final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
+            BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;
             {
-                final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-                final AppenderTask task = new AppenderTask(mailInterface, folder, force, flags, queue);
+                ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+                AppenderTask task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
-                    Iterator<UploadFile> iter;
-                    {
-                        long maxFileSize = usm.getUploadQuotaPerFile();
-                        if (maxFileSize <= 0) {
-                            maxFileSize = -1L;
-                        }
-                        long maxSize = usm.getUploadQuota();
-                        if (maxSize <= 0) {
-                            maxSize = -1L;
-                        }
-                        iter = request.getFiles(maxFileSize, maxSize).iterator();
-                    }
+                    Iterator<UploadFile> iter = request.getFiles(-1L, -1L).iterator();
                     if (iter.hasNext()) {
-                        uploadEvent = request.getUploadEvent();
                         future = service.submit(task);
                     }
-                    final javax.mail.Session defaultSession = MimeDefaultSession.getDefaultSession();
+                    javax.mail.Session defaultSession = MimeDefaultSession.getDefaultSession();
                     boolean keepgoing = true;
                     while (keepgoing && iter.hasNext()) {
-                        final UploadFile item = iter.next();
-                        final InputStream is = item.openStream();
-                        final MimeMessage message;
+                        UploadFile item = iter.next();
+                        InputStream is = item.openStream();
+                        MimeMessage message;
                         try {
                             if (preserveReceivedDate) {
                                 message = new MimeMessage(defaultSession, is) {
@@ -204,16 +181,16 @@ public final class ImportAction extends AbstractMailAction {
                                     public Date getReceivedDate() throws MessagingException {
                                         if (notParsed) {
                                             notParsed = false;
-                                            final String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
+                                            String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
                                             if (null != receivedHdrs) {
                                                 long lastReceived = Long.MIN_VALUE;
                                                 for (int i = 0; i < receivedHdrs.length; i++) {
-                                                    final String hdr = unfold(receivedHdrs[i]);
+                                                    String hdr = unfold(receivedHdrs[i]);
                                                     int pos;
                                                     if (hdr != null && (pos = hdr.lastIndexOf(';')) != -1) {
                                                         try {
                                                             lastReceived = Math.max(lastReceived, getDateRFC822(hdr.substring(pos + 1).trim()).getTime());
-                                                        } catch (final Exception e) {
+                                                        } catch (Exception e) {
                                                             continue;
                                                         }
                                                     }
@@ -235,7 +212,7 @@ public final class ImportAction extends AbstractMailAction {
                         } finally {
                             Streams.close(is);
                         }
-                        final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
+                        String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                         if (isEmpty(fromAddr)) {
                             // Add from address
                             message.setFrom(defaultSendAddr);
@@ -249,7 +226,7 @@ public final class ImportAction extends AbstractMailAction {
                 }
             }
 
-            final MailImportResult[] mirs;
+            MailImportResult[] mirs;
             if (null == future) {
                 mirs = new MailImportResult[0];
             } else {
@@ -258,8 +235,8 @@ public final class ImportAction extends AbstractMailAction {
                  */
                 try {
                     future.get();
-                } catch (final ExecutionException e) {
-                    final Throwable t = e.getCause();
+                } catch (ExecutionException e) {
+                    Throwable t = e.getCause();
                     if (t instanceof RuntimeException) {
                         throw (RuntimeException) t;
                     }
@@ -271,48 +248,48 @@ public final class ImportAction extends AbstractMailAction {
                     }
                     throw new IllegalStateException("Not unchecked", t);
                 }
-                final MailImportResult[] alreadyImportedOnes = mailInterface.getMailImportResults();
+                MailImportResult[] alreadyImportedOnes = mailInterface.getMailImportResults();
                 /*
                  * Still some in queue?
                  */
                 if (queue.isEmpty()) {
                     mirs = alreadyImportedOnes;
                 } else {
-                    final List<MimeMessage> messages = new ArrayList<MimeMessage>(16);
+                    List<MimeMessage> messages = new ArrayList<MimeMessage>(16);
                     queue.drainTo(messages);
                     messages.remove(POISON);
-                    final List<MailMessage> mails = new ArrayList<MailMessage>(messages.size());
-                    for (final MimeMessage message : messages) {
+                    List<MailMessage> mails = new ArrayList<MailMessage>(messages.size());
+                    for (MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        final MailMessage mm = MimeMessageConverter.convertMessage(message);
+                        MailMessage mm = MimeMessageConverter.convertMessage(message);
                         mails.add(mm);
                     }
                     messages.clear();
                     mailInterface = getMailInterface(mailRequest);
                     {
-                        final String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
+                        String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
                         mails.clear();
                         if (flags > 0) {
                             mailInterface.updateMessageFlags(folder, ids, flags, true);
                         }
                     }
-                    final MailImportResult[] byCaller = mailInterface.getMailImportResults();
+                    MailImportResult[] byCaller = mailInterface.getMailImportResults();
                     warnings.addAll(mailInterface.getWarnings());
                     mirs = new MailImportResult[alreadyImportedOnes.length + byCaller.length];
                     System.arraycopy(alreadyImportedOnes, 0, mirs, 0, alreadyImportedOnes.length);
                     System.arraycopy(byCaller, 0, mirs, alreadyImportedOnes.length, byCaller.length);
                 }
             }
-            final JSONArray respArray = new JSONArray();
-            for (final MailImportResult m : mirs) {
+            JSONArray respArray = new JSONArray();
+            for (MailImportResult m : mirs) {
                 if (m.hasError()) {
-                    final JSONObject responseObj = new JSONObject();
+                    JSONObject responseObj = new JSONObject();
                     responseObj.put(FolderChildFields.FOLDER_ID, folder);
                     responseObj.put(MailImportResult.FILENAME, m.getMail().getFileName());
                     responseObj.put(MailImportResult.ERROR, m.getException().getMessage());
                     respArray.put(responseObj);
                 } else {
-                    final JSONObject responseObj = new JSONObject();
+                    JSONObject responseObj = new JSONObject();
                     responseObj.put(FolderChildFields.FOLDER_ID, folder);
                     responseObj.put(DataFields.ID, m.getId());
                     respArray.put(responseObj);
@@ -321,23 +298,23 @@ public final class ImportAction extends AbstractMailAction {
             /*
              * Create response object
              */
-            final AJAXRequestResult result = new AJAXRequestResult(respArray, "json");
+            AJAXRequestResult result = new AJAXRequestResult(respArray, "json");
             result.setParameter(PLAIN_JSON, Boolean.TRUE);
             result.addWarnings(warnings);
             return result;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -356,7 +333,7 @@ public final class ImportAction extends AbstractMailAction {
         private final int flags;
         private final BlockingQueue<MimeMessage> queue;
 
-        protected AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
+        protected AppenderTask(MailServletInterface mailInterface, String folder, boolean force, int flags, BlockingQueue<MimeMessage> queue) {
             super();
             keepgoing = new AtomicBoolean(true);
             this.mailInterface = mailInterface;
@@ -373,7 +350,7 @@ public final class ImportAction extends AbstractMailAction {
              */
             try {
                 queue.put(POISON);
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 /*
                  * Cannot occur, but keep interrupted state
                  */
@@ -384,29 +361,29 @@ public final class ImportAction extends AbstractMailAction {
 
         @Override
         public Object call() throws Exception {
-            final List<String> idList = new ArrayList<String>();
+            List<String> idList = new ArrayList<String>();
             try {
-                final List<MimeMessage> messages = new ArrayList<MimeMessage>(16);
-                final List<MailMessage> mails = new ArrayList<MailMessage>(16);
+                List<MimeMessage> messages = new ArrayList<MimeMessage>(16);
+                List<MailMessage> mails = new ArrayList<MailMessage>(16);
                 while (keepgoing.get() || !queue.isEmpty()) {
                     messages.clear();
                     mails.clear();
                     if (queue.isEmpty()) {
                         // Blocking wait for at least 1 message to arrive.
-                        final MimeMessage msg = queue.take();
+                        MimeMessage msg = queue.take();
                         if (POISON == msg) {
                             return null;
                         }
                         messages.add(msg);
                     }
                     queue.drainTo(messages);
-                    final boolean quit = messages.remove(POISON);
-                    for (final MimeMessage message : messages) {
+                    boolean quit = messages.remove(POISON);
+                    for (MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        final MailMessage mm = MimeMessageConverter.convertMessage(message);
+                        MailMessage mm = MimeMessageConverter.convertMessage(message);
                         mails.add(mm);
                     }
-                    final String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
+                    String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
                     idList.addAll(Arrays.asList(ids));
                     if (flags > 0) {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
@@ -415,11 +392,11 @@ public final class ImportAction extends AbstractMailAction {
                         return null;
                     }
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             } finally {
                 mailInterface.close(true);
@@ -428,7 +405,7 @@ public final class ImportAction extends AbstractMailAction {
         }
 
         @Override
-        public void setThreadName(final ThreadRenamer threadRenamer) {
+        public void setThreadName(ThreadRenamer threadRenamer) {
             threadRenamer.rename("Mail Import Thread");
         }
     }
