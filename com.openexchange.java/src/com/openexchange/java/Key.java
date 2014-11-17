@@ -99,9 +99,6 @@ public class Key {
         if (contextId != other.contextId) {
             return false;
         }
-        if (hash != other.hash) {
-            return false;
-        }
         if (userId != other.userId) {
             return false;
         }
