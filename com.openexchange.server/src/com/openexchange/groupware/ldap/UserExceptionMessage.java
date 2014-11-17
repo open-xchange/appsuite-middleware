@@ -175,4 +175,7 @@ public class UserExceptionMessage implements LocalizableStrings {
      */
     public final static String MISSING_NEW_PASSWORD_DISPLAY = "The new password is missing. Please enter your new password and try again.";
 
+    // Denied concurrent update of user attributes likely caused by contemporary login operations performed by your client.
+    public static final String CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY = "Denied concurrent update of user attributes likely caused by contemporary login operations performed by your client.";
+
 }
