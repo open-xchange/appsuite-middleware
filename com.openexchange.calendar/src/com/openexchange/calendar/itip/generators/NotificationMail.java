@@ -313,7 +313,7 @@ public class NotificationMail {
         if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
             return true;
         }
-        if (!getRecipient().getConfiguration().interestedInChanges() && (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly())) {
+        if (!getRecipient().getConfiguration().interestedInChanges() && !getRecipient().getConfiguration().interestedInStateChanges()) {
             return false;
         }
         if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly()) {
