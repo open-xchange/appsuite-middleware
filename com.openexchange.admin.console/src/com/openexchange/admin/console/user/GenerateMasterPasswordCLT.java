@@ -117,6 +117,9 @@ public class GenerateMasterPasswordCLT {
 
         try {
             CommandLine cl = parser.parse(options, args);
+            if (cl.hasOption("h")) {
+                printUsage(0);
+            }
             if (cl.hasOption("A")) {
                 parameters.put("adminuser", cl.getOptionValue("A"));
             }
@@ -185,7 +188,7 @@ public class GenerateMasterPasswordCLT {
     private static final void printUsage(int exitCode) {
         HelpFormatter hf = new HelpFormatter();
         hf.setWidth(120);
-        hf.printHelp("generatempasswd ", null, options, "\n\nValid encryption/hashing algorithms: " + getValidEncHashAlgos());
+        hf.printHelp("generatempasswd [-A <adminuser>] [-P <adminpassword>] [-e <encryption>] [-f </path/for/mpasswdfile>]", null, options, "\n\nValid encryption/hashing algorithms: " + getValidEncHashAlgos());
         System.exit(exitCode);
     }
 
