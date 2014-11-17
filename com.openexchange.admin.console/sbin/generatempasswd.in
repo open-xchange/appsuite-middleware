@@ -51,9 +51,10 @@
 OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 
-if( $< != 0 ) {
-	die "You must be root to run this command";
-}
+if [ "$(id -u)" != "0" ]; then
+   echo "You must be root to run this command" 1>&2
+   exit 1
+fi
 
 test -f $OXFUNCTIONS || {
     echo "missing common shell functions file"
