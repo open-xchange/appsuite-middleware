@@ -50,8 +50,14 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.SessiondProperty.SESSIOND_AUTOLOGIN;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 
 /**
  * SessionConfig
@@ -74,6 +80,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private boolean autoLogin = false;
     private boolean asyncPutToSessionStorage = true;
     private String obfuscationKey = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
+    private List<String> remoteParameterNames = Collections.emptyList();
 
     public SessiondConfigImpl(final ConfigurationService conf) {
         maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", maxSession);
@@ -111,6 +118,27 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         asyncPutToSessionStorage = Boolean.parseBoolean(tmp.trim());
 
         obfuscationKey = conf.getProperty("com.openexchange.sessiond.encryptionKey", obfuscationKey);
+
+        {
+            tmp = conf.getProperty("com.openexchange.sessiond.remoteParameterNames");
+            if (Strings.isEmpty(tmp)) {
+                remoteParameterNames = Collections.emptyList();
+            } else {
+                Set<String> names = new TreeSet<String>();
+                int length = tmp.length();
+
+                int prev = 0;
+                int pos;
+                while (prev < length && (pos = tmp.indexOf(':', prev)) >= 0) {
+                    if (pos > 0) {
+                        names.add(tmp.substring(prev, pos));
+                    }
+                    prev = pos + 1;
+                }
+
+                remoteParameterNames = new ArrayList<String>(names);
+            }
+        }
     }
 
     @Override
@@ -177,6 +205,11 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     @Override
     public String getObfuscationKey() {
         return obfuscationKey;
+    }
+
+    @Override
+    public List<String> getRemoteParameterNames() {
+        return remoteParameterNames;
     }
 
 }

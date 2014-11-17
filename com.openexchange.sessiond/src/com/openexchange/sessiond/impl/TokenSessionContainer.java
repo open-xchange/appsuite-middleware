@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.sessiond.impl.SessionHandler.getRemoteParameterNames;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -219,7 +220,7 @@ public final class TokenSessionContainer {
             IMap<String, PortableTokenSessionControl> serverTokenHzMap = hzMap(serverTokenMapName);
 
             // Generate a portable session from token's session...
-            PortableSession portableSession = new PortableSession(SessionHandler.getObfuscator().wrap(control.getSession()));
+            PortableSession portableSession = new PortableSession(SessionHandler.getObfuscator().wrap(control.getSession(), getRemoteParameterNames()));
 
             // ... and put into HZ map
             serverTokenHzMap.put(serverToken, new PortableTokenSessionControl(portableSession, control.getClientToken(), control.getServerToken(), control.getCreationStamp()));
@@ -240,7 +241,7 @@ public final class TokenSessionContainer {
         }
 
         // Create the session instance from its portable representation
-        SessionImpl newSession = (SessionImpl) SessionHandler.getObfuscator().unwrap(removed.getSession());
+        SessionImpl newSession = (SessionImpl) SessionHandler.getObfuscator().unwrap(removed.getSession(), getRemoteParameterNames());
 
         // Return appropriate TokenSessionControl
         return new TokenSessionControl(newSession, removed.getClientToken(), removed.getServerToken(), removed.getCreationStamp());

@@ -67,6 +67,9 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     private static final long serialVersionUID = -3414389910481034283L;
 
+    /** The parameter name for the alternative session identifier */
+    protected static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
+
     /**
      * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
      */
@@ -116,19 +119,9 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.userLogin = "";
         // Assign parameters (if not null)
         if (parameters != null) {
-            Object parameter = parameters.get(Session.PARAM_LOCK);
+            Object parameter = parameters.get(PARAM_ALTERNATIVE_ID);
             if (null != parameter) {
-                // Unless this is a distributed lock...
-                //this.parameters.put(Session.PARAM_LOCK, parameter);
-            }
-            parameter = parameters.get(Session.PARAM_COUNTER);
-            if (null != parameter) {
-                // Counter is per JVM instance
-                // this.parameters.put(Session.PARAM_COUNTER, parameter);
-            }
-            parameter = parameters.get(Session.PARAM_ALTERNATIVE_ID);
-            if (null != parameter) {
-                this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
+                this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
             List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
             for (String parameterName : remoteParameterNames) {
@@ -154,19 +147,9 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.loginName = session.getLoginName();
         // Assign parameters (if not null)
         {
-            Object parameter = session.getParameter(Session.PARAM_LOCK);
+            Object parameter = session.getParameter(PARAM_ALTERNATIVE_ID);
             if (null != parameter) {
-                // Unless this is a distributed lock...
-                // this.parameters.put(Session.PARAM_LOCK, parameter);
-            }
-            parameter = session.getParameter(Session.PARAM_COUNTER);
-            if (null != parameter) {
-                // Counter is per JVM instance
-                // this.parameters.put(Session.PARAM_COUNTER, parameter);
-            }
-            parameter = session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-            if (null != parameter) {
-                this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
+                this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
             List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
             for (String parameterName : remoteParameterNames) {
