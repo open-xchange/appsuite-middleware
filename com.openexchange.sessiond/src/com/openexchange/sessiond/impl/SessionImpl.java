@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,7 +58,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.osgi.Services;
-import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -69,6 +69,8 @@ import com.openexchange.threadpool.Task;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionImpl implements PutIfAbsent {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
 
     private final String loginName;
     private volatile String password;
@@ -84,8 +86,6 @@ public final class SessionImpl implements PutIfAbsent {
     private volatile String client;
     private volatile boolean tranzient;
     private final ConcurrentMap<String, Object> parameters;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
 
     /**
      * Initializes a new {@link SessionImpl}
@@ -104,9 +104,9 @@ public final class SessionImpl implements PutIfAbsent {
      * @param client The client type
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId,
-        final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash,
-        final String client, final boolean tranzient) {
+    public SessionImpl(int userId, String loginName, String password, int contextId, String sessionId,
+        String secret, String randomToken, String localIp, String login, String authId, String hash,
+        String client, boolean tranzient) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -132,7 +132,7 @@ public final class SessionImpl implements PutIfAbsent {
      *
      * @param session The copy session
      */
-    public SessionImpl(final Session s) {
+    public SessionImpl(Session s) {
         super();
         this.userId = s.getUserId();
         this.loginName = s.getLoginName();
@@ -150,11 +150,22 @@ public final class SessionImpl implements PutIfAbsent {
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
-        final Object altId = s.getParameter(PARAM_ALTERNATIVE_ID);
+
+        Object altId = s.getParameter(PARAM_ALTERNATIVE_ID);
         if (null == altId) {
             parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
         } else {
             parameters.put(PARAM_ALTERNATIVE_ID, altId);
+        }
+
+        List<String> remoteParameterNames = SessionHandler.getRemoteParameterNames();
+        if (null != remoteParameterNames) {
+            for (String parameterName : remoteParameterNames) {
+                Object value = s.getParameter(parameterName);
+                if (null != value) {
+                    parameters.put(parameterName, value);
+                }
+            }
         }
     }
 
@@ -164,12 +175,12 @@ public final class SessionImpl implements PutIfAbsent {
      * @param s The session to compare with
      * @param logger The logger
      */
-    public void logDiff(final SessionImpl s, final org.slf4j.Logger logger) {
+    public void logDiff(SessionImpl s, org.slf4j.Logger logger) {
         if (null == s || null == logger) {
             return;
         }
-        final StringBuilder sb = new StringBuilder(1024).append("Session Diff:\n");
-        final String format = "%-15s%-45s%s";
+        StringBuilder sb = new StringBuilder(1024).append("Session Diff:\n");
+        String format = "%-15s%-45s%s";
         sb.append(String.format(format, "Name", "Session #1", "Session #1"));
         sb.append(String.format(format, "User-Id", Integer.valueOf(userId), Integer.valueOf(s.userId)));
         sb.append(String.format(format, "Context-Id", Integer.valueOf(contextId), Integer.valueOf(s.contextId)));
@@ -191,7 +202,7 @@ public final class SessionImpl implements PutIfAbsent {
      * @param s The other session
      * @return <code>true</code> if equal; otherwise <code>false</code>
      */
-    public boolean consideredEqual(final SessionImpl s) {
+    public boolean consideredEqual(SessionImpl s) {
         if (this == s) {
             return true;
         }
@@ -267,8 +278,8 @@ public final class SessionImpl implements PutIfAbsent {
         } else if (hash.equals(s.hash)) {
             return false;
         }
-        final Object object1 = parameters.get(PARAM_ALTERNATIVE_ID);
-        final Object object2 = s.parameters.get(PARAM_ALTERNATIVE_ID);
+        Object object1 = parameters.get(PARAM_ALTERNATIVE_ID);
+        Object object2 = s.parameters.get(PARAM_ALTERNATIVE_ID);
         if (null == object1) {
             if (null != object2) {
                 return false;
@@ -285,12 +296,12 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     @Override
-    public boolean containsParameter(final String name) {
+    public boolean containsParameter(String name) {
         return parameters.containsKey(name);
     }
 
     @Override
-    public Object getParameter(final String name) {
+    public Object getParameter(String name) {
         return parameters.get(name);
     }
 
@@ -314,7 +325,7 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     @Override
-    public void setParameter(final String name, final Object value) {
+    public void setParameter(String name, Object value) {
         if (PARAM_LOCK.equals(name)) {
             return;
         }
@@ -326,7 +337,7 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     @Override
-    public Object setParameterIfAbsent(final String name, final Object value) {
+    public Object setParameterIfAbsent(String name, Object value) {
         if (PARAM_LOCK.equals(name)) {
             return parameters.get(PARAM_LOCK);
         }
@@ -346,7 +357,7 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     @Override
-    public void setLocalIp(final String localIp) {
+    public void setLocalIp(String localIp) {
         try {
             setLocalIp(localIp, true);
         } catch (Exception e) {
@@ -360,7 +371,7 @@ public final class SessionImpl implements PutIfAbsent {
      * @param localIp The local IP address
      * @param propagate Whether to propagate that IP change through {@code SessiondService}
      */
-    public void setLocalIp(final String localIp, final boolean propagate) {
+    public void setLocalIp(final String localIp, boolean propagate) {
         this.localIp = localIp;
         if (propagate) {
             final SessionStorageService storageService = Services.getService(SessionStorageService.class);
@@ -413,7 +424,7 @@ public final class SessionImpl implements PutIfAbsent {
      *
      * @param password The password to set
      */
-    public void setPassword(final String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -428,10 +439,10 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     @Override
-    public void setHash(final String hash) {
+    public void setHash(String hash) {
         try {
             setHash(hash, true);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Failed to propagate change of hash identifier.", e);
         }
     }
@@ -442,7 +453,7 @@ public final class SessionImpl implements PutIfAbsent {
      * @param hash The hash identifier
      * @param propagate Whether to propagate that change through {@code SessiondService}
      */
-    public void setHash(final String hash, final boolean propagate) {
+    public void setHash(final String hash, boolean propagate) {
         this.hash = hash;
         if (propagate) {
             final SessionStorageService storageService = Services.getService(SessionStorageService.class);
@@ -471,10 +482,10 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     @Override
-    public void setClient(final String client) {
+    public void setClient(String client) {
         try {
             setClient(client, true);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Failed to propagate change of client identifier.", e);
         }
     }
@@ -499,7 +510,7 @@ public final class SessionImpl implements PutIfAbsent {
      * @param client The client identifier
      * @param propagate Whether to propagate that change
      */
-    public void setClient(final String client, final boolean propagate) {
+    public void setClient(final String client, boolean propagate) {
         this.client = client;
         if (propagate) {
             final SessionStorageService storageService = Services.getService(SessionStorageService.class);
@@ -524,7 +535,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(128);
+        StringBuilder builder = new StringBuilder(128);
         builder.append('{');
         builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(", ");
         if (sessionId != null) {
