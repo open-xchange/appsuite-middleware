@@ -114,7 +114,7 @@ import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageCodes;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
