@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.helper;
 
+import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.java.Strings.toUpperCase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -182,7 +184,7 @@ public final class DownloadUtility {
             String fn = fileName;
             byte[] bytes;
             // Check by Content-Type and file name
-            if (contentType.startsWithAny("text/htm", "text/xhtm")) {
+            if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm")) {
                 /*
                  * HTML content requested for download...
                  */
@@ -717,34 +719,6 @@ public final class DownloadUtility {
         public InputStream getInputStream() {
             return inputStream;
         }
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
-    /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
     }
 
 }

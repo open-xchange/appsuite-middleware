@@ -145,6 +145,34 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    public void testApplicationHtml_Bug35512() {
+        try {
+            String html = "foo\n" + "<object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"></object>\n" + "bar";
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(html.getBytes(), "application/xhtml+xml", Delivery.view, Disposition.inline, "evil.html");
+
+            AJAXRequestData requestData = new AJAXRequestData();
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+                requestData.putParameter("width", "10");
+                requestData.putParameter("height", "10");
+            }
+            AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            result.setExpires(Tools.getDefaultImageExpiry());
+            SimHttpServletRequest req = new SimHttpServletRequest();
+            SimHttpServletResponse resp = new SimHttpServletResponse();
+            ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+            FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+
+            String s = new String(servletOutputStream.toByteArray());
+            assertTrue("HTML content not sanitized: " + s, s.indexOf("<object/data") < 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
     public void testMaxAgeHeader_Bug33441() {
         try {
             ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("28082.jpg", "image/jpeg", Delivery.view, Disposition.inline, "28082.jpg");
