@@ -74,6 +74,8 @@ Build for patch 2014-10-30
 Build for patch 2014-11-04
 * Fri Oct 24 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-10-22
+* Fri Oct 24 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2014-11-03
 * Fri Oct 17 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Steffen Templin <steffen.templin@open-xchange.com>
@@ -82,6 +84,8 @@ Fifth candidate for 7.6.1 release
 Build for patch 2014-10-20
 * Fri Oct 10 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Fourth candidate for 7.6.1 release
+* Fri Oct 10 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2014-10-20
 * Fri Oct 10 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-10-20
 * Thu Oct 09 2014 Steffen Templin <steffen.templin@open-xchange.com>
