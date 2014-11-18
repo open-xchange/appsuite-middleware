@@ -218,7 +218,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
 
-                if (filter && !saveToDisk && ((mailPart.getContentType().startsWithAny("text/htm", "text/xhtm") && fileNameAbsentOrIndicatesHtml(mailPart.getFileName())) || fileNameAbsentOrIndicatesHtml(mailPart.getFileName()))) {
+                if (filter && !saveToDisk && ((Strings.startsWithAny(toLowerCase(mailPart.getContentType().getSubType()), "htm", "xhtm") && fileNameAbsentOrIndicatesHtml(mailPart.getFileName())) || fileNameAbsentOrIndicatesHtml(mailPart.getFileName()))) {
                     // Expect the attachment to be HTML content. Therefore apply filter...
                     if (isEmpty(mailPart.getFileName())) {
                         mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
