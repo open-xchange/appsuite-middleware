@@ -340,9 +340,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         if (null == metadata.getFilestoreLocation()) {
             return Streams.EMPTY_INPUT_STREAM;
         }
-        if (null == metadata.getFilestoreLocation()) {
-            return Streams.EMPTY_INPUT_STREAM;
-        }
         FileStorage fileStorage = getFileStorage(permission.getFolderOwner(), session.getContextId());
         if (0 == offset && -1 == length) {
             return fileStorage.getFile(metadata.getFilestoreLocation());
@@ -366,13 +363,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException {
         /*
-         * get needed metadata & check read permissions
+         * get needed metadata (including object permissions) & check read permissions
          */
-        DocumentMetadata metadata = load(id, version, session.getContext());
+        DocumentMetadata metadata = objectPermissionLoader.add(load(id, version, session.getContext()), session.getContext(), null);
         EffectiveInfostorePermission permission = security.getInfostorePermission(
             metadata, session.getContext(), session.getUser(), session.getUserPermissionBits());
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+        }
+        /*
+         * adjust parent folder if required
+         */
+        if (false == permission.canReadObjectInFolder()) {
+            metadata.setFolderId(getSharedFilesFolderID(session));
         }
         /*
          * check client E-Tag if supplied
