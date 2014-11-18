@@ -910,7 +910,7 @@ public final class Init {
             ShareStorage storage = new RdbShareStorage(dbService);
             services.put(ShareStorage.class, storage);
             TestServiceRegistry.getInstance().addService(ShareStorage.class, storage);
-            DefaultShareService service = new DefaultShareService(LOOKUP);
+            DefaultShareService service = new DefaultShareService(LOOKUP, null);
             services.put(ShareService.class, service);
             TestServiceRegistry.getInstance().addService(ShareService.class, service);
         }
