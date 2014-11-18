@@ -456,7 +456,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
              */
             Collection<PortableSession> sessions =
                 sessions().values(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
-            return null != sessions ? sessions.toArray(new Session[sessions.size()]) : new Session[0];
+            return null == sessions ? new Session[0] : sessions.toArray(new Session[sessions.size()]);
         } catch (HazelcastInstanceNotActiveException e) {
             throw handleNotActiveException(e);
         } catch (RuntimeException e) {
