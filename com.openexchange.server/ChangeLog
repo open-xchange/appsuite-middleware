@@ -1,3 +1,7 @@
+* 2014-11-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35512: Check for "html" or "xhtml" prefix in Content-Type's subtype
+
 * 2014-11-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 35490: Synchronize calls when checking mail standard folders
