@@ -1123,6 +1123,12 @@ ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 # SoftwareChange_Request-2224
 ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2249
+ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
+
+# SoftwareChange_Request-2250
+ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
