@@ -113,7 +113,7 @@ public interface UnifiedInboxManagement {
      * @param contextId The context ID
      * @throws OXException If creating the Unified Mail account fails for given user in specified context
      */
-    public void createUnifiedINBOX(int userId, int contextId) throws OXException;
+    void createUnifiedINBOX(int userId, int contextId) throws OXException;
 
     /**
      * Creates the Unified Mail account for given user in specified context.
@@ -123,7 +123,7 @@ public interface UnifiedInboxManagement {
      * @param con The connection to use
      * @throws OXException If creating the Unified Mail account fails for given user in specified context
      */
-    public void createUnifiedINBOX(int userId, int contextId, Connection con) throws OXException;
+    void createUnifiedINBOX(int userId, int contextId, Connection con) throws OXException;
 
     /**
      * Deletes the Unified Mail account for given user in specified context.
@@ -132,7 +132,7 @@ public interface UnifiedInboxManagement {
      * @param contextId The context ID
      * @throws OXException If deleting the Unified Mail account fails for given user in specified context
      */
-    public void deleteUnifiedINBOX(int userId, int contextId) throws OXException;
+    void deleteUnifiedINBOX(int userId, int contextId) throws OXException;
 
     /**
      * Deletes the Unified Mail account for given user in specified context.
@@ -142,7 +142,7 @@ public interface UnifiedInboxManagement {
      * @param con The connection to use
      * @throws OXException If deleting the Unified Mail account fails for given user in specified context
      */
-    public void deleteUnifiedINBOX(int userId, int contextId, Connection con) throws OXException;
+    void deleteUnifiedINBOX(int userId, int contextId, Connection con) throws OXException;
 
     /**
      * Checks if the Unified Mail account exists for given user in specified context.
@@ -154,7 +154,7 @@ public interface UnifiedInboxManagement {
      * @return <code>true</code> if the Unified Mail account exists for given user in specified context; otherwise <code>false</code>
      * @throws OXException If checking Unified Mail account's enabled status fails
      */
-    public boolean exists(int userId, int contextId) throws OXException;
+    boolean exists(int userId, int contextId) throws OXException;
 
     /**
      * Checks if the Unified Mail account exists for given user in specified context.
@@ -167,7 +167,7 @@ public interface UnifiedInboxManagement {
      * @return <code>true</code> if the Unified Mail account exists for given user in specified context; otherwise <code>false</code>
      * @throws OXException If checking Unified Mail account's enabled status fails
      */
-    public boolean exists(int userId, int contextId, Connection con) throws OXException;
+    boolean exists(int userId, int contextId, Connection con) throws OXException;
 
     /**
      * Checks if the Unified Mail account is enabled for given user in specified context.
@@ -178,7 +178,7 @@ public interface UnifiedInboxManagement {
      * @return <code>true</code> if the Unified Mail account is enabled for given user in specified context; otherwise <code>false</code>
      * @throws OXException If checking Unified Mail account's enabled status fails
      */
-    public boolean isEnabled(Session session) throws OXException;
+    boolean isEnabled(Session session) throws OXException;
 
     /**
      * Checks if the Unified Mail account is enabled for given user in specified context.
@@ -190,7 +190,7 @@ public interface UnifiedInboxManagement {
      * @return <code>true</code> if the Unified Mail account is enabled for given user in specified context; otherwise <code>false</code>
      * @throws OXException If checking Unified Mail account's enabled status fails
      */
-    public boolean isEnabled(int userId, int contextId) throws OXException;
+    boolean isEnabled(int userId, int contextId) throws OXException;
 
     /**
      * Checks if the Unified Mail account is enabled for given user in specified context.
@@ -203,7 +203,7 @@ public interface UnifiedInboxManagement {
      * @return <code>true</code> if the Unified Mail account is enabled for given user in specified context; otherwise <code>false</code>
      * @throws OXException If checking Unified Mail account's enabled status fails
      */
-    public boolean isEnabled(int userId, int contextId, Connection con) throws OXException;
+    boolean isEnabled(int userId, int contextId, Connection con) throws OXException;
 
     /**
      * Gets the ID of the mail account denoting the Unified Mail account.
@@ -212,7 +212,7 @@ public interface UnifiedInboxManagement {
      * @return The ID of the Unified Mail account or <code>-1</code> if none found
      * @throws OXException If detecting ID of the Unified Mail account fails
      */
-    public int getUnifiedINBOXAccountID(Session session) throws OXException;
+    int getUnifiedINBOXAccountID(Session session) throws OXException;
 
     /**
      * Gets the ID of the mail account denoting the Unified Mail account.
@@ -222,7 +222,7 @@ public interface UnifiedInboxManagement {
      * @return The ID of the Unified Mail account or <code>-1</code> if none found
      * @throws OXException If detecting ID of the Unified Mail account fails
      */
-    public int getUnifiedINBOXAccountID(int userId, int contextId) throws OXException;
+    int getUnifiedINBOXAccountID(int userId, int contextId) throws OXException;
 
     /**
      * Gets the ID of the mail account denoting the Unified Mail account.
@@ -233,6 +233,27 @@ public interface UnifiedInboxManagement {
      * @return The ID of the Unified Mail account or <code>-1</code> if none found
      * @throws OXException If detecting ID of the Unified Mail account fails
      */
-    public int getUnifiedINBOXAccountID(int userId, int contextId, Connection con) throws OXException;
+    int getUnifiedINBOXAccountID(int userId, int contextId, Connection con) throws OXException;
+
+    /**
+     * Gets the ID of the mail account denoting the Unified Mail account if enabled.
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The ID of the Unified Mail account or <code>-1</code> if none found or not enabled
+     * @throws OXException If detecting ID of the Unified Mail account fails
+     */
+    int getUnifiedINBOXAccountIDIfEnabled(int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the ID of the mail account denoting the Unified Mail account if enabled.
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param con The connection to use
+     * @return The ID of the Unified Mail account or <code>-1</code> if none found or not enabled
+     * @throws OXException If detecting ID of the Unified Mail account fails
+     */
+    int getUnifiedINBOXAccountIDIfEnabled(int userId, int contextId, Connection con) throws OXException;
 
 }

@@ -268,14 +268,14 @@ public final class StructureMailMessageParser {
      * @param prefix The initial prefix for mail part identifiers; e.g. <code>&quot;1.1&quot;</code>
      * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(MailMessage mail, final StructureHandler handler, final String prefix) throws OXException {
+    public void parseMailMessage(MailMessage mail, StructureHandler handler, String prefix) throws OXException {
         if (null == mail) {
             throw MailExceptionCode.MISSING_PARAMETER.create("mail");
         }
         if (null == handler) {
             throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
-        final MailMessage mm = MimeStructureFixer.getInstance().process(mail);
+        MailMessage mm = MimeStructureFixer.getInstance().process(mail);
         try {
             /*
              * Parse mail's envelope
@@ -431,16 +431,17 @@ public final class StructureMailMessageParser {
                 /*
                  * Determine the part which is considered to be the message' text according to
                  */
-                MailPart part = null;
-                for (int i = 0; null == part && i < count; i++) {
-                    final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
-                    part = extractTextFrom(enclosedPart, 0);
+                {
+                    MailPart part = null;
+                    for (int i = 0; null == part && i < count; i++) {
+                        final MailPart enclosedPart = mailPart.getEnclosedMailPart(i);
+                        part = extractTextFrom(enclosedPart, 0);
+                    }
+                    if (null != part && false == handler.handleSMIMEBodyText(part)) {
+                        stop = true;
+                        return;
+                    }
                 }
-                if (!handler.handleSMIMEBodyText(part)) {
-                    stop = true;
-                    return;
-                }
-                part = null;
                 final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(2048);
                 final byte[] bytes;
                 {

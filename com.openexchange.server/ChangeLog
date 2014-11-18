@@ -1,3 +1,17 @@
+* 2014-11-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35359: Improved special /ajax/mail?action=all request fired when loading portal page
+
+* 2014-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35242: Added null guard & improved logging behavior to provide mail information in order to identify the mail later on
+
+* 2014-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35255: Also consider file extension if mail part claims to be HTML by Content-Type
+ - Fix for bug 34465: Check for a POP3 account by mail account data fetched from storage. Do no longer rely on valid data sent by client
+ - Fix for bug 35261: Enum for client parameters passed to IMAp store
+
 * 2014-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 34706: Do not consult session storage in case session look-up is performed by alternative identifier and

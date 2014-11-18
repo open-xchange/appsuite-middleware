@@ -943,6 +943,12 @@ if [ "1500" = "${VALUE}" ]; then
     ox_set_property com.openexchange.servlet.maxRate 500 /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-2243
+VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
+if [ "500" = "${VALUE}" ]; then
+    ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
+fi
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT

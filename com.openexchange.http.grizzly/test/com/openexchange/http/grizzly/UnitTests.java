@@ -54,17 +54,19 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.http.grizzly.service.http.ServletFilterRegistrationTest;
 import com.openexchange.http.grizzly.servletfilter.RemoteIPFinderTest;
+import com.openexchange.http.grizzly.util.RequestToolsTest;
 
 /**
  * Unit tests for bundle com.openexchange.http.grizzly
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
 @RunWith(Suite.class)
 @SuiteClasses({
     RemoteIPFinderTest.class,
-    ServletFilterRegistrationTest.class
+    ServletFilterRegistrationTest.class,
+    RequestToolsTest.class
 })
 public class UnitTests {
 
