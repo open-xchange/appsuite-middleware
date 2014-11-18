@@ -8,7 +8,6 @@ BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-oauth
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 0
 %define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
@@ -51,6 +50,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Nov 10 2014 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2014-11-17
 * Wed Nov 05 2014 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.6.2 release
 * Fri Oct 31 2014 Thorben Betten <thorben.betten@open-xchange.com>

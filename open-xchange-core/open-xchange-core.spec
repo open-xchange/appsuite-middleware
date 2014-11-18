@@ -1108,7 +1108,7 @@ ox_add_property com.openexchange.ajax.login.maxRate 50 /opt/open-xchange/etc/log
 
 # SoftwareChange_Request-2243
 if [ ${1:-0} -eq 2 ]; then
-    VALUE=$(ox_read_property com.openexchange.servlet.maxRate $PFILE)
+    VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
     if [ "500" = "$VALUE" ]; then
         ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
     fi
@@ -1163,6 +1163,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-17
 * Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.6.2 release
 * Tue Nov 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
