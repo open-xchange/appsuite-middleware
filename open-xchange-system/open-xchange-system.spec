@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/lib/oxfunctions.sh
 
 %changelog
+* Tue Nov 18 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-11-20
 * Mon Nov 10 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-11-17
 * Mon Oct 27 2014 Carsten Hoeger <choeger@open-xchange.com>
