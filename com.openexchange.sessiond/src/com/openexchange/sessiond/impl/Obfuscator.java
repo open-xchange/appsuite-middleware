@@ -90,16 +90,20 @@ public class Obfuscator {
      * @param remoteParameterNames The names of such parameters that are supposed to be taken over from session to stored session representation
      * @return the wrapped session
      */
-    public Session wrap(Session session, List<String> remoteParameterNames) {
+    public Session wrap(SessionImpl session, List<String> remoteParameterNames) {
         if (null == session) {
             return null;
         }
+
+        // Initialize its parameters
         Map<String, Object> parameters = new HashMap<String, Object>(2);
         for (String param : WRAPPED_PARMETERS) {
             if (session.containsParameter(param)) {
                 parameters.put(param, session.getParameter(param));
             }
         }
+
+        // Maintain remote parameters
         if (null != remoteParameterNames) {
             for (String parameterName : remoteParameterNames) {
                 Object value = session.getParameter(parameterName);
@@ -108,6 +112,8 @@ public class Obfuscator {
                 }
             }
         }
+
+        // Instantiate & return appropriate stored session
         return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(),
             session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(),
             session.getAuthId(), session.getHash(), session.getClient(), parameters);
@@ -120,13 +126,17 @@ public class Obfuscator {
      * @param remoteParameterNames The names of such parameters that are supposed to be taken over from session to stored session representation
      * @return The unwrapped session
      */
-    public Session unwrap(Session session, List<String> remoteParameterNames) {
+    public SessionImpl unwrap(Session session, List<String> remoteParameterNames) {
         if (null == session) {
             return null;
         }
+
+        // Instantiate session
         SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(),
             session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(),
             session.getAuthId(), session.getHash(), session.getClient(), false);
+
+        // Check for remote parameter names
         if (null != remoteParameterNames) {
             for (String parameterName : remoteParameterNames) {
                 Object value = session.getParameter(parameterName);
@@ -135,11 +145,15 @@ public class Obfuscator {
                 }
             }
         }
+
+        // Maintain wrapped parameters as well
         for (String param : WRAPPED_PARMETERS) {
             if (session.containsParameter(param)) {
                 sessionImpl.setParameter(param, session.getParameter(param));
             }
         }
+
+        // Return
         return sessionImpl;
     }
 
