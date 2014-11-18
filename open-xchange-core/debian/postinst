@@ -953,7 +953,7 @@ ox_add_property com.openexchange.ajax.login.maxRate 50 /opt/open-xchange/etc/log
 
 # SoftwareChange_Request-2243
 if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property com.openexchange.servlet.maxRate $PFILE)
+    VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
     if [ "500" = "$VALUE" ]; then
         ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
     fi

@@ -58,6 +58,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Mon Nov 10 2014 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2014-11-17
 * Wed Nov 05 2014 Karsten Will <karsten.will@open-xchange.com>
 prepare for 7.8.0 release
 * Tue Nov 04 2014 Karsten Will <karsten.will@open-xchange.com>
