@@ -9,9 +9,9 @@ BuildRequires:  ant-nodeps
 %endif
 BuildRequires:  open-xchange-admin
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+BuildRequires:  java7-devel
 %else
-BuildRequires: java-devel >= 1.7.0
+BuildRequires:  java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
 %define         ox_release 0
