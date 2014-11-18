@@ -241,10 +241,10 @@ public final class TokenSessionContainer {
         }
 
         // Create the session instance from its portable representation
-        SessionImpl newSession = (SessionImpl) SessionHandler.getObfuscator().unwrap(removed.getSession(), getRemoteParameterNames());
+        SessionImpl unwrappedSession = SessionHandler.getObfuscator().unwrap(removed.getSession(), getRemoteParameterNames());
 
         // Return appropriate TokenSessionControl
-        return new TokenSessionControl(newSession, removed.getClientToken(), removed.getServerToken(), removed.getCreationStamp());
+        return new TokenSessionControl(unwrappedSession, removed.getClientToken(), removed.getServerToken(), removed.getCreationStamp());
     }
 
     private Map<String, ScheduledTimerTask> getRemoverMap() {
