@@ -212,7 +212,7 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
             return Collections.emptyMap();
         }
-
+        ShareTool.validateTargets(targets);
         int contextID = session.getContextId();
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
         Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>(recipients.size());
@@ -260,6 +260,7 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size()) {
             return null;
         }
+        ShareTool.validateTargets(targets);
         /*
          * prepare shares to update
          */
