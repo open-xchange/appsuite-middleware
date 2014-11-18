@@ -166,7 +166,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
                 URI uri = new URI(baseUri.getScheme(), baseUri.getAuthority(), baseUri.getPath() + '/' + info.getFilestoreName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
-                storage = new DBQuotaFileStorage(contextId, fsOwner.getValue(), info.getFileStorageQuota(), fileStorageService.getFileStorage(uri));
+                storage = new DBQuotaFileStorage(contextId, fsOwner.getValue(), info.getFileStorageQuota(), fileStorageService.getFileStorage(uri), uri);
 
                 // Put it into cache
                 putCachedFileStorage(userId, contextId, storage);

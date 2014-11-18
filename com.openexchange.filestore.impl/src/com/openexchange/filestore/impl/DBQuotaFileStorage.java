@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,18 +89,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     private final transient FileStorage fileStorage;
     private final long quota;
     private final int ownerId;
-
-    /**
-     * Initializes a new {@link DBQuotaFileStorage} for a context.
-     *
-     * @param contextId The context identifier
-     * @param quota The assigned quota
-     * @param fs The file storage associated with the context
-     * @throws OXException If initialization fails
-     */
-    public DBQuotaFileStorage(int contextId, long quota, FileStorage fs) throws OXException {
-        this(contextId, 0, quota, fs);
-    }
+    private final URI uri;
 
     /**
      * Initializes a new {@link DBQuotaFileStorage} for an owner.
@@ -109,13 +99,15 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
      *            accounted
      * @param quota The assigned quota
      * @param fs The file storage associated with the owner
+     * @param uri The URI that fully qualifies this file storage
      * @throws OXException If initialization fails
      */
-    public DBQuotaFileStorage(int contextId, int ownerId, long quota, FileStorage fs) throws OXException {
+    public DBQuotaFileStorage(int contextId, int ownerId, long quota, FileStorage fs, URI uri) throws OXException {
         super();
         if (fs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
+        this.uri = uri;
         this.contextId = contextId;
         this.ownerId = ownerId;
         this.quota = quota;
@@ -124,6 +116,11 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     private DatabaseService getDatabaseService() throws OXException {
         return Services.requireService(DatabaseService.class);
+    }
+
+    @Override
+    public URI getUri() {
+        return uri;
     }
 
     @Override

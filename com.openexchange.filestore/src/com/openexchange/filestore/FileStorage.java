@@ -68,7 +68,7 @@ public interface FileStorage {
      * @return The file's path in associated file storage
      * @throws OXException If saving file fails
      */
-    String saveNewFile(final InputStream file) throws OXException;
+    String saveNewFile(InputStream file) throws OXException;
 
     /**
      * Gets denoted file's content as a stream.
@@ -94,7 +94,7 @@ public interface FileStorage {
      * @return The file's size
      * @throws OXException If size cannot be returned
      */
-    long getFileSize(final String name) throws OXException;
+    long getFileSize(String name) throws OXException;
 
     /**
      * Gets file's MIME type.
@@ -112,7 +112,7 @@ public interface FileStorage {
      * @return <code>true</code> if deletion was successful; otherwise <code>false</code>
      * @throws OXException If delete attempt fails
      */
-    boolean deleteFile(final String identifier) throws OXException;
+    boolean deleteFile(String identifier) throws OXException;
 
     /**
      * Deletes multiple files.
@@ -121,7 +121,7 @@ public interface FileStorage {
      * @return The identifiers of those files that could not be deleted
      * @throws OXException If delete attempt fails
      */
-    Set<String> deleteFiles(final String[] identifiers) throws OXException;
+    Set<String> deleteFiles(String[] identifiers) throws OXException;
 
     /**
      * Completely removes/cleans all file storage's content.
