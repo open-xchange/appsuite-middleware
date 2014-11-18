@@ -75,7 +75,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
-import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
@@ -110,6 +109,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.databaseold.Database;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.event.EventFactoryService;
@@ -146,6 +146,9 @@ import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterR
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
@@ -728,9 +731,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(DBProvider.class, new DBPoolProvider());
 
         // Register Infostore
-        registerService(InfostoreFacade.class, Infostore.FACADE);
-        registerService(EventFiringInfostoreFacade.class, Infostore.EVENT_FIRING_FACADE);
-        registerService(InfostoreSearchEngine.class, Infostore.SEARCH_ENGINE);
+        registerInfostore();
 
         // Register AttachmentBase
         registerService(AttachmentBase.class, Attachment.ATTACHMENT_BASE);
@@ -835,6 +836,24 @@ public final class ServerActivator extends HousekeepingActivator {
             started.set(false);
             CONTEXT = null;
         }
+    }
+
+    private void registerInfostore() {
+        DBProvider dbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
+        InfostoreFacade infostoreFacade = new InfostoreFacadeImpl(dbProvider);
+        infostoreFacade.setTransactional(true);
+        infostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
+
+        InfostoreSearchEngine infostoreSearchEngine = new SearchEngineImpl(dbProvider);
+        infostoreSearchEngine.setTransactional(true);
+
+        EventFiringInfostoreFacade eventFiringInfostoreFacade = new EventFiringInfostoreFacadeImpl(dbProvider);
+        eventFiringInfostoreFacade.setTransactional(true);
+        eventFiringInfostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
+
+        registerService(InfostoreFacade.class, infostoreFacade);
+        registerService(EventFiringInfostoreFacade.class, eventFiringInfostoreFacade);
+        registerService(InfostoreSearchEngine.class, infostoreSearchEngine);
     }
 
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
