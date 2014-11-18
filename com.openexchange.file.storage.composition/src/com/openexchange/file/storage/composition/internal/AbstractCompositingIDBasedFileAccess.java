@@ -80,6 +80,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
@@ -1728,9 +1729,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 accounts = fsService.getAccountManager().getAccounts(session);
             }
             for (final FileStorageAccount fileStorageAccount : accounts) {
-                final FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                connect(accountAccess);
-                retval.add(accountAccess.getFileAccess());
+                try {
+                    final FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
+                    connect(accountAccess);
+                    retval.add(accountAccess.getFileAccess());
+                } catch (OXException e) {
+                    // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
+                    if (!e.equalsCode(4, "OAUTH") && !OXExceptions.containsCommunicationError(e)) {
+                        throw e;
+                    }
+                }
             }
         }
         return retval;
