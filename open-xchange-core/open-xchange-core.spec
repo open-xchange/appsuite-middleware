@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1098,6 +1098,12 @@ if [ "1500" = "${VALUE}" ]; then
     ox_set_property com.openexchange.servlet.maxRate 500 /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-2243
+VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
+if [ "500" = "${VALUE}" ]; then
+    ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1136,6 +1142,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-17
 * Mon Oct 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-30
 * Fri Oct 17 2014 Marcus Klein <marcus.klein@open-xchange.com>

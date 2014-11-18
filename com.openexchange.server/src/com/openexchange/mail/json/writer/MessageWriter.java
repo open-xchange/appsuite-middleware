@@ -120,7 +120,7 @@ public final class MessageWriter {
      * @return The structure as a JSON object
      * @throws OXException If writing structure fails
      */
-    public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws OXException {
+    public static JSONObject writeStructure(int accountId, MailMessage mail, long maxSize) throws OXException {
         {
             LogProperties.putProperty(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(accountId));
             if (null != mail.getFolder()) {
@@ -130,14 +130,10 @@ public final class MessageWriter {
                 LogProperties.putProperty(LogProperties.Name.MAIL_MAIL_ID, mail.getMailId());
             }
         }
-        try {
-            final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
-            mail.setAccountId(accountId);
-            new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(mail, handler);
-            return handler.getJSONMailObject();
-        } finally {
-            LogProperties.removeProperties(LogProperties.Name.MAIL_ACCOUNT_ID, LogProperties.Name.MAIL_FULL_NAME, LogProperties.Name.MAIL_MAIL_ID);
-        }
+        MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
+        mail.setAccountId(accountId);
+        new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(mail, handler);
+        return handler.getJSONMailObject();
     }
 
     /**
@@ -198,7 +194,7 @@ public final class MessageWriter {
 
     /**
      * Writes whole mail as a JSON object by trimming the mail content to the length provided by maxContentSize parameter
-     * 
+     *
      * @param accountId The account ID
      * @param mail The mail to write
      * @param displayMode The display mode
@@ -284,8 +280,6 @@ public final class MessageWriter {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(cause, mailId, mail.getFolder());
             }
             throw e;
-        } finally {
-            LogProperties.removeProperties(LogProperties.Name.MAIL_ACCOUNT_ID, LogProperties.Name.MAIL_FULL_NAME, LogProperties.Name.MAIL_MAIL_ID);
         }
     }
 

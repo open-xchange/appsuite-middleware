@@ -94,14 +94,14 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     }
 
     @Override
-    public void createUnifiedINBOX(final int userId, final int contextId) throws OXException {
+    public void createUnifiedINBOX(int userId, int contextId) throws OXException {
         createUnifiedINBOX(userId, contextId, null);
     }
 
     @Override
-    public void createUnifiedINBOX(final int userId, final int contextId, final Connection con) throws OXException {
+    public void createUnifiedINBOX(int userId, int contextId, Connection con) throws OXException {
         try {
-            final MailAccountStorageService storageService =
+            MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             // Check if Unified Mail account already exists for given user
             if (exists(userId, contextId, con)) {
@@ -110,10 +110,10 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
                     Integer.valueOf(userId),
                     Integer.valueOf(contextId));
             }
-            final Context ctx;
+            Context ctx;
             {
                 // Prefer context service
-                final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+                ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
                 if (null == contextService) {
                     ctx = ContextStorage.getStorageContext(contextId);
                 } else {
@@ -121,13 +121,13 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
                 }
             }
             // Create and fill appropriate description object
-            final MailAccountDescription mailAccountDescription = new MailAccountDescription();
+            MailAccountDescription mailAccountDescription = new MailAccountDescription();
             mailAccountDescription.setName(NAME_UNIFIED_INBOX);
             mailAccountDescription.setConfirmedHam("confirmed-ham");
             mailAccountDescription.setConfirmedSpam("confirmed-spam");
             mailAccountDescription.setDefaultFlag(false);
             mailAccountDescription.setDrafts("drafts");
-            final String login = getUserLogin(userId, ctx);
+            String login = getUserLogin(userId, ctx);
             mailAccountDescription.setLogin(login);
             mailAccountDescription.setMailPort(143);
             mailAccountDescription.setMailProtocol(PROTOCOL_UNIFIED_INBOX);
@@ -150,28 +150,28 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             }
             // Drop session parameters
             try {
-                final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+                SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
                 if (null != sessiondService) {
-                    for (final Session session : sessiondService.getSessions(userId, contextId)) {
+                    for (Session session : sessiondService.getSessions(userId, contextId)) {
                         session.setParameter("com.openexchange.mailaccount.unifiedMailAccountId", null);
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
 
     }
 
     @Override
-    public void deleteUnifiedINBOX(final int userId, final int contextId) throws OXException {
+    public void deleteUnifiedINBOX(int userId, int contextId) throws OXException {
         deleteUnifiedINBOX(userId, contextId, null);
     }
 
     @Override
-    public void deleteUnifiedINBOX(final int userId, final int contextId, final Connection con) throws OXException {
+    public void deleteUnifiedINBOX(int userId, int contextId, Connection con) throws OXException {
         try {
             MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
@@ -179,7 +179,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
             int id = -1;
             for (int i = 0; i < existingAccounts.length && id < 0; i++) {
-                final MailAccount mailAccount = existingAccounts[i];
+                MailAccount mailAccount = existingAccounts[i];
                 if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                     id = mailAccount.getId();
                 }
@@ -193,7 +193,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
                     storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false, con);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -216,8 +216,8 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     }
 
     @Override
-    public boolean exists(final int userId, final int contextId) throws OXException {
-        final Connection con = Database.get(contextId, false);
+    public boolean exists(int userId, int contextId) throws OXException {
+        Connection con = Database.get(contextId, false);
         try {
             return exists(userId, contextId, con);
         } finally {
@@ -226,7 +226,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     }
 
     @Override
-    public boolean exists(final int userId, final int contextId, final Connection con) throws OXException {
+    public boolean exists(int userId, int contextId, Connection con) throws OXException {
         if (null == con) {
             return exists(userId, contextId);
         }
@@ -239,13 +239,13 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             stmt.setString(3, NAME_UNIFIED_INBOX);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                final String url = rs.getString(1);
+                String url = rs.getString(1);
                 if (!rs.wasNull() && url != null && url.startsWith(UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX, 0)) {
                     return true;
                 }
             }
             return false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -265,8 +265,8 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     }
 
     @Override
-    public boolean isEnabled(final int userId, final int contextId) throws OXException {
-        final Connection con = Database.get(contextId, false);
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        Connection con = Database.get(contextId, false);
         try {
             return isEnabled(userId, contextId, con);
         } finally {
@@ -275,7 +275,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     }
 
     @Override
-    public boolean isEnabled(final int userId, final int contextId, final Connection con) throws OXException {
+    public boolean isEnabled(int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -284,7 +284,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -292,51 +292,89 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     }
 
     @Override
-    public int getUnifiedINBOXAccountID(final Session session) throws OXException {
-        final Integer i = (Integer) session.getParameter("com.openexchange.mailaccount.unifiedMailAccountId");
+    public int getUnifiedINBOXAccountID(Session session) throws OXException {
+        Integer i = (Integer) session.getParameter("com.openexchange.mailaccount.unifiedMailAccountId");
         if (null != i) {
             return i.intValue();
         }
-        final int unifiedINBOXAccountId = getUnifiedINBOXAccountID(session.getUserId(), session.getContextId());
+        int unifiedINBOXAccountId = getUnifiedINBOXAccountID(session.getUserId(), session.getContextId());
         session.setParameter("com.openexchange.mailaccount.unifiedMailAccountId", Integer.valueOf(unifiedINBOXAccountId));
         return unifiedINBOXAccountId;
     }
 
     @Override
-    public int getUnifiedINBOXAccountID(final int userId, final int contextId) throws OXException {
-        return getUnifiedINBOXAccountID(userId, contextId, null);
+    public int getUnifiedINBOXAccountID(int userId, int contextId) throws OXException {
+        DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        Connection con = databaseService.getReadOnly(contextId);
+        try {
+            return getUnifiedINBOXAccountID(userId, contextId, con);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
     }
 
     @Override
-    public int getUnifiedINBOXAccountID(final int userId, final int contextId, final Connection con) throws OXException {
-        final DatabaseService databaseService;
-        final Connection connection;
-        final boolean releaseConnection;
+    public int getUnifiedINBOXAccountID(int userId, int contextId, Connection con) throws OXException {
         if (null == con) {
-            databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-            connection = databaseService.getReadOnly(contextId);
-            releaseConnection = true;
-        } else {
-            databaseService = null;
-            connection = con;
-            releaseConnection = false;
+            return getUnifiedINBOXAccountID(userId, contextId);
         }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = connection.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND url LIKE ?");
+            stmt = con.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND url LIKE ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX + '%');
             rs = stmt.executeQuery();
             return rs.next() ? rs.getInt(1) : -1;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            if (releaseConnection && null != databaseService) {
-                databaseService.backReadOnly(contextId, connection);
+        }
+    }
+
+    @Override
+    public int getUnifiedINBOXAccountIDIfEnabled(int userId, int contextId) throws OXException {
+        DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        Connection con = databaseService.getReadOnly(contextId);
+        try {
+            return getUnifiedINBOXAccountIDIfEnabled(userId, contextId, con);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public int getUnifiedINBOXAccountIDIfEnabled(int userId, int contextId, Connection con) throws OXException {
+        if (null == con) {
+            return getUnifiedINBOXAccountIDIfEnabled(userId, contextId);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND url LIKE ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX + '%');
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return -1;
             }
+            int id = rs.getInt(1);
+            DBUtils.closeSQLStuff(rs, stmt);
+
+            stmt = con.prepareStatement(SQL_ENABLED);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            return rs.next() ? id : -1;
+        } catch (SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -344,8 +382,8 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
      * +++++++++++++++++++++++++++++++++++++++++++++ HELPERS +++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static String getUserLogin(final int userId, final Context ctx) throws OXException {
-        final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+    private static String getUserLogin(int userId, Context ctx) throws OXException {
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
         return userService.getUser(userId, ctx).getLoginInfo();
     }
 

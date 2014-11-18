@@ -49,10 +49,12 @@
 
 package com.openexchange.imap.storecache;
 
+import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import com.openexchange.imap.IMAPClientParameters;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 import com.sun.mail.imap.IMAPStore;
@@ -101,10 +103,10 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         }
         {
             Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-            clientParams.put("x-originating-ip", session.getLocalIp());
-            clientParams.put("x-session-id", session.getSessionID() + "-" + imapStore.hashCode());
-            clientParams.put("name", "Open-Xchange");
-            clientParams.put("xversion", Version.getInstance().getVersionString());
+            clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
+            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), session.getSessionID() + "-" + imapStore.hashCode());
+            clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
+            clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
             imapStore.setClientParameters(clientParams);
         }
         /*
