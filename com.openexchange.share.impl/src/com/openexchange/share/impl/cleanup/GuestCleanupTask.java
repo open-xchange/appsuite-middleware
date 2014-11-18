@@ -49,9 +49,15 @@
 
 package com.openexchange.share.impl.cleanup;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
@@ -63,8 +69,11 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.impl.ConnectionHelper;
+import com.openexchange.share.impl.DefaultGuestInfo;
 import com.openexchange.share.impl.ShareTool;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -74,23 +83,33 @@ import com.openexchange.userconf.UserPermissionService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class GuestCleanupTask extends AbstractCleanupTask<Void> {
+public class GuestCleanupTask extends AbstractTask<Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuestCleanupTask.class);
 
+    protected final ServiceLookup services;
+    protected final int contextID;
+    protected final long guestExpiry;
     private final int guestID;
 
     /**
-     * Initializes a new {@link GuestCleanupTask}.
+     * Creates guest cleanup tasks for multiple guest users of a context.
      *
      * @param services A service lookup reference
-     * @param connectionHelper A (started) connection helper
      * @param contextID The context ID
-     * @param guestID The identifier of the guest to cleanup
+     * @param guestIDs The identifiers of the guests to cleanup
+     * @param guestExpiry the timespan (in milliseconds) after which an unused guest user can be deleted permanently
+     * @return
      */
-    public GuestCleanupTask(ServiceLookup services, ConnectionHelper connectionHelper, int contextID, int guestID) {
-        super(services, connectionHelper, contextID);
-        this.guestID = guestID;
+    public static List<GuestCleanupTask> create(ServiceLookup services, int contextID, int[] guestIDs, long guestExpiry) {
+        if (null == guestIDs || 0 == guestIDs.length) {
+            return Collections.emptyList();
+        }
+        List<GuestCleanupTask> tasks = new ArrayList<GuestCleanupTask>(guestIDs.length);
+        for (int guestID : guestIDs) {
+            tasks.add(new GuestCleanupTask(services, contextID, guestID, guestExpiry));
+        }
+        return tasks;
     }
 
     /**
@@ -99,31 +118,40 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
      * @param services A service lookup reference
      * @param contextID The context ID
      * @param guestID The identifier of the guest to cleanup
+     * @param guestExpiry the timespan (in milliseconds) after which an unused guest user can be deleted permanently
      */
-    public GuestCleanupTask(ServiceLookup services, int contextID, int guestID) {
-        this(services, null, contextID, guestID);
+    public GuestCleanupTask(ServiceLookup services, int contextID, int guestID, long guestExpiry) {
+        super();
+        this.services = services;
+        this.contextID = contextID;
+        this.guestExpiry = guestExpiry;
+        this.guestID = guestID;
     }
 
     @Override
     public Void call() throws Exception {
-        Context context = services.getService(ContextService.class).getContext(contextID);
-        User guestUser = services.getService(UserService.class).getUser(guestID, context);
-        if (false == guestUser.isGuest()) {
-            LOG.warn("Cancelling cleanup task for non-guest user {}.", guestUser);
+        try {
+            cleanGuest(contextID, guestID);
             return null;
+        } catch (OXException e) {
+            if ("USR-0010".equals(e.getErrorCode())) {
+                LOG.debug("Guest user {} in context {} already deleted.", I(guestID), I (contextID));
+                return null;
+            }
+            throw e;
         }
-        if (null != connectionHelper) {
-            cleanGuest(connectionHelper, context, guestUser);
-        } else {
-            cleanGuest(context, guestUser);
-        }
-        return null;
     }
 
-    private void cleanGuest(Context context, User guestUser) throws OXException {
+    private void cleanGuest(int contextID, int guestID) throws OXException {
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
+            Context context = services.getService(ContextService.class).getContext(contextID);
+            User guestUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), guestID, context);
+            if (false == guestUser.isGuest()) {
+                LOG.warn("Cancelling cleanup task for non-guest user {}.", guestUser);
+                return;
+            }
             cleanGuest(connectionHelper, context, guestUser);
             connectionHelper.commit();
         } finally {
@@ -132,32 +160,65 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
     }
 
     private void cleanGuest(ConnectionHelper connectionHelper, Context context, User guestUser) throws OXException {
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
         /*
          * check to which modules the user has access to (if any)
          */
-        Set<Integer> modules = shareStorage.getSharedModules(context.getContextId(), guestUser.getId(), connectionHelper.getParameters());
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, contextID, guestUser);
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        Set<Integer> modules = shareStorage.getSharedModules(contextID, guestID, connectionHelper.getParameters());
         if (0 == modules.size()) {
             /*
-             * no shares remaining, delete guest user
+             * no shares remaining
              */
-            LOG.debug("No shares for guest user {} in context {} remaining, deleting guest user.", guestUser.getId(), context.getContextId());
-            //TODO: delayed deletion if user is not anonymous
-            deleteGuest(connectionHelper.getConnection(), context, guestUser.getId());
+            if (RecipientType.ANONYMOUS == guestInfo.getRecipientType() || 0 >= guestExpiry) {
+                /*
+                 * delete guest user immediately if anonymous or immediate expiry configured
+                 */
+                LOG.debug("No shares for {} remaining, deleting guest user.", guestInfo);
+                deleteGuest(connectionHelper.getConnection(), context, guestID);
+            } else if (RecipientType.GUEST == guestInfo.getRecipientType()) {
+                /*
+                 * delete named guest user if not used for defined expiry time
+                 */
+                Date now = new Date();
+                Date lastModified = GuestLastModifiedMarker.getLastModified(guestUser);
+                if (null == lastModified) {
+                    /*
+                     * set initial last modified value
+                     */
+                    LOG.debug("No shares for {} remaining, remembering current timestamp {} for delayed cleanup.",
+                        guestInfo, L(now.getTime()));
+                    GuestLastModifiedMarker.updateLastModified(services, context, guestUser, now);
+                } else if (now.getTime() - guestExpiry > lastModified.getTime()) {
+                    /*
+                     * guest user not touched for configured interval, proceed with deletion
+                     */
+                    LOG.debug("No shares for {} remaining and not touched for {} days, deleting guest user.",
+                        guestInfo, TimeUnit.DAYS.toDays(guestExpiry));
+                    deleteGuest(connectionHelper.getConnection(), context, guestUser.getId());
+                }
+            } else {
+                LOG.warn("Unexpected recipient type \"{}\" for {}, skipping cleanup", guestInfo.getRecipientType(), guestInfo);
+                return;
+            }
         } else {
             /*
              * guest user still has shares, adjust permissions as needed
              */
             int requiredPermissionBits = ShareTool.getRequiredPermissionBits(guestUser, modules);
             UserPermissionBits updatedPermissionBits = ShareTool.setPermissionBits(
-                services, connectionHelper.getConnection(), context, guestUser.getId(), requiredPermissionBits, false);
+                services, connectionHelper.getConnection(), context, guestID, requiredPermissionBits, false);
             if (updatedPermissionBits.getPermissionBits() != requiredPermissionBits) {
-                LOG.debug("Shares in modules {} still available for for guest user {} in context {}, permission bits adjusted to {}.",
-                    modules, guestUser.getId(), context.getContextId(), updatedPermissionBits);
+                LOG.debug("Shares in modules {} still available for {}, permission bits adjusted to {}.",
+                    modules, guestInfo, updatedPermissionBits);
             } else {
-                LOG.debug("Shares in modules {} still available for for guest user {} in context {}, left permission bits unchanged at {}.",
-                    modules, guestUser.getId(), context.getContextId(), requiredPermissionBits);
+                LOG.debug("Shares in modules {} still available for {}, left permission bits unchanged at {}.",
+                    modules, guestID, requiredPermissionBits);
             }
+            /*
+             * remove last-modified marker if set to reset counter
+             */
+            GuestLastModifiedMarker.clearLastModified(services, context, guestUser);
         }
     }
 
@@ -229,4 +290,3 @@ public class GuestCleanupTask extends AbstractCleanupTask<Void> {
     }
 
 }
-

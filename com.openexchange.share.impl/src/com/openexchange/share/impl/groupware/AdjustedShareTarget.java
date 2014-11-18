@@ -59,8 +59,6 @@ import com.openexchange.share.ShareTarget;
  */
 public class AdjustedShareTarget extends ShareTarget {
 
-    private static final long serialVersionUID = -5651534596560678911L;
-
     private String adjustedFolder;
     private String adjustedItem;
 

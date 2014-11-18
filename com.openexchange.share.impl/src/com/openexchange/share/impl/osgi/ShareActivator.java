@@ -80,6 +80,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
+import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
@@ -102,6 +103,8 @@ import com.openexchange.userconf.UserPermissionService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ShareActivator extends HousekeepingActivator {
+
+    private volatile GuestCleaner guestCleaner;
 
     /**
      * Initializes a new {@link ShareActivator}.
@@ -126,7 +129,9 @@ public class ShareActivator extends HousekeepingActivator {
         /*
          * register share crypto service based on underyling crypto service
          */
-        final DefaultShareService shareService = new DefaultShareService(this);
+        GuestCleaner guestCleaner = new GuestCleaner(this);
+        this.guestCleaner = guestCleaner;
+        final DefaultShareService shareService = new DefaultShareService(this, guestCleaner);
         final BundleContext context = this.context;
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
@@ -234,6 +239,14 @@ public class ShareActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
         logger.info("stopping bundle: \"com.openexchange.share.impl\"");
+        /*
+         * stop any running guest cleanup activities
+         */
+        GuestCleaner guestCleaner = this.guestCleaner;
+        if (null != guestCleaner) {
+            guestCleaner.stop();
+            this.guestCleaner = null;
+        }
         super.stopBundle();
     }
 

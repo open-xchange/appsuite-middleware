@@ -360,6 +360,11 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
+    public int[] listAllUser(Connection con, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return delegate.listAllUser(con, contextID, includeGuests, excludeUsers);
+    }
+
+    @Override
     public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {

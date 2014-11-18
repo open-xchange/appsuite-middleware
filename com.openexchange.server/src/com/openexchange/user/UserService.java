@@ -423,6 +423,17 @@ public interface UserService {
     int[] listAllUser(Context context, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
+     * Returns an array with all user identifiers of a context.
+     *
+     * @param contextID The identifier of the context to get the users for
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return An array with all user identifier of the context
+     * @throws OXException If generating this list fails.
+     */
+    int[] listAllUser(int contextID, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
      * Searches for users whose IMAP login name matches the given login name.
      *
      * @param imapLogin the IMAP login name to search for

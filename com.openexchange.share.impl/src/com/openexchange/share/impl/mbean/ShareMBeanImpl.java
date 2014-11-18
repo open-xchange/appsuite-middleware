@@ -50,11 +50,14 @@
 package com.openexchange.share.impl.mbean;
 
 import java.util.Collections;
+import java.util.List;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.impl.DefaultShareService;
-import com.openexchange.share.impl.ShareTool;
 
 /**
  * {@link ShareMBeanImpl}
@@ -73,12 +76,12 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 
     @Override
     public String listShares(int contextId) throws OXException {
-        return ShareTool.formatForCLT(shareService.getAllShares(contextId));
+        return formatForCLT(shareService.getAllShares(contextId));
     }
 
     @Override
     public String listShares(int contextId, int userId) throws OXException {
-        return ShareTool.formatForCLT(shareService.getAllShares(contextId, userId));
+        return formatForCLT(shareService.getAllShares(contextId, userId));
     }
 
     @Override
@@ -105,6 +108,20 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     @Override
     public int removeShares(int contextId, int userId) throws OXException {
         return shareService.removeShares(contextId, userId);
+    }
+
+    private static String formatForCLT(List<ShareInfo> shareInfo) throws OXException {
+        StringBuilder sb = new StringBuilder();
+        for (ShareInfo info : shareInfo) {
+            sb.append("Token: ").append(info.getToken()).append(" (");
+            Share share = info.getShare();
+            ShareTarget target = share.getTarget();
+            sb.append("Share [created by ").append(share.getCreatedBy()).append(", guest=").append(share.getGuest())
+              .append(", target=").append("ShareTarget [module=").append(target.getModule()).append(", folder=").append(target.getFolder())
+              .append((null != target.getItem() ? (", item=" + target.getItem()) : "") + "]").append("]").append(")");
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
 }

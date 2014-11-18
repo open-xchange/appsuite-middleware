@@ -103,8 +103,13 @@ public class ShareTool {
 
     public static final String SHARE_SERVLET = "share";
 
-    private static final String GUEST_LAST_MODIFIED_ATTRIBUTE = "com.openexchange.guestLastModified";
-
+    /**
+     * Extracts the first value of a specific attribute from a user.
+     *
+     * @param user The user to get the attribute value for
+     * @param name The name of the attribute to get
+     * @return The first found attribute value, or <code>null</code> if not found
+     */
     public static String getUserAttribute(User user, String name) {
         Map<String, Set<String>> attributes = user.getAttributes();
         if (attributes == null) {
@@ -145,7 +150,6 @@ public class ShareTool {
      * @return The authentication mode, or <code>null</code> if the recipient does not denote guest authentication
      */
     public static AuthenticationMode getAuthenticationMode(ShareRecipient recipient) {
-
         switch (recipient.getType()) {
         case ANONYMOUS:
             return Strings.isEmpty(((AnonymousRecipient)recipient).getPassword()) ?
@@ -173,26 +177,6 @@ public class ShareTool {
             modules.add(target.getModule());
         }
         return getRequiredPermissionBits(getAuthenticationMode(recipient), modules);
-    }
-
-    /**
-     * Gets permission bits suitable for a guest user being allowed to access all supplied share. Besides the concrete module
-     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
-     * access.
-     *
-     * @param guest The guest user
-     * @param shares The shares
-     * @return The permission bits
-     * @throws OXException
-     */
-    public static int getRequiredPermissionBits(User guest, List<Share> shares) throws OXException {
-        Set<Integer> modules = new HashSet<Integer>(shares.size());
-        for (Share share : shares) {
-            if (null != share.getTarget()) {
-                modules.add(share.getTarget().getModule());
-            }
-        }
-        return getRequiredPermissionBits(guest, modules);
     }
 
     /**
@@ -260,7 +244,6 @@ public class ShareTool {
      * @param sharingUser The sharing user
      * @param guestUserID The guest user ID
      * @param target The share target
-     * @param recipient The recipient
      * @return The share
      */
     public static Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target) {
@@ -399,6 +382,12 @@ public class ShareTool {
         return expiredShares;
     }
 
+    /**
+     * Gets all identifiers specified in the supplied shares.
+     *
+     * @param shares The shares to get the guest users for
+     * @return The guest user identifiers in a set
+     */
     public static Set<Integer> getGuestIDs(List<Share> shares) {
         if (null == shares || 0 == shares.size()) {
             return Collections.emptySet();
@@ -408,66 +397,6 @@ public class ShareTool {
             guestIDs.add(Integer.valueOf(share.getGuest()));
         }
         return guestIDs;
-    }
-
-    /**
-     * Finds a share by its token in the supplied list of shares.
-     *
-     * @param shares The shares to search
-     * @param token The token
-     * @return The share, or <code>null</code> if not found
-     */
-//    public static Share findShare(List<Share> shares, String token) {
-//        if (null != shares && 0 < shares.size()) {
-//            for (ShareList share : shares) {
-//                if (token.equals(share.getToken())) {
-//                    return share;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-
-    /**
-     * Finds a share by its guest ID in the supplied list of shares.
-     *
-     * @param shares The shares to search
-     * @param guestID The guest ID
-     * @return The share, or <code>null</code> if not found
-     */
-    public static Share findShareByGuest(List<Share> shares, int guestID) {
-        if (null != shares && 0 < shares.size()) {
-            for (Share share : shares) {
-                if (guestID == share.getGuest()) {
-                    return share;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds a share by its guest ID in the supplied list of shares.
-     *
-     * @param shares The shares to search
-     * @param guestID The guest ID
-     * @return The share, or <code>null</code> if not found
-     */
-    public static Map<Integer, List<Share>> mapSharesByGuest(List<Share> shares, int[] guests) {
-        if (null == shares || 0 == shares.size() || null == guests || 0 == guests.length) {
-            return Collections.emptyMap();
-        }
-        Map<Integer, List<Share>> sharesByGuest = new HashMap<Integer, List<Share>>(guests.length);
-        for (Share share : shares) {
-            Integer guest = I(share.getGuest());
-            List<Share> guestShares = sharesByGuest.get(guest);
-            if (null == guestShares) {
-                guestShares = new ArrayList<Share>();
-                sharesByGuest.put(guest, guestShares);
-            }
-            guestShares.add(share);
-        }
-        return sharesByGuest;
     }
 
     /**
@@ -493,25 +422,6 @@ public class ShareTool {
     }
 
     /**
-     * Extracts all tokens from the supplied shares.
-     *
-     * @param shares The shares to get the tokens for
-     * @return The tokens
-     */
-//    public static List<String> extractTokens(List<ShareList> shares) {
-//        if (null == shares) {
-//            return null;
-//        }
-//        List<String> tokens = new ArrayList<String>(shares.size());
-//        for (ShareList share : shares) {
-//            tokens.add(share.getToken());
-//
-//        }
-//        return tokens;
-//    }
-
-
-    /**
      * Checks a share target for validity before saving or updating it, throwing an exception if validation fails.
      *
      * @param target The target to validate
@@ -535,26 +445,6 @@ public class ShareTool {
     public static void validateTargets(Collection<ShareTarget> targets) throws OXException {
         for (ShareTarget target : targets) {
             validateTarget(target);
-        }
-    }
-
-    /**
-     * Gets whether this guest user was not modified since a given
-     * date. The detection is based on the user attribute <code>com.openexchange.guestLastModified</code>.
-     *
-     * @param minLastModified The minimum date to check against.
-     * @return <code>true</code> if this user has not been modified since the given date.
-     */
-    public static boolean userNotModifiedSince(User guest, Date minLastModified) {
-        String attribute = getUserAttribute(guest, GUEST_LAST_MODIFIED_ATTRIBUTE);
-        if (attribute == null) {
-            return true;
-        }
-        try {
-            Date lastModified = new Date(Long.parseLong(attribute));
-            return lastModified.before(minLastModified);
-        } catch (NumberFormatException e) {
-            return true;
         }
     }
 
@@ -634,20 +524,6 @@ public class ShareTool {
             shareInfos.add(new DefaultShareInfo(services, contextID, guestUsers.get(I(share.getGuest())), share));
         }
         return shareInfos;
-    }
-
-    public static String formatForCLT(List<ShareInfo> shareInfo) throws OXException {
-        StringBuilder sb = new StringBuilder();
-        for (ShareInfo info : shareInfo) {
-            sb.append("Token: ").append(info.getToken()).append(" (");
-            Share share = info.getShare();
-            ShareTarget target = share.getTarget();
-            sb.append("Share [created by ").append(share.getCreatedBy()).append(", guest=").append(share.getGuest())
-              .append(", target=").append("ShareTarget [module=").append(target.getModule()).append(", folder=").append(target.getFolder())
-              .append((null != target.getItem() ? (", item=" + target.getItem()) : "") + "]").append("]").append(")");
-            sb.append("\n");
-        }
-        return sb.toString();
     }
 
 }

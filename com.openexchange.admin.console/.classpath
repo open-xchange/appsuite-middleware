@@ -6,7 +6,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
-	<classpathentry kind="src" path="/com.openexchange.global"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

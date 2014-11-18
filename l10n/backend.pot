@@ -6422,6 +6422,13 @@ msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr ""
 
+#. Denied concurrent update of user attributes likely caused by contemporary login operations performed by your client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:179
+msgid ""
+"Denied concurrent update of user attributes likely caused by contemporary "
+"login operations performed by your client."
+msgstr ""
+
 #. *
 #. * User is missing for the reminder.
 #.
