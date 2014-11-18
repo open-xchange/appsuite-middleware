@@ -353,9 +353,9 @@ public class GuestClient extends AJAXClient {
     }
 
     /**
-     * Checks that a folder is accessible for the guest according to the granted permissions.
+     * Checks that a file is accessible for the guest according to the granted permissions.
      *
-     * @param folderID The identifier of the file to check
+     * @param fileID The identifier of the file to check
      * @param permissions The guest permissions for that file
      * @throws Exception
      */
@@ -387,6 +387,21 @@ public class GuestClient extends AJAXClient {
 //            DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
 //            checkResponse(deleteInfostoreResponse, false == permissions.canDelete());
         }
+    }
+
+    /**
+     * Checks that a file is not accessible for the guest.
+     *
+     * @param fileID The identifier of the file to check
+     */
+    public void checkFileNotAccessible(String fileID) throws Exception {
+        /*
+         * check item retrieval
+         */
+        GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(fileID);
+        getInfostoreRequest.setFailOnError(false);
+        GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
+        checkResponse(getInfostoreResponse, true);
     }
 
     /**
