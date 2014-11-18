@@ -61,9 +61,8 @@ import org.glassfish.grizzly.http.util.MimeHeaders;
 import org.glassfish.grizzly.servlet.ServletUtils;
 
 /**
- * {@link HttpServletResponseWrapper} - Wraps an HttpServletResponse and delegates all calls that we don't need to
- * modify to the response object. Other methods are modified to keep compatibility to the old
- * {@link com.openexchange.http.grizzly.wrapper.ajp13.servlet.http.HttpServletResponseWrapper} as good as we can using Grizzly.
+ * {@link HttpServletResponseWrapper} - Wraps an HttpServletResponse and delegates all calls that we don't need to modify to the response
+ * object.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */

@@ -77,7 +77,7 @@ import com.openexchange.log.LogProperties;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
- * and creates a new HttpSession and do various tasks to achieve feature parity with the ajp based implementation.
+ * and creates a new HttpSession.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -158,7 +158,7 @@ public class WrappingFilter implements Filter {
 
             if (!isValidProtocol(protocol)) {
                 LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
-                 protocol = httpRequest.getScheme();
+                protocol = httpRequest.getScheme();
             }
 
             if (remoteIP.isEmpty()) {

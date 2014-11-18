@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly.osgi;
 import java.util.concurrent.ExecutorService;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
-import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
@@ -144,11 +143,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
             int maxBodySize = grizzlyConfig.getMaxBodySize();
             networkListener.setMaxFormPostSize(maxBodySize);
             networkListener.setMaxBufferedPostSize(maxBodySize);
-
-            if (grizzlyConfig.isAJPEnabled()) {
-                networkListener.registerAddOn(new AjpAddOn());
-                log.info("Enabled AJP for Grizzly server.");
-            }
 
             // Set the transport
             {

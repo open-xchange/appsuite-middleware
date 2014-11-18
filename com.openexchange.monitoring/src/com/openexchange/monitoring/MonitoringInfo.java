@@ -52,7 +52,6 @@ package com.openexchange.monitoring;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.counter.Counter;
 
 /**
@@ -65,11 +64,6 @@ public class MonitoringInfo {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringInfo.class);
 
     // Constants for connection types
-
-    /**
-     * The connection type constant for open AJP socket connections.
-     */
-    public static final int AJP_SOCKET = 0;
 
     /**
      * The connection type constant for open connections/requests to AJAX interface.
@@ -108,8 +102,6 @@ public class MonitoringInfo {
     public static final int UNKNOWN = -1;
 
     // Static fields
-    private static final AtomicInteger numberOfOpenAJPSockets = new AtomicInteger();
-
     private static final AtomicInteger numberOfAJAXConnections = new AtomicInteger();
 
     private static final AtomicInteger numberOfWebDAVUserConnections = new AtomicInteger();
@@ -121,8 +113,6 @@ public class MonitoringInfo {
     private static final AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
     private static int[] numberOfSessionsInContainer;
-
-    private static final AtomicLong numberOfRunningAJPListeners = new AtomicLong();
 
     private static final ConcurrentMap<Integer, Counter> COUNTER_MAP = new ConcurrentHashMap<Integer, Counter>(8);
 
@@ -169,18 +159,6 @@ public class MonitoringInfo {
         return getNumberOfConnections(AJAX);
     }
 
-    public static long getNumberOfRunningAJPListeners() {
-        return numberOfRunningAJPListeners.get();
-    }
-
-    public static void addNumberOfRunningAJPListeners(final int num) {
-        numberOfRunningAJPListeners.addAndGet(num);
-    }
-
-    public static int getNumberOfOpenSockets() {
-        return numberOfOpenAJPSockets.get();
-    }
-
     /**
      * Omit call to this method if <code>connectionType</code> is {@link #IMAP}.
      */
@@ -204,9 +182,6 @@ public class MonitoringInfo {
     public static int getNumberOfConnections(final int connectionType) {
         int retval = -1;
         switch (connectionType) {
-        case AJP_SOCKET:
-            retval = numberOfOpenAJPSockets.get();
-            break;
         case AJAX:
             retval = numberOfAJAXConnections.get();
             break;
@@ -236,13 +211,6 @@ public class MonitoringInfo {
 
     private static void changeNumberOfConnections(final int connectionType, final boolean increment) {
         switch (connectionType) {
-        case AJP_SOCKET:
-            if (increment) {
-                numberOfOpenAJPSockets.incrementAndGet();
-            } else {
-                numberOfOpenAJPSockets.decrementAndGet();
-            }
-            break;
         case AJAX:
             if (increment) {
                 numberOfAJAXConnections.incrementAndGet();

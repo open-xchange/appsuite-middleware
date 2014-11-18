@@ -112,9 +112,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Do we want to send absolute or relative redirects */
     private boolean isAbsoluteRedirect = false;
 
-    /** Do we want to enable the AJP Filter for incoming requests */
-    private boolean isAJPEnabled = false;
-
     // server properties
 
     /** Maximal age of a cookie in seconds. A negative value destroys the cookie when the browser exits. A value of 0 deletes the cookie. */
@@ -200,7 +197,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         this.isWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
         this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
-        this.isAJPEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasAJPEnabled", false);
 
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
@@ -455,14 +451,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      */
     public boolean isAbsoluteRedirect() {
         return isAbsoluteRedirect;
-    }
-
-    /**
-     * Gets the isAJPEnabled property.
-     * @return the isAJPEnabled property.
-     */
-    public boolean isAJPEnabled() {
-        return isAJPEnabled;
     }
 
     /**

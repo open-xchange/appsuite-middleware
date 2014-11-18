@@ -56,8 +56,6 @@ public interface GeneralMonitorMBean {
 
     public int getNumberOfAJAXConnections();
 
-    public int getNumberOfOpenAJPSockets();
-
     public int getNumberOfWebDAVUserConnections();
 
     public int getNumberOfOutlookConnections();
@@ -69,8 +67,6 @@ public interface GeneralMonitorMBean {
     public int getNumberOfIdleMailConnections();
 
     public int getNumberOfActiveSessions();
-
-    public int getNumberOfRunningAJPListeners();
 
     public Integer getNbObjects();
 }

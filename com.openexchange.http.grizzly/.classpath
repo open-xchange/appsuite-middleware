@@ -3,7 +3,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-comet-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-framework-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-http-2.2.22-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-ajp-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-http-ajp-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-http-server-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-servlet-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-http-servlet-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-portunif-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-portunif-2.2.22-SNAPSHOT-sources.jar"/>

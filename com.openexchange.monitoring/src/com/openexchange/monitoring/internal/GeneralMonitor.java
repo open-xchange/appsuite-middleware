@@ -75,11 +75,6 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
     }
 
     @Override
-    public int getNumberOfOpenAJPSockets() {
-        return MonitoringInfo.getNumberOfOpenSockets();
-    }
-
-    @Override
     public int getNumberOfWebDAVUserConnections() {
         return MonitoringInfo.getNumberOfConnections(MonitoringInfo.WEBDAV_USER);
     }
@@ -114,11 +109,6 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
          * No session can be active if service is missing
          */
         return 0;
-    }
-
-    @Override
-    public int getNumberOfRunningAJPListeners() {
-        return (int) MonitoringInfo.getNumberOfRunningAJPListeners();
     }
 
     @Override
