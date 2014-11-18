@@ -50,6 +50,9 @@
 package com.openexchange.http.grizzly.servletfilter;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -58,7 +61,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.codec.binary.Base64;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
@@ -66,8 +68,6 @@ import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.RequestTools;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -82,6 +82,10 @@ public class RequestReportingFilter implements Filter {
 
     private final boolean isFilterEnabled;
 
+    private final Set<String> ignoredEasCommands;
+
+    private final Set<String> ignoredUsmCommands;
+
     /**
      * Initializes a new {@link RequestReportingFilter}.
      *
@@ -93,6 +97,12 @@ public class RequestReportingFilter implements Filter {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
         this.isFilterEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
+
+        List<String> ignoreEas = configService.getProperty("com.openexchange.requestwatcher.eas.ignore.cmd", "ping,sync", ",");
+        this.ignoredEasCommands = new HashSet<String>(ignoreEas);
+
+        List<String> ignoreUsm = configService.getProperty("com.openexchange.requestwatcher.usm.ignore.path", "/syncupdate", ",");
+        this.ignoredUsmCommands = new HashSet<String>(ignoreUsm);
     }
 
     @Override
@@ -101,36 +111,40 @@ public class RequestReportingFilter implements Filter {
     }
 
     @Override
-    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (isFilterEnabled) {
-            final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
-            // Request watcher is enabled but service is missing, bundle not started etc ..
+            RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
             if (requestWatcher == null) {
-                LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
+                // Request watcher is enabled but service is missing, bundle not started etc ..
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
+                logger.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
                 chain.doFilter(request, response);
             } else {
-                final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-                final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-                if (isLongRunning(httpServletRequest)) {
+                HttpServletRequest httpRequest = (HttpServletRequest) request;
+                if (isLongRunning(httpRequest) || isIgnored(httpRequest)) {
                     // Do not track long running requests
                     chain.doFilter(request, response);
                 } else {
-                    final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread(), LogProperties.getPropertyMap());
+                    HttpServletResponse httpResponse = (HttpServletResponse) response;
+                    RequestRegistryEntry entry = requestWatcher.registerRequest(httpRequest, httpResponse, Thread.currentThread(), LogProperties.getPropertyMap());
                     try {
                         // Proceed processing
                         chain.doFilter(request, response);
-
-                        // Debug duration
-                        LOG.debug("Request took {}ms  for URL: {}", requestRegistryEntry.getAge(), httpServletRequest.getRequestURL());
                     } finally {
                         // Remove request from watcher after processing finished
-                        requestWatcher.unregisterRequest(requestRegistryEntry);
+                        requestWatcher.unregisterRequest(entry);
                     }
                 }
             }
-        } else { // Filter is not enabled
+        } else {
+            // Filter is not enabled
             chain.doFilter(request, response);
         }
+    }
+
+
+    private boolean isIgnored(HttpServletRequest httpRequest) {
+        return RequestTools.isIgnoredEasRequest(httpRequest, ignoredEasCommands) || RequestTools.isIgnoredUsmRequest(httpRequest, ignoredUsmCommands);
     }
 
     @Override
@@ -138,8 +152,8 @@ public class RequestReportingFilter implements Filter {
         // nothing to do here
     }
 
-    private boolean isLongRunning(final HttpServletRequest request) {
-        return RequestTools.isDriveRequest(request) || RequestTools.isEasPingRequest(request);
+    private boolean isLongRunning(HttpServletRequest request) {
+        return RequestTools.isDriveRequest(request);
     }
 
 }
