@@ -50,9 +50,11 @@
 package com.openexchange.java;
 
 import java.util.AbstractQueue;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.concurrent.BlockingQueue;
@@ -334,6 +336,74 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
             }
             q.offer(delayedE);
             if (q.peek() == delayedE) {
+                leader = null;
+                available.signal();
+            }
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Inserts multiple elements into this queue if not already contained. Otherwise (meaning already contained), the
+     * contained elements delay is reseted (up to contained element's defined maxDelayDuration).
+     *
+     * @param c The elements to add
+     * @return <tt>true</tt> if at least one element was added; otherwise <code>false</code> if all elements were already contained
+     * @throws NullPointerException if the specified element is <code>null</code>
+     */
+    public boolean offerIfAbsentElseReset(Collection<? extends E> c) {
+        return offerIfAbsentElseReset(c, defaultDelayDuration, defaultMaxDelayDuration);
+    }
+
+    /**
+     * Inserts multiple elements into this queue if not already contained. Otherwise (meaning already contained), the
+     * contained elements delay is reseted (up to contained element's defined maxDelayDuration).
+     *
+     * @param c The elements to add
+     * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param maxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
+     * @return <tt>true</tt> if at least one element was added; otherwise <code>false</code> if all elements were already contained
+     * @throws NullPointerException if the specified element is <code>null</code>
+     */
+    public boolean offerIfAbsentElseReset(Collection<? extends E> c, long delayDuration, long maxDelayDuration) {
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            /*
+             * reset already contained elements, remember elements to add
+             */
+            List<E> elementsToAdd = new ArrayList<E>(c);
+            Iterator<BufferedElement<E>> iterator = q.iterator();
+            while (iterator.hasNext()) {
+                BufferedElement<E> bufferedElement = iterator.next();
+                Iterator<E> elementsIterator = elementsToAdd.iterator();
+                while (elementsIterator.hasNext()) {
+                    E element = elementsIterator.next();
+                    if (bufferedElement.equals(element)) {
+                        bufferedElement.reset();
+                        elementsIterator.remove();
+                        break;
+                    }
+                }
+            }
+            if (elementsToAdd.isEmpty()) {
+                /*
+                 * all already contained
+                 */
+                return false;
+            }
+            /*
+             * add not contained elements, signal as needed
+             */
+            boolean signal = false;
+            for (E e : elementsToAdd) {
+                BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+                q.offer(delayedE);
+                signal |= q.peek() == delayedE;
+            }
+            if (signal) {
                 leader = null;
                 available.signal();
             }

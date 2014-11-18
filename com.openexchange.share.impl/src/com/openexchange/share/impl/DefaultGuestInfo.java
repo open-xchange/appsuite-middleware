@@ -68,11 +68,8 @@ import com.openexchange.share.recipient.RecipientType;
 public class DefaultGuestInfo implements GuestInfo {
 
     private final ServiceLookup services;
-
     private final User guestUser;
-
     private final int contextID;
-
     private final String token;
 
     /**
@@ -101,25 +98,16 @@ public class DefaultGuestInfo implements GuestInfo {
         this.token = shareToken.getToken();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public AuthenticationMode getAuthentication() {
         return ShareTool.getAuthenticationMode(guestUser);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getBaseToken() {
         return token;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getEmailAddress() {
         if (RecipientType.GUEST == getRecipientType()) {
@@ -128,9 +116,6 @@ public class DefaultGuestInfo implements GuestInfo {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getPassword() throws OXException {
         if (AuthenticationMode.ANONYMOUS_PASSWORD == getAuthentication()) {
@@ -142,9 +127,6 @@ public class DefaultGuestInfo implements GuestInfo {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public RecipientType getRecipientType() {
         switch (getAuthentication()) {
@@ -158,17 +140,11 @@ public class DefaultGuestInfo implements GuestInfo {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getGuestID() {
         return guestUser.getId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getContextID() {
         return contextID;
@@ -183,4 +159,41 @@ public class DefaultGuestInfo implements GuestInfo {
     public Locale getLocale() {
         return guestUser.getLocale();
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((token == null) ? 0 : token.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof DefaultGuestInfo)) {
+            return false;
+        }
+        DefaultGuestInfo other = (DefaultGuestInfo) obj;
+        if (token == null) {
+            if (other.token != null) {
+                return false;
+            }
+        } else if (!token.equals(other.token)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultGuestInfo [guestID=" + getGuestID() + ", baseToken=" + getBaseToken() + ", eMailAddress=" + getEmailAddress()
+            + ", contextID=" + contextID + "]";
+    }
+
 }

@@ -88,6 +88,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
+import com.openexchange.share.impl.cleanup.GuestLastModifiedMarker;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -114,11 +115,12 @@ public class DefaultShareService implements ShareService {
      * Initializes a new {@link DefaultShareService}.
      *
      * @param services The service lookup reference
+     * @param guestCleaner An initialized guest cleaner to work with
      */
-    public DefaultShareService(ServiceLookup services) {
+    public DefaultShareService(ServiceLookup services, GuestCleaner guestCleaner) {
         super();
         this.services = services;
-        this.guestCleaner = new GuestCleaner(services);
+        this.guestCleaner = guestCleaner;
     }
 
     @Override
@@ -691,10 +693,11 @@ public class DefaultShareService implements ShareService {
             }
             if (null != existingGuestUser) {
                 /*
-                 * combine permission bits with existing ones
+                 * combine permission bits with existing ones, reset any last modified marker if present
                  */
                 UserPermissionBits userPermissionBits = ShareTool.setPermissionBits(
                     services, connection, context, existingGuestUser.getId(), permissionBits, true);
+                GuestLastModifiedMarker.clearLastModified(services, context, existingGuestUser);
                 LOG.debug("Using existing guest user {} with permissions {} in context {}: {}",
                     existingGuestUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
                 /*

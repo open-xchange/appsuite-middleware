@@ -225,6 +225,11 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public int[] listAllUser(int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().listAllUser(null, contextID, includeGuests, excludeUsers);
+    }
+
+    @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
         return UserStorage.getInstance().listModifiedUser(modifiedSince, context);
     }

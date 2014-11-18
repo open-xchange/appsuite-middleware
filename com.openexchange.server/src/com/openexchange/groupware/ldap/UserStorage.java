@@ -420,6 +420,18 @@ public abstract class UserStorage {
     public abstract int[] listAllUser(Connection con, Context context, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
+     * Returns an array with all user identifiers of a context.
+     *
+     * @param con The database connection, or <code>null</code> if a one shall be obtained from the pool
+     * @param contextID The identifier of the context to get the users for
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return An array with all user identifiers of the context
+     * @throws OXException if generating this list fails.
+     */
+    public abstract int[] listAllUser(Connection con, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
      * Searches for users whose IMAP login name matches the given login name.
      * @param imapLogin the IMAP login name to search for
      * @param context The context.

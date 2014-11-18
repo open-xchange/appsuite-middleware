@@ -49,16 +49,23 @@
 
 package com.openexchange.share.impl.cleanup;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.HOURS;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.BufferingQueue;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.impl.ConnectionHelper;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link GuestCleaner}
@@ -69,34 +76,66 @@ import com.openexchange.share.impl.ConnectionHelper;
 public class GuestCleaner {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuestCleaner.class);
-    private static final long DELAY_DURATION = 2000;
-//    private static final long MAX_DELAY_DURATION = 20000;
 
     private final ServiceLookup services;
     private final BufferingQueue<GuestCleanupTask> cleanupTasks;
     private final BackgroundGuestCleaner backgroundCleaner;
+    private final long guestExpiry;
+    private final ScheduledTimerTask periodicCleanerTask;
+    private final PeriodicCleaner periodicCleaner;
 
     /**
      * Initializes a new {@link GuestCleaner}.
      *
      * @param services A service lookup reference
      */
-    public GuestCleaner(ServiceLookup services) {
+    public GuestCleaner(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
+        ConfigurationService configService = services.getService(ConfigurationService.class);
+        this.guestExpiry = parseTimespanProperty(
+            configService, "com.openexchange.share.cleanup.guestExpiry", DAYS.toMillis(14), DAYS.toMillis(1), true);
         /*
          * prepare background task queue and worker thread
          */
-        cleanupTasks = new BufferingQueue<GuestCleanupTask>(DELAY_DURATION);
-        backgroundCleaner = new BackgroundGuestCleaner(cleanupTasks);
+        long delayDuration = parseTimespanProperty(
+            configService, "com.openexchange.share.cleanup.delayDuration", 2000, 200, false);
+        long maxDelayDuration = parseTimespanProperty(
+            configService, "com.openexchange.share.cleanup.maxDelayDuration", 0, 0, true);
+        this.cleanupTasks = 0 < maxDelayDuration ? new BufferingQueue<GuestCleanupTask>(delayDuration, maxDelayDuration) :
+            new BufferingQueue<GuestCleanupTask>(delayDuration);
+        this.backgroundCleaner = new BackgroundGuestCleaner(cleanupTasks);
         services.getService(ExecutorService.class).submit(backgroundCleaner);
+        /*
+         * schedule context cleanups regularly
+         */
+        long periodicCleanerInterval = parseTimespanProperty(
+            configService, "com.openexchange.share.cleanup.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true);
+        if (0 < periodicCleanerInterval) {
+            this.periodicCleaner = new PeriodicCleaner(services, guestExpiry);
+            long firstCleanerDelay = periodicCleanerInterval / 4 +
+                new Random().nextInt((int) (periodicCleanerInterval - periodicCleanerInterval / 4));
+            this.periodicCleanerTask = services.getService(TimerService.class).scheduleWithFixedDelay(
+                periodicCleaner, firstCleanerDelay, periodicCleanerInterval);
+        } else {
+            periodicCleaner = null;
+            periodicCleanerTask = null;
+        }
     }
 
     /**
-     * Stops all background processing by signaling termination flag.
+     * Stops all background processing by signaling a termination flag.
      */
     public void stop() {
-        backgroundCleaner.stop();
+        if (null != backgroundCleaner) {
+            backgroundCleaner.stop();
+        }
+        if (null != periodicCleaner) {
+            periodicCleaner.stop();
+        }
+        if (null != periodicCleanerTask) {
+            periodicCleanerTask.cancel();
+        }
     }
 
     /**
@@ -111,11 +150,9 @@ public class GuestCleaner {
             @Override
             public void run() {
                 try {
-                    ContextCleanupTask contextCleanupTask = new ContextCleanupTask(services, contextID);
+                    ContextCleanupTask contextCleanupTask = new ContextCleanupTask(services, contextID, guestExpiry);
                     List<GuestCleanupTask> tasks = contextCleanupTask.call();
-                    for (GuestCleanupTask task : tasks) {
-                        cleanupTasks.offerIfAbsentElseReset(task);
-                    }
+                    cleanupTasks.offerIfAbsentElseReset(tasks);
                 } catch (Exception e) {
                     LOG.warn("error enqueuing cleanup tasks.", e);
                 }
@@ -131,56 +168,28 @@ public class GuestCleaner {
      */
     public void scheduleGuestCleanup(int contextID, int[] guestIDs) throws OXException {
         LOG.debug("Scheduling guest cleanup tasks for guest users {} in context {}.", Arrays.toString(guestIDs), contextID);
-        for (int guestID : guestIDs) {
-            GuestCleanupTask cleanupTask = new GuestCleanupTask(services, contextID, guestID);
-            cleanupTasks.offerIfAbsentElseReset(cleanupTask);
-        }
+        cleanupTasks.offerIfAbsentElseReset(GuestCleanupTask.create(services, contextID, guestIDs, guestExpiry));
     }
 
-    /**
-     * Synchronously cleans obsolete shares and corresponding guest user remnants for a context.
-     *
-     * @param connectionHelper A (started) connection helper
-     * @param contextID The context ID
-     */
-    public void cleanupContext(ConnectionHelper connectionHelper, int contextID) throws OXException {
-        /*
-         * execute context- and resulting guest cleanup tasks in current thread
-         */
-        try {
-            List<GuestCleanupTask> guestCleanupTasks = new ContextCleanupTask(services, connectionHelper, contextID).call();
-            for (GuestCleanupTask guestCleanupTask : guestCleanupTasks) {
-                guestCleanupTask.call();
-            }
-        } catch (Exception e) {
-            if (OXException.class.isInstance(e)) {
-                throw (OXException) e;
-            }
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected error during cleanup");
+    private static long parseTimespanProperty(ConfigurationService configService, String propertyName, long defaultValue, long minimumValue, boolean allowDisabling) throws OXException  {
+        String value = configService.getProperty(propertyName);
+        if (Strings.isEmpty(value)) {
+            return defaultValue;
         }
-    }
-
-    /**
-     * Synchronously cleans obsolete shares and corresponding guest user remnants for specific guest users in a context.
-     *
-     * @param connectionHelper A (started) connection helper
-     * @param contextID The context ID
-     * @param guestIDs The identifiers of the guest users to consider for cleanup
-     */
-    public void cleanupGuests(ConnectionHelper connectionHelper, int contextID, int[] guestIDs) throws OXException {
-        /*
-         * execute guest cleanup tasks in current thread
-         */
+        long timespan;
         try {
-            for (int guestID : guestIDs) {
-                new GuestCleanupTask(services, connectionHelper, contextID, guestID).call();
-            }
-        } catch (Exception e) {
-            if (OXException.class.isInstance(e)) {
-                throw (OXException) e;
-            }
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Unexpected error during cleanup");
+            timespan = TimeSpanParser.parseTimespan(value).longValue();
+        } catch (IllegalArgumentException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, propertyName);
         }
+        if (allowDisabling && 0 >= timespan) {
+            return 0;
+        }
+        if (0 < minimumValue && minimumValue > timespan) {
+            LOG.warn("Ignoring too low value of \"{}\" for \"{}\", falling back to defaults.", value, propertyName);
+            return defaultValue;
+        }
+        return timespan;
     }
 
 }

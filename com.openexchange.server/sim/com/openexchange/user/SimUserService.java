@@ -159,6 +159,12 @@ public class SimUserService implements UserService {
         return null;
     }
 
+    @Override
+    public int[] listAllUser(int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+        // Nothing to do
+        return null;
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#listModifiedUser(java.util.Date, com.openexchange.groupware.contexts.Context)
      */

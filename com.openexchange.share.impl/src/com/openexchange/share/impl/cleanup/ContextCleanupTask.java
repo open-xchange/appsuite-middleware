@@ -49,19 +49,18 @@
 
 package com.openexchange.share.impl.cleanup;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.impl.ConnectionHelper;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.user.UserService;
 
 /**
@@ -70,35 +69,32 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ContextCleanupTask extends AbstractCleanupTask<List<GuestCleanupTask>> {
+public class ContextCleanupTask extends AbstractTask<List<GuestCleanupTask>> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ContextCleanupTask.class);
 
-    /**
-     * Initializes a new {@link ContextCleanupTask}.
-     *
-     * @param services A service lookup reference
-     * @param connectionHelper A (started) connection helper
-     * @param contextID The context ID
-     */
-    public ContextCleanupTask(ServiceLookup services, ConnectionHelper connectionHelper, int contextID) {
-        super(services, connectionHelper, contextID);
-    }
+    protected final ServiceLookup services;
+    protected final int contextID;
+    protected final long guestExpiry;
 
     /**
      * Initializes a new {@link ContextCleanupTask}.
      *
      * @param services A service lookup reference
      * @param contextID The context ID
+     * @param guestExpiry the timespan (in milliseconds) after which an unused guest user can be deleted permanently
      */
-    public ContextCleanupTask(ServiceLookup services, int contextID) {
-        this(services, null, contextID);
+    public ContextCleanupTask(ServiceLookup services, int contextID, long guestExpiry) {
+        super();
+        this.services = services;
+        this.contextID = contextID;
+        this.guestExpiry = guestExpiry;
     }
 
     @Override
     public List<GuestCleanupTask> call() throws Exception {
         try {
-            return cleanContext(connectionHelper, services.getService(ContextService.class).getContext(contextID));
+            return cleanContext();
         } catch (OXException e) {
             if ("CTX-0002".equals(e.getErrorCode())) {
                 LOG.debug("Context {} no longer found, cancelling cleanup.", contextID, e);
@@ -108,39 +104,41 @@ public class ContextCleanupTask extends AbstractCleanupTask<List<GuestCleanupTas
         }
     }
 
-    private List<GuestCleanupTask> cleanContext(ConnectionHelper connectionHelper, Context context) throws OXException {
-        /*
-         * cleanup any expired shares
-         */
-        cleanExpiredShares(connectionHelper, context.getContextId());
+    private List<GuestCleanupTask> cleanContext() throws OXException {
         /*
          * gather guest users in context
          */
-        int[] guestIDs = services.getService(UserService.class).listAllUser(context, true, true);
-        if (null != guestIDs && 0 < guestIDs.length) {
-            List<GuestCleanupTask> cleanupTasks = new ArrayList<GuestCleanupTask>(guestIDs.length);
-            for (int guestID : guestIDs) {
-                cleanupTasks.add(new GuestCleanupTask(services, connectionHelper, contextID, guestID));
-            }
-            return cleanupTasks;
+        int[] guestIDs = services.getService(UserService.class).listAllUser(contextID, true, true);
+        if (null == guestIDs || 0 == guestIDs.length) {
+            LOG.debug("No guest users found in context {}, skipping cleanup task.", I(contextID));
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
+        /*
+         * cleanup any expired shares & prepare guest cleanup tasks for all guest users
+         */
+        cleanExpiredShares();
+        LOG.debug("Found {} guest users in context {}, preparing corresponding cleanup tasks.", I(guestIDs.length), I(contextID));
+        List<GuestCleanupTask> cleanupTasks = new ArrayList<GuestCleanupTask>(guestIDs.length);
+        for (int guestID : guestIDs) {
+            cleanupTasks.add(new GuestCleanupTask(services, contextID, guestID, guestExpiry));
+        }
+        return cleanupTasks;
     }
 
     /**
      * Deletes all shares that are considered "expired" in a context.
      *
-     * @param connectionHelper A (started) connection helper, or <code>null</code> if not used
-     * @param contextID The context ID
      * @return The number of deleted shares
      */
-    private int cleanExpiredShares(ConnectionHelper connectionHelper, int contextID) throws OXException {
-        /*
-         * delete expired shares in storage
-         */
+    private int cleanExpiredShares() throws OXException {
         ShareStorage shareStorage = services.getService(ShareStorage.class);
-        StorageParameters parameters = null != connectionHelper ? connectionHelper.getParameters() : StorageParameters.NO_PARAMETERS;
-        return shareStorage.deleteSharesExpiredAfter(contextID, new Date(), parameters);
+        int expiredShares = shareStorage.deleteSharesExpiredAfter(contextID, new Date(), StorageParameters.NO_PARAMETERS);
+        if (0 < expiredShares) {
+            LOG.debug("Removed {} expired shares in context {}.", I(expiredShares), I(contextID));
+        } else {
+            LOG.debug("No expired shares detected in context {}.", I(contextID));
+        }
+        return expiredShares;
     }
 
     @Override

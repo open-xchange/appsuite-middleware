@@ -82,6 +82,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -97,6 +98,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.arrays.Arrays;
@@ -505,7 +507,7 @@ public class RdbUserStorage extends UserStorage {
     public User[] getUser(final Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
         final Connection con = DBPool.pickup(ctx);
         try {
-            return getUser(ctx, con, listAllUser(ctx, con, includeGuests, excludeUsers));
+            return getUser(ctx, con, listAllUser(ctx.getContextId(), con, includeGuests, excludeUsers));
         } finally {
             DBPool.closeReaderSilent(ctx, con);
         }
@@ -513,7 +515,7 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return getUser(ctx, con, listAllUser(ctx, con, includeGuests, excludeUsers));
+        return getUser(ctx, con, listAllUser(ctx.getContextId(), con, includeGuests, excludeUsers));
     }
 
     @Override
@@ -1459,7 +1461,7 @@ public class RdbUserStorage extends UserStorage {
             }
         }
         try {
-            return listAllUser(context, con, includeGuests, excludeUsers);
+            return listAllUser(context.getContextId(), con, includeGuests, excludeUsers);
         } finally {
             if (closeCon) {
                 DBPool.closeReaderSilent(context, con);
@@ -1467,7 +1469,26 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static int[] listAllUser(Context ctx, Connection con, boolean includeGuests, boolean excludeUsers) throws OXException {
+    public int[] listAllUser(Connection con, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+        boolean closeCon = false;
+        if (con == null) {
+            try {
+                closeCon = true;
+                con = ServerServiceRegistry.getServize(DatabaseService.class, true).getReadOnly(contextID);
+            } catch (final Exception e) {
+                throw UserExceptionCode.NO_CONNECTION.create(e);
+            }
+        }
+        try {
+            return listAllUser(contextID, con, includeGuests, excludeUsers);
+        } finally {
+            if (closeCon) {
+                ServerServiceRegistry.getServize(DatabaseService.class, true).backReadOnly(contextID, con);
+            }
+        }
+    }
+
+    private static int[] listAllUser(int contextID, Connection con, boolean includeGuests, boolean excludeUsers) throws OXException {
         StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=?");
         if (excludeUsers) {
             /*
@@ -1487,7 +1508,7 @@ public class RdbUserStorage extends UserStorage {
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(sql);
-            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(1, contextID);
             result = stmt.executeQuery();
             final TIntList tmp = new TIntArrayList();
             while (result.next()) {
