@@ -1005,6 +1005,10 @@ fi
 ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.rest.services.basic-auth.password "" /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2079
+ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
+ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
+
 # SoftwareChange_Request-2081
 PFILE=/opt/open-xchange/etc/configdb.properties
 KEY=minIdle
@@ -1016,9 +1020,6 @@ fi
 PFILE=/opt/open-xchange/etc/mail.properties
 KEY=com.openexchange.mail.imageHost
 ox_add_property $KEY "" $PFILE
-
-# SoftwareChagne_Request-2110
-ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
 
 # SoftwareChange_Request-2108
 pfile=/opt/open-xchange/etc/mime.types
@@ -1039,12 +1040,11 @@ EOF
    rm -f $ptmp
 fi
 
+# SoftwareChagne_Request-2110
+ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
+
 # SoftwareChange_Request-2148
 ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xchange/etc/mail.properties
-
-# SoftwareChange_Request-2079
-ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
-ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
 
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
@@ -1124,7 +1124,13 @@ fi
 # SoftwareChange_Request-2245
 ox_add_property com.openexchange.sessiond.useDistributedTokenSessions false /opt/open-xchange/etc/sessiond.properties
 
-# SoftwareChange_Request-2110
+# SoftwareChange_Request-2249
+ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
+
+# SoftwareChange_Request-2250
+ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
+
+# SoftwareChange_Request-2270
 ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
