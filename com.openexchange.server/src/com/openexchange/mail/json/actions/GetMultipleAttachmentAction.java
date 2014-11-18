@@ -51,6 +51,7 @@ package com.openexchange.mail.json.actions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -60,9 +61,12 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -75,8 +79,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "folder", description = "The folder identifier."),
     @Parameter(name = "id", description = "Object ID of the mail which contains the attachments."),
-    @Parameter(name = "attachment", description = "A comma-separated list of IDs of the requested attachments")
-}, responseDescription = "The raw byte data of the ZIP file.")
+    @Parameter(name = "attachment", description = "A comma-separated list of IDs of the requested attachments") }, responseDescription = "The raw byte data of the ZIP file.")
 public final class GetMultipleAttachmentAction extends AbstractMailAction {
 
     /**
@@ -108,11 +111,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 /*
                  * Set Content-Type and Content-Disposition header
                  */
-                final String fileName;
-                {
-                    final String subject = mailInterface.getMessage(folderPath, uid).getSubject();
-                    fileName = new com.openexchange.java.StringAllocator(subject).append(".zip").toString();
-                }
+                final String fileName = getFileName(req.getSession().getUser().getLocale(), mailInterface.getMessage(folderPath, uid));
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
                  */
@@ -155,4 +154,19 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         }
     }
 
+    /**
+     * Returns the filename for the attachment
+     *
+     * @param req - Mailrequest to g
+     * @param userLocale - Locale of the user to get correct subject translation in case subject is not set
+     * @return String - file name
+     */
+    protected String getFileName(final Locale userLocale, final MailMessage message) {
+        String fileName = message.getSubject();
+        if (fileName == null) { // in case no subject was set
+            fileName = StringHelper.valueOf(userLocale).getString(MailStrings.DEFAULT_SUBJECT);
+        }
+
+        return new StringBuilder(fileName).append(".zip").toString();
+    }
 }

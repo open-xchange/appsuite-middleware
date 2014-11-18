@@ -53,6 +53,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,7 +62,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
@@ -90,7 +90,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
      *
      * @param service The service
      */
-    public static void setCacheService(final CacheService service) {
+    public static void setCacheService(CacheService service) {
         SERVICE.set(service);
     }
 
@@ -99,7 +99,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     /**
      * Initializes
      */
-    public static synchronized CachingJSlobStorage initialize(final DBJSlobStorage delegate) {
+    public static synchronized CachingJSlobStorage initialize(DBJSlobStorage delegate) {
         CachingJSlobStorage tmp = instance;
         if (null == tmp) {
             tmp = new CachingJSlobStorage(delegate);
@@ -122,7 +122,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
      * Shuts-down
      */
     public static synchronized void shutdown() {
-        final CachingJSlobStorage tmp = instance;
+        CachingJSlobStorage tmp = instance;
         if (null != tmp) {
             tmp.release();
             instance = null;
@@ -144,7 +144,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     /**
      * Initializes a new {@link CachingJSlobStorage}.
      */
-    private CachingJSlobStorage(final DBJSlobStorage delegate) {
+    private CachingJSlobStorage(DBJSlobStorage delegate) {
         super();
         this.delegate = delegate;
         delayedStoreOps = new DelayedStoreOpDelayQueue();
@@ -153,39 +153,39 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
     @Override
     public void run() {
-        final List<DelayedStoreOp> objects = new ArrayList<DelayedStoreOp>(16);
+        List<DelayedStoreOp> objects = new ArrayList<DelayedStoreOp>(16);
         while (keepgoing.get()) {
             try {
                 objects.clear();
                 // Blocking wait for at least 1 DelayedPushMsObject to expire.
-                final DelayedStoreOp object = delayedStoreOps.take();
+                DelayedStoreOp object = delayedStoreOps.take();
                 if (POISON == object) {
                     return;
                 }
                 objects.add(object);
                 // Drain more if available
                 delayedStoreOps.drainTo(objects);
-                final Cache cache = optCache();
+                Cache cache = optCache();
                 if (null != cache) {
                     try {
                         if (writeMultiple2DB(objects, cache)) {
                             // Reached poison element
                             return;
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         // Multiple store failed
                         if (!JSlobExceptionCodes.UNEXPECTED_ERROR.equals(e) || !SQLException.class.isInstance(e.getCause())) {
                             throw e;
                         }
                         boolean leave = false;
-                        for (final DelayedStoreOp delayedStoreOp : objects) {
+                        for (DelayedStoreOp delayedStoreOp : objects) {
                             if (POISON == delayedStoreOp) {
                                 // Reached poison element
                                 leave = true;
                             } else if (delayedStoreOp != null) {
                                 try {
                                     write2DB(delayedStoreOp, cache);
-                                } catch (final Exception x) {
+                                } catch (Exception x) {
                                     LOG.error("JSlobs could not be flushed to database", x);
                                 }
                             }
@@ -195,34 +195,37 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
                         }
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Checking for delayed JSlobs failed", e);
             }
         }
     }
 
-    private void write2DB(final DelayedStoreOp delayedStoreOp, final Cache cache) throws OXException {
-        final Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
+    private void write2DB(DelayedStoreOp delayedStoreOp, Cache cache) throws OXException {
+        Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
         if (obj instanceof JSlob) {
-            final JSlob t = (JSlob) obj;
+            JSlob t = (JSlob) obj;
+
             // Write to store
             delegate.store(delayedStoreOp.jSlobId, t);
+
             // Propagate among remote caches
             cache.putInGroup(delayedStoreOp.id, delayedStoreOp.group, t.setId(delayedStoreOp.jSlobId), true);
         }
     }
 
-    private boolean writeMultiple2DB(final List<DelayedStoreOp> delayedStoreOps, final Cache cache) throws OXException {
+    private boolean writeMultiple2DB(List<DelayedStoreOp> delayedStoreOps, Cache cache) throws OXException {
         boolean leave = false;
+
         // Collect valid delayed store operations
         int size = delayedStoreOps.size();
-        final Map<JSlobId, JSlob> jslobs = new HashMap<JSlobId, JSlob>(size);
+        Map<JSlobId, JSlob> jslobs = new HashMap<JSlobId, JSlob>(size);
         for (int i = 0; i < size; i++) {
-            final DelayedStoreOp delayedStoreOp = delayedStoreOps.get(i);
+            DelayedStoreOp delayedStoreOp = delayedStoreOps.get(i);
             if (POISON == delayedStoreOp) {
                 leave = true;
             } else if (delayedStoreOp != null) {
-                final Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
+                Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
                 if (obj instanceof JSlob) {
                     jslobs.put(delayedStoreOp.jSlobId, (JSlob) obj);
                 }
@@ -230,25 +233,28 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         }
         // Store them
         delegate.storeMultiple(jslobs);
+
         // Invalidate remote caches
-        for (final Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
-            final JSlobId id = entry.getKey();
+        for (Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
+            JSlobId id = entry.getKey();
             cache.putInGroup(id.getId(), groupName(id), entry.getValue().setId(id), true);
         }
         return leave;
     }
 
     /**
-     * Drops all JSlob entries associated with specified user.
+     * Invalidates all JSlob entries associated with specified user from cache.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public void dropAllUserJSlobs(final int userId, final int contextId) {
-        final Cache cache = optCache();
+    public void dropAllUserJSlobs(int userId, int contextId) {
+        Cache cache = optCache();
         if (null != cache) {
-            for (final String serviceId : DBJSlobStorageActivcator.SERVICE_IDS) {
-                cache.invalidateGroup(new StringAllocator(serviceId).append('@').append(userId).append('@').append(contextId).toString());
+            flushDelayedOpsForUser(userId, contextId, cache);
+
+            for (String serviceId : DBJSlobStorageActivcator.SERVICE_IDS) {
+                cache.invalidateGroup(new StringBuilder(serviceId).append('@').append(userId).append('@').append(contextId).toString());
             }
         }
     }
@@ -256,26 +262,26 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     private void release() {
         keepgoing.set(false);
         delayedStoreOps.offer(POISON);
-        final CacheService cacheService = SERVICE.get();
+        CacheService cacheService = SERVICE.get();
         if (null != cacheService) {
             try {
-                final Cache cache = cacheService.getCache(REGION_NAME);
+                Cache cache = cacheService.getCache(REGION_NAME);
                 flushDelayedOps2Storage(cache);
                 cache.clear();
                 cache.dispose();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
     }
 
-    private void flushDelayedOps2Storage(final Cache cache) {
+    private void flushDelayedOps2Storage(Cache cache) {
         if (null != cache) {
-            for (final DelayedStoreOp delayedStoreOp : delayedStoreOps) {
+            for (DelayedStoreOp delayedStoreOp : delayedStoreOps) {
                 if (delayedStoreOp != null && POISON != delayedStoreOp) {
                     try {
                         write2DB(delayedStoreOp, cache);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.error("JSlobs could not be flushed to database", e);
                     }
                 }
@@ -285,16 +291,46 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
     private Cache optCache() {
         try {
-            final CacheService cacheService = SERVICE.get();
+            CacheService cacheService = SERVICE.get();
             return null == cacheService ? null : cacheService.getCache(REGION_NAME);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Failed to get cache.", e);
         }
         return null;
     }
 
-    private String groupName(final JSlobId id) {
-        return new StringAllocator(id.getServiceId()).append('@').append(id.getUser()).append('@').append(id.getContext()).toString();
+    private String groupName(JSlobId id) {
+        return new StringBuilder(id.getServiceId()).append('@').append(id.getUser()).append('@').append(id.getContext()).toString();
+    }
+
+    /**
+     * Flushes the delayed operations associated with given user to storage
+     *
+     * @param userId The suer identifier
+     * @param contextId The cotnext identifier
+     */
+    public void flushDelayedOpsForUser(int userId, int contextId) {
+        Cache cache = optCache();
+        if (null != cache) {
+            flushDelayedOpsForUser(userId, contextId, cache);
+        }
+    }
+
+    private void flushDelayedOpsForUser(int userId, int contextId, Cache cache) {
+        List<DelayedStoreOp> ops = new LinkedList<DelayedStoreOp>();
+        int n = delayedStoreOps.drainForUser(userId, contextId, ops);
+
+        if (n > 0) {
+            for (DelayedStoreOp delayedStoreOp : ops) {
+                if (delayedStoreOp != null && POISON != delayedStoreOp) {
+                    try {
+                        write2DB(delayedStoreOp, cache);
+                    } catch (Exception e) {
+                        LOG.error("JSlobs could not be flushed to database", e);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -303,63 +339,59 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     }
 
     @Override
-    public boolean store(final JSlobId id, final JSlob t) throws OXException {
-        final Cache cache = optCache();
+    public boolean store(JSlobId id, JSlob t) throws OXException {
+        Cache cache = optCache();
         if (null == cache) {
             return delegate.store(id, t);
         }
 
         // Delay store operation
-        final String groupName = groupName(id);
-        if (delayedStoreOps.offer(new DelayedStoreOp(id.getId(), groupName, id))) {
-            // Added to delay queue -- put current to cache
-            cache.putInGroup(id.getId(), groupName, t.setId(id), false);
-            return true;
-        }
-        // Not possible to add to delay queue
-        final boolean storeResult = delegate.store(id, t);
-        cache.putInGroup(id.getId(), groupName, t.setId(id), !storeResult);
-        return storeResult;
+        String groupName = groupName(id);
+        delayedStoreOps.offerIfAbsent(new DelayedStoreOp(id.getId(), groupName, id));
+
+        // Added to OR already contained in delay queue -- put current to cache
+        cache.putInGroup(id.getId(), groupName, t.setId(id), false);
+        return true;
     }
 
     @Override
-    public void invalidate(final JSlobId id) {
-        final Cache cache = optCache();
+    public void invalidate(JSlobId id) {
+        Cache cache = optCache();
         if (null != cache) {
             cache.removeFromGroup(id.getId(), groupName(id));
         }
     }
 
     @Override
-    public JSlob load(final JSlobId id) throws OXException {
-        final Cache cache = optCache();
+    public JSlob load(JSlobId id) throws OXException {
+        Cache cache = optCache();
         if (null == cache) {
             return delegate.load(id);
         }
-        final Object object = cache.getFromGroup(id.getId(), groupName(id));
+        Object object = cache.getFromGroup(id.getId(), groupName(id));
         if (object instanceof JSlob) {
             return (JSlob) object;
         }
-        final JSlob loaded = delegate.load(id);
+        JSlob loaded = delegate.load(id);
         cache.putInGroup(id.getId(), groupName(id), loaded, false);
         return loaded.clone();
     }
 
     @Override
-    public JSlob opt(final JSlobId id) throws OXException {
-        final Cache cache = optCache();
+    public JSlob opt(JSlobId id) throws OXException {
+        Cache cache = optCache();
         if (null == cache) {
             return delegate.opt(id);
         }
-        final String groupName = groupName(id);
+        String groupName = groupName(id);
         {
-            final Object fromCache = cache.getFromGroup(id.getId(), groupName);
+            Object fromCache = cache.getFromGroup(id.getId(), groupName);
             if (null != fromCache) {
                 return ((JSlob) fromCache).clone();
             }
         }
         // Optional retrieval from DB storage
-        final JSlob opt = delegate.opt(id);
+        JSlob opt = delegate.opt(id);
         if (null == opt) {
             // Null
             return null;
@@ -370,17 +402,17 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
     @Override
     public List<JSlob> list(List<JSlobId> ids) throws OXException {
-        final Cache cache = optCache();
+        Cache cache = optCache();
         if (null == cache) {
             return delegate.list(ids);
         }
 
-        final int size = ids.size();
-        final Map<String, JSlob> map = new HashMap<String, JSlob>(size);
-        final List<JSlobId> toLoad = new ArrayList<JSlobId>(size);
+        int size = ids.size();
+        Map<String, JSlob> map = new HashMap<String, JSlob>(size);
+        List<JSlobId> toLoad = new ArrayList<JSlobId>(size);
         for (int i = 0; i < size; i++) {
-            final JSlobId id = ids.get(i);
-            final Object object = cache.getFromGroup(id.getId(), groupName(id));
+            JSlobId id = ids.get(i);
+            Object object = cache.getFromGroup(id.getId(), groupName(id));
             if (object instanceof JSlob) {
                 map.put(id.getId(), (JSlob) object);
             } else {
@@ -389,43 +421,43 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         }
 
         if (!toLoad.isEmpty()) {
-            final List<JSlob> loaded = delegate.list(toLoad);
-            for (final JSlob jSlob : loaded) {
+            List<JSlob> loaded = delegate.list(toLoad);
+            for (JSlob jSlob : loaded) {
                 if (null != jSlob) {
-                    final JSlobId id = jSlob.getId();
+                    JSlobId id = jSlob.getId();
                     cache.putInGroup(id.getId(), groupName(id), jSlob, false);
                     map.put(id.getId(), jSlob.clone());
                 }
             }
         }
 
-        final List<JSlob> ret = new ArrayList<JSlob>(size);
-        for (final JSlobId id : ids) {
+        List<JSlob> ret = new ArrayList<JSlob>(size);
+        for (JSlobId id : ids) {
             ret.add(null == id ? null : map.get(id.getId()));
         }
         return ret;
     }
 
     @Override
-    public Collection<JSlob> list(final JSlobId id) throws OXException {
-        final Cache cache = optCache();
+    public Collection<JSlob> list(JSlobId id) throws OXException {
+        Cache cache = optCache();
         if (null == cache) {
             return delegate.list(id);
         }
-        final Collection<String> ids = delegate.getIDs(id);
-        final List<JSlob> ret = new ArrayList<JSlob>(ids.size());
-        final String serviceId = id.getServiceId();
-        final int user = id.getUser();
-        final int context = id.getContext();
-        for (final String sId : ids) {
+        Collection<String> ids = delegate.getIDs(id);
+        List<JSlob> ret = new ArrayList<JSlob>(ids.size());
+        String serviceId = id.getServiceId();
+        int user = id.getUser();
+        int context = id.getContext();
+        for (String sId : ids) {
             ret.add(load(new JSlobId(serviceId, sId, user, context)));
         }
         return ret;
     }
 
     @Override
-    public JSlob remove(final JSlobId id) throws OXException {
-        final Cache cache = optCache();
+    public JSlob remove(JSlobId id) throws OXException {
+        Cache cache = optCache();
         if (null != cache) {
             cache.removeFromGroup(id.getId(), groupName(id));
         }
@@ -433,12 +465,12 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     }
 
     @Override
-    public boolean lock(final JSlobId jslobId) throws OXException {
+    public boolean lock(JSlobId jslobId) throws OXException {
         return delegate.lock(jslobId);
     }
 
     @Override
-    public void unlock(final JSlobId jslobId) throws OXException {
+    public void unlock(JSlobId jslobId) throws OXException {
         delegate.unlock(jslobId);
     }
 

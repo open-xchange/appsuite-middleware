@@ -661,6 +661,11 @@ public final class ConfigJSlobService implements JSlobService {
                 }
             }
 
+            // Check completion service
+            if (cr.num > 0) {
+                ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
+            }
+
             // Set (or replace) JSlob
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
             if (null != attributes) {
@@ -687,11 +692,6 @@ public final class ConfigJSlobService implements JSlobService {
 
             // Finally store JSlob
             getStorage().store(new JSlobId(SERVICE_ID, id, userId, contextId), jsonJSlob);
-
-            // Check completion service
-            if (cr.num > 0) {
-                ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
-            }
         }
     }
 

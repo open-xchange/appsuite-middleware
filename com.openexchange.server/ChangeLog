@@ -1,3 +1,7 @@
+* 2014-11-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35359: Improved special /ajax/mail?action=all request fired when loading portal page
+
 * 2014-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 35023: Orderly deal with absent user permission bits
