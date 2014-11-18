@@ -79,6 +79,8 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreResponse;
+import com.openexchange.ajax.infostore.actions.GetDocumentRequest;
+import com.openexchange.ajax.infostore.actions.GetDocumentResponse;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
@@ -305,7 +307,18 @@ public class GuestClient extends AJAXClient {
      * @throws Exception
      */
     public void checkShareAccessible(FileStorageGuestObjectPermission permissions) throws Exception {
-        checkFileAccessible(getItem(), permissions);
+        checkFileAccessible(getFolder(), getItem(), permissions);
+    }
+
+    /**
+     * Checks that a share is accessible for the guest according to the granted permissions.
+     *
+     * @param permissions The guest permissions
+     * @param expectedContents The expected contents of the file
+     * @throws Exception
+     */
+    public void checkShareAccessible(FileStorageGuestObjectPermission permissions, byte[] expectedContents) throws Exception {
+        checkFileAccessible(getFolder(), getItem(), permissions, expectedContents);
     }
 
     /**
@@ -355,11 +368,25 @@ public class GuestClient extends AJAXClient {
     /**
      * Checks that a file is accessible for the guest according to the granted permissions.
      *
+     * @param folderID The folder identifier of the file to check
      * @param fileID The identifier of the file to check
      * @param permissions The guest permissions for that file
      * @throws Exception
      */
-    public void checkFileAccessible(String fileID, FileStorageGuestObjectPermission permissions) throws Exception {
+    public void checkFileAccessible(String folderID, String fileID, FileStorageGuestObjectPermission permissions) throws Exception {
+        checkFileAccessible(folderID, fileID, permissions, null);
+    }
+
+    /**
+     * Checks that a file is accessible for the guest according to the granted permissions.
+     *
+     * @param folderID The folder identifier of the file to check
+     * @param fileID The identifier of the file to check
+     * @param permissions The guest permissions for that file
+     * @param expectedContents The expected contents of the file
+     * @throws Exception
+     */
+    public void checkFileAccessible(String folderID, String fileID, FileStorageGuestObjectPermission permissions, byte[] expectedContents) throws Exception {
         /*
          * check item retrieval
          */
@@ -367,6 +394,21 @@ public class GuestClient extends AJAXClient {
         getInfostoreRequest.setFailOnError(permissions.canRead());
         GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
         checkResponse(getInfostoreResponse, false == permissions.canRead());
+        GetDocumentRequest getDocumentRequest = new GetDocumentRequest(folderID, fileID);
+        getInfostoreRequest.setFailOnError(permissions.canRead());
+        GetDocumentResponse getDocumentResponse = execute(getDocumentRequest);
+        checkResponse(getDocumentResponse, false == permissions.canRead());
+        byte[] contents = getDocumentResponse.getContentAsByteArray();
+        if (false == permissions.canRead()) {
+            Assert.assertNull("Contents wrong", contents);
+        } else {
+            if (null == expectedContents) {
+                Assert.assertNotNull("Contents wrong", contents);
+            } else {
+                Assert.assertArrayEquals("Contents wrong", expectedContents, contents);
+            }
+        }
+
         if (permissions.canRead()) {
             DefaultFile file = new DefaultFile(getInfostoreResponse.getDocumentMetadata());
             /*

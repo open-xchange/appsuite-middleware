@@ -142,8 +142,11 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         /*
          * create folder and a shared file inside
          */
+        byte[] contents = new byte[64 + random.nextInt(256)];
+        random.nextBytes(contents);
+        String filename = randomUID();
         FolderObject folder = insertPrivateFolder(api, FolderObject.INFOSTORE, parent);
-        File file = insertSharedFile(folder.getObjectID(), guestPermission);
+        File file = insertSharedFile(folder.getObjectID(), filename, guestPermission, contents);
         /*
          * check permissions
          */
@@ -166,7 +169,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
          */
         GuestClient guestClient =  resolveShare(share, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
-        guestClient.checkShareAccessible(guestPermission);
+        guestClient.checkShareAccessible(guestPermission, contents);
     }
 
 }
