@@ -72,8 +72,8 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 CLASSPATH="-classpath @classpath@"
 
 umask 066
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.DumpSchema $@
+OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.DumpSchema $@ 2>&1)"
+# Expect the following response: <schema> -h <host> -P <port> -u <username> -p<password> --single-transaction > <output>
+# This output can directly be fed to mysqldump
 
-# Expect the following response: <schema> -h <host> -P <port> -u <username> -p<password> --single-transaction
-# This output can be directly fed to mysqldump 
-
+mysqldump $OUTPUT
