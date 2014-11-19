@@ -117,7 +117,6 @@ public class LastLoginRecorder implements LoginHandlerService {
         if (context.isReadOnly()) {
             return;
         }
-
         // Set attribute and add current time stamp
         userService.setAttribute("client:" + client, Long.toString(System.currentTimeMillis()), origUser.getId(), context);
     }
