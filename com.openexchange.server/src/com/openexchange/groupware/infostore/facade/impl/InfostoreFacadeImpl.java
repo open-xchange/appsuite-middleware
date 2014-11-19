@@ -126,6 +126,7 @@ import com.openexchange.groupware.infostore.database.impl.Tools;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateObjectPermissionAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
+import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlUtil;
 import com.openexchange.groupware.infostore.index.InfostoreUUID;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -925,9 +926,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             Set<Metadata> updatedCols = parameters.getUpdatedCols();
             DocumentMetadata document = parameters.getDocument();
             DocumentMetadata oldDocument = parameters.getOldDocument();
+            Context context = parameters.getContext();
 
             if (updatedCols.contains(Metadata.VERSION_LITERAL)) {
-                final String fname = load(document.getId(), document.getVersion(), parameters.getContext()).getFileName();
+                final String fname = load(document.getId(), document.getVersion(), context).getFileName();
                 if (!updatedCols.contains(Metadata.FILENAME_LITERAL)) {
                     updatedCols.add(Metadata.FILENAME_LITERAL);
                     document.setFileName(fname);
@@ -943,7 +945,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     newFileName,
                     document.getFolderId(),
                     oldDocument.getId(),
-                    parameters.getContext(), true);
+                    context, true);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
 
@@ -951,14 +953,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 DocumentMetadataImpl tombstoneDocument = new DocumentMetadataImpl(oldDocument);
                 tombstoneDocument.setLastModified(document.getLastModified());
                 tombstoneDocument.setModifiedBy(document.getModifiedBy());
-                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, parameters.getContext(), tombstoneDocument), true);
+                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, context, tombstoneDocument), true);
             } else if (isRename) {
                 // this is a rename - reserve in current folder
                 reservation = reserve(
                     document.getFileName(),
                     oldDocument.getFolderId(),
                     oldDocument.getId(),
-                    parameters.getContext(), true);
+                    context, true);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
             }
@@ -975,6 +977,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 updatedCols.add(Metadata.TITLE_LITERAL);
             }
 
+            if (isMove) {
+                VersionControlUtil.doVersionControl(this, Collections.singletonList(document), Collections.singletonList(oldDocument), document.getFolderId(), context);
+            }
+
             Metadata[] modifiedCols;
             if (parameters.hasData()) {
                 storeNewData(parameters);
@@ -986,18 +992,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         document.setVersion(oldDocument.getVersion());
                     }
 
-                    perform(new UpdateVersionAction(this, QUERIES, parameters.getContext(), document, oldDocument, modifiedCols, parameters.getSequenceNumber()), true);
+                    perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedCols, parameters.getSequenceNumber()), true);
                 }
             }
 
             if (QUERIES.updateDocument(modifiedCols)) {
-                perform(new UpdateDocumentAction(this, QUERIES, parameters.getContext(), document, oldDocument, modifiedCols, Long.MAX_VALUE), true);
+                perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedCols, Long.MAX_VALUE), true);
             }
             /*
              * update object permissions as needed
              */
             if (updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)) {
-                perform(new UpdateObjectPermissionAction(this, parameters.getContext(), document, oldDocument), true);
+                perform(new UpdateObjectPermissionAction(this, context, document, oldDocument), true);
             }
             return new IDTuple(String.valueOf(document.getFolderId()), String.valueOf(document.getId()));
         } finally {
@@ -1248,7 +1254,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * check source folder permissions, write locks and client timestamp
          */
-        List<DocumentMetadata> rejectedDocuments = new ArrayList<DocumentMetadata>();
+        List<DocumentMetadata> rejectedDocuments = new LinkedList<DocumentMetadata>();
         List<DocumentMetadata> sourceDocuments = new ArrayList<DocumentMetadata>(documents.size());
         List<EffectiveInfostorePermission> permissions = security.getInfostorePermissions(documents, context, user, permissionBits);
         for (EffectiveInfostorePermission permission : permissions) {
@@ -1266,7 +1272,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         }
 
-        if (0 < sourceDocuments.size()) {
+        int numberOfDocuments = sourceDocuments.size();
+        if (0 < numberOfDocuments) {
             /*
              * prepare move
              */
@@ -1275,10 +1282,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             BatchFilenameReserver filenameReserver = new BatchFilenameReserverImpl(session.getContext(), this);
             try {
                 readConnection = getReadConnection(context);
-                boolean moveToTrash = FolderObject.TRASH == new OXFolderAccess(readConnection, context)
-                    .getFolderObject((int) destinationFolderID).getType();
-                List<DocumentMetadata> tombstoneDocuments = new ArrayList<DocumentMetadata>(sourceDocuments.size());
-                List<DocumentMetadata> documentsToUpdate = new ArrayList<DocumentMetadata>(sourceDocuments.size());
+                boolean moveToTrash = FolderObject.TRASH == new OXFolderAccess(readConnection, context).getFolderObject((int) destinationFolderID).getType();
+                List<DocumentMetadata> tombstoneDocuments = new ArrayList<DocumentMetadata>(numberOfDocuments);
+                List<DocumentMetadata> documentsToUpdate = new ArrayList<DocumentMetadata>(numberOfDocuments);
                 List<DocumentMetadata> versionsToUpdate = new ArrayList<DocumentMetadata>();
                 List<DocumentMetadata> objectPermissionsToCreate = new ArrayList<DocumentMetadata>();
                 List<DocumentMetadata> objectPermissionsToDelete = new ArrayList<DocumentMetadata>();
@@ -1332,6 +1338,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                  * perform tombstone creations
                  */
                 perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, session.getContext(), tombstoneDocuments), true);
+                /*
+                 * Do the version control
+                 */
+                VersionControlUtil.doVersionControl(this, documentsToUpdate, sourceDocuments, destinationFolderID, context);
                 /*
                  * perform document move
                  */
