@@ -89,7 +89,7 @@ public interface CustomPortable extends Portable {
      * <p/>
      * The following list gives an overview about the <b>already used</b> class IDs (add your IDs here):
      * <ul>
-     * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.portable.PortableSession</li>
+     * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSession</li>
      * <li><code>  2</code>: com.openexchange.drive.events.ms.PortableDriveEvent</li>
      * <li><code>  3</code>: com.openexchange.ms.internal.portable.PortableMessage</li>
      * <li><code>  4</code>: com.openexchange.caching.events.ms.internal.PortableCacheEvent</li>

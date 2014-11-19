@@ -52,6 +52,7 @@ package com.openexchange.snippet.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -60,7 +61,7 @@ import com.openexchange.snippet.internal.Services;
 
 /**
  * {@link SnippetActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SnippetActivator extends HousekeepingActivator {
@@ -74,7 +75,7 @@ public final class SnippetActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class };
+        return new Class<?>[] { HtmlService.class, ManagedFileManagement.class  };
     }
 
     @Override
@@ -90,7 +91,6 @@ public final class SnippetActivator extends HousekeepingActivator {
         }
     }
 
-    @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
         Services.setServiceLookup(null);

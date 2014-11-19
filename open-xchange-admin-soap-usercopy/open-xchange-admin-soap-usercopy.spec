@@ -14,20 +14,20 @@ BuildRequires: java7-devel
 %else
 BuildRequires: java-devel >= 1.7.0
 %endif
-Version:	@OXVERSION@
-%define		ox_release 0
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        SOAP interface for extension to copy user into other contexts
+Version:       @OXVERSION@
+%define        ox_release 0
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       SOAP interface for extension to copy user into other contexts
 Autoreqprov:   no
-Requires:       open-xchange-soap-cxf >= @OXVERSION@
-Requires:       open-xchange-admin-user-copy >= @OXVERSION@
-Provides:       open-xchange-admin-plugin-user-copy-soap = %{version}
-Obsoletes:      open-xchange-admin-plugin-user-copy-soap < %{version}
+Requires:      open-xchange-soap-cxf >= @OXVERSION@
+Requires:      open-xchange-admin-user-copy >= @OXVERSION@
+Provides:      open-xchange-admin-plugin-user-copy-soap = %{version}
+Obsoletes:     open-xchange-admin-plugin-user-copy-soap < %{version}
 
 %description
 This package installs the OSGi bundle that provides the administrative SOAP interface to copy users into other contexts. SOAP allows
@@ -63,6 +63,8 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.8.0 release
+* Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.2 release
 * Tue Nov 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-10
 * Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -77,6 +79,8 @@ Build for patch 2014-11-04
 Build for patch 2014-11-03
 * Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-22
+* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-03
 * Fri Oct 17 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -85,6 +89,8 @@ Fifth candidate for 7.6.1 release
 Build for patch 2014-10-20
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.6.1 release
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-20
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-20
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>

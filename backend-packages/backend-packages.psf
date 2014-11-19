@@ -18,6 +18,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-audit"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-imap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-kerberos"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ucs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authorization-standard"/>
@@ -68,14 +69,13 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-mailnotify"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-malpoll"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-core"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-events"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-events-json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-report-client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-rest"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-sessionstorage-hazelcast"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-kerberos"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-smtp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-soap-cxf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-cloudmark"/>

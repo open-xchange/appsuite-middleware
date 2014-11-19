@@ -380,7 +380,7 @@ public class CalendarTestManager implements TestManager {
                 continue;
             }
         }
-        
+
     }
 
     public void update(Appointment updatedAppointment) {

@@ -226,12 +226,10 @@ public enum UserExceptionCode implements DisplayableOXExceptionCode {
     UserExceptionMessage.MISSING_NEW_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 29),
 
     /**
-     * Denied concurrent update for attributes in context %1$d for user %2$d.
+     * Denied concurrent update for user attributes in context %1$d for user %2$d.
      */
-    CONCURRENT_ATTRIBUTES_UPDATE("Denied concurrent update for attributes in context %1$d for user %2$d.",
-        UserExceptionMessage.CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY, Category.CATEGORY_ERROR, 30),
-
-    ;
+    CONCURRENT_ATTRIBUTES_UPDATE("Denied concurrent update for user attributes in context %1$d for user %2$d.",
+        UserExceptionMessage.CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY, Category.CATEGORY_ERROR, 30);
 
     private static final String PREFIX = "USR";
 

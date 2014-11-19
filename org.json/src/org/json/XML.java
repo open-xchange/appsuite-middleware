@@ -74,8 +74,8 @@ public class XML {
      * @return The escaped string.
      */
     public static String escape(String string) {
-        int len = string.length();
-        StringBuilder sb = new StringBuilder(len);
+        final StringBuilder sb = new StringBuilder();
+        final int len = string.length();
         for (int i = 0; i < len; i++) {
             char c = string.charAt(i);
             switch (c) {

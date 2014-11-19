@@ -56,6 +56,8 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Marc Arens <marc.arens@open-xchange.com>
 prepare for 7.8.0 release
+* Wed Nov 05 2014 Marc Arens <marc.arens@open-xchange.com>
+prepare for 7.6.2 release
 * Fri Oct 31 2014 Marc Arens <marc.arens@open-xchange.com>
 First candidate for 7.6.2 release
 * Mon Oct 27 2014 Marc Arens <marc.arens@open-xchange.com>

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange RequireJS servlet bundle
 Bundle-SymbolicName: com.openexchange.appsuite
 Bundle-Version: 7.8.0
-Bundle-Vendor: Open-Xchange
+Bundle-Vendor: Open-Xchange, Inc.
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,

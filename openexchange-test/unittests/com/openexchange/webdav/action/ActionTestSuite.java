@@ -31,8 +31,6 @@ public class ActionTestSuite {
 		tests.addTestSuite(IgnoreLocksIfHeaderApplyTest.class);
         tests.addTestSuite(Bug33505Test.class);
         tests.addTestSuite(Bug34283Test.class);
-
-        tests.addTestSuite(Bug34283Test.class);
 		return tests;
 	}
 }

@@ -60,13 +60,16 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
+import com.openexchange.snippet.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -76,13 +79,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(
-    name = "new"
-    , description = "Creates a snippet."
-    , method = RequestMethod.POST
-    , parameters = {}
-    , requestBody = "The snippet's JSON representation"
-)
+@Action(name = "new", description = "Creates a snippet.", method = RequestMethod.POST, parameters = {}, requestBody = "The snippet's JSON representation")
 public final class NewAction extends SnippetAction {
 
     private final List<Method> restMethods;
@@ -103,8 +100,9 @@ public final class NewAction extends SnippetAction {
         if (null == jsonSnippet) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        //TESTING: UI should set the key "content-type" in order to specify the content type of the snippet, if none provided then text/plain would be set as default
-        //jsonSnippet.getJSONObject("misc").put("content-type", "text/html");
+        // TESTING: UI should set the key "content-type" in order to specify the content type of the snippet, if none provided then
+        // text/plain would be set as default
+        // jsonSnippet.getJSONObject("misc").put("content-type", "text/html");
         // Parse from JSON to snippet
         final DefaultSnippet snippet = new DefaultSnippet();
         SnippetJsonParser.parse(jsonSnippet, snippet);
@@ -125,6 +123,12 @@ public final class NewAction extends SnippetAction {
                     ((DefaultAttachment) attachment).setId(UUID.randomUUID().toString());
                 }
             }
+        }
+        // Process image in an img HTML tag and add it as an attachment
+        final String contentSubType = getContentSubType(snippet);
+        final SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
+        if (contentSubType.equals("html")) {
+            snippetProcessor.processImage(snippet);
         }
         // Create via management
         final String id = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession()).createSnippet(snippet);

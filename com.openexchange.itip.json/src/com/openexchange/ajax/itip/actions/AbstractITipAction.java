@@ -102,9 +102,6 @@ public abstract class AbstractITipAction implements AJAXActionService{
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final List<ConversionError> errors = new ArrayList<ConversionError>();
-        final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-
         final ITipParser itipParser = services.getService(ITipParser.class);
         if (null == itipParser) {
             throw ServiceExceptionCode.serviceUnavailable(ITipParser.class);
@@ -120,13 +117,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
 
         final Map<String, String> mailHeader = new HashMap<String, String>();
         final InputStream stream = getInputStreamAndFillMailHeader(request, session, mailHeader);
-        int owner = 0;
-        if (mailHeader.containsKey(OWNER)) {
-            owner = Integer.parseInt(mailHeader.get(OWNER));
-        }
-        final List<ITipMessage> messages = itipParser.parseMessage(stream, tz, session.getContext(), owner, errors, warnings);
-
-        final List<ITipAnalysis> analysis = analyzer.analyze(messages, request.getParameter("descriptionFormat"), session, mailHeader);
+        final List<ITipAnalysis> analysis = analyzer.analyze(stream, request.getParameter("descriptionFormat"), session, mailHeader);
         Object result;
         try {
             result = process(analysis, request, session, outputTimeZone);
