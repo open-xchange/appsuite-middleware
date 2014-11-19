@@ -1,3 +1,9 @@
+open-xchange-push-malpoll (7.6.0-31) stable; urgency=medium
+
+  * Build for patch 2014-11-21
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 19 Nov 2014 15:49:52 +0000
+
 open-xchange-push-malpoll (7.6.0-30) stable; urgency=medium
 
   * Build for patch 2014-11-17
