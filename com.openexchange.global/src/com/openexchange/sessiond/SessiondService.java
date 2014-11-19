@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -113,6 +114,13 @@ public interface SessiondService {
      * @param contextId The context identifier
      */
     public void removeContextSessions(int contextId);
+
+    /**
+     * Removes all sessions belonging to given contexts.
+     *
+     * @param contextId The context identifiers to remove sessions for
+     */
+    public void removeContextSessionsGlobal(Set<Integer> contextIds);
 
     /**
      * Gets the number of active sessions belonging to given user in specified context.

@@ -136,6 +136,15 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         SessionHandler.removeContextSessions(contextId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeContextSessionsGlobal(Set<Integer> contextIds) {
+        // TODO Auto-generated method stub
+
+    }
+
     @Override
     public int getUserSessions(final int userId, final int contextId) {
         return SessionHandler.SESSION_COUNTER.getNumberOfSessions(userId, contextId);
@@ -227,5 +236,4 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         final Set<SessionMatcher.Flag> flags = matcher.flags();
         return SessionHandler.findFirstSessionForUser(userId, contextId, matcher, flags.contains(SessionMatcher.Flag.IGNORE_LONG_TERM), flags.contains(SessionMatcher.Flag.IGNORE_SESSION_STORAGE));
     }
-
 }
