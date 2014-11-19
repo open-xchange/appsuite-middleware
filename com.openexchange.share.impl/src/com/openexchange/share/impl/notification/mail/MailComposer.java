@@ -109,6 +109,8 @@ import com.openexchange.user.UserService;
  */
 public class MailComposer {
 
+    private static final String FIELD_PW_RESET_INTRO = "pw_reset_intro";
+
     private static final String FIELD_RESET_PW_LINK = "reset_pw_link";
 
     private static final String FIELD_RESET_PW_LINK_INTRO = "reset_pw_link_intro";
@@ -168,9 +170,9 @@ public class MailComposer {
 
     public ComposedMailMessage buildPasswordResetMail(PasswordResetNotification<InternetAddress> notification) throws OXException, MessagingException, UnsupportedEncodingException {
         Translator translator = getTranslator(notification.getLocale());
-        String title = translator.translate(NotificationStrings.TITLE_RESET_PASSWORD);
-        Map<String, Object> vars = preparePasswordResetVars(notification, title, translator);
-        MimeMessage mail = prepareEnvelope(title, null, notification.getTransportInfo());
+        String subject = translator.translate(NotificationStrings.SUBJECT_RESET_PASSWORD);
+        Map<String, Object> vars = preparePasswordResetVars(notification, translator);
+        MimeMessage mail = prepareEnvelope(subject, null, notification.getTransportInfo());
         mail.addHeader("X-Open-Xchange-Share-Type", "password-reset");
         mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
         mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(AuthenticationMode.GUEST_PASSWORD, notification.getUsername(), notification.getPassword()));
@@ -183,18 +185,54 @@ public class MailComposer {
         return new ContentAwareComposedMailMessage(mail, notification.getContextID());
     }
 
-    private static Map<String, Object> preparePasswordResetVars(PasswordResetNotification<InternetAddress> notification, String title, Translator translator) {
+    private Map<String, Object> preparePasswordResetVars(PasswordResetNotification<InternetAddress> notification, Translator translator) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
         LinkProvider linkProvider = notification.getLinkProvider();
-        vars.put(FIELD_LINK_INTRO, String.format(translator.translate(NotificationStrings.LINK_INTRO), title));
-        vars.put(FIELD_LINK, linkProvider.getShareUrl());
-        vars.put(FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.GUEST_CREDENTIALS_INTRO));
+        final String shareUrl = linkProvider.getShareUrl();
+        final String pwResetIntro = String.format(translator.translate(NotificationStrings.RESET_PASSWORD_INTRO), shareUrl);
+        vars.put(FIELD_PW_RESET_INTRO, new PWResetIntro(pwResetIntro, shareUrl));
+        vars.put(FIELD_CREDENTIALS_INTRO, translator.translate(NotificationStrings.RESET_CREDENTIALS_INTRO));
         vars.put(FIELD_USERNAME_FIELD, translator.translate(NotificationStrings.USERNAME_FIELD));
         vars.put(FIELD_USERNAME, notification.getUsername());
         vars.put(FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
         vars.put(FIELD_PASSWORD, notification.getPassword());
 
         return vars;
+    }
+
+    public static final class PWResetIntro {
+
+        private final String shareUrl;
+        private final String pwResetIntro;
+        private final String[] pwResetIntroSplit;
+
+        public PWResetIntro(String pwResetIntro, String shareUrl) {
+            super();
+            this.shareUrl = shareUrl;
+            this.pwResetIntro = pwResetIntro;
+            this.pwResetIntroSplit = pwResetIntro.split(shareUrl);
+        }
+
+        public String pre() {
+            return pwResetIntroSplit[0];
+        }
+
+        public String in() {
+            return shareUrl;
+        }
+
+        public String post() {
+            if (pwResetIntroSplit.length > 1) {
+                return pwResetIntroSplit[1];
+            }
+
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return pwResetIntro;
+        }
     }
 
     public ComposedMailMessage buildShareCreatedMail(ShareCreatedNotification<InternetAddress> notification) throws OXException, UnsupportedEncodingException, MessagingException {

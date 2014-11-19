@@ -72,8 +72,11 @@ public class NotificationStrings implements LocalizableStrings {
     // Please use the following credentials if asked for
     public static final String GUEST_CREDENTIALS_INTRO = "Please use the following credentials if asked for";
 
-    // Please use your existing credentials if asked for.
-    public static final String GUEST_EXISTING_CREDENTIALS_INTRO = "Please use your existing credentials if asked for.";
+    // Please use your existing credentials if asked for
+    public static final String GUEST_EXISTING_CREDENTIALS_INTRO = "Please use your existing credentials if asked for";
+
+    // Your new credentials are
+    public static final String RESET_CREDENTIALS_INTRO = "Your new credentials are";
 
     // Please use the following password if asked for
     public static final String ANONYMOUS_PASSWORD_INTRO = "Please use the following password if asked for";
@@ -90,10 +93,10 @@ public class NotificationStrings implements LocalizableStrings {
     // John Doe shared 7 items with you
     public static final String GENERIC_TITLE = "%d items";
 
-    // Your password has been reseted
-    public static final String TITLE_RESET_PASSWORD = "Your password has been reseted";
+    // Your password has been reset
+    public static final String SUBJECT_RESET_PASSWORD = "Your password has been reset";
 
-    // Your password for the following URL has been reseted to %1$s:\n\n%2$s
-    public static final String MESSAGE_RESET_PASSWORD = "Your password for the following URL has been reseted to %1$s:\n\n%2$s";
+    // Your password for http://ox.io/share/af12cb769 has been reset.
+    public static final String RESET_PASSWORD_INTRO = "Your password for %1$s has been reset.";
 
 }
