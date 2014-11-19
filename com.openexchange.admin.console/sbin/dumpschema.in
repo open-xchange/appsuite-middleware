@@ -76,4 +76,9 @@ OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.sc
 # Expect the following response: <schema> -h <host> -P <port> -u <username> -p<password> --single-transaction > <output>
 # This output can directly be fed to mysqldump
 
-mysqldump $OUTPUT
+RETVAL=$?
+if [ $RETVAL -eq 0 ]; then
+	mysqldump $OUTPUT
+else
+	echo $OUTPUT
+fi
