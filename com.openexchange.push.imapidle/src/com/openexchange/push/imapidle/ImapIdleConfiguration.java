@@ -84,11 +84,11 @@ public class ImapIdleConfiguration {
         ConfigurationService configService = services.getService(ConfigurationService.class);
 
         {
-            fullName = configService.getProperty("com.openexchange.push.imapidlev2.folder", "INBOX").trim();
+            fullName = configService.getProperty("com.openexchange.push.imapidle.folder", "INBOX").trim();
         }
 
         {
-            String propName = "com.openexchange.push.imapidlev2.delay";
+            String propName = "com.openexchange.push.imapidle.delay";
             String defaultDelay = "5000";
 
             String tmp = configService.getProperty(propName, defaultDelay).trim();
@@ -103,7 +103,7 @@ public class ImapIdleConfiguration {
 
         {
 
-            String tmp = configService.getProperty("com.openexchange.push.imapidlev2.clusterLock", "hz").trim();
+            String tmp = configService.getProperty("com.openexchange.push.imapidle.clusterLock", "hz").trim();
             if ("hz".equalsIgnoreCase(tmp)) {
                 clusterLock = new HzImapIdleClusterLock("imapidle-1", services);
             } else if ("db".equalsIgnoreCase(tmp)) {
@@ -114,12 +114,12 @@ public class ImapIdleConfiguration {
         }
 
         {
-            int tmp = Strings.parsePositiveInt(configService.getProperty("com.openexchange.push.imapidlev2.accountId", "0").trim());
+            int tmp = Strings.parsePositiveInt(configService.getProperty("com.openexchange.push.imapidle.accountId", "0").trim());
             accountId = tmp < 0 ? 0 : accountId;
         }
 
         {
-            PushMode tmp = PushMode.fromIdentifier(configService.getProperty("com.openexchange.push.imapidlev2.pushMode", "always").trim());
+            PushMode tmp = PushMode.fromIdentifier(configService.getProperty("com.openexchange.push.imapidle.pushMode", "always").trim());
             pushMode = null == tmp ? PushMode.ALWAYS : tmp;
         }
     }
