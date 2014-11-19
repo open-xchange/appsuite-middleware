@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.schemamove.mbean;
 
+import java.util.Map;
+import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -77,8 +79,17 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
 
     @Override
     public AttributeList getDbAccessInfoForSchema(String schemaName) throws MBeanException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            Map<String, String> map = schemaMoveService.getDbAccessInfoForSchema(schemaName);
+            AttributeList list = new AttributeList(map.size());
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                list.add(new Attribute(entry.getKey(), entry.getValue()));
+            }
+            return list;
+        } catch (Exception e) {
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
     }
 
 }
