@@ -119,6 +119,14 @@ public interface ContextService {
     void invalidateContext(int contextId) throws OXException;
 
     /**
+     * Invalidates the context objects in cache(s).
+     *
+     * @param contextIDs unique identifiers of the contexts to invalidate
+     * @throws OXException if invalidating the context fails
+     */
+    public void invalidateContexts(final int[] contextIDs) throws OXException;
+
+    /**
      * Invalidates a login information in the cache.
      *
      * @param loginContextInfo

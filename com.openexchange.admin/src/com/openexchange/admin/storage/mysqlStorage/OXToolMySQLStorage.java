@@ -911,7 +911,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean isDistinctWritePoolIDForSchema(String schema) throws StorageException {
+    public boolean isDistinctWritePoolIDForSchema(String schema) throws StorageException, NoSuchObjectException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -924,6 +924,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             int numPools = 0;
             while (rs.next()) {
                 numPools++;
+            }
+
+            if (numPools == 0) {
+                throw new NoSuchObjectException("No such schema " + schema);
             }
 
             return numPools == 1;

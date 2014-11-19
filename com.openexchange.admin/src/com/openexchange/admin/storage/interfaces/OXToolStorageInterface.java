@@ -335,9 +335,10 @@ public abstract class OXToolStorageInterface {
      *
      * @param schema the schema name
      * @return <code>true</code> if a distinct pool ID is used for all contexts.
-     * @throws StorageException
+     * @throws StorageException If database cannot be loaded
+     * @throws NoSuchObjectException If there is no such database schema
      */
-    public abstract boolean isDistinctWritePoolIDForSchema(String schema) throws StorageException;
+    public abstract boolean isDistinctWritePoolIDForSchema(String schema) throws StorageException, NoSuchObjectException;
 
     /**
      * Load database information with the given identifier.

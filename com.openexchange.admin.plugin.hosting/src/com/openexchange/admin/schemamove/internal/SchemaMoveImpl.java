@@ -50,9 +50,11 @@
 package com.openexchange.admin.schemamove.internal;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
@@ -61,8 +63,8 @@ import com.openexchange.admin.schemamove.SchemaMoveService;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.sessiond.SessiondService;
 
@@ -86,15 +88,14 @@ public class SchemaMoveImpl implements SchemaMoveService {
     }
 
     @Override
-    public void disableSchema(String schemaName) throws OXException {
+    public void disableSchema(String schemaName) throws OXException, TargetDatabaseException {
         try {
             /*
              * Precondition: a distinct write pool must be set for all contexts of the given schema
              */
             OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.isDistinctWritePoolIDForSchema(schemaName)) {
-                // TODO
-                throw new OXException(new Exception("Multiple write pool IDs are in use for the contexts in the given schema. Unable to proceed..."));
+                throw new TargetDatabaseException("Cannot proceed with schema move: Multiple write pool IDs are in use for schema " + schemaName);
             }
 
             /*
@@ -107,13 +108,17 @@ public class SchemaMoveImpl implements SchemaMoveService {
             /*
              * Invalidate disabled contexts
              */
-            ContextStorage.getInstance().invalidateContexts(Autoboxing.I2i(disabledContexts));
+            ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class);
+            contextService.invalidateContexts(Autoboxing.I2i(disabledContexts));
 
             /*
-             * TODO: kill sessions globally
+             * Kill sessions for the disabled contexts globally
              */
-            SessiondService sessiondService = AdminServiceRegistry.getInstance().getService(SessiondService.class);
+            SessiondService sessiondService = AdminServiceRegistry.getInstance().getService(SessiondService.class, true);
+            sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(disabledContexts));
         } catch (StorageException e) {
+            throw new OXException(e);
+        } catch (NoSuchObjectException e) {
             throw new OXException(e);
         }
     }

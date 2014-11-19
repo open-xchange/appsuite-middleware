@@ -50,6 +50,7 @@
 package com.openexchange.admin.schemamove;
 
 import java.util.Map;
+import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,8 +72,9 @@ public interface SchemaMoveService {
      *
      * @param schemaName The schema name
      * @throws OXException If operation fails
+     * @throws TargetDatabaseException 
      */
-    void disableSchema(String schemaName) throws OXException;
+    void disableSchema(String schemaName) throws OXException, TargetDatabaseException;
 
     /**
      * Returns the database access information that are necessary to establish a connection to given schema's database.
