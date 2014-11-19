@@ -124,7 +124,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
             if (null == schemaName) {
                 return null;
             }
-            int writePoolId = OXToolStorageInterface.getInstance().getDatabaseIDByDatabasename(schemaName);
+            int writePoolId = OXToolStorageInterface.getInstance().getDatabaseIDByDatabaseSchema(schemaName);
             Database database = OXToolStorageInterface.getInstance().loadDatabaseById(writePoolId);
 
             final Map<String, String> props = new HashMap<String, String>(6);
@@ -138,7 +138,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
             SafePut safePut = new SafePut();
 
             safePut.put("url", database.getUrl());
-            safePut.put("db_scheme", database.getScheme());
+            safePut.put("schema", schemaName);
             safePut.put("driver", database.getDriver());
             safePut.put("login", database.getLogin());
             safePut.put("name", database.getName());

@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.console.schemamove;
 
+import java.net.URI;
 import java.util.List;
 import javax.management.Attribute;
 import javax.management.MBeanException;
@@ -59,6 +60,7 @@ import org.apache.commons.cli.Options;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.java.Strings;
 
 /**
  * {@link DumpSchema}
@@ -113,20 +115,49 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         SchemaMoveMBean schemaMoveMBean = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
         List<Attribute> list = schemaMoveMBean.getDbAccessInfoForSchema(cmd.getOptionValue('m')).asList();
 
-        String url = getAttribute("url", list);
-        int pos = url.indexOf("jdbc:");
-        if (pos >= 0) {
-            url = url.substring(pos +5 );
+        {
+            String url = getAttribute("url", list);
+            if (Strings.isEmpty(url)) {
+                System.err.println("Missing the following attribute in MBean response: url");
+                System.exit(1);
+            }
+
+            int pos = url.indexOf("jdbc:");
+            if (pos >= 0) {
+                url = url.substring(pos +5 );
+            }
+            System.out.println(new URI(url).getHost());
         }
 
-        String db_scheme = getAttribute("db_scheme", list);
-        String driver = getAttribute("driver", list);
-        String login = getAttribute("login", list);
-        String name = getAttribute("name", list);
-        String password = getAttribute("password", list);
+        {
+            String name = getAttribute("name", list);
+            if (Strings.isEmpty(name)) {
+                System.err.println("Missing the following attribute in MBean response: name");
+                System.exit(1);
+            }
 
-        // Write them to std. out
+            System.out.println(name);
+        }
 
+        {
+            String password = getAttribute("password", list);
+            if (Strings.isEmpty(password)) {
+                System.err.println("Missing the following attribute in MBean response: password");
+                System.exit(1);
+            }
+
+            System.out.println(password);
+        }
+
+        {
+            String schema = getAttribute("schema", list);
+            if (Strings.isEmpty(schema)) {
+                System.err.println("Missing the following attribute in MBean response: schema");
+                System.exit(1);
+            }
+
+            System.out.println(schema);
+        }
 
         return null;
     }

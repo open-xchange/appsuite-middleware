@@ -906,6 +906,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public int getDatabaseIDByDatabaseSchema(String schemaName) throws StorageException, NoSuchObjectException {
+        return getByNameForConfigDB(schemaName, "database", "SELECT write_db_pool_id FROM context_server2db_pool WHERE db_schema=?");
+    }
+
+    @Override
     public boolean isDistinctWritePoolIDForSchema(String schema) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
