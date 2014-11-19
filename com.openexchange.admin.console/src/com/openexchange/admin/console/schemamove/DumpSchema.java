@@ -126,7 +126,9 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
             if (pos >= 0) {
                 url = url.substring(pos +5 );
             }
-            System.out.println(new URI(url).getHost());
+            URI uri = new URI(url);
+            System.out.println(uri.getHost());
+            System.out.println(uri.getPort()); // might be -1
         }
 
         {

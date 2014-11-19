@@ -74,3 +74,5 @@ CLASSPATH="-classpath @classpath@"
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.DumpSchema $@
 
+# Expect in following order: host, port, name, password, schema
+
