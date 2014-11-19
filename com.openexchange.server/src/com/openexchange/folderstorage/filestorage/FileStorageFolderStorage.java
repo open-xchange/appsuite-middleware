@@ -315,7 +315,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
     public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
 
-        return 0 == folderAccess.getFolder(folderId).getFileCount();
+        return folderAccess.getFolder(folderId).getFileCount() <= 0;
     }
 
     @Override
