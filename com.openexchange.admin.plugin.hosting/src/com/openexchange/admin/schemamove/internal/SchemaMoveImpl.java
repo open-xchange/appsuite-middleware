@@ -47,41 +47,78 @@
  *
  */
 
-package com.openexchange.admin.schemamove;
+package com.openexchange.admin.schemamove.internal;
 
+import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.schemamove.SchemaMoveService;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.exception.OXException;
 
 
 /**
- * {@link SchemaMoveService} - The service providing methods to move a schema to another database.
+ * {@link SchemaMoveImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SchemaMoveService {
+public class SchemaMoveImpl implements SchemaMoveService {
 
     /**
-     * Disables the denoted schema.
-     * <ul>
-     * <li>Checks required preconditions</li>
-     * <li>Determines affected contexts</li>
-     * <li>Disables active contexts and decorates them with a certain reason identifier</li>
-     * <li>Distribute changes contexts in cluster</li>
-     * <li>Terminate active sessions in cluster</li>
-     * </ul>
-     *
-     * @param schemaName The schema name
-     * @throws OXException If operation fails
+     * Initializes a new {@link SchemaMoveImpl}.
      */
-    void disableSchema(String schemaName) throws OXException;
+    public SchemaMoveImpl() {
+        super();
+        // TODO Auto-generated constructor stub
 
-    /**
-     * Returns the database access information that are necessary to establish a connection to given schema's database.
-     *
-     * @param schemaName The schema name
-     * @throws OXException If operation fails
-     */
-    Map<String, String> getDbAccessInfoForSchema(String schemaName) throws OXException;
+    }
 
-    void enableSchema(String schemaName, String sourceSchema, boolean deleteSource) throws OXException;
+    @Override
+    public void disableSchema(String schemaName) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Map<String, String> getDbAccessInfoForSchema(String schemaName) throws OXException {
+        try {
+            if (null == schemaName) {
+                return null;
+            }
+            int writePoolId = OXToolStorageInterface.getInstance().getDatabaseIDByDatabasename(schemaName);
+            Database database = OXToolStorageInterface.getInstance().loadDatabaseById(writePoolId);
+
+            final Map<String, String> props = new HashMap<String, String>(6);
+            class SafePut {
+                void put(String name, String value) {
+                    if (null != value) {
+                        props.put(name, value);
+                    }
+                }
+            }
+            SafePut safePut = new SafePut();
+
+            safePut.put("url", database.getUrl());
+            safePut.put("db_scheme", database.getScheme());
+            safePut.put("driver", database.getDriver());
+            safePut.put("login", database.getLogin());
+            safePut.put("name", database.getName());
+            safePut.put("password", database.getPassword());
+
+            return props;
+        } catch (StorageException e) {
+            throw new OXException(e);
+        } catch (NoSuchObjectException e) {
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public void enableSchema(String schemaName, String sourceSchema, boolean deleteSource) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }
