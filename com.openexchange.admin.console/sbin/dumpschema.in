@@ -74,5 +74,6 @@ CLASSPATH="-classpath @classpath@"
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.DumpSchema $@
 
-# Expect in following order: host, port, name, password, schema
+# Expect the following response: <schema> -h <host> -P <port> -u <username> -p<password> --single-transaction
+# This output can be directly fed to mysqldump 
 

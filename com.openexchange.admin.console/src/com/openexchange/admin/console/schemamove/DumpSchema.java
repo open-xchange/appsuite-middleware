@@ -108,7 +108,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         options.addOption(OptionBuilder.withLongOpt("schema").withArgName("schema_name").withDescription("The name of the schema to dump.").hasArg(
             true).isRequired(true).create("m"));
         options.addOption(OptionBuilder.withLongOpt("out").withArgName("dump_file").withDescription(
-            "The name of the dump file. If not specified, the dump will be written to standard output").hasArg(true).isRequired(false).create(
+            "The name of the dump file. If not specified, the dump will be written to standard output").hasArg(true).isRequired(true).create(
             "o"));
     }
 
@@ -147,7 +147,8 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
             System.exit(1);
         }
 
-        print(uri, name, password, schema);
+        String output = cmd.getOptionValue('o');
+        print(uri, name, password, schema, output);
 
         return null;
     }
@@ -161,13 +162,13 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
      * @param out
      * @throws IOException
      */
-    private void print(URI uri, String login, String password, String schema) {
+    private void print(URI uri, String login, String password, String schema, String output) {
         StringBuilder builder = new StringBuilder();
         builder.append(schema).append(" -h ").append(uri.getHost());
         if (uri.getPort() > 0) {
             builder.append(" -P ").append(uri.getPort());
         }
-        builder.append(" -u ").append(login).append("-p").append(password).append(" --single-transaction");
+        builder.append(" -u ").append(login).append("-p").append(password).append(" --single-transaction > ").append(output);
         System.out.println(builder.toString());
     }
 }
