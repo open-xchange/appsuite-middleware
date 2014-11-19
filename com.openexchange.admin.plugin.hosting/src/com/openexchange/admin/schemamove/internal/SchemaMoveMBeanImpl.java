@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.schemamove.mbean;
+package com.openexchange.admin.schemamove.internal;
 
 import java.util.Map;
 import javax.management.Attribute;
@@ -56,6 +56,7 @@ import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.admin.schemamove.SchemaMoveService;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 
 
 /**

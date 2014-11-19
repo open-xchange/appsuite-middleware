@@ -52,7 +52,6 @@ package com.openexchange.admin.schemamove.mbean;
 import javax.management.AttributeList;
 import javax.management.MBeanException;
 
-
 /**
  * {@link SchemaMoveMBean}
  *
@@ -64,10 +63,20 @@ public interface SchemaMoveMBean {
     public static final String DOMAIN = "com.openexchange.admin.schemamove";
 
     /**
-     * Returns the database access information that are necessary to establish a connection to given schema's database.
+     * Returns the database access information that are necessary to establish a connection to given schema's database. *
+     * <p>
+     * The returned attribute list contains may contain following named attributes:
+     * <ul>
+     * <li><code>"url"</code></li>
+     * <li><code>"db_scheme"</code></li>
+     * <li><code>"driver"</code></li>
+     * <li><code>"login"</code></li>
+     * <li><code>"name"</code></li>
+     * <li><code>"password"</code></li>
+     * </ul>
      *
      * @param schemaName The schema name
-     * @return The database access information as attribute list
+     * @return The database access information as an attribute list
      * @throws MBeanException If operation fails
      */
     AttributeList getDbAccessInfoForSchema(String schemaName) throws MBeanException;

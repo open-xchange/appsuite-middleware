@@ -52,7 +52,6 @@ package com.openexchange.admin.schemamove;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link SchemaMoveService} - The service providing methods to move a schema to another database.
  *
@@ -77,6 +76,16 @@ public interface SchemaMoveService {
 
     /**
      * Returns the database access information that are necessary to establish a connection to given schema's database.
+     * <p>
+     * The returned map contains may contain:
+     * <ul>
+     * <li><code>"url"</code></li>
+     * <li><code>"db_scheme"</code></li>
+     * <li><code>"driver"</code></li>
+     * <li><code>"login"</code></li>
+     * <li><code>"name"</code></li>
+     * <li><code>"password"</code></li>
+     * </ul>
      *
      * @param schemaName The schema name
      * @return The database access information

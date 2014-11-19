@@ -49,11 +49,14 @@
 
 package com.openexchange.admin.console.schemamove;
 
+import java.util.List;
+import javax.management.Attribute;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 
@@ -87,7 +90,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return "Tool to dump Open-Xchange database schemata to a file.";
+        return "Tool to dump an Open-Xchange database schema to a file.";
     }
 
     @Override
@@ -107,8 +110,34 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        // TODO: flesh out
-        // - dump schemata
+        SchemaMoveMBean schemaMoveMBean = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
+        List<Attribute> list = schemaMoveMBean.getDbAccessInfoForSchema(cmd.getOptionValue('m')).asList();
+
+        String url = getAttribute("url", list);
+        int pos = url.indexOf("jdbc:")
+        if (pos >= 0) {
+            url = url.substring(pos +5 );
+        }
+
+        String db_scheme = getAttribute("db_scheme", list);
+        String driver = getAttribute("driver", list);
+        String login = getAttribute("login", list);
+        String name = getAttribute("name", list);
+        String password = getAttribute("password", list);
+
+        // Write them to std. out
+
+
+        return null;
+    }
+
+    private String getAttribute(String name, List<Attribute> list) {
+        for (int i = list.size(); i-- > 0;) {
+            Attribute attribute = list.get(i);
+            if (name.equals(attribute.getName())) {
+                return (String) attribute.getValue();
+            }
+        }
         return null;
     }
 

@@ -51,6 +51,8 @@ Import-Package: com.openexchange.admin.rmi,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.admin.rmi.impl,
+ com.openexchange.admin.schemamove,
+ com.openexchange.admin.schemamove.mbean,
  com.openexchange.admin.storage.interfaces
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
