@@ -60,6 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.database.Databases;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -113,15 +114,42 @@ public final class VersionControlUtil {
             do {
                 DocumentMetadataImpl version = new DocumentMetadataImpl();
                 version.setId(id);
-                version.setVersion(rs.getInt(1));
-                version.setFilestoreLocation(rs.getString(2));
-                l.add(version);
+                String filestoreLocation = rs.getString(2);
+                if (!rs.wasNull()) {
+                    version.setVersion(rs.getInt(1));
+                    version.setFilestoreLocation(filestoreLocation);
+                    l.add(version);
+                }
             } while (rs.next());
             return l;
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Performs the version control for specified documents' versions.
+     * <p>
+     * Each file storage location is checked against the destination folder's one. If they differ, a file move for each version is required.
+     * <p>
+     * The returned map contains the version control results for those documents whose files were moved during that process.
+     *
+     * @param provider The database provider to use
+     * @param documents The documents to move
+     * @param oldDocuments The originating documents
+     * @param destinationFolder The destination folder identifier
+     * @param context The associated context
+     * @return The version control results
+     * @throws OXException If operation fails
+     */
+    public static Map<Integer, List<VersionControlResult>> doVersionControl(DBProvider provider, List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, long destinationFolder, Context context) throws OXException {
+        Connection wcon = provider.getWriteConnection(context);
+        try {
+            return doVersionControl(documents, oldDocuments, destinationFolder, context, wcon);
+        } finally {
+            provider.releaseWriteConnection(context, wcon);
         }
     }
 
@@ -140,11 +168,11 @@ public final class VersionControlUtil {
      * @return The version control results
      * @throws OXException If operation fails
      */
-    public static Map<Integer, List<VersionControlResult>> doVersionControl(List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, int destinationFolder, Context context, Connection con) throws OXException {
+    public static Map<Integer, List<VersionControlResult>> doVersionControl(List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, long destinationFolder, Context context, Connection con) throws OXException {
         OXFolderAccess folderAccess = new OXFolderAccess(con, context);
         int contextId = context.getContextId();
         QuotaFileStorageService qfs = FileStorages.getQuotaFileStorageService();
-        QuotaFileStorage destFs = qfs.getQuotaFileStorage(folderAccess.getFolderOwner(destinationFolder), contextId);
+        QuotaFileStorage destFs = qfs.getQuotaFileStorage(folderAccess.getFolderOwner((int) destinationFolder), contextId);
         Map<Integer, DocumentMetadata> oldDocs = asMap(oldDocuments);
 
         Map<Integer, List<VersionControlResult>> resultMap = new LinkedHashMap<Integer, List<VersionControlResult>>(documents.size());
@@ -174,7 +202,9 @@ public final class VersionControlUtil {
             }
         }
 
-        applyVersionControl(resultMap, context, con);
+        if (false == resultMap.isEmpty()) {
+            applyVersionControl(resultMap, context, con);
+        }
 
         return resultMap;
     }
@@ -207,6 +237,24 @@ public final class VersionControlUtil {
     /**
      * Restores documents' versions file storage locations based on given version control results.
      *
+     * @param provider The database provider to use
+     * @param resultMap The result map as returned by {@link #doVersionControl(List, List, int, Context, Connection) doVersionControl()}
+     * @param context The associated context
+     * @return The restored results
+     * @throws OXException If operation fails
+     */
+    public static Map<Integer, List<VersionControlRestored>> restoreVersionControl(DBProvider provider, Map<Integer, List<VersionControlResult>> resultMap, Context context) throws OXException {
+        Connection wcon = provider.getWriteConnection(context);
+        try {
+            return restoreVersionControl(resultMap, context, wcon);
+        } finally {
+            provider.releaseWriteConnection(context, wcon);
+        }
+    }
+
+    /**
+     * Restores documents' versions file storage locations based on given version control results.
+     *
      * @param resultMap The result map as returned by {@link #doVersionControl(List, List, int, Context, Connection) doVersionControl()}
      * @param context The associated context
      * @param con The connection to use
@@ -229,7 +277,9 @@ public final class VersionControlUtil {
             restoredMap.put(id, restoreds);
         }
 
-        applyRestoreds(restoredMap, context, con);
+        if (false == restoredMap.isEmpty()) {
+            applyRestoreds(restoredMap, context, con);
+        }
 
         return restoredMap;
     }

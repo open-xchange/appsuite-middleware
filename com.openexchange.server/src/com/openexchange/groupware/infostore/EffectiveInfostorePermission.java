@@ -81,7 +81,7 @@ public class EffectiveInfostorePermission {
     /**
      * Gets the folder owner identifier
      *
-     * @return The folder administrator owner or <code>-1</code>
+     * @return The folder owner or <code>-1</code>
      */
     public int getFolderOwner() {
         return folderOwner;
