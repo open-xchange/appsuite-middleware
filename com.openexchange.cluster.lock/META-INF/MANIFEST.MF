@@ -10,6 +10,7 @@ Import-Package: com.hazelcast.core,
  com.openexchange.hazelcast.configuration,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.timer,
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.7.5"
