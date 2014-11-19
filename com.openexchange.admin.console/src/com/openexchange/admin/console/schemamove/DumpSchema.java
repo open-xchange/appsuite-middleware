@@ -49,13 +49,13 @@
 
 package com.openexchange.admin.console.schemamove;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import javax.management.Attribute;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
@@ -118,57 +118,42 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         List<Attribute> list = schemaMoveMBean.getDbAccessInfoForSchema(cmd.getOptionValue('m')).asList();
         final Map<String, String> dbAccessInfo = SchemaTools.convertToMap(list);
 
-        {
-            String url = dbAccessInfo.get("url");
-            if (Strings.isEmpty(url)) {
-                System.err.println("Missing the following attribute in MBean response: url");
-                System.exit(1);
-            }
-
-            int pos = url.indexOf("jdbc:");
-            if (pos >= 0) {
-                url = url.substring(pos + 5);
-            }
-            URI uri = new URI(url);
-            System.out.println(uri.getHost());
-            System.out.println(uri.getPort()); // might be -1
+        String url = dbAccessInfo.get("url");
+        if (Strings.isEmpty(url)) {
+            System.err.println("Missing the following attribute in MBean response: url");
+            System.exit(1);
         }
 
-        {
-            String name = dbAccessInfo.get("name");
-            if (Strings.isEmpty(name)) {
-                System.err.println("Missing the following attribute in MBean response: name");
-                System.exit(1);
-            }
-
-            System.out.println(name);
+        int pos = url.indexOf("jdbc:");
+        if (pos >= 0) {
+            url = url.substring(pos + 5);
+        }
+        URI uri = new URI(url);
+        String name = dbAccessInfo.get("name");
+        if (Strings.isEmpty(name)) {
+            System.err.println("Missing the following attribute in MBean response: name");
+            System.exit(1);
         }
 
-        {
-            String password = dbAccessInfo.get("password");
-            if (Strings.isEmpty(password)) {
-                System.err.println("Missing the following attribute in MBean response: password");
-                System.exit(1);
-            }
-
-            System.out.println(password);
+        String password = dbAccessInfo.get("password");
+        if (Strings.isEmpty(password)) {
+            System.err.println("Missing the following attribute in MBean response: password");
+            System.exit(1);
         }
 
-        {
-            String schema = dbAccessInfo.get("schema");
-            if (Strings.isEmpty(schema)) {
-                System.err.println("Missing the following attribute in MBean response: schema");
-                System.exit(1);
-            }
-
-            System.out.println(schema);
+        String schema = dbAccessInfo.get("schema");
+        if (Strings.isEmpty(schema)) {
+            System.err.println("Missing the following attribute in MBean response: schema");
+            System.exit(1);
         }
+
+        print(uri, name, password, schema);
 
         return null;
     }
 
     /**
-     * Execute dump
+     * Print
      * 
      * @param host
      * @param login
@@ -176,10 +161,13 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
      * @param out
      * @throws IOException
      */
-    private void dump(String host, String login, String password, String schema) {
+    private void print(URI uri, String login, String password, String schema) {
         StringBuilder builder = new StringBuilder();
-        builder.append("mysqldump -h ").append(host).append(" -u ").append(login).append("-p").append(password).append(
-            " --single-transaction ").append(schema);
+        builder.append(schema).append(" -h ").append(uri.getHost());
+        if (uri.getPort() > 0) {
+            builder.append(" -P ").append(uri.getPort());
+        }
+        builder.append(" -u ").append(login).append("-p").append(password).append(" --single-transaction");
         System.out.println(builder.toString());
     }
 }
