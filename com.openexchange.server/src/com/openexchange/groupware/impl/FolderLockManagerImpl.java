@@ -96,7 +96,7 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
 
     @Override
     public List<FolderLock> findFolderLocks(final int entity, final Context ctx, final User user) throws OXException {
-        final FolderTreeUtil treeUtil = new FolderTreeUtilImpl(getProvider());
+        final FolderTreeUtil treeUtil = new FolderTreeUtilImpl(this);
         List<Integer> path = treeUtil.getPath(entity, ctx, user);
         final int parent = path.get(path.size()-2).intValue();
         path = path.subList(0, path.size()-2);

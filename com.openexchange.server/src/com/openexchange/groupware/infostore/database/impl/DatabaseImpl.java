@@ -1005,7 +1005,7 @@ public class DatabaseImpl extends DBService {
             SearchIterator<DocumentMetadata> iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allDocumentsWhere(
                 " infostore.cid = " + ctx.getContextId(),
                 Metadata.VALUES_ARRAY,
-                getProvider(),
+                this,
                 ctx);
             if (!iter.hasNext()) {
                 return; // Nothing to delete
@@ -1020,7 +1020,7 @@ public class DatabaseImpl extends DBService {
             iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allVersionsWhere(
                 " infostore.cid = " + ctx.getContextId(),
                 Metadata.VALUES_ARRAY,
-                getProvider(),
+                this,
                 ctx);
             while (iter.hasNext()) {
                 final DocumentMetadata metadata = iter.next();
@@ -1030,13 +1030,13 @@ public class DatabaseImpl extends DBService {
             final InfostoreQueryCatalog catalog = InfostoreQueryCatalog.getInstance();
 
             final DeleteAllDocumentsAction deleteDocumentAction = new DeleteAllDocumentsAction();
-            deleteDocumentAction.setProvider(getProvider());
+            deleteDocumentAction.setProvider(this);
             deleteDocumentAction.setContext(ctx);
             deleteDocumentAction.setDocuments(documents);
             deleteDocumentAction.setQueryCatalog(catalog);
 
             final DeleteAllVersionsAction deleteVersionAction = new DeleteAllVersionsAction();
-            deleteVersionAction.setProvider(getProvider());
+            deleteVersionAction.setProvider(this);
             deleteVersionAction.setContext(ctx);
             deleteVersionAction.setDocuments(versions);
             deleteVersionAction.setQueryCatalog(catalog);
@@ -1085,13 +1085,13 @@ public class DatabaseImpl extends DBService {
         PreparedStatementHolder holder = null;
 
         try {
-            final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(getProvider()).discoverFolders(id, ctx);
+            final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(this).discoverFolders(id, ctx);
             if (foldersWithPrivateItems.size() == 0) {
                 return;
             }
 
             final List<String> files = new LinkedList<String>();
-            holder = new PreparedStatementHolder(getProvider().getWriteConnection(session.getContext()));
+            holder = new PreparedStatementHolder(this.getWriteConnection(session.getContext()));
 
 
             for (final FolderObject folder : foldersWithPrivateItems) {
@@ -1109,7 +1109,7 @@ public class DatabaseImpl extends DBService {
         } finally {
             if(holder != null) {
                 holder.close();
-                getProvider().releaseWriteConnection(session.getContext(), holder.getConnection());
+                releaseWriteConnection(session.getContext(), holder.getConnection());
             }
         }
     }
@@ -1120,7 +1120,7 @@ public class DatabaseImpl extends DBService {
             Metadata.VALUES_ARRAY,
             Metadata.ID_LITERAL,
             InfostoreFacade.ASC,
-            getProvider(),
+            this,
             session.getContext());
         final List<DocumentMetadata> parents = new ArrayList<DocumentMetadata>();
 
@@ -1160,7 +1160,7 @@ public class DatabaseImpl extends DBService {
             Metadata.VALUES_ARRAY,
             Metadata.ID_LITERAL,
             InfostoreFacade.ASC,
-            getProvider(),
+            this,
             session.getContext());
 
         while (allVersions.hasNext()) {

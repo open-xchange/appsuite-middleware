@@ -56,7 +56,6 @@ import java.sql.SQLException;
 import java.util.UUID;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -95,6 +94,8 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     private boolean reserved;
 
 	private boolean wasAdjusted;
+
+    private boolean startedTransaction;
 
     public SelectForUpdateReservation(final String fileName, final long folderId, final int id, final Context context, final DBProvider provider) {
         super();
@@ -160,16 +161,22 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     }
 
     private void finishTransaction() {
-        Databases.autocommit(con);
+        if (startedTransaction) {
+            Databases.autocommit(con);
+        }
         releaseConnection();
     }
 
     private void rollback() {
-        Databases.rollback(con);
+        if (startedTransaction) {
+            Databases.rollback(con);
+        }
     }
 
     private void commit() throws SQLException {
-        con.commit();
+        if (startedTransaction) {
+            con.commit();
+        }
     }
 
     private void reserveFilename() throws SQLException {
@@ -195,7 +202,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
                 folderId,
                 fileName,
                 new Metadata[] { Metadata.ID_LITERAL, Metadata.TITLE_LITERAL },
-                new StaticDBPoolProvider(con),
+                provider,
                 ctx);
             while (iter.hasNext()) {
                 final DocumentMetadata dm = iter.next();
@@ -254,7 +261,10 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private void startTransaction() throws OXException, SQLException {
         openConnection();
-        Databases.startTransaction(con);
+        if (con.getAutoCommit()) {
+            Databases.startTransaction(con);
+            startedTransaction  = true;
+        }
     }
 
 

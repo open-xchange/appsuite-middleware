@@ -47,72 +47,62 @@
  *
  */
 
-package com.openexchange.tx;
+package com.openexchange.database.provider;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Connection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
- * {@link TransactionState}
+ * A {@link DBProvider} that logs every method call on the trace log level.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class TransactionState {
+public class LoggingDBProvider implements DBProvider {
 
-    private static final ThreadLocal<Map<Object, Object>> PARAMETERS = new ThreadLocal<Map<Object, Object>>();
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingDBProvider.class);
 
-    public static final String WRITE_CON = "dbcon_writeable";
+    private static final String PREFIX = "!!!DBPROVIDER!!! ";
 
-    public static final String READ_CON = "dbcon_readonly";
+    private final DBProvider delegate;
 
-    public static void init() {
-        Map<Object, Object> existing = PARAMETERS.get();
-        if (existing != null) {
-            throw new IllegalStateException("TransactionState is already initialized!");
-        }
-
-        PARAMETERS.set(new HashMap<Object, Object>());
+    public LoggingDBProvider(DBProvider delegate) {
+        super();
+        this.delegate = delegate;
     }
 
-    public static boolean isInitialized() {
-        Map<Object, Object> existing = PARAMETERS.get();
-        return existing != null;
+    @Override
+    public Connection getReadConnection(Context ctx) throws OXException {
+        LOG.trace("{}Getting read connection", PREFIX);
+        return delegate.getReadConnection(ctx);
     }
 
-    public static void put(Object key, Object value) {
-        checkAndGetMap().put(key, value);
+    @Override
+    public void releaseReadConnection(Context ctx, Connection con) {
+        LOG.trace("{}Releasing read connection", PREFIX);
+        delegate.releaseReadConnection(ctx, con);
     }
 
-    public static Object get(Object key) {
-        return checkAndGetMap().get(key);
+    @Override
+    public Connection getWriteConnection(Context ctx) throws OXException {
+        LOG.trace("{}Getting write connection", PREFIX);
+        return delegate.getWriteConnection(ctx);
     }
 
-    public static boolean containsKey(Object key) {
-        return checkAndGetMap().containsKey(key);
+    @Override
+    public void releaseWriteConnection(Context ctx, Connection con) {
+        LOG.trace("{}Releasing write connection", PREFIX);
+        delegate.releaseWriteConnection(ctx, con);
     }
 
-    public static void remove(Object key) {
-        checkAndGetMap().remove(key);
-    }
-
-    public static void cleanUp() {
-        Map<Object, Object> existing = PARAMETERS.get();
-        if (existing == null) {
-            throw new IllegalStateException("TransactionState was not initialized!");
-        }
-
-        PARAMETERS.remove();
-    }
-
-    private static Map<Object, Object> checkAndGetMap() {
-        Map<Object, Object> existing = PARAMETERS.get();
-        if (existing == null) {
-            throw new IllegalStateException("TransactionState was not initialized!");
-        }
-
-        return existing;
+    @Override
+    public void releaseWriteConnectionAfterReading(Context ctx, Connection con) {
+        LOG.trace("{}Releasing write connection", PREFIX);
+        delegate.releaseWriteConnectionAfterReading(ctx, con);
     }
 
 }

@@ -139,9 +139,9 @@ import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tx.AbstractService;
+import com.openexchange.tx.ConnectionHolder;
 import com.openexchange.tx.TransactionAwares;
 import com.openexchange.tx.TransactionException;
-import com.openexchange.tx.TransactionState;
 
 /**
  * {@link AbstractCompositingIDBasedFileAccess}
@@ -827,10 +827,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
         @Override
         public final V call(final FileStorageFileAccess access) throws OXException {
-            boolean tsOwner = !TransactionState.isInitialized();
-            if (tsOwner) {
-                TransactionState.init();
-            }
             boolean rollback = false;
             try {
                 // Start transaction
@@ -848,9 +844,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                     TransactionAwares.rollbackSafe(access);
                 }
                 TransactionAwares.finishSafe(access);
-                if (tsOwner) {
-                    TransactionState.cleanUp();
-                }
             }
         }
 
@@ -886,23 +879,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     private boolean handleNewGuestPermissions(FileStorageFileAccess access, File document, List<FileStorageGuestObjectPermission> guestPermissions) throws OXException {
-        if (guestPermissions != null && !guestPermissions.isEmpty()) {
-            List<ShareRecipient> shareRecipients = new ArrayList<ShareRecipient>(guestPermissions.size());
-            for (FileStorageGuestObjectPermission guestPermission : guestPermissions) {
-                shareRecipients.add(guestPermission.getRecipient());
-            }
-
-            Connection con = null;
-            if (TransactionState.isInitialized()) {
-                Object object = TransactionState.get(TransactionState.WRITE_CON);
-                if (object != null && object instanceof Connection) {
-                    con = (Connection) object;
+        Connection connection = ConnectionHolder.CONNECTION.get();
+        try {
+            session.setParameter(Connection.class.getName(), connection);
+            if (guestPermissions != null && !guestPermissions.isEmpty()) {
+                List<ShareRecipient> shareRecipients = new ArrayList<ShareRecipient>(guestPermissions.size());
+                for (FileStorageGuestObjectPermission guestPermission : guestPermissions) {
+                    shareRecipients.add(guestPermission.getRecipient());
                 }
-            }
 
-            List<FileStorageObjectPermission> allPermissions = new ArrayList<FileStorageObjectPermission>(shareRecipients.size());
-            try {
-                session.setParameter(Connection.class.getName(), con);
+                List<FileStorageObjectPermission> allPermissions = new ArrayList<FileStorageObjectPermission>(shareRecipients.size());
                 ShareService shareService = Services.getService(ShareService.class);
                 int owner = document.getCreatedBy();
                 if (0 >= owner) {
@@ -931,9 +917,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
                 document.setObjectPermissions(allPermissions);
                 return true;
-            } finally {
-                session.setParameter(Connection.class.getName(), null);
             }
+        } finally {
+            session.setParameter(Connection.class.getName(), null);
         }
 
         return false;

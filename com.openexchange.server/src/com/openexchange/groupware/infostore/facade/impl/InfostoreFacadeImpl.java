@@ -77,7 +77,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
@@ -525,7 +524,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     protected DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
         InfostoreIterator iterator = null;
         try {
-            iterator = InfostoreIterator.loadDocumentIterator(id, version, getProvider(), ctx);
+            iterator = InfostoreIterator.loadDocumentIterator(id, version, this, ctx);
             if (false == iterator.hasNext()) {
                 throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
             }
@@ -597,7 +596,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         setDefaults(document);
 
         VALIDATION.validate(document);
-        CheckSizeSwitch.checkSizes(document, getProvider(), context);
+        CheckSizeSwitch.checkSizes(document, this, context);
 
         final boolean titleAlso = document.getFileName() != null && document.getTitle() != null && document.getFileName().equals(document.getTitle());
 
@@ -873,7 +872,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         updatedCols.add(Metadata.LAST_MODIFIED_LITERAL);
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
-        CheckSizeSwitch.checkSizes(document, getProvider(), context);
+        CheckSizeSwitch.checkSizes(document, this, context);
         VALIDATION.validate(document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
@@ -913,7 +912,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
         }
 
-        CheckSizeSwitch.checkSizes(document, getProvider(), context);
+        CheckSizeSwitch.checkSizes(document, this, context);
         VALIDATION.validate(document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(load(document.getId(), context), context, null);
@@ -1083,13 +1082,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
         }
         Context context = session.getContext();
-        DBProvider provider = new ReuseReadConProvider(getProvider());
         String whereClause = "infostore.folder_id = " + folderId;
         List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
-            whereClause, Metadata.VALUES_ARRAY, provider, context).asList();
+            whereClause, Metadata.VALUES_ARRAY, this, context).asList();
         if (0 < allDocuments.size()) {
             List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
-                whereClause, Metadata.VALUES_ARRAY, provider, context).asList();
+                whereClause, Metadata.VALUES_ARRAY, this, context).asList();
             objectPermissionLoader.add(allDocuments, context, objectPermissionLoader.load(folderId, context));
             removeDocuments(allDocuments, allVersions, date, session, null);
         }
@@ -1390,9 +1388,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * get documents to move
          */
-        DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
         int[] objectIDs = Tools.getObjectIDArray(ids);
-        List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), objectIDs, Metadata.VALUES_ARRAY);
+        List<DocumentMetadata> allDocuments = getAllDocuments(this, session.getContext(), objectIDs, Metadata.VALUES_ARRAY);
         objectPermissionLoader.add(allDocuments, session.getContext(), Tools.getIDs(allDocuments));
         /*
          * Ensure folder ids are consistent between request and existing documents
@@ -1430,7 +1427,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         final Context context = session.getContext();
         final User user = session.getUser();
         final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
-        final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
 
         Set<Integer> objectIDs = idsToFolders.keySet();
         String whereClause;
@@ -1442,9 +1438,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             whereClause = stringBuilder.append(')').toString();
         }
         List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
-            whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
+            whereClause, Metadata.VALUES_ARRAY, this, context).asList();
         List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
-            whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
+            whereClause, Metadata.VALUES_ARRAY, this, context).asList();
         objectPermissionLoader.add(allDocuments, context, idsToFolders.keySet());
 
         // Ensure folder ids are consistent between request and existing documents
@@ -1491,7 +1487,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
 
         final Map<Integer, Long> idsToFolders = Tools.getIDsToFolders(ids);
-        final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
         Set<Integer> objectIDs = idsToFolders.keySet();
         String whereClause;
         if (1 == objectIDs.size()) {
@@ -1502,9 +1497,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             whereClause = stringBuilder.append(')').toString();
         }
         List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
-            whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
+            whereClause, Metadata.VALUES_ARRAY, this, context).asList();
         List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
-            whereClause, Metadata.VALUES_ARRAY, reuseProvider, context).asList();
+            whereClause, Metadata.VALUES_ARRAY, this, context).asList();
 
         // Ensure folder ids are consistent between request and existing documents
         for (DocumentMetadata document : allDocuments) {
@@ -1705,9 +1700,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         InfostoreIterator iter;
         if (onlyOwn) {
-            iter = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, getProvider(), context);
+            iter = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, this, context);
         } else {
-            iter = InfostoreIterator.documents(folderId, cols, sort, order, getProvider(), context);
+            iter = InfostoreIterator.documents(folderId, cols, sort, order, this, context);
         }
         /*
          * fast-forward results to get the object IDs and sequence number in case additional metadata is required
@@ -1791,7 +1786,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         Metadata[] cols = addLastModifiedIfNeeded(columns);
-        final InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, getProvider(), context);
+        final InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, this, context);
         iter.setCustomizer(new DocumentCustomizer() {
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {
@@ -1829,7 +1824,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
          * get items, checking permissions as lazy as possible
          */
         final Map<Long, EffectiveInfostoreFolderPermission> knownFolderPermissions = new HashMap<Long, EffectiveInfostoreFolderPermission>();
-        InfostoreIterator iterator = InfostoreIterator.list(Autoboxing.I2i(objectIDs), cols, getProvider(), session.getContext());
+        InfostoreIterator iterator = InfostoreIterator.list(Autoboxing.I2i(objectIDs), cols, this, session.getContext());
         iterator.setCustomizer(new DocumentCustomizer() {
 
             @Override
@@ -1906,7 +1901,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final ServerSession session) throws OXException {
         final Context context = session.getContext();
         final User user = session.getUser();
-        final DBProvider reuse = new ReuseReadConProvider(getProvider());
 
         InfostoreIterator newIter = null;
         InfostoreIterator modIter = null;
@@ -1920,12 +1914,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     return document;
                 }
             };
-            newIter = InfostoreIterator.newSharedDocumentsForUser(context, user, columns, sort, order, updateSince, reuse);
+            newIter = InfostoreIterator.newSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
             newIter.setCustomizer(customizer);
-            modIter = InfostoreIterator.modifiedSharedDocumentsForUser(context, user, columns, sort, order, updateSince, reuse);
+            modIter = InfostoreIterator.modifiedSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
             modIter.setCustomizer(customizer);
             if (!ignoreDeleted) {
-                delIter = InfostoreIterator.deletedSharedDocumentsForUser(context, user, columns, sort, order, updateSince, reuse);
+                delIter = InfostoreIterator.deletedSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
                 delIter.setCustomizer(customizer);
             }
         } else {
@@ -1938,16 +1932,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
 
             if (onlyOwn) {
-                newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, reuse, context);
-                modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, reuse, context);
+                newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, this, context);
+                modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, this, context);
                 if (!ignoreDeleted) {
-                    delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, user.getId(), sort, order, updateSince, reuse, context);
+                    delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, user.getId(), sort, order, updateSince, this, context);
                 }
             } else {
-                newIter = InfostoreIterator.newDocuments(folderId, cols, sort, order, updateSince, reuse, context);
-                modIter = InfostoreIterator.modifiedDocuments(folderId, cols, sort, order, updateSince, reuse, context);
+                newIter = InfostoreIterator.newDocuments(folderId, cols, sort, order, updateSince, this, context);
+                modIter = InfostoreIterator.modifiedDocuments(folderId, cols, sort, order, updateSince, this, context);
                 if (!ignoreDeleted) {
-                    delIter = InfostoreIterator.deletedDocuments(folderId, sort, order, updateSince, reuse, context);
+                    delIter = InfostoreIterator.deletedDocuments(folderId, sort, order, updateSince, this, context);
                 }
             }
         }
@@ -2064,7 +2058,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             new Metadata[] { Metadata.ID_LITERAL },
             null,
             -1,
-            getProvider(),
+            this,
             session.getContext());
         try {
             while (documents.hasNext()) {
@@ -2080,7 +2074,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public int countDocuments(final long folderId, final ServerSession session) throws OXException {
         if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, getProvider());
+            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, this);
             return it.asList().size();
         }
 
@@ -2217,6 +2211,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         fileIdRemoveList.set(null);
         db.finish();
         ServiceMethod.FINISH.callUnsafe(security);
+        lockManager.finish();
         super.finish();
     }
 
@@ -2253,9 +2248,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public void setProvider(final DBProvider provider) {
         super.setProvider(provider);
-        db.setProvider(provider);
-        ServiceMethod.SET_PROVIDER.call(security, provider);
-        ServiceMethod.SET_PROVIDER.call(lockManager, provider);
+        db.setProvider(this);
+        ServiceMethod.SET_PROVIDER.call(security, this);
+        ServiceMethod.SET_PROVIDER.call(lockManager, this);
     }
 
 

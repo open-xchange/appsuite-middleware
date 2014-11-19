@@ -127,10 +127,15 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         Map<DocumentMetadata, FilenameReservation> reservations = new HashMap<DocumentMetadata, FilenameReservation>(documents.size());
         Map<Long, List<DocumentMetadata>> documentsPerFolder = getDocumentsPerFolder(documents);
         boolean committed = false;
+        boolean startedTransaction = false;
         Connection con = null;
         try {
             con = provider.getWriteConnection(context);
-            Databases.startTransaction(con);
+            if (con.getAutoCommit()) {
+                Databases.startTransaction(con);
+                startedTransaction = true;
+            }
+
             for (Map.Entry<Long, List<DocumentMetadata>> entry : documentsPerFolder.entrySet()) {
                 long folderID = entry.getKey().longValue();
                 List<DocumentMetadata> documentsInFolder = entry.getValue();
@@ -176,15 +181,21 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
                     performedReservations.addAll(reservationsInFolder);
                 }
             }
-            con.commit();
-            committed = true;
+
+            if (startedTransaction) {
+                con.commit();
+                committed = true;
+            }
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            if (false == committed) {
-                Databases.rollback(con);
+            if (startedTransaction) {
+                if (false == committed) {
+                    Databases.rollback(con);
+                }
+
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             provider.releaseWriteConnection(context, con);
         }
         /*
