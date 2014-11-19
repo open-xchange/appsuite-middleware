@@ -100,7 +100,10 @@ public class EnableSchema extends AbstractMBeanCLI<Void> {
     protected void addOptions(Options options) {
         options.addOption(OptionBuilder.withLongOpt("target-schema").withArgName("schema_name").withDescription(
             "The name of the schema to enable").hasArg(true).isRequired(true).create("m"));
-        options.addOption(OptionBuilder.withLongOpt("delete-source").hasArg(false).withDescription("Flag to indicate that the source schema should be deleted afterwards.").create("d"));
+        options.addOption(OptionBuilder.withLongOpt("delete-source").hasArg(false).withDescription(
+            "Flag to indicate that the source schema should be deleted afterwards.").create("d"));
+        options.addOption(OptionBuilder.withLongOpt("force-delete-source").hasArg(false).withDescription(
+            "Flag to force the deletion of the source schema after migration. Should be used in conjunction with the -d flag").create("f"));
     }
 
     @Override
