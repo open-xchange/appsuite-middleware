@@ -114,7 +114,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         List<Attribute> list = schemaMoveMBean.getDbAccessInfoForSchema(cmd.getOptionValue('m')).asList();
 
         String url = getAttribute("url", list);
-        int pos = url.indexOf("jdbc:")
+        int pos = url.indexOf("jdbc:");
         if (pos >= 0) {
             url = url.substring(pos +5 );
         }
