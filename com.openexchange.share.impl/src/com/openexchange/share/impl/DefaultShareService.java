@@ -742,13 +742,10 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private void scheduleGuestCleanup(int contextID, int[] guestIDs) throws OXException {
-        GuestCleaner guestCleaner = this.guestCleaner;
-        if (null != guestCleaner) {
-            if (null == guestIDs) {
-                guestCleaner.scheduleContextCleanup(contextID);
-            } else {
-                guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
-            }
+        if (null == guestIDs) {
+            guestCleaner.scheduleContextCleanup(contextID);
+        } else {
+            guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
         }
     }
 
