@@ -86,4 +86,12 @@ public interface ClusterLockService {
      * @throws OXException
      */
     public Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
+
+    /**
+     * Release a periodic cluster lock.
+     * 
+     * @param action
+     * @throws OXException
+     */
+    public void releasePeriodicClusterLock(String action) throws OXException;
 }
