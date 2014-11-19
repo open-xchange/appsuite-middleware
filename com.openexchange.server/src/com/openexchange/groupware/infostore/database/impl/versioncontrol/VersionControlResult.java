@@ -49,45 +49,85 @@
 
 package com.openexchange.groupware.infostore.database.impl.versioncontrol;
 
+import com.openexchange.filestore.QuotaFileStorage;
+
 /**
- * {@link Restored}
+ * {@link VersionControlResult}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class Restored {
+public class VersionControlResult {
 
-    private final int version;
-    private final String location;
+    private final QuotaFileStorage srcFs;
+    private final QuotaFileStorage destFs;
+
+    private final int versionId;
+
+    private final String sourceLocation;
+    private final String destLocation;
 
     /**
-     * Initializes a new {@link Restored}.
+     * Initializes a new {@link VersionControlResult}.
      *
-     * @param version
-     * @param location
+     * @param srcFs The source file storage
+     * @param destFs The destination file storage
+     * @param versionId The affected version identifier
+     * @param sourceLocation The location in the source file storage
+     * @param destLocation The location in the destination file storage
      */
-    public Restored(int version, String location) {
+    public VersionControlResult(QuotaFileStorage srcFs, QuotaFileStorage destFs, int versionId, String sourceLocation, String destLocation) {
         super();
-        this.version = version;
-        this.location = location;
+        this.srcFs = srcFs;
+        this.destFs = destFs;
+        this.versionId = versionId;
+        this.sourceLocation = sourceLocation;
+        this.destLocation = destLocation;
     }
 
     /**
-     * Gets the version
+     * Gets the source file storage
      *
-     * @return The version
+     * @return The source file storage
+     */
+    public QuotaFileStorage getSourceFileStorage() {
+        return srcFs;
+    }
+
+    /**
+     * Gets the destination file storage
+     *
+     * @return The destination file storage
+     */
+    public QuotaFileStorage getDestFileStorage() {
+        return destFs;
+    }
+
+    /**
+     * Gets the version identifier
+     *
+     * @return The version identifier
      */
     public int getVersion() {
-        return version;
+        return versionId;
     }
 
     /**
-     * Gets the location
+     * Gets the source location
      *
-     * @return The location
+     * @return The source location
      */
-    public String getLocation() {
-        return location;
+    public String getSourceLocation() {
+        return sourceLocation;
+    }
+
+    /**
+     * Gets the destination location
+     *
+     * @return The destination location
+     */
+    public String getDestLocation() {
+        return destLocation;
     }
 
 }

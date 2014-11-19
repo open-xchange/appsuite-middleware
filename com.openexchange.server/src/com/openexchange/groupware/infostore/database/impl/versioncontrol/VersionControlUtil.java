@@ -125,14 +125,29 @@ public final class VersionControlUtil {
         }
     }
 
-    public static Map<Integer, List<Result>> doVersionControl(List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, int destinationFolder, Context context, Connection con) throws OXException {
+    /**
+     * Performs the version control for specified documents' versions.
+     * <p>
+     * Each file storage location is checked against the destination folder's one. If they differ, a file move for each version is required.
+     * <p>
+     * The returned map contains the version control results for those documents whose files were moved during that process.
+     *
+     * @param documents The documents to move
+     * @param oldDocuments The originating documents
+     * @param destinationFolder The destination folder identifier
+     * @param context The associated context
+     * @param con The connection to use
+     * @return The version control results
+     * @throws OXException If operation fails
+     */
+    public static Map<Integer, List<VersionControlResult>> doVersionControl(List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, int destinationFolder, Context context, Connection con) throws OXException {
         OXFolderAccess folderAccess = new OXFolderAccess(con, context);
         int contextId = context.getContextId();
         QuotaFileStorageService qfs = FileStorages.getQuotaFileStorageService();
         QuotaFileStorage destFs = qfs.getQuotaFileStorage(folderAccess.getFolderOwner(destinationFolder), contextId);
         Map<Integer, DocumentMetadata> oldDocs = asMap(oldDocuments);
 
-        Map<Integer, List<Result>> resultMap = new LinkedHashMap<Integer, List<Result>>(documents.size());
+        Map<Integer, List<VersionControlResult>> resultMap = new LinkedHashMap<Integer, List<VersionControlResult>>(documents.size());
 
         for (DocumentMetadata document : documents) {
             Integer id = Integer.valueOf(document.getId());
@@ -146,11 +161,11 @@ public final class VersionControlUtil {
                     List<DocumentMetadata> versions = loadVersionsFor(document.getId(), contextId, con);
 
                     // And move them to new file storage location
-                    List<Result> results = new LinkedList<Result>();
+                    List<VersionControlResult> results = new LinkedList<VersionControlResult>();
                     for (DocumentMetadata version : versions) {
                         String copiedLocation = destFs.saveNewFile(srcFs.getFile(version.getFilestoreLocation()));
                         srcFs.deleteFile(version.getFilestoreLocation());
-                        results.add(new Result(srcFs, destFs, version.getVersion(), version.getFilestoreLocation(), copiedLocation));
+                        results.add(new VersionControlResult(srcFs, destFs, version.getVersion(), version.getFilestoreLocation(), copiedLocation));
                     }
 
                     // Put into result map
@@ -164,15 +179,15 @@ public final class VersionControlUtil {
         return resultMap;
     }
 
-    private static void applyVersionControl(Map<Integer, List<Result>> resultMap, Context context, Connection con) throws OXException {
+    private static void applyVersionControl(Map<Integer, List<VersionControlResult>> resultMap, Context context, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE infostore_document SET file_store_location=? WHERE cid=? AND infostore_id=? AND version_number=?");
 
             int contextId = context.getContextId();
-            for (Map.Entry<Integer, List<Result>> entry : resultMap.entrySet()) {
+            for (Map.Entry<Integer, List<VersionControlResult>> entry : resultMap.entrySet()) {
                 int id = entry.getKey().intValue();
-                for (Result result : entry.getValue()) {
+                for (VersionControlResult result : entry.getValue()) {
                     stmt.setString(1, result.getDestLocation());
                     stmt.setInt(2, contextId);
                     stmt.setInt(3, id);
@@ -189,18 +204,27 @@ public final class VersionControlUtil {
         }
     }
 
-    public static Map<Integer, List<Restored>> restoreVersionControl(Map<Integer, List<Result>> resultMap, Context context, Connection con) throws OXException {
-        Map<Integer, List<Restored>> restoredMap = new LinkedHashMap<Integer, List<Restored>>(resultMap.size());
+    /**
+     * Restores documents' versions file storage locations based on given version control results.
+     *
+     * @param resultMap The result map as returned by {@link #doVersionControl(List, List, int, Context, Connection) doVersionControl()}
+     * @param context The associated context
+     * @param con The connection to use
+     * @return The restored results
+     * @throws OXException If operation fails
+     */
+    public static Map<Integer, List<VersionControlRestored>> restoreVersionControl(Map<Integer, List<VersionControlResult>> resultMap, Context context, Connection con) throws OXException {
+        Map<Integer, List<VersionControlRestored>> restoredMap = new LinkedHashMap<Integer, List<VersionControlRestored>>(resultMap.size());
 
-        for (Map.Entry<Integer, List<com.openexchange.groupware.infostore.database.impl.versioncontrol.Result>> entry : resultMap.entrySet()) {
+        for (Map.Entry<Integer, List<com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlResult>> entry : resultMap.entrySet()) {
             Integer id = entry.getKey();
 
-            List<Restored> restoreds = new LinkedList<Restored>();
-            for (Result result : entry.getValue()) {
+            List<VersionControlRestored> restoreds = new LinkedList<VersionControlRestored>();
+            for (VersionControlResult result : entry.getValue()) {
                 QuotaFileStorage destFs = result.getDestFileStorage();
                 String restoredLocation = result.getSourceFileStorage().saveNewFile(destFs.getFile(result.getDestLocation()));
                 destFs.deleteFile(result.getDestLocation());
-                restoreds.add(new Restored(result.getVersion(), restoredLocation));
+                restoreds.add(new VersionControlRestored(result.getVersion(), restoredLocation));
             }
             restoredMap.put(id, restoreds);
         }
@@ -210,15 +234,15 @@ public final class VersionControlUtil {
         return restoredMap;
     }
 
-    private static void applyRestoreds(Map<Integer, List<Restored>> restoredMap, Context context, Connection con) throws OXException {
+    private static void applyRestoreds(Map<Integer, List<VersionControlRestored>> restoredMap, Context context, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE infostore_document SET file_store_location=? WHERE cid=? AND infostore_id=? AND version_number=?");
 
             int contextId = context.getContextId();
-            for (Map.Entry<Integer, List<Restored>> entry : restoredMap.entrySet()) {
+            for (Map.Entry<Integer, List<VersionControlRestored>> entry : restoredMap.entrySet()) {
                 int id = entry.getKey().intValue();
-                for (Restored restored : entry.getValue()) {
+                for (VersionControlRestored restored : entry.getValue()) {
                     stmt.setString(1, restored.getLocation());
                     stmt.setInt(2, contextId);
                     stmt.setInt(3, id);
