@@ -50,13 +50,21 @@
 package com.openexchange.admin.schemamove.internal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemamove.SchemaMoveService;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Autoboxing;
+import com.openexchange.sessiond.SessiondService;
 
 
 /**
@@ -65,6 +73,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SchemaMoveImpl implements SchemaMoveService {
+
+    private static final int DEFAULT_REASON = 1431655765;
 
     /**
      * Initializes a new {@link SchemaMoveImpl}.
@@ -77,8 +87,35 @@ public class SchemaMoveImpl implements SchemaMoveService {
 
     @Override
     public void disableSchema(String schemaName) throws OXException {
-        // TODO Auto-generated method stub
+        try {
+            /*
+             * Precondition: a distinct write pool must be set for all contexts of the given schema
+             */
+            OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.isDistinctWritePoolIDForSchema(schemaName)) {
+                // TODO
+                throw new OXException(new Exception("Multiple write pool IDs are in use for the contexts in the given schema. Unable to proceed..."));
+            }
 
+            /*
+             * Disable all enabled contexts with configured maintenance reason
+             */
+            Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp("SCHEMA_MOVE_MAINTENANCE_REASON", Integer.toString(DEFAULT_REASON)));
+            OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
+            List<Integer> disabledContexts = contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
+
+            /*
+             * Invalidate disabled contexts
+             */
+            ContextStorage.getInstance().invalidateContexts(Autoboxing.I2i(disabledContexts));
+
+            /*
+             * TODO: kill sessions globally
+             */
+            SessiondService sessiondService = AdminServiceRegistry.getInstance().getService(SessiondService.class);
+        } catch (StorageException e) {
+            throw new OXException(e);
+        }
     }
 
     @Override

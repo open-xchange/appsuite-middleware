@@ -244,6 +244,16 @@ public abstract class OXContextStorageInterface {
     public abstract void disable(final Context ctx, final MaintenanceReason reason) throws StorageException;
 
     /**
+     * Disables all contexts in a schema and sets the given maintenance reason. Contexts that are already disabled
+     * will be ignored and keep their original reason.
+     *
+     * @param schema
+     * @param reason
+     * @throws StorageException
+     */
+    public abstract List<Integer> disable(final String schema, final MaintenanceReason reason) throws StorageException;
+
+    /**
      * @param ctx
      * @throws StorageException
      */

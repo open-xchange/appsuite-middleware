@@ -88,6 +88,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -902,6 +903,41 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public int getDatabaseIDByDatabasename(String dbName) throws StorageException, NoSuchObjectException {
         return getByNameForConfigDB(dbName, "database", "SELECT db_pool_id FROM db_pool WHERE name=?");
+    }
+
+    @Override
+    public boolean isDistinctWritePoolIDForSchema(String schema) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id FROM context_server2db_pool WHERE db_schema = ?");
+            stmt.setString(1, schema);
+            rs = stmt.executeQuery();
+
+            int numPools = 0;
+            while (rs.next()) {
+                numPools++;
+            }
+
+            return numPools == 1;
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e.toString());
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing oxdb read connection to pool!", e);
+                }
+            }
+        }
     }
 
     /**

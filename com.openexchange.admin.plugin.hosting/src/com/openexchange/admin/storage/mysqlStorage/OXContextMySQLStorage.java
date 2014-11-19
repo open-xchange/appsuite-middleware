@@ -72,6 +72,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -404,6 +405,70 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public List<Integer> disable(String schema, MaintenanceReason reason) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            Databases.startTransaction(con);
+
+            List<Integer> contextIds = loadContextIdsForSchema(schema, con);
+            for (int contextId : contextIds) {
+                stmt = con.prepareStatement("UPDATE context SET enabled = ?, reason_id = ? WHERE cid = ? AND enabled = ?");
+                stmt.setBoolean(1, false);
+                stmt.setInt(2, reason.getId());
+                stmt.setInt(3, contextId);
+                stmt.setBoolean(4, true);
+                stmt.addBatch();
+            }
+
+            stmt.executeBatch();
+            con.commit();
+
+            LOG.info("Disabled {} contexts in schema {} with reason {}", contextIds.size(), schema, reason.getId());
+            return contextIds;
+        } catch (final SQLException e) {
+            Databases.rollback(con);
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            Databases.rollback(con);
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    private List<Integer> loadContextIdsForSchema(String schema, Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
+            stmt.setString(1, schema);
+            rs = stmt.executeQuery();
+            List<Integer> contextIds = new LinkedList<Integer>();
+            while (rs.next()) {
+                contextIds.add(rs.getInt(1));
+            }
+            return contextIds;
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
