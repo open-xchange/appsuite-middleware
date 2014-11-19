@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.share.impl
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.cluster.timer,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.configuration,
  com.openexchange.contact,

@@ -53,10 +53,10 @@ import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -64,7 +64,6 @@ import com.openexchange.java.BufferingQueue;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
@@ -113,10 +112,8 @@ public class GuestCleaner {
             configService, "com.openexchange.share.cleanup.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true);
         if (0 < periodicCleanerInterval) {
             this.periodicCleaner = new PeriodicCleaner(services, guestExpiry);
-            long firstCleanerDelay = periodicCleanerInterval / 4 +
-                new Random().nextInt((int) (periodicCleanerInterval - periodicCleanerInterval / 4));
-            this.periodicCleanerTask = services.getService(TimerService.class).scheduleWithFixedDelay(
-                periodicCleaner, firstCleanerDelay, periodicCleanerInterval);
+            this.periodicCleanerTask = services.getService(ClusterTimerService.class).scheduleWithFixedDelay(
+                PeriodicCleaner.class.getName(), periodicCleaner, periodicCleanerInterval, periodicCleanerInterval);
         } else {
             periodicCleaner = null;
             periodicCleanerTask = null;

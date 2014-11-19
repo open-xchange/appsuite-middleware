@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -119,7 +120,7 @@ public class ShareActivator extends HousekeepingActivator {
             UserService.class, ContextService.class, TemplateService.class, ShareStorage.class, ConfigurationService.class,
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
-            QuotaService.class, FolderCacheInvalidationService.class };
+            QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class };
     }
 
     @Override
