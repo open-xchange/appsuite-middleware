@@ -196,6 +196,24 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
                 final Account accountInfo = mDBApi.accountInfo();
                 LOG.info("Dropbox OAuth account successfully created for {}", accountInfo.displayName);
             }
+        } catch (final DropboxServerException e) {
+            String reason = e.reason;
+            if (!Strings.isEmpty(reason)) {
+                throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, reason);
+            }
+
+            DropboxServerException.Error error = e.body;
+            if (null != error) {
+                reason = error.userError;
+                if (Strings.isEmpty(reason)) {
+                    reason = error.error;
+                }
+            }
+            if (Strings.isEmpty(reason)) {
+                reason = "Dropbox signaled HTTP error: " + e.error;
+            }
+
+            throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, reason);
         } catch (final DropboxException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
