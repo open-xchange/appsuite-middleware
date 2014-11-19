@@ -251,13 +251,24 @@ public abstract class OXContextStorageInterface {
      * @param reason
      * @throws StorageException
      */
-    public abstract List<Integer> disable(final String schema, final MaintenanceReason reason) throws StorageException;
+    public abstract void disable(final String schema, final MaintenanceReason reason) throws StorageException;
 
     /**
      * @param ctx
      * @throws StorageException
      */
     public abstract void enable(final Context ctx) throws StorageException;
+
+    /**
+     * Enables all contexts in a schema which are currently disabled with to the given maintenance reason. Contexts that are disabled
+     * with any other maintenance reason will not be enabled. If no reason is given, all disabled contexts are enabled. For every context
+     * that is enabled, the reason ID is set to NULL.
+     *
+     * @param schema
+     * @param reason The reason or <code>null</code>
+     * @throws StorageException
+     */
+    public abstract void enable(final String schema, final MaintenanceReason reason) throws StorageException;
 
     /**
      * @param reason
@@ -283,6 +294,15 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract Context[] searchContextByFilestore(final Filestore filestore) throws StorageException;
+
+    /**
+     * Gets all contexts that belong to the given schema.
+     *
+     * @param schema
+     * @return
+     * @throws StorageException
+     */
+    public abstract List<Integer> getContextIdsBySchema(final String schema) throws StorageException;
 
     /**
      * This method deletes all inaccessible data in a context.

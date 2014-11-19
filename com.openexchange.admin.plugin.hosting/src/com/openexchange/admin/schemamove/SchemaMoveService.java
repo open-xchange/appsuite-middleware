@@ -72,7 +72,7 @@ public interface SchemaMoveService {
      *
      * @param schemaName The schema name
      * @throws OXException If operation fails
-     * @throws TargetDatabaseException 
+     * @throws TargetDatabaseException
      */
     void disableSchema(String schemaName) throws OXException, TargetDatabaseException;
 
@@ -95,5 +95,5 @@ public interface SchemaMoveService {
      */
     Map<String, String> getDbAccessInfoForSchema(String schemaName) throws OXException;
 
-    void enableSchema(String schemaName, String sourceSchema, boolean deleteSource) throws OXException;
+    void enableSchema(String schemaName) throws OXException;
 }

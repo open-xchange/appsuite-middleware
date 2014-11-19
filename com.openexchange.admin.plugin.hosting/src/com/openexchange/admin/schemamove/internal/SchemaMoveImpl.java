@@ -103,19 +103,20 @@ public class SchemaMoveImpl implements SchemaMoveService {
              */
             Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp("SCHEMA_MOVE_MAINTENANCE_REASON", Integer.toString(DEFAULT_REASON)));
             OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
-            List<Integer> disabledContexts = contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
+            contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
 
             /*
              * Invalidate disabled contexts
              */
+            List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
             ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class);
-            contextService.invalidateContexts(Autoboxing.I2i(disabledContexts));
+            contextService.invalidateContexts(Autoboxing.I2i(contextIds));
 
             /*
              * Kill sessions for the disabled contexts globally
              */
             SessiondService sessiondService = AdminServiceRegistry.getInstance().getService(SessiondService.class, true);
-            sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(disabledContexts));
+            sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
         } catch (StorageException e) {
             throw new OXException(e);
         } catch (NoSuchObjectException e) {
@@ -158,9 +159,24 @@ public class SchemaMoveImpl implements SchemaMoveService {
     }
 
     @Override
-    public void enableSchema(String schemaName, String sourceSchema, boolean deleteSource) throws OXException {
-        // TODO Auto-generated method stub
+    public void enableSchema(String schemaName) throws OXException {
+        try {
+            /*
+             * Disable all enabled contexts with configured maintenance reason
+             */
+            Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp("SCHEMA_MOVE_MAINTENANCE_REASON", Integer.toString(DEFAULT_REASON)));
+            OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
+            contextStorage.enable(schemaName, new MaintenanceReason(reasonId));
 
+            /*
+             * Invalidate disabled contexts
+             */
+            List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
+            ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class);
+            contextService.invalidateContexts(Autoboxing.I2i(contextIds));
+        } catch (StorageException e) {
+            throw new OXException(e);
+        }
     }
 
 }

@@ -55,8 +55,10 @@ import javax.management.AttributeList;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.schemamove.SchemaMoveService;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -79,6 +81,11 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
     }
 
     @Override
+    public void disableSchema(String schemaName) throws OXException, TargetDatabaseException {
+        schemaMoveService.disableSchema(schemaName);
+    }
+
+    @Override
     public AttributeList getDbAccessInfoForSchema(String schemaName) throws MBeanException {
         try {
             Map<String, String> map = schemaMoveService.getDbAccessInfoForSchema(schemaName);
@@ -91,6 +98,11 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
             String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
         }
+    }
+
+    @Override
+    public void enableSchema(String schemaName) throws OXException {
+        schemaMoveService.enableSchema(schemaName);
     }
 
 }

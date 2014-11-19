@@ -51,6 +51,9 @@ package com.openexchange.admin.schemamove.mbean;
 
 import javax.management.AttributeList;
 import javax.management.MBeanException;
+import com.openexchange.admin.exceptions.TargetDatabaseException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SchemaMoveMBean}
@@ -61,6 +64,22 @@ public interface SchemaMoveMBean {
 
     /** The MBean's domain */
     public static final String DOMAIN = "com.openexchange.admin.schemamove";
+
+    /**
+     * Disables the denoted schema.
+     * <ul>
+     * <li>Checks required preconditions</li>
+     * <li>Determines affected contexts</li>
+     * <li>Disables active contexts and decorates them with a certain reason identifier</li>
+     * <li>Distribute changes contexts in cluster</li>
+     * <li>Terminate active sessions in cluster</li>
+     * </ul>
+     *
+     * @param schemaName The schema name
+     * @throws OXException If operation fails
+     * @throws TargetDatabaseException
+     */
+    void disableSchema(String schemaName) throws OXException, TargetDatabaseException;
 
     /**
      * Returns the database access information that are necessary to establish a connection to given schema's database. *
@@ -80,5 +99,7 @@ public interface SchemaMoveMBean {
      * @throws MBeanException If operation fails
      */
     AttributeList getDbAccessInfoForSchema(String schemaName) throws MBeanException;
+
+    void enableSchema(String schemaName) throws OXException, StorageException;
 
 }
