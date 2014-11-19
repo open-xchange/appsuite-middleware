@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.db;
+package com.openexchange.admin.console.schemamove;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -58,17 +58,17 @@ import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 
 /**
- * {@link DisableSchema}
+ * {@link ReplaySchema}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DisableSchema extends AbstractMBeanCLI<Void> {
+public class ReplaySchema extends AbstractMBeanCLI<Void> {
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        new DisableSchema().execute(args);
+        new ReplaySchema().execute(args);
     }
 
     @Override
@@ -87,29 +87,33 @@ public class DisableSchema extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return "Tool to disable Open-Xchange database schemata.";
+        return "Tool to replay Open-Xchange database schemata.";
     }
 
     @Override
     protected String getName() {
-        return "disableschema";
+        return "replayschema";
     }
 
     @SuppressWarnings("static-access")
     @Override
     protected void addOptions(Options options) {
-        options.addOption(OptionBuilder.withLongOpt("schema").withArgName("schema_name").withDescription(
-            "The name of the schema to disable").hasArg(true).isRequired(true).create("m"));
+        options.addOption(OptionBuilder.withLongOpt("source-schema").withArgName("schema_name").withDescription(
+            "The name of the source schema in which the database dump will be replayed").hasArg(true).isRequired(true).create("m"));
+        options.addOption(OptionBuilder.withLongOpt("in").withArgName("dump_file").withDescription("The name of the dump file to replay.").hasArg(
+            true).isRequired(true).create("i"));
+        options.addOption(OptionBuilder.withLongOpt("write-db-pool").withArgName("write_db_pool_id").withDescription(
+            "The identifier of the write db pool.").hasArg(true).isRequired(true).create("w"));
+        options.addOption(OptionBuilder.withLongOpt("read-db-pool").withArgName("read_db_pool_id").withDescription(
+            "The identifier of the read db pool.").hasArg(true).isRequired(true).create("r"));
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         // TODO: flesh out
-        // - check for the precondition
-        // - fetch all cids
-        // - iterate over all cids and create a batch statement
-        // - invalidate sessions
-        // - execute batch
+        // - create new schema
+        // - replay the dump file in that schema
+        // - update the context_server2db_pool entries
         return null;
     }
 

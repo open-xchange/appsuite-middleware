@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.db;
+package com.openexchange.admin.console.schemamove;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -58,17 +58,17 @@ import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 
 /**
- * {@link ReplaySchema}
+ * {@link EnableSchema}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ReplaySchema extends AbstractMBeanCLI<Void> {
+public class EnableSchema extends AbstractMBeanCLI<Void> {
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        new ReplaySchema().execute(args);
+        new EnableSchema().execute(args);
     }
 
     @Override
@@ -87,34 +87,31 @@ public class ReplaySchema extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return "Tool to replay Open-Xchange database schemata.";
+        return "Tool to enable Open-Xchange database schemata.";
     }
 
     @Override
     protected String getName() {
-        return "replayschema";
+        return "enableschema";
     }
 
     @SuppressWarnings("static-access")
     @Override
     protected void addOptions(Options options) {
-        options.addOption(OptionBuilder.withLongOpt("source-schema").withArgName("schema_name").withDescription(
-            "The name of the source schema in which the database dump will be replayed").hasArg(true).isRequired(true).create("m"));
-        options.addOption(OptionBuilder.withLongOpt("in").withArgName("dump_file").withDescription("The name of the dump file to replay.").hasArg(
-            true).isRequired(true).create("i"));
-        options.addOption(OptionBuilder.withLongOpt("write-db-pool").withArgName("write_db_pool_id").withDescription(
-            "The identifier of the write db pool.").hasArg(true).isRequired(true).create("w"));
-        options.addOption(OptionBuilder.withLongOpt("read-db-pool").withArgName("read_db_pool_id").withDescription(
-            "The identifier of the read db pool.").hasArg(true).isRequired(true).create("r"));
+        options.addOption(OptionBuilder.withLongOpt("target-schema").withArgName("schema_name").withDescription(
+            "The name of the schema to enable").hasArg(true).isRequired(true).create("m"));
+        options.addOption(OptionBuilder.withLongOpt("delete-source").hasArg(false).withDescription(
+            "Flag to indicate that the source schema should be deleted afterwards.").create("d"));
+        options.addOption(OptionBuilder.withLongOpt("force-delete-source").hasArg(false).withDescription(
+            "Flag to force the deletion of the source schema after migration. Should be used in conjunction with the -d flag").create("f"));
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         // TODO: flesh out
-        // - create new schema
-        // - replay the dump file in that schema
-        // - update the context_server2db_pool entries
+        // - fetch contexts that were disabled during the migration process
+        // - iterate over the cids and create a batch statement
+        // - execute the batch statement to enable the contexts
         return null;
     }
-
 }

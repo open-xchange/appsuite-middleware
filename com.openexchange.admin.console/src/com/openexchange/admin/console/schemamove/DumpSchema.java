@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.db;
+package com.openexchange.admin.console.schemamove;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -58,17 +58,17 @@ import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 
 /**
- * {@link EnableSchema}
+ * {@link DumpSchema}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class EnableSchema extends AbstractMBeanCLI<Void> {
+public class DumpSchema extends AbstractMBeanCLI<Void> {
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        new EnableSchema().execute(args);
+        new DumpSchema().execute(args);
     }
 
     @Override
@@ -87,31 +87,29 @@ public class EnableSchema extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return "Tool to enable Open-Xchange database schemata.";
+        return "Tool to dump Open-Xchange database schemata to a file.";
     }
 
     @Override
     protected String getName() {
-        return "enableschema";
+        return "dumpschema";
     }
 
     @SuppressWarnings("static-access")
     @Override
     protected void addOptions(Options options) {
-        options.addOption(OptionBuilder.withLongOpt("target-schema").withArgName("schema_name").withDescription(
-            "The name of the schema to enable").hasArg(true).isRequired(true).create("m"));
-        options.addOption(OptionBuilder.withLongOpt("delete-source").hasArg(false).withDescription(
-            "Flag to indicate that the source schema should be deleted afterwards.").create("d"));
-        options.addOption(OptionBuilder.withLongOpt("force-delete-source").hasArg(false).withDescription(
-            "Flag to force the deletion of the source schema after migration. Should be used in conjunction with the -d flag").create("f"));
+        options.addOption(OptionBuilder.withLongOpt("schema").withArgName("schema_name").withDescription("The name of the schema to dump.").hasArg(
+            true).isRequired(true).create("m"));
+        options.addOption(OptionBuilder.withLongOpt("out").withArgName("dump_file").withDescription(
+            "The name of the dump file. If not specified, the dump will be written to standard output").hasArg(true).isRequired(false).create(
+            "o"));
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         // TODO: flesh out
-        // - fetch contexts that were disabled during the migration process
-        // - iterate over the cids and create a batch statement
-        // - execute the batch statement to enable the contexts
+        // - dump schemata
         return null;
     }
+
 }

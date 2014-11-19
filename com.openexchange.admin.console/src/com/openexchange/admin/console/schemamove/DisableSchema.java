@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.db;
+package com.openexchange.admin.console.schemamove;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -58,17 +58,17 @@ import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 
 /**
- * {@link DumpSchema}
+ * {@link DisableSchema}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DumpSchema extends AbstractMBeanCLI<Void> {
+public class DisableSchema extends AbstractMBeanCLI<Void> {
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        new DumpSchema().execute(args);
+        new DisableSchema().execute(args);
     }
 
     @Override
@@ -87,28 +87,29 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return "Tool to dump Open-Xchange database schemata to a file.";
+        return "Tool to disable Open-Xchange database schemata.";
     }
 
     @Override
     protected String getName() {
-        return "dumpschema";
+        return "disableschema";
     }
 
     @SuppressWarnings("static-access")
     @Override
     protected void addOptions(Options options) {
-        options.addOption(OptionBuilder.withLongOpt("schema").withArgName("schema_name").withDescription("The name of the schema to dump.").hasArg(
-            true).isRequired(true).create("m"));
-        options.addOption(OptionBuilder.withLongOpt("out").withArgName("dump_file").withDescription(
-            "The name of the dump file. If not specified, the dump will be written to standard output").hasArg(true).isRequired(false).create(
-            "o"));
+        options.addOption(OptionBuilder.withLongOpt("schema").withArgName("schema_name").withDescription(
+            "The name of the schema to disable").hasArg(true).isRequired(true).create("m"));
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         // TODO: flesh out
-        // - dump schemata
+        // - check for the precondition
+        // - fetch all cids
+        // - iterate over all cids and create a batch statement
+        // - invalidate sessions
+        // - execute batch
         return null;
     }
 
