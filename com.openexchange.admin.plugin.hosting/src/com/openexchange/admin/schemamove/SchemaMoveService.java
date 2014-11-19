@@ -69,8 +69,14 @@ public interface SchemaMoveService {
      * <li>Terminate active sessions in cluster</li>
      * </ul>
      *
-     * @param schemaName
-     * @throws OXException
+     * @param schemaName The schema name
+     * @throws OXException If operation fails
      */
     void disbaleSchema(String schemaName) throws OXException;
+
+    void dumpSchema(String schemaName, String out) throws OXException;
+
+    void replaySchema(int targetClusterId, String sourceSchema, String in) throws OXException;
+
+    void enableSchema(String schemaName, String sourceSchema, boolean deleteSource) throws OXException;
 }
