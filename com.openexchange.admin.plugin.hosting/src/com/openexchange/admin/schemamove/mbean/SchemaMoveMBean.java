@@ -47,42 +47,29 @@
  *
  */
 
-package com.openexchange.admin.schemamove;
+package com.openexchange.admin.schemamove.mbean;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
+import javax.management.AttributeList;
+import javax.management.MBeanException;
 
 
 /**
- * {@link SchemaMoveService} - The service providing methods to move a schema to another database.
+ * {@link SchemaMoveMBean}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SchemaMoveService {
+public interface SchemaMoveMBean {
 
-    /**
-     * Disables the denoted schema.
-     * <ul>
-     * <li>Checks required preconditions</li>
-     * <li>Determines affected contexts</li>
-     * <li>Disables active contexts and decorates them with a certain reason identifier</li>
-     * <li>Distribute changes contexts in cluster</li>
-     * <li>Terminate active sessions in cluster</li>
-     * </ul>
-     *
-     * @param schemaName The schema name
-     * @throws OXException If operation fails
-     */
-    void disableSchema(String schemaName) throws OXException;
+    /** The MBean's domain */
+    public static final String DOMAIN = "com.openexchange.admin.schemamove";
 
     /**
      * Returns the database access information that are necessary to establish a connection to given schema's database.
      *
      * @param schemaName The schema name
-     * @return The database access information
-     * @throws OXException If operation fails
+     * @return The database access information as attribute list
+     * @throws MBeanException If operation fails
      */
-    Map<String, String> getDbAccessInfoForSchema(String schemaName) throws OXException;
+    AttributeList getDbAccessInfoForSchema(String schemaName) throws MBeanException;
 
-    void enableSchema(String schemaName, String sourceSchema, boolean deleteSource) throws OXException;
 }
