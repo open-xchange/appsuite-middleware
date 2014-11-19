@@ -47,81 +47,69 @@
  *
  */
 
-package com.openexchange.file.storage.copycom.osgi;
+package com.openexchange.file.storage.dropbox.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.copycom.access.CopyComEventHandler;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.timer.TimerService;
 
 /**
- * {@link CopyComActivator} - Activator for Copy.com bundle.
+ * {@link OAuthServiceMetaDataRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CopyComActivator extends HousekeepingActivator {
+public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
+
+    private final BundleContext context;
+    private final String identifier;
+    private volatile ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker;
 
     /**
-     * Initializes a new {@link CopyComActivator}.
+     * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
+     *
+     * @param context The bundle context
      */
-    public CopyComActivator() {
+    public OAuthServiceMetaDataRegisterer(BundleContext context) {
         super();
+        identifier = "com.openexchange.oauth.dropbox";
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class };
+    public OAuthServiceMetaData addingService(ServiceReference<OAuthServiceMetaData> reference) {
+        OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
+        if (identifier.equals(oAuthServiceMetaData.getId())) {
+            DropboxServiceRegisterer registerer = new DropboxServiceRegisterer(context);
+            ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker = new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, registerer);
+            this.tracker = tracker;
+            tracker.open();
+            return oAuthServiceMetaData;
+        }
+        // Not of interest
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComActivator.class);
-        try {
-            Services.setServices(this);
-            /*
-             * Some initialization stuff
-             */
-            final BundleContext context = this.context;
-            /*
-             * Register tracker
-             */
-            track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context));
-            openTrackers();
-            /*
-             * Register event handler
-             */
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new CopyComEventHandler(), serviceProperties);
-        } catch (final Exception e) {
-            logger.error("", e);
-            throw e;
+    public void modifiedService(ServiceReference<OAuthServiceMetaData> reference, OAuthServiceMetaData service) {
+        // nothing to do here
+    }
+
+    @Override
+    public void removedService(ServiceReference<OAuthServiceMetaData> reference, OAuthServiceMetaData service) {
+        if (null != service) {
+            OAuthServiceMetaData oAuthServiceMetaData = service;
+            if (identifier.equals(oAuthServiceMetaData.getId())) {
+                ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker = this.tracker;
+                if (null != tracker) {
+                    tracker.close();
+                    this.tracker = null;
+                }
+            }
+            context.ungetService(reference);
         }
     }
-
-    @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServices(null);
-    }
-
 }

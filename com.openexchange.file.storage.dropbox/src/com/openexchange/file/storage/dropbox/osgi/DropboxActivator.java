@@ -54,15 +54,14 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.file.storage.dropbox.access.DropboxEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -99,8 +98,7 @@ public final class DropboxActivator extends HousekeepingActivator {
             /*
              * Register tracker
              */
-            final DropboxServiceRegisterer registerer = new DropboxServiceRegisterer(context);
-            rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, registerer));
+            track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context));
             openTrackers();
             /*
              * Register event handler
