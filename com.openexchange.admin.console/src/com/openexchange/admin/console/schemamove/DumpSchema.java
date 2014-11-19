@@ -51,9 +51,11 @@ package com.openexchange.admin.console.schemamove;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import javax.management.Attribute;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
@@ -114,9 +116,10 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         SchemaMoveMBean schemaMoveMBean = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
         List<Attribute> list = schemaMoveMBean.getDbAccessInfoForSchema(cmd.getOptionValue('m')).asList();
+        final Map<String, String> dbAccessInfo = SchemaTools.convertToMap(list);
 
         {
-            String url = getAttribute("url", list);
+            String url = dbAccessInfo.get("url");
             if (Strings.isEmpty(url)) {
                 System.err.println("Missing the following attribute in MBean response: url");
                 System.exit(1);
@@ -124,7 +127,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
 
             int pos = url.indexOf("jdbc:");
             if (pos >= 0) {
-                url = url.substring(pos +5 );
+                url = url.substring(pos + 5);
             }
             URI uri = new URI(url);
             System.out.println(uri.getHost());
@@ -132,7 +135,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         }
 
         {
-            String name = getAttribute("name", list);
+            String name = dbAccessInfo.get("name");
             if (Strings.isEmpty(name)) {
                 System.err.println("Missing the following attribute in MBean response: name");
                 System.exit(1);
@@ -142,7 +145,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         }
 
         {
-            String password = getAttribute("password", list);
+            String password = dbAccessInfo.get("password");
             if (Strings.isEmpty(password)) {
                 System.err.println("Missing the following attribute in MBean response: password");
                 System.exit(1);
@@ -152,7 +155,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         }
 
         {
-            String schema = getAttribute("schema", list);
+            String schema = dbAccessInfo.get("schema");
             if (Strings.isEmpty(schema)) {
                 System.err.println("Missing the following attribute in MBean response: schema");
                 System.exit(1);
@@ -164,14 +167,19 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         return null;
     }
 
-    private String getAttribute(String name, List<Attribute> list) {
-        for (int i = list.size(); i-- > 0;) {
-            Attribute attribute = list.get(i);
-            if (name.equals(attribute.getName())) {
-                return (String) attribute.getValue();
-            }
-        }
-        return null;
+    /**
+     * Execute dump
+     * 
+     * @param host
+     * @param login
+     * @param password
+     * @param out
+     * @throws IOException
+     */
+    private void dump(String host, String login, String password, String schema) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("mysqldump -h ").append(host).append(" -u ").append(login).append("-p").append(password).append(
+            " --single-transaction ").append(schema);
+        System.out.println(builder.toString());
     }
-
 }
