@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.schemamove;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 
@@ -74,9 +75,13 @@ public interface SchemaMoveService {
      */
     void disbaleSchema(String schemaName) throws OXException;
 
-    void dumpSchema(String schemaName, String out) throws OXException;
-
-    void replaySchema(int targetClusterId, String sourceSchema, String in) throws OXException;
+    /**
+     * Returns the database access information that are necessary to establish a connection to given schema's database.
+     *
+     * @param schemaName The schema name
+     * @throws OXException If operation fails
+     */
+    Map<String, String> schemaDbAccessInfo(String schemaName) throws OXException;
 
     void enableSchema(String schemaName, String sourceSchema, boolean deleteSource) throws OXException;
 }
