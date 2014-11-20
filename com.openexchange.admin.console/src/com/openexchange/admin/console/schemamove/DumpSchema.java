@@ -168,7 +168,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         if (uri.getPort() > 0) {
             builder.append(" -P ").append(uri.getPort());
         }
-        builder.append(" -u ").append(login).append("-p").append(password).append(" --single-transaction > ").append(output);
+        builder.append(" -u ").append(login).append(" -p").append(password).append(" --single-transaction > ").append(output);
         System.out.println(builder.toString());
     }
 }
