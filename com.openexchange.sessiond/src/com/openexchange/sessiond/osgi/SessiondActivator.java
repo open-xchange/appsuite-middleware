@@ -312,7 +312,6 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.sessiond");
         try {
-            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             final ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
             if (null != eventHandlerRegistration) {
                 eventHandlerRegistration.unregister();
@@ -320,28 +319,6 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             }
             cleanUp();
             SessiondService.SERVICE_REFERENCE.set(null);
-            // Put remaining sessions into cache for remote distribution, if no session storage exist
-            final List<SessionControl> sessions = SessionHandler.getSessions();
-            if (null != storageService) {
-                try {
-                    final EventAdmin eventAdmin = Services.getService(EventAdmin.class);
-                    for (final SessionControl sessionControl : sessions) {
-                        if (null != sessionControl) {
-                            final SessionImpl session = sessionControl.getSession();
-                            try {
-                                if (storageService.addSessionIfAbsent(session)) {
-                                    SessionHandler.postSessionStored(session, eventAdmin);
-                                }
-                            } catch (final Exception e) {
-                                LOG.warn("Active session {} could not be put into session storage.", session.getSessionID(), e);
-                            }
-                        }
-                    }
-                    LOG.info("stopping bundle: com.openexchange.sessiond.\nRemaining active sessions were put into central session storage\n");
-                } catch (final RuntimeException e) {
-                    LOG.warn("Remaining active sessions could not be put into central session storage.", e);
-                }
-            }
             TokenSessionContainer.getInstance().setNotActiveExceptionHandler(null);
             // Stop sessiond
             SessiondInit.getInstance().stop();
