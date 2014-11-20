@@ -394,23 +394,25 @@ public class GuestClient extends AJAXClient {
         getInfostoreRequest.setFailOnError(permissions.canRead());
         GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
         checkResponse(getInfostoreResponse, false == permissions.canRead());
-        GetDocumentRequest getDocumentRequest = new GetDocumentRequest(folderID, fileID);
-        getInfostoreRequest.setFailOnError(permissions.canRead());
-        GetDocumentResponse getDocumentResponse = execute(getDocumentRequest);
-        checkResponse(getDocumentResponse, false == permissions.canRead());
-        byte[] contents = getDocumentResponse.getContentAsByteArray();
-        if (false == permissions.canRead()) {
-            Assert.assertNull("Contents wrong", contents);
-        } else {
-            if (null == expectedContents) {
-                Assert.assertNotNull("Contents wrong", contents);
+        DefaultFile file = new DefaultFile(getInfostoreResponse.getDocumentMetadata());
+        if (null != file.getFileName() && 0 < file.getFileSize()) {
+            GetDocumentRequest getDocumentRequest = new GetDocumentRequest(folderID, fileID);
+            getInfostoreRequest.setFailOnError(permissions.canRead());
+            GetDocumentResponse getDocumentResponse = execute(getDocumentRequest);
+            checkResponse(getDocumentResponse, false == permissions.canRead());
+            byte[] contents = getDocumentResponse.getContentAsByteArray();
+            if (false == permissions.canRead()) {
+                Assert.assertNull("Contents wrong", contents);
             } else {
-                Assert.assertArrayEquals("Contents wrong", expectedContents, contents);
+                if (null == expectedContents) {
+                    Assert.assertNotNull("Contents wrong", contents);
+                } else {
+                    Assert.assertArrayEquals("Contents wrong", expectedContents, contents);
+                }
             }
         }
 
         if (permissions.canRead()) {
-            DefaultFile file = new DefaultFile(getInfostoreResponse.getDocumentMetadata());
             /*
              * check item update
              */
