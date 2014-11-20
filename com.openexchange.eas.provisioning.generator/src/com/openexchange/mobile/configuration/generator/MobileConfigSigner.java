@@ -56,11 +56,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
@@ -85,24 +88,40 @@ public class MobileConfigSigner extends Writer {
     private Writer output;
     private InputStream input;
 
-    public MobileConfigSigner(final OutputStream writer) throws ConfigurationException {
+    public MobileConfigSigner(OutputStream writer) throws ConfigurationException {
         this.writer = writer;
-        final String[] command = getCommand();
+        List<String> command = getCommand();
         this.pb = new ProcessBuilder(command);
     }
 
-    protected String[] getCommand() throws ConfigurationException {
-        final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+    protected List<String> getCommand() throws ConfigurationException {
+        ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null == service) {
             throw new ConfigurationException("No configuration service found");
         }
 
-        final String opensslBinary = MobileConfigProperties.getProperty(service, Property.OpensslBinary);
-        final String certFile = MobileConfigProperties.getProperty(service, Property.CertFile);
-        final String keyFile = MobileConfigProperties.getProperty(service, Property.KeyFile);
-        final String[] command = new String[]{ opensslBinary, "smime", "-sign", "-signer", certFile, "-inkey",
-            keyFile, "-outform", "der", "-nodetach"};
-        return command;
+        String opensslBinary = MobileConfigProperties.getProperty(service, Property.OpensslBinary);
+        String certFile = MobileConfigProperties.getProperty(service, Property.CertFile);
+        String keyFile = MobileConfigProperties.getProperty(service, Property.KeyFile);
+        String pemFile = MobileConfigProperties.getProperty(service, Property.PemFile);
+
+        List<String> l = new LinkedList<String>();
+        l.add(opensslBinary);
+        l.add("smime");
+        l.add("-sign");
+        l.add("-signer");
+        l.add(certFile);
+        l.add("-inkey");
+        l.add(keyFile);
+        l.add("-outform");
+        l.add("der");
+        l.add("-nodetach");
+        if (!Strings.isEmpty(pemFile)) {
+            l.add("-certfile");
+            l.add(pemFile);
+        }
+
+        return l;
     }
 
     private void init() throws IOException {

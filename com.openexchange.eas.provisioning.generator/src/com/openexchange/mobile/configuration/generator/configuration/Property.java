@@ -58,7 +58,9 @@ public enum Property implements PropertyInterface {
     OpensslBinary(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.OpensslBinary"),
     OpensslTimeout(Integer.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.OpensslTimeout"),
     CertFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.CertFile"),
-    KeyFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.KeyFile");
+    KeyFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.KeyFile"),
+    PemFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.PemFile"),
+    ;
 
 
     private final Class<?> clazz;
