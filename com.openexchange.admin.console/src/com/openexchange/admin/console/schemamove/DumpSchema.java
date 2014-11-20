@@ -134,7 +134,12 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
             System.err.println("Missing the following attribute in MBean response: name");
             System.exit(1);
         }
-
+        String login = dbAccessInfo.get("login");
+        if (Strings.isEmpty(login)) {
+            System.err.println("Missing the following attribute in MBean response: login");
+            System.exit(1);
+        }
+        
         String password = dbAccessInfo.get("password");
         if (Strings.isEmpty(password)) {
             System.err.println("Missing the following attribute in MBean response: password");
@@ -148,7 +153,7 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         }
 
         String output = cmd.getOptionValue('o');
-        print(uri, name, password, schema, output);
+        print(uri, login, password, schema, output);
 
         return null;
     }
