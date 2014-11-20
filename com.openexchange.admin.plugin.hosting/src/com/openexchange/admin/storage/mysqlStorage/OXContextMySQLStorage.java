@@ -2806,6 +2806,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt.setString(3, targetSchema);
             stmt.setString(4, sourceSchema);
 
+            stmt.executeUpdate();
+            
             LOG.info("Successfully restored database pool references in configdb for schema {}", targetSchema);
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
