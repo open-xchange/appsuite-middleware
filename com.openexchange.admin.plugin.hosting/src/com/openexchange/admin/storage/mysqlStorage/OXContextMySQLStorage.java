@@ -218,7 +218,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // fetch tables which can contain context data and sort these tables magically by foreign keys
             LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
             final Vector<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
-            LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
+            LOG.debug(
+                "Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}",
+                ctx.getId(),
+                ctx.getId());
             // sort the tables by references (foreign keys)
             sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
             LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
@@ -261,7 +264,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     QuotaFileStorage.getInstance(storageURI, gwCtx).remove();
                 } catch (final OXException e) {
                     simpleDelete = true;
-                    LOG.error("File storage implementation failed to remove the file storage. Continuing with hard delete of file storage.", e);
+                    LOG.error(
+                        "File storage implementation failed to remove the file storage. Continuing with hard delete of file storage.",
+                        e);
                 }
             }
             if (simpleDelete) {
@@ -686,7 +691,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getId().intValue());
                 cache.resetPoolMappingForContext(ctx.getId().intValue());
             } catch (final Exception ecp) {
-                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ctx.getId(), ecp);
+                LOG.error(
+                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
+                    ctx.getId(),
+                    ecp);
             }
 
             // enableContext() back
@@ -704,9 +712,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getId().intValue());
                 cache.resetPoolMappingForContext(ctx.getId().intValue());
             } catch (final SQLException ecp) {
-                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ctx.getId(), ecp);
+                LOG.error(
+                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
+                    ctx.getId(),
+                    ecp);
             } catch (final PoolException ecp) {
-                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ctx.getId(), ecp);
+                LOG.error(
+                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
+                    ctx.getId(),
+                    ecp);
             }
 
             // enableContext() back
@@ -801,7 +815,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         if (LOG.isDebugEnabled()) {
             double time = (System.currentTimeMillis() - start) / 1000;
-            LOG.debug("Data moving for context {} to target database system {} completed in {} seconds!", ctx.getId(), target_database_id, time);
+            LOG.debug(
+                "Data moving for context {} to target database system {} completed in {} seconds!",
+                ctx.getId(),
+                target_database_id,
+                time);
         }
     }
 
@@ -875,9 +893,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         final boolean failOnMissing = false;
 
-        return contextCommon.loadContexts(filteredCids != null ? filteredCids : cids, Long.parseLong(prop.getProp(
-            "AVERAGE_CONTEXT_SIZE",
-            "100")), loaders, failOnMissing);
+        return contextCommon.loadContexts(
+            filteredCids != null ? filteredCids : cids,
+            Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")),
+            loaders,
+            failOnMissing);
     }
 
     @Override
@@ -892,7 +912,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 cids.add(I(contextId));
             }
 
-            return contextCommon.loadContexts(cids, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE","100")), null, false);
+            return contextCommon.loadContexts(cids, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")), null, false);
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -947,7 +967,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             stmt = con.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.filestore_id = ?");
             logininfo = con.prepareStatement("SELECT login_info FROM `login2context` WHERE cid=?");
-            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AdminProperties.Prop.SERVER_NAME, "local");
+            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
+                AdminProperties.Prop.SERVER_NAME,
+                "local");
             stmt.setString(1, serverName);
             stmt.setInt(2, filestore.getId().intValue());
             rs = stmt.executeQuery();
@@ -1485,22 +1507,27 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         final int serverId = ClientAdminThread.cache.getServerId();
         ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
+
             @Override
             public int getWritePoolId() {
                 return i(db.getId());
             }
+
             @Override
             public int getServerId() {
                 return serverId;
             }
+
             @Override
             public String getSchema() {
                 return db.getScheme();
             }
+
             @Override
             public int getReadPoolId() {
                 return i(db.getRead_id());
             }
+
             @Override
             public int getContextId() {
                 return contextId;
@@ -2135,7 +2162,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         throw new OXContextException(e.toString());
                     } finally {
                         if (null != rsi) {
-                            try { rsi.close(); } catch (Exception e) { /*ignore*/ }
+                            try {
+                                rsi.close();
+                            } catch (Exception e) { /* ignore */
+                            }
                         }
                     }
                 }
@@ -2257,7 +2287,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         stmt.setString(2, cap.substring(1));
                         stmt.addBatch();
                     } else {
-                        stmt.setString(2, "-"+cap);
+                        stmt.setString(2, "-" + cap);
                         stmt.addBatch();
                     }
                 }
@@ -2757,6 +2787,40 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 cache.pushConnectionForConfigDB(con);
             } catch (final PoolException exp) {
                 LOG.error("Error pushing configdb connection to pool!", exp);
+            }
+        }
+    }
+
+    @Override
+    public void updateContextReferences(String sourceSchema, String targetSchema, int writeDbPoolId, int readDbPoolId) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+
+            String query = "UPDATE context_server2db_pool SET write_db_pool_id = ?, read_db_pool_id = ?, db_schema = ? WHERE db_schema = ?";
+
+            stmt = con.prepareStatement(query);
+            stmt.setInt(1, writeDbPoolId);
+            stmt.setInt(2, readDbPoolId);
+            stmt.setString(3, targetSchema);
+            stmt.setString(4, sourceSchema);
+
+            LOG.info("Successfully restored database pool references in configdb for schema {}", targetSchema);
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
             }
         }
     }

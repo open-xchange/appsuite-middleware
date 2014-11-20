@@ -68,11 +68,9 @@ import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
- * This interface provides an abstraction to the storage of the context
- * information
+ * This interface provides an abstraction to the storage of the context information
  *
  * @author d7
- *
  */
 public abstract class OXContextStorageInterface {
 
@@ -89,6 +87,7 @@ public abstract class OXContextStorageInterface {
 
     /**
      * Creates a new instance implementing the group storage interface.
+     * 
      * @return an instance implementing the group storage interface.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
@@ -220,7 +219,6 @@ public abstract class OXContextStorageInterface {
      */
     public abstract Context create(final Context ctx, final User admin_user, final UserModuleAccess access) throws StorageException, InvalidDataException;
 
-
     /**
      * @param ctx
      * @throws StorageException
@@ -244,8 +242,8 @@ public abstract class OXContextStorageInterface {
     public abstract void disable(final Context ctx, final MaintenanceReason reason) throws StorageException;
 
     /**
-     * Disables all contexts in a schema and sets the given maintenance reason. Contexts that are already disabled
-     * will be ignored and keep their original reason.
+     * Disables all contexts in a schema and sets the given maintenance reason. Contexts that are already disabled will be ignored and keep
+     * their original reason.
      *
      * @param schema
      * @param reason
@@ -260,9 +258,9 @@ public abstract class OXContextStorageInterface {
     public abstract void enable(final Context ctx) throws StorageException;
 
     /**
-     * Enables all contexts in a schema which are currently disabled with to the given maintenance reason. Contexts that are disabled
-     * with any other maintenance reason will not be enabled. If no reason is given, all disabled contexts are enabled. For every context
-     * that is enabled, the reason ID is set to NULL.
+     * Enables all contexts in a schema which are currently disabled with to the given maintenance reason. Contexts that are disabled with
+     * any other maintenance reason will not be enabled. If no reason is given, all disabled contexts are enabled. For every context that is
+     * enabled, the reason ID is set to NULL.
      *
      * @param schema
      * @param reason The reason or <code>null</code>
@@ -306,6 +304,7 @@ public abstract class OXContextStorageInterface {
 
     /**
      * This method deletes all inaccessible data in a context.
+     * 
      * @param ctx Context.
      * @throws StorageException if some problem occurs.
      */
@@ -326,5 +325,15 @@ public abstract class OXContextStorageInterface {
      */
     public abstract void enableAll(final String additionaltable, final String sqlconjunction) throws StorageException;
 
+    /**
+     * Updates the context references after a replay
+     * 
+     * @param sourceSchema The source schema
+     * @param targetSchema The target schema
+     * @param writeDbPoolId The write database pool identifier
+     * @param readDbPoolId The read database pool identifier
+     * @throws StorageException
+     */
+    public abstract void updateContextReferences(final String sourceSchema, final String targetSchema, final int writeDbPoolId, final int readDbPoolId) throws StorageException;
 
 }
