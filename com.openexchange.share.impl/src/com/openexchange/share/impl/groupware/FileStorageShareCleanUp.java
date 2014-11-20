@@ -54,6 +54,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareTarget;
@@ -81,7 +82,8 @@ public class FileStorageShareCleanUp implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
+        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event) &&
+            false == Boolean.TRUE.equals(event.getProperty(FileStorageEventConstants.SHARE_CLEANUP_DONE))) {
             try {
                 ShareTarget target = new ShareTarget(
                     Module.INFOSTORE.getFolderConstant(),
