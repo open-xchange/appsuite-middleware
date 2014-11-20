@@ -118,41 +118,18 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         List<Attribute> list = schemaMoveMBean.getDbAccessInfoForSchema(cmd.getOptionValue('m')).asList();
         final Map<String, String> dbAccessInfo = SchemaTools.convertToMap(list);
 
-        String url = dbAccessInfo.get("url");
-        if (Strings.isEmpty(url)) {
-            System.err.println("Missing the following attribute in MBean response: url");
-            System.exit(1);
-        }
-
+        String url = getAttribute("url", dbAccessInfo);
         int pos = url.indexOf("jdbc:");
         if (pos >= 0) {
             url = url.substring(pos + 5);
         }
         URI uri = new URI(url);
-        String name = dbAccessInfo.get("name");
-        if (Strings.isEmpty(name)) {
-            System.err.println("Missing the following attribute in MBean response: name");
-            System.exit(1);
-        }
-        String login = dbAccessInfo.get("login");
-        if (Strings.isEmpty(login)) {
-            System.err.println("Missing the following attribute in MBean response: login");
-            System.exit(1);
-        }
-        
-        String password = dbAccessInfo.get("password");
-        if (Strings.isEmpty(password)) {
-            System.err.println("Missing the following attribute in MBean response: password");
-            System.exit(1);
-        }
 
-        String schema = dbAccessInfo.get("schema");
-        if (Strings.isEmpty(schema)) {
-            System.err.println("Missing the following attribute in MBean response: schema");
-            System.exit(1);
-        }
-
+        String login = getAttribute("login", dbAccessInfo);
+        String password = getAttribute("password", dbAccessInfo);
+        String schema = getAttribute("schema", dbAccessInfo);
         String output = cmd.getOptionValue('o');
+        
         print(uri, login, password, schema, output);
 
         return null;
@@ -175,5 +152,21 @@ public class DumpSchema extends AbstractMBeanCLI<Void> {
         }
         builder.append(" -u ").append(login).append(" -p").append(password).append(" --single-transaction > ").append(output);
         System.out.println(builder.toString());
+    }
+
+    /**
+     * Helper method to get the attribute from the map
+     * 
+     * @param name
+     * @param map
+     * @return
+     */
+    private String getAttribute(final String name, final Map<String, String> map) {
+        final String attribute = map.get(name);
+        if (Strings.isEmpty(attribute)) {
+            System.err.println("Missing the following attribute in MBean response: " + name);
+            System.exit(1);
+        }
+        return attribute;
     }
 }
