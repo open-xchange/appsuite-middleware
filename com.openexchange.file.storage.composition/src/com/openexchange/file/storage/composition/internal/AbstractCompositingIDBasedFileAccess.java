@@ -109,6 +109,7 @@ import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
+import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStorageCapability;
@@ -281,6 +282,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 break;
             case LOCKS:
                 if (false == FileStorageLockedFileAccess.class.isInstance(fileAccess)) {
+                    return false;
+                }
+                break;
+            case OBJECT_PERMISSIONS:
+                if (false == ObjectPermissionAware.class.isInstance(fileAccess)) {
                     return false;
                 }
                 break;
