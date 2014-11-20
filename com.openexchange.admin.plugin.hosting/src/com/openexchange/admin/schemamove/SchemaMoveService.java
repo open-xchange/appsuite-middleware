@@ -51,6 +51,8 @@ package com.openexchange.admin.schemamove;
 
 import java.util.Map;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -91,9 +93,10 @@ public interface SchemaMoveService {
      *
      * @param schemaName The schema name
      * @return The database access information
-     * @throws OXException If operation fails
+     * @throws StorageException  If database cannot be loaded
+     * @throws NoSuchObjectException If the specified schema does not exist
      */
-    Map<String, String> getDbAccessInfoForSchema(String schemaName) throws OXException;
+    Map<String, String> getDbAccessInfoForSchema(String schemaName) throws StorageException, NoSuchObjectException;
 
     void enableSchema(String schemaName) throws OXException;
 }

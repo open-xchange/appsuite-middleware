@@ -68,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.sessiond.SessiondService;
 
-
 /**
  * {@link SchemaMoveImpl}
  *
@@ -95,13 +94,16 @@ public class SchemaMoveImpl implements SchemaMoveService {
              */
             OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.isDistinctWritePoolIDForSchema(schemaName)) {
-                throw new TargetDatabaseException("Cannot proceed with schema move: Multiple write pool IDs are in use for schema " + schemaName);
+                throw new TargetDatabaseException(
+                    "Cannot proceed with schema move: Multiple write pool IDs are in use for schema " + schemaName);
             }
 
             /*
              * Disable all enabled contexts with configured maintenance reason
              */
-            Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp("SCHEMA_MOVE_MAINTENANCE_REASON", Integer.toString(DEFAULT_REASON)));
+            Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
+                "SCHEMA_MOVE_MAINTENANCE_REASON",
+                Integer.toString(DEFAULT_REASON)));
             OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
             contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
 
@@ -125,37 +127,32 @@ public class SchemaMoveImpl implements SchemaMoveService {
     }
 
     @Override
-    public Map<String, String> getDbAccessInfoForSchema(String schemaName) throws OXException {
-        try {
-            if (null == schemaName) {
-                return null;
-            }
-            int writePoolId = OXToolStorageInterface.getInstance().getDatabaseIDByDatabaseSchema(schemaName);
-            Database database = OXToolStorageInterface.getInstance().loadDatabaseById(writePoolId);
+    public Map<String, String> getDbAccessInfoForSchema(String schemaName) throws StorageException, NoSuchObjectException {
+        if (null == schemaName) {
+            return null;
+        }
+        int writePoolId = OXToolStorageInterface.getInstance().getDatabaseIDByDatabaseSchema(schemaName);
+        Database database = OXToolStorageInterface.getInstance().loadDatabaseById(writePoolId);
 
-            final Map<String, String> props = new HashMap<String, String>(6);
-            class SafePut {
-                void put(String name, String value) {
-                    if (null != value) {
-                        props.put(name, value);
-                    }
+        final Map<String, String> props = new HashMap<String, String>(6);
+        class SafePut {
+
+            void put(String name, String value) {
+                if (null != value) {
+                    props.put(name, value);
                 }
             }
-            SafePut safePut = new SafePut();
-
-            safePut.put("url", database.getUrl());
-            safePut.put("schema", schemaName);
-            safePut.put("driver", database.getDriver());
-            safePut.put("login", database.getLogin());
-            safePut.put("name", database.getName());
-            safePut.put("password", database.getPassword());
-
-            return props;
-        } catch (StorageException e) {
-            throw new OXException(e);
-        } catch (NoSuchObjectException e) {
-            throw new OXException(e);
         }
+        SafePut safePut = new SafePut();
+
+        safePut.put("url", database.getUrl());
+        safePut.put("schema", schemaName);
+        safePut.put("driver", database.getDriver());
+        safePut.put("login", database.getLogin());
+        safePut.put("name", database.getName());
+        safePut.put("password", database.getPassword());
+
+        return props;
     }
 
     @Override
@@ -164,7 +161,9 @@ public class SchemaMoveImpl implements SchemaMoveService {
             /*
              * Disable all enabled contexts with configured maintenance reason
              */
-            Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp("SCHEMA_MOVE_MAINTENANCE_REASON", Integer.toString(DEFAULT_REASON)));
+            Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
+                "SCHEMA_MOVE_MAINTENANCE_REASON",
+                Integer.toString(DEFAULT_REASON)));
             OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
             contextStorage.enable(schemaName, new MaintenanceReason(reasonId));
 
