@@ -121,10 +121,9 @@ public interface SchemaMoveMBean {
      * 
      * @param sourceSchema The source schema
      * @param targetSchema The target schema
-     * @param writeDbPoolId The write database pool identifier
-     * @param readDbPoolId The write database pool identifier
+     * @param targetClusterId The target cluster identifier
      * @throws StorageException
      */
-    void restorePoolReferences(String sourceSchema, String targetSchema, int writeDbPoolId, int readDbPoolId) throws StorageException;
+    void restorePoolReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException;
 
 }

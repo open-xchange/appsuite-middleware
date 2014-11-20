@@ -62,7 +62,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemamove.SchemaMoveService;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 
-
 /**
  * {@link SchemaMoveMBeanImpl}
  *
@@ -108,8 +107,8 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
     }
 
     @Override
-    public void restorePoolReferences(String sourceSchema, String targetSchema, int writeDbPoolId, int readDbPoolId) throws StorageException {
-        schemaMoveService.restorePoolReferences(sourceSchema, targetSchema, writeDbPoolId, readDbPoolId);        
+    public void restorePoolReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException {
+        schemaMoveService.restorePoolReferences(sourceSchema, targetSchema, targetClusterId);
     }
 
 }

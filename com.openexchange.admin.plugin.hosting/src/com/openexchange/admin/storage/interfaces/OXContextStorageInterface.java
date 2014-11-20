@@ -330,10 +330,9 @@ public abstract class OXContextStorageInterface {
      * 
      * @param sourceSchema The source schema
      * @param targetSchema The target schema
-     * @param writeDbPoolId The write database pool identifier
-     * @param readDbPoolId The read database pool identifier
+     * @param targetClusterId The target cluster identifier
      * @throws StorageException
      */
-    public abstract void updateContextReferences(final String sourceSchema, final String targetSchema, final int writeDbPoolId, final int readDbPoolId) throws StorageException;
+    public abstract void updateContextReferences(final String sourceSchema, final String targetSchema, final int targetClusterId) throws StorageException;
 
 }

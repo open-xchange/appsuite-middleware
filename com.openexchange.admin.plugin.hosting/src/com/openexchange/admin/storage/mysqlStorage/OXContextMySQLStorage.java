@@ -2792,22 +2792,37 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public void updateContextReferences(String sourceSchema, String targetSchema, int writeDbPoolId, int readDbPoolId) throws StorageException {
+    public void updateContextReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
             con = cache.getConnectionForConfigDB();
 
-            String query = "UPDATE context_server2db_pool SET write_db_pool_id = ?, read_db_pool_id = ?, db_schema = ? WHERE db_schema = ?";
+            // Get the database pool identifier from the specified target cluster identifier
+            String getPoolIds = "SELECT read_db_pool_id, write_db_pool_id FROM db_cluster WHERE cluster_id = ?";
+            stmt = con.prepareStatement(getPoolIds);
+            stmt.setInt(1, targetClusterId);
+            stmt.executeQuery();
+            final ResultSet rs = stmt.executeQuery();
+            final int writeDbPoolId;
+            final int readDbPoolId;
+            if (rs.next()) {
+                readDbPoolId = rs.getInt(1);
+                writeDbPoolId = rs.getInt(2);
+            } else {
+                LOG.error("The specified target cluster id '{}' has no database pool references", targetClusterId);
+                throw new StorageException("The specified target cluster id '" + targetClusterId + "' has no database pool references");
+            }
 
+            // Update the relevant references
+            String query = "UPDATE context_server2db_pool SET write_db_pool_id = ?, read_db_pool_id = ?, db_schema = ? WHERE db_schema = ?";
             stmt = con.prepareStatement(query);
             stmt.setInt(1, writeDbPoolId);
             stmt.setInt(2, readDbPoolId);
             stmt.setString(3, targetSchema);
             stmt.setString(4, sourceSchema);
-
             stmt.executeUpdate();
-            
+
             LOG.info("Successfully restored database pool references in configdb for schema {}", targetSchema);
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
@@ -2826,5 +2841,4 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
     }
-
 }
