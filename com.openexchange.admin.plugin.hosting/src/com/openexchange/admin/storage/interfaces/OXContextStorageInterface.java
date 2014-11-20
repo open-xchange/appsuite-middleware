@@ -335,4 +335,12 @@ public abstract class OXContextStorageInterface {
      */
     public abstract void updateContextReferences(final String sourceSchema, final String targetSchema, final int targetClusterId) throws StorageException;
 
+    /**
+     * Create a new database schema
+     * 
+     * @return The name of the new database schema
+     * @throws StorageException
+     */
+    public abstract String createSchema() throws StorageException;
+
 }

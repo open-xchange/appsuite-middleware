@@ -126,4 +126,12 @@ public interface SchemaMoveMBean {
      */
     void restorePoolReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException;
 
+    /**
+     * Create a new database scheme
+     * 
+     * @return The name of the new database scheme
+     * @throws StorageException
+     */
+    String createSchema() throws StorageException;
+
 }

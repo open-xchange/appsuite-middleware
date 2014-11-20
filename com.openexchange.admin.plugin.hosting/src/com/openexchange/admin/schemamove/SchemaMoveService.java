@@ -124,4 +124,12 @@ public interface SchemaMoveService {
      */
     void restorePoolReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException;
 
+    /**
+     * Create a new database schema
+     * 
+     * @return The name of the new database schema
+     * @throws StorageException
+     */
+    String createSchema() throws StorageException;
+
 }

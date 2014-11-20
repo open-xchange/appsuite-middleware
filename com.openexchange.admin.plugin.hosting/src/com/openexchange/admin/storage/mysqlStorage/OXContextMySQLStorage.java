@@ -2841,4 +2841,26 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
     }
+
+    @Override
+    public String createSchema() throws StorageException {
+        Connection configCon = null;
+        try {
+            configCon = cache.getConnectionForConfigDB();
+            Database db = new Database(-1);
+            findOrCreateSchema(configCon, db);
+            return db.getScheme();
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (configCon != null) {
+                try {
+                    cache.pushConnectionForConfigDB(configCon);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
 }

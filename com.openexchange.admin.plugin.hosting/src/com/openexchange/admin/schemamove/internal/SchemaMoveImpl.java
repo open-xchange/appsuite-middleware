@@ -64,6 +64,7 @@ import com.openexchange.admin.schemamove.SchemaMoveService;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -209,6 +210,12 @@ public class SchemaMoveImpl implements SchemaMoveService {
     public void restorePoolReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException {
         OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
         contextStorage.updateContextReferences(sourceSchema, targetSchema, targetClusterId);
+    }
+
+    @Override
+    public String createSchema() throws StorageException {
+        OXContextStorageInterface contextStorage = OXContextMySQLStorage.getInstance();
+        return contextStorage.createSchema();
     }
 
 }

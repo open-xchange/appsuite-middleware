@@ -72,5 +72,10 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 CLASSPATH="-classpath @classpath@"
 
 umask 066
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.ReplaySchema $@
+#exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.ReplaySchema $@
 
+# Basic workflow
+################
+# 1) CreateSchema.java
+# 2) mysql < dump
+# 3) RestoreReference

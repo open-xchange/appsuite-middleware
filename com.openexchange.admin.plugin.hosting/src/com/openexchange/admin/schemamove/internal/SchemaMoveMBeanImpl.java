@@ -111,4 +111,9 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
         schemaMoveService.restorePoolReferences(sourceSchema, targetSchema, targetClusterId);
     }
 
+    @Override
+    public String createSchema() throws StorageException {
+        return schemaMoveService.createSchema();
+    }
+
 }
