@@ -56,9 +56,11 @@ import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
+import com.openexchange.admin.rmi.exceptions.MissingServiceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemamove.SchemaMoveService;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
-import com.openexchange.exception.OXException;
 
 
 /**
@@ -81,7 +83,7 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
     }
 
     @Override
-    public void disableSchema(String schemaName) throws OXException, TargetDatabaseException {
+    public void disableSchema(String schemaName) throws TargetDatabaseException, StorageException, NoSuchObjectException, MissingServiceException {
         schemaMoveService.disableSchema(schemaName);
     }
 
@@ -101,7 +103,7 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
     }
 
     @Override
-    public void enableSchema(String schemaName) throws OXException {
+    public void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException {
         schemaMoveService.enableSchema(schemaName);
     }
 

@@ -51,9 +51,9 @@ package com.openexchange.admin.schemamove;
 
 import java.util.Map;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
+import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link SchemaMoveService} - The service providing methods to move a schema to another database.
@@ -73,10 +73,12 @@ public interface SchemaMoveService {
      * </ul>
      *
      * @param schemaName The schema name
-     * @throws OXException If operation fails
      * @throws TargetDatabaseException
+     * @throws NoSuchObjectException
+     * @throws StorageException
+     * @throws MissingServiceException
      */
-    void disableSchema(String schemaName) throws OXException, TargetDatabaseException;
+    void disableSchema(String schemaName) throws TargetDatabaseException, StorageException, NoSuchObjectException, MissingServiceException;
 
     /**
      * Returns the database access information that are necessary to establish a connection to given schema's database.
@@ -98,5 +100,17 @@ public interface SchemaMoveService {
      */
     Map<String, String> getDbAccessInfoForSchema(String schemaName) throws StorageException, NoSuchObjectException;
 
-    void enableSchema(String schemaName) throws OXException;
+    /**
+     * Disables the denoted schema, resp. all contexts in that schema.
+     * <ul>
+     * <li>Enables all contexts that have been disabled via {@link #disableSchema(String)}</li>
+     * <li>Distribute changes contexts in cluster</li>
+     * </ul>
+     * @param schemaName
+     * @throws StorageException
+     * @throws NoSuchObjectException
+     * @throws MissingServiceException
+     */
+    void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException;
+
 }

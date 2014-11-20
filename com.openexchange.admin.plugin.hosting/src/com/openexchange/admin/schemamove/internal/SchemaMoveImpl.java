@@ -57,6 +57,7 @@ import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemamove.SchemaMoveService;
@@ -64,6 +65,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.sessiond.SessiondService;
@@ -87,43 +89,41 @@ public class SchemaMoveImpl implements SchemaMoveService {
     }
 
     @Override
-    public void disableSchema(String schemaName) throws OXException, TargetDatabaseException {
-        try {
-            /*
-             * Precondition: a distinct write pool must be set for all contexts of the given schema
-             */
-            OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            if (!tool.isDistinctWritePoolIDForSchema(schemaName)) {
-                throw new TargetDatabaseException(
-                    "Cannot proceed with schema move: Multiple write pool IDs are in use for schema " + schemaName);
-            }
-
-            /*
-             * Disable all enabled contexts with configured maintenance reason
-             */
-            Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
-                "SCHEMA_MOVE_MAINTENANCE_REASON",
-                Integer.toString(DEFAULT_REASON)));
-            OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
-            contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
-
-            /*
-             * Invalidate disabled contexts
-             */
-            List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
-            ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class);
-            contextService.invalidateContexts(Autoboxing.I2i(contextIds));
-
-            /*
-             * Kill sessions for the disabled contexts globally
-             */
-            SessiondService sessiondService = AdminServiceRegistry.getInstance().getService(SessiondService.class, true);
-            sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
-        } catch (StorageException e) {
-            throw new OXException(e);
-        } catch (NoSuchObjectException e) {
-            throw new OXException(e);
+    public void disableSchema(String schemaName) throws StorageException, NoSuchObjectException, TargetDatabaseException, MissingServiceException {
+        /*
+         * Precondition: a distinct write pool must be set for all contexts of the given schema
+         */
+        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        if (!tool.isDistinctWritePoolIDForSchema(schemaName)) {
+            throw new TargetDatabaseException(
+                "Cannot proceed with schema move: Multiple write pool IDs are in use for schema " + schemaName);
         }
+
+        /*
+         * Disable all enabled contexts with configured maintenance reason
+         */
+        Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
+            "SCHEMA_MOVE_MAINTENANCE_REASON",
+            Integer.toString(DEFAULT_REASON)));
+        OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
+        contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
+
+        /*
+         * Invalidate disabled contexts
+         */
+        List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
+        ContextService contextService = getContextService();
+        try {
+            contextService.invalidateContexts(Autoboxing.I2i(contextIds));
+        } catch (OXException e) {
+            throw StorageException.wrapForRMI(e);
+        }
+
+        /*
+         * Kill sessions for the disabled contexts globally
+         */
+        SessiondService sessiondService = getSessiondService();
+        sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
     }
 
     @Override
@@ -156,25 +156,52 @@ public class SchemaMoveImpl implements SchemaMoveService {
     }
 
     @Override
-    public void enableSchema(String schemaName) throws OXException {
-        try {
-            /*
-             * Disable all enabled contexts with configured maintenance reason
-             */
-            Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
-                "SCHEMA_MOVE_MAINTENANCE_REASON",
-                Integer.toString(DEFAULT_REASON)));
-            OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
-            contextStorage.enable(schemaName, new MaintenanceReason(reasonId));
+    public void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException {
+        /*
+         * Disable all enabled contexts with configured maintenance reason
+         */
+        Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
+            "SCHEMA_MOVE_MAINTENANCE_REASON",
+            Integer.toString(DEFAULT_REASON)));
+        OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
+        contextStorage.enable(schemaName, new MaintenanceReason(reasonId));
 
-            /*
-             * Invalidate disabled contexts
-             */
-            List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
-            ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class);
-            contextService.invalidateContexts(Autoboxing.I2i(contextIds));
-        } catch (StorageException e) {
-            throw new OXException(e);
+        /*
+         * Invalidate disabled contexts
+         */
+        List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
+        ContextService contextService = getContextService();
+        DatabaseService dbService = getDatabaseService();
+        try {
+            int[] contextIdArray = Autoboxing.I2i(contextIds);
+            dbService.invalidate(contextIdArray);
+            contextService.invalidateContexts(contextIdArray);
+        } catch (OXException e) {
+            throw StorageException.wrapForRMI(e);
+        }
+    }
+
+    private ContextService getContextService() throws MissingServiceException {
+        try {
+            return AdminServiceRegistry.getInstance().getService(ContextService.class, true);
+        } catch (OXException e) {
+            throw new MissingServiceException(e.getMessage());
+        }
+    }
+
+    private SessiondService getSessiondService() throws MissingServiceException {
+        try {
+            return AdminServiceRegistry.getInstance().getService(SessiondService.class, true);
+        } catch (OXException e) {
+            throw new MissingServiceException(e.getMessage());
+        }
+    }
+
+    private DatabaseService getDatabaseService() throws MissingServiceException {
+        try {
+            return AdminServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        } catch (OXException e) {
+            throw new MissingServiceException(e.getMessage());
         }
     }
 

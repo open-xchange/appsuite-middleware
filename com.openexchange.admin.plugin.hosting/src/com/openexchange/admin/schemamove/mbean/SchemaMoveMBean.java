@@ -52,6 +52,8 @@ package com.openexchange.admin.schemamove.mbean;
 import javax.management.AttributeList;
 import javax.management.MBeanException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
+import com.openexchange.admin.rmi.exceptions.MissingServiceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.exception.OXException;
 
@@ -66,7 +68,7 @@ public interface SchemaMoveMBean {
     public static final String DOMAIN = "com.openexchange.admin.schemamove";
 
     /**
-     * Disables the denoted schema.
+     * Disables the denoted schema, resp. all contexts in that schema.
      * <ul>
      * <li>Checks required preconditions</li>
      * <li>Determines affected contexts</li>
@@ -79,7 +81,7 @@ public interface SchemaMoveMBean {
      * @throws OXException If operation fails
      * @throws TargetDatabaseException
      */
-    void disableSchema(String schemaName) throws OXException, TargetDatabaseException;
+    void disableSchema(String schemaName) throws TargetDatabaseException, StorageException, NoSuchObjectException, MissingServiceException;
 
     /**
      * Returns the database access information that are necessary to establish a connection to given schema's database. *
@@ -100,6 +102,17 @@ public interface SchemaMoveMBean {
      */
     AttributeList getDbAccessInfoForSchema(String schemaName) throws MBeanException;
 
-    void enableSchema(String schemaName) throws OXException, StorageException;
+    /**
+     * Disables the denoted schema, resp. all contexts in that schema.
+     * <ul>
+     * <li>Enables all contexts that have been disabled via {@link #disableSchema(String)}</li>
+     * <li>Distribute changes contexts in cluster</li>
+     * </ul>
+     * @param schemaName
+     * @throws StorageException
+     * @throws NoSuchObjectException
+     * @throws MissingServiceException
+     */
+    void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException;
 
 }
