@@ -1,3 +1,7 @@
+* 2014-11-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35490: Synchronize calls when checking mail standard folders
+
 * 2014-10-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 35242: Added null guard & improved logging behavior to provide mail information in order to identify the mail later on
