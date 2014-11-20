@@ -49,6 +49,11 @@
 
 package com.openexchange.admin.console.schemamove;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import javax.management.Attribute;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
@@ -57,6 +62,7 @@ import org.apache.commons.cli.Options;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CreateSchema}
@@ -108,8 +114,60 @@ public class CreateSchema extends AbstractMBeanCLI<Void> {
         SchemaMoveMBean schemaMoveMBean = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
         final String targetClusterId = cmd.getOptionValue("t");
         final String schemaName = schemaMoveMBean.createSchema(Integer.valueOf(targetClusterId));
+
+        List<Attribute> list = schemaMoveMBean.getDbAccessInfoForSchema(schemaName).asList();
+        final Map<String, String> dbAccessInfo = SchemaTools.convertToMap(list);
+
+        String url = getAttribute("url", dbAccessInfo);
+        int pos = url.indexOf("jdbc:");
+        if (pos >= 0) {
+            url = url.substring(pos + 5);
+        }
+        URI uri = new URI(url);
+
+        String login = getAttribute("login", dbAccessInfo);
+        String password = getAttribute("password", dbAccessInfo);
+        String schema = getAttribute("schema", dbAccessInfo);
+
+        print(uri, login, password, schema);
+
         System.out.println(schemaName);
         return null;
+    }
+
+    /**
+     * Print
+     * 
+     * @param host
+     * @param login
+     * @param password
+     * @param out
+     * @throws IOException
+     */
+    private void print(URI uri, String login, String password, String schema) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(schema).append(" -h ").append(uri.getHost());
+        if (uri.getPort() > 0) {
+            builder.append(" -P ").append(uri.getPort());
+        }
+        builder.append(" -u ").append(login).append(" -p").append(password).append(" ").append(schema);
+        System.out.println(builder.toString());
+    }
+    
+    /**
+     * Helper method to get the attribute from the map
+     * 
+     * @param name
+     * @param map
+     * @return
+     */
+    private String getAttribute(final String name, final Map<String, String> map) {
+        final String attribute = map.get(name);
+        if (Strings.isEmpty(attribute)) {
+            System.err.println("Missing the following attribute in MBean response: " + name);
+            System.exit(1);
+        }
+        return attribute;
     }
 
 }
