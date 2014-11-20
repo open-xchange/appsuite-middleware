@@ -47,75 +47,73 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.serialization;
 
+import java.io.IOException;
 import java.util.Set;
-import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import com.openexchange.exception.OXException;
-import com.openexchange.sessiond.SessiondMBean;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.osgi.Services;
-import com.openexchange.sessionstorage.SessionStorageService;
+import java.util.concurrent.Callable;
+import org.apache.commons.lang.Validate;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.sessiond.impl.SessionHandler;
 
 /**
- * {@link SessiondMBeanImpl}
+ * {@link PortableContextSessionsCleaner}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
+public class PortableContextSessionsCleaner extends AbstractCustomPortable implements Callable<Void> {
+
+    private Set<Integer> contextIds;
 
     /**
-     * Initializes a new {@link SessiondMBeanImpl}
+     * Initializes a new {@link ClearRemoteContextSessions}.
      *
-     * @throws NotCompliantMBeanException If the mbeanInterface does not follow JMX design patterns for Management Interfaces, or if this
-     *             does not implement the specified interface.
+     * @param contextIds
      */
-    public SessiondMBeanImpl() throws NotCompliantMBeanException {
-        super(SessiondMBean.class);
+    public PortableContextSessionsCleaner(Set<Integer> contextIds) {
+        Validate.notNull(contextIds, "Mandatory parameter contextIds is missing.");
+
+        this.contextIds = contextIds;
     }
 
-    @Override
-    public int clearUserSessions(final int userId, final int contextId) {
-        return SessionHandler.removeUserSessions(userId, contextId).length;
-    }
-
-    @Override
-    public void clearContextSessions(final int contextId) {
-        /*
-         * Clear context-associated sessions
-         */
-        SessionHandler.removeContextSessions(contextId);
-    }
-
-    @Override
-    public int[] getNumberOfShortTermSessions() {
-        return SessionHandler.getNumberOfShortTermSessions();
-    }
-
-    @Override
-    public int[] getNumberOfLongTermSessions() {
-        return SessionHandler.getNumberOfLongTermSessions();
-    }
-
-    @Override
-    public void clearSessionStorage() throws MBeanException {
-        SessionStorageService storageService = Services.getService(SessionStorageService.class);
-        try {
-            storageService.cleanUp();
-        } catch (OXException e) {
-            throw new MBeanException(e, e.getMessage());
-        }
+    public PortableContextSessionsCleaner() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void clearContextSessionsGlobal(Set<Integer> contextIds) {
-        final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+    public Void call() throws Exception {
+        SessionHandler.removeContextSessions(this.contextIds);
 
-        sessiondService.removeContextSessionsGlobal(contextIds);
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getClassId() {
+        return PORTABLE_CONTEXT_SESSIONS_CLEANER_CLASS_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.getRawDataOutput().writeObject(this.contextIds);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        contextIds = reader.getRawDataInput().readObject();
     }
 }

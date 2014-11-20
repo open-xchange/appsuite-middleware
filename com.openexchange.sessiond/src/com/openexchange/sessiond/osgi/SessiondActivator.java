@@ -89,6 +89,7 @@ import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
 import com.openexchange.sessiond.impl.TokenSessionContainer;
 import com.openexchange.sessiond.portable.PortableTokenSessionControlFactory;
+import com.openexchange.sessiond.serialization.PortableContextSessionsCleanerFactory;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -237,7 +238,8 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             final BundleContext context = this.context;
             SessiondInit.getInstance().start();
 
-            // Create & register portable factory
+            // Create & register portable factories
+            registerService(CustomPortableFactory.class, new PortableContextSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableTokenSessionControlFactory());
 
             // Initialize token session container

@@ -116,9 +116,9 @@ public interface SessiondService {
     public void removeContextSessions(int contextId);
 
     /**
-     * Removes all sessions belonging to given contexts.
+     * Removes all sessions belonging to given contexts from this and all other cluster nodes.
      *
-     * @param contextId The context identifiers to remove sessions for
+     * @param contextIds - Set with the context identifiers to remove sessions for
      */
     public void removeContextSessionsGlobal(Set<Integer> contextIds);
 

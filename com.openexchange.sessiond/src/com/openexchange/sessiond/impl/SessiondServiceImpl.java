@@ -141,8 +141,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
      */
     @Override
     public void removeContextSessionsGlobal(Set<Integer> contextIds) {
-        // TODO Auto-generated method stub
-
+        SessionHandler.removeContextSessionsGlobal(contextIds);
     }
 
     @Override

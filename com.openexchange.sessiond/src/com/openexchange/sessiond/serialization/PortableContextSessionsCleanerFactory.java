@@ -47,75 +47,34 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.serialization;
 
-import java.util.Set;
-import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import com.openexchange.exception.OXException;
-import com.openexchange.sessiond.SessiondMBean;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.osgi.Services;
-import com.openexchange.sessionstorage.SessionStorageService;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+
 
 /**
- * {@link SessiondMBeanImpl}
+ * {@link PortableContextSessionsCleanerFactory}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
+public class PortableContextSessionsCleanerFactory extends AbstractCustomPortableFactory {
 
     /**
-     * Initializes a new {@link SessiondMBeanImpl}
-     *
-     * @throws NotCompliantMBeanException If the mbeanInterface does not follow JMX design patterns for Management Interfaces, or if this
-     *             does not implement the specified interface.
+     * {@inheritDoc}
      */
-    public SessiondMBeanImpl() throws NotCompliantMBeanException {
-        super(SessiondMBean.class);
-    }
-
     @Override
-    public int clearUserSessions(final int userId, final int contextId) {
-        return SessionHandler.removeUserSessions(userId, contextId).length;
-    }
-
-    @Override
-    public void clearContextSessions(final int contextId) {
-        /*
-         * Clear context-associated sessions
-         */
-        SessionHandler.removeContextSessions(contextId);
-    }
-
-    @Override
-    public int[] getNumberOfShortTermSessions() {
-        return SessionHandler.getNumberOfShortTermSessions();
-    }
-
-    @Override
-    public int[] getNumberOfLongTermSessions() {
-        return SessionHandler.getNumberOfLongTermSessions();
-    }
-
-    @Override
-    public void clearSessionStorage() throws MBeanException {
-        SessionStorageService storageService = Services.getService(SessionStorageService.class);
-        try {
-            storageService.cleanUp();
-        } catch (OXException e) {
-            throw new MBeanException(e, e.getMessage());
-        }
+    public int getClassId() {
+        return CustomPortable.PORTABLE_CONTEXT_SESSIONS_CLEANER_CLASS_ID;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void clearContextSessionsGlobal(Set<Integer> contextIds) {
-        final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-
-        sessiondService.removeContextSessionsGlobal(contextIds);
+    public Portable create() {
+        return new PortableContextSessionsCleaner();
     }
 }
