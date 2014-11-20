@@ -107,4 +107,9 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
         schemaMoveService.enableSchema(schemaName);
     }
 
+    @Override
+    public void restorePoolReferences(String sourceSchema, String targetSchema, int writeDbPoolId, int readDbPoolId) throws StorageException {
+        schemaMoveService.restorePoolReferences(sourceSchema, targetSchema, writeDbPoolId, readDbPoolId);        
+    }
+
 }

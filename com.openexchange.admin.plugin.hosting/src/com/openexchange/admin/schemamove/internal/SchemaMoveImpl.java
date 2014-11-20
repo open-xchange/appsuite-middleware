@@ -205,4 +205,10 @@ public class SchemaMoveImpl implements SchemaMoveService {
         }
     }
 
+    @Override
+    public void restorePoolReferences(String sourceSchema, String targetSchema, int writeDbPoolId, int readDbPoolId) throws StorageException {
+        OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
+        contextStorage.updateContextReferences(sourceSchema, targetSchema, writeDbPoolId, readDbPoolId);
+    }
+
 }

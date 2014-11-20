@@ -108,11 +108,23 @@ public interface SchemaMoveMBean {
      * <li>Enables all contexts that have been disabled via {@link #disableSchema(String)}</li>
      * <li>Distribute changes contexts in cluster</li>
      * </ul>
+     * 
      * @param schemaName
      * @throws StorageException
      * @throws NoSuchObjectException
      * @throws MissingServiceException
      */
     void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException;
+
+    /**
+     * Restore the database pool references after a replay
+     * 
+     * @param sourceSchema The source schema
+     * @param targetSchema The target schema
+     * @param writeDbPoolId The write database pool identifier
+     * @param readDbPoolId The write database pool identifier
+     * @throws StorageException
+     */
+    void restorePoolReferences(String sourceSchema, String targetSchema, int writeDbPoolId, int readDbPoolId) throws StorageException;
 
 }
