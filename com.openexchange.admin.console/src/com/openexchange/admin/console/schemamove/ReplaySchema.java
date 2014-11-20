@@ -102,10 +102,8 @@ public class ReplaySchema extends AbstractMBeanCLI<Void> {
             "The name of the source schema in which the database dump will be replayed").hasArg(true).isRequired(true).create("m"));
         options.addOption(OptionBuilder.withLongOpt("in").withArgName("dump_file").withDescription("The name of the dump file to replay.").hasArg(
             true).isRequired(true).create("i"));
-        options.addOption(OptionBuilder.withLongOpt("write-db-pool").withArgName("write_db_pool_id").withDescription(
-            "The identifier of the write db pool.").hasArg(true).isRequired(true).create("w"));
-        options.addOption(OptionBuilder.withLongOpt("read-db-pool").withArgName("read_db_pool_id").withDescription(
-            "The identifier of the read db pool.").hasArg(true).isRequired(true).create("r"));
+        options.addOption(OptionBuilder.withLongOpt("target-cluster-id").withArgName("target_cluster_id").withDescription(
+            "The identifier of the target cluster.").hasArg(true).isRequired(true).create("t"));
     }
 
     @Override
