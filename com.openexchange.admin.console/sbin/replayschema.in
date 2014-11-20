@@ -72,10 +72,76 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 CLASSPATH="-classpath @classpath@"
 
 umask 066
-#exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.ReplaySchema $@
-
+#######################
 # Basic workflow
-################
-# 1) CreateSchema.java
+#######################
+# 1) CreateSchema
 # 2) mysql < dump
 # 3) RestoreReference
+#######################
+usage() {
+	echo "Usage: $0 [-h] [-m <source_schema> -t <target_cluster_id> -i <dump_file>]"
+	echo "	-h                      Help. Display this help screen"
+	echo "	-m <source_schema>      Source schema name"
+	echo " 	-t <target_cluster_id>  The target cluster identifier"
+	echo "	-i <dump_file>          The dump file previously created with dumpschema"
+}
+
+ARGS=`getopt -o i:m:t:h --long help,in,source-schema,target-cluster-id: -n 'replayschema' -- "$@"`
+
+if [ $? -ne 0 ];
+then
+	exit 1
+fi
+
+#echo "$ARGS"
+eval set -- "$ARGS"
+
+while true; do
+	case "$1" in
+		-h | --help)
+			usage
+			shift;
+			break;;
+		-m | --source-schema)
+			case "$2" in
+				"") shift 2;;
+				*) schema=$2
+					shift 2;;
+			esac;;
+		-t | --target-cluster-id)
+			case "$2" in
+				"") shift 2;;
+				*) target=$2
+					shift 2;;
+			esac;;
+		-i | --in)
+			case "$2" in
+				"") shift 2;;
+				*) input=$2
+					shift 2;;
+			esac;;
+		--)
+			shift; break;;
+		*)
+			usage
+			break;;
+	esac
+done
+
+OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema 2>&1)"
+RETVAL=$?
+
+if [ $RETVAL -eq 0 ]; then
+	echo "Pumping into schema '$OUTPUT'"
+	mysqldump $OUTPUT < $input
+	echo "done.\n"
+else
+	echo $OUTPUT
+	exit $RETVAL
+fi
+
+RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -m $schema -n $OUTPUT -t $target 2>&1)"
+RETVAL=$?
+echo $RESTORE
+exit $RETVAL
