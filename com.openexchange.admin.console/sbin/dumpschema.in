@@ -86,8 +86,19 @@ fi
 
 # Return code is 0, no flag '-h' supplied, DumpSchema exited successfully, feed output to mysqldump, 
 # otherwise return output and the exit code of the java tool
+schema=
 if [ $RETVAL -eq 0 ] && [ $1 != "-h" ]; then
+	while getopts "m" OPTION
+	do
+		case $OPTION in
+			m)
+				schema=$OPTARG
+				;;
+		esac
+	done
+	echo "Dumping schema '$schema'...";
 	mysqldump $OUTPUT
+	echo "done.\n";
 else
 	echo $OUTPUT
 	exit $RETVAL
