@@ -77,8 +77,18 @@ OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.sc
 # This output can directly be fed to mysqldump
 
 RETVAL=$?
-if [ $RETVAL -eq 0 ]; then
+
+# No parameters supplied, return output which is usage
+if [ $# -eq 0 ]; then
+	echo $OUTPUT
+	exit 0
+fi
+
+# Return code is 0, no flag '-h' supplied, DumpSchema exited successfully, feed output to mysqldump, 
+# otherwise return output and the exit code of the java tool
+if [ $RETVAL -eq 0 ] && [ $1 != "-h" ]; then
 	mysqldump $OUTPUT
 else
 	echo $OUTPUT
+	exit $RETVAL
 fi
