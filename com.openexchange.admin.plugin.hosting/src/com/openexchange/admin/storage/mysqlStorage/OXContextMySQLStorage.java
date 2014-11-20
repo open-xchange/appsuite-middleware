@@ -2843,15 +2843,35 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public String createSchema() throws StorageException {
+    public String createSchema(int targetClusterId) throws StorageException {
         Connection configCon = null;
+        PreparedStatement stmt = null;
         try {
             configCon = cache.getConnectionForConfigDB();
+
+            String getDbInfo = "SELECT p.url, p.driver, p.login, p.password FROM db_pool AS p LEFT JOIN db_cluster AS c ON (c.write_db_pool_id = p.db_pool_id) WHERE c.cluster_id = ?";
+            stmt = configCon.prepareStatement(getDbInfo);
+            stmt.setInt(1, targetClusterId);
+            final ResultSet rs = stmt.executeQuery();
+
             Database db = new Database(-1);
+            if (rs.next()) {
+                db.setUrl(rs.getString(1));
+                db.setDriver(rs.getString(2));
+                db.setLogin(rs.getString(3));
+                db.setPassword(rs.getString(4));
+            } else {
+                LOG.error("The specified target cluster id '{}' has no database pool references", targetClusterId);
+                throw new StorageException("The specified target cluster id '" + targetClusterId + "' has no database pool references");
+            }
+
             findOrCreateSchema(configCon, db);
             return db.getScheme();
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
             if (configCon != null) {

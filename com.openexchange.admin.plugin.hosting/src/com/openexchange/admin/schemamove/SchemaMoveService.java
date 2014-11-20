@@ -127,9 +127,10 @@ public interface SchemaMoveService {
     /**
      * Create a new database schema
      * 
+     * @param targetClusterId The target cluster identifier
      * @return The name of the new database schema
      * @throws StorageException
      */
-    String createSchema() throws StorageException;
+    String createSchema(int targetClusterId) throws StorageException;
 
 }

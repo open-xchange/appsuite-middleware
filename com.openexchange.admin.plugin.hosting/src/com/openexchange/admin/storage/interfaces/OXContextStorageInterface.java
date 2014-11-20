@@ -338,9 +338,10 @@ public abstract class OXContextStorageInterface {
     /**
      * Create a new database schema
      * 
+     * @param targetClusterId The identifier of the target cluster
      * @return The name of the new database schema
      * @throws StorageException
      */
-    public abstract String createSchema() throws StorageException;
+    public abstract String createSchema(int targetClusterId) throws StorageException;
 
 }

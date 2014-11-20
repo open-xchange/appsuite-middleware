@@ -213,9 +213,9 @@ public class SchemaMoveImpl implements SchemaMoveService {
     }
 
     @Override
-    public String createSchema() throws StorageException {
+    public String createSchema(int targetClusterId) throws StorageException {
         OXContextStorageInterface contextStorage = OXContextMySQLStorage.getInstance();
-        return contextStorage.createSchema();
+        return contextStorage.createSchema(targetClusterId);
     }
 
 }

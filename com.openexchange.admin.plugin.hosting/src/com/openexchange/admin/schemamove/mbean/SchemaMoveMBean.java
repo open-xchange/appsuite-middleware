@@ -132,6 +132,6 @@ public interface SchemaMoveMBean {
      * @return The name of the new database scheme
      * @throws StorageException
      */
-    String createSchema() throws StorageException;
+    String createSchema(int targetClusterId) throws StorageException;
 
 }

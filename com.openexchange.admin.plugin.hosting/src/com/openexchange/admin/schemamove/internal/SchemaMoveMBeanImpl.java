@@ -112,8 +112,8 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
     }
 
     @Override
-    public String createSchema() throws StorageException {
-        return schemaMoveService.createSchema();
+    public String createSchema(int targetClusterId) throws StorageException {
+        return schemaMoveService.createSchema(targetClusterId);
     }
 
 }
