@@ -53,6 +53,7 @@ import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 
 /**
  * {@link EnableSchema}
@@ -60,6 +61,8 @@ import org.apache.commons.cli.Options;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class EnableSchema extends AbstractSchemaToolkit {
+
+    private static final String OPT_SCHEMA = "m";
 
     /**
      * @param args
@@ -82,19 +85,13 @@ public class EnableSchema extends AbstractSchemaToolkit {
     @Override
     protected void addOptions(Options options) {
         options.addOption(OptionBuilder.withLongOpt("target-schema").withArgName("schema_name").withDescription(
-            "The name of the schema to enable").hasArg(true).isRequired(true).create("m"));
-        options.addOption(OptionBuilder.withLongOpt("delete-source").hasArg(false).withDescription(
-            "Flag to indicate that the source schema should be deleted afterwards.").create("d"));
-        options.addOption(OptionBuilder.withLongOpt("force-delete-source").hasArg(false).withDescription(
-            "Flag to force the deletion of the source schema after migration. Should be used in conjunction with the -d flag").create("f"));
+            "The name of the schema to enable").hasArg(true).isRequired(true).create(OPT_SCHEMA));
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        // TODO: flesh out
-        // - fetch contexts that were disabled during the migration process
-        // - iterate over the cids and create a batch statement
-        // - execute the batch statement to enable the contexts
+        SchemaMoveMBean schemaMove = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
+        schemaMove.enableSchema(cmd.getOptionValue(OPT_SCHEMA));
         return null;
     }
 }

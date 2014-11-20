@@ -53,6 +53,7 @@ import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 
 /**
  * {@link DisableSchema}
@@ -60,6 +61,8 @@ import org.apache.commons.cli.Options;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DisableSchema extends AbstractSchemaToolkit {
+
+    private static final String OPT_SCHEMA = "m";
 
     /**
      * @param args
@@ -82,17 +85,13 @@ public class DisableSchema extends AbstractSchemaToolkit {
     @Override
     protected void addOptions(Options options) {
         options.addOption(OptionBuilder.withLongOpt("schema").withArgName("schema_name").withDescription(
-            "The name of the schema to disable").hasArg(true).isRequired(true).create("m"));
+            "The name of the schema to disable").hasArg(true).isRequired(true).create(OPT_SCHEMA));
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        // TODO: flesh out
-        // - check for the precondition
-        // - fetch all cids
-        // - iterate over all cids and create a batch statement
-        // - invalidate sessions
-        // - execute batch
+        SchemaMoveMBean schemaMove = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
+        schemaMove.disableSchema(cmd.getOptionValue(OPT_SCHEMA));
         return null;
     }
 
