@@ -195,6 +195,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * ZIP archive exceeds max. allowed size of %1$s
      */
     ARCHIVE_MAX_SIZE_EXCEEDED(" ZIP archive exceeds max. allowed size of %1$s", Category.CATEGORY_PERMISSION_DENIED, 34, FileStorageExceptionMessages.ARCHIVE_MAX_SIZE_EXCEEDED_MSG),
+    /**
+     * File storage account %1$s of service "%2$s" cannot be accessed for user %3$s in context %4$s.
+     */
+    ACCOUNT_NOT_ACCESSIBLE("File storage account %1$s of service \"%2$s\" cannot be accessed for user %3$s in context %4$s.", Category.CATEGORY_ERROR, 35, FileStorageExceptionMessages.ACCOUNT_NOT_ACCESSIBLE_MSG),
 
     ;
 
