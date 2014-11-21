@@ -88,6 +88,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/realtime.properties
 
 %changelog
+* Wed Nov 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-21
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
