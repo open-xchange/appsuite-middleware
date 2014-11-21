@@ -2309,6 +2309,11 @@ msgstr ""
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr ""
 
+#. The file storage account is currently not accessible.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
+msgid "The file storage account is currently not accessible."
+msgstr ""
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
