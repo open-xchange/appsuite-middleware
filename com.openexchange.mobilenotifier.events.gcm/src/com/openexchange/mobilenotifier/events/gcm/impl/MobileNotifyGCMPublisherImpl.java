@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.events.MobileNotifyEvent;
 import com.openexchange.mobilenotifier.events.MobileNotifyPublisher;
 import com.openexchange.mobilenotifier.events.gcm.osgi.Services;
-import com.openexchange.mobilenotifier.events.storage.MobileNotifierSubscriptionService;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 import com.openexchange.mobilenotifier.events.storage.Subscription;
 
 
@@ -80,16 +80,31 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifyGCMPublisherImpl.class);
 
+    @Override
+    public void publishNewLogin(MobileNotifyEvent loginEvent) {
+        List<Subscription> subscriptions = null;
+        try {
+            MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class);
+            subscriptions = mnss.getTokensFromSubscriptions(loginEvent.getContextUsers(), SERIVCE_ID, loginEvent.getProvider());
+        } catch(OXException e) {
+            LOG.error("Could not get subscription {}", SERIVCE_ID, e);
+        }
+        subscriptionPublisher(subscriptions, loginEvent);
+    }
 
     @Override
     public void publish(MobileNotifyEvent event) {
         List<Subscription> subscriptions = null;
         try {
-            MobileNotifierSubscriptionService mnss = Services.getService(MobileNotifierSubscriptionService.class);
+            MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class);
             subscriptions = mnss.getSubscription(event.getSession(), SERIVCE_ID, event.getProvider());
         } catch(OXException e) {
             LOG.error("Could not get subscription {}", SERIVCE_ID, e);
         }
+        subscriptionPublisher(subscriptions, event);
+    }
+
+    private void subscriptionPublisher(List<Subscription> subscriptions, MobileNotifyEvent event) {
         if(subscriptions != null && subscriptions.size() > 0) {
             if (null != subscriptions && 0 < subscriptions.size()) {
                 Sender sender = null;
@@ -217,7 +232,7 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
 
     private static void updateRegistrationIDs(MobileNotifyEvent event, String oldRegistrationID, String newRegistrationID) {
         try {
-            if (Services.getService(MobileNotifierSubscriptionService.class, true).updateToken(
+            if (Services.getService(MobileNotifierStorageService.class, true).updateToken(
                 event.getSession(), oldRegistrationID, SERIVCE_ID, newRegistrationID)) {
                 LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
             } else {
@@ -230,7 +245,7 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
 
     private static void removeRegistrations(MobileNotifyEvent event, String registrationID) {
         try {
-            if (true == Services.getService(MobileNotifierSubscriptionService.class, true).deleteSubscriptions(
+            if (true == Services.getService(MobileNotifierStorageService.class, true).deleteSubscriptions(
                 event.getSession(), registrationID, SERIVCE_ID)) {
                 LOG.info("Successfully removed registration ID {}.", registrationID);
             } else {

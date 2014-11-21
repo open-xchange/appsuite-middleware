@@ -49,16 +49,17 @@
 
 package com.openexchange.mobilenotifier.events.storage.osgi;
 
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.mobilenotifier.events.storage.MobileNotifierSubscriptionService;
-import com.openexchange.mobilenotifier.events.storage.rdb.MobileNotifierSubscriptionServiceImpl;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 import com.openexchange.mobilenotifier.events.storage.rdb.MobileNotifierSubscriptionsCreateTableService;
 import com.openexchange.mobilenotifier.events.storage.rdb.MobileNotifierSubscriptionsCreateTableTask;
 import com.openexchange.mobilenotifier.events.storage.rdb.MobileNotifierSubscriptionsDeleteListener;
+import com.openexchange.mobilenotifier.events.storage.rdb.RdbMobileNotifierStorageImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -72,7 +73,7 @@ public class MobileNotifierStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class };
+        return new Class[] { DatabaseService.class, ContextService.class };
     }
 
     @Override
@@ -83,8 +84,8 @@ public class MobileNotifierStorageActivator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new MobileNotifierSubscriptionsCreateTableTask()));
         registerService(CreateTableService.class, new MobileNotifierSubscriptionsCreateTableService());
         registerService(DeleteListener.class, new MobileNotifierSubscriptionsDeleteListener());
-        //
-        registerService(MobileNotifierSubscriptionService.class, new MobileNotifierSubscriptionServiceImpl());
+
+        registerService(MobileNotifierStorageService.class, new RdbMobileNotifierStorageImpl());
     }
 
     @Override

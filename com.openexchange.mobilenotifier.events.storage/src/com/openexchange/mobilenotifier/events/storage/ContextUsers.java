@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,62 +49,33 @@
 
 package com.openexchange.mobilenotifier.events.storage;
 
+import java.util.Arrays;
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierProviders;
-import com.openexchange.session.Session;
 
 /**
- * {@link MobileNotifierSubscriptionService}
+ * {@link ContextUsers} - Holds a list of userIds for a context
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public interface MobileNotifierSubscriptionService {
-    /**
-     * Creates an subscription
-     *
-     * @param session
-     * @param token
-     * @param serviceId
-     * @param provider
-     */
-    Subscription createSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
+public class ContextUsers {
+    private int contextId;
+    private List<Integer> userIds;
 
-    /**
-     * Updates a token to a new token
-     *
-     * @param session
-     * @param token
-     * @param serviceId
-     * @param newToken
-     */
-    boolean updateToken(Session session, String token, String serviceId, String newToken) throws OXException;
+    public ContextUsers(int contextId, List<Integer> userIds) {
+        this.contextId = contextId;
+        this.userIds = userIds;
+    }
 
-    /**
-     * Deletes a subscription by the userId, token, serviceId and provider
-     *
-     * @param session
-     * @param token
-     * @param serviceId
-     * @param provider
-     */
-    boolean deleteSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
+    public int getContextId() {
+        return contextId;
+    }
 
-    /**
-     * Deletes a subscription by the userId, token and serviceId
-     *
-     * @param session
-     * @param token
-     * @param serviceId
-     */
-    boolean deleteSubscriptions(Session session, String token, String serviceId) throws OXException;
+    public List<Integer> getUserIds() {
+        return userIds;
+    }
 
-    /**
-     * Gets all subscriptions of the specified userId
-     *
-     * @param serviceId The serviceId e.g. gcm, apn, apn.macos
-     * @param provider The provider
-     * @return
-     */
-    List<Subscription> getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException;
+    @Override
+    public String toString() {
+        return "ContextUsers [contextId=" + contextId + ", userIds=" + Arrays.toString(userIds.toArray()) + "]";
+    }
 }

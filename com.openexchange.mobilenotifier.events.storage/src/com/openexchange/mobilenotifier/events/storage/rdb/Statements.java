@@ -79,16 +79,21 @@ public class Statements {
 
     public static final String UPDATE_TOKEN = "UPDATE mobileEventSubscriptions "
         + "SET token=?, timestamp=? "
-        + "WHERE cid=? AND user=? AND service=? AND token=? ";
+        + "WHERE cid=? AND service=? AND token=? ";
 
     public static final String DELETE_TOKEN_BY_PROVIDER = "DELETE FROM mobileEventSubscriptions "
-        + "WHERE cid=? AND user=? AND service=? AND provider=? AND token=?";
+        + "WHERE cid=? AND service=? AND provider=? AND token=?";
 
     public static final String DELETE_TOKEN_BY_SERVICE_ID = "DELETE FROM mobileEventSubscriptions "
-        + "WHERE cid=? AND user=? AND service=? AND token=?";
+        + "WHERE cid=? AND service=? AND token=?";
 
     public static final String SELECT_SUBSCRIPTIONS = "SELECT cid, service, token, provider, user, timestamp "
         + "FROM mobileEventSubscriptions "
-        + "WHERE cid=? AND service=? AND provider=? AND user=?";
+        + "WHERE cid=? AND user=? AND service=? AND provider=?;";
 
+    public static final String SELECT_ALL_SUBSCRIPTIONS = "SELECT DISTINCT user, cid "
+        + "FROM mobileEventSubscriptions WHERE provider=?;";
+
+    public static final String SELECT_TOKENS = "SELECT token, timestamp "
+        + "FROM mobileEventSubscriptions WHERE cid=? AND user=? AND provider=? GROUP BY cid, user;";
 }

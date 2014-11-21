@@ -49,11 +49,12 @@
 
 package com.openexchange.mobilenotifier.events.mail.impl;
 
+import java.util.List;
 import java.util.Map;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.MobileNotifyEvent;
+import com.openexchange.mobilenotifier.events.storage.ContextUsers;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link MobileNotifyMailEvent}
@@ -62,9 +63,11 @@ import com.openexchange.session.Session;
  */
 public class MobileNotifyMailEvent implements MobileNotifyEvent {
 
-    private final Session session;
+    private Session session;
 
-    private final Map<String, String> messageData;
+    private List<ContextUsers> contextUsers;
+
+    private Map<String, String> messageData;
 
     private final static String COLLAPSE_KEY = "TRIGGER_NEW_MAIL";
 
@@ -76,6 +79,17 @@ public class MobileNotifyMailEvent implements MobileNotifyEvent {
     public MobileNotifyMailEvent(Session session, Map<String, String> messageData) {
         super();
         this.session = session;
+        this.messageData = messageData;
+    }
+
+    /**
+     * Initializes a new {@link MobileNotifyMailEvent}.
+     *
+     * A list of context / users without a valid session
+     */
+    public MobileNotifyMailEvent(List<ContextUsers> contextUsers, Map<String, String> messageData) {
+        super();
+        this.contextUsers = contextUsers;
         this.messageData = messageData;
     }
 
@@ -97,5 +111,10 @@ public class MobileNotifyMailEvent implements MobileNotifyEvent {
     @Override
     public MobileNotifierProviders getProvider() {
         return PROVIDER;
+    }
+
+    @Override
+    public List<ContextUsers> getContextUsers() {
+        return contextUsers;
     }
 }

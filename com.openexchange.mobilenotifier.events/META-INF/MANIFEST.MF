@@ -10,6 +10,7 @@ Import-Package:
  com.openexchange.event,
  com.openexchange.exception,
  com.openexchange.mobilenotifier,
+ com.openexchange.mobilenotifier.events.storage,
  com.openexchange.osgi,
  com.openexchange.push,
  com.openexchange.server,
