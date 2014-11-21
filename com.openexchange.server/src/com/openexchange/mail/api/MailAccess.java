@@ -59,7 +59,11 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -68,6 +72,8 @@ import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
@@ -98,6 +104,26 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static final long serialVersionUID = -2580495494392812083L;
 
     private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccess.class);
+
+    // --------------------------------------------------------------------------------------------------------------------------------- //
+
+    private static final ConcurrentMap<Key, AcquiredLatch> SYNCHRONIZER = new ConcurrentHashMap<Key, AcquiredLatch>(256);
+
+    private static AcquiredLatch acquireFor(Key key) {
+        AcquiredLatch latch = SYNCHRONIZER.get(key);
+        if (null == latch) {
+            AcquiredLatch newLatch = new AcquiredLatch(Thread.currentThread(), new CountDownLatch(1));
+            latch = SYNCHRONIZER.putIfAbsent(key, newLatch);
+            if (null == latch) {
+                latch = newLatch;
+            }
+        }
+        return latch;
+    }
+
+    private static void releaseFor(Key key) {
+        SYNCHRONIZER.remove(key);
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -696,24 +722,66 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     private void checkDefaultFolderOnConnect() throws OXException {
-        try {
-            getFolderStorage().checkDefaultFolders();
-        } catch (final OXException e) {
-            throw e;
-        } catch (final Exception e) {
-            final MailConfig mailConfig = getMailConfig();
-            final OXException mailExc =
-                MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED.create(
-                    e,
-                    mailConfig.getServer(),
-                    Integer.valueOf(session.getUserId()),
-                    mailConfig.getLogin(),
-                    Integer.valueOf(session.getContextId()),
-                    e.getMessage());
-            LOG.error("", mailExc);
-            closeInternal();
-            throw mailExc;
+        if (isDefaultFoldersChecked()) {
+            return;
         }
+
+        Key key = new Key(session.getUserId(), session.getContextId());
+        AcquiredLatch acquiredLatch = acquireFor(key);
+        CountDownLatch latch = acquiredLatch.latch;
+        if (Thread.currentThread() == acquiredLatch.owner) {
+            // Perform the standard folder check
+            try {
+                getFolderStorage().checkDefaultFolders();
+                acquiredLatch.result.set(Boolean.TRUE);
+                return;
+            } catch (OXException e) {
+                acquiredLatch.result.set(e);
+                throw e;
+            } catch (Exception e) {
+                MailConfig mailConfig = getMailConfig();
+                String server = mailConfig.getServer();
+                String login = mailConfig.getLogin();
+                Integer contextId = Integer.valueOf(session.getContextId());
+                Integer userId = Integer.valueOf(session.getUserId());
+
+                OXException mailExc = MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED.create(e, server, userId, login, contextId, e.getMessage());
+                LOG.error("", mailExc);
+                closeInternal();
+                acquiredLatch.result.set(mailExc);
+                throw mailExc;
+            } finally {
+                latch.countDown();
+                releaseFor(key);
+            }
+        }
+
+        try {
+            // Need to await 'til check done by concurrent thread
+            latch.await();
+
+            // Check if already locally available...
+            Object result = acquiredLatch.result.get();
+            if (result instanceof OXException) {
+                throw  (OXException) result;
+            }
+        } catch (InterruptedException e) {
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, new Object[0]);
+        }
+    }
+
+    /**
+     * Gets the value of <code>"mail.deffldflag"</code> cache entry.
+     *
+     * @return The value
+     */
+    protected boolean isDefaultFoldersChecked() {
+        MailSessionCache cache = MailSessionCache.getInstance(session);
+        if (null == cache) {
+            return false;
+        }
+        Boolean b = cache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
+        return (b != null) && b.booleanValue();
     }
 
     /**
@@ -1162,5 +1230,67 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If shutdown actions fail
      */
     protected abstract void shutdown() throws OXException;
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private static final class Key {
+
+        private final int contextId;
+        private final int userId;
+        private final int hash;
+
+        Key(int userId, int contextId) {
+            super();
+            this.userId = userId;
+            this.contextId = contextId;
+
+            int prime = 31;
+            int result = prime * 1 + contextId;
+            result = prime * result + userId;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            Key other = (Key) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static final class AcquiredLatch {
+
+        /** The associated latch */
+        final CountDownLatch latch;
+
+        /** The thread owning this instance */
+        final Thread owner;
+
+        /** The reference to resulting object */
+        final AtomicReference<Object> result;
+
+        AcquiredLatch(Thread owner, CountDownLatch latch) {
+            super();
+            this.owner = owner;
+            this.latch = latch;
+            result = new AtomicReference<Object>();
+        }
+    }
 
 }
