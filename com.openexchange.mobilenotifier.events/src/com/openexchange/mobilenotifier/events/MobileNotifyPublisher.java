@@ -49,7 +49,6 @@
 
 package com.openexchange.mobilenotifier.events;
 
-
 /**
  * {@link MobileNotifyPublisher}
  *
@@ -62,4 +61,11 @@ public interface MobileNotifyPublisher {
      * @param event the MobileNotifyEvent
      */
     void publish(MobileNotifyEvent event);
+
+    /**
+     * Publishes a new login event about a necessary re-login.
+     *
+     * @param loginEvent the event which should be published to the subscribers
+     */
+    void publishNewLogin(MobileNotifyEvent loginEvent);
 }

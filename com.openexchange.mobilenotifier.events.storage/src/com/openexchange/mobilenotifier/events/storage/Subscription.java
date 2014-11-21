@@ -128,4 +128,9 @@ public class Subscription {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    @Override
+    public String toString() {
+        return "Subscription [contextId=" + contextId + ", userId=" + userId + ", token=" + token + ", serviceId=" + serviceId + ", mobileNotifierProviders=" + mobileNotifierProviders.getProviderName() + ", timestamp=" + timestamp + "]";
+    }
 }
