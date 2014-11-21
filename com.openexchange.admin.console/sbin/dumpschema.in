@@ -90,10 +90,10 @@ schema=
 
 if [ $RETVAL -eq 0 ] && [ $1 != "-h" ]; then
         schema="$(echo $OUTPUT | awk '{print $1}')"
-        echo -n "Dumping schema '$schema'...";
+        echo -n "Dumping schema '$schema'..."
         dump="mysqldump $OUTPUT"
         eval $dump
-        echo -e " done.";
+        echo -e " done."
 
 else
         echo -e "$OUTPUT"
