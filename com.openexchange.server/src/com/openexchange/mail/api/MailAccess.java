@@ -107,18 +107,18 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
-    private static final ConcurrentMap<Key, CountDownLatch> SYNCHRONIZER = new ConcurrentHashMap<Key, CountDownLatch>(256);
+    private static final ConcurrentMap<Key, AcquiredLatch> SYNCHRONIZER = new ConcurrentHashMap<Key, AcquiredLatch>(256);
 
     private static AcquiredLatch acquireFor(Key key) {
-        CountDownLatch latch = SYNCHRONIZER.get(key);
+        AcquiredLatch latch = SYNCHRONIZER.get(key);
         if (null == latch) {
-            CountDownLatch newLatch = new CountDownLatch(1);
+            AcquiredLatch newLatch = new AcquiredLatch(Thread.currentThread(), new CountDownLatch(1));
             latch = SYNCHRONIZER.putIfAbsent(key, newLatch);
             if (null == latch) {
-                return new AcquiredLatch(true, newLatch);
+                latch = newLatch;
             }
         }
-        return new AcquiredLatch(false, latch);
+        return latch;
     }
 
     private static void releaseFor(Key key) {
@@ -729,7 +729,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         Key key = new Key(session.getUserId(), session.getContextId());
         AcquiredLatch acquiredLatch = acquireFor(key);
         CountDownLatch latch = acquiredLatch.latch;
-        if (acquiredLatch.acquired) {
+        if (Thread.currentThread() == acquiredLatch.owner) {
             // Perform the standard folder check
             try {
                 getFolderStorage().checkDefaultFolders();
@@ -1279,15 +1279,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         /** The associated latch */
         final CountDownLatch latch;
 
-        /** Whether the associated was acquired or not */
-        final boolean acquired;
+        /** The thread owning this instance */
+        final Thread owner;
 
         /** The reference to resulting object */
         final AtomicReference<Object> result;
 
-        AcquiredLatch(boolean acquired, CountDownLatch latch) {
+        AcquiredLatch(Thread owner, CountDownLatch latch) {
             super();
-            this.acquired = acquired;
+            this.owner = owner;
             this.latch = latch;
             result = new AtomicReference<Object>();
         }
