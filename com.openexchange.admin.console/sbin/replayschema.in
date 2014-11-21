@@ -169,19 +169,22 @@ while true; do
 	esac
 done
 
-OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema -A $adminuser -P $adminpass $optJmxArgs 2>&1)"
+# invoke create schema
+OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema -A $adminuser -P $adminpass -t $target -m $schema $optJmxArgs 2>&1)"
 RETVAL=$?
 
+# pump data in mysql
 if [ $RETVAL -eq 0 ]; then
 	echo -e "Pumping into schema '$OUTPUT'"
 	mysqldump $OUTPUT < $input
 	echo -e "done.\n"
 else
-	echo -e $OUTPUT
+	echo -e "$OUTPUT"
 	exit $RETVAL
 fi
 
+# restore configdb references
 RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -m $schema -n $OUTPUT -t $target 2>&1)"
 RETVAL=$?
-echo -e $RESTORE
+echo -e "$RESTORE"
 exit $RETVAL
