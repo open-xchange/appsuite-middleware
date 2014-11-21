@@ -81,15 +81,15 @@ umask 066
 #######################
 usage() {
 	echo "Usage: $0 [-h] [-m <source_schema> -t <target_cluster_id> -i <dump_file> -A <admin_user> -P <admin_pass> [-l <jmxLogin> -s <jmxPassword> [-p <jmxPort]]]"
-	echo "	-h                                          Prints a help text"
-	echo "	-m,--source-schema <source_schema>          Source schema name"
-	echo " 	-t,--target-cluster-id <target_cluster_id>  The target cluster identifier"
-	echo "	-i,--in <dump_file>                         The dump file previously created with dumpschema"
 	echo "  -A,--adminuser <admin_user>                 Admin username"
+	echo "	-h                                          Prints a help text"
+	echo "	-i,--in <dump_file>                         The dump file previously created with dumpschema"
 	echo "  -l,--login <jmxLogin>                       The optional JMX login (if JMX authentication is enabled)"
+	echo "	-m,--source-schema <source_schema>          Source schema name"
     echo "  -P,--adminpass <admin_pass>                 Admin password"
  	echo "  -p,--port <jmxPort>                         The optional JMX port (default:9999)"
     echo "  -s,--password <jmxPassword>                 The optional JMX password (if JMX authentication is enabled)"
+    echo " 	-t,--target-cluster-id <target_cluster_id>  The target cluster identifier"
 }
 
 ARGS=`getopt -o i:m:t:hA:l:P:p:s: --long in,source-schema,target-cluster-id,help,adminuser,login,adminpass,port,password: -n 'replayschema' -- "$@"`
