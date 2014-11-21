@@ -603,16 +603,31 @@ public class GuestClient extends AJAXClient {
         }
     }
 
+    /**
+     * Checks that the guest client's session is "alive" by executing a "get user" request, followed by a "visible folders" request in
+     * case the module is different from infostore.
+     *
+     * @param expectToFail <code>true</code> if the requests are expected to fail, <code>false</code>, otherwise
+     */
     public void checkSessionAlive(boolean expectToFail) throws Exception {
-        String contentType = getContentType(getModuleID());
-        VisibleFoldersResponse response = execute(new VisibleFoldersRequest(
-            EnumAPI.OX_NEW, contentType, FolderObject.ALL_COLUMNS, false == expectToFail));
-        checkResponse(response, expectToFail);
+        com.openexchange.ajax.user.actions.GetResponse getResponse = execute(
+            new com.openexchange.ajax.user.actions.GetRequest(TimeZones.UTC, false == expectToFail));
+        checkResponse(getResponse, expectToFail);
+        if (FolderObject.INFOSTORE != getModuleID()) {
+            String contentType = getContentType(getModuleID());
+            VisibleFoldersResponse response = execute(new VisibleFoldersRequest(
+                EnumAPI.OX_NEW, contentType, FolderObject.ALL_COLUMNS, false == expectToFail));
+            checkResponse(response, expectToFail);
+        }
     }
 
     private static void checkResponse(AbstractAJAXResponse response, boolean expectToFail) {
         Assert.assertNotNull("No response", response);
         if (expectToFail) {
+            if (false == response.hasError()) {
+                System.out.println( "+++");
+            }
+
             Assert.assertTrue("No errors in response", response.hasError());
         } else {
             Assert.assertFalse("Errors in response", response.hasError());
