@@ -450,7 +450,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleUnknownTag(final Tag tag) {
         if (!body) {
-            htmlBuilder.append(tag.toString());
+            htmlBuilder.append(tag);
         }
     }
 
@@ -676,7 +676,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         }
 
-        List<Attribute> uriAttributes = startTag.getURIAttributes();
+        List<Attribute> uriAttributes = replaceUrls ? startTag.getURIAttributes() : Collections.<Attribute> emptyList();
         for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
             String attr = attribute.getKey();
             if ("style".equals(attr)) {
@@ -721,7 +721,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             }
                         } else {
                             if (replaceUrls && uriAttributes.contains(attribute)) {
-                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(replaceUrls ? checkPossibleURL(val) : val)).append('"');
+                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                             } else {
                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                             }
@@ -748,7 +748,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                         }
                                     } else {
                                         if (replaceUrls && uriAttributes.contains(attribute)) {
-                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(replaceUrls ? checkPossibleURL(val) : val)).append('"');
+                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                                         } else {
                                             attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                                         }

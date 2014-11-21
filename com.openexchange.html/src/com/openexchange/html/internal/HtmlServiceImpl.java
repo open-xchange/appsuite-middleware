@@ -98,10 +98,10 @@ import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
+import com.openexchange.html.internal.jericho.handler.UrlReplacerJerichoHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
-import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
@@ -1467,8 +1467,8 @@ public final class HtmlServiceImpl implements HtmlService {
          * Check URLs
          */
         if (replaceUrls) {
-            final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
-            HtmlParser.parse(html, handler);
+            UrlReplacerJerichoHandler handler = new UrlReplacerJerichoHandler(html.length());
+            JerichoParser.getInstance().parse(html, handler);
             html = handler.getHTML();
         }
         return html;
@@ -1882,7 +1882,13 @@ public final class HtmlServiceImpl implements HtmlService {
         StringBuilder tmp = new StringBuilder(64);
         do {
             tmp.setLength(0);
-            m.appendReplacement(sb, Matcher.quoteReplacement(tmp.append('<').append(m.group(1)).append(m.group(2)).append(m.group(3)).append('>').toString()));
+            tmp.append('<').append(m.group(1));
+            String appendix = m.group(3);
+            if (!Strings.isEmpty(appendix)) {
+                tmp.append(m.group(2)).append(appendix);
+            }
+            tmp.append('>');
+            m.appendReplacement(sb, Matcher.quoteReplacement(tmp.toString()));
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
