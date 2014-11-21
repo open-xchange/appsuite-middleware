@@ -1,6 +1,7 @@
 * 2014-11-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 35546: Obey empty element tags when generating conform HTML content
+ - Fix for bug 35548: Have unique marker for attachments and avoid attaching duplicate parts
 
 * 2014-11-18 - thorben.betten@open-xchange.com
 

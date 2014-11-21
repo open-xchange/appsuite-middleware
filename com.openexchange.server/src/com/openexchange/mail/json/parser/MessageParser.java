@@ -717,8 +717,9 @@ public final class MessageParser {
                      */
                     MailPath msgref;
                     final boolean isMail;
-                    if (attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
-                        msgref = new MailPath(attachment.get(MailJSONField.MSGREF.getKey()).toString());
+                    String msgrefKey = MailJSONField.MSGREF.getKey();
+                    if (attachment.hasAndNotNull(msgrefKey)) {
+                        msgref = new MailPath(attachment.get(msgrefKey).toString());
                         isMail = true;
                     } else {
                         msgref = transportMailMsgref;

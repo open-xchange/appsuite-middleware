@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
@@ -108,6 +109,7 @@ import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
@@ -717,14 +719,12 @@ public class MimeMessageFiller {
         final boolean hasAttachments;
         final boolean isAttachmentForward;
         {
-            final int size = mail.getEnclosedCount();
+            int size = mail.getEnclosedCount();
             hasAttachments = size > 0;
             /*
              * A non-inline forward message
              */
-            isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (compositionParameters.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
-                mail,
-                size))));
+            isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (compositionParameters.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(mail, size))));
         }
         /*
          * Initialize primary multipart
@@ -842,20 +842,19 @@ public class MimeMessageFiller {
             /*
              * Get number of enclosed parts
              */
-            final int size = mail.getEnclosedCount();
+            int size = mail.getEnclosedCount();
             if (size > 0) {
                 if (isAttachmentForward) {
                     /*
                      * Add referenced mail(s)
                      */
-                    final StringBuilder sb = new StringBuilder(32);
+                    StringBuilder sb = new StringBuilder(32);
                     for (int i = 0; i < size; i++) {
-                        final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
-                        if (enclosedMailPart.getContentType().startsWith("message/rfc822") || (enclosedMailPart.getContentType().getNameParameter() != null && enclosedMailPart.getContentType().getNameParameter().endsWith(
-                            ".eml"))) {
+                        MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
+                        if (isMessage(enclosedMailPart)) {
                             addNestedMessage(enclosedMailPart, Boolean.FALSE, primaryMultipart, sb);
                         } else {
-                            addMessageBodyPart(primaryMultipart, enclosedMailPart, false);
+                            addMessageBodyPart(primaryMultipart, enclosedMailPart, false, i, mail, size);
                         }
                     }
                 } else {
@@ -884,11 +883,11 @@ public class MimeMessageFiller {
                                     add = true;
                                 }
                                 if (add) {
-                                    addMessageBodyPart(primaryMultipart, mailPart, false);
+                                    addMessageBodyPart(primaryMultipart, mailPart, false, i, mail, size);
                                 }
                             } else {
                                 // A regular file-attachment image
-                                addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+                                addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false, i, mail, size);
                             }
                         } else {
                             final MailPart mailPart = mail.getEnclosedMailPart(i);
@@ -901,7 +900,7 @@ public class MimeMessageFiller {
                                 }
                             }
                             if (add) {
-                                addMessageBodyPart(primaryMultipart, mailPart, false);
+                                addMessageBodyPart(primaryMultipart, mailPart, false, i, mail, size);
                             }
                         }
                     }
@@ -910,7 +909,7 @@ public class MimeMessageFiller {
             /*
              * Append VCard
              */
-            appendVCard(mail, primaryMultipart, mimeMessage);
+            primaryMultipart = appendVCard(mail, primaryMultipart, mimeMessage);
             /*
              * Finally set multipart
              */
@@ -1031,7 +1030,7 @@ public class MimeMessageFiller {
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
             }
             mp.addBodyPart(msgBodyPart);
-            addMessageBodyPart(mp, mail, true);
+            addMessageBodyPart(mp, mail, true, -1, mail, mail.getEnclosedCount());
         }
         /*
          * if (hasNestedMessages) { if (primaryMultipart == null) { primaryMultipart = new MimeMultipart(); } message/rfc822 final int
@@ -1049,7 +1048,7 @@ public class MimeMessageFiller {
         }
     }
 
-    private void appendVCard(ComposedMailMessage mail, Multipart primaryMultipart, MimeMessage mimeMessage) throws OXException, MessagingException, UnsupportedEncodingException {
+    private Multipart appendVCard(ComposedMailMessage mail, Multipart primaryMultipart, MimeMessage mimeMessage) throws OXException, MessagingException, UnsupportedEncodingException {
         final String charset = MailProperties.getInstance().getDefaultMimeCharset();
         final String fileName = compositionParameters.getUserVCardFileName();
         AppendVCard: if (mail.isAppendVCard() && fileName != null) {
@@ -1062,9 +1061,6 @@ public class MimeMessageFiller {
                      */
                     break AppendVCard;
                 }
-            }
-            if (primaryMultipart == null) {
-                primaryMultipart = new MimeMultipart();
             }
             try {
                 final String userVCard = compositionParameters.getUserVCard(charset);
@@ -1089,14 +1085,26 @@ public class MimeMessageFiller {
                 /*
                  * Append body part
                  */
-                primaryMultipart.addBodyPart(vcardPart);
+                Multipart mp = null == primaryMultipart ? new MimeMultipart() : primaryMultipart;
+                mp.addBodyPart(vcardPart);
                 if (mail.isDraft()) {
                     mimeMessage.setHeader(MessageHeaders.HDR_X_OX_VCARD, "true");
                 }
+                return mp;
             } catch (final OXException e) {
                 LOG.error(VCARD_ERROR, e);
             }
         }
+        return primaryMultipart;
+    }
+
+    private boolean isMessage(final MailPart enclosedMailPart) {
+        ContentType contentType = enclosedMailPart.getContentType();
+        if (contentType.startsWith("message/rfc822")) {
+            return true;
+        }
+        String nameParameter = contentType.getNameParameter();
+        return (nameParameter != null && nameParameter.endsWith(".eml"));
     }
 
     /**
@@ -1206,7 +1214,7 @@ public class MimeMessageFiller {
         /*
          * Check for local images
          */
-        htmlContent[0] = processReferencedLocalImages(wellFormedHTMLContent, relatedMultipart, this);
+        htmlContent[0] = processReferencedLocalImages(wellFormedHTMLContent, relatedMultipart, this, mail);
         /*
          * Process referenced local image files and insert returned html content as a new body part to first index
          */
@@ -1293,28 +1301,28 @@ public class MimeMessageFiller {
 
     private static final String MIME_MESSAGE_RFC822 = MimeTypes.MIME_MESSAGE_RFC822;
 
-    protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline) throws MessagingException, OXException, IOException {
+    protected final void addMessageBodyPart(Multipart mp, MailPart part, boolean inline, int index, ComposedMailMessage mail, int size) throws MessagingException, OXException, IOException {
         if (part.getContentType().startsWith(MIME_MESSAGE_RFC822)) {
             // TODO: Works correctly?
-            final StringBuilder sb = new StringBuilder(32);
+            StringBuilder sb = new StringBuilder(32);
             addNestedMessage(part, null, mp, sb);
             return;
         }
         /*
          * A non-message attachment
          */
-        final String fileName = part.getFileName();
-        final ContentType ct = part.getContentType();
+        String fileName = part.getFileName();
+        ContentType ct = part.getContentType();
         if ((ct.startsWith(MimeTypes.MIME_APPL_OCTET) || ct.startsWith(MimeTypes.MIME_MULTIPART_OCTET)) && fileName != null) {
             /*
              * Try to determine MIME type
              */
-            final String ct2 = MimeType2ExtMap.getContentType(fileName);
-            final int pos = ct2.indexOf('/');
+            String ct2 = MimeType2ExtMap.getContentType(fileName);
+            int pos = ct2.indexOf('/');
             ct.setPrimaryType(ct2.substring(0, pos));
             ct.setSubType(ct2.substring(pos + 1));
         }
-        final MimeBodyPart messageBodyPart = new MimeBodyPart();
+        MimeBodyPart messageBodyPart = new MimeBodyPart();
         messageBodyPart.setDataHandler(part.getDataHandler());
         if (fileName != null && !ct.containsNameParameter()) {
             ct.setNameParameter(fileName);
@@ -1329,8 +1337,8 @@ public class MimeMessageFiller {
         /*
          * Disposition
          */
-        final String disposition = messageBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
-        final ContentDisposition cd;
+        String disposition = messageBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+        ContentDisposition cd;
         if (disposition == null) {
             cd = new ContentDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
         } else {
@@ -1344,15 +1352,39 @@ public class MimeMessageFiller {
         /*
          * Content-ID
          */
-        if (part.getContentId() != null) {
-            final String cid = part.getContentId().charAt(0) == '<' ? part.getContentId() : new StringBuilder(part.getContentId().length() + 2).append('<').append(
-                part.getContentId()).append('>').toString();
-            messageBodyPart.setContentID(cid);
+        String contentId = part.getContentId();
+        if (contentId == null) {
+            messageBodyPart.setContentID(new StringBuilder(36).append("<part-").append(UUIDs.getUnformattedStringFromRandom()).append('>').toString());
+            /*
+             * Add to parental multipart
+             */
+            mp.addBodyPart(messageBodyPart);
+        } else {
+            // Check for duplicate by Content-Id value
+            if (index < 0 || size <= 0 || !contains(contentId, index, mail, size)) {
+                if (contentId.charAt(0) == '<') {
+                    messageBodyPart.setContentID(contentId);
+                } else {
+                    messageBodyPart.setContentID(new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString());
+                }
+                /*
+                 * Add to parental multipart
+                 */
+                mp.addBodyPart(messageBodyPart);
+            }
         }
-        /*
-         * Add to parental multipart
-         */
-        mp.addBodyPart(messageBodyPart);
+    }
+
+    private static final boolean contains(String contentId, int index, ComposedMailMessage mail, int size) throws OXException {
+        for (int i = size; i-- > 0;) {
+            if (i != index) {
+                MailPart part = mail.getEnclosedMailPart(i);
+                if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) && contentId.equals(part.getContentId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     protected void addNestedMessage(final MailPart mailPart, final Boolean inline, final Multipart primaryMultipart, final StringBuilder sb) throws OXException, MessagingException {
@@ -1586,11 +1618,12 @@ public class MimeMessageFiller {
      * @param htmlContent The HTML content whose &lt;img&gt; tags must be replaced with real content IDs
      * @param mp The parental instance of <code>{@link Multipart}</code>
      * @param msgFiller The message filler
+     * @param mail The associated mail
      * @return The replaced HTML content
      * @throws MessagingException If appending as body part fails
      * @throws OXException If a mail error occurs
      */
-    protected final String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MimeMessageFiller msgFiller) throws MessagingException, OXException {
+    protected final String processReferencedLocalImages(String htmlContent, Multipart mp, MimeMessageFiller msgFiller, ComposedMailMessage mail) throws MessagingException, OXException {
         if (isEmpty(htmlContent)) {
             return htmlContent;
         }
@@ -1606,16 +1639,44 @@ public class MimeMessageFiller {
                 if (MimeMessageUtility.isValidImageUri(imageTag)) {
                     final String id = m.getManagedFileId();
                     final ImageProvider imageProvider;
-                    if (null != id && mfm.contains(id)) {
-                        try {
-                            imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
-                        } catch (final OXException e) {
-                            LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id, e);
-                            /*
-                             * Anyway, replace image tag
-                             */
-                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
-                            continue;
+                    if (null != id) {
+                        if (mfm.contains(id)) {
+                            try {
+                                imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
+                            } catch (final OXException e) {
+                                LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id, e);
+                                // Anyway, replace image tag
+                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
+                                continue;
+                            }
+                        } else {
+                            // "ajax/file?..." but no matching file, check in referenced ones
+                            int size = mail.getEnclosedCount();
+                            if (size <= 0) {
+                                LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id);
+                                // Anyway, replace image tag
+                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
+                                continue;
+                            }
+                            ImageProvider tmp = null;
+                            String prefix = "<" + UUIDs.getUnformattedString(UUID.fromString(id));
+                            for (int i = size; null == tmp && i-- > 0;) {
+                                MailPart part = mail.getEnclosedMailPart(i);
+                                if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {
+                                    String contentId = part.getContentId();
+                                    if (null != contentId && contentId.startsWith(prefix, 0)) {
+                                        tmp = new ReferencedPartImageProvider(part);
+                                        mail.removeEnclosedPart(i);
+                                    }
+                                }
+                            }
+                            if (null == tmp) {
+                                LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id);
+                                // Anyway, replace image tag
+                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
+                                continue;
+                            }
+                            imageProvider = tmp;
                         }
                     } else {
                         final ImageLocation imageLocation;
@@ -1882,11 +1943,41 @@ public class MimeMessageFiller {
         public String getContentType();
     } // End of ImageProvider
 
+    private static class ReferencedPartImageProvider implements ImageProvider {
+
+        private final MailPart mailPart;
+
+        public ReferencedPartImageProvider(MailPart mailPart) {
+            super();
+            this.mailPart = mailPart;
+        }
+
+        @Override
+        public boolean isLocalFile() {
+            return false;
+        }
+
+        @Override
+        public String getContentType() {
+            return mailPart.getContentType().toString();
+        }
+
+        @Override
+        public DataSource getDataSource() throws OXException {
+            return mailPart.getDataHandler().getDataSource();
+        }
+
+        @Override
+        public String getFileName() {
+            return mailPart.getFileName();
+        }
+    } // End of ReferencedPartImageProvider
+
     private static class ManagedFileImageProvider implements ImageProvider {
 
         private final ManagedFile managedFile;
 
-        public ManagedFileImageProvider(final ManagedFile managedFile) {
+        public ManagedFileImageProvider(ManagedFile managedFile) {
             super();
             this.managedFile = managedFile;
         }
@@ -1920,7 +2011,7 @@ public class MimeMessageFiller {
 
         private final String fileName;
 
-        public ImageDataImageProvider(final ImageDataSource imageData, final ImageLocation imageLocation, final Session session) throws OXException {
+        public ImageDataImageProvider(ImageDataSource imageData, ImageLocation imageLocation, Session session) throws OXException {
             super();
             this.data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
             final DataProperties dataProperties = data.getDataProperties();
