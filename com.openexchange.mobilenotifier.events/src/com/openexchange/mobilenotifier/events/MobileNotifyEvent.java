@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.storage.ContextUsers;
-import com.openexchange.session.Session;
 
 /**
  * {@link MobileNotifyEvent}
@@ -76,13 +75,6 @@ public interface MobileNotifyEvent {
     String getCollapseKey();
 
     /**
-     * The session
-     *
-     * @return The session
-     */
-    Session getSession();
-
-    /**
      * The provider
      *
      * @return the provider of the subscription
@@ -95,4 +87,15 @@ public interface MobileNotifyEvent {
      * @return the provider of the subscription
      */
     List<ContextUsers> getContextUsers();
+
+    /**
+     * @return
+     */
+    int getContextId();
+
+    /**
+     *
+     * @return
+     */
+    int getUserId();
 }

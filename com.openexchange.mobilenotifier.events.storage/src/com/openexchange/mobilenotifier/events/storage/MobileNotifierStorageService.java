@@ -63,19 +63,22 @@ public interface MobileNotifierStorageService {
     /**
      * Creates an subscription
      *
-     * @param session
-     * @param token
-     * @param serviceId
-     * @param provider
+     * @param session - The session
+     * @param token - The device token
+     * @param serviceId The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param provider - The provider
+     * @return the subscription
      */
     Subscription createSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
 
     /**
-     * @param session
-     * @param token
-     * @param serviceId
-     * @param newToken
-     * @return
+     * Updates a token to a new token
+     *
+     * @param session - The session
+     * @param token - The device token
+     * @param serviceId - The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param newToken - The new device token
+     * @return <code>true</true> if the subscriptions could be successfully updated; <code>false</code> if not.
      * @throws OXException
      */
     boolean updateToken(Session session, String token, String serviceId, String newToken) throws OXException;
@@ -83,75 +86,104 @@ public interface MobileNotifierStorageService {
     /**
      * Updates a token to a new token
      *
-     * @param session
-     * @param token
-     * @param serviceId
-     * @param newToken
+     * @param contextId - The contextId
+     * @param token - The old device token
+     * @param serviceId - The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param newToken - The new device token
+     * @return <code>true</true> if the subscriptions could be successfully updated; <code>false</code> if not.
      */
     boolean updateToken(int contextId, String token, String serviceId, String newToken) throws OXException;
 
     /**
      * Deletes a subscription by the userId, token, serviceId and provider.
      *
-     * @param session
-     * @param token
-     * @param serviceId
-     * @param provider
+     * @param session - The session
+     * @param token - The device token
+     * @param serviceId - The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param provider - The provider
+     * @return <code>true</true> if the subscriptions could be successfully removed; <code>false</code> if not.
      */
     boolean deleteSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
 
     /**
      * Deletes a subscription by the userId, token, serviceId and provider.
      *
-     * @param session
-     * @param token
-     * @param serviceId
-     * @param provider
+     * @param session - The session
+     * @param token - The hardware token provided by the push provider
+     * @param serviceId - The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param provider - The provider
+     * @return <code>true</true> if the subscriptions could be successfully removed; <code>false</code> if not.
      */
     boolean deleteSubscription(int contextId, String token, String serviceId, MobileNotifierProviders provider) throws OXException;
 
     /**
-     * Deletes all tokens for the specified service id
-     *
-     * @param session
-     * @param token
-     * @param serviceId
-     */
-    boolean deleteSubscriptions(Session session, String token, String serviceId) throws OXException;
-
-    /**
      * Deletes a subscription by the userId, token and serviceId.
      *
-     * @param session
-     * @param token
-     * @param serviceId
+     * @param contextId - The context id
+     * @param token - The hardware token provided by the push provider
+     * @param serviceId - The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @return <code>true</true> if the subscriptions could be successfully removed; <code>false</code> if not.
      */
     boolean deleteSubscriptions(int contextId, String token, String serviceId) throws OXException;
 
     /**
-     * Gets all subscriptions of the specified userId and serviceId.
+     * Gets all subscriptions of the specified contextId, userId, serviceId and provider.
      *
-     * @param serviceId The serviceId e.g. gcm, apn, apn.macos
+     * @param userId The userId
+     * @param contextId The contextId
+     * @param serviceId The serviceId of the push service e.g. gcm, apn, apn.macos
      * @param provider The provider
-     * @return
+     * @return a list of subscription
      */
-    List<Subscription> getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException;
+    List<Subscription> getSubscription(int userId, int contextId, String serviceId, MobileNotifierProviders provider) throws OXException;
 
     /**
      * Gets all subscriptions for the specified provider
      *
-     * @param session
-     * @return A list of context / user ids of the subscribed provider
+     * @param provider The provider
+     * @return A list of context / userIds of the specified provider
      * @throws OXException
      */
     List<ContextUsers> getAllSubscriptions(MobileNotifierProviders provider) throws OXException;
 
     /**
-     * Returns a single token per context / userIds combination
+     * Gets all tokens for a provider from the subscription table for a list of context users.
      *
-     * @param ContextUser
-     * @return List of subscriptions with tokens which should be informed
+     * @param ContextUser a list of context / userIds
+     * @param serviceId The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param provider The provider
+     * @return List of strings which contains the tokens
      * @throws OXException
      */
-    List<Subscription> getTokensFromSubscriptions(List<ContextUsers> contextUser,  String serviceId, MobileNotifierProviders provider) throws OXException;
+    List<String> getTokensFromSubscriptions(List<ContextUsers> contextUsers,  String serviceId, MobileNotifierProviders provider) throws OXException;
+
+    /**
+     * Updates the last login timestamp. The timestamp should be updated whenever the user is informed to login again.
+     *
+     * @param contextId the context id
+     * @param userId the userId
+     * @param serviceId The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @return <code>true</code> if the timestamp is successfully updated; <code>false</code> if not
+     * @throws OXException
+     */
+    boolean updateLastLoginPush(int contextId, int userId, String serviceId) throws OXException;
+
+    /**
+     * @param contextUser
+     * @param token
+     * @param serviceId
+     * @param newToken
+     * @return
+     * @throws OXException
+     */
+    boolean updateToken(List<ContextUsers> contextUser, String token, String serviceId, String newToken) throws OXException;
+
+    /**
+     * @param contextUsers
+     * @param token
+     * @param serviceId
+     * @return
+     * @throws OXException
+     */
+    boolean deleteSubscriptions(List<ContextUsers> contextUsers, String token, String serviceId) throws OXException;
 }

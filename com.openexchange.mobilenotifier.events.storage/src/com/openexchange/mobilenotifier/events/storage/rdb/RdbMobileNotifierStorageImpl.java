@@ -127,6 +127,11 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
+    public boolean updateToken(List<ContextUsers> contextUser, String token, String serviceId, String newToken) throws OXException {
+        return false;
+    }
+
+    @Override
     public boolean updateToken(int contextId, String token, String serviceId, String newToken) throws OXException {
         Connection connection = databaseService.getWritable(contextId);
         try {
@@ -149,6 +154,34 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
             stmt.setInt(3, contextId);
             stmt.setString(4, serviceId);
             stmt.setString(5, token);
+            return stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public boolean updateLastLoginPush(int contextId, int userId, String serviceId) throws OXException {
+        Connection connection = databaseService.getWritable(contextId);
+        try {
+            return 0 < updateLastLoginTimestamp(connection, contextId, userId, serviceId);
+        } catch (SQLException e) {
+            throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(contextId, connection);
+        }
+    }
+
+    private static int updateLastLoginTimestamp(Connection connection, int contextId, int userId, String serviceId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(Statements.UPDATE_LAST_LOGIN_PUSH_TIMESTAMP);
+            //UPDATE ... SET:
+            stmt.setLong(1, System.currentTimeMillis());
+            //WHERE:
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
+            stmt.setString(4, serviceId);
             return stmt.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -187,13 +220,13 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
             stmt.setString(1, provider.getProviderName());
 
             ResultSet results = stmt.executeQuery();
-            List<Integer> userIds = new LinkedList<Integer>();
+            List<Integer> userTokens = new LinkedList<Integer>();
             while(results.next()) {
                 int userId = results.getInt(1);
-                userIds.add(userId);
+                userTokens.add(userId);
             }
-            if(false == userIds.isEmpty()) {
-                contextUser.add(new ContextUsers(currentCtx, userIds));
+            if(false == userTokens.isEmpty()) {
+                contextUser.add(new ContextUsers(currentCtx, userTokens));
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -232,11 +265,6 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public boolean deleteSubscriptions(Session session, String token, String serviceId) throws OXException {
-        return deleteSubscriptions(session.getContextId(), token, serviceId);
-    }
-
-    @Override
     public boolean deleteSubscriptions(int contextId, String token, String serviceId) throws OXException {
         Connection connection = databaseService.getWritable(contextId);
         try {
@@ -246,6 +274,11 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
         } finally {
             databaseService.backWritable(contextId, connection);
         }
+    }
+
+    @Override
+    public boolean deleteSubscriptions(List<ContextUsers> contextUsers, String token, String serviceId) throws OXException {
+        return false;
     }
 
     private static int deleteSubscriptions(Connection connection, int contextId, String token, String serviceId) throws SQLException, OXException {
@@ -262,11 +295,10 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public List<Subscription> getSubscription(Session session, String serviceId, MobileNotifierProviders provider) throws OXException {
-        int contextId = session.getContextId();
+    public List<Subscription> getSubscription(int contextId, int userId, String serviceId, MobileNotifierProviders provider) throws OXException {
         Connection connection = databaseService.getReadOnly(contextId);
         try {
-            return selectSubscriptions(connection, session, serviceId, provider.getProviderName());
+            return selectSubscriptions(connection, userId, contextId, serviceId, provider.getProviderName());
         } catch (SQLException e) {
             throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -274,25 +306,25 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
         }
     }
 
-    private static List<Subscription> selectSubscriptions(Connection connection, Session session, String service, String providerName) throws SQLException {
+    private static List<Subscription> selectSubscriptions(Connection connection, int userId, int contextId, String service, String providerName) throws SQLException {
         List<Subscription> subscriptions = new LinkedList<Subscription>();
         PreparedStatement stmt = null;
         try {
             int index = 0;
             stmt = connection.prepareStatement(Statements.SELECT_SUBSCRIPTIONS);
-            stmt.setInt(++index, session.getContextId());
-            stmt.setInt(++index, session.getUserId());
+            stmt.setInt(++index, contextId);
+            stmt.setInt(++index, userId);
             stmt.setString(++index, service);
             stmt.setString(++index, providerName);
             ResultSet results = stmt.executeQuery();
             while(results.next()) {
                 int cid = results.getInt(1);
-                String retService = results.getString(2);
-                String token = results.getString(3);
-                String provider = results.getString(4);
-                int userId = results.getInt(5);
-                long timestamp = results.getLong(6);
-                subscriptions.add(new Subscription(cid, userId, token, retService, MobileNotifierProviders.parseProviderFromParam(provider), timestamp));
+                String resService = results.getString(2);
+                String resToken = results.getString(3);
+                String resProvider = results.getString(4);
+                int resUserId = results.getInt(5);
+                long resTimestamp = results.getLong(6);
+                subscriptions.add(new Subscription(cid, resUserId, resToken, resService, MobileNotifierProviders.parseProviderFromParam(resProvider), resTimestamp));
             }
             return subscriptions;
         } finally {
@@ -301,8 +333,8 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public List<Subscription> getTokensFromSubscriptions(List<ContextUsers> contextUser, String serviceId, MobileNotifierProviders provider) throws OXException {
-        List<Subscription> subscriptions = new LinkedList<Subscription>();
+    public List<String> getTokensFromSubscriptions(List<ContextUsers> contextUser, String serviceId, MobileNotifierProviders provider) throws OXException {
+        List<String> subscriptions = new LinkedList<String>();
         if(false == contextUser.isEmpty()) {
             for(ContextUsers cu : contextUser) {
                 int contextId = cu.getContextId();
@@ -319,11 +351,11 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
         return subscriptions;
     }
 
-    private List<Subscription> selectTokensFromContext(Connection connection, int contextId, List<Integer> userIds, String serviceId, MobileNotifierProviders provider) throws SQLException {
+    private List<String> selectTokensFromContext(Connection connection, int contextId, List<Integer> userIds, String serviceId, MobileNotifierProviders provider) throws SQLException {
         PreparedStatement stmt = null;
         try {
 
-            List<Subscription> subscriptions = new LinkedList<Subscription>();
+            List<String> tokens = new LinkedList<String>();
 
             stmt = connection.prepareStatement(Statements.SELECT_TOKENS);
 
@@ -335,12 +367,10 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
 
                 ResultSet results = stmt.executeQuery();
                 while(results.next()) {
-                    String token = results.getString(1);
-                    long timestamp = results.getLong(2);
-                    subscriptions.add(new Subscription(contextId, userId, token, serviceId, provider, timestamp));
+                    tokens.add(results.getString(1));
                 }
             }
-            return subscriptions;
+            return tokens;
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }

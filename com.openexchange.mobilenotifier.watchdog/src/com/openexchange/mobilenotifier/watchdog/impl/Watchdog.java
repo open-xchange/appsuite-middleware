@@ -116,7 +116,7 @@ public class Watchdog  {
 
                     if(false == contextUsersWithoutSessions.isEmpty()) {
                         MobileNotifyEventService mns = Services.getService(MobileNotifyEventService.class);
-                        LOG.debug("Notifying new login");
+                        LOG.trace("Notifying new login");
                         //TODO: async call
                         mns.notifyLogin(contextUsersWithoutSessions);
                     }

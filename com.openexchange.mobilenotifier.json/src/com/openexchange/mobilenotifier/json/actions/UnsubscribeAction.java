@@ -58,6 +58,7 @@ import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
@@ -102,7 +103,9 @@ public class UnsubscribeAction extends AbstractMobileNotifierAction {
         }
 
         MobileNotifierStorageService mnss = getService(MobileNotifierStorageService.class);
-        mnss.deleteSubscription(req.getSession(), token, serviceId, provider);
+
+        Session session = req.getSession();
+        mnss.deleteSubscription(session.getContextId(), token, serviceId, provider);
 
         /*
          * return empty json object to indicate success
