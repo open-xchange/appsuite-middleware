@@ -102,6 +102,13 @@ public abstract class AbstractSchemaToolkit extends AbstractMBeanCLI<Void> {
         return convertToMap(list);
     }
 
+    /**
+     * Process and print the database access information along with some optional parameters
+     * 
+     * @param dbAccessInfo The database info map
+     * @param optionalParams The optional command line parameters
+     * @throws URISyntaxException
+     */
     protected void printDBAccessInfo(Map<String, String> dbAccessInfo, String... optionalParams) throws URISyntaxException {
         String url = getAttribute("url", dbAccessInfo);
         int pos = url.indexOf("jdbc:");
