@@ -170,7 +170,7 @@ while true; do
 done
 
 # invoke create schema
-OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema -A $adminuser -P $adminpass -t $target -m $schema $optJmxArgs 2>&1)"
+OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema -A $adminuser -P $adminpass -t $target $optJmxArgs 2>&1)"
 RETVAL=$?
 
 # pump data in mysql
