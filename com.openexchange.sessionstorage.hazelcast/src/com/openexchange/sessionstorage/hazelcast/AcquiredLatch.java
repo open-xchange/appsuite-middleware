@@ -63,8 +63,8 @@ public final class AcquiredLatch {
     /** The associated latch */
     public final CountDownLatch latch;
 
-    /** Whether the associated was acquired or not */
-    public final boolean acquired;
+    /** The thread owning this instance */
+    public final Thread owner;
 
     /** The reference to resulting object */
     public final AtomicReference<Object> result;
@@ -72,12 +72,12 @@ public final class AcquiredLatch {
     /**
      * Initializes a new {@link AcquiredLatch}.
      *
-     * @param acquired <code>true</code> if acquired; otherwise <code>false</code>
+     * @param owner The thread owning this instance
      * @param latch The associated latch
      */
-    public AcquiredLatch(boolean acquired, CountDownLatch latch) {
+    public AcquiredLatch(Thread owner, CountDownLatch latch) {
         super();
-        this.acquired = acquired;
+        this.owner = owner;
         this.latch = latch;
         result = new AtomicReference<Object>();
     }
