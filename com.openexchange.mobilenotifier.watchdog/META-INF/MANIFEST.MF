@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Example service implementation for the Mobilenotifier
+Bundle-SymbolicName: com.openexchange.mobilenotifier.watchdog
+Bundle-Version: 7.6.0
+Bundle-Activator: com.openexchange.mobilenotifier.watchdog.osgi.WatchdogActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.hazelcast.core,
+ com.openexchange.cluster.timer,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.mobilenotifier,
+ com.openexchange.mobilenotifier.events,
+ com.openexchange.mobilenotifier.events.storage,
+ com.openexchange.mobilenotifier.utility,
+ com.openexchange.osgi,
+ com.openexchange.push,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.threadpool,
+ com.openexchange.timer,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.util.tracker,
+ org.slf4j
