@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Fri Nov 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.6.2 release
+* Wed Nov 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-21
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
