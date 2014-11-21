@@ -277,9 +277,17 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
     protected FileStorageFolderAccess getFolderAccess(String serviceId, String accountId) throws OXException {
         FileStorageAccountAccess accountAccess = connectedAccounts.get().get(serviceId + '/' + accountId);
         if (null == accountAccess) {
-            FileStorageService fileStorage = getFileStorageService(serviceId);
-            accountAccess = fileStorage.getAccountAccess(accountId, session);
-            connect(accountAccess);
+            try {
+                FileStorageService fileStorage = getFileStorageService(serviceId);
+                accountAccess = fileStorage.getAccountAccess(accountId, session);
+                connect(accountAccess);
+            } catch (OXException e) {
+                // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
+                if (e.equalsCode(4, "OAUTH") || OXExceptions.containsCommunicationError(e)) {
+                    throw FileStorageExceptionCodes.ACCOUNT_NOT_ACCESSIBLE.create(e, accountId, serviceId, session.getUserId(), session.getContextId());
+                }
+                throw e;
+            }
         }
         return accountAccess.getFolderAccess();
     }

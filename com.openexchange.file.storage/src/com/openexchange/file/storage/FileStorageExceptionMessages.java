@@ -84,6 +84,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // ZIP archive exceeds max. allowed size of %1$s
     public static final String ARCHIVE_MAX_SIZE_EXCEEDED_MSG = "ZIP archive exceeds max. allowed size of %1$s";
 
+    // The file storage account is currently not accessible.
+    public static final String ACCOUNT_NOT_ACCESSIBLE_MSG = "The file storage account is currently not accessible.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */
