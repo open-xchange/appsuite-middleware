@@ -107,7 +107,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     private final String sessionsMapName;
     private final Unregisterer unregisterer;
     private final AtomicBoolean inactive;
-    private final ConcurrentMap<String, CountDownLatch> synchronizer;
+    private final ConcurrentMap<String, AcquiredLatch> synchronizer;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -120,19 +120,19 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         this.sessionsMapName = sessionsMapName;
         this.unregisterer = unregisterer;
         inactive = new AtomicBoolean(false);
-        synchronizer = new ConcurrentHashMap<String, CountDownLatch>(256);
+        synchronizer = new ConcurrentHashMap<String, AcquiredLatch>(256);
     }
 
     private AcquiredLatch acquireFor(String sessionId) {
-        CountDownLatch latch = synchronizer.get(sessionId);
+        AcquiredLatch latch = synchronizer.get(sessionId);
         if (null == latch) {
-            CountDownLatch newLatch = new CountDownLatch(1);
+            AcquiredLatch newLatch = new AcquiredLatch(Thread.currentThread(), new CountDownLatch(1));
             latch = synchronizer.putIfAbsent(sessionId, newLatch);
             if (null == latch) {
-                return new AcquiredLatch(true, newLatch);
+                latch = newLatch;
             }
         }
-        return new AcquiredLatch(false, latch);
+        return latch;
     }
 
     private void releaseFor(String sessionId) {
@@ -166,7 +166,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
         AcquiredLatch acquiredLatch = acquireFor(sessionId);
         CountDownLatch latch = acquiredLatch.latch;
-        if (acquiredLatch.acquired) {
+        if (Thread.currentThread() == acquiredLatch.owner) {
             // Look-up that session in Hazelcast
             try {
                 Session session = fetchFromHz(sessionId, timeoutMillis);
@@ -206,9 +206,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 storedSession = sessions().get(sessionId);
             } else {
                 Future<PortableSession> f = sessions().getAsync(sessionId);
-                BoolReference timeoutOccurred = new BoolReference(false);
-                storedSession = getFrom(f, timeoutMillis, timeoutOccurred);
-                if (null == storedSession && timeoutOccurred.getValue()) {
+                storedSession = getFrom(f, timeoutMillis);
+                if (null == storedSession && f.isCancelled()) {
                     LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, Long.valueOf(timeoutMillis));
                 }
             }
@@ -235,10 +234,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     private <V> V getFrom(Future<V> f, long timeoutMillis) throws OXException {
-        return getFrom(f, timeoutMillis, null);
-    }
-
-    private <V> V getFrom(Future<V> f, long timeoutMillis, BoolReference timeoutOccurred) throws OXException {
         try {
             return f.get(timeoutMillis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -261,9 +256,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             throw new RuntimeException(cause);
         } catch (TimeoutException e) {
             f.cancel(true);
-            if (null != timeoutOccurred) {
-                timeoutOccurred.setValue(true);
-            }
             return null;
         }
     }
