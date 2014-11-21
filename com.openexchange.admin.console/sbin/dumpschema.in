@@ -80,26 +80,22 @@ RETVAL=$?
 
 # No parameters supplied, return output which is usage
 if [ $# -eq 0 ]; then
-	echo -e $OUTPUT
+	echo -e "$OUTPUT"
 	exit 0
 fi
 
 # Return code is 0, no flag '-h' supplied, DumpSchema exited successfully, feed output to mysqldump, 
 # otherwise return output and the exit code of the java tool
 schema=
+
 if [ $RETVAL -eq 0 ] && [ $1 != "-h" ]; then
-	while getopts "m" OPTION
-	do
-		case $OPTION in
-			m)
-				schema=$OPTARG
-				;;
-		esac
-	done
-	echo -e "Dumping schema '$schema'...";
-	mysqldump $OUTPUT
-	echo -e "done.\n";
+        schema="$(echo $OUTPUT | awk '{print $1}')"
+        echo -n "Dumping schema '$schema'...";
+        dump="mysqldump $OUTPUT"
+        eval $dump
+        echo -e " done.";
+
 else
-	echo -e $OUTPUT
-	exit $RETVAL
+        echo -e "$OUTPUT"
+        exit $RETVAL
 fi
