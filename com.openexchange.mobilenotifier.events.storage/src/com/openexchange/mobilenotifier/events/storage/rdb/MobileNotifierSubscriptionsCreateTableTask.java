@@ -97,6 +97,8 @@ public class MobileNotifierSubscriptionsCreateTableTask extends UpdateTaskAdapte
                     stmt.executeUpdate();
                 } catch (final SQLException e) {
                     throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
                 }
             }
             writeCon.commit(); // COMMIT

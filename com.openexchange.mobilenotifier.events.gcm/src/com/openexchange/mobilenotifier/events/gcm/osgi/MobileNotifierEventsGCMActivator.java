@@ -51,7 +51,7 @@ package com.openexchange.mobilenotifier.events.gcm.osgi;
 
 import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
 import com.openexchange.mobilenotifier.events.gcm.impl.MobileNotifyGCMPublisherImpl;
-import com.openexchange.mobilenotifier.events.storage.MobileNotifierSubscriptionService;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -65,7 +65,7 @@ public class MobileNotifierEventsGCMActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { MobileNotifierSubscriptionService.class, MobileNotifyEventService.class };
+        return new Class[] { MobileNotifierStorageService.class, MobileNotifyEventService.class };
     }
 
     @Override

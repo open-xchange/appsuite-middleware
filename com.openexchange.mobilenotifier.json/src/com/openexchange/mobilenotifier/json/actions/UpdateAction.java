@@ -54,7 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mobilenotifier.events.storage.MobileNotifierSubscriptionService;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -92,7 +92,7 @@ public class UpdateAction extends AbstractMobileNotifierAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("serviceId");
         }
 
-        MobileNotifierSubscriptionService mnss = getService(MobileNotifierSubscriptionService.class);
+        MobileNotifierStorageService mnss = getService(MobileNotifierStorageService.class);
         mnss.updateToken(req.getSession(), token, serviceId, newToken);
 
         /*

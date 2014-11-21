@@ -49,8 +49,10 @@
 
 package com.openexchange.mobilenotifier.events;
 
+import java.util.List;
 import java.util.Map;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
+import com.openexchange.mobilenotifier.events.storage.ContextUsers;
 import com.openexchange.session.Session;
 
 /**
@@ -86,4 +88,11 @@ public interface MobileNotifyEvent {
      * @return the provider of the subscription
      */
     MobileNotifierProviders getProvider();
+
+    /**
+     * This should be set if the user doesn't have a valid session.
+     *
+     * @return the provider of the subscription
+     */
+    List<ContextUsers> getContextUsers();
 }

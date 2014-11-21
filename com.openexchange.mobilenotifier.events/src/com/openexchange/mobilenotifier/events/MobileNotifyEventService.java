@@ -49,8 +49,8 @@
 
 package com.openexchange.mobilenotifier.events;
 
-import com.openexchange.mobilenotifier.events.mail.impl.MobileNotifyMailEvent;
-
+import java.util.List;
+import com.openexchange.mobilenotifier.events.storage.ContextUsers;
 
 /**
  * {@link MobileNotifyEventService}
@@ -73,9 +73,16 @@ public interface MobileNotifyEventService {
     void unregisterPushPublisher(MobileNotifyPublisher publisher);
 
     /**
-     * Notifies an push publisher about incoming events.
+     * Notifies subscribers with a valid session about the triggered event.
      *
      * @param publisher
      */
-    void notifyPublishers(MobileNotifyMailEvent publisher);
+    void notifySubscribers(MobileNotifyEvent publisher);
+
+    /**
+     * Notifies a list of context users without a valid session to login again.
+     *
+     * @param contextUsers
+     */
+    void notifyLogin(List<ContextUsers> contextUsers);
 }

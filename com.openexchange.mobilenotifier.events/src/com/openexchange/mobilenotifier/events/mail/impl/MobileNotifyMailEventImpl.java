@@ -55,8 +55,10 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.service.event.Event;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.mobilenotifier.events.MobileNotifyEvent;
 import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
 import com.openexchange.mobilenotifier.events.MobileNotifyPublisher;
+import com.openexchange.mobilenotifier.events.storage.ContextUsers;
 
 /**
  * {@link MobileNotifyMailEventImpl}
@@ -85,7 +87,8 @@ public class MobileNotifyMailEventImpl implements org.osgi.service.event.EventHa
         CommonEvent commonEvent = (CommonEvent) event.getProperty("OX_EVENT");
         Map<String, String> map = new HashMap<String, String>();
         map.put("SYNC_EVENT", "NEW_MAIL");
-        notifyPublishers(new MobileNotifyMailEvent(commonEvent.getSession(), map));
+
+        notifySubscribers(new MobileNotifyMailEvent(commonEvent.getSession(), map));
     }
 
     private boolean checkEvent(Event event) {
@@ -113,12 +116,24 @@ public class MobileNotifyMailEventImpl implements org.osgi.service.event.EventHa
     }
 
     @Override
-    public void notifyPublishers(MobileNotifyMailEvent event) {
+    public void notifySubscribers(MobileNotifyEvent event) {
         if(event != null) {
             for (MobileNotifyPublisher publisher : publishers) {
                 LOG.debug("Publishing: {}", event);
                 publisher.publish(event);
             }
+        }
+    }
+
+    @Override
+    public void notifyLogin(List<ContextUsers> contextUsers) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("SYNC_EVENT", "LOGIN");
+
+        MobileNotifyMailEvent loginEvent = new MobileNotifyMailEvent(contextUsers, map);
+        for (MobileNotifyPublisher publisher : publishers) {
+            LOG.debug("Publishing new login event: {}", contextUsers);
+            publisher.publishNewLogin(loginEvent);
         }
     }
 }
