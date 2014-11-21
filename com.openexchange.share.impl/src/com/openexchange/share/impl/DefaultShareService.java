@@ -296,11 +296,11 @@ public class DefaultShareService implements ShareService {
         /*
          * delete targets from storage
          */
-        int affectedShares = 0;
+        int[] affectedGuests;
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            affectedShares = services.getService(ShareStorage.class).deleteTargets(
+            affectedGuests = services.getService(ShareStorage.class).deleteTargets(
                 session.getContextId(), targets, includeItems, connectionHelper.getParameters());
             connectionHelper.commit();
         } finally {
@@ -309,8 +309,8 @@ public class DefaultShareService implements ShareService {
         /*
          * schedule cleanup tasks as needed
          */
-        if (0 < affectedShares) {
-            scheduleGuestCleanup(session.getContextId(), null);
+        if (null != affectedGuests && 0 < affectedGuests.length) {
+            scheduleGuestCleanup(session.getContextId(), affectedGuests);
         }
     }
 
@@ -322,11 +322,11 @@ public class DefaultShareService implements ShareService {
         /*
          * delete targets from storage
          */
-        int affectedShares = 0;
+        int[] affectedGuests;
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            affectedShares = removeTargets(connectionHelper, targets, guestIDs);
+            affectedGuests = removeTargets(connectionHelper, targets, guestIDs);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -334,8 +334,8 @@ public class DefaultShareService implements ShareService {
         /*
          * schedule cleanup tasks as needed
          */
-        if (0 < affectedShares) {
-            scheduleGuestCleanup(session.getContextId(), guestIDs == null ? null : I2i(guestIDs));
+        if (null != affectedGuests && 0 < affectedGuests.length) {
+            scheduleGuestCleanup(session.getContextId(), affectedGuests);
         }
     }
 
@@ -502,11 +502,11 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
             return;
         }
-        int affectedShares;
+        int[] affectedGuests;
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
-            affectedShares = removeTargets(connectionHelper, targets, guestIDs);
+            affectedGuests = removeTargets(connectionHelper, targets, guestIDs);
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -514,8 +514,8 @@ public class DefaultShareService implements ShareService {
         /*
          * schedule cleanup tasks as needed
          */
-        if (0 < affectedShares) {
-            scheduleGuestCleanup(contextID, null == guestIDs ? null : I2i(guestIDs));
+        if (null != affectedGuests && 0 < affectedGuests.length) {
+            scheduleGuestCleanup(contextID, affectedGuests);
         }
     }
 
@@ -525,9 +525,9 @@ public class DefaultShareService implements ShareService {
      * @param connectionHelper A (started) connection helper
      * @param targets The share targets to delete
      * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
-     * @return The number of deleted shares in the storage
+     * @return The identifiers of the affected guest users, or an empty array if no shares were deleted
      */
-    private int removeTargets(ConnectionHelper connectionHelper, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
+    private int[] removeTargets(ConnectionHelper connectionHelper, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
         int contextId = connectionHelper.getContextID();
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         if (null == guestIDs) {
@@ -545,7 +545,8 @@ public class DefaultShareService implements ShareService {
                     shares.add(new Share(guestID.intValue(), target));
                 }
             }
-            return shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters());
+            int affectedShares = shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters());
+            return 0 < affectedShares ? I2i(guestIDs) : new int[0];
         }
     }
 
@@ -625,7 +626,7 @@ public class DefaultShareService implements ShareService {
              * schedule cleanup tasks as needed
              */
             if (0 < affectedShares) {
-                scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
+                scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(expiredShares)));
             }
         }
         return shares;

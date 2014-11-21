@@ -174,10 +174,10 @@ public interface ShareStorage {
      * @param contextID The context ID
      * @param shares The share targets to delete
      * @param parameters The storage parameters
-     * @return The number of affected entries
+     * @return The identifiers of the affected guest users, or an empty array if no shares were deleted
      * @throws OXException
      */
-    int deleteTargets(int contextID, List<ShareTarget> targets, StorageParameters parameters) throws OXException;
+    int[] deleteTargets(int contextID, List<ShareTarget> targets, StorageParameters parameters) throws OXException;
 
     /**
      * Deletes multiple shares targets associated to any guest user from the storage.
@@ -186,9 +186,9 @@ public interface ShareStorage {
      * @param shares The share targets to delete
      * @param includeItems <code>true</code> to remove item targets upon parent folder target removal, <code>false</code>, otherwise
      * @param parameters The storage parameters
-     * @return The number of affected entries
+     * @return The identifiers of the affected guest users, or an empty array if no shares were deleted
      */
-    int deleteTargets(int contextID, List<ShareTarget> targets, boolean includeItems, StorageParameters parameters) throws OXException;
+    int[] deleteTargets(int contextID, List<ShareTarget> targets, boolean includeItems, StorageParameters parameters) throws OXException;
 
     /**
      * Counts the number of currently created shares for the given user id.
