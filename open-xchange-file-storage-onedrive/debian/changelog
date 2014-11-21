@@ -1,3 +1,9 @@
+open-xchange-file-storage-onedrive (7.6.2-2) stable; urgency=low
+
+  * Second candidate for 7.6.2 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 21 Nov 2014 10:38:31 +0100
+
 open-xchange-file-storage-onedrive (7.6.2-1) stable; urgency=medium
 
   * First candidate for 7.6.2 release

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-realtime-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -45,6 +45,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Nov 21 2014 Marc Arens <marc.arens@open-xchange.com>
+Second candidate for 7.6.2 release
 * Mon Nov 10 2014 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Marc Arens <marc.arens@open-xchange.com>
