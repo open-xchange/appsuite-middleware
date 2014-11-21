@@ -80,7 +80,7 @@ RETVAL=$?
 
 # No parameters supplied, return output which is usage
 if [ $# -eq 0 ]; then
-	echo $OUTPUT
+	echo -e $OUTPUT
 	exit 0
 fi
 
@@ -96,10 +96,10 @@ if [ $RETVAL -eq 0 ] && [ $1 != "-h" ]; then
 				;;
 		esac
 	done
-	echo "Dumping schema '$schema'...";
+	echo -e "Dumping schema '$schema'...";
 	mysqldump $OUTPUT
-	echo "done.\n";
+	echo -e "done.\n";
 else
-	echo $OUTPUT
+	echo -e $OUTPUT
 	exit $RETVAL
 fi

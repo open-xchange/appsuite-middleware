@@ -133,15 +133,15 @@ OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.sc
 RETVAL=$?
 
 if [ $RETVAL -eq 0 ]; then
-	echo "Pumping into schema '$OUTPUT'"
+	echo -e "Pumping into schema '$OUTPUT'"
 	mysqldump $OUTPUT < $input
-	echo "done.\n"
+	echo -e "done.\n"
 else
-	echo $OUTPUT
+	echo -e $OUTPUT
 	exit $RETVAL
 fi
 
 RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -m $schema -n $OUTPUT -t $target 2>&1)"
 RETVAL=$?
-echo $RESTORE
+echo -e $RESTORE
 exit $RETVAL
