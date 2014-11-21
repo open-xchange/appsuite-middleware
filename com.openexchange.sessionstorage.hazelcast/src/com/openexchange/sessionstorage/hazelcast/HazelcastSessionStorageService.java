@@ -73,6 +73,7 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.query.SqlPredicate;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.BoolReference;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
@@ -205,9 +206,10 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 storedSession = sessions().get(sessionId);
             } else {
                 Future<PortableSession> f = sessions().getAsync(sessionId);
-                storedSession = getFrom(f, timeoutMillis);
-                if (null == storedSession) {
-                    LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, timeoutMillis);
+                BoolReference timeoutOccurred = new BoolReference(false);
+                storedSession = getFrom(f, timeoutMillis, timeoutOccurred);
+                if (null == storedSession && timeoutOccurred.getValue()) {
+                    LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, Long.valueOf(timeoutMillis));
                 }
             }
 
@@ -233,6 +235,10 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     private <V> V getFrom(Future<V> f, long timeoutMillis) throws OXException {
+        return getFrom(f, timeoutMillis, null);
+    }
+
+    private <V> V getFrom(Future<V> f, long timeoutMillis, BoolReference timeoutOccurred) throws OXException {
         try {
             return f.get(timeoutMillis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -255,6 +261,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             throw new RuntimeException(cause);
         } catch (TimeoutException e) {
             f.cancel(true);
+            if (null != timeoutOccurred) {
+                timeoutOccurred.setValue(true);
+            }
             return null;
         }
     }
