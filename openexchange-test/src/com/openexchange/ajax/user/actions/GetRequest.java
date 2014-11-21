@@ -51,6 +51,7 @@ package com.openexchange.ajax.user.actions;
 
 import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.Params;
 
 /**
  * {@link GetRequest}
@@ -70,6 +71,10 @@ public class GetRequest extends AbstractUserRequest<GetResponse> {
         this.failOnError = failOnError;
     }
 
+    public GetRequest(TimeZone timeZone, boolean failOnError) {
+        this(-1, timeZone, failOnError);
+    }
+
     public GetRequest(int userId, TimeZone timeZone) {
         this(userId, timeZone, true);
     }
@@ -86,7 +91,11 @@ public class GetRequest extends AbstractUserRequest<GetResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "get"), new Parameter(AJAXServlet.PARAMETER_ID, userId) };
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, "get");
+        if (0 < userId) {
+            params.add(AJAXServlet.PARAMETER_ID, String.valueOf(userId));
+        }
+        return params.toArray();
     }
 
     @Override
