@@ -81,15 +81,15 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifyGCMPublisherImpl.class);
 
     @Override
-    public void publishNewLogin(MobileNotifyEvent loginEvent) {
-        List<Subscription> subscriptions = null;
+    public void publishLogin(MobileNotifyEvent loginEvent) {
+        List<String> tokens = null;
         try {
             MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class);
-            subscriptions = mnss.getTokensFromSubscriptions(loginEvent.getContextUsers(), SERIVCE_ID, loginEvent.getProvider());
+            tokens = mnss.getTokensFromSubscriptions(loginEvent.getContextUsers(), SERIVCE_ID, loginEvent.getProvider());
         } catch(OXException e) {
             LOG.error("Could not get subscription {}", SERIVCE_ID, e);
         }
-        subscriptionPublisher(subscriptions, loginEvent);
+        publishByTokens(tokens, loginEvent);
     }
 
     @Override
@@ -97,14 +97,58 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
         List<Subscription> subscriptions = null;
         try {
             MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class);
-            subscriptions = mnss.getSubscription(event.getSession(), SERIVCE_ID, event.getProvider());
+            subscriptions = mnss.getSubscription(event.getUserId(), event.getContextId(), SERIVCE_ID, event.getProvider());
         } catch(OXException e) {
             LOG.error("Could not get subscription {}", SERIVCE_ID, e);
         }
-        subscriptionPublisher(subscriptions, event);
+        publishBySubscriptions(subscriptions, event);
     }
 
-    private void subscriptionPublisher(List<Subscription> subscriptions, MobileNotifyEvent event) {
+    private void publishByTokens(List<String> tokens, MobileNotifyEvent event) {
+        if(tokens != null && tokens.size() > 0) {
+            if (null != tokens && 0 < tokens.size()) {
+                Sender sender = null;
+                try {
+                    sender = getSender();
+                } catch (OXException e) {
+                    LOG.error("Error getting GCM sender", e);
+                }
+                if (null == sender) {
+                    return;
+                }
+                for (int i = 0; i < tokens.size(); i += MULTICAST_LIMIT) {
+                    /*
+                     * prepare chunk
+                     */
+                    int length = Math.min(tokens.size(), i + MULTICAST_LIMIT) - i;
+                    List<String> registrationIDs = new ArrayList<String>(length);
+                    for (int j = 0; j < length; j++) {
+                        registrationIDs.add(tokens.get(i + j));
+                    }
+                    /*
+                     * send chunk
+                     */
+                    if (0 < registrationIDs.size()) {
+                        MulticastResult result = null;
+                        try {
+                            result = sender.sendNoRetry(getMessage(event), registrationIDs);
+                        } catch (IOException e) {
+                            LOG.warn("error publishing mobile notification event", e);
+                        }
+                        if (null != result) {
+                            LOG.debug("{}", result);
+                        }
+                        /*
+                         * process results
+                         */
+                        processResult(event, registrationIDs, result);
+                    }
+                }
+            }
+        }
+    }
+
+    private void publishBySubscriptions(List<Subscription> subscriptions, MobileNotifyEvent event) {
         if(subscriptions != null && subscriptions.size() > 0) {
             if (null != subscriptions && 0 < subscriptions.size()) {
                 Sender sender = null;
@@ -232,11 +276,21 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
 
     private static void updateRegistrationIDs(MobileNotifyEvent event, String oldRegistrationID, String newRegistrationID) {
         try {
-            if (Services.getService(MobileNotifierStorageService.class, true).updateToken(
-                event.getSession(), oldRegistrationID, SERIVCE_ID, newRegistrationID)) {
-                LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
+            //TODO
+            if(event.getContextUsers() != null && event.getContextUsers().isEmpty()) {
+                if (Services.getService(MobileNotifierStorageService.class, true).updateToken(
+                    event.getContextUsers(), oldRegistrationID, SERIVCE_ID, newRegistrationID)) {
+                    LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
+                } else {
+                    LOG.warn("Registration ID {} not updated.", oldRegistrationID);
+                }
             } else {
-                LOG.warn("Registration ID {} not updated.", oldRegistrationID);
+                if (Services.getService(MobileNotifierStorageService.class, true).updateToken(
+                    event.getContextId(), oldRegistrationID, SERIVCE_ID, newRegistrationID)) {
+                    LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
+                } else {
+                    LOG.warn("Registration ID {} not updated.", oldRegistrationID);
+                }
             }
         } catch (OXException e) {
             LOG.error("Error updating registration IDs", e);
@@ -245,11 +299,20 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
 
     private static void removeRegistrations(MobileNotifyEvent event, String registrationID) {
         try {
-            if (true == Services.getService(MobileNotifierStorageService.class, true).deleteSubscriptions(
-                event.getSession(), registrationID, SERIVCE_ID)) {
-                LOG.info("Successfully removed registration ID {}.", registrationID);
+            if(event.getContextUsers() != null && event.getContextUsers().isEmpty()) {
+                if (true == Services.getService(MobileNotifierStorageService.class, true).deleteSubscriptions(
+                    event.getContextUsers(), registrationID, SERIVCE_ID)) {
+                    LOG.info("Successfully removed registration ID {}.", registrationID);
+                } else {
+                    LOG.warn("Registration ID {} not removed.", registrationID);
+                }
             } else {
-                LOG.warn("Registration ID {} not removed.", registrationID);
+                if (true == Services.getService(MobileNotifierStorageService.class, true).deleteSubscriptions(
+                    event.getContextId(), registrationID, SERIVCE_ID)) {
+                    LOG.info("Successfully removed registration ID {}.", registrationID);
+                } else {
+                    LOG.warn("Registration ID {} not removed.", registrationID);
+                }
             }
         } catch (OXException e) {
             LOG.error("Error removing registrations", e);
