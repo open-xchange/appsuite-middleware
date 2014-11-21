@@ -112,7 +112,7 @@ public class LogbackCLT {
         options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", false));
         options.addOption(createOption("oec", "override-exception-categories", true, false, "Override the exception categories to be suppressed", false));
         options.addOption(createOption("s", "session", true, false, "The session id for which to enable logging", false));
-        Option o = createOption("l", "level", false, true, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG)", false);
+        Option o = createOption("l", "level", false, true, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
         o.setArgs(Short.MAX_VALUE);
         options.addOption(o);
         options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
