@@ -208,7 +208,7 @@ public class GuestContactTest extends ShareTest {
         DeleteRequest deleteRequest = new DeleteRequest(shares, System.currentTimeMillis());
         CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
         assertFalse(deleteResponse.getErrorMessage(), deleteResponse.hasError());
-        Thread.sleep(CLEANUP_DELAY);
+        checkGuestUserDeleted(guestId);
         GetRequest getRequest = new GetRequest(guestId, client.getValues().getTimeZone(), false);
         GetResponse getResponse = client.execute(getRequest);
         assertTrue("Contact was not deleted.", getResponse.hasError());

@@ -91,6 +91,7 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
@@ -107,8 +108,8 @@ import com.openexchange.share.recipient.ShareRecipient;
 public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
-        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
-        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
+//        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
+//        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
         createAnonymousAuthorPermission("secret"),
         createAnonymousGuestPermission()
     };
@@ -116,8 +117,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] {
         asObjectPermission(TESTED_PERMISSIONS[0]),
         asObjectPermission(TESTED_PERMISSIONS[1]),
-        asObjectPermission(TESTED_PERMISSIONS[2]),
-        asObjectPermission(TESTED_PERMISSIONS[3])
+//        asObjectPermission(TESTED_PERMISSIONS[2]),
+//        asObjectPermission(TESTED_PERMISSIONS[3])
     };
 
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
@@ -127,7 +128,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     };
 
     protected static final Random random = new Random();
-    protected static final int CLEANUP_DELAY = 5000;
+    protected static final int CLEANUP_DELAY = 30000;
 
     private Map<Integer, FolderObject> foldersToDelete;
     private Map<String, File> filesToDelete;
@@ -537,6 +538,30 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected GuestClient resolveShare(String url, String username, String password) throws Exception {
         return new GuestClient(url, username, password);
+    }
+
+    protected boolean awaitGuestCleanup(int guestID, long timeout) throws Exception {
+        long until = System.currentTimeMillis() + timeout;
+        do {
+            com.openexchange.ajax.user.actions.GetResponse response = getClient().execute(
+                new com.openexchange.ajax.user.actions.GetRequest(guestID, TimeZones.UTC, false));
+            if (response.hasError() && null != response.getException()) {
+                OXException e = response.getException();
+                if ("USR-0010".equals(e.getErrorCode())) {
+                    return true;
+                } else if ("CON-0125".equals(e.getErrorCode())) {
+                    // partly okay
+                } else {
+                    throw e;
+                }
+            }
+            Thread.sleep(500);
+        } while (System.currentTimeMillis() < until);
+        return false;
+    }
+
+    protected void checkGuestUserDeleted(int guestID) throws Exception {
+        assertTrue("Guest user " + guestID + " not deleted after " + CLEANUP_DELAY + "ms", awaitGuestCleanup(guestID, CLEANUP_DELAY));
     }
 
     /**

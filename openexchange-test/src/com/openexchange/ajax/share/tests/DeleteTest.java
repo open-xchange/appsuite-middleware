@@ -169,7 +169,7 @@ public class DeleteTest extends ShareTest {
             /*
              * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
              */
-            Thread.sleep(CLEANUP_DELAY);
+            checkGuestUserDeleted(matchingPermission.getEntity());
             guestClient.checkSessionAlive(true);
             /*
              * check if share link still accessible
@@ -247,7 +247,7 @@ public class DeleteTest extends ShareTest {
             /*
              * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
              */
-            Thread.sleep(CLEANUP_DELAY);
+            checkGuestUserDeleted(matchingPermission.getEntity());
             guestClient.checkSessionAlive(true);
             /*
              * check if share link still accessible
