@@ -76,7 +76,7 @@ public class RestoreReference extends AbstractSchemaToolkit {
 
     @Override
     protected String getName() {
-        return "restorereference";
+        return "restorereference [-m <source_schema_name> -n <target_schema_name> -t <target_cluster_id> -A <adminuser> -P <adminpass>[-l <jmx_login> -s <jmx_password> [-p <jmx_port>]]] [-h]";
     }
 
     @SuppressWarnings("static-access")

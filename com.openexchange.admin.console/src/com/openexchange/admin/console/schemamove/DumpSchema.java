@@ -76,7 +76,7 @@ public class DumpSchema extends AbstractSchemaToolkit {
 
     @Override
     protected String getName() {
-        return "dumpschema";
+        return "dumpschema [-m <schema_name> -o <dump_file> -A <adminuser> -P <adminpass>[-l <jmx_login> -s <jmx_password> [-p <jmx_port>]]] [-h]";
     }
 
     @SuppressWarnings("static-access")
@@ -84,9 +84,8 @@ public class DumpSchema extends AbstractSchemaToolkit {
     protected void addOptions(Options options) {
         options.addOption(OptionBuilder.withLongOpt("schema").withArgName("schema_name").withDescription("The name of the schema to dump.").hasArg(
             true).isRequired(true).create("m"));
-        options.addOption(OptionBuilder.withLongOpt("out").withArgName("dump_file").withDescription(
-            "The name of the dump file. If not specified, the dump will be written to standard output").hasArg(true).isRequired(true).create(
-            "o"));
+        options.addOption(OptionBuilder.withLongOpt("out").withArgName("dump_file").withDescription("The name of the dump file.").hasArg(
+            true).isRequired(true).create("o"));
     }
 
     @Override

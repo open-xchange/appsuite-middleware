@@ -75,7 +75,7 @@ public class EnableSchema extends AbstractSchemaToolkit {
 
     @Override
     protected String getName() {
-        return "enableschema";
+        return "enableschema [-m <schema_name> -d [-f] -A <adminuser> -P <adminpass>[-l <jmx_login> -s <jmx_password> [-p <jmx_port>]] [-h]";
     }
 
     @SuppressWarnings("static-access")

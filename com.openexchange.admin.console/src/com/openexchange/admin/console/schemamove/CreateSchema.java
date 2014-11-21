@@ -77,7 +77,7 @@ public class CreateSchema extends AbstractSchemaToolkit {
 
     @Override
     protected String getName() {
-        return "createschema";
+        return "createschema [-t <target_cluster_id> -A <adminuser> -P <adminpass>[-l <jmx_login> -s <jmx_password> [-p <jmx_port>]]] [-h]";
     }
 
     @SuppressWarnings("static-access")

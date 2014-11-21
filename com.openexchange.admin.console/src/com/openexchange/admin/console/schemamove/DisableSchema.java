@@ -75,7 +75,7 @@ public class DisableSchema extends AbstractSchemaToolkit {
 
     @Override
     protected String getName() {
-        return "disableschema";
+        return "disableschema [-m <schema_name> -A <adminuser> -P <adminpass>[-l <jmx_login> -s <jmx_password> [-p <jmx_port>]]] [-h]";
     }
 
     @SuppressWarnings("static-access")
