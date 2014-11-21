@@ -351,7 +351,6 @@ final class SessionData {
         final List<SessionControl> list = new ArrayList<SessionControl>();
         wlock.lock();
         try {
-            // TODO - check if the loop for contexts should be here
             for (final SessionContainer container : sessionList) {
                 list.addAll(container.removeSessionsByContexts(contextIds));
             }
