@@ -49,40 +49,23 @@
 
 package com.openexchange.admin.console.schemamove;
 
-import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
 
 /**
  * {@link EnableSchema}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class EnableSchema extends AbstractMBeanCLI<Void> {
+public class EnableSchema extends AbstractSchemaToolkit {
 
     /**
      * @param args
      */
     public static void main(String[] args) {
         new EnableSchema().execute(args);
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
     }
 
     @Override
