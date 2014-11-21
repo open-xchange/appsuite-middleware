@@ -2846,6 +2846,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public String createSchema(int targetClusterId) throws StorageException {
         Connection configCon = null;
         PreparedStatement stmt = null;
+        Database db = new Database(-1);
         try {
             configCon = cache.getConnectionForConfigDB();
 
@@ -2854,7 +2855,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt.setInt(1, targetClusterId);
             final ResultSet rs = stmt.executeQuery();
 
-            Database db = new Database(-1);
             if (rs.next()) {
                 db.setUrl(rs.getString(1));
                 db.setDriver(rs.getString(2));
@@ -2864,16 +2864,22 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("The specified target cluster id '{}' has no database pool references", targetClusterId);
                 throw new StorageException("The specified target cluster id '" + targetClusterId + "' has no database pool references");
             }
-
+            startTransaction(configCon);
             findOrCreateSchema(configCon, db);
+            configCon.commit();
             return db.getScheme();
         } catch (PoolException e) {
+            rollback(configCon);
+            OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } catch (SQLException e) {
+            rollback(configCon);
+            OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
+            autocommit(configCon);
             if (configCon != null) {
                 try {
                     cache.pushConnectionForConfigDB(configCon);
