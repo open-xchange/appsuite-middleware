@@ -54,6 +54,7 @@ import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 
 /**
  * {@link CreateSchema}
@@ -88,7 +89,9 @@ public class CreateSchema extends AbstractSchemaToolkit {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        final Map<String, String> dbAccessInfo = fetchDBAccessInfo(cmd.getOptionValue('m'), mbsc);
+        SchemaMoveMBean schemaMoveMBean = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
+        String schema = schemaMoveMBean.createSchema(Integer.valueOf(cmd.getOptionValue('t')));
+        final Map<String, String> dbAccessInfo = fetchDBAccessInfo(schema, mbsc);
         printDBAccessInfo(dbAccessInfo);
         return null;
     }
