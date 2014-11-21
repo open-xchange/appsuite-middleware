@@ -49,7 +49,6 @@
 
 package com.openexchange.mobilenotifier.events.storage;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,11 +58,11 @@ import java.util.List;
  */
 public class ContextUsers {
     private int contextId;
-    private List<Integer> userIds;
+    private List<Integer> usersIds;
 
     public ContextUsers(int contextId, List<Integer> userIds) {
         this.contextId = contextId;
-        this.userIds = userIds;
+        this.usersIds = userIds;
     }
 
     public int getContextId() {
@@ -71,11 +70,6 @@ public class ContextUsers {
     }
 
     public List<Integer> getUserIds() {
-        return userIds;
-    }
-
-    @Override
-    public String toString() {
-        return "ContextUsers [contextId=" + contextId + ", userIds=" + Arrays.toString(userIds.toArray()) + "]";
+        return usersIds;
     }
 }

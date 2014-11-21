@@ -54,7 +54,6 @@ import java.util.Map;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.MobileNotifyEvent;
 import com.openexchange.mobilenotifier.events.storage.ContextUsers;
-import com.openexchange.session.Session;
 
 /**
  * {@link MobileNotifyMailEvent}
@@ -62,8 +61,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobileNotifyMailEvent implements MobileNotifyEvent {
+    private int userId;
 
-    private Session session;
+    private int contextId;
 
     private List<ContextUsers> contextUsers;
 
@@ -76,16 +76,17 @@ public class MobileNotifyMailEvent implements MobileNotifyEvent {
     /**
      * Initializes a new {@link MobileNotifyMailEvent}.
      */
-    public MobileNotifyMailEvent(Session session, Map<String, String> messageData) {
+    public MobileNotifyMailEvent(int contextId, int userId, Map<String, String> messageData) {
         super();
-        this.session = session;
+        this.userId = userId;
+        this.contextId = contextId;
         this.messageData = messageData;
     }
 
     /**
      * Initializes a new {@link MobileNotifyMailEvent}.
      *
-     * A list of context / users without a valid session
+     * A list of context / userIds for providing the event to several users
      */
     public MobileNotifyMailEvent(List<ContextUsers> contextUsers, Map<String, String> messageData) {
         super();
@@ -99,8 +100,13 @@ public class MobileNotifyMailEvent implements MobileNotifyEvent {
     }
 
     @Override
-    public Session getSession() {
-        return session;
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
     }
 
     @Override

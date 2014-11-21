@@ -87,8 +87,9 @@ public class MobileNotifyMailEventImpl implements org.osgi.service.event.EventHa
         CommonEvent commonEvent = (CommonEvent) event.getProperty("OX_EVENT");
         Map<String, String> map = new HashMap<String, String>();
         map.put("SYNC_EVENT", "NEW_MAIL");
-
-        notifySubscribers(new MobileNotifyMailEvent(commonEvent.getSession(), map));
+        int userId = commonEvent.getUserId();
+        int contextId = commonEvent.getContextId();
+        notifySubscribers(new MobileNotifyMailEvent(userId, contextId, map));
     }
 
     private boolean checkEvent(Event event) {
@@ -133,7 +134,7 @@ public class MobileNotifyMailEventImpl implements org.osgi.service.event.EventHa
         MobileNotifyMailEvent loginEvent = new MobileNotifyMailEvent(contextUsers, map);
         for (MobileNotifyPublisher publisher : publishers) {
             LOG.debug("Publishing new login event: {}", contextUsers);
-            publisher.publishNewLogin(loginEvent);
+            publisher.publishLogin(loginEvent);
         }
     }
 }

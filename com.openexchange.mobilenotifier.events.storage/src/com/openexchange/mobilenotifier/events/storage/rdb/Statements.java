@@ -66,6 +66,7 @@ public class Statements {
         "provider VARCHAR(64) NOT NULL, " +
         "user INT4 UNSIGNED NOT NULL, " +
         "timestamp BIGINT(20) NOT NULL, " +
+        "lastLoginPush BIGINT(20) " +
         "PRIMARY KEY (cid,service,token,provider), " +
         "INDEX (cid,service,token,provider) " +
     ") ENGINE=InnoDB DEFAULT CHARSET=ascii; ";
@@ -81,6 +82,10 @@ public class Statements {
         + "SET token=?, timestamp=? "
         + "WHERE cid=? AND service=? AND token=? ";
 
+    public static final String UPDATE_LAST_LOGIN_PUSH_TIMESTAMP = "UPDATE mobileEventSubscriptions "
+        + "SET lastLoginPush=? "
+        + "WHERE cid=? AND service=? AND user=?;";
+
     public static final String DELETE_TOKEN_BY_PROVIDER = "DELETE FROM mobileEventSubscriptions "
         + "WHERE cid=? AND service=? AND provider=? AND token=?";
 
@@ -91,9 +96,9 @@ public class Statements {
         + "FROM mobileEventSubscriptions "
         + "WHERE cid=? AND user=? AND service=? AND provider=?;";
 
-    public static final String SELECT_ALL_SUBSCRIPTIONS = "SELECT DISTINCT user, cid "
-        + "FROM mobileEventSubscriptions WHERE provider=?;";
+    public static final String SELECT_ALL_SUBSCRIPTIONS = "SELECT user, cid "
+        + "FROM mobileEventSubscriptions WHERE provider=? GROUP BY user, cid;";
 
     public static final String SELECT_TOKENS = "SELECT token, timestamp "
-        + "FROM mobileEventSubscriptions WHERE cid=? AND user=? AND provider=? GROUP BY cid, user;";
+        + "FROM mobileEventSubscriptions WHERE cid=? AND user=? AND provider=? GROUP BY user;";
 }
