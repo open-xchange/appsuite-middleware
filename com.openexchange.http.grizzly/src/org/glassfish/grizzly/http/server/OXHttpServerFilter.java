@@ -93,6 +93,10 @@ package org.glassfish.grizzly.http.server;
 import static org.glassfish.grizzly.http.util.HttpCodecUtils.put;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -422,9 +426,14 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     }
 
     private static final String USM_USER_AGENT = "Open-Xchange USM HTTP Client";
+    private static final String _NET_USER_AGENT = "Open-Xchange .NET HTTP Client";
+    private static final String OXSTOR_USER_AGENT = "oxstor.dll";
+
+    private static final Set<String> NO_PING = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(USM_USER_AGENT, _NET_USER_AGENT, OXSTOR_USER_AGENT)));
 
     private boolean allowsPing(Request request) {
-        return !USM_USER_AGENT.equals(request.getHeader("User-Agent"));
+        String ua = request.getHeader("User-Agent");
+        return null != ua && !NO_PING.contains(ua);
     }
 
     private boolean initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
