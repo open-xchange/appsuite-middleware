@@ -175,7 +175,8 @@ RETVAL=$?
 
 # pump data in mysql
 if [ $RETVAL -eq 0 ]; then
-	echo -e "Pumping into schema '$OUTPUT'"
+	targetSchema="$(echo $OUTPUT | awk '{print $1}')"
+	echo -e "Pumping into schema '$targetSchema'"
 	mysqldump $OUTPUT < $input
 	echo -e "done.\n"
 else
@@ -184,7 +185,7 @@ else
 fi
 
 # restore configdb references
-RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -m $schema -n $OUTPUT -t $target 2>&1)"
+RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -m $schema -n $targetSchema -t $target 2>&1)"
 RETVAL=$?
 echo -e "$RESTORE"
 exit $RETVAL
