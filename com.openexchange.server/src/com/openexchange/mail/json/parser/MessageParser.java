@@ -1002,7 +1002,7 @@ public final class MessageParser {
                 }
             }
         }
-        return addresses.toArray(new InternetAddress[0]);
+        return addresses.toArray(new InternetAddress[addresses.size()]);
     }
 
     private static InternetAddress getEmailAddress(final String addrStr) {
