@@ -310,6 +310,20 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Gets a file by ID.
+     *
+     * @param id The identifier of the file to get
+     * @return The file
+     * @throws Exception
+     */
+    protected File getFile(String id) throws Exception {
+        GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(id);
+        getInfostoreRequest.setFailOnError(true);
+        GetInfostoreResponse getInfostoreResponse = getClient().execute(getInfostoreRequest);
+        return getInfostoreResponse.getDocumentMetadata();
+    }
+
+    /**
      * Gets a folder by ID.
      *
      * @param api The folder API to use

@@ -61,6 +61,9 @@ import com.openexchange.ajax.share.actions.AllResponse;
 import com.openexchange.ajax.share.actions.DeleteRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageGuestObjectPermission;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
@@ -81,25 +84,35 @@ public class DeleteTest extends ShareTest {
         super(name);
     }
 
-    public void testDeleteShareRandomly() throws Exception {
-        testDeleteShare(randomFolderAPI(), randomModule(), randomGuestPermission());
+    public void testDeleteFolderShareRandomly() throws Exception {
+        testDeleteFolderShare(randomFolderAPI(), randomModule(), randomGuestPermission());
     }
 
-    public void noTestDeleteShareExtensively() throws Exception {
+    public void noTestDeleteFolderShareExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
-                    testDeleteShare(api, module, guestPermission);
+                    testDeleteFolderShare(api, module, guestPermission);
                 }
             }
         }
     }
 
-    private void testDeleteShare(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
-        testDeleteShare(api, module, getDefaultFolder(module), guestPermission);
+    public void testDeleteFileShareRandomly() throws Exception {
+        testDeleteFileShare(randomFolderAPI(), randomGuestObjectPermission());
     }
 
-    private void testDeleteShare(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
+    public void noTestDeleteFileShareExtensively() throws Exception {
+        for (FileStorageGuestObjectPermission guestPermission : TESTED_OBJECT_PERMISSIONS) {
+            testDeleteFileShare(randomFolderAPI(), guestPermission);
+        }
+    }
+
+    private void testDeleteFolderShare(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
+        testDeleteFolderShare(api, module, getDefaultFolder(module), guestPermission);
+    }
+
+    private void testDeleteFolderShare(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
         /*
          * create folder shared to guest user
          */
@@ -169,6 +182,84 @@ public class DeleteTest extends ShareTest {
              * check if share target no longer accessible for non-anonymous guest user, since session may still be alive
              */
             guestClient.checkFolderNotAccessible(share.getTarget().getFolder());
+            guestClient.logout();
+        }
+    }
+
+    private void testDeleteFileShare(EnumAPI api, FileStorageGuestObjectPermission guestPermission) throws Exception {
+        testDeleteFileShare(api, getDefaultFolder(FolderObject.INFOSTORE), guestPermission);
+    }
+
+    private void testDeleteFileShare(EnumAPI api, int parent, FileStorageGuestObjectPermission guestPermission) throws Exception {
+        /*
+         * create folder and a shared file inside
+         */
+        FolderObject folder = insertPrivateFolder(api, FolderObject.INFOSTORE, parent);
+        File file = insertSharedFile(folder.getObjectID(), guestPermission);
+        /*
+         * check permissions
+         */
+        FileStorageObjectPermission matchingPermission = null;
+        for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created file found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
+        /*
+         * discover & check share
+         */
+        AllResponse allResponse = client.execute(new AllRequest());
+        List<ParsedShare> allShares = allResponse.getParsedShares();
+        ParsedShare share = discoverShare(allShares, folder.getObjectID(), file.getId(), matchingPermission.getEntity());
+        checkShare(guestPermission, share);
+        /*
+         * check access to share
+         */
+        GuestClient guestClient =  resolveShare(share, guestPermission.getRecipient());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+        /*
+         * delete share
+         */
+        CommonDeleteResponse deleteResponse = client.execute(new DeleteRequest(share, allResponse.getTimestamp().getTime()));
+        assertNotNull("no response", deleteResponse);
+        assertFalse("errors in response", deleteResponse.hasError());
+        /*
+         * check shares list
+         */
+        allResponse = client.execute(new AllRequest());
+        allShares = allResponse.getParsedShares();
+        ParsedShare discoveredShare = discoverShare(allShares, folder.getObjectID(), file.getId(), matchingPermission.getEntity());
+        assertTrue("share still found", null == discoveredShare);
+        /*
+         * check file permissions
+         */
+        file = getFile(file.getId());
+        assertTrue("object permissions still present", null == file.getObjectPermissions() || 0 == file.getObjectPermissions().size());
+        /*
+         * check guest access to share
+         */
+        assertTrue("object permissions still present", null == file.getObjectPermissions() || 0 == file.getObjectPermissions().size());
+        if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
+            /*
+             * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
+             */
+            Thread.sleep(CLEANUP_DELAY);
+            guestClient.checkSessionAlive(true);
+            /*
+             * check if share link still accessible
+             */
+            GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
+            ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
+            assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+        } else {
+            /*
+             * check share target no longer accessible for non-anonymous guest user
+             */
+            guestClient.checkFileNotAccessible(file.getId());
             guestClient.logout();
         }
     }
