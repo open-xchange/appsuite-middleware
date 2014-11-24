@@ -74,6 +74,9 @@ if grep com.openexchange.mobile.configuration.gui $pfile > /dev/null; then
     rm -f $ptmp
 fi
 
+# SoftwareChange_Request-2297
+ox_add_property com.openexchange.mobile.configuration.generator.PemFile "" /opt/open-xchange/etc/eas-provisioning.properties
+
 %clean
 %{__rm} -rf %{buildroot}
 
