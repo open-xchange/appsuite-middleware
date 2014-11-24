@@ -100,7 +100,7 @@ fi
 
 eval set -- "$ARGS"
 
-if [ $ARGS = "--" ]; then
+if [ "$ARGS" = "--" ]; then
         usage
         exit 1
 fi
