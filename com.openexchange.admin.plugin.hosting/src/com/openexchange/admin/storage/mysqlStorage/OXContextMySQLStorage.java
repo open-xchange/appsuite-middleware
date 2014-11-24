@@ -2815,6 +2815,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("The specified target cluster id '{}' has no database pool references", targetClusterId);
                 throw new StorageException("The specified target cluster id '" + targetClusterId + "' has no database pool references");
             }
+            stmt.close();
 
             // Update the relevant references
             String query = "UPDATE context_server2db_pool SET write_db_pool_id = ?, read_db_pool_id = ?, db_schema = ? WHERE db_schema = ?";
