@@ -2796,6 +2796,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public void updateContextReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
             con = cache.getConnectionForConfigDB();
 
@@ -2804,7 +2805,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt = con.prepareStatement(getPoolIds);
             stmt.setInt(1, targetClusterId);
             stmt.executeQuery();
-            final ResultSet rs = stmt.executeQuery();
+            rs = stmt.executeQuery();
             final int writeDbPoolId;
             final int readDbPoolId;
             if (rs.next()) {
@@ -2832,7 +2833,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
                     cache.pushConnectionForConfigDB(con);
