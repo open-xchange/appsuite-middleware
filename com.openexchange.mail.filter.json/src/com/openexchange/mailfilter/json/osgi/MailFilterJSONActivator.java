@@ -49,9 +49,13 @@
 
 package com.openexchange.mailfilter.json.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mailfilter.MailFilterService;
@@ -74,34 +78,27 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
-        // final Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
         Services.setServiceLookup(this);
 
         MailFilterServletInit.getInstance().start();
+
+        getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
+
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MailFilterChecker.CAPABILITY);
+        registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
-        final Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
+        Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
         try {
             super.stopBundle();
             MailFilterServletInit.getInstance().stop();

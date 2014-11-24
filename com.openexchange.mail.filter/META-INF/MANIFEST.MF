@@ -5,11 +5,10 @@ Bundle-SymbolicName: com.openexchange.mail.filter
 Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-Activator: com.openexchange.mailfilter.osgi.Activator
+Bundle-Activator: com.openexchange.mailfilter.osgi.MailFilterActivator
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.writer,
- com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.dispatcher,
