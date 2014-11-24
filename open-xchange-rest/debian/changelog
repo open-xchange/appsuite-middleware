@@ -1,9 +1,3 @@
-open-xchange-rest (7.6.0-31) stable; urgency=medium
-
-  * Build for patch 2014-12-01
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 24 Nov 2014 11:12:42 +0000
-
 open-xchange-rest (7.6.0-30) stable; urgency=medium
 
   * Build for patch 2014-11-21
