@@ -179,7 +179,7 @@ RETVAL=$?
 if [ $RETVAL -eq 0 ]; then
 	targetSchema="$(echo $OUTPUT | awk '{print $1}')"
 	echo -n "Pumping into schema '$targetSchema'"
-	dumpOutput="$(mysqldump $OUTPUT < $input)"
+	dumpOutput="$(mysql $OUTPUT < $input)"
 	RETVAL=$?
 	
 	if [ $RETVAL -ne 0 ]; then
