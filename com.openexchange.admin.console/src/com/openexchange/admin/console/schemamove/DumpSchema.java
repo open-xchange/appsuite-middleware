@@ -90,7 +90,9 @@ public class DumpSchema extends AbstractSchemaToolkit {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        final Map<String, String> dbAccessInfo = fetchDBAccessInfo(cmd.getOptionValue('m'), mbsc);
+        String schema = cmd.getOptionValue('m');
+        final Map<String, String> dbAccessInfo = fetchDBAccessInfo(schema, mbsc);
+        dbAccessInfo.put("schema", schema);
         String output = cmd.getOptionValue('o');
         printDBAccessInfo(dbAccessInfo, "--single-transaction >", output);
         return null;

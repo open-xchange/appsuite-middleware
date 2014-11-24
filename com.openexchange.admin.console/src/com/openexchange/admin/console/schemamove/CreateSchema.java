@@ -90,8 +90,10 @@ public class CreateSchema extends AbstractSchemaToolkit {
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         SchemaMoveMBean schemaMoveMBean = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
-        String schema = schemaMoveMBean.createSchema(Integer.valueOf(cmd.getOptionValue('t')));
-        final Map<String, String> dbAccessInfo = fetchDBAccessInfo(schema, mbsc);
+        Integer clusterId = Integer.valueOf(cmd.getOptionValue('t'));
+        String schema = schemaMoveMBean.createSchema(clusterId);
+        final Map<String, String> dbAccessInfo = fetchDBAccessInfo(clusterId, mbsc);
+        dbAccessInfo.put("schema", schema);
         printDBAccessInfo(dbAccessInfo);
         return null;
     }
