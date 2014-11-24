@@ -185,7 +185,7 @@ else
 fi
 
 # restore configdb references
-RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -m $schema -n $targetSchema -t $target 2>&1)"
+RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -m $schema -n $targetSchema -t $target $optJmxArgs 2>&1)"
 RETVAL=$?
 echo -e "$RESTORE"
 exit $RETVAL
