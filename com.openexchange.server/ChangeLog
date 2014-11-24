@@ -1,3 +1,7 @@
+* 2014-11-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34834: Newappointments action also searches public folders.
+
 * 2014-11-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 35546: Obey empty element tags when generating conform HTML content
