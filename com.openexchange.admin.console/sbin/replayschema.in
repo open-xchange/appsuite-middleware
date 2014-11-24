@@ -182,7 +182,7 @@ if [ $RETVAL -eq 0 ]; then
 	dumpOutput="$(mysqldump $OUTPUT < $input)"
 	RETVAL=$?
 	
-	if [ $RETVAL -ne 0]; then
+	if [ $RETVAL -ne 0 ]; then
 		echo "failed!\n"
 		echo "Failed pumping data into schema '$targetSchema'"
 		exit $RETVAL;
