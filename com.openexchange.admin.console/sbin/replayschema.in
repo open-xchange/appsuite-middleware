@@ -82,32 +82,34 @@ umask 066
 usage() {
 	echo "Usage: $0 [-h] [-m <source_schema> -t <target_cluster_id> -i <dump_file> -A <admin_user> -P <admin_pass> [-l <jmxLogin> -s <jmxPassword> [-p <jmxPort]]]"
 	echo "  -A,--adminuser <admin_user>                 Admin username"
-	echo "	-h                                          Prints a help text"
-	echo "	-i,--in <dump_file>                         The dump file previously created with dumpschema"
+	echo "  -h                                          Prints a help text"
+	echo "  -i,--in <dump_file>                         The dump file previously created with dumpschema"
 	echo "  -l,--login <jmxLogin>                       The optional JMX login (if JMX authentication is enabled)"
-	echo "	-m,--source-schema <source_schema>          Source schema name"
+	echo "  -m,--source-schema <source_schema>          Source schema name"
     echo "  -P,--adminpass <admin_pass>                 Admin password"
  	echo "  -p,--port <jmxPort>                         The optional JMX port (default:9999)"
     echo "  -s,--password <jmxPassword>                 The optional JMX password (if JMX authentication is enabled)"
     echo " 	-t,--target-cluster-id <target_cluster_id>  The target cluster identifier"
 }
 
-ARGS=`getopt -o i:m:t:hA:l:P:p:s: --long in,source-schema,target-cluster-id,help,adminuser,login,adminpass,port,password: -n 'replayschema' -- "$@"`
+ARGS=`getopt -o i:m:t:hA:l:P:p:s: --long in:,source-schema:,target-cluster-id:,help,adminuser:,login:,adminpass:,port:,password: -n 'replayschema' -- "$@"`
 
-if [ $? -ne 0 ];
-then
+if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-#echo "$ARGS"
 eval set -- "$ARGS"
+
+if [ $ARGS = "--" ]; then
+        usage
+        exit 1
+fi
 
 while true; do
 	case "$1" in
 		-h | --help)
 			usage
-			shift;
-			break;;
+			exit 0;;
 		-m | --source-schema)
 			case "$2" in
 				"") shift 2;;
@@ -165,7 +167,7 @@ while true; do
 			shift; break;;
 		*)
 			usage
-			break;;
+			exit;;
 	esac
 done
 
@@ -176,9 +178,17 @@ RETVAL=$?
 # pump data in mysql
 if [ $RETVAL -eq 0 ]; then
 	targetSchema="$(echo $OUTPUT | awk '{print $1}')"
-	echo -e "Pumping into schema '$targetSchema'"
-	mysqldump $OUTPUT < $input
-	echo -e "done.\n"
+	echo -n "Pumping into schema '$targetSchema'"
+	dumpOutput="$(mysqldump $OUTPUT < $input)"
+	RETVAL=$?
+	
+	if [ $RETVAL -ne 0]; then
+		echo "failed!\n"
+		echo "Failed pumping data into schema '$targetSchema'"
+		exit $RETVAL;
+	else 
+		echo "done."
+	fi
 else
 	echo -e "$OUTPUT"
 	exit $RETVAL
