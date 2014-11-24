@@ -86,19 +86,39 @@ public interface SchemaMoveService {
      * The returned map contains may contain:
      * <ul>
      * <li><code>"url"</code></li>
-     * <li><code>"db_scheme"</code></li>
      * <li><code>"driver"</code></li>
      * <li><code>"login"</code></li>
      * <li><code>"name"</code></li>
      * <li><code>"password"</code></li>
      * </ul>
-     *
+     * </p>
+     * 
      * @param schemaName The schema name
      * @return The database access information
      * @throws StorageException If database cannot be loaded
      * @throws NoSuchObjectException If the specified schema does not exist
      */
     Map<String, String> getDbAccessInfoForSchema(String schemaName) throws StorageException, NoSuchObjectException;
+
+    /**
+     * Returns the database access information that is necessary to establish connection to a given schema on the specified cluster
+     * <p>
+     * The returned map contains may contain:
+     * <ul>
+     * <li><code>"url"</code></li>
+     * <li><code>"driver"</code></li>
+     * <li><code>"login"</code></li>
+     * <li><code>"name"</code></li>
+     * <li><code>"password"</code></li>
+     * </ul>
+     * </p>
+     * 
+     * @param clusterId The cluster identifier
+     * @return The database access information
+     * @throws StorageException
+     * @throws NoSuchObjectException
+     */
+    Map<String, String> getDbAccessInfoForCluster(int clusterId) throws StorageException, NoSuchObjectException;
 
     /**
      * Disables the denoted schema, resp. all contexts in that schema.

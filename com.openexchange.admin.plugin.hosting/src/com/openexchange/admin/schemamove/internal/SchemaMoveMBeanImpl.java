@@ -90,15 +90,30 @@ public class SchemaMoveMBeanImpl extends StandardMBean implements SchemaMoveMBea
     public AttributeList getDbAccessInfoForSchema(String schemaName) throws MBeanException {
         try {
             Map<String, String> map = schemaMoveService.getDbAccessInfoForSchema(schemaName);
-            AttributeList list = new AttributeList(map.size());
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                list.add(new Attribute(entry.getKey(), entry.getValue()));
-            }
-            return list;
+            return mapToList(map);
         } catch (Exception e) {
             String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
         }
+    }
+
+    @Override
+    public AttributeList getDbAccessInfoForCluster(int clusterId) throws MBeanException {
+        try {
+            Map<String, String> map = schemaMoveService.getDbAccessInfoForCluster(clusterId);
+            return mapToList(map);
+        } catch (Exception e) {
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    private AttributeList mapToList(Map<String, String> map) {
+        AttributeList list = new AttributeList(map.size());
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            list.add(new Attribute(entry.getKey(), entry.getValue()));
+        }
+        return list;
     }
 
     @Override

@@ -89,7 +89,6 @@ public interface SchemaMoveMBean {
      * The returned attribute list contains may contain following named attributes:
      * <ul>
      * <li><code>"url"</code></li>
-     * <li><code>"db_scheme"</code></li>
      * <li><code>"driver"</code></li>
      * <li><code>"login"</code></li>
      * <li><code>"name"</code></li>
@@ -101,6 +100,25 @@ public interface SchemaMoveMBean {
      * @throws MBeanException If operation fails
      */
     AttributeList getDbAccessInfoForSchema(String schemaName) throws MBeanException;
+    
+    /**
+     * Returns the database access information that is necessary to establish connection to a given schema on the specified cluster
+     * <p>
+     * The returned map contains may contain:
+     * <ul>
+     * <li><code>"url"</code></li>
+     * <li><code>"driver"</code></li>
+     * <li><code>"login"</code></li>
+     * <li><code>"name"</code></li>
+     * <li><code>"password"</code></li>
+     * </ul>
+     * </p>
+     * 
+     * @param clusterId The cluster identifier
+     * @return The database access information as an attribute list
+     * @throws MBeanException If operation fails
+     */
+    AttributeList getDbAccessInfoForCluster(int clusterId) throws MBeanException;
 
     /**
      * Disables the denoted schema, resp. all contexts in that schema.

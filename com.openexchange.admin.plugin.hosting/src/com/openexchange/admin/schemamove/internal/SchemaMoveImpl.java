@@ -65,6 +65,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage;
+import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -133,6 +134,26 @@ public class SchemaMoveImpl implements SchemaMoveService {
             return null;
         }
         int writePoolId = OXToolStorageInterface.getInstance().getDatabaseIDByDatabaseSchema(schemaName);
+        return fetchDbAccessInfo(writePoolId);
+    }
+
+    @Override
+    public Map<String, String> getDbAccessInfoForCluster(int clusterId) throws StorageException, NoSuchObjectException {
+        if (clusterId <= 0) {
+            return null;
+        }
+        int writePoolId = OXUtilMySQLStorage.getInstance().getWritePoolIdForCluster(clusterId);
+        return fetchDbAccessInfo(writePoolId);
+    }
+
+    /**
+     * Fetch db access information
+     * 
+     * @param writePoolId
+     * @return
+     * @throws StorageException
+     */
+    private Map<String, String> fetchDbAccessInfo(int writePoolId) throws StorageException {
         Database database = OXToolStorageInterface.getInstance().loadDatabaseById(writePoolId);
 
         final Map<String, String> props = new HashMap<String, String>(6);
@@ -147,7 +168,6 @@ public class SchemaMoveImpl implements SchemaMoveService {
         SafePut safePut = new SafePut();
 
         safePut.put("url", database.getUrl());
-        safePut.put("schema", schemaName);
         safePut.put("driver", database.getDriver());
         safePut.put("login", database.getLogin());
         safePut.put("name", database.getName());

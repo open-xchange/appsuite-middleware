@@ -103,6 +103,21 @@ public abstract class AbstractSchemaToolkit extends AbstractMBeanCLI<Void> {
     }
 
     /**
+     * Fetch the database access information from the MBean
+     * 
+     * @param clusterId The cluster identifier
+     * @param cmd The command
+     * @return A map with all attributes
+     * @throws MalformedObjectNameException
+     * @throws MBeanException
+     */
+    protected Map<String, String> fetchDBAccessInfo(int clusterId, MBeanServerConnection mbsc) throws MalformedObjectNameException, MBeanException {
+        SchemaMoveMBean schemaMoveMBean = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
+        List<Attribute> list = schemaMoveMBean.getDbAccessInfoForCluster(clusterId).asList();
+        return convertToMap(list);
+    }
+
+    /**
      * Process and print the database access information along with some optional parameters
      * 
      * @param dbAccessInfo The database info map
