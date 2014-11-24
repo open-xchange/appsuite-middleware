@@ -1885,7 +1885,7 @@ public final class IMAPCommandsCollection {
         return getServerSortList(folder, sortCrit, RANGE_ALL);
     }
 
-    private static final String COMMAND_SORT = "SORT";
+    private static final String COMMAND_SORT = "SORT".intern();
 
     /**
      * Executes the IMAP <i>SORT</i> command parameterized with given sort criteria and given sort range.
@@ -1910,27 +1910,25 @@ public final class IMAPCommandsCollection {
         /*
          * Call the IMAPFolder.doCommand() method with inner class definition of ProtocolCommand
          */
-        final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String command =
-                    new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
-                final Response[] r = performCommand(p, command);
-                final Response response = r[r.length - 1];
-                final SmartIntArray sia = new SmartIntArray(32);
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
+                String command = new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
+                Response[] r = performCommand(p, command);
+                Response response = r[r.length - 1];
+                SmartIntArray sia = new SmartIntArray(32);
                 if (response.isOK()) {
                     for (int i = 0, len = r.length; i < len; i++) {
                         if (!(r[i] instanceof IMAPResponse)) {
                             continue;
                         }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals(COMMAND_SORT)) {
-                            String num;
-                            while ((num = ir.readAtomString()) != null) {
+                            for (String num; (num = ir.readAtomString()) != null && num.length() > 0;) {
                                 try {
                                     sia.append(Integer.parseInt(num));
-                                } catch (final NumberFormatException e) {
+                                } catch (NumberFormatException e) {
                                     LOG.error("", e);
                                     throw wrapException(e, "Invalid Message Number: " + num);
                                 }
