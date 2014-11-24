@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
+package com.openexchange.mailfilter.json.osgi;
 
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.exception.OXException;

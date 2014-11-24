@@ -54,15 +54,12 @@ import java.util.Properties;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
-import com.openexchange.mailfilter.internal.MailFilterChecker;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
@@ -70,28 +67,26 @@ import com.openexchange.mailfilter.services.Services;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 
-public class Activator extends HousekeepingActivator {
+public class MailFilterActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);
 
     /**
      * Initializes a new {@link MailFilterServletActivator}
      */
-    public Activator() {
+    public MailFilterActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CapabilityService.class };
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
-
-            //MailFilterServletInit.getInstance().start();
 
             checkConfigfile();
 
@@ -119,11 +114,6 @@ public class Activator extends HousekeepingActivator {
             }
 
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
-            getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
-
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MailFilterChecker.CAPABILITY);
-            registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
 
             registerService(Reloadable.class, new MailFilterReloadable(), null);
 
