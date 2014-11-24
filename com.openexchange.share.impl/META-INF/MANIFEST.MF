@@ -4,7 +4,7 @@ Bundle-Name: The share implementation bundle
 Bundle-SymbolicName: com.openexchange.share.impl
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.cluster.timer,
  com.openexchange.config,
  com.openexchange.config.cascade,

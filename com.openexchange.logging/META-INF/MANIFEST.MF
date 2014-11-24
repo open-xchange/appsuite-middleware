@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.logging
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.logging.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.filter,
  ch.qos.logback.classic.joran,

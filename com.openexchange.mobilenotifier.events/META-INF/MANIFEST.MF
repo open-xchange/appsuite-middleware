@@ -5,7 +5,7 @@ Bundle-Name: Open-Xchange Mobilenotifier Event Bundle
 Bundle-SymbolicName: com.openexchange.mobilenotifier.events
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.mobilenotifier.events.osgi.MobileNotifierEventsActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: 
  com.openexchange.event,
  com.openexchange.exception,

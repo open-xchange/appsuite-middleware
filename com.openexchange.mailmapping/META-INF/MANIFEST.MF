@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.mailmapping
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.mailmapping.osgi.MailMappingActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.context,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,

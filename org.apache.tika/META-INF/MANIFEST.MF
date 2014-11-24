@@ -4,7 +4,7 @@ Bundle-Name: Apache Tika
 Bundle-SymbolicName: org.apache.tika
 Bundle-Version: 1.1.0
 Bundle-Vendor: Apache Software Foundation
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/tika-app-1.4.jar
 Export-Package: org.apache.tika;version="1.4.0",

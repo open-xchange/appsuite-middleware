@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.realtime
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.realtime.osgi.RealtimeActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.hazelcast;resolution:=optional
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,

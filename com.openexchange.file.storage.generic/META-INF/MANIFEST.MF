@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange File Storage Generic Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.generic
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.file.storage,
  com.openexchange.java,

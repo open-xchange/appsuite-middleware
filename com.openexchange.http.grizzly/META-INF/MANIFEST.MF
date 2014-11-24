@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.http.grizzly
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.cache,
  com.google.common.net,
  com.openexchange.config,

@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.jslob.test
 Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.jslob.test.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,

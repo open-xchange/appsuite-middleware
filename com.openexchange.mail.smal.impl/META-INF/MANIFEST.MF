@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.mail.smal.impl
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.mail.smal.impl.osgi.SmalActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-RegisterBuddy: com.hazelcast,com.openexchange.service.indexing.impl
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,

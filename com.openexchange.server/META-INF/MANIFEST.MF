@@ -515,7 +515,7 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.webdav.protocol.osgi,
  com.openexchange.webdav.protocol.util,
  com.openexchange.webdav.xml.resources
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/jacksum.jar,
  lib/java-image-scaling-0.8.5.jar,

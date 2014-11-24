@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.mobilenotifier.example
 Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.mobilenotifier.example.osgi.ExampleMobileNotifierActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.exception,
  com.openexchange.mobilenotifier,
  com.openexchange.mobilenotifier.utility,

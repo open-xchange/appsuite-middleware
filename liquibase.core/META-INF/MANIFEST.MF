@@ -4,7 +4,7 @@ Bundle-Name: Liquibase core bundle
 Bundle-SymbolicName: liquibase.core
 Bundle-Version: 3.0.7
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/ant-1.6.5.jar,
  lib/jetty-server-8.1.15.v20140411.jar,
  lib/jetty-util-8.1.15.v20140411.jar,

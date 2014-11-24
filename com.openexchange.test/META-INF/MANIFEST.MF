@@ -4,7 +4,7 @@ Bundle-Name: Test resources
 Bundle-SymbolicName: com.openexchange.test
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/jchronic-0.2.3.jar,
  lib/junit-4.11.jar,

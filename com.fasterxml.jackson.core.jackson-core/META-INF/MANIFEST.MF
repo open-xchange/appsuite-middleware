@@ -4,7 +4,7 @@ Bundle-Name: Jackson-core
 Bundle-SymbolicName: com.fasterxml.jackson.core.jackson-core
 Bundle-Version: 2.4.3
 Bundle-Vendor: FasterXML
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Description: Core Jackson abstractions, basic JSON streaming API implementation
 Bundle-DocURL: http://wiki.fasterxml.com/JacksonHome
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt

@@ -141,5 +141,5 @@ Export-Package: com.openexchange.imap,
  com.openexchange.imap.sort,
  com.openexchange.imap.util
 Bundle-Activator: com.openexchange.imap.osgi.IMAPActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .

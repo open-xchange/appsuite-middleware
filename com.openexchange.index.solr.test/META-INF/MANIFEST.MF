@@ -4,7 +4,7 @@ Bundle-Name: com.openexchange.index.solr.test
 Bundle-SymbolicName: com.openexchange.index.solr.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,

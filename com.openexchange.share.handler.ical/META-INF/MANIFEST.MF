@@ -4,7 +4,7 @@ Bundle-Name: Share handler to output iCal data
 Bundle-SymbolicName: com.openexchange.share.handler.ical
 Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.api2,
  com.openexchange.config,
  com.openexchange.data.conversion.ical,

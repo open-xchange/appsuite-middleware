@@ -5,7 +5,7 @@ Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-SymbolicName: com.openexchange.i18n
 Bundle-Activator: com.openexchange.i18n.osgi.I18nActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,

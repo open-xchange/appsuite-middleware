@@ -5,7 +5,7 @@ Bundle-SymbolicName: javax.mail
 Bundle-Version: 1.5.2
 Bundle-Vendor: Oracle
 Bundle-License: http://www.sun.com/cddl, https://glassfish.dev.java.net/public/CDDL+GPL.html
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.tools.ssl,
  com.sun.net,
  com.sun.net.ssl,

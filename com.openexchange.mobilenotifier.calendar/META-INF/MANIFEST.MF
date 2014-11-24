@@ -5,7 +5,7 @@ Bundle-Name: Open-Xchange Mobilenotifier Calendar Bundle
 Bundle-SymbolicName: com.openexchange.mobilenotifier.calendar
 Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.mobilenotifier.calendar.osgi.MobileNotifierCalendarActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.api2,
  com.openexchange.calendar.itip,
  com.openexchange.exception,

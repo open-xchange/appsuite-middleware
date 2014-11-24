@@ -4,7 +4,7 @@ Bundle-Name: The Copy.com file storage bundle
 Bundle-SymbolicName: com.openexchange.file.storage.copycom
 Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,

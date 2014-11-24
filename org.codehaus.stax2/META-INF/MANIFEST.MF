@@ -4,7 +4,7 @@ Bundle-Name: Stax2 API
 Bundle-SymbolicName: org.codehaus.stax2
 Bundle-Version: 3.1.1
 Bundle-Vendor: http://woodstox.codehaus.org
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-License: http://www.opensource.org/licenses/bsd-license.php
 Import-Package: javax.xml.namespace,
  javax.xml.stream,

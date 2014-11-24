@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Continuation Service Bundle
 Bundle-SymbolicName: com.openexchange.continuation
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.base.internal,

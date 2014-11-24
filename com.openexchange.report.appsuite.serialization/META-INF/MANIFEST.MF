@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.report.appsuite.serialization
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.report.appsuite.serialization.osgi.ReportSerializationActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.hazelcast.core,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,

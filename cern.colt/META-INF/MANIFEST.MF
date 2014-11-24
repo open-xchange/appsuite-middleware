@@ -4,7 +4,7 @@ Bundle-Name: Colt Bundle
 Bundle-SymbolicName: cern.colt
 Bundle-Version: 1.2.0
 Bundle-Vendor: CERN http://acs.lbl.gov/software/colt/
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/concurrent.jar
 Export-Package: cern.clhep,

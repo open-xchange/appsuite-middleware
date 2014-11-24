@@ -4,7 +4,7 @@ Bundle-Name: Client stub for Microsoft Exchange Web Services
 Bundle-SymbolicName: com.openexchange.ews
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.microsoft.schemas.exchange.services._2006.messages,
  com.microsoft.schemas.exchange.services._2006.types,
  com.openexchange.ews

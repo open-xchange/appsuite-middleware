@@ -5,7 +5,7 @@ Bundle-SymbolicName: javapns.notification.management
 Eclipse-BuddyPolicy: registered
 Bundle-Version: 2.3.3
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/JavaPNS_2.3_Beta_3.jar
 Import-Package:  javax.crypto,

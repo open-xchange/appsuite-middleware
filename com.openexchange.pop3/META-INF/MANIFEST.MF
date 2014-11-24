@@ -64,7 +64,7 @@ Import-Package: com.openexchange.api2,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.pop3.osgi.POP3Activator
 Export-Package: com.openexchange.pop3.config

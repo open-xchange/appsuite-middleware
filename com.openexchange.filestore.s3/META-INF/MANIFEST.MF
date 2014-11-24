@@ -4,7 +4,7 @@ Bundle-Name: Filestorage implementation storing files in a S3 API compatible sto
 Bundle-SymbolicName: com.openexchange.filestore.s3
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.amazonaws,
  com.amazonaws.auth,
  com.amazonaws.handlers,

@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.publish.basic
 Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.publish.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax.customizer.folder,
  com.openexchange.api2,
  com.openexchange.caching,
