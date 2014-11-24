@@ -63,7 +63,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -74,6 +74,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
+
+    private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
 
     /**
      * Initializes a new {@link UpdatePerformer} from given session.
@@ -259,32 +261,29 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                  * Check for forbidden public mail folder
                  */
                 {
-                    final boolean started2 = newRealParentStorage.startTransaction(storageParameters, true);
+                    boolean started2 = newRealParentStorage.startTransaction(storageParameters, true);
+                    boolean rollback = true;
                     try {
-                        final Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
-                        if ((FolderStorage.PUBLIC_ID.equals(newParent.getID()) || PublicType.getInstance().equals(newParent.getType())) && "mail".equals(storageFolder.getContentType().toString())) {
+                        Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
+                        if (isPublicPimFolder(newParent) && CONTENT_TYPE_MAIL.equals(storageFolder.getContentType().toString())) {
                             throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
                         }
                         if (started2) {
                             newRealParentStorage.commitTransaction(storageParameters);
+                            rollback = false;
                         }
-                    } catch (final OXException e) {
-                        if (started2) {
-                            newRealParentStorage.rollback(storageParameters);
-                        }
-                        throw e;
-                    } catch (final Exception e) {
-                        if (started2) {
-                            newRealParentStorage.rollback(storageParameters);
-                        }
+                    } catch (RuntimeException e) {
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    } finally {
+                        if (started2 && rollback) {
+                            newRealParentStorage.rollback(storageParameters);
+                        }
                     }
                 }
-
                 /*
                  * Perform move either in real or in virtual storage
                  */
-                final MovePerformer movePerformer = newMovePerformer();
+                MovePerformer movePerformer = newMovePerformer();
                 movePerformer.setStorageParameters(storageParameters);
                 if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                     movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
