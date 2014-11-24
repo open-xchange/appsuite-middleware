@@ -1942,18 +1942,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String new_search_pattern = null;
+        boolean pattern = false;
         if (null != search_pattern) {
             new_search_pattern = search_pattern.replace('*', '%');
+            pattern = !"%".equals(new_search_pattern);
         }
         final int context_id = ctx.getId().intValue();
         try {
             final ArrayList<User> retval = new ArrayList<User>();
             read_ox_con = cache.getConnectionForContext(context_id);
-            String sql = buildQuery(ignoreCase, includeGuests, excludeUsers);
+            String sql = buildQuery(new_search_pattern, ignoreCase, includeGuests, excludeUsers);
             stmt = read_ox_con.prepareStatement(sql);
             stmt.setInt(1, context_id);
-            stmt.setString(2, new_search_pattern);
-            stmt.setString(3, new_search_pattern);
+            if (pattern) {
+                stmt.setString(2, new_search_pattern);
+                stmt.setString(3, new_search_pattern);
+            }
             rs = stmt.executeQuery();
             while (rs.next()) {
                 retval.add(new User(rs.getInt(1)));
@@ -1993,35 +1997,34 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private String buildQuery(boolean ignoreCase, boolean includeGuests, boolean excludeUsers) {
+    private String buildQuery(String search_pattern, boolean ignoreCase, boolean includeGuests, boolean excludeUsers) {
         StringBuilder sb = new StringBuilder();
         if (!includeGuests) {
             sb.append("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid ")
-              .append("WHERE con.cid = ? AND ");
-            if (ignoreCase) {
-                sb.append("(lower(lu.uid) LIKE lower(?) OR lower(con.field01) LIKE lower(?))");;
-            } else {
-                sb.append("(lu.uid LIKE ? OR con.field01 LIKE ?)");
-            }
-
-        } else {
-            String condition = "AND";
-            sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ")
-              .append("LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ?");
-            if (!includeGuests) {
-                sb.append(" AND us.guestCreatedBy = 0");
-                condition = "OR";
-            }
+              .append("JOIN user us ON con.userid = us.id AND us.cid = con.cid ")
+              .append("WHERE con.cid = ?");
             if (excludeUsers) {
                 sb.append(" AND us.guestCreatedBy > 0");
-                condition = "OR";
             }
-            if (ignoreCase) {
-                sb.append(" AND ((lower(lu.uid) LIKE lower(?) OR lu.uid IS NULL) ")
-                  .append(condition).append(" lower(con.field01) LIKE lower(?))");
-            } else {
-                sb.append(" AND ((lu.uid LIKE ? OR lu.uid IS NULL) ")
-                  .append(condition).append(" con.field01 LIKE ?)");
+            if (null != search_pattern && !"%".equals(search_pattern)) {
+                if (ignoreCase) {
+                    sb.append(" AND (lower(lu.uid) LIKE lower(?) OR lower(con.field01) LIKE lower(?))");;
+                } else {
+                    sb.append(" AND (lu.uid LIKE ? OR con.field01 LIKE ?)");
+                }
+            }
+        } else {
+            sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ")
+              .append("LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ?");
+            if (excludeUsers) {
+                sb.append(" AND us.guestCreatedBy > 0");
+            }
+            if (null != search_pattern && !"%".equals(search_pattern)) {
+                if (ignoreCase) {
+                    sb.append(" AND (lower(lu.uid) LIKE lower(?) ").append("OR lower(con.field01) LIKE lower(?))");
+                } else {
+                    sb.append(" AND (lu.uid LIKE ? ").append("OR con.field01 LIKE ?)");
+                }
             }
         }
         return sb.toString();
