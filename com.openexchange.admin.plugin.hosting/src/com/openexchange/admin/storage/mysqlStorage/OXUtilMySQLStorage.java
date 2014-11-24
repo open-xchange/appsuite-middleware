@@ -1662,4 +1662,41 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         return usage;
     }
+
+    @Override
+    public int getWritePoolIdForCluster(int clusterId) throws StorageException {
+        final Connection con;
+        try {
+            con = cache.getConnectionForConfigDB();
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String getDbInfo = "SELECT write_db_pool_id FROM db_cluster WHERE cluster_id = ?";
+            stmt = con.prepareStatement(getDbInfo);
+            stmt.setInt(1, clusterId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                LOG.error("The specified cluster id '{}' has no database pool references", clusterId);
+                throw new StorageException("The specified cluster id '" + clusterId + "' has no database pool references");
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(rs, stmt);
+            try {
+                cache.pushConnectionForConfigDB(con);
+            } catch (final PoolException e) {
+                LOG.error("Error pushing configdb connection to pool!", e);
+            }
+        }
+    }
 }
