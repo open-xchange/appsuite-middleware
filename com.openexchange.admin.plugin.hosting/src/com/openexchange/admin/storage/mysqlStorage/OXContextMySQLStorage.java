@@ -2847,45 +2847,79 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public String createSchema(int targetClusterId) throws StorageException {
         Connection configCon = null;
 
-        // Get connection to configdb
+        // Get connection to 'configdb'
         try {
             configCon = cache.getConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
 
-        // Initialize database object
-        Database db = new Database(-1);
+        Database db = null;
         try {
-            db = getNextDBHandleByWeight(configCon);
-        } catch (SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } catch (OXContextException e) {
-            LOG.error(e.getMessage(), e);
-            throw new StorageException(e.getMessage());
-        }
+            // Get database handle
+            try {
+                final int writePoolId = getWritePoolId(targetClusterId, configCon);
+                db = getDatabaseHandleById(new Database(writePoolId), configCon);
+            } catch (SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            }
 
-        // Create schema
-        try {
+            // Create schema
             startTransaction(configCon);
-            findOrCreateSchema(configCon, db);
+            int schemaUnique;
+            try {
+                schemaUnique = IDGenerator.getId(configCon);
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            String schemaName = db.getName() + '_' + schemaUnique;
+            db.setScheme(schemaName);
+            OXUtilStorageInterface.getInstance().createDatabase(db);
             configCon.commit();
             return db.getScheme();
         } catch (SQLException e) {
             rollback(configCon);
-            OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
+            if (db != null) {
+                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
+            }
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
             autocommit(configCon);
-            if (configCon != null) {
-                try {
-                    cache.pushConnectionForConfigDB(configCon);
-                } catch (PoolException e) {
-                    LOG.error("Error pushing configdb connection to pool!", e);
-                }
+            try {
+                cache.pushConnectionForConfigDB(configCon);
+            } catch (PoolException e) {
+                LOG.error("Error pushing configdb connection to pool!", e);
             }
+        }
+    }
+
+    /**
+     * Get the writePoolId for the specified targetClusterId
+     * 
+     * @param targetClusterId The target cluster identifier
+     * @param conn A readable connection to 'configdb'
+     * @return The write pool identifier for the specified cluster
+     * @throws StorageException
+     */
+    private int getWritePoolId(int targetClusterId, Connection conn) throws StorageException {
+        PreparedStatement stmt = null;
+        try {
+            String getDbInfo = "SELECT write_db_pool_id FROM db_cluster WHERE cluster_id = ?";
+            stmt = conn.prepareStatement(getDbInfo);
+            stmt.setInt(1, targetClusterId);
+            final ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                LOG.error("The specified target cluster id '{}' has no database pool references", targetClusterId);
+                throw new StorageException("The specified target cluster id '" + targetClusterId + "' has no database pool references");
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
         }
     }
 }
