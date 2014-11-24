@@ -1469,28 +1469,28 @@ public class CalendarMySQL implements CalendarSqlImp {
                         sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
                     }
                 }
-                // Look into public folders
-                // where the user can read all objects
-                for (final TIntIterator iter = cfo.getPublicReadableAll().iterator(); iter.hasNext();) {
-                    final int folder = iter.next();
-                    if (first) {
-                        sb.append(" WHERE (");
-                        sb.append("(pd.fid = " + folder + ")");
-                        first = false;
-                    } else {
-                        sb.append(" OR (pd.fid = " + folder + ")");
-                    }
+            }
+            // Look into public folders
+            // where the user can read all objects
+            for (final TIntIterator iter = cfo.getPublicReadableAll().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
+                if (first) {
+                    sb.append(" WHERE (");
+                    sb.append("(pd.fid = " + folder + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (pd.fid = " + folder + ")");
                 }
-                // where the user can read own objects
-                for (final TIntIterator iter = cfo.getPublicReadableOwn().iterator(); iter.hasNext();) {
-                    final int folder = iter.next();
-                    if (first) {
-                        sb.append(" WHERE (");
-                        sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
-                        first = false;
-                    } else {
-                        sb.append(" OR (pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
-                    }
+            }
+            // where the user can read own objects
+            for (final TIntIterator iter = cfo.getPublicReadableOwn().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
+                if (first) {
+                    sb.append(" WHERE (");
+                    sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
                 }
             }
             if (!first) {
