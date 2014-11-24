@@ -1777,12 +1777,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields, headerFields, supportsContinuation);
     }
 
+    private static final Set<String> NON_CACHES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-appsuite")));
+
+    private static boolean isCacheApplicable(Session session) {
+        String client = session.getClient();
+        return null == client || !NON_CACHES.contains(client);
+    }
+
     private SearchIterator<MailMessage> getMessagesInternal(FullnameArgument argument, SearchTerm<?> searchTerm, int[] fromToIndices, int sortCol, int order, int[] fields, String[] headerNames, boolean supportsContinuation) throws OXException {
         /*
          * Identify and sort messages according to search term and sort criteria while only fetching their IDs
          */
         String fullName = argument.getFullname();
-        MailMessage[] mails;
+        MailMessage[] mails = null;
         {
             IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
             MailSortField sortField = MailSortField.getField(sortCol);
@@ -1799,6 +1806,54 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } else {
                 int accountId = argument.getAccountId();
                 initConnection(accountId);
+
+                if (false == isCacheApplicable(session)) {
+                    MailField[] useFields = MailField.getFields(fields);
+                    if (null != headerNames && 0 < headerNames.length) {
+                        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                        if (messageStorage instanceof IMailMessageStorageExt) {
+                            mails = ((IMailMessageStorageExt) messageStorage).searchMessages(fullName,indexRange,sortField,orderDir,searchTerm,useFields,headerNames);
+                        }
+                    } else {
+                        mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
+                    }
+                    if (null != mails) {
+                        /*
+                         * Set account information
+                         */
+                        for (MailMessage mail : mails) {
+                            if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
+                                mail.setAccountId(accountId);
+                            }
+                        }
+                        /*
+                         * Put message information into cache
+                         */
+                        try {
+                            /*
+                             * Remove old user cache entries
+                             */
+                            MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
+                            boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
+                            if ((cachable) && (mails.length > 0)) {
+                                /*
+                                 * ... and put new ones
+                                 */
+                                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
+                            }
+                        } catch (OXException e) {
+                            LOG.error("", e);
+                        }
+                        List<MailMessage> l = new LinkedList<MailMessage>();
+                        for (MailMessage mm : mails) {
+                            if (null != mm) {
+                                l.add(mm);
+                            }
+                        }
+                        return new SearchIteratorDelegator<MailMessage>(l);
+                    }
+                }
+
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, FIELDS_ID_INFO);
             }
         }
@@ -1906,7 +1961,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Remove old user cache entries
              */
-            // TODO: JSONMessageCache.getInstance().removeAllFoldersExcept(accountId, fullName, session);
             MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
             if ((cachable) && (mails.length > 0)) {
                 /*
