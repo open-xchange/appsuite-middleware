@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
-import com.openexchange.push.PushManagerService;
+import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
@@ -72,7 +72,7 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.1
  */
-public final class ImapIdlePushManagerService implements PushManagerService {
+public final class ImapIdlePushManagerService implements PushManagerExtendedService {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushManagerService.class);
 
@@ -264,4 +264,19 @@ public final class ImapIdlePushManagerService implements PushManagerService {
         }
     }
 
+    @Override
+    public boolean[] hasListenerFor(int contextId, int[] userIds) {
+        boolean[] hasListener = new boolean[userIds.length];
+        int index = 0;
+        for(int userId : userIds) {
+            SimpleKey sk = SimpleKey.valueOf(userId, contextId);
+            ImapIdlePushListener listener = listeners.get(sk);
+            if(listener == null) {
+                hasListener[index++] = false;
+            } else {
+                hasListener[index++] = true;
+            }
+        }
+        return hasListener;
+    }
 }
