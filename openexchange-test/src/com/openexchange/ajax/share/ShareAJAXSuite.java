@@ -68,9 +68,10 @@ import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.InviteTest;
 import com.openexchange.ajax.share.tests.MailNotificationTest;
 import com.openexchange.ajax.share.tests.ParallelGuestSessionsTest;
+import com.openexchange.ajax.share.tests.PasswordResetServletTest;
 import com.openexchange.ajax.share.tests.QuotaTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
-import com.openexchange.ajax.share.tests.PasswordResetServletTest;
+import com.openexchange.ajax.share.tests.StoreMetaInformationTest;
 
 /**
  * {@link ShareAJAXSuite}
@@ -106,6 +107,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(DownloadHandlerTest.class);
         tests.addTestSuite(PasswordResetServletTest.class);
         tests.addTestSuite(MailNotificationTest.class);
+        tests.addTestSuite(StoreMetaInformationTest.class);
         return tests;
     }
 
