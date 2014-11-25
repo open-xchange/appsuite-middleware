@@ -202,10 +202,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No administrative file access exists for service "%1$s"
      */
-    ADMIN_FILE_ACCESS_NOT_AVAILABLE("No administrative file access exists for service \"%1$s\"", Category.CATEGORY_ERROR, 36),
-
-
-    ;
+    ADMIN_FILE_ACCESS_NOT_AVAILABLE("No administrative file access exists for service \"%1$s\"", Category.CATEGORY_ERROR, 36);
 
     /**
      * The prefix constant.

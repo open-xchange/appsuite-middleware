@@ -13,18 +13,18 @@ BuildRequires: java7-devel
 %else
 BuildRequires: java-devel >= 1.7.0
 %endif
-Version:	@OXVERSION@
-%define		ox_release 0
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        The Open-Xchange administrative SOAP interface
+Version:       @OXVERSION@
+%define        ox_release 0
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       The Open-Xchange administrative SOAP interface
 Autoreqprov:   no
-Requires:       open-xchange-soap-cxf >= @OXVERSION@
-Requires:	open-xchange-admin >= @OXVERSION@
+Requires:      open-xchange-soap-cxf >= @OXVERSION@
+Requires:      open-xchange-admin >= @OXVERSION@
 
 %description
 This package installs the OSGi bundles that provide a SOAP interface to administer the backend installation. This is an extension to the
@@ -57,8 +57,14 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Nov 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.6.2 release
 * Wed Nov 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-21
+* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-17
+* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -81,6 +87,8 @@ Build for patch 2014-11-03
 Build for patch 2014-10-22
 * Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-03
+* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-22
 * Fri Oct 17 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -89,8 +97,6 @@ Fifth candidate for 7.6.1 release
 Build for patch 2014-10-20
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.6.1 release
-* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-10-20
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-20
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>

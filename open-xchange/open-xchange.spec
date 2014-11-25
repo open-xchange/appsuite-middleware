@@ -67,8 +67,14 @@ ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
 /sbin/rcopen-xchange
 
 %changelog
+* Fri Nov 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.6.2 release
 * Wed Nov 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-21
+* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-17
+* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -91,6 +97,8 @@ Build for patch 2014-11-03
 Build for patch 2014-10-22
 * Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-03
+* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-22
 * Fri Oct 17 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -99,8 +107,6 @@ Fifth candidate for 7.6.1 release
 Build for patch 2014-10-20
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.6.1 release
-* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-10-20
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-20
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>
