@@ -259,6 +259,7 @@ public final class DownloadUtility {
                         }
                         sink = copy;
                     }
+                    contentType.setSubType("html");
                     contentType.setCharsetParameter("UTF-8");
                     sz = sink.getLength();
                     in = sink.getClosingStream();

@@ -217,19 +217,22 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
-
-                if (filter && !saveToDisk && ((mailPart.getContentType().startsWithAny("text/htm", "text/xhtm") && fileNameAbsentOrIndicatesHtml(mailPart.getFileName())) || fileNameAbsentOrIndicatesHtml(mailPart.getFileName()))) {
-                    // Expect the attachment to be HTML content. Therefore apply filter...
-                    if (isEmpty(mailPart.getFileName())) {
-                        mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
+                if (isEmpty(mailPart.getFileName())) {
+                    mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
+                }
+                if (filter && !saveToDisk && mailPart.getContentType().startsWithAny("text/htm", "text/xhtm")) {
+                    /*
+                     * Apply filter
+                     */
+                    final byte[] bytes;
+                    {
+                        final ContentType contentType = mailPart.getContentType();
+                        final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
+                        final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                        bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
+                        contentType.setCharsetParameter(cs);
                     }
-                    ContentType contentType = mailPart.getContentType();
-                    String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
-                    String htmlContent = MessageUtility.readMailPart(mailPart, cs);
-                    HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-
-                    final byte[] bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
-                    contentType.setCharsetParameter(cs);
                     size = bytes.length;
                     isClosure = new IFileHolder.InputStreamClosure() {
 
