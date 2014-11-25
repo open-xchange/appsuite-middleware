@@ -199,7 +199,7 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
                     selectAllSubscription(connection, provider, ctx, contextUser, isLoginPush);
                 } catch (SQLException e) {
                     if ("42S02".equals(e.getSQLState())) {
-                        // "Table 'mobileEventSubscriptions' doesn't exist" => no update task for drive tables in this schema yet, so ignore
+                        // "Table 'mobileEventSubscriptions' doesn't exist" => no update task for tables in this schema yet, so ignore
                     } else {
                         throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                     }
