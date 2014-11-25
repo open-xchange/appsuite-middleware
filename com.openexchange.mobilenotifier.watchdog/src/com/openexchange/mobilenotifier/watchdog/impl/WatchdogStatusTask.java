@@ -63,7 +63,7 @@ public class WatchdogStatusTask implements Runnable {
         try {
             Watchdog.sessionLookup();
         } catch(Exception e) {
-            LOG.error("Exception {}", e);
+            LOG.error("", e);
         }
     }
 

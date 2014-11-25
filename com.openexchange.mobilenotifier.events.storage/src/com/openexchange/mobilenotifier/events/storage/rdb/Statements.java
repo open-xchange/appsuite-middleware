@@ -99,10 +99,10 @@ public class Statements {
      * Returns the following SQL statement based on parameter blockLoginPush.
      * <br>
      *  <code>true: </code><br>
-     *   <code>SELECT user, cid FROM mobileEventSubscriptions WHERE provider=? AND lastLoginPush &lt;= System.currentTimeMillis();</code>
+     *   <code>SELECT user, cid FROM mobileEventSubscriptions WHERE provider=? AND lastLoginPush &lt;= System.currentTimeMillis() GROUP BY cid, user;</code>
      *  <br><br>
      *  <code>false: </code><br>
-     *   <code>SELECT user, cid FROM mobileEventSubscriptions WHERE provider=?;</code>
+     *   <code>SELECT user, cid FROM mobileEventSubscriptions WHERE provider=? GROUP BY cid, user;</code>
      *
      * @param blockLoginPush <code>true</code> if push notification should be blocked until b limit is exceeded.
      * @return string which represents the statement
@@ -113,6 +113,7 @@ public class Statements {
         stringBuilder.append("SELECT cid, user, token FROM mobileEventSubscriptions WHERE provider=? ");
         if(blockLoginPush) {
             stringBuilder.append("AND blockLoginPushUntil <= " +  System.currentTimeMillis());
+            stringBuilder.append(" OR blockLoginPushUntil IS NULL");
         }
         stringBuilder.append(" GROUP BY user, cid;");
         return stringBuilder.toString();

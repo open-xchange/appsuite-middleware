@@ -77,7 +77,7 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
 
     private static final int MULTICAST_LIMIT = 1000;
 
-    private static final String SERIVCE_ID = "gcm";
+    private static final String SERVICE_ID = "gcm";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifyGCMPublisherImpl.class);
 
@@ -86,9 +86,9 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
         List<String> subscriptions = null;
         try {
             MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class);
-            subscriptions = mnss.getTokens(loginEvent.getContextUsers(), SERIVCE_ID, loginEvent.getProvider());
+            subscriptions = mnss.getTokens(loginEvent.getContextUsers(), SERVICE_ID, loginEvent.getProvider());
         } catch(OXException e) {
-            LOG.error("Could not get subscription {}", SERIVCE_ID, e);
+            LOG.error("Could not get subscription {}", SERVICE_ID, e);
         }
         publishByContextUsers(subscriptions, loginEvent);
     }
@@ -98,9 +98,9 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
         List<Subscription> subscriptions = null;
         try {
             MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class);
-            subscriptions = mnss.getSubscriptions(event.getUserId(), event.getContextId(), SERIVCE_ID, event.getProvider());
+            subscriptions = mnss.getSubscriptions(event.getUserId(), event.getContextId(), SERVICE_ID, event.getProvider());
         } catch(OXException e) {
-            LOG.error("Could not get subscription {}", SERIVCE_ID, e);
+            LOG.error("Could not get subscription {}", SERVICE_ID, e);
         }
         publishBySubscriptions(subscriptions, event);
     }
@@ -282,13 +282,13 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
             MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class, true);
             if(event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
                 int contextId = getContextIdForToken(event.getContextUsers(), oldRegistrationID);
-                if(contextId > -1 && true == mnss.updateToken(contextId, oldRegistrationID, SERIVCE_ID, newRegistrationID)) {
+                if(contextId > -1 && true == mnss.updateToken(contextId, oldRegistrationID, SERVICE_ID, newRegistrationID)) {
                     LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
                 } else {
                     LOG.warn("Registration ID {} not updated.", oldRegistrationID);
                 }
             } else {
-                if (mnss.updateToken(event.getContextId(), oldRegistrationID, SERIVCE_ID, newRegistrationID)) {
+                if (mnss.updateToken(event.getContextId(), oldRegistrationID, SERVICE_ID, newRegistrationID)) {
                     LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
                 } else {
                     LOG.warn("Registration ID {} not updated.", oldRegistrationID);
@@ -304,13 +304,13 @@ public class MobileNotifyGCMPublisherImpl implements MobileNotifyPublisher {
             MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class, true);
             if(event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
                 int contextId = getContextIdForToken(event.getContextUsers(), registrationID);
-                if (contextId > -1 && true == mnss.deleteSubscription(contextId, registrationID, SERIVCE_ID)) {
+                if (contextId > -1 && true == mnss.deleteSubscription(contextId, registrationID, SERVICE_ID)) {
                     LOG.info("Successfully removed registration ID {}.", registrationID);
                 } else {
                     LOG.warn("Registration ID {} not removed.", registrationID);
                 }
             } else {
-                if (true == mnss.deleteSubscription(event.getContextId(), registrationID, SERIVCE_ID)) {
+                if (true == mnss.deleteSubscription(event.getContextId(), registrationID, SERVICE_ID)) {
                     LOG.info("Successfully removed registration ID {}.", registrationID);
                 } else {
                     LOG.warn("Registration ID {} not removed.", registrationID);
