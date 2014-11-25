@@ -55,10 +55,13 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.service.event.Event;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.events.MobileNotifyEvent;
 import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
 import com.openexchange.mobilenotifier.events.MobileNotifyPublisher;
+import com.openexchange.mobilenotifier.events.osgi.Services;
 import com.openexchange.mobilenotifier.events.storage.ContextUsers;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 
 /**
  * {@link MobileNotifyMailEventImpl}
@@ -127,14 +130,21 @@ public class MobileNotifyMailEventImpl implements org.osgi.service.event.EventHa
     }
 
     @Override
-    public void notifyLogin(List<ContextUsers> contextUsers) {
+    public void notifyLogin(final List<ContextUsers> contextUsers) throws OXException {
         Map<String, String> map = new HashMap<String, String>();
         map.put("SYNC_EVENT", "LOGIN");
 
         MobileNotifyMailEvent loginEvent = new MobileNotifyMailEvent(contextUsers, map);
+
+        MobileNotifierStorageService mnss = Services.getService(MobileNotifierStorageService.class);
+
+        //Currently blocked for seven days (configurable?)
+        long timeToWait = 1000 * 60 * 60 * 24 * 7;
+        mnss.blockLoginPush(contextUsers, timeToWait);
+
         for (MobileNotifyPublisher publisher : publishers) {
             LOG.debug("Publishing new login event: {}", contextUsers);
-            publisher.publishLogin(loginEvent);
+            publisher.multiPublish(loginEvent);
         }
     }
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.mobilenotifier.events.storage.rdb;
 
-
 /**
  * {@link Statements}
  *
@@ -60,16 +59,16 @@ public class Statements {
 
     public static final String CREATE_TABLE =
         "CREATE TABLE mobileEventSubscriptions ( " +
-        "cid INT4 UNSIGNED NOT NULL, " +
-        "service VARCHAR(64) NOT NULL, " +
-        "token VARCHAR(255) NOT NULL, " +
-        "provider VARCHAR(64) NOT NULL, " +
-        "user INT4 UNSIGNED NOT NULL, " +
-        "timestamp BIGINT(20) NOT NULL, " +
-        "lastLoginPush BIGINT(20) " +
-        "PRIMARY KEY (cid,service,token,provider), " +
-        "INDEX (cid,service,token,provider) " +
-    ") ENGINE=InnoDB DEFAULT CHARSET=ascii; ";
+            "cid INT4 UNSIGNED NOT NULL, " +
+            "service VARCHAR(64) NOT NULL, " +
+            "token VARCHAR(255) NOT NULL, " +
+            "provider VARCHAR(64) NOT NULL, " +
+            "user INT4 UNSIGNED NOT NULL, " +
+            "timestamp BIGINT(20) NOT NULL, " +
+            "blockLoginPushUntil BIGINT(20), " +
+            "PRIMARY KEY (cid,service,token,provider), " +
+            "INDEX (cid,service,token,provider) " +
+            ") ENGINE=InnoDB DEFAULT CHARSET=ascii; ";
 
     public static final String DELETE_SUBSCRIPTION_BY_USER = "DELETE FROM mobileEventSubscriptions WHERE cid=? AND user=?;";
 
@@ -78,13 +77,9 @@ public class Statements {
     public static final String REPLACE_OR_ADD_SUBSCRIPTION = "REPLACE INTO mobileEventSubscriptions (cid,service,token,provider,user,timestamp) "
         + "VALUES (?,?,?,?,?,?);";
 
-    public static final String UPDATE_TOKEN = "UPDATE mobileEventSubscriptions "
+    public static final String UPDATE_TOKENS = "UPDATE mobileEventSubscriptions "
         + "SET token=?, timestamp=? "
         + "WHERE cid=? AND service=? AND token=? ";
-
-    public static final String UPDATE_LAST_LOGIN_PUSH_TIMESTAMP = "UPDATE mobileEventSubscriptions "
-        + "SET lastLoginPush=? "
-        + "WHERE cid=? AND service=? AND user=?;";
 
     public static final String DELETE_TOKEN_BY_PROVIDER = "DELETE FROM mobileEventSubscriptions "
         + "WHERE cid=? AND service=? AND provider=? AND token=?";
@@ -96,9 +91,73 @@ public class Statements {
         + "FROM mobileEventSubscriptions "
         + "WHERE cid=? AND user=? AND service=? AND provider=?;";
 
-    public static final String SELECT_ALL_SUBSCRIPTIONS = "SELECT user, cid "
-        + "FROM mobileEventSubscriptions WHERE provider=? GROUP BY user, cid;";
-
-    public static final String SELECT_TOKENS = "SELECT token, timestamp "
+    public static final String SELECT_TOKENS = "SELECT token "
         + "FROM mobileEventSubscriptions WHERE cid=? AND user=? AND provider=? GROUP BY user;";
+
+
+    /**
+     * Returns the following SQL statement based on parameter blockLoginPush.
+     * <br>
+     *  <code>true: </code><br>
+     *   <code>SELECT user, cid FROM mobileEventSubscriptions WHERE provider=? AND lastLoginPush &lt;= System.currentTimeMillis();</code>
+     *  <br><br>
+     *  <code>false: </code><br>
+     *   <code>SELECT user, cid FROM mobileEventSubscriptions WHERE provider=?;</code>
+     *
+     * @param blockLoginPush <code>true</code> if push notification should be blocked until b limit is exceeded.
+     * @return string which represents the statement
+     *
+     */
+    public static String SELECT_SUBSCRIPTIONS(boolean blockLoginPush) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT cid, user, token FROM mobileEventSubscriptions WHERE provider=? ");
+        if(blockLoginPush) {
+            stringBuilder.append("AND blockLoginPushUntil <= " +  System.currentTimeMillis());
+        }
+        stringBuilder.append(" GROUP BY user, cid;");
+        return stringBuilder.toString();
+    }
+
+
+    private static final String UPDATE_LAST_LOGIN_PUSH_TIMESTAMP = "UPDATE mobileEventSubscriptions "
+        + "SET blockLoginPushUntil=? "
+        + "WHERE cid=? AND user";
+
+    /**
+     * Resulting SQL statement
+     *  <br><code>UPDATE mobileEventSubscriptions SET blockLoginPushUntil=? WHERE cid=? AND user;</code><br>
+     * Count of IN arguments depends on userSize
+     * @param userSize
+     * @return
+     */
+    public static String UPDATE_LAST_PUSH_LOGIN_TIMESTAMP(int userSize) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(UPDATE_LAST_LOGIN_PUSH_TIMESTAMP);
+        appendPlaceholders(stringBuilder, userSize);
+        return stringBuilder.append(';').toString();
+    }
+
+    /**
+     * Appends a SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
+     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
+     *
+     * @param stringBuilder The string builder to append the clause
+     * @param count The number of placeholders to append
+     * @return The string builder
+     */
+    private static StringBuilder appendPlaceholders(StringBuilder stringBuilder, int count) {
+        if (0 >= count) {
+            throw new IllegalArgumentException("count");
+        }
+        if (1 == count) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < count; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        return stringBuilder;
+    }
 }

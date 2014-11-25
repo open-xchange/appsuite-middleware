@@ -71,7 +71,8 @@ public class WatchdogActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ClusterTimerService.class, MobileNotifierStorageService.class, SessiondService.class, PushListenerService.class, MobileNotifyEventService.class };
+        return new Class[] { ClusterTimerService.class, MobileNotifierStorageService.class,
+            SessiondService.class, PushListenerService.class, MobileNotifyEventService.class };
     }
 
     @Override
@@ -79,7 +80,7 @@ public class WatchdogActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: {}", context.getBundle().getSymbolicName());
         Services.setServiceLookup(this);
          ClusterTimerService clusterTimerService = getService(ClusterTimerService.class);
-         clusterTimerService.scheduleWithFixedDelay("MOBILE-NOTIFIER-WATCHDOG", new WatchdogStatusTask(), 5L, 5L, TimeUnit.MINUTES);
+         clusterTimerService.scheduleWithFixedDelay("MOBILE-NOTIFIER-WATCHDOG", new WatchdogStatusTask(), 0L, 5L, TimeUnit.SECONDS);
     }
 
     @Override

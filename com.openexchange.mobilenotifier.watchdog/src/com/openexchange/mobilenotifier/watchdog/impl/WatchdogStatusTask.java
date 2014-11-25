@@ -62,10 +62,8 @@ package com.openexchange.mobilenotifier.watchdog.impl;
      public void run() {
          try {
              Watchdog.sessionLookup();
-             LOG.info("Starting watchdog task");
          } catch(Exception e) {
-             // TODO: exception handling
-             LOG.info("Exception {}", e);
+             LOG.error("Exception {}", e);
          }
      }
 
