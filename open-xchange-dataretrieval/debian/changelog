@@ -16,6 +16,18 @@ open-xchange-dataretrieval (7.6.2-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 13:40:12 +0100
 
+open-xchange-dataretrieval (7.6.1-10) stable; urgency=medium
+
+  * Build for patch 2014-12-01
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 24 Nov 2014 09:59:01 +0100
+
+open-xchange-dataretrieval (7.6.1-9) stable; urgency=low
+
+  * Build for patch 2014-11-20
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 18 Nov 2014 15:59:44 +0100
+
 open-xchange-dataretrieval (7.6.1-8) stable; urgency=low
 
   * Build for patch 2014-11-17
