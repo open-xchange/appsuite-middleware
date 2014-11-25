@@ -244,33 +244,61 @@ public final class SessionHandler {
     /**
      * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
      *
-     * @param contextIds - Set with Integer to be removed
+     * @param contextIds - Set with context ids to be removed
      */
     public static void removeContextSessionsGlobal(final Set<Integer> contextIds) {
+        SessionHandler.removeRemoteContextSessions(contextIds);
+
+        SessionHandler.removeContextSessions(contextIds);
+    }
+
+    /**
+     * Triggers removing sessions for given context ids on remote cluster nodes
+     *
+     * @param contextIds - Set with context ids to be removed
+     */
+    private static void removeRemoteContextSessions(final Set<Integer> contextIds) {
         HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
 
         if (hazelcastInstance != null) {
             LOG.debug("Trying to remove sessions for context ids {} from remote nodes", Strings.concat(", ", contextIds));
 
-            try {
-                Member localMember = hazelcastInstance.getCluster().getLocalMember();
-                Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
-                if (!clusterMembers.remove(localMember)) {
-                    LOG.warn("Couldn't remove local member from cluster members.");
+            Member localMember = hazelcastInstance.getCluster().getLocalMember();
+            Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
+            if (!clusterMembers.remove(localMember)) {
+                LOG.warn("Couldn't remove local member from cluster members.");
+            }
+            if (!clusterMembers.isEmpty()) {
+                Map<Member, Future<Set<Integer>>> submitToMembers = hazelcastInstance.getExecutorService("default").submitToMembers(new PortableContextSessionsCleaner(contextIds), clusterMembers);
+                for (Member member : submitToMembers.keySet()) {
+                    Future<Set<Integer>> future = submitToMembers.get(member);
+                    try {
+                        Set<Integer> contextIdsSessionsHaveBeenRemovedFor = future.get(10, TimeUnit.SECONDS);
+                        if ((contextIdsSessionsHaveBeenRemovedFor != null) && (future.isDone())) {
+                            LOG.info("Removed sessions for context ids {} on remote node {}", Strings.concat(", ", contextIdsSessionsHaveBeenRemovedFor), member.getSocketAddress());
+                        } else {
+                            LOG.warn("No sessions for context ids {} removed on node {}.", Strings.concat(", ", contextIds), member.getSocketAddress());
+                        }
+                    } catch (TimeoutException e) {
+                        // Wait time elapsed; enforce cancelation
+                        future.cancel(true);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than 10 seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress(), e);
+                    } catch (InterruptedException e) {
+                        future.cancel(true);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than 10 seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress(), e);
+                    } catch (ExecutionException e) {
+                        future.cancel(true);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than 10 seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress(), e.getCause());
+                    } catch (Exception e) {
+                        LOG.error("Failed to issue remote session removal for contexts {} on remote node {}.", Strings.concat(", ", contextIds), member.getSocketAddress(), e);
+                    }
                 }
-                if (!clusterMembers.isEmpty()) {
-                    hazelcastInstance.getExecutorService("default").submitToMembers(new PortableContextSessionsCleaner(contextIds), clusterMembers);
-                } else {
-                    LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
-                }
-            } catch (Exception e) {
-                LOG.error("Failed to issue remote session removal for contexts {}.", Strings.concat(", ", contextIds), e);
+            } else {
+                LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
             }
         } else {
-            LOG.warn("Cannot find HazelcastInstance for remote execution of session removing for context ids {}. Only remove local sessions.", Strings.concat(", ", contextIds));
+            LOG.warn("Cannot find HazelcastInstance for remote execution of session removing for context ids {}. Only local sessions will be removed.", Strings.concat(", ", contextIds));
         }
-
-        SessionHandler.removeContextSessions(contextIds);
     }
 
     /**
@@ -306,17 +334,23 @@ public final class SessionHandler {
      *
      * @param contextId Set with contextIds to remove session for.
      */
-    public static void removeContextSessions(final Set<Integer> contextIds) {
+    public static Set<Integer> removeContextSessions(final Set<Integer> contextIds) {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
-            return;
+            return null;
         }
         /*
          * remove from session data
          */
         List<SessionControl> removeContextSessions = sessionData.removeContextSessions(contextIds);
         postContainerRemoval(removeContextSessions, true);
+
+        Set<Integer> processedContexts = new HashSet<Integer>(removeContextSessions.size());
+        for (SessionControl control : removeContextSessions) {
+            processedContexts.add(control.getSession().getContextId());
+        }
+        return processedContexts;
     }
 
     /**
