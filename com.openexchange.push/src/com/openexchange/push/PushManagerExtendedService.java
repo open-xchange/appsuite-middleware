@@ -49,23 +49,22 @@
 
 package com.openexchange.push;
 
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link PushListenerServiceExtended} - The singleton push listener service to manually start/stop psuh listeners.
+ * {@link PushManagerExtendedService} - Extends {@link PushManagerService} by {@link #hasListenerFor(int, int[])} method.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@SingletonService
-public interface PushListenerServiceExtended extends PushListenerService {
+public interface PushManagerExtendedService extends PushManagerService {
+
     /**
      * Checks cluster-wide if the user has already a registered IMAP PUSH listener
      *
-     * @param cid - The context id
-     * @param userIds - The user ids
+     * @param contextId The context identifier
+     * @param userIds The user identifiers
      * @return An array of booleans which indicates if the user has an activated push listener.
      * The order of the booleans is arranged to the input of usersIds
      */
-    boolean[] hasListenerFor(int cid, int[] userIds);
+    boolean[] hasListenerFor(int contextId, int[] userIds);
 
 }
