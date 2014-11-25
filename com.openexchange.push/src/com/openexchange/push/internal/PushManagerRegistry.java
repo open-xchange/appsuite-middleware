@@ -49,6 +49,7 @@
 
 package com.openexchange.push.internal;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;
 
@@ -118,6 +120,28 @@ public final class PushManagerRegistry implements PushListenerService {
     private PushManagerRegistry() {
         super();
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
+    }
+
+    @Override
+    public boolean[] hasListenerFor(int cid, int[] userIds) {
+        boolean[] ret = new boolean[userIds.length];
+        Arrays.fill(ret, false);
+
+        // Iterate push managers
+        PushManagerRegistry registry = PushManagerRegistry.getInstance();
+        for (Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
+            PushManagerService pushManager = pushManagersIterator.next();
+            if (pushManager instanceof PushManagerExtendedService) {
+                PushManagerExtendedService serviceExtended = (PushManagerExtendedService) pushManager;
+
+                boolean[] result = serviceExtended.hasListenerFor(cid, userIds);
+                for (int i = 0; i < result.length; i++) {
+                    ret[i] |= result[i];
+                }
+            }
+        }
+
+        return ret;
     }
 
     @Override
