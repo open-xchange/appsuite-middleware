@@ -80,7 +80,7 @@ public class WatchdogActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: {}", context.getBundle().getSymbolicName());
         Services.setServiceLookup(this);
          ClusterTimerService clusterTimerService = getService(ClusterTimerService.class);
-         clusterTimerService.scheduleWithFixedDelay("MOBILE-NOTIFIER-WATCHDOG", new WatchdogStatusTask(), 0L, 5L, TimeUnit.SECONDS);
+         clusterTimerService.scheduleWithFixedDelay("MOBILE-NOTIFIER-WATCHDOG", new WatchdogStatusTask(), 5L, 5L, TimeUnit.MINUTES);
     }
 
     @Override
