@@ -1493,19 +1493,17 @@ public final class SessionHandler {
                     @Override
                     public Void call() {
                         try {
-                            for (SessionControl sessionControl : tSessionControls) {
+                            List<String> sessionsToRemove = new ArrayList<String>();
+                            for (final SessionControl sessionControl : tSessionControls) {
                                 SessionImpl session = sessionControl.getSession();
                                 if (useSessionStorage(session)) {
-                                    try {
-                                        sessionStorageService.removeSession(session.getSessionID());
-                                    } catch (OXException e) {
-                                        LOG.error("", e);
-                                    } catch (RuntimeException e) {
-                                        LOG.error("", e);
-                                    }
+                                    sessionsToRemove.add(session.getSessionID());
                                 }
                             }
-                        } catch (RuntimeException e) {
+                            sessionStorageService.removeSessions(sessionsToRemove);
+                        } catch (final RuntimeException e) {
+                            LOG.error("", e);
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
                         return null;

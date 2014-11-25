@@ -117,6 +117,15 @@ public interface SessionStorageService {
     void removeSession(String sessionId) throws OXException;
 
     /**
+     * Removes the sessions with given session Ids from session storage
+     *
+     * @param sessionIds The session Ids to remove
+     * @return List with removed sessions
+     * @throws OXException If no session with given session Id found
+     */
+    public List<Session> removeSessions(List<String> sessionIds) throws OXException;
+
+    /**
      * Remove all sessions for user with given user Id and context Id from session storage
      *
      * @param userId The user Id
