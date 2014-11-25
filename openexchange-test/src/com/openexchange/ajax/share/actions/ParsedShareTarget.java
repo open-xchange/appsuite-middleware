@@ -50,6 +50,8 @@
 package com.openexchange.ajax.share.actions;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.folder.json.FolderField;
@@ -90,7 +92,11 @@ public class ParsedShareTarget extends ShareTarget {
             setExpiryDate(new Date(json.getLong(FolderField.EXPIRY_DATE.getName())));
         }
         if (json.hasAndNotNull("meta")) {
-            //TODO
+            Map<String, Object> meta = new HashMap<String, Object>();
+            for (String key : json.getJSONObject("meta").keySet()) {
+                meta.put(key, json.getJSONObject("meta").get(key));
+            }
+            setMeta(meta);
         }
     }
 
