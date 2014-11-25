@@ -1,3 +1,9 @@
+open-xchange-meta (7.6.1-11) stable; urgency=low
+
+  * Build for patch 2014-12-01
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 25 Nov 2014 11:52:24 +0100
+
 open-xchange-meta (7.6.1-10) stable; urgency=medium
 
   * Build for patch 2014-12-01
