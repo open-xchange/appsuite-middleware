@@ -96,7 +96,7 @@ public class UnsubscribeAction extends AbstractMobileNotifierAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("providerId");
         }
 
-        MobileNotifierProviders provider = MobileNotifierProviders.parseProviderFromParam(providerId);
+        MobileNotifierProviders provider = MobileNotifierProviders.parseProvider(providerId);
 
         if(provider == null) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("providerId", providerId);

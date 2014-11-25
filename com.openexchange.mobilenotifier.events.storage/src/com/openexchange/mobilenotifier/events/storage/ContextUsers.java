@@ -58,18 +58,18 @@ import java.util.List;
  */
 public class ContextUsers {
     private int contextId;
-    private List<Integer> usersIds;
+    private List<UserToken> userTokens;
 
-    public ContextUsers(int contextId, List<Integer> userIds) {
+    public ContextUsers(int contextId, List<UserToken> userTokens) {
         this.contextId = contextId;
-        this.usersIds = userIds;
+        this.userTokens = userTokens;
     }
 
     public int getContextId() {
         return contextId;
     }
 
-    public List<Integer> getUserIds() {
-        return usersIds;
+    public List<UserToken> getUserTokens() {
+        return userTokens;
     }
 }

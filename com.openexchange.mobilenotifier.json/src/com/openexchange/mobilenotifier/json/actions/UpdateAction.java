@@ -57,6 +57,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
@@ -93,7 +94,8 @@ public class UpdateAction extends AbstractMobileNotifierAction {
         }
 
         MobileNotifierStorageService mnss = getService(MobileNotifierStorageService.class);
-        mnss.updateToken(req.getSession(), token, serviceId, newToken);
+        Session session = req.getSession();
+        mnss.updateToken(session.getContextId(), token, serviceId, newToken);
 
         /*
          * return empty json object to indicate success

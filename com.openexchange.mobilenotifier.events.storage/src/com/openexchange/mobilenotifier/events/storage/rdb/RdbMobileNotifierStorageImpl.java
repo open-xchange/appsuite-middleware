@@ -66,6 +66,7 @@ import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.storage.ContextUsers;
 import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 import com.openexchange.mobilenotifier.events.storage.Subscription;
+import com.openexchange.mobilenotifier.events.storage.UserToken;
 import com.openexchange.mobilenotifier.events.storage.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
@@ -122,20 +123,10 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public boolean updateToken(Session session, String token, String serviceId, String newToken) throws OXException {
-        return updateToken(session.getContextId(), token, serviceId, newToken);
-    }
-
-    @Override
-    public boolean updateToken(List<ContextUsers> contextUser, String token, String serviceId, String newToken) throws OXException {
-        return false;
-    }
-
-    @Override
     public boolean updateToken(int contextId, String token, String serviceId, String newToken) throws OXException {
         Connection connection = databaseService.getWritable(contextId);
         try {
-            return 0 < updateSubscription(connection, contextId, serviceId, token, newToken);
+            return 0 < updateSubscriptions(connection, contextId, serviceId, token, newToken);
         } catch (SQLException e) {
             throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -143,10 +134,10 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
         }
     }
 
-    private static int updateSubscription(Connection connection, int contextId, String serviceId, String token, String newToken) throws SQLException, OXException {
+    private static int updateSubscriptions(Connection connection, int contextId, String serviceId, String token, String newToken) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(Statements.UPDATE_TOKEN);
+            stmt = connection.prepareStatement(Statements.UPDATE_TOKENS);
             //UPDATE ... SET:
             stmt.setString(1, newToken);
             stmt.setLong(2, System.currentTimeMillis());
@@ -161,27 +152,34 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public boolean updateLastLoginPush(int contextId, int userId, String serviceId) throws OXException {
-        Connection connection = databaseService.getWritable(contextId);
-        try {
-            return 0 < updateLastLoginTimestamp(connection, contextId, userId, serviceId);
-        } catch (SQLException e) {
-            throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            databaseService.backWritable(contextId, connection);
+    public boolean blockLoginPush(List<ContextUsers> contextUsers, long blockUntil) throws OXException {
+        for(ContextUsers cu : contextUsers) {
+            int contextId = cu.getContextId();
+            Connection connection = databaseService.getWritable(contextId);
+            try {
+                touchBlockUntilTimestamp(connection, contextId, cu.getUserTokens(), blockUntil);
+            } catch (SQLException e) {
+                throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                databaseService.backWritable(contextId, connection);
+            }
         }
+        return false;
     }
 
-    private static int updateLastLoginTimestamp(Connection connection, int contextId, int userId, String serviceId) throws SQLException {
+    private static int touchBlockUntilTimestamp(Connection connection, int contextId, List<UserToken> userTokens, long blockUntil) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(Statements.UPDATE_LAST_LOGIN_PUSH_TIMESTAMP);
+            stmt = connection.prepareStatement(Statements.UPDATE_LAST_PUSH_LOGIN_TIMESTAMP(userTokens.size()));
+            int index = 0;
             //UPDATE ... SET:
-            stmt.setLong(1, System.currentTimeMillis());
+            stmt.setLong(++index, System.currentTimeMillis() + blockUntil);
             //WHERE:
-            stmt.setInt(2, contextId);
-            stmt.setInt(3, userId);
-            stmt.setString(4, serviceId);
+            stmt.setInt(++index, contextId);
+            //IN(?, ?, ...)
+            for(UserToken userToken : userTokens) {
+                stmt.setInt(++index, userToken.getUserId());
+            }
             return stmt.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -189,7 +187,7 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public List<ContextUsers> getAllSubscriptions(MobileNotifierProviders provider) throws OXException {
+    public List<ContextUsers> getSubscriptions(MobileNotifierProviders provider, boolean isLoginPush) throws OXException {
         ContextService contextService = Services.getService(ContextService.class);
         Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
         List<ContextUsers> contextUser = new LinkedList<ContextUsers>();
@@ -198,7 +196,7 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
                 int ctx = iter.next().intValue();
                 Connection connection = databaseService.getReadOnly(ctx);
                 try {
-                    selectAllSubscription(connection, provider, ctx, contextUser);
+                    selectAllSubscription(connection, provider, ctx, contextUser, isLoginPush);
                 } catch (SQLException e) {
                     if ("42S02".equals(e.getSQLState())) {
                         // "Table 'mobileEventSubscriptions' doesn't exist" => no update task for drive tables in this schema yet, so ignore
@@ -213,29 +211,29 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
         return contextUser;
     }
 
-    private void selectAllSubscription(Connection connection, MobileNotifierProviders provider, int currentCtx, List<ContextUsers> contextUser) throws SQLException {
+    private void selectAllSubscription(Connection connection, MobileNotifierProviders provider, int currentCtx, List<ContextUsers> contextUser, boolean rejectLoginPush) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(Statements.SELECT_ALL_SUBSCRIPTIONS);
+            stmt = connection.prepareStatement(Statements.SELECT_SUBSCRIPTIONS(rejectLoginPush));
             stmt.setString(1, provider.getProviderName());
 
             ResultSet results = stmt.executeQuery();
-            List<Integer> userTokens = new LinkedList<Integer>();
+            List<UserToken> userIds = new LinkedList<UserToken>();
+            int contextId = -1;
+
             while(results.next()) {
-                int userId = results.getInt(1);
-                userTokens.add(userId);
+                contextId = results.getInt(1);
+
+                int userId = results.getInt(2);
+                String token = results.getString(3);
+                userIds.add(new UserToken(userId, token));
             }
-            if(false == userTokens.isEmpty()) {
-                contextUser.add(new ContextUsers(currentCtx, userTokens));
+            if(false == userIds.isEmpty()) {
+                contextUser.add(new ContextUsers(contextId, userIds));
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-    }
-
-    @Override
-    public boolean deleteSubscription(Session session, String token, String serviceId, MobileNotifierProviders provider) throws OXException {
-        return deleteSubscription(session.getContextId(), token, serviceId, provider);
     }
 
     @Override
@@ -265,7 +263,7 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public boolean deleteSubscriptions(int contextId, String token, String serviceId) throws OXException {
+    public boolean deleteSubscription(int contextId, String token, String serviceId) throws OXException {
         Connection connection = databaseService.getWritable(contextId);
         try {
             return 0 < deleteSubscriptions(connection, contextId, token, serviceId);
@@ -274,11 +272,6 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
         } finally {
             databaseService.backWritable(contextId, connection);
         }
-    }
-
-    @Override
-    public boolean deleteSubscriptions(List<ContextUsers> contextUsers, String token, String serviceId) throws OXException {
-        return false;
     }
 
     private static int deleteSubscriptions(Connection connection, int contextId, String token, String serviceId) throws SQLException, OXException {
@@ -295,7 +288,7 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public List<Subscription> getSubscription(int contextId, int userId, String serviceId, MobileNotifierProviders provider) throws OXException {
+    public List<Subscription> getSubscriptions(int contextId, int userId, String serviceId, MobileNotifierProviders provider) throws OXException {
         Connection connection = databaseService.getReadOnly(contextId);
         try {
             return selectSubscriptions(connection, userId, contextId, serviceId, provider.getProviderName());
@@ -324,7 +317,7 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
                 String resProvider = results.getString(4);
                 int resUserId = results.getInt(5);
                 long resTimestamp = results.getLong(6);
-                subscriptions.add(new Subscription(cid, resUserId, resToken, resService, MobileNotifierProviders.parseProviderFromParam(resProvider), resTimestamp));
+                subscriptions.add(new Subscription(cid, resUserId, resToken, resService, MobileNotifierProviders.parseProvider(resProvider), resTimestamp));
             }
             return subscriptions;
         } finally {
@@ -333,14 +326,14 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
     }
 
     @Override
-    public List<String> getTokensFromSubscriptions(List<ContextUsers> contextUser, String serviceId, MobileNotifierProviders provider) throws OXException {
+    public List<String> getTokens(List<ContextUsers> contextUser, String serviceId, MobileNotifierProviders provider) throws OXException {
         List<String> subscriptions = new LinkedList<String>();
         if(false == contextUser.isEmpty()) {
             for(ContextUsers cu : contextUser) {
                 int contextId = cu.getContextId();
                 Connection connection = databaseService.getReadOnly(contextId);
                 try {
-                    subscriptions.addAll(selectTokensFromContext(connection, contextId, cu.getUserIds(), serviceId, provider));
+                    subscriptions.addAll(selectTokensFromContext(connection, contextId, cu.getUserTokens(), serviceId, provider));
                 } catch (SQLException e) {
                     throw MobileNotifierExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
@@ -351,7 +344,7 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
         return subscriptions;
     }
 
-    private List<String> selectTokensFromContext(Connection connection, int contextId, List<Integer> userIds, String serviceId, MobileNotifierProviders provider) throws SQLException {
+    private List<String> selectTokensFromContext(Connection connection, int contextId, List<UserToken> userTokens, String serviceId, MobileNotifierProviders provider) throws SQLException {
         PreparedStatement stmt = null;
         try {
 
@@ -359,10 +352,10 @@ public class RdbMobileNotifierStorageImpl implements MobileNotifierStorageServic
 
             stmt = connection.prepareStatement(Statements.SELECT_TOKENS);
 
-            for(Integer userId : userIds) {
+            for(UserToken userToken : userTokens) {
                 int index = 0;
                 stmt.setInt(++index, contextId);
-                stmt.setInt(++index, userId);
+                stmt.setInt(++index, userToken.getUserId());
                 stmt.setString(++index, provider.getProviderName());
 
                 ResultSet results = stmt.executeQuery();

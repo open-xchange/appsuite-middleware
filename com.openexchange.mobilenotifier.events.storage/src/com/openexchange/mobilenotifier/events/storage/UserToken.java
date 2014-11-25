@@ -47,45 +47,30 @@
  *
  */
 
-package com.openexchange.mobilenotifier.events;
+package com.openexchange.mobilenotifier.events.storage;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.events.storage.ContextUsers;
 
 /**
- * {@link MobileNotifyEventService}
+ * {@link UserToken}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public interface MobileNotifyEventService {
-    /**
-     * Registers a push publish provider.
-     *
-     * @param publisher the publisher to register
-     */
-    void registerPushPublisher(MobileNotifyPublisher publisher);
+public class UserToken {
+    private int userId;
+    private String token;
 
-    /**
-     * Unregisters a push publish provider.
-     *
-     * @param publisher
-     */
-    void unregisterPushPublisher(MobileNotifyPublisher publisher);
+    public UserToken(int userId, String token) {
+        this.userId = userId;
+        this.token = token;
+    }
 
-    /**
-     * Notifies subscribers with a valid session about the triggered event.
-     *
-     * @param publisher
-     */
-    void notifySubscribers(MobileNotifyEvent publisher);
+    public int getUserId() {
+        return userId;
+    }
 
-    /**
-     * Notifies a list of context users without a valid session to login again.
-     *
-     * @param contextUsers
-     * @return
-     * @throws OXException
-     */
-    void notifyLogin(List<ContextUsers> contextUsers) throws OXException;
+    public String getToken() {
+        return token;
+    }
+
+
 }
