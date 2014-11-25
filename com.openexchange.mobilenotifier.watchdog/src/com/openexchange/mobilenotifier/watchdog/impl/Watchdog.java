@@ -49,11 +49,11 @@
 
 package com.openexchange.mobilenotifier.watchdog.impl;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
 import com.openexchange.mobilenotifier.events.storage.ContextUsers;
@@ -61,8 +61,6 @@ import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageServi
 import com.openexchange.mobilenotifier.events.storage.UserToken;
 import com.openexchange.mobilenotifier.watchdog.osgi.Services;
 import com.openexchange.push.PushListenerService;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link Watchdog}
@@ -76,54 +74,24 @@ public class Watchdog  {
     public static void sessionLookup() throws OXException {
         MobileNotifierStorageService rdms = Services.getService(MobileNotifierStorageService.class);
 
-        //The time to wait for sending a new notification
         List<ContextUsers> contextUsers = rdms.getSubscriptions(MobileNotifierProviders.MAIL, true);
 
         if(false == contextUsers.isEmpty()) {
             PushListenerService pls = Services.getService(PushListenerService.class);
-//            if(pls instanceof PushListenerServiceExtended) {
-//                PushListenerServiceExtended plse = (PushListenerServiceExtended) pls;
-                List<ContextUsers> contextUsersWithoutPush = new LinkedList<ContextUsers>();
-                for(ContextUsers cu : contextUsers) {
-//                    boolean[] hasListeners = plse.hasListenerFor(cu.getContextId(), Autoboxing.I2i(getUserIds(cu)));
-//                    cu = getUserIdsWithoutPushListener(cu, hasListeners);
-                    if(cu != null) {
-                        contextUsersWithoutPush.add(cu);
-                    }
+            List<ContextUsers> contextUsersWithoutPush = new LinkedList<ContextUsers>();
+            for(ContextUsers cu : contextUsers) {
+                boolean[] hasListeners = pls.hasListenerFor(cu.getContextId(), Autoboxing.I2i(getUserIds(cu)));
+                cu = getUserIdsWithoutPushListener(cu, hasListeners);
+                if(cu != null) {
+                    contextUsersWithoutPush.add(cu);
                 }
+            }
 
-                if(false == contextUsersWithoutPush.isEmpty()) {
-                    SessiondService sessiond = Services.getService(SessiondService.class);
-
-                    List<ContextUsers> contextUsersWithoutSessions = new ArrayList<ContextUsers>();
-
-                    for(ContextUsers cu : contextUsersWithoutPush) {
-                        List<UserToken> userIdsWithoutSessions = new LinkedList<UserToken>();
-                        int ctxId = cu.getContextId();
-
-                        for(UserToken userToken : cu.getUserTokens()) {
-                            Session session = sessiond.getAnyActiveSessionForUser(ctxId, userToken.getUserId());
-                            if(session == null) {
-                                // user has no active push listener and no active session found
-                                userIdsWithoutSessions.add(userToken);
-                            } else {
-                                //TODO client? / starts for multiple users
-//                                plse.startListenerFor(session);
-                            }
-                        }
-                        if(false == userIdsWithoutSessions.isEmpty()) {
-                            contextUsersWithoutSessions.add(new ContextUsers(ctxId, userIdsWithoutSessions));
-                        }
-                    }
-
-                    if(false == contextUsersWithoutSessions.isEmpty()) {
-                        //TODO: async call
-                        MobileNotifyEventService mns = Services.getService(MobileNotifyEventService.class);
-                        LOG.trace("Notifying new login");
-                        mns.notifyLogin(contextUsersWithoutSessions);
-                    }
-                }
-//            }
+            if(false == contextUsersWithoutPush.isEmpty()) {
+                //TODO: async call
+                MobileNotifyEventService mns = Services.getService(MobileNotifyEventService.class);
+                mns.notifyLogin(contextUsersWithoutPush);
+            }
         }
     }
 
@@ -148,6 +116,7 @@ public class Watchdog  {
     private static ContextUsers getUserIdsWithoutPushListener(ContextUsers contextUser, boolean[] hasListeners) {
         int i=0;
         for(Iterator<UserToken> iter = contextUser.getUserTokens().iterator(); iter.hasNext();) {
+            iter.next();
             if(hasListeners[i++]) {
                 iter.remove();
             }

@@ -49,22 +49,22 @@
 
 package com.openexchange.mobilenotifier.watchdog.impl;
 
- /**
-  * {@link WatchdogStatusTask}
-  *
-  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
-  */
- public class WatchdogStatusTask implements Runnable {
+/**
+ * {@link WatchdogStatusTask}
+ *
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ */
+public class WatchdogStatusTask implements Runnable {
 
-     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WatchdogStatusTask.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WatchdogStatusTask.class);
 
-     @Override
-     public void run() {
-         try {
-             Watchdog.sessionLookup();
-         } catch(Exception e) {
-             LOG.error("Exception {}", e);
-         }
-     }
+    @Override
+    public void run() {
+        try {
+            Watchdog.sessionLookup();
+        } catch(Exception e) {
+            LOG.error("Exception {}", e);
+        }
+    }
 
- }
+}
