@@ -86,10 +86,10 @@ usage() {
 	echo "  -i,--in <dump_file>                         The dump file previously created with dumpschema"
 	echo "  -l,--login <jmxLogin>                       The optional JMX login (if JMX authentication is enabled)"
 	echo "  -m,--source-schema <source_schema>          Source schema name"
-    echo "  -P,--adminpass <admin_pass>                 Admin password"
- 	echo "  -p,--port <jmxPort>                         The optional JMX port (default:9999)"
-    echo "  -s,--password <jmxPassword>                 The optional JMX password (if JMX authentication is enabled)"
-    echo " 	-t,--target-cluster-id <target_cluster_id>  The target cluster identifier"
+	echo "  -P,--adminpass <admin_pass>                 Admin password"
+	echo "  -p,--port <jmxPort>                         The optional JMX port (default:9999)"
+	echo "  -s,--password <jmxPassword>                 The optional JMX password (if JMX authentication is enabled)"
+	echo "  -t,--target-cluster-id <target_cluster_id>  The target cluster identifier"
 }
 
 ARGS=`getopt -o i:m:t:hA:l:P:p:s: --long in:,source-schema:,target-cluster-id:,help,adminuser:,login:,adminpass:,port:,password: -n 'replayschema' -- "$@"`
@@ -100,7 +100,7 @@ fi
 
 eval set -- "$ARGS"
 
-if [ "$ARGS" = "--" ]; then
+if [ $# -lt 10 ]; then
         usage
         exit 1
 fi
