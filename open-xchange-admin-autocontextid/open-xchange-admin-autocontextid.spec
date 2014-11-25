@@ -73,10 +73,14 @@ done
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
+* Mon Nov 24 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2014-12-01
 * Fri Nov 21 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Second candidate for 7.6.2 release
 * Wed Nov 19 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2014-11-21
+* Tue Nov 18 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2014-11-20
 * Mon Nov 10 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>

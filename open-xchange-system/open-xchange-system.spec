@@ -56,8 +56,12 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 /opt/open-xchange/lib/oxfunctions.sh
 
 %changelog
+* Mon Nov 24 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-12-01
 * Fri Nov 21 2014 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.6.2 release
+* Tue Nov 18 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-11-20
 * Mon Nov 10 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Carsten Hoeger <choeger@open-xchange.com>
