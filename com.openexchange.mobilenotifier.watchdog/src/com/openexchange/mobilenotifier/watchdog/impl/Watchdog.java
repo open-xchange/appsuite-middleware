@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
 import com.openexchange.mobilenotifier.events.storage.ContextUsers;
@@ -62,7 +61,6 @@ import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageServi
 import com.openexchange.mobilenotifier.events.storage.UserToken;
 import com.openexchange.mobilenotifier.watchdog.osgi.Services;
 import com.openexchange.push.PushListenerService;
-import com.openexchange.push.PushListenerServiceExtended;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
@@ -83,12 +81,12 @@ public class Watchdog  {
 
         if(false == contextUsers.isEmpty()) {
             PushListenerService pls = Services.getService(PushListenerService.class);
-            if(pls instanceof PushListenerServiceExtended) {
-                PushListenerServiceExtended plse = (PushListenerServiceExtended) pls;
+//            if(pls instanceof PushListenerServiceExtended) {
+//                PushListenerServiceExtended plse = (PushListenerServiceExtended) pls;
                 List<ContextUsers> contextUsersWithoutPush = new LinkedList<ContextUsers>();
                 for(ContextUsers cu : contextUsers) {
-                    boolean[] hasListeners = plse.hasListenerFor(cu.getContextId(), Autoboxing.I2i(getUserIds(cu)));
-                    cu = getUserIdsWithoutPushListener(cu, hasListeners);
+//                    boolean[] hasListeners = plse.hasListenerFor(cu.getContextId(), Autoboxing.I2i(getUserIds(cu)));
+//                    cu = getUserIdsWithoutPushListener(cu, hasListeners);
                     if(cu != null) {
                         contextUsersWithoutPush.add(cu);
                     }
@@ -110,7 +108,7 @@ public class Watchdog  {
                                 userIdsWithoutSessions.add(userToken);
                             } else {
                                 //TODO client? / starts for multiple users
-                                plse.startListenerFor(session);
+//                                plse.startListenerFor(session);
                             }
                         }
                         if(false == userIdsWithoutSessions.isEmpty()) {
@@ -125,7 +123,7 @@ public class Watchdog  {
                         mns.notifyLogin(contextUsersWithoutSessions);
                     }
                 }
-            }
+//            }
         }
     }
 
