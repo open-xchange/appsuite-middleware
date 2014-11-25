@@ -52,6 +52,7 @@ package com.openexchange.mobilenotifier.watchdog.impl;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
@@ -61,6 +62,7 @@ import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageServi
 import com.openexchange.mobilenotifier.events.storage.UserToken;
 import com.openexchange.mobilenotifier.watchdog.osgi.Services;
 import com.openexchange.push.PushListenerService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link Watchdog}
@@ -78,7 +80,7 @@ public class Watchdog  {
 
         if(false == contextUsers.isEmpty()) {
             PushListenerService pls = Services.getService(PushListenerService.class);
-            List<ContextUsers> contextUsersWithoutPush = new LinkedList<ContextUsers>();
+            final List<ContextUsers> contextUsersWithoutPush = new LinkedList<ContextUsers>();
             for(ContextUsers cu : contextUsers) {
                 boolean[] hasListeners = pls.hasListenerFor(cu.getContextId(), Autoboxing.I2i(getUserIds(cu)));
                 cu = getUserIdsWithoutPushListener(cu, hasListeners);
@@ -88,9 +90,24 @@ public class Watchdog  {
             }
 
             if(false == contextUsersWithoutPush.isEmpty()) {
-                //TODO: async call
-                MobileNotifyEventService mns = Services.getService(MobileNotifyEventService.class);
-                mns.notifyLogin(contextUsersWithoutPush);
+                final MobileNotifyEventService mns = Services.getService(MobileNotifyEventService.class);
+                ThreadPoolService executorService = Services.getService(ThreadPoolService.class);
+                if(executorService == null) {
+                    mns.notifyLogin(contextUsersWithoutPush);
+                } else {
+                    ExecutorService executor = executorService.getExecutor();
+                    executor.execute(new Runnable()
+                    {
+                        @Override
+                        public void run() {
+                            try {
+                                mns.notifyLogin(contextUsersWithoutPush);
+                            } catch (Exception e) {
+                                LOG.error("An error while executing login message to users occured", e);
+                            }
+                        }
+                    });
+                }
             }
         }
     }

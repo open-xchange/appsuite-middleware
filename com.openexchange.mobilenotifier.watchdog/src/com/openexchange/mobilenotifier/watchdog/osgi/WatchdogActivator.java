@@ -53,10 +53,12 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
 import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
+import com.openexchange.mobilenotifier.watchdog.impl.Watchdog;
 import com.openexchange.mobilenotifier.watchdog.impl.WatchdogStatusTask;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -72,15 +74,15 @@ public class WatchdogActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { ClusterTimerService.class, MobileNotifierStorageService.class,
-            SessiondService.class, PushListenerService.class, MobileNotifyEventService.class };
+            SessiondService.class, PushListenerService.class, MobileNotifyEventService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: {}", context.getBundle().getSymbolicName());
         Services.setServiceLookup(this);
-         ClusterTimerService clusterTimerService = getService(ClusterTimerService.class);
-         clusterTimerService.scheduleWithFixedDelay("MOBILE-NOTIFIER-WATCHDOG", new WatchdogStatusTask(), 5L, 5L, TimeUnit.MINUTES);
+        ClusterTimerService clusterTimerService = getService(ClusterTimerService.class);
+        clusterTimerService.scheduleWithFixedDelay(Watchdog.class.getName(), new WatchdogStatusTask(), 5L, 5L, TimeUnit.MINUTES);
     }
 
     @Override
