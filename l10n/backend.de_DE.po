@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-10-17 16:27+0100\n"
+"PO-Revision-Date: 2014-11-25 14:35+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.6.5\n"
+"X-Generator: Poedit 1.6.10\n"
 "X-POOTLE-MTIME: 1409745551.000000\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
@@ -2096,9 +2096,11 @@ msgstr ""
 msgid "Login"
 msgstr "Login"
 
+#. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:91
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr "Passwort"
@@ -2435,6 +2437,11 @@ msgstr ""
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr "ZIP-Archiv übersteigt die maximal zulässige Größe von %1$s"
 
+#. The file storage account is currently not accessible.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
+msgid "The file storage account is currently not accessible."
+msgstr "Der Dateispeicher-Account ist derzeit nicht verfügbar."
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -2614,6 +2621,15 @@ msgid "The e-mail address you provided does not match any account on record."
 msgstr ""
 "Die von Ihnen angegebene E-Mail-Adresse stimmt mit keinem registrierten "
 "Account überein."
+
+#. * The allowed Quota is reached.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
+msgid ""
+"The allowed quota is reached. Please delete some items in order to create "
+"new ones."
+msgstr ""
+"Die zulässige Quota wurde überschritten. Bitte löschen Sie einige Objekte, "
+"um Platz für neue zu schaffen."
 
 #. The service you requested is currently not available. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
@@ -4669,6 +4685,16 @@ msgstr ""
 "löschen Sie einige Anlagen, um neue anlegen zu können. Bitte beachten: Die "
 "Quota bezieht sich auf alle Anlagen aller Benutzer in diesem Kontext."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
+msgid ""
+"Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
+msgstr ""
+"Quota für Freigaben überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
+"löschen Sie einige Freigaben, um neue anlegen zu können. Bitte beachten: Die "
+"Quota bezieht sich auf alle Freigaben eines Benutzers in diesem Kontext."
+
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not send stanza to resource. Resource was offline: %1$s"
@@ -4770,6 +4796,28 @@ msgstr "HTTP-Fehler %1$s beim Laden des RSS-Feed von der URL: %2$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:69
 msgid "Timeout while reading the RSS feed from URL: %1$s"
 msgstr "Zeitüberschreitung beim Lesen des RSS-Feed von der URL: %1$s."
+
+#. No appropriate anonymizer available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
+msgid "No appropriate anonymizer available."
+msgstr "Kein passender Anonymisierer verfügbar."
+
+#. The identifier for user module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:71
+msgid "User"
+msgstr "Benutzer"
+
+#. The identifier for group module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:74
+msgid "Group"
+msgstr "Gruppe"
+
+#. The identifier for resource module
+#. Resource
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:663
+msgid "Resource"
+msgstr "Ressource"
 
 #. *
 #. * The value you inserted for %2$s is not correct
@@ -5592,13 +5640,18 @@ msgstr "Gelöschte Dateien"
 msgid "Other files"
 msgstr "Weitere Dateien"
 
-#. Display name of group with identifier 0. This group always contains all existing users of a context.
+#. Display name of group with identifier 0. This group always contains all existing users of a context but no guests.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All users"
 msgstr "Alle Anwender"
 
-#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#. Display name of group for guest users.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:71
+msgid "Guests"
+msgstr "Gäste"
+
+#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:74
 msgid "Standard group"
 msgstr "Standardgruppe"
 
@@ -6702,11 +6755,6 @@ msgstr "Keine Änderungsausnahmen"
 msgid "Mail to resource %1$s"
 msgstr "E-Mail an Ressource %1$s"
 
-#. Resource
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:663
-msgid "Resource"
-msgstr "Ressource"
-
 #. Not set
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:666
 msgid "Not set"
@@ -6935,6 +6983,11 @@ msgstr ", endet am %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:915
 msgid "Weekday"
 msgstr "Wochentag"
+
+#. Display name of the anonymous guest user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Users.java:69
+msgid "Guest"
+msgstr "Gast"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:57
 msgid "Broken CSV file."
@@ -7293,6 +7346,12 @@ msgid ""
 msgstr ""
 "Das neue Passwort fehlt. Bitte geben Sie Ihr neues Passwort ein und "
 "versuchen Sie es erneut."
+
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+msgid "Denied concurrent update of user attributes."
+msgstr "Gleichzeitige Aktualisierung von Benutzerattributen verweigert."
 
 #. *
 #. * User is missing for the reminder.
@@ -7735,6 +7794,24 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "Verbindung wurde geschlossen. Bitte erneut versuchen."
+
+#. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+msgid ""
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
+msgstr ""
+"Anfrage abgelehnt. Die Dateigröße (%1$s) übersteigt die konfigurierte "
+"maximale Dateigröße von %2$s."
+
+#. Request rejected because file size exceeds the maximum configured file size of %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+msgid ""
+"Request rejected because file size exceeds the maximum configured file size "
+"of %1$s."
+msgstr ""
+"Anfrage abgelehnt. Die Dateigröße übersteigt die konfigurierte maximale "
+"Dateigröße von %1$s."
 
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
@@ -8219,23 +8296,44 @@ msgid "Message could not be sent to the following recipients: %1$s (%2$s)"
 msgstr "Senden der Nachricht an folgende Empfänger fehlgeschlagen: %1$s (%2$s)"
 
 #. *
-#. * Lost connection to mail server.
+#. * Message could not be sent. Error message from mail transport server: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s"
+msgstr ""
+"Die Nachricht konnte nicht gesendet werden. Fehlermeldung vom Mail-"
+"Transportserver: %1$s."
+
+#. *
+#. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s "
+"(%2$s)"
+msgstr ""
+"Die Nachricht konnte nicht gesendet werden. Fehlermeldung vom Mail-"
+"Transportserver: %1$s (%2$s)"
+
+#. *
+#. * Lost connection to mail server.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Lost connection to mail server."
 msgstr "Die Verbindung zum Mailserver ist abgebrochen."
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s."
 msgstr "Die Verbindung zum Mailserver %1$s ist abgebrochen."
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
 "attempting to connect."
@@ -8246,21 +8344,21 @@ msgstr ""
 #. *
 #. * The allowed quota on mail server exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid "The allowed quota on mail server exceeded."
 msgstr "Die zulässige Quota auf dem Mailserver wurde überschritten."
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
 msgstr "Die zulässige Quota auf dem Mailserver \"%1$s\" wurde überschritten."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
 msgid "The mailbox is already in use. Please try again later."
 msgstr ""
 "Diese Mailbox wird bereits verwendet. Bitte versuchen Sie es später erneut. "
@@ -8268,7 +8366,7 @@ msgstr ""
 #. *
 #. * The mailbox on mail server %1$s is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid ""
 "The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr ""
@@ -8276,7 +8374,7 @@ msgstr ""
 "Sie es später erneut."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
@@ -8473,15 +8571,6 @@ msgstr "Die angegebene E-Mail-Adresse \"%1$s\" für die Ressource ist ungültig.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:106
 msgid "The selected resource \"%1$s\" has been changed in the meantime."
 msgstr "Die gewählte Ressource \"%1$s\" hat sich mittlerweile geändert."
-
-#. * The allowed Quota is reached.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:62
-msgid ""
-"The allowed quota is reached. Please delete some items in order to create "
-"new ones."
-msgstr ""
-"Die zulässige Quota wurde überschritten. Bitte löschen Sie einige Objekte, "
-"um Platz für neue zu schaffen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:69
 msgid "You do not have appropriate permissions for module \"%2$s\"."
@@ -8880,6 +8969,119 @@ msgstr "Authentifizierung fehlgeschlagen für den Benutzernamen: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 msgid "No session found for identifier: %1$s"
 msgstr "Kein Sitzung gefunden für die ID: %1$s"
+
+#. [John Doe] shared "[holiday pictures]" with you
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:64
+msgid "%1$s shared \"%2$s\" with you"
+msgstr "%1$s hat \"%2$s\" mit Ihnen geteilt"
+
+#. Message from [John Doe]
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:67
+msgid "Message from %1$s"
+msgstr "Nachricht von %1$s"
+
+#. Click here to view [holiday pictures]
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:70
+msgid "Click here to view %1$s"
+msgstr "Zum Anzeigen von %1$s bitte hier klicken"
+
+#. Please use the following credentials if asked for
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:73
+msgid "Please use the following credentials if asked for"
+msgstr "Bitte verwenden Sie bei Aufforderung folgende Anmeldedaten"
+
+#. Please use your existing credentials if asked for
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:76
+msgid "Please use your existing credentials if asked for"
+msgstr "Verwenden Sie bei Aufforderung bitte Ihre bestehenden Anmeldedaten"
+
+#. Your new credentials are
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:79
+msgid "Your new credentials are"
+msgstr "Ihre neuen Anmeldedaten sind"
+
+#. Please use the following password if asked for
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:82
+msgid "Please use the following password if asked for"
+msgstr "Verwenden Sie bei Aufforderung bitte das folgende Passwort"
+
+#. Click here to reset your password
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:85
+msgid "Click here to reset your password"
+msgstr "Zum Zurücksetzen Ihres Passworts klicken Sie bitte hier"
+
+#. Username
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
+msgid "Username"
+msgstr "Benutzername"
+
+#. John Doe shared 7 items with you
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:94
+msgid "%d items"
+msgstr "%d Objekte"
+
+#. Your password has been reset
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:97
+msgid "Your password has been reset"
+msgstr "Ihr Passwort wurde zurückgesetzt"
+
+#. Your password for http://ox.io/share/af12cb769 has been reset.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:100
+msgid "Your password for %1$s has been reset."
+msgstr "Ihr Passwort für %1$s wurde zurückgesetzt."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64
+msgid "The requested share does not exist."
+msgstr "Die angeforderte Freigabe ist nicht vorhanden."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:66
+msgid "The token \"%1$s\" is invalid."
+msgstr "Token \"%1$s\" ist ungültig."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
+msgid "The link \"%1$s\" is invalid."
+msgstr "Der Link  \"%1$s\" ist ungültig."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
+msgid "\"%1$s\" is not a valid email address."
+msgstr "\"%1$s\" ist keine gültige E-Mail-Adresse."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
+msgid ""
+"The share has been modified in the meantime. Please refresh or synchronize "
+"and try again."
+msgstr ""
+"Die Freigabe hat sich mittlerweile geändert. Bitte aktualisieren oder "
+"synchronisieren Sie und versuchen Sie es erneut."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:74
+msgid "You don't have sufficient permissions to delete the share."
+msgstr ""
+"Sie haben nicht die entsprechenden Berechtigungen zum Löschen der Freigabe."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:76
+msgid "You don't have sufficient permissions to edit the share."
+msgstr ""
+"Sie haben nicht die entsprechenden Berechtigungen zum Bearbeiten der "
+"Freigabe."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:78
+msgid "You don't have sufficient permissions to share folder or item \"%2$s\"."
+msgstr ""
+"Sie haben nicht die entsprechenden Berechtigungen zum Freigeben des Ordners "
+"bzw. Objekts \"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:80
+msgid "Module %1$s does not support sharing."
+msgstr "Das Modul %1$s unterstützt keine Freigaben."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:82
+msgid "Module %1$s does not support sharing of items."
+msgstr "Das Modul %1$s unterstützt keine Objektfreigaben."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:84
+msgid "Module %1$s does not support sharing of folders."
+msgstr "Das Modul %1$s unterstützt keine Ordnerfreigaben."
 
 #. *
 #. * No recipient(s) has been defined for new message
@@ -11448,10 +11650,6 @@ msgstr "Zulu"
 #~ msgid "Telephone IP"
 #~ msgstr "IP-Telefon"
 
-#, fuzzy
-#~ msgid "Filename"
-#~ msgstr "Dateiname"
-
 #~ msgid "Unknown problem: \"%1$s\"."
 #~ msgstr "Unbekanntes Problem: \"%1$s\"."
 
@@ -11991,10 +12189,6 @@ msgstr "Zulu"
 #~ msgid "Check value to parse."
 #~ msgstr "Prüfen Sie den zu analysierenden Wert."
 
-#~ msgid "Please correct the login or password and try again"
-#~ msgstr ""
-#~ "Korrigieren Sie das Login oder das Passwort und versuchen Sie es erneut."
-
 #~ msgid ""
 #~ "Make sure the service is still available and there are no major changes "
 #~ "on the website."
@@ -12057,9 +12251,6 @@ msgstr "Zulu"
 
 #~ msgid "The underlying templating system threw an exception: %1$s"
 #~ msgstr "Fehlermeldung des zugrundeliegenden Vorlagesystems: %1$s"
-
-#~ msgid "Please use an existing template"
-#~ msgstr "Verwenden Sie bitte eine vorhandene Vorlage"
 
 #~ msgid "The template %1$s does not exist."
 #~ msgstr "Die Vorlage %1$s ist nicht vorhanden."
@@ -13623,9 +13814,6 @@ msgstr "Zulu"
 #~ "A protocol exception occurred during execution of a POP3 request: %1$s"
 #~ msgstr "Protokollfehler beim Ausführen der POP3-Anfrage: %1$s"
 
-#~ msgid "POP3 does not support to move folders."
-#~ msgstr "POP3 unterstützt das Verschieben von Ordnern nicht."
-
 #~ msgid "Sort field %1$s is not supported via POP3 SORT command"
 #~ msgstr "Das Sortierfeld %1$s wird nicht vom POP3 SORT-Befehl unterstützt"
 
@@ -13754,9 +13942,6 @@ msgstr "Zulu"
 
 #~ msgid "File name for property file is not defined."
 #~ msgstr "Der Dateiname für die property-Datei wurde nicht angegeben."
-
-#~ msgid "File \"%1$s\" does not exist."
-#~ msgstr "Die Datei \"%1$s\" ist nicht vorhanden."
 
 #~ msgid "File \"%1$s\" is not readable."
 #~ msgstr "Die Datei \"%1$s\" ist nicht lesbar."
@@ -14361,9 +14546,6 @@ msgstr "Zulu"
 #~ msgid "Cannot pre-fetch results."
 #~ msgstr "Ergebnisse können nicht vorab geholt werden"
 
-#~ msgid "The requested item does not exist."
-#~ msgstr "Das angeforderte Objekt ist nicht vorhanden."
-
 #~ msgid "Could not load documents to check the permissions"
 #~ msgstr ""
 #~ "Dokumente konnten nicht zum Prüfen der Berechtigungen geladen werden"
@@ -14389,11 +14571,6 @@ msgstr "Zulu"
 
 #~ msgid "Could not delete all objects."
 #~ msgstr "Objekte konnten nicht alle gelöscht werden"
-
-#~ msgid "You do not have sufficient permissions to delete this version."
-#~ msgstr ""
-#~ "Sie haben nicht die entsprechenden Berechtigungen zum Löschen dieser "
-#~ "Version."
 
 #~ msgid "Could not iterate result."
 #~ msgstr "Ergebnis kann nicht iteriert werden"
@@ -14729,9 +14906,6 @@ msgstr "Zulu"
 
 #~ msgid "Invalid content type value: %1$s"
 #~ msgstr "Ungültiger Content-Type-Wert: %1$s"
-
-#~ msgid "Messaging error: %1$s"
-#~ msgstr "Es trat ein Messaging-Fehler auf: %1$s"
 
 #~ msgid "Message field %1$s cannot be handled"
 #~ msgstr "Nachrichtenfeld %1$s kann nicht verarbeitet werden"
@@ -15255,9 +15429,6 @@ msgstr "Zulu"
 
 #~ msgid "Missing field %1$s in folder %2$s in context %3$s"
 #~ msgstr "Fehlendes Feld %1$s im Ordner %2$s im Kontext %3$s"
-
-#~ msgid "Folder %1$s does not exist in context %2$s"
-#~ msgstr "Kein Ordner namens %1$s im Kontext %2$s vorhanden"
 
 #~ msgid ""
 #~ "Folder %1$s has been modified after last sync timestamp in context %2$s"
@@ -15974,9 +16145,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Entfernen Sie zunächst Ihre gelöschten Objekte oder löschen Sie zunächst "
 #~ "kleinere Nachrichten."
-
-#~ msgid "Folder \"%1$s\" has been closed."
-#~ msgstr "Der Ordner \"%1$s\" wurde geschlossen."
 
 #~ msgid ""
 #~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
