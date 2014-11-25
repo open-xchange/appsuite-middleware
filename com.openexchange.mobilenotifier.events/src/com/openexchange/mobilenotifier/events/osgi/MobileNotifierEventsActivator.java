@@ -55,6 +55,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
 import com.openexchange.mobilenotifier.events.mail.impl.MobileNotifyMailEventImpl;
+import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushEventConstants;
 
@@ -69,7 +70,7 @@ public class MobileNotifierEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { };
+        return new Class[] { MobileNotifierStorageService.class };
     }
 
     @Override

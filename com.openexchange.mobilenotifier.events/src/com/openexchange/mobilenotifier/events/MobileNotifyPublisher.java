@@ -67,5 +67,5 @@ public interface MobileNotifyPublisher {
      *
      * @param loginEvent the event which should be published to the subscribers
      */
-    void publishLogin(MobileNotifyEvent loginEvent);
+    void multiPublish(MobileNotifyEvent loginEvent);
 }

@@ -126,7 +126,7 @@ public enum MobileNotifierProviders {
      * @param providerName
      * @return the provider or <code>null</code> if not found
      */
-    public static MobileNotifierProviders parseProviderFromParam(String providerName) {
+    public static MobileNotifierProviders parseProvider(String providerName) {
         for(MobileNotifierProviders p : MobileNotifierProviders.values())
             if(providerName.equals(p.getProviderName())) {
                 return p;

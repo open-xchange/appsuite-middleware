@@ -59,6 +59,7 @@ import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.events.MobileNotifyEventService;
 import com.openexchange.mobilenotifier.events.storage.ContextUsers;
 import com.openexchange.mobilenotifier.events.storage.MobileNotifierStorageService;
+import com.openexchange.mobilenotifier.events.storage.UserToken;
 import com.openexchange.mobilenotifier.watchdog.osgi.Services;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushListenerServiceExtended;
@@ -76,7 +77,9 @@ public class Watchdog  {
 
     public static void sessionLookup() throws OXException {
         MobileNotifierStorageService rdms = Services.getService(MobileNotifierStorageService.class);
-        List<ContextUsers> contextUsers = rdms.getAllSubscriptions(MobileNotifierProviders.MAIL);
+
+        //The time to wait for sending a new notification
+        List<ContextUsers> contextUsers = rdms.getSubscriptions(MobileNotifierProviders.MAIL, true);
 
         if(false == contextUsers.isEmpty()) {
             PushListenerService pls = Services.getService(PushListenerService.class);
@@ -84,8 +87,7 @@ public class Watchdog  {
                 PushListenerServiceExtended plse = (PushListenerServiceExtended) pls;
                 List<ContextUsers> contextUsersWithoutPush = new LinkedList<ContextUsers>();
                 for(ContextUsers cu : contextUsers) {
-                    boolean[] hasListeners = plse.hasListenerFor(cu.getContextId(), Autoboxing.I2i(cu.getUserIds()));
-
+                    boolean[] hasListeners = plse.hasListenerFor(cu.getContextId(), Autoboxing.I2i(getUserIds(cu)));
                     cu = getUserIdsWithoutPushListener(cu, hasListeners);
                     if(cu != null) {
                         contextUsersWithoutPush.add(cu);
@@ -98,26 +100,28 @@ public class Watchdog  {
                     List<ContextUsers> contextUsersWithoutSessions = new ArrayList<ContextUsers>();
 
                     for(ContextUsers cu : contextUsersWithoutPush) {
-                        List<Integer> userIdsWithoutSessions = new LinkedList<Integer>();
+                        List<UserToken> userIdsWithoutSessions = new LinkedList<UserToken>();
                         int ctxId = cu.getContextId();
 
-                        for(Integer userId : cu.getUserIds()) {
-                            Session session = sessiond.getAnyActiveSessionForUser(ctxId, userId);
+                        for(UserToken userToken : cu.getUserTokens()) {
+                            Session session = sessiond.getAnyActiveSessionForUser(ctxId, userToken.getUserId());
                             if(session == null) {
                                 // user has no active push listener and no active session found
-                                userIdsWithoutSessions.add(userId);
+                                userIdsWithoutSessions.add(userToken);
                             } else {
                                 //TODO client? / starts for multiple users
                                 plse.startListenerFor(session);
                             }
                         }
-                        contextUsersWithoutSessions.add(new ContextUsers(ctxId, userIdsWithoutSessions));
+                        if(false == userIdsWithoutSessions.isEmpty()) {
+                            contextUsersWithoutSessions.add(new ContextUsers(ctxId, userIdsWithoutSessions));
+                        }
                     }
 
                     if(false == contextUsersWithoutSessions.isEmpty()) {
+                        //TODO: async call
                         MobileNotifyEventService mns = Services.getService(MobileNotifyEventService.class);
                         LOG.trace("Notifying new login");
-                        //TODO: async call
                         mns.notifyLogin(contextUsersWithoutSessions);
                     }
                 }
@@ -125,8 +129,19 @@ public class Watchdog  {
         }
     }
 
+    private static List<Integer> getUserIds(ContextUsers contextUsers) {
+        List<UserToken> userTokens = contextUsers.getUserTokens();
+        List<Integer> userIds = new LinkedList<Integer>();
+        if(userTokens != null && false == userTokens.isEmpty()) {
+            for(UserToken ut : userTokens) {
+                userIds.add(ut.getUserId());
+            }
+        }
+        return userIds;
+    }
+
     /**
-     * Gets the context users without any push listeners.
+     * Returns the ContextUsers without any push listeners.
      *
      * @param contextUser
      * @param hasListeners
@@ -134,31 +149,14 @@ public class Watchdog  {
      */
     private static ContextUsers getUserIdsWithoutPushListener(ContextUsers contextUser, boolean[] hasListeners) {
         int i=0;
-        for(Iterator<Integer> iter = contextUser.getUserIds().iterator(); iter.hasNext();) {
+        for(Iterator<UserToken> iter = contextUser.getUserTokens().iterator(); iter.hasNext();) {
             if(hasListeners[i++]) {
                 iter.remove();
             }
         }
-        if(contextUser.getUserIds().isEmpty()) {
+        if(contextUser.getUserTokens().isEmpty()) {
             return null;
         }
-        return new ContextUsers(contextUser.getContextId(), contextUser.getUserIds());
+        return new ContextUsers(contextUser.getContextId(), contextUser.getUserTokens());
     }
-
-//    private final static int MAX_FETCH_SIZE = 2;
-//
-//    private List<List<Subscription>> partitionList(List<Subscription> subscriptions, int chunkSize) {
-//        if(subscriptions.size() == 0 || chunkSize == 0) {
-//            return null;
-//        }
-//
-//        List<List<Subscription>> subs = new ArrayList<List<Subscription>>();
-//
-//        for(int i=0; i<subscriptions.size(); i += chunkSize) {
-//            int listSize = Math.min(subscriptions.size(), i + chunkSize);
-//            subs.add(new ArrayList<Subscription>(subscriptions.subList(i, listSize)));
-//        }
-//
-//        return subs;
-//    }
 }
