@@ -778,7 +778,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public boolean declareCapability(String capability) {
-        final boolean added = null == declaredCapabilities.putIfAbsent(capability, PRESENT);
+        boolean added = null == declaredCapabilities.putIfAbsent(capability, PRESENT);
 
         if (added) {
             final Cache optCache = optCache();
@@ -792,6 +792,24 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
 
         return added;
+    }
+
+    @Override
+    public boolean undeclareCapability(String capability) {
+        boolean removed = null != declaredCapabilities.remove(capability);
+
+        if (removed) {
+            final Cache optCache = optCache();
+            if (null != optCache) {
+                try {
+                    optCache.clear();
+                } catch (final Exception e) {
+                    // ignore
+                }
+            }
+        }
+
+        return removed;
     }
 
     /**
