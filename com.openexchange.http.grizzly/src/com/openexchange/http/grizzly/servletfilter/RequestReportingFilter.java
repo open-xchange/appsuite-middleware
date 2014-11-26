@@ -50,9 +50,9 @@
 package com.openexchange.http.grizzly.servletfilter;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -99,10 +99,10 @@ public class RequestReportingFilter implements Filter {
         this.isFilterEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
 
         List<String> ignoreEas = configService.getProperty("com.openexchange.requestwatcher.eas.ignore.cmd", "ping,sync", ",");
-        this.ignoredEasCommands = new HashSet<String>(ignoreEas);
+        this.ignoredEasCommands = new CopyOnWriteArraySet<String>(ignoreEas);
 
         List<String> ignoreUsm = configService.getProperty("com.openexchange.requestwatcher.usm.ignore.path", "/syncupdate", ",");
-        this.ignoredUsmCommands = new HashSet<String>(ignoreUsm);
+        this.ignoredUsmCommands = new CopyOnWriteArraySet<String>(ignoreUsm);
 
         serviceName = RequestWatcherService.class.getSimpleName();
     }
@@ -123,19 +123,25 @@ public class RequestReportingFilter implements Filter {
                 chain.doFilter(request, response);
             } else {
                 HttpServletRequest httpRequest = (HttpServletRequest) request;
-                if (isLongRunning(httpRequest) || isIgnored(httpRequest)) {
-                    // Do not track long running requests
-                    chain.doFilter(request, response);
-                } else {
-                    HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    RequestRegistryEntry entry = requestWatcher.registerRequest(httpRequest, httpResponse, Thread.currentThread(), LogProperties.getPropertyMap());
-                    try {
-                        // Proceed processing
+                try {
+                    if (isLongRunning(httpRequest) || isIgnored(httpRequest)) {
+                        // Do not track long running requests
                         chain.doFilter(request, response);
-                    } finally {
-                        // Remove request from watcher after processing finished
-                        requestWatcher.unregisterRequest(entry);
+                    } else {
+                        HttpServletResponse httpResponse = (HttpServletResponse) response;
+                        RequestRegistryEntry entry = requestWatcher.registerRequest(httpRequest, httpResponse, Thread.currentThread(), LogProperties.getPropertyMap());
+                        try {
+                            // Proceed processing
+                            chain.doFilter(request, response);
+                        } finally {
+                            // Remove request from watcher after processing finished
+                            requestWatcher.unregisterRequest(entry);
+                        }
                     }
+                } catch (Exception exception) {
+                    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
+                    logger.error("RequestWatcher is not able to check requests to be ignored and/or to register for watching. Move forward with filter chain processing.", exception);
+                    chain.doFilter(request, response);
                 }
             }
         } else {
@@ -144,7 +150,14 @@ public class RequestReportingFilter implements Filter {
         }
     }
 
-
+    /**
+     * Checks if the given request is defined as to be ignored.<br>
+     * Ignored requests can be defined by setting property 'com.openexchange.requestwatcher.eas.ignore.cmd' or property
+     * 'com.openexchange.requestwatcher.usm.ignore.path'.
+     *
+     * @param httpRequest - request to check
+     * @return <code>true</code> if this request should not be watched by RequestWatcher, otherwise <code>false</code>
+     */
     private boolean isIgnored(HttpServletRequest httpRequest) {
         return RequestTools.isIgnoredEasRequest(httpRequest, ignoredEasCommands) || RequestTools.isIgnoredUsmRequest(httpRequest, ignoredUsmCommands);
     }
