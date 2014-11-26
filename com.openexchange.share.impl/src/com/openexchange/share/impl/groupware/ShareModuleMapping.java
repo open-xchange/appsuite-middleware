@@ -82,7 +82,6 @@ public class ShareModuleMapping {
             String mapping = configService.getProperty("com.openexchange.share.modulemapping");
             try {
                 if (null != mapping && !"".equals(mapping) && !mapping.isEmpty()) {
-                    mapping = mapping.replace("\"", "");
                     for (String module : mapping.split(",")) {
                         String moduleName = module.split("=")[0];
                         String moduleId = module.split("=")[1];
