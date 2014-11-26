@@ -109,4 +109,12 @@ public interface CapabilityService {
      */
     boolean declareCapability(String capability);
 
+    /**
+     * Un-Declares specified capability.
+     *
+     * @param capability The capability to undeclare
+     * @return <code>true</code> if capability has been undeclared before; otherwise <code>false</code> if no such capability was available
+     */
+    boolean undeclareCapability(String capability);
+
 }
