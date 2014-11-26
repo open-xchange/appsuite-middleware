@@ -66,9 +66,8 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.TransactionManager;
-import com.openexchange.folderstorage.osgi.UserServiceHolder;
-import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -235,7 +234,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                  * Check for forbidden public mail folder
                  */
                 {
-                    boolean started2 = newRealParentStorage.startTransaction(storageParameters, true);
+                    boolean started = newRealParentStorage.startTransaction(storageParameters, true);
                     boolean rollback = true;
                     try {
                         Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
@@ -249,7 +248,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     } catch (RuntimeException e) {
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                     } finally {
-                        if (started2 && rollback) {
+                        if (started && rollback) {
                             newRealParentStorage.rollback(storageParameters);
                         }
                     }
