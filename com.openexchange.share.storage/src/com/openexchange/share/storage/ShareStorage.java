@@ -205,4 +205,14 @@ public interface ShareStorage {
     List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
 
     //    int deleteShares(int contextID, List<ShareTarget> targets, int[] guests, StorageParameters parameters) throws OXException;
+
+    /**
+     * Loads all shares stored for a specific module.
+     *
+     * @param contextID The context ID
+     * @param module The module Id
+     * @param parameters The storage parameters
+     * @return The shares, or an empty list if none were found
+     */
+    List<Share> loadSharesForModule(int contextId, int module, StorageParameters parameters) throws OXException;
 }

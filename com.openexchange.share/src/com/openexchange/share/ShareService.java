@@ -211,6 +211,15 @@ public interface ShareService {
     List<ShareInfo> getAllShares(Session session) throws OXException;
 
     /**
+     * Gets all shares that were created for the specified module by the supplied session's user.
+     *
+     * @param session The session
+     * @param module The module
+     * @return The shares, or an empty list if there are none.
+     */
+    List<ShareInfo> getAllShares(Session session, String module) throws OXException;
+
+    /**
      * Gets all users that shared something to specified guest.
      *
      * @param contextId The context identifier

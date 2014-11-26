@@ -69,6 +69,7 @@ public class SelectShareBuilder {
     private final int contextID;
     private final ShareField[] shareFields;
     private int createdBy;
+    private int module;
     private int[] guests;
     private List<ShareTarget> targets;
     private Date expiredAfter;
@@ -94,6 +95,17 @@ public class SelectShareBuilder {
      */
     public SelectShareBuilder createdBy(int createdBy) {
         this.createdBy = createdBy;
+        return this;
+    }
+
+    /**
+     * Adds the module of the share to restrict the results to.
+     *
+     * @param module The ID of the module for which the share was created
+     * @return The builder
+     */
+    public SelectShareBuilder forModule(int module) {
+        this.module = module;
         return this;
     }
 
@@ -178,6 +190,9 @@ public class SelectShareBuilder {
         if (0 < createdBy) {
             stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?");
         }
+        if (0 < module) {
+            stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=?");
+        }
         if (null != guests && 0 < guests.length) {
             stringBuilder.append(" AND ").append(SHARE_MAPPER.get(ShareField.GUEST).getColumnLabel());
             if (1 == guests.length) {
@@ -221,6 +236,9 @@ public class SelectShareBuilder {
         stmt.setInt(parameterIndex++, contextID);
         if (0 < createdBy) {
             stmt.setInt(parameterIndex++, createdBy);
+        }
+        if (0 < module) {
+            stmt.setInt(parameterIndex++, module);
         }
         if (null != guests) {
             for (int guest : guests) {

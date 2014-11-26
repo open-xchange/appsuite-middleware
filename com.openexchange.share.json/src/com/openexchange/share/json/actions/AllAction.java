@@ -79,10 +79,19 @@ public class AllAction extends AbstractShareAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String module = null;
+        if (requestData.containsParameter("module")) {
+            module = requestData.checkParameter("module");
+        }
         /*
          * get shares from storage
          */
-        List<ShareInfo> shares = getShareService().getAllShares(session);
+        List<ShareInfo> shares = null;
+        if (null != module) {
+            shares = getShareService().getAllShares(session, module);
+        } else {
+            shares = getShareService().getAllShares(session);
+        }
         if (null == shares || 0 == shares.size()) {
             return new AJAXRequestResult(new JSONArray());
         }
