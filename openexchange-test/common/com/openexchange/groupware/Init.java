@@ -835,6 +835,8 @@ public final class Init {
             SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
             serviceLookup.add(ConfigurationService.class, services.get(ConfigurationService.class));
             serviceLookup.add(TimerService.class, services.get(TimerService.class));
+            serviceLookup.add(EventAdmin.class, services.get(EventAdmin.class));
+            serviceLookup.add(SessionStorageService.class, services.get(SessionStorageService.class));
             com.openexchange.sessiond.osgi.Services.setServiceLookup(serviceLookup);
             final SessiondServiceImpl serviceImpl = new SessiondServiceImpl();
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
