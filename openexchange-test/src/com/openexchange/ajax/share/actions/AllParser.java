@@ -71,11 +71,7 @@ public class AllParser extends AbstractAJAXParser<AllResponse> {
 
 	@Override
 	protected AllResponse createResponse(Response response) throws JSONException {
-
-
-
-
-        return new AllResponse(response);
+	    return new AllResponse(response);
     }
 
 }

@@ -53,6 +53,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
@@ -117,6 +118,31 @@ public class AllTest extends ShareTest {
              */
             ParsedShare share = discoverShare(allShares, folder.getObjectID(), matchingPermission.getEntity());
             checkShare(guestPermission, share);
+        }
+    }
+
+    public void testListForModule() throws Exception {
+        /*
+         * create multiple random shares
+         */
+        List<Entry<FolderObject, OCLGuestPermission>> sharedFolders = new ArrayList<Entry<FolderObject, OCLGuestPermission>>();
+        for (int i = 0; i < 10; i++) {
+            int module = randomModule();
+            int parent = getDefaultFolder(module);
+            OCLGuestPermission guestPermission = randomGuestPermission();
+            FolderObject folder = insertSharedFolder(randomFolderAPI(), module, parent, guestPermission);
+            sharedFolders.add(new AbstractMap.SimpleEntry<FolderObject, OCLGuestPermission>(folder, guestPermission));
+        }
+        /*
+         * list shares from random module
+         */
+        int random = new Random(System.currentTimeMillis()).nextInt(TESTED_MODULES.length);
+        String module = TESTED_MODULES_NAMES[random];
+        int moduleId = TESTED_MODULES[random];
+        AllResponse allResponse = client.execute(new AllRequest(module));
+        List<ParsedShare> allShares = allResponse.getParsedShares();
+        for (ParsedShare share : allShares) {
+            assertEquals("Wrong target module.", moduleId, share.getTarget().getModule());
         }
     }
 

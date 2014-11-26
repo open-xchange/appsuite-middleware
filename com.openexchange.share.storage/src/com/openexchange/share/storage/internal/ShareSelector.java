@@ -215,5 +215,16 @@ public class ShareSelector {
         }
     }
 
+    /**
+     * Adds the module ID of the share to restrict the results to.
+     *
+     * @param module The ID of the module for which the share was created, or <code>0</code> to not filter by the module
+     * @return The builder
+     */
+    public ShareSelector forModule(int moduleId) {
+        builder.forModule(moduleId);
+        return this;
+    }
+
 }
 

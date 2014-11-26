@@ -89,6 +89,7 @@ import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.cleanup.GuestLastModifiedMarker;
+import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -184,6 +185,15 @@ public class DefaultShareService implements ShareService {
     public List<ShareInfo> getAllShares(Session session) throws OXException {
         List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(
             session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
+        shares = removeExpired(session.getContextId(), shares);
+        return ShareTool.toShareInfos(services, session.getContextId(), shares);
+    }
+
+    @Override
+    public List<ShareInfo> getAllShares(Session session, String module) throws OXException {
+        int moduleId = ShareModuleMapping.moduleMapping2int(module);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForModule(
+            session.getContextId(), moduleId, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         return ShareTool.toShareInfos(services, session.getContextId(), shares);
     }

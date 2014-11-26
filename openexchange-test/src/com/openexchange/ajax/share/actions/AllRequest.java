@@ -65,6 +65,7 @@ import com.openexchange.ajax.framework.Params;
 public class AllRequest implements AJAXRequest<AllResponse>{
 
     private final boolean failOnError;
+    private final String module;
 
     /**
      * Initializes a new {@link AllRequest}.
@@ -73,6 +74,7 @@ public class AllRequest implements AJAXRequest<AllResponse>{
      */
     public AllRequest(boolean failOnError) {
         super();
+        this.module = null;
         this.failOnError = true;
     }
 
@@ -81,6 +83,18 @@ public class AllRequest implements AJAXRequest<AllResponse>{
      */
     public AllRequest() {
         this(true);
+    }
+
+    public AllRequest(String module) {
+        super();
+        this.module = module;
+        this.failOnError = true;
+    }
+
+    public AllRequest(String module, boolean failOnError) {
+        super();
+        this.module = module;
+        this.failOnError = failOnError;
     }
 
     @Override
@@ -95,7 +109,11 @@ public class AllRequest implements AJAXRequest<AllResponse>{
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL).toArray();
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
+        if (null != module) {
+            params.add("module", module);
+        }
+        return params.toArray();
     }
 
     @Override
