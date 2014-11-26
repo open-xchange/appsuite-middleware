@@ -147,6 +147,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.processing.MimeForward;
+import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.permission.MailPermission;
@@ -1662,12 +1663,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * first loading from cache then loading missing headers in next step
          */
         try {
-            MailMessage[] mails = MailMessageCache.getInstance().getMessages(
-                uids,
-                accountId,
-                fullName,
-                session.getUserId(),
-                contextId);
+            MailMessage[] mails = MailMessageCache.getInstance().getMessages(uids, accountId, fullName, session.getUserId(), contextId);
             if (null != mails) {
                 /*
                  * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
@@ -1694,11 +1690,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                         if (messageStorage instanceof IMailMessageStorageExt) {
                             IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
-                            for (MailMessage header : messageStorageExt.getMessages(
-                                fullName,
-                                loadMe.toArray(new String[loadMe.size()]),
-                                FIELDS_ID_INFO,
-                                headerFields)) {
+                            for (MailMessage header : messageStorageExt.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), FIELDS_ID_INFO, headerFields)) {
                                 if (null != header) {
                                     MailMessage mailMessage = finder.get(header.getMailId());
                                     if (null != mailMessage) {
@@ -1730,11 +1722,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailMessage[] mails;
         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         if (messageStorage instanceof IMailMessageStorageExt) {
-            mails = ((IMailMessageStorageExt) messageStorage).getMessages(
-                fullName,
-                uids,
-                MailField.toFields(MailListField.getFields(fields)),
-                headerFields);
+            mails = ((IMailMessageStorageExt) messageStorage).getMessages(fullName, uids, MailField.toFields(MailListField.getFields(fields)), headerFields);
         } else {
             /*
              * Get appropriate mail fields
@@ -1829,7 +1817,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Selection fits into cache: Prepare for caching
              */
-            useFields = com.openexchange.mail.mime.utils.MimeStorageUtility.getCacheFieldsArray();
+            useFields = MimeStorageUtility.getCacheFieldsArray();
             onlyFolderAndID = false;
         } else {
             useFields = MailField.getFields(fields);
@@ -1915,6 +1903,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailMessage[] mails;
         // Do pagination
         MailField[] useFields = MailField.getFields(fields);
+        useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
         if (null != headerNames && 0 < headerNames.length) {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (messageStorage instanceof IMailMessageStorageExt) {
@@ -2338,7 +2327,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Selection fits into cache: Prepare for caching
              */
-            useFields = com.openexchange.mail.mime.utils.MimeStorageUtility.getCacheFieldsArray();
+            useFields = MimeStorageUtility.getCacheFieldsArray();
             onlyFolderAndID = false;
         } else {
             useFields = MailField.toFields(MailListField.getFields(fields));

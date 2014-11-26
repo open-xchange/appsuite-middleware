@@ -1,3 +1,7 @@
+* 2014-11-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35622: Orderly apply cache fields to cached messages
+
 * 2014-11-26 - martin.schneider@open-xchange.com
 
 - Fix for bug 35619: Avoid ConcurrentModificationException and appropriate exception handling
