@@ -64,9 +64,12 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
@@ -152,6 +155,27 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     public void dispose() {
         rankingAwareTurboFilterList.removeTurboFilter(turboFilterCache);
         turboFilterCache.clear();
+    }
+    
+    @Override
+    public String getRootAppenderStats() {
+        ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+        Iterator<Appender<ILoggingEvent>> appenders = rootLogger.iteratorForAppenders();
+        StringBuilder sb = new StringBuilder();
+        while (appenders.hasNext()) {
+            Appender<ILoggingEvent> appender = appenders.next();
+            sb.append(appender.getClass().getSimpleName()).append(": ").append(appender.getName());
+            if (appender instanceof AsyncAppender) {
+                AsyncAppender asyncAppender = (AsyncAppender) appender;
+                sb.append(" [capacity=").append(asyncAppender.getQueueSize()).append(",size=").append(asyncAppender.getNumberOfElementsInQueue()).append(']');
+            }
+            sb.append(System.lineSeparator());
+        }
+        
+        if (sb.length() == 0) {
+            sb.append("No root appenders found.").append(System.lineSeparator());
+        }
+        return sb.toString();
     }
 
     @Override
