@@ -56,7 +56,6 @@ import java.util.regex.Matcher;
 import net.htmlparser.jericho.Attribute;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
 import com.openexchange.html.internal.HtmlServiceImpl;
@@ -114,7 +113,7 @@ public final class UrlReplacerJerichoHandler implements JerichoHandler {
     }
 
     @Override
-    public void handleSegment(final Segment content) {
+    public void handleSegment(final CharSequence content) {
         htmlBuilder.append(content);
     }
 

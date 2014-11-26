@@ -465,7 +465,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     @Override
-    public void handleSegment(final Segment content) {
+    public void handleSegment(final CharSequence content) {
         if (skipLevel == 0) {
             if (isCss) {
                 if (false == maxContentSizeExceeded) {
@@ -486,7 +486,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
             } else {
                 if (checkMaxContentSize(content.length())) {
-                    if (content.isWhiteSpace()) {
+                    if (content instanceof Segment ? ((Segment) content).isWhiteSpace() : isWhiteSpace(content)) {
                         htmlBuilder.append(content);
                     } else {
                         /*-
@@ -500,6 +500,18 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
             }
         }
+    }
+
+    /**
+     * Indicates whether this segment consists entirely of white spaces.
+     */
+    private boolean isWhiteSpace(CharSequence content) {
+        for (int i = content.length(); i-- > 0;) {
+            if (!Segment.isWhiteSpace(content.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

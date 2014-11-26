@@ -1795,7 +1795,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 int accountId = argument.getAccountId();
                 initConnection(accountId);
 
-                // Check if a certain range is requested
+                // Check if a certain range/page is requested
                 if (IndexRange.NULL != indexRange) {
                     return getMessageRange(searchTerm, fields, headerNames, fullName, indexRange, sortField, orderDir, accountId);
                 }
@@ -1900,10 +1900,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private SearchIterator<MailMessage> getMessageRange(SearchTerm<?> searchTerm, int[] fields, String[] headerNames, String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection orderDir, int accountId) throws OXException {
-        MailMessage[] mails;
-        // Do pagination
+        boolean cachable = (indexRange.end - indexRange.start) < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit();
         MailField[] useFields = MailField.getFields(fields);
-        useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
+        if (cachable) {
+            useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
+        }
+        MailMessage[] mails;
         if (null != headerNames && 0 < headerNames.length) {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (messageStorage instanceof IMailMessageStorageExt) {
@@ -1932,7 +1934,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Remove old user cache entries
              */
             MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
-            boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
             if ((cachable) && (mails.length > 0)) {
                 /*
                  * ... and put new ones

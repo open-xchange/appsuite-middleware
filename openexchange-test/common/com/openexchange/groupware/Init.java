@@ -63,6 +63,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
+import sessionstorage.TestSessionStorageService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
@@ -168,6 +169,7 @@ import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
+import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
@@ -352,8 +354,8 @@ public final class Init {
         startAndInjectDatabaseUpdate();
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
-        startAndInjectSessiondBundle();
         startAndInjectEventBundle();
+        startAndInjectSessiondBundle();
         startAndInjectContextService();
         startAndInjectFileStorage();
         startAndInjectGroupService();
@@ -431,15 +433,7 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
             final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
             final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
-            final ThreadPoolServiceImpl threadPool =
-                ThreadPoolServiceImpl.newInstance(
-                    props.getCorePoolSize(),
-                    props.getMaximumPoolSize(),
-                    props.getKeepAliveTime(),
-                    props.getWorkQueue(),
-                    props.getWorkQueueSize(),
-                    props.isBlocking(),
-                    props.getRefusedExecutionBehavior());
+            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior());
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
             ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
@@ -832,7 +826,12 @@ public final class Init {
             SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
             serviceLookup.add(ConfigurationService.class, services.get(ConfigurationService.class));
             serviceLookup.add(TimerService.class, services.get(TimerService.class));
+            serviceLookup.add(EventAdmin.class, services.get(EventAdmin.class));
+            SessionStorageService sessionStorageService = TestSessionStorageService.getInstance();
+            serviceLookup.add(SessionStorageService.class, sessionStorageService);
             com.openexchange.sessiond.osgi.Services.setServiceLookup(serviceLookup);
+
+            TestServiceRegistry.getInstance().addService(SessionStorageService.class, sessionStorageService);
             final SessiondServiceImpl serviceImpl = new SessiondServiceImpl();
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             TestServiceRegistry.getInstance().addService(SessiondService.class, serviceImpl);

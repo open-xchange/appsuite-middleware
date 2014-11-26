@@ -185,7 +185,7 @@ public final class JerichoParser {
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("^\\s*(<[^?][^>]+)(>?)\\s*$");
+    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[^?][^>]+)(>?)\\s*$");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -288,7 +288,12 @@ public final class JerichoParser {
                     /*
                      * Re-parse start tag
                      */
-                    StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(m.group(1)));
+                    int start = m.start();
+                    if (start > 0) {
+                        handler.handleSegment(segment.subSequence(0, start));
+                    }
+
+                    StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(m.group(2)));
                     Thread thread = Thread.currentThread();
                     for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
                         Segment nestedSegment = iter.next();
