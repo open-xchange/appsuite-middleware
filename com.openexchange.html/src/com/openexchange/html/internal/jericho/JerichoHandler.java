@@ -51,7 +51,6 @@ package com.openexchange.html.internal.jericho;
 
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
 
@@ -84,7 +83,7 @@ public interface JerichoHandler {
 
     void handleCharacterReference(CharacterReference characterReference);
 
-    void handleSegment(Segment content);
+    void handleSegment(CharSequence content);
 
     void handleStartTag(StartTag startTag);
 
