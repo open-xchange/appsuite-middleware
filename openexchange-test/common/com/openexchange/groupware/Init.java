@@ -62,6 +62,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
+import sessionstorage.TestSessionStorageService;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
@@ -163,6 +164,7 @@ import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
+import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -372,8 +374,8 @@ public final class Init {
         startAndInjectDatabaseUpdate();
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
-        startAndInjectSessiondBundle();
         startAndInjectEventBundle();
+        startAndInjectSessiondBundle();
         startAndInjectContextService();
         startAndInjectUserService();
         startAndInjectGroupService();
@@ -450,15 +452,7 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
             final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
             final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
-            final ThreadPoolServiceImpl threadPool =
-                ThreadPoolServiceImpl.newInstance(
-                    props.getCorePoolSize(),
-                    props.getMaximumPoolSize(),
-                    props.getKeepAliveTime(),
-                    props.getWorkQueue(),
-                    props.getWorkQueueSize(),
-                    props.isBlocking(),
-                    props.getRefusedExecutionBehavior());
+            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior());
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
             ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
@@ -497,11 +491,9 @@ public final class Init {
             final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
             com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
             final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getFileByName("HTMLEntities.properties"));
-            @SuppressWarnings("unchecked")
-            final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+            @SuppressWarnings("unchecked") final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
             htmlEntityMap.put("apos", Character.valueOf('\''));
-            @SuppressWarnings("unchecked")
-            final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+            @SuppressWarnings("unchecked") final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
             htmlCharMap.put(Character.valueOf('\''), "apos");
             final HtmlService service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
             services.put(HtmlService.class, service);
@@ -512,16 +504,15 @@ public final class Init {
     private static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
         new Component() {
+
             private static final long serialVersionUID = 2411378382745647554L;
+
             @Override
             public String getAbbreviation() {
                 return "TEST";
             }
         };
-        return new OXException(
-            9999,
-            null == message ? "[Not available]" : message,
-                cause);
+        return new OXException(9999, null == message ? "[Not available]" : message, cause);
     }
 
     private static void startAndInjectCalendarServices() {
@@ -543,20 +534,7 @@ public final class Init {
                     /*
                      * Compose cache configuration
                      */
-                    final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                        "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                        "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
-                        "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                        "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                        "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
-                        "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
-                        "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                        "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                        "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
-                        "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
-                        "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                        "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                        "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                    final byte[] ccf = ("jcs.region." + regionName + "=LTCP\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=" + maxObjects + "\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=" + shrinkerIntervalSeconds + "\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=" + maxLifeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
                     final CacheService cacheService = TestServiceRegistry.getInstance().getService(CacheService.class);
                     cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
                     CalendarVolatileCache.initInstance(cacheService.getCache(regionName));
@@ -582,17 +560,18 @@ public final class Init {
     private static void startAndInjectImportExportServices() throws OXException {
         if (null == com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.get()) {
             com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(new ServiceLookup() {
+
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
+
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
                 }
             });
-            SubscriptionServiceRegistry.getInstance().addService(
-                ContactService.class, services.get(ContactService.class));
+            SubscriptionServiceRegistry.getInstance().addService(ContactService.class, services.get(ContactService.class));
         }
     }
 
@@ -616,10 +595,12 @@ public final class Init {
             registry.addStorage(new RdbContactStorage());
             TestServiceRegistry.getInstance().addService(ContactStorageRegistry.class, registry);
             com.openexchange.contact.storage.rdb.internal.RdbServiceLookup.set(new ServiceLookup() {
+
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
+
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
@@ -632,10 +613,12 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
             final ContactService contactService = new ContactServiceImpl(new UserServiceInterceptorRegistry(null));
             ContactServiceLookup.set(new ServiceLookup() {
+
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
+
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
@@ -711,7 +694,7 @@ public final class Init {
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
-        if(databaseUpdateinitialized ) {
+        if (databaseUpdateinitialized) {
             return;
         }
         // ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -749,7 +732,7 @@ public final class Init {
             reg.addService(ContextService.class, services.get(ContextService.class));
             reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             reg.addService(UserService.class, services.get(UserService.class));
-            //            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+            // reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
             reg.addService(ContactService.class, services.get(ContactService.class));
         }
     }
@@ -779,9 +762,7 @@ public final class Init {
             SpamHandlerRegistry.registerSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName(), DefaultSpamHandler.getInstance());
         }
         if (null == SpamHandlerRegistry.getSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName())) {
-            SpamHandlerRegistry.registerSpamHandler(
-                SpamAssassinSpamHandler.getInstance().getSpamHandlerName(),
-                SpamAssassinSpamHandler.getInstance());
+            SpamHandlerRegistry.registerSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName(), SpamAssassinSpamHandler.getInstance());
         }
     }
 
@@ -796,6 +777,7 @@ public final class Init {
     private static void startAndInjectUserService() {
         if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
             final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
+
                 @Override
                 public synchronized List<UserServiceInterceptor> getInterceptors() {
                     return Collections.emptyList();
@@ -836,8 +818,11 @@ public final class Init {
             serviceLookup.add(ConfigurationService.class, services.get(ConfigurationService.class));
             serviceLookup.add(TimerService.class, services.get(TimerService.class));
             serviceLookup.add(EventAdmin.class, services.get(EventAdmin.class));
-            serviceLookup.add(SessionStorageService.class, services.get(SessionStorageService.class));
+            SessionStorageService sessionStorageService = TestSessionStorageService.getInstance();
+            serviceLookup.add(SessionStorageService.class, sessionStorageService);
             com.openexchange.sessiond.osgi.Services.setServiceLookup(serviceLookup);
+
+            TestServiceRegistry.getInstance().addService(SessionStorageService.class, sessionStorageService);
             final SessiondServiceImpl serviceImpl = new SessiondServiceImpl();
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             TestServiceRegistry.getInstance().addService(SessiondService.class, serviceImpl);
@@ -869,7 +854,7 @@ public final class Init {
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();
-            JCSCacheServiceInit.getInstance().setCacheEventService((CacheEventService)services.get(CacheEventService.class));
+            JCSCacheServiceInit.getInstance().setCacheEventService((CacheEventService) services.get(CacheEventService.class));
             JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
             final CacheService cache = JCSCacheService.getInstance();
             services.put(CacheService.class, cache);
@@ -915,9 +900,9 @@ public final class Init {
         // for (final Initialization init: started) {
         // init.stop();
         // }
-        //        stopMailBundle();
-        //        stopDatabaseBundle();
-        //        stopThreadPoolBundle();
+        // stopMailBundle();
+        // stopDatabaseBundle();
+        // stopThreadPoolBundle();
         if (!running.compareAndSet(true, false)) {
             /*
              * Already stopped
