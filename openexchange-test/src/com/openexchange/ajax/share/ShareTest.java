@@ -90,6 +90,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
@@ -125,6 +126,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static final int[] TESTED_MODULES = new int[] {
         FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
+    };
+
+    protected static final String[] TESTED_MODULES_NAMES = new String[] {
+        Module.CONTACTS.getName(), Module.INFOSTORE.getName(), Module.TASK.getName(), Module.CALENDAR.getName()
     };
 
     protected static final Random random = new Random();
