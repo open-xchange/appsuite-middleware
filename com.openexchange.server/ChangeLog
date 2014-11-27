@@ -1,6 +1,7 @@
 * 2014-11-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 35639: Write generated ZIP file directly to stream (if possible)
+ - Fix for bug 35630: Keep URLs intact that contain double URL-encoded entities
 
 * 2014-11-26 - thorben.betten@open-xchange.com
 
