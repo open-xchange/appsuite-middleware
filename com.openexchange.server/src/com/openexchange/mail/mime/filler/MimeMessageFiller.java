@@ -1353,20 +1353,27 @@ public class MimeMessageFiller {
          * Content-ID
          */
         String contentId = part.getContentId();
-        if (contentId == null) {
-            messageBodyPart.setContentID(new StringBuilder(36).append("<part-").append(UUIDs.getUnformattedStringFromRandom()).append('>').toString());
+        if (contentId != null) {
+            if (contentId.charAt(0) == '<') {
+                messageBodyPart.setContentID(contentId);
+            } else {
+                messageBodyPart.setContentID(new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString());
+            }
+        }
+        /*
+         * Part identifier
+         */
+        String partId = part.getFirstHeader(MessageHeaders.HDR_X_PART_ID);
+        if (partId == null) {
+            messageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, UUIDs.getUnformattedStringFromRandom());
             /*
              * Add to parental multipart
              */
             mp.addBodyPart(messageBodyPart);
         } else {
             // Check for duplicate by Content-Id value
-            if (index < 0 || size <= 0 || !contains(contentId, index, mail, size)) {
-                if (contentId.charAt(0) == '<') {
-                    messageBodyPart.setContentID(contentId);
-                } else {
-                    messageBodyPart.setContentID(new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString());
-                }
+            if (index < 0 || size <= 0 || !contains(partId, MessageHeaders.HDR_X_PART_ID, index, mail, size)) {
+                messageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, partId);
                 /*
                  * Add to parental multipart
                  */
@@ -1375,11 +1382,11 @@ public class MimeMessageFiller {
         }
     }
 
-    private static final boolean contains(String contentId, int index, ComposedMailMessage mail, int size) throws OXException {
+    private static final boolean contains(String partId, String hdrName, int index, ComposedMailMessage mail, int size) throws OXException {
         for (int i = size; i-- > 0;) {
             if (i != index) {
                 MailPart part = mail.getEnclosedMailPart(i);
-                if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) && contentId.equals(part.getContentId())) {
+                if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) && partId.equals(part.getFirstHeader(hdrName))) {
                     return true;
                 }
             }
