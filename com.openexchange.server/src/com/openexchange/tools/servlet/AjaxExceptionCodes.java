@@ -171,6 +171,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * No such conversion path from "%1$s" to "%2$s" in module "%3$s" for action "%4$s".
      */
     NO_SUCH_CONVERSION_PATH("No such conversion path from \"%1$s\" to \"%2$s\" in module \"%3$s\" for action \"%4$s\".", null, Category.CATEGORY_ERROR, 26),
+    /**
+     * The HTML content is too big and therefore cannot be safely displayed. Please select to download its content if you want to see it.
+     */
+    HTML_TOO_BIG("The HTML content is too big and therefore cannot be safely displayed. Please select to download its content if you want to see it.", AjaxExceptionMessages.HTML_TOO_BIG_MSG, Category.CATEGORY_USER_INPUT, 27),
 
     ;
 
