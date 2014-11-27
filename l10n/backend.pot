@@ -7072,6 +7072,12 @@ msgstr ""
 msgid "Mail access is disabled for context administrator."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+msgid ""
+"The maximum number of files that may be attached to an E-Mail is exceeded. "
+"Max. is %1$s."
+msgstr ""
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
