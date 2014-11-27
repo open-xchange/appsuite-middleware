@@ -64,17 +64,18 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({ 
-    Bug26237Test.class, 
-    Bug26611Test.class, 
-    Bug27335Test.class, 
-    Bug27708Test.class, 
-    CSSMatcherTest.class, 
-    Bug30114Test.class, 
-    Bug31826Test.class, 
+@SuiteClasses({
+    Bug26237Test.class,
+    Bug26611Test.class,
+    Bug27335Test.class,
+    Bug27708Test.class,
+    CSSMatcherTest.class,
+    Bug30114Test.class,
+    Bug31826Test.class,
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class
+    FilterJerichoHandlerTest.class,
+    com.openexchange.html.internal.SaneScriptTagsTest.class
 })
 public class UnitTests {
 
