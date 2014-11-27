@@ -180,7 +180,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             ustmt.setInt(2, contextId);
             ustmt.setInt(3, ownerId);
             final int rows = ustmt.executeUpdate();
-            if (1 != rows) {
+            if (rows == 0) {
                 if (ownerId > 0) {
                     throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
                 }
