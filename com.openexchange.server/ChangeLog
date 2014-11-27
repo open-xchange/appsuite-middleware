@@ -1,3 +1,7 @@
+* 2014-11-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35639: Write generated ZIP file directly to stream (if possible)
+
 * 2014-11-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 35622: Orderly apply cache fields to cached messages

@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -65,6 +66,8 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.helper.DownloadUtility;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -77,6 +80,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link GetMultipleMessagesAction}
@@ -144,23 +148,65 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                 }
             }
         }
+
         // Do it...
         Collections.sort(pairs);
-        return performMultipleFolder(req, pairs);
-    }
+        AJAXRequestData ajaxRequestData = req.getRequest();
 
-    private AJAXRequestResult performMultipleFolder(final MailRequest req, final List<IdFolderPair> pairs) throws OXException {
-        final MailServletInterface mailInterface = getMailInterface(req);
-        // Initialize ZIP'ing
-        final ThresholdFileHolder thresholdFileHolder = new ThresholdFileHolder();
-        final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(thresholdFileHolder.asOutputStream());
-        zipOutput.setEncoding("UTF-8");
-        zipOutput.setUseLanguageEncodingFlag(true);
+        if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
+            // Write directly...
+            // Set HTTP response headers
+            {
+                final StringBuilder sb = new StringBuilder(512);
+                sb.append("attachment");
+                DownloadUtility.appendFilenameParameter("mails.zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
+                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
+            }
+
+            try {
+                performMultipleFolder(req, pairs, ajaxRequestData.optOutputStream());
+                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        // Store to .tmp folder
+        ThresholdFileHolder thresholdFileHolder = new ThresholdFileHolder();
         boolean error = true;
         try {
-            final int size = pairs.size();
-            final Set<String> names = new HashSet<String>(size);
-            final String ext = ".eml";
+            performMultipleFolder(req, pairs, thresholdFileHolder.asOutputStream());
+            error = false;
+        } finally {
+            // Close on error
+            if (error) {
+                Streams.close(thresholdFileHolder);
+            }
+        }
+
+        // Set meta information
+        req.getRequest().setFormat("file");
+        thresholdFileHolder.setContentType("application/zip");
+        thresholdFileHolder.setName("mails.zip");
+
+        // Return AJAX result
+        return new AJAXRequestResult(thresholdFileHolder, "file");
+    }
+
+    private void performMultipleFolder(MailRequest req, List<IdFolderPair> pairs, OutputStream out) throws OXException {
+        final MailServletInterface mailInterface = getMailInterface(req);
+
+        // Initialize ZIP'ing
+        ZipArchiveOutputStream zipOutput = null;
+        try {
+            zipOutput = new ZipArchiveOutputStream(out);
+            zipOutput.setEncoding("UTF-8");
+            zipOutput.setUseLanguageEncodingFlag(true);
+
+            int size = pairs.size();
+            Set<String> names = new HashSet<String>(size);
+            String ext = ".eml";
+
             for (int i = 0; i < size; i++) {
                 final IdFolderPair pair = pairs.get(i);
                 final MailMessage message = mailInterface.getMessage(pair.folderId, pair.identifier, false);
@@ -205,28 +251,17 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                     zipOutput.closeArchiveEntry();
                 }
             }
-            error = false;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            // Close on error
-            if (error) {
-                Streams.close(thresholdFileHolder);
-            }
             // Complete the ZIP file
             Streams.close(zipOutput);
         }
-        // Set meta information
-        req.getRequest().setFormat("file");
-        thresholdFileHolder.setContentType("application/zip");
-        thresholdFileHolder.setName("mails.zip");
-        // Return AJAX result
-        return new AJAXRequestResult(thresholdFileHolder, "file");
     }
 
     private final class IdFolderPair implements Comparable<IdFolderPair> {
