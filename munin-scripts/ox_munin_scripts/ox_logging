@@ -2,9 +2,7 @@
 #%# family=auto
 #%# capabilities=autoconf
 
-#$logconf="/opt/open-xchange/sbin/logconf";
-$logconf="/home/steffen/tmp/appenders";
-
+$logconf="/opt/open-xchange/sbin/logconf";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf") {
     if (-x $logconf) {
