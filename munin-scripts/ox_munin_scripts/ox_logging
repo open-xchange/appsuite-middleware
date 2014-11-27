@@ -22,9 +22,11 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     open(APPENDERS,"$logconf -la |") || die "can not read monitoring output";
     $i = 0;
     while (<APPENDERS>) {
-        if ( $_ =~ /AsyncAppender:\s/) {
-            $_ =~ /AsyncAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/;
+        if ( $_ =~ /AsyncAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
             print "a$i.label $1 (capacity: $2)\n";
+            my $w = int($2 / 2);
+            print "a$i.warning :$w\n";
+            print "a$i.critical :$2\n";
             $i++;
         }
     }
@@ -35,8 +37,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
 open(APPENDERS,"$logconf -la |") || die "can not read monitoring output";
 $i = 0;
 while (<APPENDERS>) {
-    if ( $_ =~ /AsyncAppender:\s/) {
-        $_ =~ /AsyncAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/;
+    if ( $_ =~ /AsyncAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
         print "a$i.value $3\n";
         $i++;
     }
