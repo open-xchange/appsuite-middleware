@@ -7115,6 +7115,12 @@ msgstr ""
 msgid "Mail access is disabled for context administrator."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+msgid ""
+"The maximum number of files that may be attached to an E-Mail is exceeded. "
+"Max. is %1$s."
+msgstr ""
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -7754,6 +7760,12 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:68
 msgid "Missing the following field in JSON data: %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
+msgid ""
+"The HTML content is too big and therefore cannot be safely displayed. Please "
+"select to download its content if you want to see it."
 msgstr ""
 
 #. *
