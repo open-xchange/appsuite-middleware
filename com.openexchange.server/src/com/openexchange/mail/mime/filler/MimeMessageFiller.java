@@ -1548,7 +1548,7 @@ public class MimeMessageFiller {
             BodyPart bodyPart = mp.getBodyPart(i);
             if (bodyPart instanceof MimeBodyPart) {
                 MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
-                String header = mimeBodyPart.getHeader(hdrName, "");
+                String header = mimeBodyPart.getHeader(hdrName, null);
                 if (header != null) {
                     if (partId.equals(header)) {
                         return true;
