@@ -47,9 +47,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-
 mkdir -m 750 -p %{buildroot}/opt/open-xchange/osgi
-
 ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
