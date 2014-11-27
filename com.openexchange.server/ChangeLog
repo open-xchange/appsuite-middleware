@@ -1,3 +1,8 @@
+* 2014-11-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35639: Write generated ZIP file directly to stream (if possible)
+ - Fix for bug 35630: Keep URLs intact that contain double URL-encoded entities
+
 * 2014-11-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 35426: Let session obfuscator properly maintain such parameters that are supposed to be taken over from session to stored

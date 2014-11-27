@@ -49,7 +49,6 @@
 
 package com.openexchange.html.internal;
 
-import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -78,7 +77,7 @@ public final class SaneScriptTags {
 //            a[0] = false;
 //            s = saneScriptTags(s, a);
 //        }
-//        System.out.println(s);
+//        System.out.println("--> "+s);
 //    }
 
     /**
@@ -88,22 +87,22 @@ public final class SaneScriptTags {
      * @param sanitized The sanitized flag
      * @return The sanitized HTML content
      */
-    public static String saneScriptTags(final String html, final boolean[] sanitized) {
+    public static String saneScriptTags(String html, boolean[] sanitized) {
         if (isEmpty(html)) {
             return html;
         }
-        final StringBuffer sb = new StringBuffer(html);
+        StringBuffer sb = new StringBuffer(html);
         decode(sb);
         dropConcatenations(sb);
         dropScriptTags(sanitized, sb);
-        return sb.toString();
+        return sanitized[0] ? sb.toString() : html;
     }
 
     private static final Pattern PAT_URLDECODE_ENTITIES = Pattern.compile("%([0-9a-fA-F]{2})");
     private static final Pattern PAT_URLDECODE_PERCENT = Pattern.compile("%25");
     private static final Set<String> REPLACEES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("3c", "3e", "22")));
 
-    private static void decode(final StringBuffer sb) {
+    private static void decode(StringBuffer sb) {
         if (sb.indexOf("%") < 0) {
             return;
         }
@@ -129,31 +128,13 @@ public final class SaneScriptTags {
         m.appendTail(sb);
     }
 
-    private static void urlDecode(final StringBuffer sb) {
-        try {
-            final String decoded = URLDecoder.decode(sb.toString(), "UTF-8");
-            sb.setLength(0);
-            sb.append(decoded);
-        } catch (final Exception e) {
-            final Matcher m = PAT_URLDECODE_ENTITIES.matcher(sb.toString());
-            if (!m.find()) {
-                return;
-            }
-            sb.setLength(0);
-            do {
-                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
-            } while (m.find());
-            m.appendTail(sb);
-        }
-    }
-
     private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c](\\+|%2b)[\"\u201d\u201c]");
 
-    private static void dropConcatenations(final StringBuffer sb) {
+    private static void dropConcatenations(StringBuffer sb) {
         if ((sb.indexOf("+") < 0) && (sb.indexOf("%2b") < 0)) {
             return;
         }
-        final Matcher m = PAT_CONCAT.matcher(sb.toString());
+        Matcher m = PAT_CONCAT.matcher(sb.toString());
         if (!m.find()) {
             return;
         }
@@ -168,14 +149,14 @@ public final class SaneScriptTags {
     private static final Pattern PATTERN_SCRIPT_TAG_START;
     private static final Pattern PATTERN_SCRIPT_TAG_END;
     static {
-        final String regexScriptStart = "<+[\\s]*script[^>]*>";
-        final String regexScriptEnd = "<+[\\s]*/script[^>]*>";
+        String regexScriptStart = "<+[\\s]*script(?:>| [^>]*>)";
+        String regexScriptEnd = "<+[\\s]*/script(?:>| [^>]*>)";
         PATTERN_SCRIPT_TAG = Pattern.compile(regexScriptStart + ".*?" + regexScriptEnd, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
         PATTERN_SCRIPT_TAG_START = Pattern.compile(regexScriptStart, Pattern.CASE_INSENSITIVE);
         PATTERN_SCRIPT_TAG_END = Pattern.compile(regexScriptEnd, Pattern.CASE_INSENSITIVE);
     }
 
-    private static void dropScriptTags(final boolean[] sanitized, final StringBuffer sb) {
+    private static void dropScriptTags(boolean[] sanitized, StringBuffer sb) {
         Matcher m = PATTERN_SCRIPT_TAG.matcher(sb.toString());
         if (m.find()) {
             sb.setLength(0);
