@@ -66,6 +66,7 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
     public static final String MISSING_COOKIE_MSG = "The requested operation requires a valid session. Please login and try again.";
     public static final String MISSING_FIELD_MSG = "Missing the following field in JSON data: %1$s";
+    public static final String HTML_TOO_BIG_MSG = "The HTML content is too big and therefore cannot be safely displayed. Please select to download its content if you want to see it.";
 
     /**
      * Initializes a new {@link AjaxExceptionMessages}

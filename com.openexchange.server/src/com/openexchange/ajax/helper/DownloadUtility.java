@@ -126,7 +126,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws OXException {
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String contentTypeStr, String userAgent) throws OXException {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
     }
 
@@ -141,7 +141,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String sContentType, String overridingDisposition, String userAgent) throws OXException {
         return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent);
     }
 
@@ -160,7 +160,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final long sizer, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, long sizer, String fileName, String sContentType, String overridingDisposition, String userAgent) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             /*
@@ -207,8 +207,8 @@ public final class DownloadUtility {
                     }
                     // Check size
                     if (sink.getLength() > htmlThreshold()) {
-                        // HTML cannot be sanitized as it exceeds threshold for HTML parsing
-                        throw AjaxExceptionCodes.BAD_REQUEST.create();
+                        // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
+                        throw AjaxExceptionCodes.HTML_TOO_BIG.create();
                     }
                     String htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
                     sink.close();
