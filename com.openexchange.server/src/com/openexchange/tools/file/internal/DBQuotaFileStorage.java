@@ -138,8 +138,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
         ResultSet rs = null;
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
             sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
             sstmt.setInt(1, context.getContextId());
             rs = sstmt.executeQuery();
@@ -158,14 +160,17 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             ustmt.setLong(1, newUsage);
             ustmt.setInt(2, context.getContextId());
             final int rows = ustmt.executeUpdate();
-            if (1 != rows) {
+            if (rows == 0) {
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(context.getContextId()));
             }
             con.commit();
+            rollback = false;
         } catch (final SQLException s) {
-            DBUtils.rollback(con);
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             DBUtils.autocommit(con);
             DBUtils.closeSQLStuff(rs);
             DBUtils.closeSQLStuff(sstmt);
