@@ -86,6 +86,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     private static final Logger LOG = LoggerFactory.getLogger(LogbackConfiguration.class);
 
     private static final String WHITELIST_PROPERTY = "com.openexchange.logging.filter.loggerWhitelist";
+    
+    private static final String lineSeparator = System.getProperty("line.separator");
 
     // -------------------------------------------------------------------------------------------- //
 
@@ -169,11 +171,11 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                 AsyncAppender asyncAppender = (AsyncAppender) appender;
                 sb.append(" [capacity=").append(asyncAppender.getQueueSize()).append(",size=").append(asyncAppender.getNumberOfElementsInQueue()).append(']');
             }
-            sb.append(System.lineSeparator());
+            sb.append(lineSeparator);
         }
-        
+
         if (sb.length() == 0) {
-            sb.append("No root appenders found.").append(System.lineSeparator());
+            sb.append("No root appenders found.").append(lineSeparator);
         }
         return sb.toString();
     }
