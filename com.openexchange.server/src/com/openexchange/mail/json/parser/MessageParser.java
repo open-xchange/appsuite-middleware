@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.parser;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.isCustomOrReplyHeader;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
@@ -106,10 +107,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
-import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MimeMailException;
@@ -161,27 +160,27 @@ public final class MessageParser {
      * {@link ComposedMailMessage} object dedicated for being saved as a draft message. Moreover the user's quota limitations are
      * considered.
      *
-     * @param jsonObj The JSON object
+     * @param jMail The JSON mail representation
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param warnings
      * @param monitor The monitor
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parse4Draft(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final List<OXException> warnings) throws OXException {
-        return parse(jsonObj, uploadEvent, session, accountId, null, null, false, warnings)[0];
+    public static ComposedMailMessage parse4Draft(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, List<OXException> warnings) throws OXException {
+        return parse(jMail, uploadEvent, session, accountId, null, null, false, warnings)[0];
     }
 
     /**
      * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to corresponding
      * {@link ComposedMailMessage} objects dedicated for being sent. Moreover the user's quota limitations are considered.
      *
-     * @param jsonObj The JSON object
+     * @param jMail The JSON mail representation
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param protocol The server's protocol
      * @param warnings
      * @param monitor The monitor
@@ -189,18 +188,18 @@ public final class MessageParser {
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage[] parse4Transport(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final List<OXException> warnings) throws OXException {
-        return parse(jsonObj, uploadEvent, session, accountId, protocol, hostName, true, warnings);
+    public static ComposedMailMessage[] parse4Transport(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, String protocol, String hostName, List<OXException> warnings) throws OXException {
+        return parse(jMail, uploadEvent, session, accountId, protocol, hostName, true, warnings);
     }
 
     /**
      * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to corresponding
      * {@link ComposedMailMessage} objects. Moreover the user's quota limitations are considered.
      *
-     * @param jsonObj The JSON object
+     * @param jMail The JSON mail representation
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param protocol The server's protocol
      * @param hostname The server's host name
      * @param prepare4Transport <code>true</code> to parse with the intention to transport returned mail later on; otherwise
@@ -210,54 +209,55 @@ public final class MessageParser {
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    private static ComposedMailMessage[] parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final boolean prepare4Transport, final List<OXException> warnings) throws OXException {
+    private static ComposedMailMessage[] parse(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, String protocol, String hostName, boolean prepare4Transport, List<OXException> warnings) throws OXException {
         try {
-            final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final ComposedMailMessage composedMail = provider.getNewComposedMailMessage(session, ctx);
+            TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
+            Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            ComposedMailMessage composedMail = provider.getNewComposedMailMessage(session, ctx);
             composedMail.setAccountId(accountId);
-            /*
-             * Select appropriate handler
-             */
-            final IAttachmentHandler attachmentHandler;
+
+            // Select appropriate handler
+            IAttachmentHandler attachmentHandler;
             if (prepare4Transport && TransportProperties.getInstance().isPublishOnExceededQuota() && (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))) {
                 attachmentHandler = new PublishAttachmentHandler(session, provider, protocol, hostName);
             } else {
                 attachmentHandler = new AbortAttachmentHandler(session);
             }
-            /*
-             * Parse transport message plus its text body
-             */
-            parse(composedMail, jsonObj, session, accountId, provider, attachmentHandler, ctx, prepare4Transport);
+
+            // Parse transport message plus its text body
+            parse(composedMail, jMail, session, accountId, provider, attachmentHandler, ctx, prepare4Transport);
+
+            // Check for file attachments; either uploaded or referenced ones
             if (null != uploadEvent) {
-                /*
-                 * Uploaded files
-                 */
-                for (final UploadFile uf : uploadEvent.getUploadFiles()) {
+                for (UploadFile uf : uploadEvent.getUploadFiles()) {
                     if (uf != null) {
-                        final UploadFileMailPart mailPart = provider.getNewFilePart(uf);
-                        attachmentHandler.addAttachment(mailPart);
+                        attachmentHandler.addAttachment(provider.getNewFilePart(uf));
                     }
                 }
             }
-            /*
-             * Attached data sources
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.DATASOURCES.getKey())) {
-                final JSONArray datasourceArray = jsonObj.getJSONArray(MailJSONField.DATASOURCES.getKey());
-                final int length = datasourceArray.length();
+
+            // Attach data sources
+            if (jMail.hasAndNotNull(MailJSONField.DATASOURCES.getKey())) {
+                JSONArray datasourceArray = jMail.getJSONArray(MailJSONField.DATASOURCES.getKey());
+                int length = datasourceArray.length();
                 if (length > 0) {
-                    final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
+                    // Check max. allowed Drive attachments
+                    int max = MailProperties.getInstance().getMaxDriveAttachments();
+                    if (max > 0 && length > max) {
+                        throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
+                    }
+                    // Proceed
+                    ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
                     if (conversionService == null) {
                         throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConversionService.class.getName());
                     }
-                    final Set<Class<?>> types = new HashSet<Class<?>>(4);
+                    Set<Class<?>> types = new HashSet<Class<?>>(4);
                     for (int i = 0; i < length; i++) {
-                        final JSONObject dataSourceObject = datasourceArray.getJSONObject(i);
+                        JSONObject dataSourceObject = datasourceArray.getJSONObject(i);
                         if (!dataSourceObject.hasAndNotNull(JSON_IDENTIFIER)) {
                             throw MailExceptionCode.MISSING_PARAM.create(JSON_IDENTIFIER);
                         }
-                        final DataSource dataSource = conversionService.getDataSource(dataSourceObject.getString(JSON_IDENTIFIER));
+                        DataSource dataSource = conversionService.getDataSource(dataSourceObject.getString(JSON_IDENTIFIER));
                         if (dataSource == null) {
                             throw DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceObject.getString(JSON_IDENTIFIER));
                         }
@@ -265,7 +265,7 @@ public final class MessageParser {
                             types.clear();
                         }
                         types.addAll(Arrays.asList(dataSource.getTypes()));
-                        final Data<?> data;
+                        Data<?> data;
                         if (types.contains(InputStream.class)) {
                             data = dataSource.getData(InputStream.class, parseDataSourceArguments(dataSourceObject), session);
                         } else if (types.contains(byte[].class)) {
@@ -273,54 +273,57 @@ public final class MessageParser {
                         } else {
                             throw MailExceptionCode.UNSUPPORTED_DATASOURCE.create();
                         }
-                        final DataMailPart dataMailPart =
-                            provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
+                        DataMailPart dataMailPart = provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
                         attachmentHandler.addAttachment(dataMailPart);
                     }
                 }
             }
-            /*
-             * Attached infostore document IDs
-             */
-            if (jsonObj.hasAndNotNull(MailJSONField.INFOSTORE_IDS.getKey())) {
-                final JSONArray ja = jsonObj.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
-                final int length = ja.length();
-                for (int i = 0; i < length; i++) {
-                    final InfostoreDocumentMailPart part = provider.getNewDocumentPart(ja.getString(i), session);
-                    attachmentHandler.addAttachment(part);
+
+            // Attach Drive documents
+            if (jMail.hasAndNotNull(MailJSONField.INFOSTORE_IDS.getKey())) {
+                JSONArray ja = jMail.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
+                int length = ja.length();
+                if (length > 0) {
+                    // Check max. allowed Drive attachments
+                    int max = MailProperties.getInstance().getMaxDriveAttachments();
+                    if (max > 0 && length > max) {
+                        throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
+                    }
+                    for (int i = 0; i < length; i++) {
+                        attachmentHandler.addAttachment(provider.getNewDocumentPart(ja.getString(i), session));
+                    }
                 }
             }
-            /*
-             * Fill composed mail
-             */
-            final ComposedMailMessage[] ret = attachmentHandler.generateComposedMails(composedMail, warnings);
-            for (final ComposedMailMessage mail : ret) {
+
+            // Fill composed mail
+            ComposedMailMessage[] ret = attachmentHandler.generateComposedMails(composedMail, warnings);
+            for (ComposedMailMessage mail : ret) {
                 if (!mail.containsAccountId()) {
                     mail.setAccountId(accountId);
                 }
             }
             return ret;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static DataArguments parseDataSourceArguments(final JSONObject json) throws JSONException {
+    private static DataArguments parseDataSourceArguments(JSONObject json) throws JSONException {
         if (!json.hasAndNotNull(JSON_ARGS)) {
             return DataArguments.EMPTY_ARGS;
         }
-        final Object args = json.get(JSON_ARGS);
+        Object args = json.get(JSON_ARGS);
         if (args instanceof JSONArray) {
             /*
              * Handle as JSON array
              */
-            final JSONArray jsonArray = (JSONArray) args;
-            final int len = jsonArray.length();
-            final DataArguments dataArguments = new DataArguments(len);
+            JSONArray jsonArray = (JSONArray) args;
+            int len = jsonArray.length();
+            DataArguments dataArguments = new DataArguments(len);
             for (int i = 0; i < len; i++) {
-                final JSONObject elem = jsonArray.getJSONObject(i);
+                JSONObject elem = jsonArray.getJSONObject(i);
                 if (elem.length() == 1) {
-                    final String key = elem.keys().next();
+                    String key = elem.keys().next();
                     dataArguments.put(key, elem.getString(key));
                 } else {
                     LOG.warn("Corrupt data argument in JSON object: {}", elem);
@@ -331,30 +334,22 @@ public final class MessageParser {
         /*
          * Expect JSON object
          */
-        final JSONObject argsObject = (JSONObject) args;
-        final int len = argsObject.length();
-        final DataArguments dataArguments = new DataArguments(len);
-        for (final Entry<String, Object> entry : argsObject.entrySet()) {
+        JSONObject argsObject = (JSONObject) args;
+        int len = argsObject.length();
+        DataArguments dataArguments = new DataArguments(len);
+        for (Entry<String, Object> entry : argsObject.entrySet()) {
             dataArguments.put(entry.getKey(), entry.getValue().toString());
         }
         return dataArguments;
     }
 
-    private static void parse(final ComposedMailMessage transportMail, final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IAttachmentHandler attachmentHandler, final Context ctx, final boolean prepare4Transport) throws OXException {
-        parse(
-            jsonObj,
-            transportMail,
-            TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone()),
-            provider,
-            session,
-            accountId,
-            attachmentHandler,
-            prepare4Transport);
+    private static void parse(ComposedMailMessage transportMail, JSONObject jsonObj, Session session, int accountId, TransportProvider provider, IAttachmentHandler attachmentHandler, Context ctx, boolean prepare4Transport) throws OXException {
+        TimeZone timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+        parse(jsonObj, transportMail, timeZone, provider, session, accountId, attachmentHandler, prepare4Transport);
     }
 
     /**
-     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}. Moreover the user's quota limitations are
-     * considered.
+     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}. Moreover the user's quota limitations are considered.
      *
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty
@@ -362,20 +357,14 @@ public final class MessageParser {
      * @param accountId The account ID
      * @throws OXException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session, final int accountId) throws OXException {
-        parse(
-            jsonObj,
-            mail,
-            TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(
-                session.getUserId(),
-                ContextStorage.getStorageContext(session.getContextId())).getTimeZone()),
-                session,
-                accountId);
+    public static void parse(JSONObject jsonObj, MailMessage mail, Session session, int accountId) throws OXException {
+        Context ctx = ContextStorage.getStorageContext(session.getContextId());
+        TimeZone timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+        parse(jsonObj, mail, timeZone, session, accountId);
     }
 
     /**
-     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}. Moreover the user's quota limitations are
-     * considered.
+     * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}. Moreover the user's quota limitations are considered.
      *
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty
@@ -384,19 +373,11 @@ public final class MessageParser {
      * @param accountId The account ID
      * @throws OXException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final Session session, final int accountId) throws OXException {
-        parse(
-            jsonObj,
-            mail,
-            timeZone,
-            TransportProviderRegistry.getTransportProviderBySession(session, accountId),
-            session,
-            accountId,
-            new AbortAttachmentHandler(session),
-            false);
+    public static void parse(JSONObject jsonObj, MailMessage mail, TimeZone timeZone, Session session, int accountId) throws OXException {
+        parse(jsonObj, mail, timeZone, TransportProviderRegistry.getTransportProviderBySession(session, accountId), session, accountId, new AbortAttachmentHandler(session), false);
     }
 
-    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final IAttachmentHandler attachmentHandler, final boolean prepare4Transport) throws OXException {
+    private static void parse(JSONObject jsonObj, MailMessage mail, TimeZone timeZone, TransportProvider provider, Session session, int accountId, IAttachmentHandler attachmentHandler, boolean prepare4Transport) throws OXException {
         try {
             parseBasics(jsonObj, mail, timeZone, prepare4Transport);
             /*
@@ -407,18 +388,18 @@ public final class MessageParser {
              * Parse attachments
              */
             if (mail instanceof ComposedMailMessage) {
-                final ComposedMailMessage transportMail = (ComposedMailMessage) mail;
-                final JSONArray attachmentArray = jsonObj.optJSONArray(ATTACHMENTS);
+                ComposedMailMessage transportMail = (ComposedMailMessage) mail;
+                JSONArray attachmentArray = jsonObj.optJSONArray(ATTACHMENTS);
                 if (null != attachmentArray) {
                     /*
                      * Parse body text (the first array element)
                      */
-                    final String sContent;
+                    String sContent;
                     {
-                        final JSONObject tmp = attachmentArray.getJSONObject(0);
+                        JSONObject tmp = attachmentArray.getJSONObject(0);
                         sContent = tmp.getString(CONTENT);
-                        final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
-                        final String contentType = parseContentType(tmp.getString(CONTENT_TYPE));
+                        TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
+                        String contentType = parseContentType(tmp.getString(CONTENT_TYPE));
                         part.setContentType(contentType);
                         if (contentType.startsWith("text/plain") && tmp.optBoolean("raw", false)) {
                             part.setPlainText(sContent);
@@ -431,11 +412,11 @@ public final class MessageParser {
                      * Parse referenced parts
                      */
                     if (attachmentArray.length() > 1) {
-                        final Set<String> contentIds = extractContentIds(sContent);
+                        Set<String> contentIds = extractContentIds(sContent);
                         parseReferencedParts(provider, session, accountId, transportMail.getMsgref(), attachmentHandler, attachmentArray, contentIds, prepare4Transport);
                     }
                 } else {
-                    final TextBodyMailPart part = provider.getNewTextBodyPart("");
+                    TextBodyMailPart part = provider.getNewTextBodyPart("");
                     part.setContentType(MimeTypes.MIME_DEFAULT);
                     transportMail.setContentType(part.getContentType());
                     // Add text part
@@ -445,24 +426,24 @@ public final class MessageParser {
             /*
              * TODO: Parse nested messages. Currently not used
              */
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
 
     private static final Pattern PATTERN_ID_ATTRIBUTE = Pattern.compile("id=\"((?:\\\\\\\"|[^\"])+?)\"");
 
-    private static Set<String> extractContentIds(final String htmlContent) {
-        final ImageMatcher m = ImageMatcher.matcher(htmlContent);
+    private static Set<String> extractContentIds(String htmlContent) {
+        ImageMatcher m = ImageMatcher.matcher(htmlContent);
         if (!m.find()) {
             return Collections.emptySet();
         }
-        final Set<String> set = new HashSet<String>(4);
+        Set<String> set = new HashSet<String>(4);
         do {
-            final String imageTag = m.group();
-            final Matcher tmp = PATTERN_ID_ATTRIBUTE.matcher(imageTag);
+            String imageTag = m.group();
+            Matcher tmp = PATTERN_ID_ATTRIBUTE.matcher(imageTag);
             if (tmp.find()) {
                 set.add(tmp.group(1));
             }
@@ -481,11 +462,11 @@ public final class MessageParser {
      * @throws AddressException
      * @throws OXException
      */
-    public static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone) throws JSONException, AddressException, OXException {
+    public static void parseBasics(JSONObject jsonObj, MailMessage mail, TimeZone timeZone) throws JSONException, AddressException, OXException {
         parseBasics(jsonObj, mail, timeZone, false);
     }
 
-    private static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final boolean prepare4Transport) throws JSONException, AddressException, OXException {
+    private static void parseBasics(JSONObject jsonObj, MailMessage mail, TimeZone timeZone, boolean prepare4Transport) throws JSONException, AddressException, OXException {
         /*
          * System flags
          */
@@ -502,9 +483,9 @@ public final class MessageParser {
          * User flags
          */
         if (jsonObj.hasAndNotNull(MailJSONField.USER.getKey())) {
-            final JSONArray arr = jsonObj.getJSONArray(MailJSONField.USER.getKey());
-            final int length = arr.length();
-            final List<String> l = new ArrayList<String>(length);
+            JSONArray arr = jsonObj.getJSONArray(MailJSONField.USER.getKey());
+            int length = arr.length();
+            List<String> l = new ArrayList<String>(length);
             for (int i = 0; i < length; i++) {
                 l.add(arr.getString(i));
             }
@@ -514,12 +495,12 @@ public final class MessageParser {
          * Parse headers
          */
         if (jsonObj.hasAndNotNull(MailJSONField.HEADERS.getKey())) {
-            final JSONObject jHeaders = jsonObj.getJSONObject(MailJSONField.HEADERS.getKey());
-            final int size = jHeaders.length();
-            final HeaderCollection headers = new HeaderCollection(size);
-            final Iterator<String> iter = jHeaders.keys();
+            JSONObject jHeaders = jsonObj.getJSONObject(MailJSONField.HEADERS.getKey());
+            int size = jHeaders.length();
+            HeaderCollection headers = new HeaderCollection(size);
+            Iterator<String> iter = jHeaders.keys();
             for (int i = size; i-- > 0;) {
-                final String key = iter.next();
+                String key = iter.next();
                 if (isCustomOrReplyHeader(key) && !key.equalsIgnoreCase("x-original-headers")) {
                     headers.setHeader(key, jHeaders.getString(key));
                 }
@@ -529,16 +510,16 @@ public final class MessageParser {
         /*
          * From Only mandatory if non-draft message
          */
-        final String fromKey = MailJSONField.FROM.getKey();
+        String fromKey = MailJSONField.FROM.getKey();
         if (jsonObj.hasAndNotNull(fromKey)) {
             try {
                 String value = jsonObj.getString(fromKey);
-                final int endPos;
+                int endPos;
                 if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
                     value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
                 }
                 mail.addFrom(parseAddressList(value, true, true));
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 mail.addFrom(parseAddressKey(fromKey, jsonObj, prepare4Transport));
             }
         } else if (prepare4Transport) {
@@ -560,7 +541,7 @@ public final class MessageParser {
          * Optional Reply-To
          */
         {
-            final InternetAddress[] addrs = parseAddressKey("reply_to", jsonObj, false);
+            InternetAddress[] addrs = parseAddressKey("reply_to", jsonObj, false);
             if (null != addrs && addrs.length > 0) {
                 mail.setHeader("Reply-To", addrs[0].toString());
             }
@@ -572,15 +553,15 @@ public final class MessageParser {
             /*
              * Ok, disposition-notification-to is set. Check if its value is a valid email address
              */
-            final String dispVal = jsonObj.getString(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey());
+            String dispVal = jsonObj.getString(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey());
             if (STR_TRUE.equalsIgnoreCase(dispVal)) {
                 /*
                  * Boolean value "true"
                  */
-                final InternetAddress[] from = mail.getFrom();
+                InternetAddress[] from = mail.getFrom();
                 mail.setDispositionNotification(from.length > 0 ? from[0] : null);
             } else {
-                final InternetAddress ia = getEmailAddress(dispVal);
+                InternetAddress ia = getEmailAddress(dispVal);
                 if (ia == null) {
                     /*
                      * Any other value
@@ -634,13 +615,13 @@ public final class MessageParser {
          * Sent & received date
          */
         if (jsonObj.hasAndNotNull(MailJSONField.SENT_DATE.getKey())) {
-            final Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
-            final int offset = timeZone.getOffset(date.getTime());
+            Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
+            int offset = timeZone.getOffset(date.getTime());
             mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
         }
         if (jsonObj.hasAndNotNull(MailJSONField.RECEIVED_DATE.getKey())) {
-            final Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
-            final int offset = timeZone.getOffset(date.getTime());
+            Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
+            int offset = timeZone.getOffset(date.getTime());
             mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
         }
         /*
@@ -653,13 +634,12 @@ public final class MessageParser {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void parseReferencedParts(final TransportProvider provider, final Session session, final int accountId, final MailPath transportMailMsgref, final IAttachmentHandler attachmentHandler, final JSONArray attachmentArray, final Set<String> contentIds, final boolean prepare4Transport) throws OXException, JSONException {
-        final int len = attachmentArray.length();
+    private static void parseReferencedParts(TransportProvider provider, Session session, int accountId, MailPath transportMailMsgref, IAttachmentHandler attachmentHandler, JSONArray attachmentArray, Set<String> contentIds, boolean prepare4Transport) throws OXException, JSONException {
+        int len = attachmentArray.length();
         /*
          * Group referenced parts by referenced mails' paths
          */
-        final Map<String, ReferencedMailPart> groupedReferencedParts =
-            groupReferencedParts(provider, session, transportMailMsgref, attachmentArray, contentIds, prepare4Transport);
+        Map<String, ReferencedMailPart> groupedReferencedParts = groupReferencedParts(provider, session, transportMailMsgref, attachmentArray, contentIds, prepare4Transport);
         /*
          * Iterate attachments array
          */
@@ -667,41 +647,40 @@ public final class MessageParser {
         try {
             ManagedFileManagement management = null;
             NextAttachment: for (int i = 1; i < len; i++) {
-                final JSONObject attachment = attachmentArray.getJSONObject(i);
-                final String seqId = attachment.optString(MailListField.ID.getKey(), null);
+                JSONObject attachment = attachmentArray.getJSONObject(i);
+                String seqId = attachment.optString(MailListField.ID.getKey(), null);
                 if (null == seqId && attachment.hasAndNotNull(CONTENT)) {
                     /*
                      * A direct attachment, as data part
                      */
-                    final String contentType = parseContentType(attachment.getString(CONTENT_TYPE));
-                    final String charsetName = "UTF-8";
-                    final byte[] content;
+                    String contentType = parseContentType(attachment.getString(CONTENT_TYPE));
+                    String charsetName = "UTF-8";
+                    byte[] content;
                     try {
                         /*
                          * UI delivers HTML content in any case. Generate well-formed HTML for further processing dependent on given content
                          * type.
                          */
-                        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                        HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         if (MimeTypes.MIME_TEXT_PLAIN.equals(contentType)) {
                             content = htmlService.html2text(attachment.getString(CONTENT), true).getBytes(charsetName);
                         } else {
-                            final String conformHTML =
-                                htmlService.getConformHTML(attachment.getString(CONTENT), "ISO-8859-1");
+                            String conformHTML = htmlService.getConformHTML(attachment.getString(CONTENT), "ISO-8859-1");
                             content = conformHTML.getBytes(charsetName);
                         }
 
-                    } catch (final UnsupportedEncodingException e) {
+                    } catch (UnsupportedEncodingException e) {
                         throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
                     }
                     /*
                      * As data object
                      */
-                    final DataProperties properties = new DataProperties();
+                    DataProperties properties = new DataProperties();
                     properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType);
                     properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(content.length));
                     properties.put(DataProperties.PROPERTY_CHARSET, charsetName);
-                    final Data<byte[]> data = new SimpleData<byte[]>(content, properties);
-                    final DataMailPart dataMailPart = provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
+                    Data<byte[]> data = new SimpleData<byte[]>(content, properties);
+                    DataMailPart dataMailPart = provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
                     attachmentHandler.addAttachment(dataMailPart);
                 } else if (null != seqId && seqId.startsWith(FILE_PREFIX, 0)) {
                     /*
@@ -716,7 +695,7 @@ public final class MessageParser {
                      * Prefer MSGREF from attachment if present, otherwise get MSGREF from superior mail
                      */
                     MailPath msgref;
-                    final boolean isMail;
+                    boolean isMail;
                     String msgrefKey = MailJSONField.MSGREF.getKey();
                     if (attachment.hasAndNotNull(msgrefKey)) {
                         msgref = new MailPath(attachment.get(msgrefKey).toString());
@@ -735,7 +714,7 @@ public final class MessageParser {
                     /*
                      * Decide how to retrieve part
                      */
-                    final ReferencedMailPart referencedMailPart;
+                    ReferencedMailPart referencedMailPart;
                     if (isMail || null == seqId || ROOT.equals(seqId)) {
                         /*
                          * The mail itself
@@ -744,8 +723,7 @@ public final class MessageParser {
                             access = MailAccess.getInstance(session, msgref.getAccountId());
                             access.connect();
                         }
-                        MailMessage referencedMail =
-                            access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
+                        MailMessage referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
                         if (null == referencedMail) {
                             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(msgref.getMailID(), msgref.getFolder());
                         }
@@ -755,8 +733,8 @@ public final class MessageParser {
                     } else {
                         ReferencedMailPart tmp = groupedReferencedParts.get(seqId);
                         if (null != tmp && tmp.containsContentId()) {
-                            final String contentId = tmp.getContentId();
-                            if (null != contentId && contentIds.contains('<' == contentId.charAt(0) ? contentId.substring(1, contentId.length()-1) : contentId)) {
+                            String contentId = tmp.getContentId();
+                            if (null != contentId && contentIds.contains('<' == contentId.charAt(0) ? contentId.substring(1, contentId.length() - 1) : contentId)) {
                                 tmp = null;
                             }
                         }
@@ -775,29 +753,28 @@ public final class MessageParser {
         }
     }
 
-    private static Map<String, ReferencedMailPart> groupReferencedParts(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final JSONArray attachmentArray, final Set<String> contentIds, final boolean prepare4Transport) throws OXException, JSONException {
+    private static Map<String, ReferencedMailPart> groupReferencedParts(TransportProvider provider, Session session, MailPath parentMsgRef, JSONArray attachmentArray, Set<String> contentIds, boolean prepare4Transport) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
-        final int len = attachmentArray.length();
-        final Map<String, String> groupedSeqIDs = new HashMap<String, String>(len);
+        int len = attachmentArray.length();
+        Map<String, String> groupedSeqIDs = new HashMap<String, String>(len);
         NextAttachment: for (int i = 1; i < len; i++) {
-            final JSONObject attachment = attachmentArray.getJSONObject(i);
-            final String seqId =
-                attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
-                if (seqId == null || seqId.startsWith(FILE_PREFIX, 0)) {
-                    /*
-                     * A file reference
-                     */
-                    continue NextAttachment;
-                }
+            JSONObject attachment = attachmentArray.getJSONObject(i);
+            String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
+            if (seqId == null || seqId.startsWith(FILE_PREFIX, 0)) {
                 /*
-                 * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
+                 * A file reference
                  */
-                if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
-                    final Object cid = attachment.opt(MailJSONField.CID.getKey());
-                    groupedSeqIDs.put(seqId, null == cid ? "" : cid.toString());
-                }
+                continue NextAttachment;
+            }
+            /*
+             * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
+             */
+            if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
+                Object cid = attachment.opt(MailJSONField.CID.getKey());
+                groupedSeqIDs.put(seqId, null == cid ? "" : cid.toString());
+            }
         }
         /*
          * Now load them by message reference
@@ -812,7 +789,7 @@ public final class MessageParser {
             access.connect();
             retval = new HashMap<String, ReferencedMailPart>(len);
             handleMultipleRefs(provider, session, parentMsgRef, contentIds, prepare4Transport, groupedSeqIDs, retval, access);
-        } catch (final OXException oe) {
+        } catch (OXException oe) {
             if (null == access || !shouldRetry(oe)) {
                 throw oe;
             }
@@ -827,8 +804,8 @@ public final class MessageParser {
         return retval;
     }
 
-    private static void handleMultipleRefs(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final Set<String> contentIds, final boolean prepare4Transport, final Map<String, String> groupedSeqIDs, final Map<String, ReferencedMailPart> retval, final MailAccess<?, ?> access) throws OXException {
-        final MailPath pMsgRef = /*prepareMsgref(*/parentMsgRef/*)*/;
+    private static void handleMultipleRefs(TransportProvider provider, Session session, MailPath parentMsgRef, Set<String> contentIds, boolean prepare4Transport, Map<String, String> groupedSeqIDs, Map<String, ReferencedMailPart> retval, MailAccess<?, ?> access) throws OXException {
+        MailPath pMsgRef = /*prepareMsgref(*/parentMsgRef/*)*/;
         MailMessage referencedMail = access.getMessageStorage().getMessage(pMsgRef.getFolder(), pMsgRef.getMailID(), false);
         if (null == referencedMail) {
             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(pMsgRef.getMailID(), pMsgRef.getFolder());
@@ -836,16 +813,16 @@ public final class MessageParser {
         referencedMail.setAccountId(access.getAccountId());
         referencedMail = ManagedMimeMessage.clone(referencedMail);
         // Get attachments out of referenced mail
-        final Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
-        final MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);
+        Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
+        MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);
         new MailMessageParser().parseMailMessage(referencedMail, handler);
-        for (final Map.Entry<String, MailPart> e : handler.getMailParts().entrySet()) {
-            final String seqId = e.getKey();
+        for (Map.Entry<String, MailPart> e : handler.getMailParts().entrySet()) {
+            String seqId = e.getKey();
             retval.put(seqId, provider.getNewReferencedPart(e.getValue(), session));
             remaining.remove(seqId);
         }
         if (prepare4Transport && !remaining.isEmpty()) {
-            for (final String seqId : remaining) {
+            for (String seqId : remaining) {
                 if (!contentIds.contains(seqId)) {
                     throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
                 }
@@ -853,8 +830,8 @@ public final class MessageParser {
         }
     }
 
-    private static MailPath prepareMsgref(final MailPath msgref) throws OXException {
-        final String mailID = msgref.getMailID();
+    private static MailPath prepareMsgref(MailPath msgref) throws OXException {
+        String mailID = msgref.getMailID();
         if (mailID.startsWith("%64%65%66%61")) {
             // Referenced by Unified Mail; e.g. "%64%65%66%61ult0%2FIN%42OX%2F%44r%61%66ts%2F2255"
             return new MailPath(decodeQP(mailID));
@@ -863,27 +840,27 @@ public final class MessageParser {
     }
 
     private static final Pattern DECODE_PATTERN = Pattern.compile("%");
-    private static String decodeQP(final String string) {
+    private static String decodeQP(String string) {
         try {
             return new String(QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(DECODE_PATTERN.matcher(string).replaceAll("="))), com.openexchange.java.Charsets.UTF_8);
-        } catch (final DecoderException e) {
+        } catch (DecoderException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private static void processReferencedUploadFile(final TransportProvider provider, final ManagedFileManagement management, final String seqId, final IAttachmentHandler attachmentHandler) throws OXException {
+    private static void processReferencedUploadFile(TransportProvider provider, ManagedFileManagement management, String seqId, IAttachmentHandler attachmentHandler) throws OXException {
         /*
          * A file reference
          */
-        final ManagedFile managedFile;
+        ManagedFile managedFile;
         try {
             managedFile = management.getByID(seqId.substring(FILE_PREFIX.length()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("No temp file found for ID: {}", seqId.substring(FILE_PREFIX.length()), e);
             return;
         }
         // Create wrapping upload file
-        final UploadFile wrapper = new UploadFileImpl();
+        UploadFile wrapper = new UploadFileImpl();
         wrapper.setContentType(managedFile.getContentType());
         wrapper.setFileName(managedFile.getFileName());
         wrapper.setSize(managedFile.getSize());
@@ -894,8 +871,8 @@ public final class MessageParser {
 
     private static final String CT_ALTERNATIVE = "alternative";
 
-    private static String parseContentType(final String ctStrArg) {
-        final String ctStr = toLowerCase(ctStrArg).trim();
+    private static String parseContentType(String ctStrArg) {
+        String ctStr = toLowerCase(ctStrArg).trim();
         if (ctStr.indexOf(CT_ALTERNATIVE) != -1) {
             return MimeTypes.MIME_MULTIPART_ALTERNATIVE;
         }
@@ -913,7 +890,7 @@ public final class MessageParser {
      * @throws AddressException If parsing the address fails
      * @throws JSONException If a JSON error occurred
      */
-    public static InternetAddress[] getFromField(final JSONObject jo) throws AddressException, JSONException {
+    public static InternetAddress[] getFromField(JSONObject jo) throws AddressException, JSONException {
         return parseAddressKey(MailJSONField.FROM.getKey(), jo);
     }
 
@@ -926,7 +903,7 @@ public final class MessageParser {
      * @throws JSONException If a JSON error occurred
      * @throws AddressException If parsing an address fails
      */
-    public static InternetAddress[] parseAddressKey(final String key, final JSONObject jo) throws JSONException, AddressException {
+    public static InternetAddress[] parseAddressKey(String key, JSONObject jo) throws JSONException, AddressException {
         return parseAddressKey(key, jo, false);
     }
 
@@ -941,7 +918,7 @@ public final class MessageParser {
      * @throws JSONException If a JSON error occurred
      * @throws AddressException If parsing an address fails
      */
-    public static InternetAddress[] parseAddressKey(final String key, final JSONObject jo, final boolean failOnError) throws JSONException, AddressException {
+    public static InternetAddress[] parseAddressKey(String key, JSONObject jo, boolean failOnError) throws JSONException, AddressException {
         String value = null;
         if (!jo.has(key) || jo.isNull(key) || Strings.isEmpty( (value = jo.getString(key)) )) {
             return EMPTY_ADDRS;
@@ -951,13 +928,13 @@ public final class MessageParser {
              * Treat as JSON array
              */
             try {
-                final JSONArray jsonArr = new JSONArray(value);
-                final int length = jsonArr.length();
+                JSONArray jsonArr = new JSONArray(value);
+                int length = jsonArr.length();
                 if (length == 0) {
                     return EMPTY_ADDRS;
                 }
                 return parseAdressArray(jsonArr, length);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
                 /*
                  * Reset
@@ -980,21 +957,21 @@ public final class MessageParser {
      * @throws JSONException If a JSON error occurs
      * @throws AddressException If constructing an address fails
      */
-    private static InternetAddress[] parseAdressArray(final JSONArray jsonArray, final int length) throws JSONException, AddressException {
-        final List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
+    private static InternetAddress[] parseAdressArray(JSONArray jsonArray, int length) throws JSONException, AddressException {
+        List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
         for (int i = 0; i < length; i++) {
-            final JSONArray persAndAddr = jsonArray.getJSONArray(i);
-            final int pLen = persAndAddr.length();
+            JSONArray persAndAddr = jsonArray.getJSONArray(i);
+            int pLen = persAndAddr.length();
             if (pLen != 0) {
                 if (1 == pLen) {
                     addresses.add(new QuotedInternetAddress(persAndAddr.getString(0)));
                 } else {
-                    final String personal = persAndAddr.getString(0);
-                    final boolean hasPersonal = (personal != null && !"null".equals(personal));
+                    String personal = persAndAddr.getString(0);
+                    boolean hasPersonal = (personal != null && !"null".equals(personal));
                     if (hasPersonal) {
                         try {
                             addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), personal, "UTF-8"));
-                        } catch (final UnsupportedEncodingException x) {
+                        } catch (UnsupportedEncodingException x) {
                             // Cannot occur
                         }
                     } else {
@@ -1006,19 +983,19 @@ public final class MessageParser {
         return addresses.toArray(new InternetAddress[addresses.size()]);
     }
 
-    private static InternetAddress getEmailAddress(final String addrStr) {
+    private static InternetAddress getEmailAddress(String addrStr) {
         if (com.openexchange.java.Strings.isEmpty(addrStr)) {
             return null;
         }
         try {
             return new QuotedInternetAddress(addrStr, false);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             return null;
         }
     }
 
-    private static void prepareMsgRef(final Session session, final MailMessage mail) throws OXException {
-        final MailPath msgref = mail.getMsgref();
+    private static void prepareMsgRef(Session session, MailMessage mail) throws OXException {
+        MailPath msgref = mail.getMsgref();
         if (null == msgref) {
             // Nothing to do
             return;
@@ -1026,13 +1003,12 @@ public final class MessageParser {
         mail.setMsgref(prepareMsgRef(session, msgref));
     }
 
-    private static MailPath prepareMsgRef(final Session session, final MailPath msgref) throws OXException {
-        final UnifiedInboxManagement unifiedINBOXManagement =
-            ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+    private static MailPath prepareMsgRef(Session session, MailPath msgref) throws OXException {
+        UnifiedInboxManagement unifiedINBOXManagement = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
         if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(session)) {
             // Something like: INBOX/default6/INBOX
-            final String nestedFullname = msgref.getFolder();
-            final int pos = nestedFullname.indexOf(MailFolder.DEFAULT_FOLDER_ID);
+            String nestedFullname = msgref.getFolder();
+            int pos = nestedFullname.indexOf(MailFolder.DEFAULT_FOLDER_ID);
             if (-1 == pos) {
                 // Return unchanged
                 return msgref;
@@ -1046,25 +1022,11 @@ public final class MessageParser {
                 return msgref;
             }
             // Create fullname argument from sub-path
-            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(nestedFullname.substring(pos));
+            FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(nestedFullname.substring(pos));
             // Adjust msgref
             return new MailPath(arg.getAccountId(), arg.getFullname(), msgref.getMailID());
         }
         return msgref;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }
