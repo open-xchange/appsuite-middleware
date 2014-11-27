@@ -920,8 +920,8 @@ public class MimeMessageFiller {
                         primaryMultipart = (Multipart) cto;
                     }
                 }
-                MessageUtility.setContent(primaryMultipart, mimeMessage);
-                // mimeMessage.setContent(primaryMultipart);
+                // MessageUtility.setContent(primaryMultipart, mimeMessage);
+                mimeMessage.setContent(primaryMultipart);
             }
             return;
         }

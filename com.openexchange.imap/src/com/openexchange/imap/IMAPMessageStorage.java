@@ -164,12 +164,13 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
-import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -2916,21 +2917,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 msgs = new Message[length];
                 {
-                    final MailMessage m = mailMessages[0];
+                    MailMessage m = mailMessages[0];
                     if (null != m) {
-                        msgs[0] = MimeMessageConverter.convertMailMessage(m, MimeMessageConverter.BEHAVIOR_CLONE);
+                        msgs[0] = asMessage(m, MimeMessageConverter.BEHAVIOR_CLONE);
                     }
                 }
                 for (int i = 1; i < length; i++) {
-                    final MailMessage m = mailMessages[i];
+                    MailMessage m = mailMessages[i];
                     if (null != m) {
-                        msgs[i] = MimeMessageConverter.convertMailMessage(m, MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
+                        msgs[i] = asMessage(m, MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
                     }
                 }
                 /*
                  * Check if destination folder supports user flags
                  */
-                final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
+                boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
                 if (!supportsUserFlags) {
                     /*
                      * Remove all user flags from messages before appending to folder
@@ -3051,12 +3052,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } finally {
             if (null != msgs) {
                 for (final Message message : msgs) {
-                    if (message instanceof ManagedMimeMessage) {
-                        ((ManagedMimeMessage) message).cleanUp();
+                    if (message instanceof MimeCleanUp) {
+                        ((MimeCleanUp) message).cleanUp();
                     }
                 }
             }
         }
+    }
+
+    private Message asMessage(MailMessage m, int behavior) throws OXException {
+        if (m instanceof MimeRawSource) {
+            Part part = ((MimeRawSource) m).getPart();
+            if (part instanceof Message) {
+                return (Message) part;
+            }
+            return MimeMessageConverter.convertMailMessage(m, behavior);
+        }
+        return MimeMessageConverter.convertMailMessage(m, behavior);
     }
 
     @Override

@@ -2,6 +2,7 @@
 
  - Fix for bug 35639: Write generated ZIP file directly to stream (if possible)
  - Fix for bug 35630: Keep URLs intact that contain double URL-encoded entities
+ - Fix for bug 35626: Try stream-based byte transfer and/or do file-based backup to relieve memory
 
 * 2014-11-26 - thorben.betten@open-xchange.com
 

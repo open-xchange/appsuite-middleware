@@ -513,6 +513,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Invalid argument(s) supplied
      */
     ILLEGAL_ARGUMENT("Invalid argument(s) supplied.", CATEGORY_ERROR, 93),
+    /**
+     * The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.
+     */
+    MAX_DRIVE_ATTACHMENTS_EXCEEDED("The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.", MailExceptionStrings.MAX_DRIVE_ATTACHMENTS_EXCEEDED_MSG, CATEGORY_USER_INPUT, 94),
     ;
 
     private static String PREFIX = "MSG";
