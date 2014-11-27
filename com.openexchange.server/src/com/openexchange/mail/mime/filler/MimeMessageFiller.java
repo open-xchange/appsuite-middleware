@@ -1531,9 +1531,9 @@ public class MimeMessageFiller {
              */
             mp.addBodyPart(messageBodyPart);
         } else {
-            // Check for duplicate by Content-Id value
-            if (index < 0 || size <= 0 || !contains(partId, MessageHeaders.HDR_X_PART_ID, index, mail, size)) {
-                messageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, partId);
+            messageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, partId);
+            // Check if part is already present in new mail
+            if (!contains(partId, MessageHeaders.HDR_X_PART_ID, mp)) {
                 /*
                  * Add to parental multipart
                  */
@@ -1542,12 +1542,17 @@ public class MimeMessageFiller {
         }
     }
 
-    private static final boolean contains(String partId, String hdrName, int index, ComposedMailMessage mail, int size) throws OXException {
-        for (int i = size; i-- > 0;) {
-            if (i != index) {
-                MailPart part = mail.getEnclosedMailPart(i);
-                if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) && partId.equals(part.getFirstHeader(hdrName))) {
-                    return true;
+    private static final boolean contains(String partId, String hdrName, Multipart mp) throws MessagingException {
+        int count = mp.getCount();
+        for (int i = 0; i < count; i++) {
+            BodyPart bodyPart = mp.getBodyPart(i);
+            if (bodyPart instanceof MimeBodyPart) {
+                MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
+                String header = mimeBodyPart.getHeader(hdrName, "");
+                if (header != null) {
+                    if (partId.equals(header)) {
+                        return true;
+                    }
                 }
             }
         }
