@@ -50,8 +50,11 @@
 package com.openexchange.sessiond.impl;
 
 import junit.framework.TestCase;
+import org.mockito.Mockito;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link Bug22838Test}
@@ -75,6 +78,12 @@ public class Bug22838Test extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         config = new SessiondConfigImpl(new SimConfigurationService());
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        SessionStorageService sessionStorageService = Mockito.mock(SessionStorageService.class);
+        serviceLookup.add(SessionStorageService.class, sessionStorageService);
+        com.openexchange.sessiond.osgi.Services.setServiceLookup(serviceLookup);
+
         SessionHandler.init(config);
     }
 
