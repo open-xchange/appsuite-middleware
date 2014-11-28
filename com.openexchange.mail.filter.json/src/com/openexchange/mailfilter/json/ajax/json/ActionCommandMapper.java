@@ -64,6 +64,7 @@ import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
@@ -154,7 +155,8 @@ final class ActionCommandMapper implements Mapper<Rule> {
             }
             final String subjectFieldname = VacationActionFields.SUBJECT.getFieldname();
             if (object.has(subjectFieldname)) {
-                final String subject = object.getString(subjectFieldname);
+                String subject = object.getString(subjectFieldname);
+                subject = MimeMessageUtility.quotePhrase(subject, true);
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.SUBJECT));
                 arrayList.add(stringToList(subject));
             }
@@ -299,7 +301,8 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 }
                 final List<String> subject = tagarguments.get(VacationActionFields.SUBJECT.getTagname());
                 if (null != subject) {
-                    tmp.put(VacationActionFields.SUBJECT.getFieldname(), subject.get(0));
+                    String decodedSubject = MimeMessageUtility.decodeEnvelopeSubject(subject.get(0));
+                    tmp.put(VacationActionFields.SUBJECT.getFieldname(), decodedSubject);
                 }
                 tmp.put(VacationActionFields.TEXT.getFieldname(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
             } else if (ActionCommand.Commands.ENOTIFY.equals(actionCommand.getCommand())) {

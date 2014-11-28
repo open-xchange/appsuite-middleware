@@ -1,3 +1,7 @@
+* 2014-11-28 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 34960: Convert subject header to ASCII characters for vacations filter.
+
 * 2014-11-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 35651: Respect "protected" flag when applying changes to JSlob values that reflect a config-cascade property
