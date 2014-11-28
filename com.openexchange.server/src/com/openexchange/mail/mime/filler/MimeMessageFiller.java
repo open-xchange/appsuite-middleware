@@ -1616,7 +1616,9 @@ public class MimeMessageFiller {
             return imageTag;
         }
         final StringBuffer sb = new StringBuffer(imageTag.length());
-        srcMatcher.appendReplacement(sb, "");
+        int st = srcMatcher.start(1);
+        int end = srcMatcher.end(1);
+        srcMatcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageTag.substring(end)));
         srcMatcher.appendTail(sb);
         return sb.toString();
     }
@@ -1650,7 +1652,7 @@ public class MimeMessageFiller {
                 final String imageTag = m.group();
                 if (MimeMessageUtility.isValidImageUri(imageTag)) {
                     final String id = m.getManagedFileId();
-                    final ImageProvider imageProvider;
+                    ImageProvider imageProvider;
                     if (null != id) {
                         if (mfm.contains(id)) {
                             try {
@@ -1737,11 +1739,31 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = compositionParameters.createImageProvider(dataSource, imageLocation);
                         } catch (final OXException e) {
-                            if (isIgnorableException(e)) {
-                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
-                                continue;
+                            imageProvider = null;
+                            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                                // Do look-up by identifier
+                                String contentId = new StringBuilder(48).append('<').append(imageLocation.getImageId()).append('>').toString();
+
+                                MailPart imagePart = null;
+                                int size = mail.getEnclosedCount();
+                                for (int i = 0; null == imagePart && i < size; i++) {
+                                    MailPart part = mail.getEnclosedMailPart(i);
+                                    if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) && contentId.equals(part.getContentId())) {
+                                        imagePart = part;
+                                    }
+                                }
+
+                                if (null != imagePart) {
+                                    imageProvider = new ReferencedPartImageProvider(imagePart);
+                                }
                             }
-                            throw e;
+                            if (null == imageProvider) {
+                                if (isIgnorableException(e)) {
+                                    m.appendLiteralReplacement(sb, blankSrc(imageTag));
+                                    continue;
+                                }
+                                throw e;
+                            }
                         } catch (final RuntimeException rte) {
                             LOG.warn("Couldn't load image data", rte);
                             m.appendLiteralReplacement(sb, blankSrc(imageTag));

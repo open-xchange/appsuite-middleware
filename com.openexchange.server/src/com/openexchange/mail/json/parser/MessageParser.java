@@ -731,14 +731,7 @@ public final class MessageParser {
                         referencedMail = ManagedMimeMessage.clone(referencedMail);
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
-                        ReferencedMailPart tmp = groupedReferencedParts.get(seqId);
-                        if (null != tmp && tmp.containsContentId()) {
-                            String contentId = tmp.getContentId();
-                            if (null != contentId && contentIds.contains('<' == contentId.charAt(0) ? contentId.substring(1, contentId.length() - 1) : contentId)) {
-                                tmp = null;
-                            }
-                        }
-                        referencedMailPart = tmp;
+                        referencedMailPart = groupedReferencedParts.get(seqId);
                     }
                     if (null != referencedMailPart) {
                         referencedMailPart.setMsgref(msgref);
