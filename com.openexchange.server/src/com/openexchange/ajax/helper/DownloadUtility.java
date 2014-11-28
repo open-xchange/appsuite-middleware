@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -78,6 +79,7 @@ import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.encoding.URLCoder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DownloadUtility} - Utility class for download.
@@ -142,7 +144,7 @@ public final class DownloadUtility {
      * @throws OXException If checking download fails
      */
     public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String sContentType, String overridingDisposition, String userAgent) throws OXException {
-        return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent);
+        return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent, null);
     }
 
 
@@ -157,10 +159,11 @@ public final class DownloadUtility {
      * @param sContentType The <i>Content-Type</i> string
      * @param overridingDisposition Optionally overrides the <i>Content-Disposition</i> header
      * @param userAgent The <i>User-Agent</i>
+     * @param session The associated session
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(InputStream inputStream, long sizer, String fileName, String sContentType, String overridingDisposition, String userAgent) throws OXException {
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, long sizer, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             /*
@@ -206,16 +209,20 @@ public final class DownloadUtility {
                         }
                     }
                     // Check size
+                    String htmlContent;
                     if (sink.getLength() > htmlThreshold()) {
                         // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
-                        throw AjaxExceptionCodes.HTML_TOO_BIG.create();
+                        OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
+                        Locale locale = session.getUser().getLocale();
+                        htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                    } else {
+                        htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                        htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     }
-                    String htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
                     sink.close();
                     sink = null; // Null'ify as not needed anymore
-                    htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-                    final byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
                     contentType.setCharsetParameter("UTF-8");
+                    byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
                     sz = tmp.length;
                     in = Streams.newByteArrayInputStream(tmp);
                 }

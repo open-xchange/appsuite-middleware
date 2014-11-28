@@ -179,17 +179,17 @@ public class FileResponseRenderer implements ResponseRenderer {
      *
      * @param scaler The image scaler
      */
-    public void setScaler(final ImageTransformationService scaler) {
+    public void setScaler(ImageTransformationService scaler) {
         this.scaler = scaler;
     }
 
     @Override
-    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
+    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
         return (result.getResultObject() instanceof IFileHolder);
     }
 
     @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
         // Check if file is actually supplied by the request URL.
         if (file == null || hasNoFileItem(file)) {
@@ -214,7 +214,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param req The HTTP request
      * @param resp The HTTP response
      */
-    public void writeFileHolder(final IFileHolder fileHolder, final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void writeFileHolder(IFileHolder fileHolder, AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = fileHolder;
         final String fileName = file.getName();
         final long length;
@@ -343,7 +343,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             cts = fileContentType;
                         }
                     }
-                    checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileLength, fileName, cts, contentDisposition, userAgent);
+                    checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileLength, fileName, cts, contentDisposition, userAgent, requestData.getSession());
                 }
                 /*
                  * Set stream
