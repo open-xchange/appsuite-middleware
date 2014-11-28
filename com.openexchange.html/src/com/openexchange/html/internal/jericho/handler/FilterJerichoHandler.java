@@ -291,7 +291,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     /**
-     * Sets the max. content size. <= 0 means unlimited, <10000 will be set to 10000.
+     * Sets the max. content size. &lt;= <code>0</code> means unlimited, &lt; <code>10000</code> will be set to <code>10000</code>.
      *
      * @param maxContentSize The max. content size to set
      * @return This handler with new behavior applied
