@@ -126,17 +126,17 @@ public class GenerateMasterPasswordCLT {
             if (cl.hasOption("e")) {
                 parameters.put("encryption", cl.getOptionValue("e"));
             }
-            final String password;
+            String clearPassword;
             if (cl.hasOption("P")) {
-                password = cl.getOptionValue("P");
+                clearPassword = cl.getOptionValue("P");
             } else {
                 System.out.print("Enter password for user " + parameters.get("adminuser") + ": ");
                 BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                String p = bufferRead.readLine();
-                password = encryptPassword(parameters.get("encryption"), p);
-                p = null;
+                clearPassword = bufferRead.readLine();
             }
-            parameters.put("adminpass", password);
+            final String encPassword = encryptPassword(parameters.get("encryption"), clearPassword);
+            clearPassword = null;
+            parameters.put("adminpass", encPassword);
             if (cl.hasOption("f")) {
                 parameters.put("mpasswdfile", cl.getOptionValue("f"));
             }
