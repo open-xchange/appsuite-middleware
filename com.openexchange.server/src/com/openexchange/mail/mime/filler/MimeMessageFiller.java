@@ -854,7 +854,7 @@ public class MimeMessageFiller {
                         if (isMessage(enclosedMailPart)) {
                             addNestedMessage(enclosedMailPart, Boolean.FALSE, primaryMultipart, sb);
                         } else {
-                            addMessageBodyPart(primaryMultipart, enclosedMailPart, false, i, mail, size);
+                            addMessageBodyPart(primaryMultipart, enclosedMailPart, false);
                         }
                     }
                 } else {
@@ -883,11 +883,11 @@ public class MimeMessageFiller {
                                     add = true;
                                 }
                                 if (add) {
-                                    addMessageBodyPart(primaryMultipart, mailPart, false, i, mail, size);
+                                    addMessageBodyPart(primaryMultipart, mailPart, false);
                                 }
                             } else {
                                 // A regular file-attachment image
-                                addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false, i, mail, size);
+                                addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
                             }
                         } else {
                             final MailPart mailPart = mail.getEnclosedMailPart(i);
@@ -900,7 +900,7 @@ public class MimeMessageFiller {
                                 }
                             }
                             if (add) {
-                                addMessageBodyPart(primaryMultipart, mailPart, false, i, mail, size);
+                                addMessageBodyPart(primaryMultipart, mailPart, false);
                             }
                         }
                     }
@@ -1030,7 +1030,7 @@ public class MimeMessageFiller {
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
             }
             mp.addBodyPart(msgBodyPart);
-            addMessageBodyPart(mp, mail, true, -1, mail, mail.getEnclosedCount());
+            addMessageBodyPart(mp, mail, true);
         }
         /*
          * if (hasNestedMessages) { if (primaryMultipart == null) { primaryMultipart = new MimeMultipart(); } message/rfc822 final int
@@ -1301,7 +1301,7 @@ public class MimeMessageFiller {
 
     private static final String MIME_MESSAGE_RFC822 = MimeTypes.MIME_MESSAGE_RFC822;
 
-    protected final void addMessageBodyPart(Multipart mp, MailPart part, boolean inline, int index, ComposedMailMessage mail, int size) throws MessagingException, OXException, IOException {
+    protected final void addMessageBodyPart(Multipart mp, MailPart part, boolean inline) throws MessagingException, OXException {
         if (part.getContentType().startsWith(MIME_MESSAGE_RFC822)) {
             // TODO: Works correctly?
             StringBuilder sb = new StringBuilder(32);
@@ -1496,7 +1496,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a processing error occurs
      */
-    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException, OXException {
+    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException {
         /*
          * Convert HTML content to regular text. First: Create a body part for text content
          */
