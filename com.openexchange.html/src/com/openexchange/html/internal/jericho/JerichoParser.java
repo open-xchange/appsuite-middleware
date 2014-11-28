@@ -172,14 +172,15 @@ public final class JerichoParser {
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    private boolean checkBody(String html) {
+    private boolean checkBody(String html, boolean checkSize) {
         if (null == html) {
             return false;
         }
-        final int maxLength = maxLength();
-        final boolean big = html.length() > maxLength;
-        if (big) {
-            throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
+        if (checkSize) {
+            int maxLength = maxLength();
+            if (html.length() > maxLength) {
+                throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
+            }
         }
         return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);
     }
@@ -195,9 +196,21 @@ public final class JerichoParser {
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
     public void parse(String html, JerichoHandler handler) {
+        parse(html, handler, true);
+    }
+
+    /**
+     * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
+     *
+     * @param html The real-life HTML document
+     * @param handler The HTML handler
+     * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     */
+    public void parse(String html, JerichoHandler handler, boolean checkSize) {
         StreamedSource streamedSource = null;
         try {
-            if (false == checkBody(html)) {
+            if (false == checkBody(html, checkSize)) {
                 // <body> tag not available
                 handler.markBodyAbsent();
             }

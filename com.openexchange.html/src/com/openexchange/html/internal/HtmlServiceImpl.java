@@ -589,7 +589,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
 
                 // Parse the HTML content
-                JerichoParser.getInstance().parse(html, handler);
+                JerichoParser.getInstance().parse(html, handler, maxContentSize <= 0);
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
