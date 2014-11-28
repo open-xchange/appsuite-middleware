@@ -285,32 +285,32 @@ public final class ConfigJSlobService implements JSlobService {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigJSlobService.class);
         // Initialize resulting map
         final int initialCapacity = all.size() >> 1;
-        final Map<String, Map<String, AttributedProperty>> preferenceItems = new HashMap<String, Map<String, AttributedProperty>>(
-            initialCapacity);
-        for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-            // Check for existence of "preferencePath"
-            final ComposedConfigProperty<String> property = entry.getValue();
-            String preferencePath = property.get(PREFERENCE_PATH);
-            if (null != preferencePath) {
-                // e.g. ui//halo/configuration/property01
-                final int separatorPos = preferencePath.indexOf("//");
-                if (separatorPos != -1) {
-                    final String key = preferencePath.substring(0, separatorPos);
-                    preferencePath = preferencePath.substring(separatorPos + 2);
-                    Map<String, AttributedProperty> attributes = preferenceItems.get(key);
-                    if (null == attributes) {
-                        attributes = new HashMap<String, AttributedProperty>(initialCapacity);
-                        preferenceItems.put(key, attributes);
-                    }
-                    try {
-                        attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
-                    } catch (final Exception e) {
-                        logger.warn("Couldn't initialize preference path: {}", preferencePath, e);
+            final Map<String, Map<String, AttributedProperty>> preferenceItems = new HashMap<String, Map<String, AttributedProperty>>(
+                initialCapacity);
+            for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                // Check for existence of "preferencePath"
+                final ComposedConfigProperty<String> property = entry.getValue();
+                String preferencePath = property.get(PREFERENCE_PATH);
+                if (null != preferencePath) {
+                    // e.g. ui//halo/configuration/property01
+                    final int separatorPos = preferencePath.indexOf("//");
+                    if (separatorPos != -1) {
+                        final String key = preferencePath.substring(0, separatorPos);
+                        preferencePath = preferencePath.substring(separatorPos + 2);
+                        Map<String, AttributedProperty> attributes = preferenceItems.get(key);
+                        if (null == attributes) {
+                            attributes = new HashMap<String, AttributedProperty>(initialCapacity);
+                            preferenceItems.put(key, attributes);
+                        }
+                        try {
+                            attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
+                        } catch (final Exception e) {
+                            logger.warn("Couldn't initialize preference path: {}", preferencePath, e);
+                        }
                     }
                 }
             }
-        }
-        return preferenceItems;
+            return preferenceItems;
     }
 
     /**
@@ -765,15 +765,17 @@ public final class ConfigJSlobService implements JSlobService {
             if (setting.isLeaf()) {
                 final String value = setting.getSingleValue().toString();
                 if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
-                    final JSONArray array = new JSONArray(value);
-                    if (array.length() == 0) {
-                        setting.setEmptyMultiValue();
-                    } else {
-                        for (int i = 0; i < array.length(); i++) {
-                            setting.addMultiValue(array.getString(i));
+                    final JSONArray array = asJsonArray(value);
+                    if(array != null) {
+                        if (array.length() == 0) {
+                            setting.setEmptyMultiValue();
+                        } else {
+                            for (int i = 0; i < array.length(); i++) {
+                                setting.addMultiValue(array.getString(i));
+                            }
                         }
+                        setting.setSingleValue(null);
                     }
-                    setting.setSingleValue(null);
                 }
                 storage.save(setting);
             } else {
@@ -809,6 +811,15 @@ public final class ConfigJSlobService implements JSlobService {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+        }
+    }
+
+    private JSONArray asJsonArray(final String value) {
+        try {
+            return new JSONArray(value);
+        } catch (JSONException e) {
+            // Apparently no JSON array, treat as string
+            return null;
         }
     }
 
