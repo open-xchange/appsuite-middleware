@@ -87,7 +87,10 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -229,7 +232,13 @@ public class MailAttachment extends AJAXServlet {
                     }
                     resp.setContentType(contentType);
                 } else {
-                    final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(attachmentInputStream, fileName, mailPart.getContentType().toString(), userAgent);
+                    Session session = SessiondService.SERVICE_REFERENCE.get().getSession(token.getSessionId());
+                    final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
+                        attachmentInputStream,
+                        fileName,
+                        mailPart.getContentType().toString(),
+                        userAgent,
+                        ServerSessionAdapter.valueOf(session));
                     contentType = checkedDownload.getContentType();
                     resp.setContentType(contentType);
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
