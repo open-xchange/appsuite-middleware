@@ -125,11 +125,12 @@ public final class DownloadUtility {
      * @param fileName The file name
      * @param contentTypeStr The content-type string
      * @param userAgent The user agent
+     * @param session The associated session
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String contentTypeStr, String userAgent) throws OXException {
-        return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String contentTypeStr, String userAgent, ServerSession session) throws OXException {
+        return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent, session);
     }
 
     /**
@@ -140,11 +141,12 @@ public final class DownloadUtility {
      * @param sContentType The <i>Content-Type</i> string
      * @param overridingDisposition Optionally overrides the <i>Content-Disposition</i> header
      * @param userAgent The <i>User-Agent</i>
+     * @param session The associated session
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String sContentType, String overridingDisposition, String userAgent) throws OXException {
-        return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent, null);
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
+        return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent, session);
     }
 
 

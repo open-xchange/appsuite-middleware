@@ -230,8 +230,18 @@ public class AdminCache {
         return getNamedAccessCombination(name, true);
     }
 
+    /**
+     * Gets the access combination by given name
+     *
+     * @param name The name
+     * @param contextAdmin Whether this call is performed by context administrator
+     * @return The access combination or <code>null</code>
+     */
     public synchronized UserModuleAccess getNamedAccessCombination(String name, boolean contextAdmin) {
         UserModuleAccess retval = named_access_combinations.get(name);
+        if (null == retval) {
+            return null;
+        }
         if (!contextAdmin) {
             // publicFolderEditable can only be applied to the context administrator.
             retval.setPublicFolderEditable(false);

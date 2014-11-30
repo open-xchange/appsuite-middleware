@@ -1,3 +1,7 @@
+* 2014-11-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34670: Added null guard when performing access combination look-up by name
+
 * 2014-11-28 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 34960: Convert subject header to ASCII characters for vacations filter.

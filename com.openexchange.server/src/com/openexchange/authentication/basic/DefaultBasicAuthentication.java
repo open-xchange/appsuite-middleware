@@ -139,7 +139,7 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
             try {
                 userId = userService.getUserId(splitted[1], ctx);
             } catch (final OXException e) {
-                if (UserExceptionCode.PROPERTY_MISSING.getPrefix().equals(e.getPrefix()) && LdapExceptionCode.USER_NOT_FOUND.getNumber() == e.getCode()) {
+                if (e.equalsCode(LdapExceptionCode.USER_NOT_FOUND.getNumber(), UserExceptionCode.PROPERTY_MISSING.getPrefix())) {
                     throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(splitted[1]);
                 }
                 throw e;
