@@ -500,21 +500,31 @@ public final class ResponseWriter {
          * Categories
          */
         {
-            final List<Category> categories = exception.getCategories();
-            if (1 == categories.size()) {
-                json.put(ERROR_CATEGORIES, categories.get(0).toString());
-            } else {
-                final JSONArray jArray = new JSONArray(categories.size());
-                for (final Category category : categories) {
-                    jArray.put(category.toString());
-                }
-                json.put(ERROR_CATEGORIES, jArray);
-            }
-            // For compatibility
-            if (!categories.isEmpty()) {
-                final int number = Categories.getFormerCategoryNumber(categories.get(0));
+            List<Category> categories = exception.getCategories();
+            int size = categories.size();
+            if (1 == size) {
+                Category category = categories.get(0);
+                json.put(ERROR_CATEGORIES, category.toString());
+                // For compatibility
+                int number = Categories.getFormerCategoryNumber(category);
                 if (number > 0) {
                     json.put(ERROR_CATEGORY, number);
+                }
+            } else {
+                if (size <= 0) {
+                    // Empty JSON array
+                    json.put(ERROR_CATEGORIES, new JSONArray(0));
+                } else {
+                    JSONArray jArray = new JSONArray(size);
+                    for (final Category category : categories) {
+                        jArray.put(category.toString());
+                    }
+                    json.put(ERROR_CATEGORIES, jArray);
+                    // For compatibility
+                    int number = Categories.getFormerCategoryNumber(categories.get(0));
+                    if (number > 0) {
+                        json.put(ERROR_CATEGORY, number);
+                    }
                 }
             }
         }
@@ -803,26 +813,35 @@ public final class ResponseWriter {
             }
         }
         {
-            final List<Category> categories = exc.getCategories();
-            if (1 == categories.size()) {
-                final Category category = categories.get(0);
+            List<Category> categories = exc.getCategories();
+            int size = categories.size();
+            if (1 == size) {
+                Category category = categories.get(0);
                 writer.key(ERROR_CATEGORIES).value(category.toString());
-            } else {
-                writer.key(ERROR_CATEGORIES);
-                writer.array();
-                try {
-                    for (final Category category : categories) {
-                        writer.value(category.toString());
-                    }
-                } finally {
-                    writer.endArray();
-                }
-            }
-            // For compatibility
-            if (!categories.isEmpty()) {
-                final int number = Categories.getFormerCategoryNumber(categories.get(0));
+                // For compatibility
+                int number = Categories.getFormerCategoryNumber(category);
                 if (number > 0) {
                     writer.key(ERROR_CATEGORY).value(number);
+                }
+            } else {
+                writer.key(ERROR_CATEGORIES);
+                if (size <= 0) {
+                    // Empty JSON array
+                    writer.array().endArray();
+                } else {
+                    writer.array();
+                    try {
+                        for (Category category : categories) {
+                            writer.value(category.toString());
+                        }
+                    } finally {
+                        writer.endArray();
+                    }
+                    // For compatibility
+                    int number = Categories.getFormerCategoryNumber(categories.get(0));
+                    if (number > 0) {
+                        writer.key(ERROR_CATEGORY).value(number);
+                    }
                 }
             }
         }
