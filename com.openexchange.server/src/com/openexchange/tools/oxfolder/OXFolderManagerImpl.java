@@ -491,7 +491,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
                 try {
                     if (FolderObject.INFOSTORE == folderObj.getModule()) {
-                        new EventClient(session).create(folderObj, parentFolder, getFolderPath(folderObj, folderObj, wc));
+                        new EventClient(session).create(folderObj, parentFolder, getFolderPath(folderObj, parentFolder, wc));
                     } else {
                         new EventClient(session).create(folderObj, parentFolder);
                     }
