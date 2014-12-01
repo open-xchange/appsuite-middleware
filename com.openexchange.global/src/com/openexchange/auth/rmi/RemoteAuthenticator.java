@@ -47,39 +47,65 @@
  *
  */
 
-package com.openexchange.cli;
+package com.openexchange.auth.rmi;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
- * {@link ExecutionFault} - A wrapper for exceptions causes by MBean/RMI invocation.
+ * {@link RemoteAuthenticator} - The remote stub for administrative authentication
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.2
  */
-public class ExecutionFault extends Exception {
+public interface RemoteAuthenticator extends Remote {
 
-    private static final long serialVersionUID = -435169182635746789L;
-
-    /**
-     * Initializes a new {@link ExecutionFault}.
-     *
-     * @param cause The cause
-     */
-    public ExecutionFault(Throwable cause) {
-        super(cause);
-    }
+    /** The RMI name */
+    public static final String RMI_NAME = RemoteAuthenticator.class.getSimpleName();
 
     /**
-     * Initializes a new {@link ExecutionFault}.
+     * Authenticates the master administrator
      *
-     * @param message The message
-     * @param cause The cause
+     * @param login The login for master administrator
+     * @param password The password for master administrator
+     * @throws RemoteException If credentials are invalid
      */
-    public ExecutionFault(String message, Throwable cause) {
-        super(message, cause);
-    }
+    void doAuthentication(String login, String password) throws RemoteException;
 
-    @Override
-    public synchronized Throwable initCause(Throwable cause) {
-        return this;
-    }
+    /**
+     * Authenticates the context administrator
+     *
+     * @param login The login for context administrator
+     * @param password The password for context administrator
+     * @param contextId The context identifier
+     * @throws RemoteException If credentials are invalid
+     */
+    void doAuthentication(String login, String password, int contextId) throws RemoteException;
+
+    /**
+     * Authenticates all users within a context.
+     *
+     * @param login The login
+     * @param password The password
+     * @param contextId The context identifier
+     * @throws RemoteException If credentials are invalid
+     */
+    void doUserAuthentication(String login, String password, int contextId) throws RemoteException;
+
+    /**
+     * Checks if master authentication has been disabled for associated machine.
+     *
+     * @return <code>true</code> if master authentication has been disabled; otherwise <code>false</code>
+     * @throws RemoteException If operation fails
+     */
+    boolean isMasterAuthenticationDisabled() throws RemoteException;
+
+    /**
+     * Checks if context authentication has been disabled for associated machine.
+     *
+     * @return <code>true</code> if context authentication has been disabled; otherwise <code>false</code>
+     * @throws RemoteException If operation fails
+     */
+    boolean isContextAuthenticationDisabled() throws RemoteException;
 
 }

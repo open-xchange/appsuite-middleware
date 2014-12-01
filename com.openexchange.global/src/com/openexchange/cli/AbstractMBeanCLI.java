@@ -64,7 +64,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -77,7 +76,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public abstract class AbstractMBeanCLI<R> {
+public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
 
     /**
      * Initializes a new {@link AbstractMBeanCLI}.
@@ -218,75 +217,6 @@ public abstract class AbstractMBeanCLI<R> {
     }
 
     /**
-     * Parses & validates the port value for given option.
-     * <p>
-     * Exits gracefully if port value is invalid.
-     *
-     * @param opt The option name
-     * @param defaultValue The default value
-     * @param cmd The command line
-     * @param options The options
-     * @return The port value
-     */
-    protected int parsePort(final char opt, final int defaultValue, final CommandLine cmd, final Options options) {
-        int port = defaultValue;
-        // Check option & parse if present
-        final String sPort = cmd.getOptionValue(opt);
-        if (null != sPort) {
-            try {
-                port = Integer.parseInt(sPort.trim());
-            } catch (final NumberFormatException e) {
-                System.err.println("Port parameter is not a number: " + sPort);
-                printHelp(options);
-                System.exit(1);
-            }
-        }
-        if (port < 1 || port > 65535) {
-            System.err.println("Port parameter is out of range: " + sPort + ". Valid range is from 1 to 65535.");
-            printHelp(options);
-            System.exit(1);
-        }
-        return port;
-    }
-
-    /**
-     * Parses & validates the <code>int</code> value for given option.
-     * <p>
-     * Exits gracefully if <code>int</code> value is invalid.
-     *
-     * @param opt The option name
-     * @param defaultValue The default value
-     * @param cmd The command line
-     * @param options The options
-     * @return The <code>int</code> value
-     */
-    protected int parseInt(final char opt, final int defaultValue, final CommandLine cmd, final Options options) {
-        int i = defaultValue;
-        // Check option & parse if present
-        final String sInt = cmd.getOptionValue(opt);
-        if (null != sInt) {
-            try {
-                i = Integer.parseInt(sInt.trim());
-            } catch (final NumberFormatException e) {
-                System.err.println("Integer parameter is not a number: " + sInt);
-                printHelp(options);
-                System.exit(1);
-            }
-        }
-        return i;
-    }
-
-    /**
-     * Prints the <code>--help</code> text.
-     *
-     * @param options The help output
-     */
-    protected void printHelp(final Options options) {
-        final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, getName(), null, options, getFooter(), false);
-    }
-
-    /**
      * Gets the {@link AuthenticatorMBean} instance.
      *
      * @param mbsc The MBean server connection
@@ -295,16 +225,6 @@ public abstract class AbstractMBeanCLI<R> {
      */
     protected AuthenticatorMBean authenticatorMBean(final MBeanServerConnection mbsc) throws MalformedObjectNameException {
         return getMBean(mbsc, AuthenticatorMBean.class, AuthenticatorMBean.DOMAIN);
-    }
-
-    /**
-     * Checks other mandatory options.
-     *
-     * @param cmd The command line
-     * @param options The associated options
-     */
-    protected void checkOptions(CommandLine cmd, Options options) {
-        checkOptions(cmd);
     }
 
     /**
@@ -320,21 +240,6 @@ public abstract class AbstractMBeanCLI<R> {
     }
 
     /**
-     * Checks other mandatory options.
-     *
-     * @param cmd The command line
-     * @param options The associated options
-     */
-    protected abstract void checkOptions(CommandLine cmd);
-
-    /**
-     * Signals if this command-line tool requires administrative permission.
-     *
-     * @return <code>true</code> for administrative permission; otherwise <code>false</code>
-     */
-    protected abstract boolean requiresAdministrativePermission();
-
-    /**
      * Performs appropriate administrative authentication.
      * <p>
      * This method needs only to be implemented in case {@link #requiresAdministrativePermission()} is supposed to return <code>true</code>.
@@ -346,20 +251,6 @@ public abstract class AbstractMBeanCLI<R> {
      * @throws MBeanException If authentication fails
      */
     protected abstract void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException;
-
-    /**
-     * Gets the banner to display at the end of the help
-     *
-     * @return The banner to display at the end of the help
-     */
-    protected abstract String getFooter();
-
-    /**
-     * Gets the syntax for this application.
-     *
-     * @return The syntax for this application
-     */
-    protected abstract String getName();
 
     /**
      * Adds this command-line tool's options.
