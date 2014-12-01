@@ -69,6 +69,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 Build for patch 2014-12-01
 * Fri Nov 21 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Second candidate for 7.6.2 release
+* Thu Nov 20 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2014-12-01
 * Wed Nov 19 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-11-21
 * Tue Nov 18 2014 Steffen Templin <steffen.templin@open-xchange.com>
