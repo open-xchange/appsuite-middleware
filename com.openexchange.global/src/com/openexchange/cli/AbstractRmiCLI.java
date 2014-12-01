@@ -199,8 +199,6 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
                     }
                 }
                 retval = invoke(options, cmd, optRmiHostName);
-            } catch (RemoteException x) {
-                throw x;
             } catch (MalformedURLException x) {
                 throw x;
             } catch (NotBoundException x) {
