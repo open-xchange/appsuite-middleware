@@ -88,6 +88,12 @@ open-xchange-appsuite-backend (7.6.1-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Jun 2014 11:39:27 +0200
 
+open-xchange-appsuite-backend (7.6.0-32) stable; urgency=medium
+
+  * Build for patch 2014-12-01
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 24 Nov 2014 16:01:37 +0100
+
 open-xchange-appsuite-backend (7.6.0-31) stable; urgency=medium
 
   * Build for patch 2014-11-21
