@@ -247,7 +247,7 @@ public final class MimeForward {
             {
                 boolean fromSet = false;
                 if (setFrom) {
-                    InternetAddress from = MimeReply.determinePossibleFrom(origMsgs[0], accountIds[0], session, ctx);
+                    InternetAddress from = MimeReply.determinePossibleFrom(true, origMsgs[0], accountIds[0], session, ctx);
                     if (null != from) {
                         forwardMsg.setFrom(from);
                         fromSet = true;
