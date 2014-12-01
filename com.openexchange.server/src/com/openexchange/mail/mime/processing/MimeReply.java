@@ -644,12 +644,13 @@ public final class MimeReply {
      * @throws AddressException If address cannot be parsed
      */
     public static InternetAddress determinePossibleFrom(boolean isForward, MailMessage origMsg, int accountId, Session session, Context ctx) throws OXException, AddressException {
-        Set<InternetAddress> fromCandidates = new HashSet<InternetAddress>(8);
+        final Set<InternetAddress> fromCandidates;
         if (accountId == MailAccount.DEFAULT_ID) {
             if (isForward) {
                 // Fall-back to primary address
                 return null;
             }
+            fromCandidates = new HashSet<InternetAddress>(8);
             addUserAliases(fromCandidates, session, ctx);
         } else {
             // Check for Unified Mail account
@@ -662,6 +663,7 @@ public final class MimeReply {
                         // Fall-back to primary address
                         return null;
                     }
+                    fromCandidates = new HashSet<InternetAddress>(8);
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
                     MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
@@ -670,12 +672,15 @@ public final class MimeReply {
                             // Fall-back to primary address
                             return null;
                         }
+                        fromCandidates = new HashSet<InternetAddress>(8);
                         addUserAliases(fromCandidates, session, ctx);
                     } else {
-                        QuotedInternetAddress a = new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false);
+                        QuotedInternetAddress a =
+                            new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false);
                         if (isForward) {
                             return a;
                         }
+                        fromCandidates = new HashSet<InternetAddress>(2);
                         fromCandidates.add(a);
                     }
                 }
@@ -686,12 +691,14 @@ public final class MimeReply {
                         // Fall-back to primary address
                         return null;
                     }
+                    fromCandidates = new HashSet<InternetAddress>(8);
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
                     QuotedInternetAddress a = new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false);
                     if (isForward) {
                         return a;
                     }
+                    fromCandidates = new HashSet<InternetAddress>(2);
                     fromCandidates.add(a);
                 }
             }
