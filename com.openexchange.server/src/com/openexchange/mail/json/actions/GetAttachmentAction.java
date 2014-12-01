@@ -82,6 +82,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -263,7 +264,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 if (isEmpty(mailPart.getFileName())) {
                     mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                 }
-                if (filter && !saveToDisk && mailPart.getContentType().startsWithAny("text/htm", "text/xhtm", "text/xml")) {
+                if (filter && !saveToDisk && Strings.startsWithAny(toLowerCase(mailPart.getContentType().getSubType()), "htm", "xhtm")) {
                     /*
                      * Apply filter
                      */
