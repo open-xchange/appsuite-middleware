@@ -1868,9 +1868,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Set account information
          */
+        List<MailMessage> l = new LinkedList<MailMessage>();
         for (MailMessage mail : mails) {
-            if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
-                mail.setAccountId(accountId);
+            if (mail != null) {
+                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                    mail.setAccountId(accountId);
+                }
+                l.add(mail);
             }
         }
         /*
@@ -1889,12 +1893,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } catch (OXException e) {
             LOG.error("", e);
-        }
-        List<MailMessage> l = new LinkedList<MailMessage>();
-        for (MailMessage mm : mails) {
-            if (null != mm) {
-                l.add(mm);
-            }
         }
         return new SearchIteratorDelegator<MailMessage>(l);
     }
@@ -1909,7 +1907,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null != headerNames && 0 < headerNames.length) {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (messageStorage instanceof IMailMessageStorageExt) {
-                mails = ((IMailMessageStorageExt) messageStorage).searchMessages(fullName,indexRange,sortField,orderDir,searchTerm,useFields,headerNames);
+                mails = ((IMailMessageStorageExt) messageStorage).searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields, headerNames);
             } else {
                 useFields = MailFields.addIfAbsent(useFields, MailField.ID);
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
@@ -1921,9 +1919,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Set account information
          */
+        List<MailMessage> l = new LinkedList<MailMessage>();
         for (MailMessage mail : mails) {
-            if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
-                mail.setAccountId(accountId);
+            if (mail != null) {
+                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                    mail.setAccountId(accountId);
+                }
+                l.add(mail);
             }
         }
         /*
@@ -1942,12 +1944,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } catch (OXException e) {
             LOG.error("", e);
-        }
-        List<MailMessage> l = new LinkedList<MailMessage>();
-        for (MailMessage mm : mails) {
-            if (null != mm) {
-                l.add(mm);
-            }
         }
         return new SearchIteratorDelegator<MailMessage>(l);
     }

@@ -320,7 +320,7 @@ public final class MimeReply {
              * Set "From"
              */
             if (setFrom) {
-                InternetAddress from = determinePossibleFrom(origMsg, accountId, session, ctx);
+                InternetAddress from = determinePossibleFrom(false, origMsg, accountId, session, ctx);
                 /*
                  * Set if a "From" candidate applies
                  */
@@ -643,9 +643,13 @@ public final class MimeReply {
      * @throws OXException If an Open-Xchange error occurs
      * @throws AddressException If address cannot be parsed
      */
-    public static InternetAddress determinePossibleFrom(final MailMessage origMsg, final int accountId, final Session session, final Context ctx) throws OXException, AddressException {
-        final Set<InternetAddress> fromCandidates = new HashSet<InternetAddress>(8);
+    public static InternetAddress determinePossibleFrom(boolean isForward, MailMessage origMsg, int accountId, Session session, Context ctx) throws OXException, AddressException {
+        Set<InternetAddress> fromCandidates = new HashSet<InternetAddress>(8);
         if (accountId == MailAccount.DEFAULT_ID) {
+            if (isForward) {
+                // Fall-back to primary address
+                return null;
+            }
             addUserAliases(fromCandidates, session, ctx);
         } else {
             // Check for Unified Mail account
@@ -654,21 +658,41 @@ public final class MimeReply {
             if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
                 int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
                 if (realAccountId == MailAccount.DEFAULT_ID) {
+                    if (isForward) {
+                        // Fall-back to primary address
+                        return null;
+                    }
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
-                    final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                    MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
                     if (null == mass) {
+                        if (isForward) {
+                            // Fall-back to primary address
+                            return null;
+                        }
                         addUserAliases(fromCandidates, session, ctx);
                     } else {
-                        fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        QuotedInternetAddress a = new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false);
+                        if (isForward) {
+                            return a;
+                        }
+                        fromCandidates.add(a);
                     }
                 }
             } else {
-                final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
                 if (null == mass) {
+                    if (isForward) {
+                        // Fall-back to primary address
+                        return null;
+                    }
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
-                    fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                    QuotedInternetAddress a = new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false);
+                    if (isForward) {
+                        return a;
+                    }
+                    fromCandidates.add(a);
                 }
             }
         }

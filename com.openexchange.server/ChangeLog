@@ -1,3 +1,7 @@
+* 2014-12-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35673: Fill proper "From" on mail forward for external account
+
 * 2014-11-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 34670: Added null guard when performing access combination look-up by name
