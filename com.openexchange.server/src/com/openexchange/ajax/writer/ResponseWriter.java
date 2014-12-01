@@ -53,12 +53,14 @@ import static com.openexchange.ajax.fields.ResponseFields.*;
 import static com.openexchange.ajax.requesthandler.Utils.getUnsignedInteger;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -275,20 +277,29 @@ public final class ResponseWriter {
          *       "JSONObject.NULL.equals(response.getData())"
          *       when performing null comparison?
          */
-        if (null != response.getData()) {
-            json.put(DATA, response.getData());
+        {
+            Object data = response.getData();
+            if (null != data) {
+                json.put(DATA, data);
+            }
         }
 
-        if (null != response.getTimestamp()) {
-            json.put(TIMESTAMP, response.getTimestamp().getTime());
+        {
+            Date timestamp = response.getTimestamp();
+            if (null != timestamp) {
+                json.put(TIMESTAMP, timestamp.getTime());
+            }
         }
 
-        if (null != response.getContinuationUUID()) {
-            json.put(CONTINUATION, UUIDs.getUnformattedString(response.getContinuationUUID()));
+        {
+            UUID continuationUUID = response.getContinuationUUID();
+            if (null != continuationUUID) {
+                json.put(CONTINUATION, UUIDs.getUnformattedString(continuationUUID));
+            }
         }
 
-        final List<OXException> warnings = response.getWarnings();
-        final OXException exception = response.getException();
+        List<OXException> warnings = response.getWarnings();
+        OXException exception = response.getException();
         if (null == exception) {
             /*
              * Any warning available? Set first warning as "exception" for compatibility reasons
