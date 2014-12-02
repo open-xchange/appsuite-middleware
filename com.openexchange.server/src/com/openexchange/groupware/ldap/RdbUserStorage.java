@@ -415,6 +415,11 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
+    public User loadIfAbsent(int userId, Context ctx, Connection con) throws OXException {
+        return getUser(ctx, con, new int[] { userId })[0];
+    }
+
+    @Override
     public User getUser(final Context ctx, final int userId, final Connection con) throws OXException {
         return getUser(ctx, con, new int[] { userId })[0];
     }

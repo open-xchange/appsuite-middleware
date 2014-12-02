@@ -150,6 +150,17 @@ public abstract class UserStorage {
     public abstract User getUser(int uid, Context context) throws OXException;
 
     /**
+     * Reads the data from a user from the underlying persistent data storage.
+     *
+     * @param userId The user identifier.
+     * @param context The context.
+     * @param con The connection to use
+     * @return A user object.
+     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     */
+    public abstract User loadIfAbsent(int userId, Context context, Connection con) throws OXException;
+
+    /**
      * Reads the data from a user from the underlying persistent data storage by through using the given database connection.
      * @param ctx The context.
      * @param userId User identifier.
