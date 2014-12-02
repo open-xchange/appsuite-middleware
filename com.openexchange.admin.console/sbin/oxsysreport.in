@@ -86,7 +86,7 @@ LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
-OX_CONFIG_DIR="/opt/open-xchange/etc /opt/open-xchange/guard/etc"
+OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/guard/etc"
 
 ###############################################################################
 #                                   Functions                                 #
