@@ -4026,7 +4026,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static FetchProfile checkFetchProfile(FetchProfile fetchProfile) {
         if (null == fetchProfile || IMAPProperties.getInstance().allowFetchSingleHeaders()) {
-            return null;
+            return fetchProfile;
         }
 
         FetchProfile newFetchProfile = new FetchProfile();
