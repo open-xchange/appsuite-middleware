@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import static com.openexchange.tools.Collections.newHashMap;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -125,7 +124,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
@@ -176,6 +174,7 @@ import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.utils.AddressUtility;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -1578,65 +1577,9 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
-            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-            addrs.addAll(Arrays.asList(mail.getFrom()));
-            addrs.addAll(Arrays.asList(mail.getTo()));
-            addrs.addAll(Arrays.asList(mail.getCc()));
-            addrs.addAll(Arrays.asList(mail.getBcc()));
-            // Strip by aliases
-            try {
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final UserSettingMail usm = session.getUserSettingMail();
-                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
-                }
-                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new QuotedInternetAddress(alias));
-                }
-                addrs.removeAll(validAddrs);
-            } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
+            Set<InternetAddress> addrs = AddressUtility.getUnknownAddresses(mail, session);
 
-            }
             if (!addrs.isEmpty()) {
-                // Add addresses
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
-            }
-        }
-    }
-
-    private static void triggerContactCollector(final ServerSession session, final JSONObject mail) throws OXException {
-        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
-        if (null != ccs) {
-            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-            try {
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.FROM.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), mail)));
-                // Strip by aliases
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final UserSettingMail usm = session.getUserSettingMail();
-                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
-                }
-                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new QuotedInternetAddress(alias));
-                }
-                addrs.removeAll(validAddrs);
-            } catch (final AddressException e) {
-                LOG.warn("Contact collector could not be triggered", e);
-            } catch (final JSONException e) {
-                LOG.warn("Contact collector could not be triggered", e);
-            }
-            if (!addrs.isEmpty()) {
-                // Add addresses
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
             }
         }

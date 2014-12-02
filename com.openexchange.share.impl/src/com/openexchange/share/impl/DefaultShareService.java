@@ -56,12 +56,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -70,6 +74,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -93,6 +98,7 @@ import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
@@ -110,6 +116,7 @@ public class DefaultShareService implements ShareService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultShareService.class);
 
     private final ServiceLookup services;
+
     private final GuestCleaner guestCleaner;
 
     /**
@@ -142,8 +149,7 @@ public class DefaultShareService implements ShareService {
             LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(
-            contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
         return 0 == shares.size() ? null : new ResolvedGuestShare(services, contextID, guest, shares, true);
     }
@@ -157,8 +163,7 @@ public class DefaultShareService implements ShareService {
             LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(
-            contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
 
         // TODO:
@@ -183,8 +188,7 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public List<ShareInfo> getAllShares(Session session) throws OXException {
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(
-            session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         return ShareTool.toShareInfos(services, session.getContextId(), shares);
     }
@@ -192,8 +196,7 @@ public class DefaultShareService implements ShareService {
     @Override
     public List<ShareInfo> getAllShares(Session session, String module) throws OXException {
         int moduleId = ShareModuleMapping.moduleMapping2int(module);
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForModule(
-            session.getContextId(), moduleId, StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForModule(session.getContextId(), moduleId, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         return ShareTool.toShareInfos(services, session.getContextId(), shares);
     }
@@ -257,12 +260,75 @@ public class DefaultShareService implements ShareService {
              * store shares
              */
             shareStorage.storeShares(contextID, sharesToStore, connectionHelper.getParameters());
+
             connectionHelper.commit();
             LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
+            collectAddresses(session, recipients);
+
             return sharesPerRecipient;
         } finally {
             connectionHelper.finish();
         }
+    }
+
+    /**
+     * Recognizes the email addresses that should be collected and adds them to the ContactCollector.
+     *
+     * @param session - the {@link Session} to get aliases for
+     * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
+     * @throws OXException
+     */
+    private void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
+        final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients, session);
+            if (!addrs.isEmpty()) {
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            }
+        }
+    }
+
+    /**
+     * Returns a <code>Set</code> of <code>InternetAddress</code>es that should be collected by the {@link ContactCollectorService}
+     *
+     * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
+     * @param session - {@link Session} to get aliases for
+     * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
+     * @throws OXException
+     */
+    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients, Session session) throws OXException {
+        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+        try {
+            for (ShareRecipient shareRecipient : shareRecipients) {
+                RecipientType recipientType = RecipientType.of(shareRecipient);
+                if ((recipientType == null) || (recipientType != RecipientType.GUEST)) {
+                    continue;
+                }
+
+                GuestRecipient guest = (GuestRecipient) shareRecipient;
+                addrs.add(new InternetAddress(guest.getEmailAddress()));
+            }
+            if (addrs.size() == 0) {
+                return addrs;
+            }
+            // Strip by aliases
+            if (session == null) {
+                LOG.info("Provided Session object is null. Cannot remove already known addresses!");
+                return addrs;
+            }
+
+            final Set<InternetAddress> knownAddresses = new HashSet<InternetAddress>();
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+            knownAddresses.add(new InternetAddress(user.getMail()));
+            final String[] aliases = user.getAliases();
+            for (final String alias : aliases) {
+                knownAddresses.add(new InternetAddress(alias));
+            }
+            addrs.removeAll(knownAddresses);
+        } catch (final AddressException addressException) {
+            LOG.warn("Unable to add address to ContactCollector.", addressException);
+        }
+        return addrs;
     }
 
     @Override
@@ -310,8 +376,7 @@ public class DefaultShareService implements ShareService {
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            affectedGuests = services.getService(ShareStorage.class).deleteTargets(
-                session.getContextId(), targets, includeItems, connectionHelper.getParameters());
+            affectedGuests = services.getService(ShareStorage.class).deleteTargets(session.getContextId(), targets, includeItems, connectionHelper.getParameters());
             connectionHelper.commit();
         } finally {
             connectionHelper.finish();
@@ -361,8 +426,7 @@ public class DefaultShareService implements ShareService {
      * @return The shares, or an empty list if there are none
      */
     public List<ShareInfo> getAllShares(int contextID) throws OXException {
-        return ShareTool.toShareInfos(services, contextID,
-            services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS));
+        return ShareTool.toShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS));
     }
 
     /**
@@ -373,15 +437,14 @@ public class DefaultShareService implements ShareService {
      * @return The shares, or an empty list if there are none
      */
     public List<ShareInfo> getAllShares(int contextID, int userID) throws OXException {
-        return ShareTool.toShareInfos(services, contextID,
-            services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, StorageParameters.NO_PARAMETERS));
+        return ShareTool.toShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, StorageParameters.NO_PARAMETERS));
     }
 
     /**
      * Removes all shares in a context.
      * <P/>
-     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
-     * as needed.
+     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled as
+     * needed.
      * <p/>
      * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
      *
@@ -418,8 +481,8 @@ public class DefaultShareService implements ShareService {
     /**
      * Removes all shares in a context that were created by a specific user.
      * <P/>
-     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
-     * as needed.
+     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled as
+     * needed.
      * <p/>
      * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
      *
@@ -456,11 +519,10 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Removes all shares identified by the supplied tokens. The tokens might either be in their absolute format (i.e. base token plus
-     * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being
-     * removed.
+     * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being removed.
      * <P/>
-     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
-     * as needed.
+     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled as
+     * needed.
      * <p/>
      * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
      *
@@ -562,11 +624,10 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Removes all shares identified by the supplied tokens. The tokens might either be in their absolute format (i.e. base token plus
-     * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being
-     * removed.
+     * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being removed.
      * <P/>
-     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled
-     * as needed.
+     * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled as
+     * needed.
      * <p/>
      * Depending on the session, the removal is done in terms of an administrative update with no further permission checks, or regular
      * update as performed by the session's user, checking permissions on the share targets implicitly.
@@ -582,8 +643,7 @@ public class DefaultShareService implements ShareService {
          */
         TokenCollection tokenCollection = new TokenCollection(services, contextID, tokens);
         List<Share> shares;
-        ConnectionHelper connectionHelper = null != session ?
-            new ConnectionHelper(session, services, true) : new ConnectionHelper(contextID, services, true);
+        ConnectionHelper connectionHelper = null != session ? new ConnectionHelper(session, services, true) : new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
             /*
@@ -707,14 +767,12 @@ public class DefaultShareService implements ShareService {
                 /*
                  * combine permission bits with existing ones, reset any last modified marker if present
                  */
-                UserPermissionBits userPermissionBits = ShareTool.setPermissionBits(
-                    services, connection, context, existingGuestUser.getId(), permissionBits, true);
+                UserPermissionBits userPermissionBits = ShareTool.setPermissionBits(services, connection, context, existingGuestUser.getId(), permissionBits, true);
                 GuestLastModifiedMarker.clearLastModified(services, context, existingGuestUser);
-                LOG.debug("Using existing guest user {} with permissions {} in context {}: {}",
-                    existingGuestUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
+                LOG.debug("Using existing guest user {} with permissions {} in context {}: {}", existingGuestUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
                 /*
-                 * As the recipient already belongs to an existing user, its password must be set to null, to avoid
-                 * wrong notification messages
+                 * As the recipient already belongs to an existing user, its password must be set to null, to avoid wrong notification
+                 * messages
                  */
                 guestRecipient.setPassword(null);
                 return existingGuestUser;

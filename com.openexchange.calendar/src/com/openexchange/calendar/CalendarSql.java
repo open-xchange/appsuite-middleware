@@ -57,6 +57,7 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -64,9 +65,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
@@ -78,9 +83,11 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ParticipantsDiffer;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
@@ -140,6 +147,12 @@ public class CalendarSql implements AppointmentSQLInterface {
     public static final int[] EXCEPTION_FIELDS = new int[Appointment.ALL_COLUMNS.length - EXEMPT.size()];
 
     private static volatile int MAX_SEARCH_FOLDER = 100;
+
+    private static final AtomicReference<ContactCollectorService> SERVICES_REF = new AtomicReference<ContactCollectorService>();
+
+    public static void setContactCollectorService(ContactCollectorService contactCollectorService) {
+        CalendarSql.SERVICES_REF.set(contactCollectorService);
+    }
 
     static {
         int i = 0;
@@ -472,6 +485,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                             writecon.setAutoCommit(false);
                             try {
                                 final CalendarDataObject[] appointments = cimp.insertAppointment(cdao, writecon, session);
+                                collectAddresses(cdao);
                                 modificationPerformed = true;
                                 return appointments;
                             } catch(final DataTruncation dt) {
@@ -520,6 +534,66 @@ public class CalendarSql implements AppointmentSQLInterface {
                     DBPool.pushWriteAfterReading(ctx, writecon);
                 }
             }
+        }
+    }
+
+    /**
+     * Tries to add addresses of external participants to the ContactCollector.
+     *
+     * @param cdao - the {@link CalendarDataObject} to collect addresses for
+     */
+    private void collectAddresses(CalendarDataObject cdao) {
+        if (cdao == null) {
+            LOG.info("Provided CalendarDataObject object is null. Nothing to collect for the ContactCollector!");
+            return;
+        }
+
+        ContactCollectorService contactCollectorService = SERVICES_REF.get();
+        if ((contactCollectorService != null) && (cdao.getParticipants().length > 0)) {
+            Participant[] participants = cdao.getParticipants();
+
+            List<InternetAddress> addresses = new ArrayList<InternetAddress>(participants.length);
+            for (Participant participant : participants) {
+                if (participant.getType() == Participant.EXTERNAL_USER) {
+                    try {
+                        addresses.add(new InternetAddress(participant.getEmailAddress()));
+                    } catch (AddressException addressException) {
+                        LOG.warn("Unable to add address " + participant.getEmailAddress() + " to ContactCollector.", addressException);
+                    }
+                }
+            }
+
+            contactCollectorService.memorizeAddresses(addresses, session);
+        }
+    }
+
+    /**
+     * Tries to add addresses of external participants to the ContactCollector.
+     *
+     * @param addresses - List of addresses to be collected
+     */
+    private void collectAddresses(List<Object> participants) {
+        if (participants == null) {
+            LOG.info("Provided list with participants is null. Nothing to collect for the ContactCollector!");
+            return;
+        }
+
+        ContactCollectorService contactCollectorService = SERVICES_REF.get();
+        if ((contactCollectorService != null) && (participants.size() > 0)) {
+
+            List<InternetAddress> addresses = new ArrayList<InternetAddress>(participants.size());
+            for (Object participant : participants) {
+                if (participant instanceof ExternalUserParticipant) {
+                    ExternalUserParticipant externalUserParticipant = (ExternalUserParticipant) participant;
+                    try {
+                        addresses.add(new InternetAddress(externalUserParticipant.getEmailAddress()));
+                    } catch (AddressException addressException) {
+                        LOG.warn("Unable to add address " + externalUserParticipant.getEmailAddress() + " to ContactCollector.", addressException);
+                    }
+                }
+            }
+
+            contactCollectorService.memorizeAddresses(addresses, session);
         }
     }
 
@@ -601,6 +675,12 @@ public class CalendarSql implements AppointmentSQLInterface {
                     } else {
                         cdao.setActionFolder(inFolder);
                     }
+
+                    ParticipantsDiffer participantsDiffer = new ParticipantsDiffer();
+                    Difference difference = participantsDiffer.getDifference(edao, cdao);
+                    List<Object> added = difference.getAdded();
+
+                    this.collectAddresses(added);
                     return cimp.updateAppointment(cdao, edao, writecon, session, ctx, inFolder, clientLastModified);
                 } catch(final DataTruncation dt) {
                     throwTruncationError(cdao, writecon, dt);

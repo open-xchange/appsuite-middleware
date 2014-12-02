@@ -52,14 +52,20 @@ package com.openexchange.groupware.tasks;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -187,6 +193,36 @@ public class TasksSQLImpl implements TasksSQLInterface {
         insert.doInsert();
         insert.createReminder();
         insert.sentEvent(session);
+
+        collectAddresses(task);
+    }
+
+    /**
+     * Tries to add addresses of external participants to the ContactCollector.
+     *
+     * @param task - the {@link Task} to collect addresses for
+     */
+    private void collectAddresses(Task task) {
+        if (task == null) {
+            LOG.info("Provided Task object is null. Nothing to collect for the ContactCollector!");
+            return;
+        }
+
+        ContactCollectorService contactCollectorService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        if ((contactCollectorService != null) && (task.getParticipants().length > 0)) {
+            Participant[] participants = task.getParticipants();
+
+            List<InternetAddress> addresses = new ArrayList<InternetAddress>(participants.length) ;
+            for (Participant participant : participants) {
+                try {
+                    addresses.add(new InternetAddress(participant.getEmailAddress()));
+                } catch (AddressException addressException) {
+                    LOG.warn("Unable to add address " + participant.getEmailAddress() + " to ContactCollector.", addressException);
+                }
+            }
+
+            contactCollectorService.memorizeAddresses(addresses, session);
+        }
     }
 
     @Override
@@ -212,8 +248,41 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.sentEvent(session);
             update.updateReminder();
             update.makeNextRecurrence(session);
+
+            collectAddresses(update);
         } catch (final OXException e) {
             throw e;
+        }
+    }
+
+    /**
+     * Collects addresses from the given {@link UpdateData}
+     *
+     * @param update - the {@link UpdateData} to get addresses from
+     * @throws OXException
+     */
+    private void collectAddresses(UpdateData update) throws OXException {
+        if (update == null) {
+            LOG.info("Provided UpdateData object is null. Nothing to collect for the ContactCollector!");
+            return;
+        }
+        ContactCollectorService contactCollectorService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        Set<TaskParticipant> updatedParticipants = update.getUpdatedParticipants();
+
+        if ((contactCollectorService != null) && (!updatedParticipants.isEmpty())) {
+
+            List<InternetAddress> addresses = new ArrayList<InternetAddress>(updatedParticipants.size());
+            for (TaskParticipant participant : updatedParticipants) {
+                if (participant.getType() == TaskParticipant.Type.EXTERNAL) {
+                    ExternalParticipant external = (ExternalParticipant) participant;
+                    try {
+                        addresses.add(new InternetAddress(external.getMail()));
+                    } catch (AddressException addressException) {
+                        LOG.warn("Unable to add address " + external.getMail() + " to ContactCollector.", addressException);
+                    }
+                }
+            }
+            contactCollectorService.memorizeAddresses(addresses, session);
         }
     }
 
