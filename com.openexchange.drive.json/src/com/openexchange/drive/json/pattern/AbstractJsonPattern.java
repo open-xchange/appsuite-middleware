@@ -81,7 +81,7 @@ public abstract class AbstractJsonPattern {
         final int prime = 31;
         int result = 1;
         result = prime * result + (caseSensitive ? 1231 : 1237);
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.ordinal());
         return result;
     }
 
