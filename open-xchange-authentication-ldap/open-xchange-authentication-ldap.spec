@@ -77,6 +77,8 @@ fi
 %doc com.openexchange.authentication.ldap/ChangeLog
 
 %changelog
+* Tue Nov 25 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-01
 * Mon Nov 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-01
 * Fri Nov 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
