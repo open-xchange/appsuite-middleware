@@ -72,6 +72,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -1203,6 +1204,30 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * Sort them by name only
                  */
+                if (FolderObject.SHARED == iType) {
+                    /*
+                     * Pre-load users with current connection
+                     */
+                    Map<String, Integer> tracker = new HashMap<String, Integer>(list.size());
+                    for (FolderObject folder : list) {
+                        Integer pre = tracker.get(folder.getFolderName());
+                        if (null == pre) {
+                            int owner = folder.getCreatedBy();
+                            if (owner > 0) {
+                                tracker.put(folder.getFolderName(), Integer.valueOf(owner));
+                            }
+                        } else {
+                            int owner = folder.getCreatedBy();
+                            if (owner > 0) {
+                                int otherOwner = pre.intValue();
+                                if (otherOwner != owner) {
+                                    UserStorage.getInstance().loadIfAbsent(otherOwner, ctx, con);
+                                    UserStorage.getInstance().loadIfAbsent(owner, ctx, con);
+                                }
+                            }
+                        }
+                    }
+                }
                 Collections.sort(list, new FolderNameComparator(user.getLocale(), storageParameters.getContext()));
             }
             /*
@@ -1993,10 +2018,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     private static final class FolderObjectComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-
         private final Context context;
 
-        public FolderObjectComparator(final Locale locale, final Context context) {
+        FolderObjectComparator(Locale locale, Context context) {
             super();
             collator = Collator.getInstance(locale);
             collator.setStrength(Collator.SECONDARY);
@@ -2013,7 +2037,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                          */
                         final int owner1 = o1.getCreatedBy();
                         final int owner2 = o2.getCreatedBy();
-                        if (owner1 > 0 && owner2 > 0) {
+                        if (owner1 > 0 && owner2 > 0 && owner1 != owner2) {
                             String d1;
                             try {
                                 d1 = UserStorage.getInstance().getUser(owner1, context).getDisplayName();
@@ -2048,10 +2072,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     private static final class FolderNameComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-
         private final Context context;
 
-        public FolderNameComparator(final Locale locale, final Context context) {
+        FolderNameComparator(Locale locale, Context context) {
             super();
             collator = Collator.getInstance(locale);
             collator.setStrength(Collator.SECONDARY);
@@ -2071,7 +2094,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  */
                 final int owner1 = o1.getCreatedBy();
                 final int owner2 = o2.getCreatedBy();
-                if (owner1 > 0 && owner2 > 0) {
+                if (owner1 > 0 && owner2 > 0 && owner1 != owner2) {
                     String d1;
                     try {
                         d1 = UserStorage.getInstance().getUser(owner1, context).getDisplayName();
