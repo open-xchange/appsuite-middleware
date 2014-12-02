@@ -81,6 +81,8 @@ import com.openexchange.charset.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
 import com.openexchange.charset.ModifyCharsetExtendedProvider;
+import com.openexchange.cluster.timer.ClusterTimerService;
+import com.openexchange.cluster.timer.internal.ClusterTimerServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -373,6 +375,7 @@ public final class Init {
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
         startAndInjectCapabilitiesServices();
+        startAndInjectClusterTimerService();
         startAndInjectDefaultShareService();
     }
 
@@ -901,6 +904,14 @@ public final class Init {
             final ConversionService conversionService = new ConversionServiceImpl();
             services.put(ConversionService.class, conversionService);
             TestServiceRegistry.getInstance().addService(ConversionService.class, conversionService);
+        }
+    }
+
+    public static void startAndInjectClusterTimerService() throws OXException {
+        if (null == TestServiceRegistry.getInstance().getService(ClusterTimerService.class)) {
+            ClusterTimerService clusterTimerService = new ClusterTimerServiceImpl(LOOKUP, null);
+            services.put(ClusterTimerService.class, clusterTimerService);
+            TestServiceRegistry.getInstance().addService(ClusterTimerService.class, clusterTimerService);
         }
     }
 
