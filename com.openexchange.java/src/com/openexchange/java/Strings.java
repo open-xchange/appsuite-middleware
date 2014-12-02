@@ -87,6 +87,25 @@ public class Strings {
     }
 
     /**
+     * Checks if given string starts with any of specified prefixes
+     *
+     * @param s The string to check
+     * @param prefixes The prefixes
+     * @return <code>true</code> if given string starts with any of specified prefixes; otherwise <code>false</code>
+     */
+    public static boolean startsWithAny(String s, String... prefixes) {
+        if (null == s) {
+            return false;
+        }
+        boolean startsWith = false;
+        for (int i = prefixes.length; !startsWith && i-- > 0;) {
+            String prefix = prefixes[i];
+            startsWith = null == prefix ? false : s.startsWith(prefix, 0);
+        }
+        return startsWith;
+    }
+
+    /**
      * Builds up a string from passed objects.
      *
      * @param objects The objects

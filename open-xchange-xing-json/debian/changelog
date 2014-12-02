@@ -1,3 +1,9 @@
+open-xchange-xing-json (7.6.1-11) stable; urgency=low
+
+  * Build for patch 2014-12-01
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 25 Nov 2014 11:53:17 +0100
+
 open-xchange-xing-json (7.6.1-10) stable; urgency=medium
 
   * Build for patch 2014-12-01
