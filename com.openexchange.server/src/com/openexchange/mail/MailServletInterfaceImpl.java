@@ -147,6 +147,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.processing.MimeForward;
+import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.permission.MailPermission;
@@ -1662,12 +1663,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * first loading from cache then loading missing headers in next step
          */
         try {
-            final MailMessage[] mails = MailMessageCache.getInstance().getMessages(
-                uids,
-                accountId,
-                fullName,
-                session.getUserId(),
-                contextId);
+            final MailMessage[] mails =
+                MailMessageCache.getInstance().getMessages(uids, accountId, fullName, session.getUserId(), contextId);
             if (null != mails) {
                 /*
                  * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
@@ -1707,7 +1704,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 }
                             }
                         } else {
-                            for (final MailMessage header : messageStorage.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), HEADERS)) {
+                            for (final MailMessage header : messageStorage.getMessages(
+                                fullName,
+                                loadMe.toArray(new String[loadMe.size()]),
+                                HEADERS)) {
                                 if (null != header) {
                                     final MailMessage mailMessage = finder.get(header.getMailId());
                                     if (null != mailMessage) {
@@ -1730,11 +1730,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final MailMessage[] mails;
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         if (messageStorage instanceof IMailMessageStorageExt) {
-            mails = ((IMailMessageStorageExt) messageStorage).getMessages(
-                fullName,
-                uids,
-                MailField.toFields(MailListField.getFields(fields)),
-                headerFields);
+            mails =
+                ((IMailMessageStorageExt) messageStorage).getMessages(
+                    fullName,
+                    uids,
+                    MailField.toFields(MailListField.getFields(fields)),
+                    headerFields);
         } else {
             /*
              * Get appropriate mail fields
@@ -1764,7 +1765,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final com.openexchange.search.SearchTerm<?> searchTerm, final boolean linkSearchTermsWithOR, final int[] fields, final boolean supportsContinuation) throws OXException {
-        return getMessagesInternal(prepareMailFolderParam(folder), SearchTermMapper.map(searchTerm), fromToIndices, sortCol, order, fields, supportsContinuation);
+        return getMessagesInternal(prepareMailFolderParam(folder), SearchTermMapper.map(searchTerm), fromToIndices, sortCol, order, fields, null, supportsContinuation);
     }
 
     @Override
@@ -1774,15 +1775,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             searchCols,
             searchPatterns,
             linkSearchTermsWithOR);
-        return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields, supportsContinuation);
+        return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields, null, supportsContinuation);
     }
 
-    private SearchIterator<MailMessage> getMessagesInternal(final FullnameArgument argument, final SearchTerm<?> searchTerm, final int[] fromToIndices, final int sortCol, final int order, final int[] fields, final boolean supportsContinuation) throws OXException {
+    private SearchIterator<MailMessage> getMessagesInternal(FullnameArgument argument, SearchTerm<?> searchTerm, int[] fromToIndices, int sortCol, int order, int[] fields, String[] headerNames, boolean supportsContinuation) throws OXException {
         /*
          * Identify and sort messages according to search term and sort criteria while only fetching their IDs
          */
         String fullName = argument.getFullname();
-        MailMessage[] mails;
+        MailMessage[] mails = null;
         {
             IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
             MailSortField sortField = MailSortField.getField(sortCol);
@@ -1793,12 +1794,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
                 }
                 mails = unifiedView.searchMessages(UnifiedFullName.INBOX, indexRange, sortField, orderDir, searchTerm, FIELDS_ID_INFO, session);
-                final int accountId = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
+                int accountId = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
                 initConnection(accountId);
                 fullName = UnifiedFullName.INBOX.getFullName();
             } else {
-                final int accountId = argument.getAccountId();
+                int accountId = argument.getAccountId();
                 initConnection(accountId);
+
+                // Check if a certain range/page is requested
+                if (IndexRange.NULL != indexRange) {
+                    return getMessageRange(searchTerm, fields, headerNames, fullName, indexRange, sortField, orderDir, accountId);
+                }
+
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, FIELDS_ID_INFO);
             }
         }
@@ -1808,21 +1815,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if ((mails == null) || (mails.length == 0) || onlyNull(mails)) {
             return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
-        final boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
+        boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
+
         MailField[] useFields;
-        final boolean onlyFolderAndID;
+        boolean onlyFolderAndID;
         if (cachable) {
             /*
              * Selection fits into cache: Prepare for caching
              */
-            useFields = com.openexchange.mail.mime.utils.MimeStorageUtility.getCacheFieldsArray();
+            useFields = MimeStorageUtility.getCacheFieldsArray();
             onlyFolderAndID = false;
         } else {
             useFields = MailField.getFields(fields);
-            onlyFolderAndID = onlyFolderAndID(useFields);
+            onlyFolderAndID = (null != headerNames && 0 < headerNames.length) ? false : onlyFolderAndID(useFields);
         }
         if (supportsContinuation) {
-            final MailFields mfs = new MailFields(useFields);
+            MailFields mfs = new MailFields(useFields);
             if (!mfs.contains(MailField.SUPPORTS_CONTINUATION)) {
                 mfs.add(MailField.SUPPORTS_CONTINUATION);
                 useFields = mfs.toArray();
@@ -1837,9 +1845,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Extract IDs
              */
-            final String[] mailIds = new String[mails.length];
+            String[] mailIds = new String[mails.length];
             for (int i = 0; i < mailIds.length; i++) {
-                final MailMessage m = mails[i];
+                MailMessage m = mails[i];
                 if (null != m) {
                     mailIds[i] = m.getMailId();
                 }
@@ -1847,7 +1855,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Fetch identified messages by their IDs and pre-fill them according to specified fields
              */
-            mails = mailAccess.getMessageStorage().getMessages(fullName, mailIds, useFields);
+            if (null != headerNames && 0 < headerNames.length) {
+                IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                if (messageStorage instanceof IMailMessageStorageExt) {
+                    mails = ((IMailMessageStorageExt) messageStorage).getMessages(fullName, mailIds, useFields, headerNames);
+                } else {
+                    useFields = MailFields.addIfAbsent(useFields, MailField.ID);
+                    mails = messageStorage.getMessages(fullName, mailIds, useFields);
+                    enrichWithHeaders(fullName, mails, headerNames, messageStorage);
+                }
+            } else {
+                mails = mailAccess.getMessageStorage().getMessages(fullName, mailIds, useFields);
+            }
             if ((mails == null) || (mails.length == 0) || onlyNull(mails)) {
                 return SearchIteratorAdapter.emptyIterator();
             }
@@ -1855,9 +1874,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Set account information
          */
-        for (final MailMessage mail : mails) {
-            if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
-                mail.setAccountId(accountId);
+        List<MailMessage> l = new LinkedList<MailMessage>();
+        for (MailMessage mail : mails) {
+            if (mail != null) {
+                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                    mail.setAccountId(accountId);
+                }
+                l.add(mail);
             }
         }
         /*
@@ -1867,7 +1890,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Remove old user cache entries
              */
-            // TODO: JSONMessageCache.getInstance().removeAllFoldersExcept(accountId, fullName, session);
             MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
             if ((cachable) && (mails.length > 0)) {
                 /*
@@ -1875,16 +1897,91 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
-        final List<MailMessage> l = new LinkedList<MailMessage>();
-        for (final MailMessage mm : mails) {
-            if (null != mm) {
-                l.add(mm);
+        return new SearchIteratorDelegator<MailMessage>(l);
+    }
+
+    private SearchIterator<MailMessage> getMessageRange(SearchTerm<?> searchTerm, int[] fields, String[] headerNames, String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection orderDir, int accountId) throws OXException {
+        boolean cachable = (indexRange.end - indexRange.start) < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit();
+        MailField[] useFields = MailField.getFields(fields);
+        if (cachable) {
+            useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
+        }
+        MailMessage[] mails;
+        if (null != headerNames && 0 < headerNames.length) {
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            if (messageStorage instanceof IMailMessageStorageExt) {
+                mails = ((IMailMessageStorageExt) messageStorage).searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
+            } else {
+                useFields = MailFields.addIfAbsent(useFields, MailField.ID);
+                mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
+                enrichWithHeaders(fullName, mails, headerNames, messageStorage);
+            }
+        } else {
+            mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
+        }
+        /*
+         * Set account information
+         */
+        List<MailMessage> l = new LinkedList<MailMessage>();
+        for (MailMessage mail : mails) {
+            if (mail != null) {
+                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                    mail.setAccountId(accountId);
+                }
+                l.add(mail);
             }
         }
+        /*
+         * Put message information into cache
+         */
+        try {
+            /*
+             * Remove old user cache entries
+             */
+            MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
+            if ((cachable) && (mails.length > 0)) {
+                /*
+                 * ... and put new ones
+                 */
+                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
+            }
+        } catch (OXException e) {
+            LOG.error("", e);
+        }
         return new SearchIteratorDelegator<MailMessage>(l);
+    }
+
+    private void enrichWithHeaders(String fullName, MailMessage[] mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
+        int length = mails.length;
+        MailMessage[] headers;
+        {
+            String[] ids = new String[length];
+            for (int i = ids.length; i-- > 0;) {
+                MailMessage m = mails[i];
+                ids[i] = null == m ? null : m.getMailId();
+            }
+            headers = messageStorage.getMessages(fullName, ids, MailFields.toArray(MailField.HEADERS));
+        }
+
+        for (int i = length; i-- > 0;) {
+            MailMessage mailMessage = mails[i];
+            if (null != mailMessage) {
+                MailMessage header = headers[i];
+                if (null != header) {
+                    for (String headerName : headerNames) {
+                        String[] values = header.getHeader(headerName);
+                        if (null != values) {
+                            for (String value : values) {
+                                mailMessage.addHeader(headerName, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static boolean onlyNull(final MailMessage[] mails) {

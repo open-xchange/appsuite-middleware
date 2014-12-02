@@ -189,6 +189,13 @@ public interface IIMAPProperties extends IMailProperties {
     public boolean allowFolderCaches();
 
     /**
+     * Checks whether it is allowed to FETCH single headers
+     *
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public boolean allowFetchSingleHeaders();
+
+    /**
      * Gets supported SSL protocols
      *
      * @return Supported SSL protocols
