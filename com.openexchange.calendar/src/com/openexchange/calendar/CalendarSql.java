@@ -678,9 +678,11 @@ public class CalendarSql implements AppointmentSQLInterface {
 
                     ParticipantsDiffer participantsDiffer = new ParticipantsDiffer();
                     Difference difference = participantsDiffer.getDifference(edao, cdao);
-                    List<Object> added = difference.getAdded();
+                    if (difference != null) {
+                        List<Object> added = difference.getAdded();
+                        this.collectAddresses(added);
+                    }
 
-                    this.collectAddresses(added);
                     return cimp.updateAppointment(cdao, edao, writecon, session, ctx, inFolder, clientLastModified);
                 } catch(final DataTruncation dt) {
                     throwTruncationError(cdao, writecon, dt);
