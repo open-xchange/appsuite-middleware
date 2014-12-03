@@ -54,6 +54,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
+import com.openexchange.java.Strings;
 
 /**
  *
@@ -125,7 +126,12 @@ public class DumpSchema extends AbstractSchemaRMIToolkit {
             String output = (String) parser.getOptionValue(optOutput);
             String rmiHost = (String) parser.getOptionValue(optRMIHost);
 
-            SchemaMoveRemote smr = getSchemaMoveRemoteInterface(rmiHost);
+            SchemaMoveRemote smr = null;
+            if(Strings.isEmpty(rmiHost)) {
+                smr = getSchemaMoveRemoteInterface();
+            } else {
+                smr = getSchemaMoveRemoteInterface(rmiHost);
+            }
 
             final Map<String, String> dbAccessInfo = fetchDBAccessInfo(auth, smr, schemaName, parser);
             dbAccessInfo.put("schema", schemaName);

@@ -53,6 +53,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
+import com.openexchange.java.Strings;
 
 /**
  *
@@ -138,7 +139,13 @@ public class RestoreReference extends AbstractSchemaRMIToolkit {
             int targetClusterId = Integer.valueOf((String) parser.getOptionValue(optTargetCluster));
             String rmiHost = (String) parser.getOptionValue(optRMIHost);
 
-            SchemaMoveRemote smr = getSchemaMoveRemoteInterface(rmiHost);
+            SchemaMoveRemote smr = null;
+            if(Strings.isEmpty(rmiHost)) {
+                smr = getSchemaMoveRemoteInterface();
+            } else {
+                smr = getSchemaMoveRemoteInterface(rmiHost);
+            }
+
             smr.restorePoolReferences(auth, sourceSchema, targetSchema, targetClusterId);
         } catch (Exception e) {
             printErrors(null, null, e, parser);
