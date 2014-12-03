@@ -346,6 +346,16 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         }
     }
 
+    private boolean fileNameIndicatesHtml(String fileName) {
+        String mimeTypeByFileName = MimeType2ExtMap.getContentType(fileName, null);
+        if (null == mimeTypeByFileName) {
+            return false;
+        }
+
+        String lc = Strings.asciiLowerCase(mimeTypeByFileName);
+        return lc.startsWith("text/htm") || lc.startsWith("text/xhtm");
+    }
+
     private boolean fileNameAbsentOrIndicatesHtml(String fileName) {
         if (null == fileName) {
             return true;

@@ -86,7 +86,7 @@ LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
-OX_CONFIG_DIR=/opt/open-xchange/etc
+OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/guard/etc"
 
 ###############################################################################
 #                                   Functions                                 #
@@ -216,18 +216,22 @@ collect_other_configs() {
 }
 
 collect_ox_configs() {
-   local _ox_config_copy=$(normalize_path ${TMP}/${LOGDIR}/${OX_CONFIG_DIR})
-   echo "Collecting Open-Xchange configurations into ${_ox_config_copy}"
-   mkdir -p $(dirname ${_ox_config_copy})
-   if [ "$(normalize_path ${OX_CONFIG_DIR})" == "$(normalize_path ${_ox_config_copy})" ]; then
-        die "${0}: Internal Tool Error, tried to modify original data: ${OX_CONFIG_DIR}"
-   fi
-   cp -rL ${OX_CONFIG_DIR} ${_ox_config_copy}
-   if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
-       echo "Removing secrets from Open-Xchange configurations: ${_ox_config_copy}"
-       exclude_secret_ox_properties_entries ${_ox_config_copy}
-       exclude_secret_ox_config_files ${_ox_config_copy}
-   fi
+    for ox_config_dir in ${OX_CONFIG_DIRS}; do
+        if [ -d ${ox_config_dir} ]; then
+            local _ox_config_copy=$(normalize_path ${TMP}/${LOGDIR}/${ox_config_dir})
+            echo "Collecting Open-Xchange configurations into ${_ox_config_copy}"
+            mkdir -p $(dirname ${_ox_config_copy})
+            if [ "$(normalize_path ${ox_config_dir})" == "$(normalize_path ${_ox_config_copy})" ]; then
+                die "${0}: Internal Tool Error, tried to modify original data: ${ox_config_dir}"
+            fi
+            cp -rL ${ox_config_dir} ${_ox_config_copy}
+            if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
+                echo "Removing secrets from Open-Xchange configurations: ${_ox_config_copy}"
+                exclude_secret_ox_properties_entries ${_ox_config_copy}
+                exclude_secret_ox_config_files ${_ox_config_copy}
+            fi
+        fi
+    done
 }
 
 create_excluded_and_modified_overview() {
@@ -237,8 +241,8 @@ create_excluded_and_modified_overview() {
     echo "Creating an overview about modified and excluded files: ${_overview_file}"
     cat ${ALL_EXCLUDED} | sed "s|$(normalize_path ${TMP}/${LOGDIR})||g" | \
     sed 's|^/||g' | \
-    sort > ${_overview_file}
-    rm ${ALL_EXCLUDED}
+    sort -u > ${_overview_file}
+    rm -f ${ALL_EXCLUDED}
 }
 
 create_heap_dump() {
@@ -377,10 +381,10 @@ exclude_secret_ox_properties_entries() {
     local _ox_config_copy=${1}
     local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-secret-exclude)
     local _whitelist='enabledMailCapableKey|UserAttributePassword|^[[:blank:]]*#'
-    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*=|[sS]alt[[:blank:]]*='
+    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*=|[sS]alt[[:blank:]]*=|SSLKey(Pass|Name)[[:blank:]]*='
     find ${_ox_config_copy} -type f -name "*.properties*" | \
-        xargs egrep -rIv "${_whitelist}" | \
-        egrep "${_blacklist}" > ${_tmp_exclude_status}
+        xargs egrep -HrIv "${_whitelist}" | \
+        egrep "${_blacklist}" >> ${_tmp_exclude_status}
 
     while read line; do
         local _file=$(echo ${line} | awk -F ':' '{print $1}')
@@ -409,9 +413,9 @@ exclude_secret_ox_config_files() {
     local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names'
     find ${_ox_config_copy} -type f | \
         egrep -v "${_whitelist}" | \
-        sed 's| |// |g' > ${_tmp_exclude_status}
+        sed 's| |// |g' >> ${_tmp_exclude_status}
     cat ${_tmp_exclude_status} | \
-        xargs -r rm
+        xargs -r rm -f
     print_hint_to_line_end ${_tmp_exclude_status} "removed"
     ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
 }
