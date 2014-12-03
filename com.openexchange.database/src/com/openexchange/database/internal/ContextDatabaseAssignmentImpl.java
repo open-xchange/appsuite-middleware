@@ -114,27 +114,36 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     public AssignmentImpl getAssignment(final int contextId) throws OXException {
         CacheService myCacheService = this.cacheService;
         Cache myCache = this.cache;
-        AssignmentImpl retval;
+
+        // Check cache references
         if (null == myCache || null == myCacheService) {
-            retval = loadAssignment(contextId);
-        } else {
-            final CacheKey key = myCacheService.newCacheKey(contextId, Server.getServerId());
-            cacheLock.lock();
-            try {
-                retval = (AssignmentImpl) myCache.get(key);
-                if (null == retval) {
-                    retval = loadAssignment(contextId);
-                    try {
-                        myCache.putSafe(key, retval);
-                    } catch (final OXException e) {
-                        LOG.error("Cannot put database assignment into cache.", e);
-                    }
-                }
-            } finally {
-                cacheLock.unlock();
-            }
+            // No cache available
+            return loadAssignment(contextId);
         }
-        return retval;
+
+        // Use that cache
+        CacheKey key = myCacheService.newCacheKey(contextId, Server.getServerId());
+        Object object = myCache.get(key);
+        if (object instanceof AssignmentImpl) {
+            return (AssignmentImpl) object;
+        }
+
+        // Need to load - synchronously!
+        cacheLock.lock();
+        try {
+            AssignmentImpl retval = (AssignmentImpl) myCache.get(key);
+            if (null == retval) {
+                retval = loadAssignment(contextId);
+                try {
+                    myCache.putSafe(key, retval);
+                } catch (OXException e) {
+                    LOG.error("Cannot put database assignment into cache.", e);
+                }
+            }
+            return retval;
+        } finally {
+            cacheLock.unlock();
+        }
     }
 
     private static AssignmentImpl loadAssignment(Connection con, int contextId) throws OXException {
