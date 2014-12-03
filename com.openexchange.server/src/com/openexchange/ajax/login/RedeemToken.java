@@ -63,12 +63,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tokenlogin.TokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginService;
 import com.openexchange.tools.servlet.http.Tools;
-
 
 /**
  * {@link RedeemToken}
@@ -145,18 +145,24 @@ public class RedeemToken implements LoginRequestHandler {
         }
         // Write cookie accordingly
         LoginServlet.writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
-        // Generate JSON response
-        try {
-            final JSONObject json = new JSONObject(12);
-            LoginWriter.write(session, json);
-            if (null != writePassword && writePassword.booleanValue()) {
-                final String password = session.getPassword();
-                json.put("password", null == password ? JSONObject.NULL : password);
+
+        String redirectUrl = LoginTools.parseRedirectUrl(req);
+        if (Strings.isEmpty(redirectUrl)) {
+            // Generate JSON response
+            try {
+                final JSONObject json = new JSONObject(12);
+                LoginWriter.write(session, json);
+                if (null != writePassword && writePassword.booleanValue()) {
+                    final String password = session.getPassword();
+                    json.put("password", null == password ? JSONObject.NULL : password);
+                }
+                json.write(resp.getWriter());
+            } catch (final JSONException e) {
+                LOG.info("", e);
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
-            json.write(resp.getWriter());
-        } catch (final JSONException e) {
-            LOG.info("", e);
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } else {
+            resp.sendRedirect(redirectUrl);
         }
     }
 

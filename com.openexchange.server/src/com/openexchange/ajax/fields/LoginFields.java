@@ -81,10 +81,12 @@ public class LoginFields {
     public static final String CLIENT_TOKEN = "clientToken";
 
     public static final String SERVER_TOKEN = "serverToken";
-    
+
     public static final String TOKEN = "token";
-    
+
     public static final String APPSECRET = "secret";
+
+    public static final String REDIRECT_URL = "redirectUrl";
 
     private LoginFields() {
         super();
