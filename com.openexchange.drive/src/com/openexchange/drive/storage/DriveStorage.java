@@ -720,7 +720,7 @@ public class DriveStorage {
      */
     public FileStorageFolder getTrashFolder() throws OXException {
         if (null == trashFolder) {
-            return getFolderAccess().getTrashFolder(rootFolderID.toUniqueID());
+            trashFolder = getFolderAccess().getTrashFolder(rootFolderID.toUniqueID());
         }
         return trashFolder;
     }
