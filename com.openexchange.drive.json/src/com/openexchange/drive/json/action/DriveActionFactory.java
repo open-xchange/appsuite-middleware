@@ -80,6 +80,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("updateToken", new UpdateTokenAction());
         actions.put("fileMetadata", new FileMetadataAction());
         actions.put("directoryMetadata", new DirectoryMetadataAction());
+        actions.put("jump", new JumpAction());
     }
 
     @Override
