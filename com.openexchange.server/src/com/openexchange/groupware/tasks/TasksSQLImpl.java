@@ -203,13 +203,13 @@ public class TasksSQLImpl implements TasksSQLInterface {
      * @param task - the {@link Task} to collect addresses for
      */
     private void collectAddresses(Task task) {
-        if (task == null) {
-            LOG.info("Provided Task object is null. Nothing to collect for the ContactCollector!");
+        if ((task == null) || (task.getParticipants() == null)) {
+            LOG.info("Provided Task object or containing participants null. Nothing to collect for the ContactCollector!");
             return;
         }
 
         ContactCollectorService contactCollectorService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
-        if ((contactCollectorService != null) && (task.getParticipants().length > 0)) {
+        if (contactCollectorService != null) {
             Participant[] participants = task.getParticipants();
 
             List<InternetAddress> addresses = new ArrayList<InternetAddress>(participants.length) ;
