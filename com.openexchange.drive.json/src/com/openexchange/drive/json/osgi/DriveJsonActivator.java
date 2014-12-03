@@ -83,8 +83,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DriveService.class, DriveEventService.class,
-            ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class,
-            TokenLoginService.class
+            ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class
         };
     }
 
@@ -92,7 +91,9 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.drive.json\"");
         Services.set(this);
-        registerModule(new DriveActionFactory(), "drive");
+        DriveActionFactory factory = new DriveActionFactory(context);
+        track(TokenLoginService.class, factory);
+        registerModule(factory, "drive");
         getService(DriveEventService.class).registerPublisher(ListenerRegistrar.getInstance());
         track(LongPollingListenerFactory.class, new ServiceTrackerCustomizer<LongPollingListenerFactory, LongPollingListenerFactory>() {
 

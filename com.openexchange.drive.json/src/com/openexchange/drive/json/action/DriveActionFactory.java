@@ -52,22 +52,28 @@ package com.openexchange.drive.json.action;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.tokenlogin.TokenLoginService;
 
 /**
  * {@link DriveActionFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActionFactory implements AJAXActionServiceFactory {
+public class DriveActionFactory implements AJAXActionServiceFactory, ServiceTrackerCustomizer<TokenLoginService, TokenLoginService> {
 
     private final Map<String, AJAXActionService> actions;
+    private final BundleContext context;
 
-    public DriveActionFactory() {
+    public DriveActionFactory(BundleContext context) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(12);
+        this.context = context;
+        actions = new ConcurrentHashMap<String, AJAXActionService>(13);
         actions.put("syncfolders", new SyncFoldersAction());
         actions.put("syncfiles", new SyncFilesAction());
         actions.put("upload", new UploadAction());
@@ -80,7 +86,6 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("updateToken", new UpdateTokenAction());
         actions.put("fileMetadata", new FileMetadataAction());
         actions.put("directoryMetadata", new DirectoryMetadataAction());
-        actions.put("jump", new JumpAction());
     }
 
     @Override
@@ -91,6 +96,23 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
     @Override
     public Collection<? extends AJAXActionService> getSupportedServices() {
         return java.util.Collections.unmodifiableCollection(actions.values());
+    }
+
+    @Override
+    public TokenLoginService addingService(ServiceReference<TokenLoginService> reference) {
+        TokenLoginService service = context.getService(reference);
+        actions.put("jump", new JumpAction(service));
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<TokenLoginService> reference, TokenLoginService service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<TokenLoginService> reference, TokenLoginService service) {
+        actions.remove("jump");
     }
 
 }

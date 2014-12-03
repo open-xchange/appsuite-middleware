@@ -70,15 +70,19 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * {@link JumpAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
 public class JumpAction extends AbstractDriveAction {
 
-    private final static String[] METHODS = { "edit", "view" };
+    private final TokenLoginService tokenLoginService;
+
+    public JumpAction(TokenLoginService service) {
+        super();
+        this.tokenLoginService = service;
+    }
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        TokenLoginService tokenLoginService = getTokenLoginService();
         DriveService driveService = getDriveService();
         try {
             /*
@@ -97,7 +101,7 @@ public class JumpAction extends AbstractDriveAction {
             String name = requestData.getParameter("name");
             if (Strings.isEmpty(name)) {
                 DirectoryMetadata directoryMetadata = driveService.getDirectoryMetadata(session, path);
-                link = directoryMetadata.getDirectLinkFragments();
+                link = directoryMetadata.getDirectLink();
             } else {
                 String checksum = requestData.getParameter("checksum");
                 if (Strings.isEmpty(checksum)) {
