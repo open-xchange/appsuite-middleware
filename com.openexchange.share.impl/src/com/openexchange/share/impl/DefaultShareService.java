@@ -306,7 +306,10 @@ public class DefaultShareService implements ShareService {
                 }
 
                 GuestRecipient guest = (GuestRecipient) shareRecipient;
-                addrs.add(new InternetAddress(guest.getEmailAddress()));
+                String emailAddress = guest.getEmailAddress();
+                if (emailAddress != null) {
+                    addrs.add(new InternetAddress(emailAddress));
+                }
             }
             if (addrs.size() == 0) {
                 return addrs;

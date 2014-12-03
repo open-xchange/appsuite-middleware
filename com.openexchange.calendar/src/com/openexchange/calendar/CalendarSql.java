@@ -554,11 +554,12 @@ public class CalendarSql implements AppointmentSQLInterface {
 
             List<InternetAddress> addresses = new ArrayList<InternetAddress>(participants.length);
             for (Participant participant : participants) {
-                if (participant.getType() == Participant.EXTERNAL_USER) {
+                String emailAddress = participant.getEmailAddress();
+                if ((participant.getType() == Participant.EXTERNAL_USER) && (emailAddress != null)) {
                     try {
-                        addresses.add(new InternetAddress(participant.getEmailAddress()));
+                        addresses.add(new InternetAddress(emailAddress));
                     } catch (AddressException addressException) {
-                        LOG.warn("Unable to add address " + participant.getEmailAddress() + " to ContactCollector.", addressException);
+                        LOG.warn("Unable to add address " + emailAddress + " to ContactCollector.", addressException);
                     }
                 }
             }
@@ -585,10 +586,13 @@ public class CalendarSql implements AppointmentSQLInterface {
             for (Object participant : participants) {
                 if (participant instanceof ExternalUserParticipant) {
                     ExternalUserParticipant externalUserParticipant = (ExternalUserParticipant) participant;
+                    String emailAddress = externalUserParticipant.getEmailAddress();
                     try {
-                        addresses.add(new InternetAddress(externalUserParticipant.getEmailAddress()));
+                        if (emailAddress != null) {
+                            addresses.add(new InternetAddress(emailAddress));
+                        }
                     } catch (AddressException addressException) {
-                        LOG.warn("Unable to add address " + externalUserParticipant.getEmailAddress() + " to ContactCollector.", addressException);
+                        LOG.warn("Unable to add address " + emailAddress + " to ContactCollector.", addressException);
                     }
                 }
             }

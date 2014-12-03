@@ -214,10 +214,13 @@ public class TasksSQLImpl implements TasksSQLInterface {
 
             List<InternetAddress> addresses = new ArrayList<InternetAddress>(participants.length) ;
             for (Participant participant : participants) {
+                String emailAddress = participant.getEmailAddress();
                 try {
-                    addresses.add(new InternetAddress(participant.getEmailAddress()));
+                    if (emailAddress != null) {
+                        addresses.add(new InternetAddress(emailAddress));
+                    }
                 } catch (AddressException addressException) {
-                    LOG.warn("Unable to add address " + participant.getEmailAddress() + " to ContactCollector.", addressException);
+                    LOG.warn("Unable to add address " + emailAddress + " to ContactCollector.", addressException);
                 }
             }
 
@@ -275,10 +278,13 @@ public class TasksSQLImpl implements TasksSQLInterface {
             for (TaskParticipant participant : updatedParticipants) {
                 if (participant.getType() == TaskParticipant.Type.EXTERNAL) {
                     ExternalParticipant external = (ExternalParticipant) participant;
+                    String mail = external.getMail();
                     try {
-                        addresses.add(new InternetAddress(external.getMail()));
+                        if (mail != null) {
+                            addresses.add(new InternetAddress(mail));
+                        }
                     } catch (AddressException addressException) {
-                        LOG.warn("Unable to add address " + external.getMail() + " to ContactCollector.", addressException);
+                        LOG.warn("Unable to add address " + mail + " to ContactCollector.", addressException);
                     }
                 }
             }
