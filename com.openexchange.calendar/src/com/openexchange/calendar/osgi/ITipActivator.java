@@ -132,10 +132,12 @@ public class ITipActivator extends HousekeepingActivator {
         AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, detailInterval, stateChangeInterval, priorityInterval);
         sender = new PoolingMailSenderService(pool, sender);
 
-        Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RAKING.toString()); // Default
-        registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util, this), props);
-        registerService(ITipDingeMacherFactoryService.class, new DefaultITipDingeMacherFactoryService(util, sender, mails));
+        Dictionary<String, String> analyzerProps = new Hashtable<String, String>();
+        analyzerProps.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RANKING.toString()); // Default
+        registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util, this), analyzerProps);
+        Dictionary<String, String> factoryProps = new Hashtable<String, String>();
+        factoryProps.put(Constants.SERVICE_RANKING, DefaultITipDingeMacherFactoryService.RANKING.toString()); // Default
+        registerService(ITipDingeMacherFactoryService.class, new DefaultITipDingeMacherFactoryService(util, sender, mails), factoryProps);
 
         registerService(ITipMailGeneratorFactory.class, mails);
 
