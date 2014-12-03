@@ -218,7 +218,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
 
-                if (filter && !saveToDisk && ((Strings.startsWithAny(toLowerCase(mailPart.getContentType().getSubType()), "htm", "xhtm") && fileNameAbsentOrIndicatesHtml(mailPart.getFileName())) || fileNameAbsentOrIndicatesHtml(mailPart.getFileName()))) {
+                if (filter && !saveToDisk && ((Strings.startsWithAny(toLowerCase(mailPart.getContentType().getSubType()), "htm", "xhtm") && fileNameAbsentOrIndicatesHtml(mailPart.getFileName())) || fileNameIndicatesHtml(mailPart.getFileName()))) {
                     // Expect the attachment to be HTML content. Therefore apply filter...
                     if (isEmpty(mailPart.getFileName())) {
                         mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
@@ -298,6 +298,16 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private boolean fileNameIndicatesHtml(String fileName) {
+        String mimeTypeByFileName = MimeType2ExtMap.getContentType(fileName, null);
+        if (null == mimeTypeByFileName) {
+            return false;
+        }
+
+        String lc = Strings.asciiLowerCase(mimeTypeByFileName);
+        return lc.startsWith("text/htm") || lc.startsWith("text/xhtm");
     }
 
     private boolean fileNameAbsentOrIndicatesHtml(String fileName) {
