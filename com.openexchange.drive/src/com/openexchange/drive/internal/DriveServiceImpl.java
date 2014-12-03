@@ -92,6 +92,7 @@ import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.internal.tracking.SyncTracker;
 import com.openexchange.drive.management.DriveConfig;
+import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.storage.execute.FileActionExecutor;
 import com.openexchange.drive.sync.DefaultSyncResult;
@@ -503,6 +504,19 @@ public class DriveServiceImpl implements DriveService {
             Thread.currentThread().interrupt();
             throw new OXException(e);
         }
+    }
+
+    @Override
+    public String getJumpRedirectUrl(DriveSession session, String path, String fileName, String method) throws OXException {
+        DriveStorage storage = new SyncSession(session).getStorage();
+        if (null == fileName) {
+            String folderId = storage.getFolderID(path);
+        } else {
+            File file = storage.getFileByName(path, fileName);
+            String folderId = file.getFolderId();
+            String fileId = file.getId();
+        }
+        return null;
     }
 
 }

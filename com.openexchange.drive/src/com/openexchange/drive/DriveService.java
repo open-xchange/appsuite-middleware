@@ -166,5 +166,17 @@ public interface DriveService {
      */
     DriveSettings getSettings(DriveSession session) throws OXException;
 
+    /**
+     * Creates an URL for the given file or directory used to jump into it directly.
+     *
+     * @param session The session
+     * @param path The path to the folder, relative to the root folder
+     * @param fileName The filename, or <code>null</code>
+     * @param method The method
+     * @return The URL to redirect to
+     * @throws OXException
+     */
+    String getJumpRedirectUrl(DriveSession session, String path, String fileName, String method) throws OXException;
+
 }
 

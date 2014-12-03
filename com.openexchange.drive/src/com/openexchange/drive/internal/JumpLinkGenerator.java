@@ -47,62 +47,52 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.drive.internal;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.tokenlogin.TokenLoginService;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.management.DriveConfig;
+
 
 /**
- * {@link JumpAction}
+ * {@link JumpLinkGenerator}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.0
  */
-public class JumpAction extends AbstractDriveAction {
+public class JumpLinkGenerator {
 
-    private final TokenLoginService tokenLoginService;
+    private final DriveSession session;
 
-    public JumpAction(TokenLoginService service) {
-        super();
-        this.tokenLoginService = service;
+    public JumpLinkGenerator(DriveSession session) {
+        this.session = session;
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        DriveService driveService = getDriveService();
-        try {
-            /*
-             * get parameters
-             */
-            String path = requestData.getParameter("path");
-            if (Strings.isEmpty(path)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
-            }
-            String method = requestData.getParameter("method");
-            if (Strings.isEmpty(method)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("method");
-            }
-            String token = tokenLoginService.acquireToken(session.getServerSession());
-            String name = requestData.getParameter("name");
-            String link = driveService.getJumpRedirectUrl(session, path, name, method);
-            /*
-             * get & return metadata as json
-             */
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("link", link);
-            jsonObject.put("token", token);
-            return new AJAXRequestResult(jsonObject, "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+    public String getJumpLink(String folderId, String fileId, String method) {
+        String redirectUrl = DriveConfig.getInstance().getJumpLink()
+          .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
+          .replaceAll("\\[hostname\\]", session.getHostData().getHost())
+          .replaceAll("\\[uiwebpath\\]", trimSlashes(DriveConfig.getInstance().getUiWebPath()))
+          .replaceAll("\\[app\\]", "app=io.ox/" + method)
+          .replaceAll("\\[perspective\\]", "perspective=fluid:icon")
+          .replaceAll("\\[folder\\]", "folder=" + folderId);
+        if (null != fileId) {
+            redirectUrl = redirectUrl.replaceAll("\\[id\\]", fileId);
+        } else {
+            redirectUrl = redirectUrl.replaceAll("\\[id\\]", "");
         }
+        return redirectUrl;
+    }
+
+    private static String trimSlashes(String path) {
+        if (null != path && 0 < path.length()) {
+            if ('/' == path.charAt(0)) {
+                path = path.substring(1);
+            }
+            if (0 < path.length() && '/' == path.charAt(path.length() - 1)) {
+                path = path.substring(0, path.length() - 1);
+            }
+        }
+        return path;
     }
 
 }

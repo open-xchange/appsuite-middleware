@@ -103,6 +103,7 @@ public class DriveConfig implements Initialization {
     private int maxFileActions;
     private String directLinkFragmentsFile;
     private String directLinkFile;
+    private String jumpLink;
     private int[] previewImageSize;
     private int[] thumbnailImageSize;
     private String imageLinkImageFile;
@@ -288,6 +289,10 @@ public class DriveConfig implements Initialization {
         return directLinkFile;
     }
 
+    public String getJumpLink() {
+        return jumpLink;
+    }
+
     /**
      * Gets the thumbnailImageSize
      *
@@ -440,6 +445,8 @@ public class DriveConfig implements Initialization {
             "m=infostore&f=[folder]&i=[object]");
         directLinkFile = configService.getProperty("com.openexchange.drive.directLinkFile",
             "[protocol]://[hostname]/[uiwebpath]#[filefragments]");
+        jumpLink = configService.getProperty("com.openexchange.drive.jumpLink",
+            "[protocol]://[hostname]/[uiwebpath]#[app]&[perspective]&[folder]&[id]");
         previewImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.previewImageSize", "800x800"));
         thumbnailImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.thumbnailImageSize", "100x100"));
         imageLinkImageFile = configService.getProperty("com.openexchange.drive.imageLinkImageFile",
