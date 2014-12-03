@@ -49,6 +49,9 @@
 
 package com.openexchange.admin.schemamove.osgi;
 
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -58,7 +61,10 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.admin.schemamove.SchemaMoveService;
 import com.openexchange.admin.schemamove.internal.SchemaMoveImpl;
 import com.openexchange.admin.schemamove.internal.SchemaMoveMBeanImpl;
+import com.openexchange.admin.schemamove.internal.SchemaMoveRemoteImpl;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.Managements;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -80,7 +86,7 @@ public class SchemaMoveActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class[]{ ConfigurationService.class };
     }
 
     @Override
@@ -89,6 +95,12 @@ public class SchemaMoveActivator extends HousekeepingActivator {
 
         final SchemaMoveImpl schemaMoveImpl = new SchemaMoveImpl();
         registerService(SchemaMoveService.class, schemaMoveImpl);
+
+        // Register RMI
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", SchemaMoveRemote.RMI_NAME);
+        registerService(Remote.class, new SchemaMoveRemoteImpl(this.context, schemaMoveImpl), serviceProperties);
+
 
         final BundleContext context = this.context;
         ServiceTrackerCustomizer<ManagementService, ManagementService> managementTracker = new ServiceTrackerCustomizer<ManagementService, ManagementService>() {

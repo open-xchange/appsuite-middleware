@@ -86,8 +86,6 @@ public class SchemaMoveImpl implements SchemaMoveService {
      */
     public SchemaMoveImpl() {
         super();
-        // TODO Auto-generated constructor stub
-
     }
 
     @Override
@@ -110,22 +108,22 @@ public class SchemaMoveImpl implements SchemaMoveService {
         OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
         contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
 
-        /*
-         * Invalidate disabled contexts
-         */
-        List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
-        ContextService contextService = getContextService();
-        try {
-            contextService.invalidateContexts(Autoboxing.I2i(contextIds));
-        } catch (OXException e) {
-            throw StorageException.wrapForRMI(e);
-        }
-
-        /*
-         * Kill sessions for the disabled contexts globally
-         */
-        SessiondService sessiondService = getSessiondService();
-        sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
+//        /*
+//         * Invalidate disabled contexts
+//         */
+//        List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
+//        ContextService contextService = getContextService();
+//        try {
+//            contextService.invalidateContexts(Autoboxing.I2i(contextIds));
+//        } catch (OXException e) {
+//            throw StorageException.wrapForRMI(e);
+//        }
+//
+//        /*
+//         * Kill sessions for the disabled contexts globally
+//         */
+//        SessiondService sessiondService = getSessiondService();
+//        sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
     }
 
     @Override
@@ -148,7 +146,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
 
     /**
      * Fetch db access information
-     * 
+     *
      * @param writePoolId
      * @return
      * @throws StorageException
@@ -177,19 +175,11 @@ public class SchemaMoveImpl implements SchemaMoveService {
     }
 
     @Override
-    public void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException {
-        /*
-         * Disable all enabled contexts with configured maintenance reason
-         */
-        Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
-            "SCHEMA_MOVE_MAINTENANCE_REASON",
-            Integer.toString(DEFAULT_REASON)));
-        OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
-        contextStorage.enable(schemaName, new MaintenanceReason(reasonId));
-
+    public void invalidateContexts(String schemaName, boolean invalidateSession) throws StorageException, MissingServiceException {
         /*
          * Invalidate disabled contexts
          */
+        OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
         List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
         ContextService contextService = getContextService();
         DatabaseService dbService = getDatabaseService();
@@ -200,6 +190,26 @@ public class SchemaMoveImpl implements SchemaMoveService {
         } catch (OXException e) {
             throw StorageException.wrapForRMI(e);
         }
+
+        if(invalidateSession == true) {
+            /*
+             * Kill sessions for the disabled contexts globally
+             */
+            SessiondService sessiondService = getSessiondService();
+            sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
+        }
+    }
+
+    @Override
+    public void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException {
+        /*
+         * Disable all enabled contexts with configured maintenance reason
+         */
+        Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
+            "SCHEMA_MOVE_MAINTENANCE_REASON",
+            Integer.toString(DEFAULT_REASON)));
+        OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
+        contextStorage.enable(schemaName, new MaintenanceReason(reasonId));
     }
 
     private ContextService getContextService() throws MissingServiceException {

@@ -47,20 +47,23 @@
  *
  */
 
-package com.openexchange.admin.schemamove;
+package com.openexchange.admin.schemamove.mbean;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.Map;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-/**
- * {@link SchemaMoveService} - The service providing methods to move a schema to another database.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public interface SchemaMoveService {
+
+public interface SchemaMoveRemote extends Remote {
+
+    public static final String RMI_NAME = SchemaMoveRemote.class.getName();
 
     /**
      * Disables the denoted schema.
@@ -72,13 +75,15 @@ public interface SchemaMoveService {
      * <li>Terminate active sessions in cluster</li>
      * </ul>
      *
+     * @param auth The credentials
      * @param schemaName The schema name
      * @throws TargetDatabaseException
      * @throws NoSuchObjectException
      * @throws StorageException
      * @throws MissingServiceException
+     * @throws InvalidDataException
      */
-    void disableSchema(String schemaName) throws TargetDatabaseException, StorageException, NoSuchObjectException, MissingServiceException;
+    void disableSchema(final Credentials auth, String schemaName) throws TargetDatabaseException, StorageException, NoSuchObjectException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Returns the database access information that are necessary to establish a connection to given schema's database.
@@ -93,12 +98,14 @@ public interface SchemaMoveService {
      * </ul>
      * </p>
      *
+     * @param auth The credentials
      * @param schemaName The schema name
      * @return The database access information
      * @throws StorageException If database cannot be loaded
      * @throws NoSuchObjectException If the specified schema does not exist
+     * @throws InvalidDataException
      */
-    Map<String, String> getDbAccessInfoForSchema(String schemaName) throws StorageException, NoSuchObjectException;
+    Map<String, String> getDbAccessInfoForSchema(final Credentials auth, String schemaName) throws StorageException, NoSuchObjectException, RemoteException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Returns the database access information that is necessary to establish connection to a given schema on the specified cluster
@@ -113,20 +120,14 @@ public interface SchemaMoveService {
      * </ul>
      * </p>
      *
+     * @param auth The credentials
      * @param clusterId The cluster identifier
      * @return The database access information
      * @throws StorageException
      * @throws NoSuchObjectException
+     * @throws InvalidDataException
      */
-    Map<String, String> getDbAccessInfoForCluster(int clusterId) throws StorageException, NoSuchObjectException;
-
-    /**
-     *
-     * @param schemaName
-     * @param invalidateSession
-     * @throws StorageException
-     */
-    void invalidateContexts(String schemaName, boolean invalidateSession) throws StorageException, MissingServiceException;
+    Map<String, String> getDbAccessInfoForCluster(final Credentials auth, int clusterId) throws StorageException, NoSuchObjectException, RemoteException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Disables the denoted schema, resp. all contexts in that schema.
@@ -135,29 +136,50 @@ public interface SchemaMoveService {
      * <li>Distribute changes contexts in cluster</li>
      * </ul>
      *
-     * @param schemaName
+     * @param auth The credentials
+     * @param schemaName The schema name
      * @throws StorageException
      * @throws NoSuchObjectException
      * @throws MissingServiceException
+     * @throws InvalidDataException
      */
-    void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException;
+    void enableSchema(final Credentials auth, String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Restore the database pool references after a replay
      *
+     * @param auth The credentials
      * @param sourceSchema The source schema
      * @param targetSchema The target schema
      * @param targetClusterId The target cluster identifier
      * @throws StorageException
+     * @throws InvalidDataException
      */
-    void restorePoolReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException;
+    void restorePoolReferences(final Credentials auth, String sourceSchema, String targetSchema, int targetClusterId) throws StorageException, RemoteException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Create a new database schema
      *
+     * @param auth The credentials
      * @param targetClusterId The target cluster identifier
      * @return The name of the new database schema
      * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws InvalidDataException
      */
-    String createSchema(int targetClusterId) throws StorageException;
+    String createSchema(final Credentials auth, int targetClusterId) throws StorageException, RemoteException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     *
+     * @param auth
+     * @param schemaName
+     * @param invalidateSession
+     * @return
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws InvalidDataException
+     * @throws MissingServiceException
+     */
+    void invalidateContexts(Credentials auth, String schemaName, boolean invalidateSession) throws StorageException, InvalidCredentialsException, InvalidDataException, MissingServiceException, RemoteException;
+
 }
