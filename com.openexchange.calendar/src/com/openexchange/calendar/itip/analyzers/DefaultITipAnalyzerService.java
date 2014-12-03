@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultITipAnalyzerService implements ITipAnalyzerService {
 
-    public static final Integer RAKING = 0;
+    public static final Integer RANKING = 0;
 
     private final Map<ITipMethod, ITipAnalyzer> analyzers = new EnumMap<ITipMethod, ITipAnalyzer>(ITipMethod.class);
 
