@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.MessageRemovedException;
@@ -64,6 +65,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -82,6 +84,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
@@ -104,6 +107,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.HashUtility;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -208,10 +212,26 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     }
                     ContentType contentType = mailPart.getContentType();
                     String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
-                    String htmlContent = MessageUtility.readMailPart(mailPart, cs);
-                    HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
 
-                    final byte[] bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
+                    // Read HTML content
+                    final byte[] bytes;
+                    {
+                        String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                        if (htmlContent.length() > HtmlServices.htmlThreshold()) {
+                            // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
+                            OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
+                            Locale locale = req.getSession().getUser().getLocale();
+                            htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                        } else {
+                            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                            htmlContent = sanitizeHtml(htmlContent, htmlService);
+                        }
+
+                        // Get its bytes
+                        bytes = htmlContent.getBytes(Charsets.forName(cs));
+                    }
+
+                    // Proceed
                     contentType.setCharsetParameter(cs);
                     size = bytes.length;
                     isClosure = new IFileHolder.InputStreamClosure() {

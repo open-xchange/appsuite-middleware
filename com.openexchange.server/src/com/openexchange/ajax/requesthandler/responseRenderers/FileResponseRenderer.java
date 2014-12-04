@@ -339,7 +339,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             cts = fileContentType;
                         }
                     }
-                    checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileLength, fileName, cts, contentDisposition, userAgent);
+                    checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileLength, fileName, cts, contentDisposition, userAgent, requestData.getSession());
                 }
                 /*
                  * Set stream

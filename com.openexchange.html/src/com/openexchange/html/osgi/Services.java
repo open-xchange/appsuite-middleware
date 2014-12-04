@@ -47,31 +47,72 @@
  *
  */
 
-package com.openexchange.tools.servlet;
+package com.openexchange.html.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AjaxExceptionMessages}
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AjaxExceptionMessages implements LocalizableStrings {
-
-    public static final String NON_SECURE_DENIED_MSG = "The requested operation is not permitted via a non-secure connection.";
-    public static final String DISABLED_ACTION_MSG = "The requested operation is disabled.";
-    public static final String NO_PERMISSION_FOR_MODULE = "You do not have appropriate permissions for module %1$s.";
-    public static final String CONFLICT = "The object has been changed in the meantime. Please reload the view and try again.";
-    public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
-    public static final String MISSING_COOKIE_MSG = "The requested operation requires a valid session. Please login and try again.";
-    public static final String HTML_TOO_BIG_MSG = "The HTML content is too big and therefore cannot be safely displayed. Please select to download its content if you want to see it.";
+public final class Services {
 
     /**
-     * Initializes a new {@link AjaxExceptionMessages}
+     * Initializes a new {@link Services}.
      */
-    private AjaxExceptionMessages() {
+    private Services() {
         super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.html\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
     }
 
 }

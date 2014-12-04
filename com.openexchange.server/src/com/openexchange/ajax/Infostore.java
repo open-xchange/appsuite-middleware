@@ -623,7 +623,8 @@ public class Infostore extends PermissionServlet {
                     documentData,
                     metadata.getFileName(),
                     metadata.getFileMIMEType(),
-                    userAgent);
+                    userAgent,
+                    session);
                 res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 res.setContentType(checkedDownload.getContentType());
                 documentData = checkedDownload.getInputStream();

@@ -387,7 +387,8 @@ public class Attachment extends PermissionServlet {
                     documentData,
                     attachment.getFilename(),
                     attachment.getFileMIMEType(),
-                    userAgent);
+                    userAgent,
+                    ServerSessionAdapter.valueOf(session));
 
                 res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 res.setContentType(checkedDownload.getContentType());
