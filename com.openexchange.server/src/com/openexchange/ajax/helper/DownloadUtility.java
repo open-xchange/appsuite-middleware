@@ -63,9 +63,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
@@ -89,27 +89,6 @@ import com.openexchange.tools.session.ServerSession;
 public final class DownloadUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DownloadUtility.class);
-
-    private static volatile Integer maxLength;
-    private static int htmlThreshold() {
-        Integer i = maxLength;
-        if (null == maxLength) {
-            synchronized (DownloadUtility.class) {
-                i = maxLength;
-                if (null == maxLength) {
-                    // Default is 1MB
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final int defaultMaxLength = 1048576;
-                    if (null == service) {
-                        return defaultMaxLength;
-                    }
-                    i = Integer.valueOf(service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
-                    maxLength = i;
-                }
-            }
-        }
-        return i.intValue();
-    }
 
     /**
      * Initializes a new {@link DownloadUtility}.
@@ -212,7 +191,7 @@ public final class DownloadUtility {
                     }
                     // Check size
                     String htmlContent;
-                    if (sink.getLength() > htmlThreshold()) {
+                    if (sink.getLength() > HtmlServices.htmlThreshold()) {
                         // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
                         OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
                         Locale locale = session.getUser().getLocale();
@@ -458,11 +437,16 @@ public final class DownloadUtility {
                         }
                     }
                     // Check size
-                    if (sink.getLength() > htmlThreshold()) {
-                        // HTML cannot be sanitized as it exceeds threshold for HTML parsing
-                        throw AjaxExceptionCodes.BAD_REQUEST.create();
+                    String htmlContent;
+                    if (sink.getLength() > HtmlServices.htmlThreshold()) {
+                        // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
+                        OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
+                        Locale locale = session.getUser().getLocale();
+                        htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                    } else {
+                        htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                        htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     }
-                    String htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
                     sink.close();
                     sink = null; // Null'ify as not needed anymore
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
