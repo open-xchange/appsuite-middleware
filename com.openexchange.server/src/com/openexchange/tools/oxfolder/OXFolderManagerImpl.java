@@ -1674,15 +1674,27 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     /**
      * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
      *
-     * @param con A "write" connection to the database
+     * @param wcon A "write" connection to the database
      * @param folder The deleted folder. Must be fully initialized.
      * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
-     *                 otherwise
+     *            otherwise
      * @return The number of removed subscriptions and publications
      * @throws OXException
      */
-    private void  deleteDependentEntities(Connection con, FolderObject folder, boolean handDown) throws OXException {
-        OXFolderDependentDeleter.folderDeleted(con, session, folder, handDown);
+    private void deleteDependentEntities(Connection wcon, FolderObject folder, boolean handDown) throws OXException {
+        if (null == wcon) {
+            Connection wc = null;
+            try {
+                wc = DBPool.pickupWriteable(ctx);
+                OXFolderDependentDeleter.folderDeleted(wc, session, folder, handDown);
+            } finally {
+                if (null != wc) {
+                    DBPool.closeWriterSilent(ctx, wc);
+                }
+            }
+        } else {
+            OXFolderDependentDeleter.folderDeleted(wcon, session, folder, handDown);
+        }
     }
 
     /**
