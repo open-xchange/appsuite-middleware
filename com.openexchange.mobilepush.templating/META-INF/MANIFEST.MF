@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Mobile Push Templating Bundle
+Bundle-SymbolicName: com.openexchange.mobilepush.templating
+Bundle-Version: 7.6.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config.cascade,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.mobilepush,
+ com.openexchange.mobilepush.templating,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Export-Package: com.openexchange.mobilepush.templating,
+ com.openexchange.mobilepush.templating.utility
+Bundle-Activator: com.openexchange.mobilepush.templating.osgi.MobilePushTemplatingActivator
