@@ -56,6 +56,8 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginRequest.TokenLoginParameters;
 import com.openexchange.ajax.session.actions.LoginResponse;
+import com.openexchange.ajax.session.actions.TokenLoginV2Request;
+import com.openexchange.ajax.session.actions.TokenLoginV2Response;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.tokenlogin.TokenLoginExceptionCodes;
 
@@ -162,6 +164,20 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         LoginResponse loginResponse = client.execute(login);
 
         assertTrue("Error expected.", loginResponse.hasError());
+    }
+
+    public void testRedirect() throws Exception {
+        final String REDIRECT = client.getHostname() + "/tokenRedirectTest";
+        AcquireTokenRequest request = new AcquireTokenRequest();
+        AcquireTokenResponse response = client.execute(request);
+        String token = response.getToken();
+        assertNotNull("Missing token.", token);
+        assertFalse("Invalid token.", token.equals(""));
+        AJAXClient client2 = new AJAXClient();
+        TokenLoginV2Request login = new TokenLoginV2Request(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.8.0", REDIRECT);
+        TokenLoginV2Response loginResponse = client2.execute(login);
+        assertTrue("Tokenlogin failed.", loginResponse.isLoginSuccessful());
+        assertEquals("Redirect urls does not match.", REDIRECT, loginResponse.getRedirectUrl());
     }
 
     @Override
