@@ -1,3 +1,11 @@
+* 2014-12-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35693: Fixed conditional expression to check for possible HTML content by Content-Type and/or file name values
+
+* 2014-12-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21654: Log missing translations with level DEBUG.
+
 * 2014-12-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 35673: Fill proper "From" on mail forward for external account

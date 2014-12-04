@@ -77,7 +77,7 @@ import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link LogbackConfiguration}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -86,6 +86,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     private static final Logger LOG = LoggerFactory.getLogger(LogbackConfiguration.class);
 
     private static final String WHITELIST_PROPERTY = "com.openexchange.logging.filter.loggerWhitelist";
+
+    private static final String lineSeparator = System.getProperty("line.separator");
 
     // -------------------------------------------------------------------------------------------- //
 
@@ -109,7 +111,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     /**
      * Initializes a new {@link LogbackConfiguration}. Reads the MBean annotations and adds those to the method* maps.
-     * 
+     *
      * @throws NotCompliantMBeanException
      */
     public LogbackConfiguration(final LoggerContext loggerContext, final RankingAwareTurboFilterList rankingAwareTurboFilterList, final IncludeStackTraceServiceImpl traceServiceImpl) throws NotCompliantMBeanException {
@@ -156,7 +158,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         rankingAwareTurboFilterList.removeTurboFilter(turboFilterCache);
         turboFilterCache.clear();
     }
-    
+
     @Override
     public String getRootAppenderStats() {
         ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -169,11 +171,10 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                 AsyncAppender asyncAppender = (AsyncAppender) appender;
                 sb.append(" [capacity=").append(asyncAppender.getQueueSize()).append(",size=").append(asyncAppender.getNumberOfElementsInQueue()).append(']');
             }
-            sb.append(System.lineSeparator());
+            sb.append(lineSeparator);
         }
-        
         if (sb.length() == 0) {
-            sb.append("No root appenders found.").append(System.lineSeparator());
+            sb.append("No root appenders found.").append(lineSeparator);
         }
         return sb.toString();
     }
@@ -203,12 +204,12 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
         builder.append("filter for user with ID \"").append(userID).append("\", in context with ID \"").append(contextID).append("\" and policy \"ACCEPT\"");
         response.addMessage(builder.toString(), MessageType.INFO);
-        
+
         addLoggersToFilter(getLoggerWhitelist(), loggers, filter, response);
-        
+
         turboFilterCache.put(key, filter);
-        LOG.info(builder.toString());        
-        
+        LOG.info(builder.toString());
+
         return response;
     }
 
@@ -288,7 +289,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         StringBuilder builder = new StringBuilder().append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)));
         builder.append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
         String key = builder.toString();
-        
+
         if (loggers.isEmpty()) {
             removeFilter(key);
             builder.setLength(0);
@@ -313,7 +314,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                 response.addMessage(builder.toString(), MessageType.WARNING);
             }
         }
-        
+
         return response;
     }
 
@@ -427,7 +428,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     /**
      * Delegate method for MBeanOperationInfo
-     * 
+     *
      * @param map
      * @param op
      * @param param
@@ -450,7 +451,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         String sKey = createKey(key, value);
         ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(sKey);
         StringBuilder builder = new StringBuilder();
-        
+
         if (filter == null) {
             filter = new ExtendedMDCFilter(getLoggerWhitelist());
             filter.addTuple(key, value);
@@ -461,12 +462,12 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
         builder.append("filter with key \"").append(key).append("\" and value \"").append(value).append("\" and policy \"ACCEPT\"");
         response.addMessage(builder.toString(), MessageType.INFO);
-        
+
         addLoggersToFilter(getLoggerWhitelist(), loggers, filter, response);
-        
+
         turboFilterCache.put(sKey, filter);
         LOG.info(builder.toString());
-        
+
         return response;
     }
 
@@ -488,7 +489,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     /**
      * Get a stringified version of logger name and level
-     * 
+     *
      * @param logger
      * @return
      */
@@ -512,10 +513,10 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
         return resultSet;
     }
-    
+
     /**
      * Add the specified loggers to the filter in regard to the whitelist
-     * 
+     *
      * @param whitelist of loggers
      * @param loggers to add to the filter
      * @param filter the filter
@@ -528,7 +529,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                 if (s.startsWith(wl)) {
                     Level l = loggers.get(s);
                     filter.addLogger(s, l);
-                    String msg = "Added logger \"" + s + "\" with level \"" + l + "\""; 
+                    String msg = "Added logger \"" + s + "\" with level \"" + l + "\"";
                     response.addMessage(msg, MessageType.INFO);
                     added = true;
                     break;
