@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 32
+%define        ox_release 33
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -98,6 +98,8 @@ ox_add_property com.openexchange.mobile.configuration.generator.PemFile "" /opt/
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Thu Dec 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-09
 * Mon Nov 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-01
 * Wed Nov 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
