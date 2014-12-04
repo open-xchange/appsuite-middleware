@@ -53,6 +53,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Tue Dec 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-03
 * Tue Nov 25 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-01
 * Mon Nov 24 2014 Marcus Klein <marcus.klein@open-xchange.com>

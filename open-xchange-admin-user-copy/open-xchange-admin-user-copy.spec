@@ -70,6 +70,8 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 %doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
+* Tue Dec 02 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2014-12-03
 * Tue Nov 25 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2014-12-01
 * Mon Nov 24 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>

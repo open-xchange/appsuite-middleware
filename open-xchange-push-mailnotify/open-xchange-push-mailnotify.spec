@@ -66,6 +66,8 @@ fi
 %doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
+* Tue Dec 02 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-12-03
 * Tue Nov 25 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-12-01
 * Mon Nov 24 2014 Carsten Hoeger <choeger@open-xchange.com>

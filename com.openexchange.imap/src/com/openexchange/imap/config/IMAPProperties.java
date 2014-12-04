@@ -137,6 +137,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean allowFolderCaches;
 
+    private boolean allowFetchSingleHeaders;
+
     private String sContainerType;
 
     private String sslProtocols;
@@ -154,6 +156,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         newACLExtMap = new NonBlockingHashMap<String, Boolean>();
         mailProperties = MailProperties.getInstance();
         propagateHostNames = Collections.emptySet();
+        allowFetchSingleHeaders = true;
+        allowFolderCaches = true;
     }
 
     @Override
@@ -189,6 +193,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String allowFolderCachesStr = configuration.getProperty("com.openexchange.imap.allowFolderCaches", "true").trim();
             allowFolderCaches = "true".equalsIgnoreCase(allowFolderCachesStr);
             logBuilder.append("\tIMAP allow folder caches: ").append(allowFolderCaches).append('\n');
+        }
+
+        {
+            final String str = configuration.getProperty("com.openexchange.imap.allowFetchSingleHeaders", "true").trim();
+            allowFetchSingleHeaders = "true".equalsIgnoreCase(str);
+            logBuilder.append("\tIMAP allow FETCH single headers: ").append(allowFetchSingleHeaders).append('\n');
         }
 
         {
@@ -605,6 +615,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean allowFolderCaches() {
         return allowFolderCaches;
+    }
+
+    @Override
+    public boolean allowFetchSingleHeaders() {
+        return allowFetchSingleHeaders;
     }
 
     /**

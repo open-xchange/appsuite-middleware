@@ -22,6 +22,12 @@ open-xchange-admin (7.6.2-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 17 Sep 2014 12:35:49 +0200
 
+open-xchange-admin (7.6.1-12) stable; urgency=medium
+
+  * Build for patch 2014-12-03
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Dec 2014 17:07:42 +0100
+
 open-xchange-admin (7.6.1-11) stable; urgency=low
 
   * Build for patch 2014-12-01

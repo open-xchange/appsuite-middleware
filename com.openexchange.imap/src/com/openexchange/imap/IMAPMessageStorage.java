@@ -124,6 +124,7 @@ import com.openexchange.imap.command.MoveIMAPCommand;
 import com.openexchange.imap.command.SimpleFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.Services;
@@ -1774,7 +1775,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         // Fill selected chunk
         if (mergeWithSent) {
-            FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), true);
+            FetchProfile fetchProfile = checkFetchProfile(getFetchProfile(usedFields.toArray(), true));
             List<MailMessage> msgs = new LinkedList<MailMessage>();
             List<MailMessage> sentmsgs = new LinkedList<MailMessage>();
             for (List<MailMessage> conversation : list) {
@@ -1882,7 +1883,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             // Fill selected chunk
             if (!list.isEmpty()) {
-                FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), true);
+                FetchProfile fetchProfile = checkFetchProfile(getFetchProfile(usedFields.toArray(), true));
                 List<MailMessage> msgs = new LinkedList<MailMessage>();
                 List<MailMessage> sentmsgs = new LinkedList<MailMessage>();
                 for (List<MailMessage> conversation : list) {
@@ -2074,7 +2075,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             usedFields.add(MailField.THREAD_LEVEL);
             // Add sort field
             usedFields.add(MailField.toField(effectiveSortField.getListField()));
-            final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
+            final FetchProfile fetchProfile = checkFetchProfile(getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch()));
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
             if (!body) {
                 final Map<MessageInfo, MailMessage> mapping;
@@ -4049,6 +4050,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         for (final String headerName : fetchProfile.getHeaderNames()) {
             newFetchProfile.add(headerName);
+        }
+        return newFetchProfile;
+    }
+
+    private static FetchProfile checkFetchProfile(FetchProfile fetchProfile) {
+        if (null == fetchProfile || IMAPProperties.getInstance().allowFetchSingleHeaders()) {
+            return fetchProfile;
+        }
+
+        FetchProfile newFetchProfile = new FetchProfile();
+        for (final Item item : fetchProfile.getItems()) {
+            newFetchProfile.add(item);
         }
         return newFetchProfile;
     }
