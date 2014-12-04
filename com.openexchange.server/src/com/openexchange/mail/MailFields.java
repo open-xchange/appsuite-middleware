@@ -63,7 +63,49 @@ import java.util.Set;
  */
 public final class MailFields {
 
+    /** The mail field universe */
     private static final MailField[] VALUES = MailField.values();
+
+    /**
+     * Adds the specified fields to given array of {@code MailField} instances.
+     *
+     * @param fields The {@code MailField} array to add to
+     * @param toAdd The fields to add
+     * @return The resulting {@code MailField} array;<br>
+     *         either newly created if one of given fields was absent or the passed array as-is if nothing needed to be changed
+     */
+    public static MailField[] addIfAbsent(MailField[] fields, MailField... toAdd) {
+        if (null == fields) {
+            return null;
+        }
+        MailFields mailFields = new MailFields(fields);
+        boolean changed = false;
+        if (null != toAdd) {
+            for (MailField mailField : toAdd) {
+                if (mailField != null && !mailFields.arr[mailField.ordinal()]) {
+                    mailFields.arr[mailField.ordinal()] = true;
+                    changed = true;
+                }
+            }
+        }
+        return changed ? mailFields.toArray() : fields;
+    }
+
+    /**
+     * Generates an array for specified {@code MailField} constants.
+     *
+     * @param fields The {@code MailField} constants
+     * @return The resulting {@code MailField} array
+     */
+    public static MailField[] toArray(MailField... fields) {
+        if (null == fields) {
+            return null;
+        }
+        return new MailFields(fields).toArray();
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------ //
+
     private final boolean[] arr;
 
     /**
