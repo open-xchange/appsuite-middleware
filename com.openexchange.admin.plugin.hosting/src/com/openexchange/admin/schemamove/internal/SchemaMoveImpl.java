@@ -107,23 +107,6 @@ public class SchemaMoveImpl implements SchemaMoveService {
             Integer.toString(DEFAULT_REASON)));
         OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
         contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
-
-//        /*
-//         * Invalidate disabled contexts
-//         */
-//        List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
-//        ContextService contextService = getContextService();
-//        try {
-//            contextService.invalidateContexts(Autoboxing.I2i(contextIds));
-//        } catch (OXException e) {
-//            throw StorageException.wrapForRMI(e);
-//        }
-//
-//        /*
-//         * Kill sessions for the disabled contexts globally
-//         */
-//        SessiondService sessiondService = getSessiondService();
-//        sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
     }
 
     @Override
@@ -191,7 +174,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
             throw StorageException.wrapForRMI(e);
         }
 
-        if(invalidateSession == true) {
+        if(invalidateSession) {
             /*
              * Kill sessions for the disabled contexts globally
              */
