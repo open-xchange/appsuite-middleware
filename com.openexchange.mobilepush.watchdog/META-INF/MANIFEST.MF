@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Mobile Push Watchdog Bundle
+Bundle-SymbolicName: com.openexchange.mobilepush.events.watchdog
+Bundle-Version: 7.8.0
+Bundle-Activator: com.openexchange.mobilepush.watchdog.osgi.WatchdogActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.hazelcast.core,
+ com.openexchange.cluster.timer,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.mobilepush,
+ com.openexchange.mobilepush.events,
+ com.openexchange.mobilepush.events.storage,
+ com.openexchange.osgi,
+ com.openexchange.push,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.threadpool,
+ com.openexchange.timer,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.util.tracker,
+ org.slf4j

@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-Name: Open-Xchange Mobile Push Event Storage RDB Bundle
+Bundle-SymbolicName: com.openexchange.mobilepush.events.storage
+Bundle-Version: 7.8.0
+Bundle-Activator: com.openexchange.mobilepush.events.storage.osgi.MobilePushStorageActivator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: 
+ com.openexchange.context,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.update,
+ com.openexchange.java,
+ com.openexchange.mobilepush,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ com.openexchange.tools.sql,
+ org.osgi.framework,
+ org.slf4j
+Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.mobilepush.events.storage
