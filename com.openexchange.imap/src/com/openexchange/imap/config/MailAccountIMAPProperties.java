@@ -295,6 +295,16 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
+    public boolean allowFetchSingleHeaders() {
+        final String tmp = properties.get("com.openexchange.imap.allowFetchSingleHeaders");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().allowFetchSingleHeaders();
+        }
+
+        return Boolean.parseBoolean(tmp.trim());
+    }
+
+    @Override
     public String getSSLProtocols() {
         final String tmp = properties.get("com.openexchange.imap.ssl.protocols");
         if (null == tmp) {

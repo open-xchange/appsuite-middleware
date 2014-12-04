@@ -1945,6 +1945,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (OXException e) {
             LOG.error("", e);
         }
+        /*
+         * Put message information into cache
+         */
+        try {
+            /*
+             * Remove old user cache entries
+             */
+            MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
+            if ((cachable) && (mails.length > 0)) {
+                /*
+                 * ... and put new ones
+                 */
+                MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
+            }
+        } catch (OXException e) {
+            LOG.error("", e);
+        }
         return new SearchIteratorDelegator<MailMessage>(l);
     }
 
