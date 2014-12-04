@@ -80,7 +80,7 @@ umask 066
 # 3) RestoreReference
 #######################
 usage() {
-	echo "Usage: $0 [-h] [-m <source_schema> -t <target_cluster_id> -i <dump_file> -A <admin_user> -P <admin_pass> [-l <jmxLogin> -s <jmxPassword> [-p <jmxPort]]]"
+	echo "Usage: $0 [-h] [-m <source_schema> -t <target_cluster_id> -i <dump_file> -A <admin_user> -P <admin_pass> [-l <jmxLogin> -s <jmxPassword> [-p <jmxPort]] -r <rmi-host>]"
 	echo "  -A,--adminuser <admin_user>                 Admin username"
 	echo "  -h                                          Prints a help text"
 	echo "  -i,--in <dump_file>                         The dump file previously created with dumpschema"
@@ -88,8 +88,13 @@ usage() {
 	echo "  -m,--source-schema <source_schema>          Source schema name"
 	echo "  -P,--adminpass <admin_pass>                 Admin password"
 	echo "  -p,--port <jmxPort>                         The optional JMX port (default:9999)"
+	echo "  -r,--rmi-host <rmi_host>                    A RMI host address e.g. 192.168.1.25:1099. If no port is given the default RMI port 1099 is taken. Default: rmi://localhost:1099/"
 	echo "  -s,--password <jmxPassword>                 The optional JMX password (if JMX authentication is enabled)"
 	echo "  -t,--target-cluster-id <target_cluster_id>  The target cluster identifier"
+	echo ""
+	echo "Entries marked with an asterisk (*) are mandatory."
+	echo "Entries marked with an question mark (?) are mandatory depending on your configuration."
+	echo "Entries marked with a pipe (|) are mandatory for one another which means that at least one of them must be set."
 }
 
 ARGS=`getopt -o i:m:t:hA:l:P:p:s: --long in:,source-schema:,target-cluster-id:,help,adminuser:,login:,adminpass:,port:,password: -n 'replayschema' -- "$@"`
@@ -163,6 +168,14 @@ while true; do
 					optJmxArgs="$optJmxArgs -p $jmxPort"
 					shift 2;;
 			esac;;
+		-r | --rmi-host)
+			case "$2" in
+				"") rmiHost="localhost"
+					optRMIArgs="-r $rmiHost"
+					shift 2;break;;
+				*) rmiHost=$2
+					optRMIArgs="-r $rmiHost"
+					shift 2;;
 		--)
 			shift; break;;
 		*)
@@ -172,12 +185,18 @@ while true; do
 done
 
 # invoke create schema
-OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema -A $adminuser -P $adminpass -t $target $optJmxArgs 2>&1)"
+OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema -A $adminuser -P $adminpass -t $target $optJmxArgs $optRMIArgs 2>&1)"
 RETVAL=$?
 
 # pump data in mysql
 if [ $RETVAL -eq 0 ]; then
 	targetSchema="$(echo $OUTPUT | awk '{print $1}')"
+	echo -n "Connected to "
+	if [ ! -z $rmiHost ]; then
+		echo "$rmiHost"
+	else
+		echo "localhost"
+	fi
 	echo -n "Pumping into schema '$targetSchema'"
 	dumpOutput="$(mysql $OUTPUT < $input)"
 	RETVAL=$?
@@ -195,7 +214,7 @@ else
 fi
 
 # restore configdb references
-RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -A $adminuser -P $adminpass -m $schema -n $targetSchema -t $target $optJmxArgs 2>&1)"
+RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -A $adminuser -P $adminpass -m $schema -n $targetSchema -t $target $optJmxArgs $optRMIArgs 2>&1)"
 RETVAL=$?
 echo -e "$RESTORE"
 exit $RETVAL
