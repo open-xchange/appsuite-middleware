@@ -509,14 +509,16 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public String getJumpRedirectUrl(DriveSession session, String path, String fileName, String method) throws OXException {
         DriveStorage storage = new SyncSession(session).getStorage();
+        String folderId = null;
+        String fileId = null;
         if (null == fileName) {
-            String folderId = storage.getFolderID(path);
+            folderId = storage.getFolderID(path);
         } else {
             File file = storage.getFileByName(path, fileName);
-            String folderId = file.getFolderId();
-            String fileId = file.getId();
+            folderId = file.getFolderId();
+            fileId = file.getId();
         }
-        return null;
+        return new JumpLinkGenerator(session).getJumpLink(folderId, fileId, method);
     }
 
 }

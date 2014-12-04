@@ -65,12 +65,8 @@ import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
-import com.openexchange.drive.internal.JumpLinkGenerator;
-import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
-import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 
 /**
  * {@link ThrottlingDriveService}
@@ -177,17 +173,7 @@ public class ThrottlingDriveService implements DriveService {
 
     @Override
     public String getJumpRedirectUrl(DriveSession session, String path, String fileName, String method) throws OXException {
-        DriveStorage storage = new SyncSession(session).getStorage();
-        String folderId = null;
-        String fileId = null;
-        if (null == fileName) {
-            folderId = storage.getFolderID(path);
-        } else {
-            File file = storage.getFileByName(path, fileName);
-            folderId = file.getFolderId();
-            fileId = file.getId();
-        }
-        return new JumpLinkGenerator(session).getJumpLink(folderId, fileId, method);
+        return delegate.getJumpRedirectUrl(session, path, fileName, method);
     }
 
 }
