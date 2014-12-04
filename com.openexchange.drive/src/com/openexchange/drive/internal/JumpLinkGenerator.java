@@ -76,7 +76,7 @@ public class JumpLinkGenerator {
           .replaceAll("\\[perspective\\]", "perspective=fluid:icon")
           .replaceAll("\\[folder\\]", "folder=" + folderId);
         if (null != fileId) {
-            redirectUrl = redirectUrl.replaceAll("\\[id\\]", fileId);
+            redirectUrl = redirectUrl.replaceAll("\\[id\\]", "id=" + fileId);
         } else {
             redirectUrl = redirectUrl.replaceAll("\\[id\\]", "");
         }
