@@ -49,55 +49,113 @@
 
 package com.openexchange.admin.console.schemamove;
 
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
+import com.openexchange.java.Strings;
 
 /**
+ *
  * {@link RestoreReference}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.6.1
  */
-public class RestoreReference extends AbstractSchemaToolkit {
+public class RestoreReference extends AbstractSchemaRMIToolkit {
 
-    /**
-     * @param args
-     */
+    protected static final char OPT_NAME_SOURCE_SCHEMA_SHORT = 'm';
+    protected static final String OPT_NAME_SOURCE_SCHEMA_LONG = "source-schema";
+    protected static final String OPT_NAME_SOURCE_SCHEMA_ARG_NAME = "source_schema_name";
+    protected static final String OPT_NAME_SOURCE_SCHEMA_DESCRIPTION = "The name of the source schema in which the database dump will be replayed.";
+
+    protected static final char OPT_NAME_TARGET_SCHEMA_SHORT = 'n';
+    protected static final String OPT_NAME_TARGET_SCHEMA_LONG = "target-schema";
+    protected static final String OPT_NAME_TARGET_SCHEMA_ARG_NAME = "target_schema_name";
+    protected static final String OPT_NAME_TARGET_SCHEMA_DESCRIPTION = "The name of the target schema in which the database dump will be replayed.";
+
+    protected static final char OPT_NAME_TARGET_CLUSTER_SHORT = 't';
+    protected static final String OPT_NAME_TARGET_CLUSTER_LONG = "target-cluster-id";
+    protected static final String OPT_NAME_TARGET_CLUSTER_ARG_NAME = "target_cluster_id";
+    protected static final String OPT_NAME_TARGET_CLUSTER_DESCRIPTION = "The identifier of the target cluster.";
+
+    protected static final char OPT_NAME_TARGET_RMI_SHORT = 'r';
+    protected static final String OPT_NAME_TARGET_RMI_LONG = "rmi-host";
+    protected static final String OPT_NAME_TARGET_RMI_ARG_NAME = "rmi_host";
+    protected static final String OPT_NAME_TARGET_RMI_DESCRIPTION = "A RMI host address e.g. 192.168.1.25:1099."
+        + " If no port is given the default RMI port 1099 is taken.";
+
     public static void main(String[] args) {
-        new RestoreReference().execute(args);
+        RestoreReference es = new RestoreReference();
+        es.start(args);
+    }
+
+    private void start(final String[] args) {
+        final AdminParser parser = new AdminParser("restorereference");
+
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+
+        final CLIOption optSourceSchema = setShortLongOpt(
+            parser,
+            OPT_NAME_SOURCE_SCHEMA_SHORT,
+            OPT_NAME_SOURCE_SCHEMA_LONG,
+            OPT_NAME_SOURCE_SCHEMA_ARG_NAME,
+            OPT_NAME_SOURCE_SCHEMA_DESCRIPTION,
+            true);
+
+        final CLIOption optTargetSchema = setShortLongOpt(
+            parser,
+            OPT_NAME_TARGET_SCHEMA_SHORT,
+            OPT_NAME_TARGET_SCHEMA_LONG,
+            OPT_NAME_TARGET_SCHEMA_ARG_NAME,
+            OPT_NAME_TARGET_SCHEMA_DESCRIPTION,
+            true);
+
+        final CLIOption optTargetCluster = setShortLongOpt(
+            parser,
+            OPT_NAME_TARGET_CLUSTER_SHORT,
+            OPT_NAME_TARGET_CLUSTER_LONG,
+            OPT_NAME_TARGET_CLUSTER_ARG_NAME,
+            OPT_NAME_TARGET_CLUSTER_DESCRIPTION,
+            true);
+
+        final CLIOption optRMIHost = setShortLongOptWithDefault(
+            parser,
+            OPT_NAME_TARGET_RMI_SHORT,
+            OPT_NAME_TARGET_RMI_LONG,
+            OPT_NAME_TARGET_RMI_ARG_NAME,
+            OPT_NAME_TARGET_RMI_DESCRIPTION,
+            RMI_HOSTNAME,
+            false);
+
+        // parse the command line
+        try {
+            parser.ownparse(args);
+
+            final Credentials auth = credentialsparsing(parser);
+            String sourceSchema = (String) parser.getOptionValue(optSourceSchema);
+            String targetSchema = (String) parser.getOptionValue(optTargetSchema);
+            int targetClusterId = Integer.valueOf((String) parser.getOptionValue(optTargetCluster));
+            String rmiHost = (String) parser.getOptionValue(optRMIHost);
+
+            SchemaMoveRemote smr = null;
+            if(Strings.isEmpty(rmiHost)) {
+                smr = getSchemaMoveRemoteInterface();
+            } else {
+                smr = getSchemaMoveRemoteInterface(rmiHost);
+            }
+
+            smr.restorePoolReferences(auth, sourceSchema, targetSchema, targetClusterId);
+        } catch (Exception e) {
+            printErrors(null, null, e, parser);
+            sysexit(1);
+        }
     }
 
     @Override
-    protected String getFooter() {
-        return "Tool to restore database pool references";
+    protected String getObjectName() {
+        return "restorereference";
     }
 
-    @Override
-    protected String getName() {
-        return "restorereference [-m <source_schema_name> -n <target_schema_name> -t <target_cluster_id> -A <adminuser> -P <adminpass>[-l <jmx_login> -s <jmx_password> [-p <jmx_port>]]] [-h]";
-    }
-
-    @SuppressWarnings("static-access")
-    @Override
-    protected void addOptions(Options options) {
-        options.addOption(OptionBuilder.withLongOpt("source-schema").withArgName("source_schema_name").withDescription(
-            "The name of the source schema in which the database dump will be replayed").hasArg(true).isRequired(true).create("m"));
-        options.addOption(OptionBuilder.withLongOpt("target-schema").withArgName("target_schema_name").withDescription(
-            "The name of the target schema in which the database dump will be replayed").hasArg(true).isRequired(true).create("n"));
-        options.addOption(OptionBuilder.withLongOpt("target-cluster-id").withArgName("target_cluster_id").withDescription(
-            "The identifier of the target cluster.").hasArg(true).isRequired(true).create("t"));
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        SchemaMoveMBean schemaMoveMBean = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
-        final String sourceSchema = cmd.getOptionValue("m");
-        final String targetSchema = cmd.getOptionValue("n");
-        final String targetClusterId = cmd.getOptionValue("t");
-
-        schemaMoveMBean.restorePoolReferences(sourceSchema, targetSchema, Integer.valueOf(targetClusterId));
-        return null;
-    }
 }

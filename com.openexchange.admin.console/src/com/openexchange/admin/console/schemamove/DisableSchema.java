@@ -49,50 +49,101 @@
 
 package com.openexchange.admin.console.schemamove;
 
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
 
 /**
+ *
  * {@link DisableSchema}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.6.1
  */
-public class DisableSchema extends AbstractSchemaToolkit {
+public class DisableSchema extends AbstractSchemaRMIToolkit {
 
-    private static final String OPT_SCHEMA = "m";
+    protected static final char OPT_NAME_SCHEMA_SHORT = 'm';
+    protected static final String OPT_NAME_SCHEMA_LONG = "schema";
+    protected static final String OPT_NAME_SCHEMA_ARG_NAME = "schema_name";
+    protected static final String OPT_NAME_SCHEMA_DESCRIPTION = "The name of the schema to disable";
 
-    /**
-     * @param args
-     */
+    protected static final char OPT_NAME_TARGET_RMI_SHORT = 'r';
+    protected static final String OPT_NAME_TARGET_RMI_LONG = "rmi-hosts";
+    protected static final String OPT_NAME_TARGET_RMI_ARG_NAME = "rmi_hosts";
+    protected static final String OPT_NAME_TARGET_RMI_DESCRIPTION = "A list of RMI hosts e.g. 192.168.1.25:1099,192.168.1.26. "
+        + "If no port is given the default RMI port 1099 is taken.";
+
     public static void main(String[] args) {
-        new DisableSchema().execute(args);
+        DisableSchema es = new DisableSchema();
+        es.start(args);
+    }
+
+    private void start(final String[] args) {
+        final AdminParser parser = new AdminParser("disableschema");
+
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+
+        final CLIOption optSchema = setShortLongOpt(
+            parser,
+            OPT_NAME_SCHEMA_SHORT,
+            OPT_NAME_SCHEMA_LONG,
+            OPT_NAME_SCHEMA_ARG_NAME,
+            OPT_NAME_SCHEMA_DESCRIPTION,
+            true);
+
+        final CLIOption optRMIHosts = setShortLongOptWithDefault(
+            parser,
+            OPT_NAME_TARGET_RMI_SHORT,
+            OPT_NAME_TARGET_RMI_LONG,
+            OPT_NAME_TARGET_RMI_ARG_NAME,
+            OPT_NAME_TARGET_RMI_DESCRIPTION,
+            RMI_HOSTNAME,
+            false);
+
+        // parse the command line
+        try {
+            parser.ownparse(args);
+
+            final Credentials auth = credentialsparsing(parser);
+            String schemaName = (String) parser.getOptionValue(optSchema);
+            List<String> rmiHosts = getRMIHostsFromOptions(parser, optRMIHosts);
+
+            if(rmiHosts == null) {
+                SchemaMoveRemote smr = getSchemaMoveRemoteInterface();
+                smr.disableSchema(auth, schemaName);
+                smr.invalidateContexts(auth, schemaName, true);
+            } else {
+                List<SchemaMoveRemote> remotes = new LinkedList<SchemaMoveRemote>();
+
+                // Check first if remote interface is reachable for the given RMI hosts
+                for(String rmiHost : rmiHosts) {
+                   remotes.add(getSchemaMoveRemoteInterface(rmiHost));
+                }
+
+                if(false == remotes.isEmpty()) {
+                    boolean shouldDisableSchema = true;
+                    for(SchemaMoveRemote smr : remotes) {
+                        if(shouldDisableSchema) {
+                            smr.disableSchema(auth, schemaName);
+                            shouldDisableSchema = false;
+                        }
+                        smr.invalidateContexts(auth, schemaName, true);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            printErrors(null, null, e, parser);
+            sysexit(1);
+        }
     }
 
     @Override
-    protected String getFooter() {
-        return "Tool to disable Open-Xchange database schemata.";
-    }
-
-    @Override
-    protected String getName() {
-        return "disableschema [-m <schema_name> -A <adminuser> -P <adminpass>[-l <jmx_login> -s <jmx_password> [-p <jmx_port>]]] [-h]";
-    }
-
-    @SuppressWarnings("static-access")
-    @Override
-    protected void addOptions(Options options) {
-        options.addOption(OptionBuilder.withLongOpt("schema").withArgName("schema_name").withDescription(
-            "The name of the schema to disable").hasArg(true).isRequired(true).create(OPT_SCHEMA));
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        SchemaMoveMBean schemaMove = getMBean(mbsc, SchemaMoveMBean.class, SchemaMoveMBean.DOMAIN);
-        schemaMove.disableSchema(cmd.getOptionValue(OPT_SCHEMA));
-        return null;
+    protected String getObjectName() {
+        return "disableschema";
     }
 
 }
