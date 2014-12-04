@@ -477,7 +477,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param resp The HTTP response
      * @throws IOException If an I/O error occurs
      */
-    protected void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
+    public static void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/html; charset=UTF-8");
         resp.setHeader("Content-Disposition", "inline");
         PrintWriter writer = resp.getWriter();

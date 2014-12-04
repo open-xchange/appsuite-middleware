@@ -153,8 +153,7 @@ public final class JerichoParser {
             return null;
         }
         final int maxLength = HtmlServices.htmlThreshold();
-        final boolean big = html.length() > maxLength;
-        if (big) {
+        if (html.length() > maxLength) {
             throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
         }
         if (BODY_START.matcher(html).find()) {
