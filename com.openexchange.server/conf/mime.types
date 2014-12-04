@@ -244,13 +244,13 @@ application/vnd.ms-works wps wks wcm wdb
 application/vnd.ms-word.document.macroEnabled.12 docm
 application/vnd.ms-word.template dotm
 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx
-application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx
-application/vnd.openxmlformats-officedocument.presentationml.template potx
+application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx xltm
+application/vnd.openxmlformats-officedocument.presentationml.template potx pptm
 application/vnd.openxmlformats-officedocument.presentationml.slideshow ppsx
 application/vnd.openxmlformats-officedocument.presentationml.presentation pptx
 application/vnd.openxmlformats-officedocument.presentationml.slide sldx
 application/vnd.openxmlformats-officedocument.wordprocessingml.document docx
-application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx
+application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx dotm
 application/vnd.ms-excel.addin.macroEnabled.12 xlam
 application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
 application/vnd.ms-wpl wpl
