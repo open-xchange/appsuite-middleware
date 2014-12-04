@@ -1,3 +1,7 @@
+* 2014-12-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35693: Fixed conditional expression to check for possible HTML content by Content-Type and/or file name values
+
 * 2014-11-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 35639: Write generated ZIP file directly to stream (if possible)
