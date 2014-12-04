@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-Name: Open-Xchange Mobile Push Watchdog Bundle
 Bundle-SymbolicName: com.openexchange.mobilepush.events.watchdog
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.mobilepush.watchdog.osgi.WatchdogActivator
-Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.core,
  com.openexchange.cluster.timer,
