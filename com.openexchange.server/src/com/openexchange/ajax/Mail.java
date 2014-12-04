@@ -2253,7 +2253,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                         attachmentInputStream,
                         fileName,
                         mailPart.getContentType().toString(),
-                        req.getHeader(STR_USER_AGENT));
+                        req.getHeader(STR_USER_AGENT),
+                        session);
                     resp.setContentType(checkedDownload.getContentType());
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     attachmentInputStream = checkedDownload.getInputStream();

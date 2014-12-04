@@ -64,9 +64,8 @@ import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.parser.HtmlHandler;
-import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -142,31 +141,6 @@ public final class JerichoParser {
 
     private final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-    private volatile Integer maxLength;
-    private int maxLength() {
-        Integer i = maxLength;
-        if (null == i) {
-            synchronized (this) {
-                i = maxLength;
-                if (null == i) {
-                    // Default is 1MB
-                    final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final int defaultMaxLength = 1048576;
-                    if (null == service) {
-                        return defaultMaxLength;
-                    }
-                    int prop = service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength);
-                    if (prop <= 0) {
-                        prop = Integer.MAX_VALUE;
-                    }
-                    i = Integer.valueOf(prop);
-                    maxLength = i;
-                }
-            }
-        }
-        return i.intValue();
-    }
-
     /**
      * Ensure given HTML content has a <code>&lt;body&gt;</code> tag.
      *
@@ -178,7 +152,7 @@ public final class JerichoParser {
         if (null == html) {
             return null;
         }
-        final int maxLength = maxLength();
+        final int maxLength = HtmlServices.htmlThreshold();
         final boolean big = html.length() > maxLength;
         if (big) {
             throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
