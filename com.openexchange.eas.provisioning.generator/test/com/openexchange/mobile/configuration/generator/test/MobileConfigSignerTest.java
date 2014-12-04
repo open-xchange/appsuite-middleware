@@ -3,6 +3,8 @@ package com.openexchange.mobile.configuration.generator.test;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,8 +54,8 @@ public class MobileConfigSignerTest {
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter) {
             @Override
-            protected String[] getCommand() throws ConfigurationException {
-                return new String[]{ "sleep", "10" };
+            protected List<String> getCommand() throws ConfigurationException {
+                return Arrays.asList("sleep", "10");
             }
         };
         final char[] buf = new char[1024];
@@ -77,8 +79,8 @@ public class MobileConfigSignerTest {
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter) {
             @Override
-            protected String[] getCommand() throws ConfigurationException {
-                return new String[]{ "/bin/false" };
+            protected List<String> getCommand() throws ConfigurationException {
+                return Arrays.asList("/bin/false");
             }
         };
         final char[] buf = new char[1024];
