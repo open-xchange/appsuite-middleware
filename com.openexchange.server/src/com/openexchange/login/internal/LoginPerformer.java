@@ -151,6 +151,8 @@ public final class LoginPerformer {
      * Performs the login for specified login request.
      *
      * @param request The login request
+     * @param properties The properties to decorate
+     * @param loginMethod The actual login method that performs authentication
      * @return The login providing login information
      * @throws OXException If login fails
      */
