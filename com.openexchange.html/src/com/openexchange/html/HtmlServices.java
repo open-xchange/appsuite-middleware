@@ -207,7 +207,7 @@ public final class HtmlServices {
                 i = maxLength;
                 if (null == maxLength) {
                     // Default is 1MB
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
                     int defaultMaxLength = 1048576;
                     if (null == service) {
                         return defaultMaxLength;
