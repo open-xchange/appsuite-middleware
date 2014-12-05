@@ -176,6 +176,7 @@ while true; do
 				*) rmiHost=$2
 					optRMIArgs="-r $rmiHost"
 					shift 2;;
+			esac;;
 		--)
 			shift; break;;
 		*)
@@ -197,7 +198,7 @@ if [ $RETVAL -eq 0 ]; then
 	else
 		echo "localhost"
 	fi
-	echo -n "Pumping into schema '$targetSchema'"
+	echo -n "Pumping into schema '$targetSchema' "
 	dumpOutput="$(mysql $OUTPUT < $input)"
 	RETVAL=$?
 	
