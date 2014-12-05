@@ -62,11 +62,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
-
-import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
@@ -106,11 +103,9 @@ import com.openexchange.test.ContactTestManager;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class BasicMailTest extends AbstractFindTest {
+public class BasicMailTest extends AbstractMailFindTest {
 
     private FolderObject testFolder;
-
-    private String defaultAddress;
 
     private ContactTestManager contactManager;
 
@@ -121,7 +116,6 @@ public class BasicMailTest extends AbstractFindTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        defaultAddress = client.getValues().getSendAddress();
         String inboxFolder = client.getValues().getInboxFolder();
         String folderName = "findApiMailTestFolder_" + System.currentTimeMillis();
         testFolder = new FolderObject();
@@ -155,10 +149,10 @@ public class BasicMailTest extends AbstractFindTest {
         modified.setImageContentType("image/png");
         modified.setLastModified(new Date());
         contactManager.updateAction(ownContact.getParentFolderID(), modified);
-        
+
         /*
          * Create a distribution list
-         */        
+         */
         Contact distributionList = new Contact();
         distributionList.setParentFolderID(client.getValues().getPrivateContactFolder());
         distributionList.setSurName(randomUID());
@@ -174,7 +168,7 @@ public class BasicMailTest extends AbstractFindTest {
          * Expect the clients contact in autocomplete response
          */
         String prefix = defaultAddress.substring(0, 3);
-        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier());
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets());
         AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
         List<Facet> facets = autocompleteResponse.getFacets();
         FacetValue found = detectContact(facets);
@@ -195,11 +189,12 @@ public class BasicMailTest extends AbstractFindTest {
         /*
          * Set own contact as activeFacet
          */
-        ActiveFacet activeFacet = createActiveFacet(MailFacetType.CONTACTS, found.getId(), found.getOptions().get(0).getFilter());
-        facets = autocomplete(prefix, Collections.singletonList(activeFacet));
+        List<ActiveFacet> activeFacets = prepareFacets();
+        activeFacets.add(createActiveFacet(MailFacetType.CONTACTS, found.getId(), found.getOptions().get(0).getFilter()));
+        facets = autocomplete(prefix, activeFacets);
         found = detectContact(facets);
         assertNull("Own contact should've been missing in response", found);
-        
+
         /*
          * Distribution lists ignored?
          */
@@ -458,7 +453,9 @@ public class BasicMailTest extends AbstractFindTest {
         FacetValue last = values.get(values.size() - 1);
         assertEquals("Prefix item is at wrong position in result set", prefix, last.getId());
 
-        facets = autocomplete(prefix, Collections.singletonList(new ActiveFacet(MailFacetType.CONTACTS, values.get(0).getId(), values.get(0).getOptions().get(0).getFilter())));
+        List<ActiveFacet> activeFacets = prepareFacets();
+        activeFacets.add(new ActiveFacet(MailFacetType.CONTACTS, values.get(0).getId(), values.get(0).getOptions().get(0).getFilter()));
+        facets = autocomplete(prefix, activeFacets);
         facet = findByType(MailFacetType.CONTACTS, facets);
         assertNotNull("Contacts facet not found", facet);
         values = ((DefaultFacet) facet).getValues();
@@ -537,21 +534,21 @@ public class BasicMailTest extends AbstractFindTest {
 
 
         List<ActiveFacet> facets = prepareFacets();
-        SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.MAIL, t1 + " " + t3));
+        SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(t1 + " " + t3));
         facets.add(createActiveFacet(globalFacet));
         List<PropDocument> documents = query(Module.MAIL, facets);
         assertTrue("no document found", 0 < documents.size());
         assertNotNull("document not found", findByProperty(documents, "id", mailIds[0][1]));
 
         prepareFacets();
-        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.MAIL, "\"" + t1 + " " + t2 + "\""));
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete("\"" + t1 + " " + t2 + "\""));
         facets.add(createActiveFacet(globalFacet));
         documents = query(Module.MAIL, facets);
         assertTrue("no document found", 0 < documents.size());
         assertNotNull("document not found", findByProperty(documents, "id", mailIds[0][1]));
 
         prepareFacets();
-        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.MAIL, "\"" + t1 + " " + t3 + "\""));
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete("\"" + t1 + " " + t3 + "\""));
         facets.add(createActiveFacet(globalFacet));
         documents = query(Module.MAIL, facets);
         assertTrue("document found", 0 == documents.size());
@@ -601,37 +598,10 @@ public class BasicMailTest extends AbstractFindTest {
         }
     }
 
-    private List<ActiveFacet> prepareFacets() {
-        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
-        facets.add(createActiveFacet(CommonFacetType.FOLDER, testFolder.getFullName(), Filter.NO_FILTER));
-        return facets;
+    protected List<ActiveFacet> prepareFacets() throws OXException, IOException, JSONException {
+        return prepareFacets(testFolder.getFullName());
     }
-
-    private List<Facet> autocomplete(String prefix) throws Exception {
-        return autocomplete(Module.MAIL, prefix);
-    }
-
-    private List<Facet> autocomplete(String prefix, List<ActiveFacet> facets) throws Exception {
-        return autocomplete(Module.MAIL, prefix, facets);
-    }
-
-    private List<PropDocument> query(List<ActiveFacet> facets, int start, int size) throws Exception {
-        return query(Module.MAIL, facets, start, size);
-    }
-
-    private List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
-        return query(Module.MAIL, facets);
-    }
-
-    private List<PropDocument> query(List<ActiveFacet> facets, Map<String, String> options) throws Exception {
-        return query(Module.MAIL, facets, options);
-    }
-
-
-    private List<PropDocument> query(List<ActiveFacet> facets, int[] columns) throws Exception {
-        return query(Module.MAIL, facets, columns);
-    }
-
+    
     private String[][] importMails(int num, String fromHeader, String toHeader) throws OXException, IOException, JSONException {
         InputStream[] streams = new InputStream[num];
         for (int i = 0; i < num; i++) {
@@ -665,42 +635,7 @@ public class BasicMailTest extends AbstractFindTest {
         ImportMailResponse response = client.execute(request);
         return response.getIds();
     }
-
-    private FacetValue detectContact(List<Facet> facets) throws OXException, IOException, JSONException {
-        GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
-        GetResponse getResponse = client.execute(getRequest);
-        Contact contact = getResponse.getContact();
-        FacetValue found = findByDisplayName(facets, DisplayItems.convert(contact).getDisplayName());
-        return found;
-    }
-
-    protected Contact randomContact(String givenName, int folderId) {
-        Contact contact = new Contact();
-        contact.setParentFolderID(folderId);
-        contact.setSurName(randomUID());
-        contact.setGivenName(givenName);
-        contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
-        contact.setEmail1(randomUID() + "@example.com");
-        contact.setUid(randomUID());
-        return contact;
-    }
-
-    protected Contact specificContact(String givenName, String surName, String mailAddress, int folderId) {
-        Contact contact = new Contact();
-        contact.setParentFolderID(folderId);
-        if (surName != null) {
-            contact.setSurName(surName);
-        }
-
-        if (givenName != null) {
-            contact.setGivenName(givenName);
-        }
-
-        contact.setEmail1(mailAddress);
-        contact.setUid(randomUID());
-        return contact;
-    }
-
+    
     private static final String MAIL =
         "From: #FROM#\n" +
         "To: #TO#\n" +

@@ -212,6 +212,10 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         case TENTATIVE: confirm = CalendarObject.TENTATIVE; break;
         default: confirm = -1;
         }
+        String message = null;
+        if (action.getMessage() != null && !action.getMessage().trim().equals("")) {
+            message = action.getMessage();
+        }
         Participant[] participants = appointment.getParticipants();
         boolean found = false;
         if (null != participants) {
@@ -223,6 +227,9 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
                         if (confirm != -1) {
                             up.setConfirm(confirm);
                         }
+                        if (message != null) {
+                            up.setConfirmMessage(message);
+                        }
                     }
                 }
             }
@@ -232,6 +239,9 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             UserParticipant up = new UserParticipant(owner);
             if (confirm != -1) {
                 up.setConfirm(confirm);
+            }
+            if (message != null) {
+                up.setConfirmMessage(message);
             }
             Participant[] tmp = appointment.getParticipants();
             List<Participant> participantList = (null == tmp) ? new ArrayList<Participant>(1) : new ArrayList<Participant>(Arrays.asList(tmp));
@@ -247,6 +257,9 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
                     found = true;
                     if (confirm != -1) {
                         userParticipant.setConfirm(confirm);
+                    }
+                    if (message != null) {
+                        userParticipant.setConfirmMessage(message);
                     }
                 }
             }

@@ -47,118 +47,54 @@
  *
  */
 
-package com.openexchange.calendar.itip;
+package com.openexchange.ajax.find.mail;
 
+import java.util.List;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
+import com.openexchange.find.Module;
+import com.openexchange.find.facet.DefaultFacet;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.Option;
+import com.openexchange.find.mail.MailFacetType;
 
 /**
- * {@link ITipAction}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum ITipAction {
+public class Bug35442Test extends AbstractMailFindTest {
 
-    /**
-     * Cases:
-     * 1. Create Appointment if not existing
-     * 2. Set user accepted
-     * 3. Add user to existing appointment if not participant (rights?!)
-     * 4. If Attendee: Answer with REPLY
-     */
-    ACCEPT,
-
-    /**
-     * see accept
-     * (implicit ignore conflicts)
-     */
-    DECLINE,
-
-    /**
-     * see accept
-     * (implicit ignore conflicts)
-     */
-    TENTATIVE,
-
-    /**
-     *
-     */
-    DELEGATE,
-
-    /**
-     * Create original appointment
-     * add user with status "none"
-     */
-    COUNTER,
-
-    /**
-     * see accept with "ignore conflicts"
-     */
-    ACCEPT_AND_IGNORE_CONFLICTS,
-
-    /**
-     * Cases:
-     * 1. Delete Appointment or sequence: Just delete.
-     * 2. Delete change exception: replace with delete exception
-     * 3. Delete occurrence: Create delete exception
-     */
-    DELETE,
-
-    /**
-     * does nothing
-     */
-    IGNORE,
-
-    /**
-     * Edit change exception
-     * See accept
-     */
-    ACCEPT_AND_REPLACE,
-
-    /**
-     * only mails
-     * Send a REFRESH mail
-     */
-    REFRESH,
-
-    /**
-     * only mails
-     * Send a REQUEST mail
-     */
-    SEND_APPOINTMENT,
-
-    /**
-     * for organizer:
-     * add participant
-     * Send a REQUEST mail
-     */
-    ACCEPT_PARTY_CRASHER,
-
-    /**
-     * for organizer:
-     * accept a counter -> change appointment
-     * Send a REQUEST mail
-     */
-    UPDATE,
-
-    /**
-     * just mail
-     * Send a DECLINECOUNTER mail
-     */
-    DECLINECOUNTER,
-
-    /**
-     * Create change exception
-     * If ORGANIZER: Send an ADD mail
-     * If Attendee: Send a REPLY
-     */
-    CREATE;
-    
-    private String message;
-
-    public String getMessage() {
-        return message;
+    public Bug35442Test(String name) {
+        super(name);
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void testDefaultContactOptionIsSwitchedToToInSentFolder() throws Exception {
+        String prefix = defaultAddress.substring(0, 3);
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets());
+        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        List<Facet> facets = autocompleteResponse.getFacets();
+        DefaultFacet contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);
+        assertNotNull(contactFacet);
+
+        /*
+         * autocomplete in inbox - we expect the first option to be set to 'from'
+         */
+        Option option = contactFacet.getValues().get(0).getOptions().get(0);
+        assertEquals("from", option.getId());
+
+        autocompleteRequest = new AutocompleteRequest(
+            prefix,
+            Module.MAIL.getIdentifier(),
+            prepareFacets(client.getValues().getSentFolder()));
+        autocompleteResponse = client.execute(autocompleteRequest);
+        facets = autocompleteResponse.getFacets();
+        contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);
+        assertNotNull(contactFacet);
+
+        /*
+         * autocomplete in sent - we expect the first option to be set to 'to'
+         */
+        option = contactFacet.getValues().get(0).getOptions().get(0);
+        assertEquals("to", option.getId());
     }
+
 }

@@ -1,6 +1,8 @@
 * 2014-12-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 35693: Fixed conditional expression to check for possible HTML content by Content-Type and/or file name values
+ - Fix for bug 35413: Fill properties for re-authenticate attempt
+ - Fix for bug 35716: In rare to impossible cases of an Exception during "MailServletInterface.close()" a DEBUG logging is performed
 
 * 2014-12-04 - marcus.klein@open-xchange.com
 

@@ -53,6 +53,7 @@ import static com.openexchange.java.Strings.isEmpty;
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.List;
+import org.slf4j.Logger;
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -528,7 +529,12 @@ public abstract class MailServletInterface implements Closeable {
 
     @Override
     public void close() {
-        try { close(true); } catch (Exception x) { /**/ }
+        try {
+            close(true);
+        } catch (Exception x) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(MailServletInterface.class);
+            logger.debug("Error while closing MailAccess instance.", x);
+        }
     }
 
     /**

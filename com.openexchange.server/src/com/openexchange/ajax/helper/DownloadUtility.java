@@ -449,7 +449,6 @@ public final class DownloadUtility {
                     }
                     sink.close();
                     sink = null; // Null'ify as not needed anymore
-                    htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     final byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
                     contentType.setCharsetParameter("UTF-8");
                     sz = tmp.length;
