@@ -562,7 +562,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             LOG.error("", oxe);
 
             final ServletException se = new ServletException(e.getMessage());
-            se.initCause(e);
+            se.initCause(oxe);
             throw se;
         } finally {
             decrementRequests();
