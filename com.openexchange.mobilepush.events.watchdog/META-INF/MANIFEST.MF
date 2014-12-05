@@ -4,7 +4,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-Name: Open-Xchange Mobile Push Watchdog Bundle
 Bundle-SymbolicName: com.openexchange.mobilepush.events.watchdog
 Bundle-Version: 7.8.0
-Bundle-Activator: com.openexchange.mobilepush.events.storage.osgi.MobilePushStorageActivator
+Bundle-Activator: com.openexchange.mobilepush.watchdog.osgi.WatchdogActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.cluster.timer,
  com.openexchange.config,
