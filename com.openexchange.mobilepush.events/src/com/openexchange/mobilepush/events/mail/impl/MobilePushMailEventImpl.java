@@ -136,7 +136,8 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     public void notifyLogin(final List<ContextUsers> contextUsers) throws OXException {
         Map<String, String> map = new HashMap<String, String>();
         map.put("SYNC_EVENT", "LOGIN");
-        map.put("message", "OX Mail");
+        map.put("title", "OX Mail");
+        map.put("message", "You've received a new login");
         map.put("msgcnt", "1");
 
         MobilePushMailEvent loginEvent = new MobilePushMailEvent(contextUsers, map);
