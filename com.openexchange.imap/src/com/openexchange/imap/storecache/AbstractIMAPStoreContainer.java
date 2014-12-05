@@ -103,7 +103,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         {
             Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
             clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
-            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), session.getSessionID() + "-" + imapStore.hashCode());
+            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
             clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
             clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
             imapStore.setClientParameters(clientParams);
