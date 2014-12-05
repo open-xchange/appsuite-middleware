@@ -80,9 +80,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
 import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
@@ -561,7 +561,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             }
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final RuntimeException e) {
-            LOG.error("", e);
+            OXException oxe = new OXException(e);
+            LOG.error("", oxe);
+
             final ServletException se = new ServletException(e.getMessage());
             se.initCause(e);
             throw se;
