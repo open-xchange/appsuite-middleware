@@ -88,6 +88,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.jump.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.logback.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.logback.configuration"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.logback.core.extensions"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.logback.classic.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.logback.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.mail.autoconfig"/>
