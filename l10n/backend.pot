@@ -7386,6 +7386,16 @@ msgid ""
 "The requested operation requires a valid session. Please login and try again."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:68
+msgid "Missing the following field in JSON data: %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
+msgid ""
+"The HTML content is too big and therefore cannot be safely displayed. Please "
+"select to download its content if you want to see it."
+msgstr ""
+
 #. *
 #. * The provided cookie is invalid. Please login.
 #.
