@@ -1192,6 +1192,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return <code>true</code> if such a message exists; otherwise <code>false</code> if absent
      * @throws OXException If operation fails
      */
+    public boolean exists(String fullName, String msgUID)  throws OXException {
+        return existsLong(fullName, parseUnsignedLong(msgUID));
+    }
+
+    /**
+     * Checks existence for a message denoted by given identifier.
+     *
+     * @param fullName The mailbox full name
+     * @param msgUID The message identifier
+     * @return <code>true</code> if such a message exists; otherwise <code>false</code> if absent
+     * @throws OXException If operation fails
+     */
     public boolean existsLong(String fullName, long msgUID)  throws OXException {
         if (msgUID < 0) {
             return false;
