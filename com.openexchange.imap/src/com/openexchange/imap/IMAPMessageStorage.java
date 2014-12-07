@@ -1184,6 +1184,79 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    /**
+     * Checks existence for a message denoted by given identifier.
+     *
+     * @param fullName The mailbox full name
+     * @param msgUID The message identifier
+     * @return <code>true</code> if such a message exists; otherwise <code>false</code> if absent
+     * @throws OXException If operation fails
+     */
+    public boolean exists(String fullName, long msgUID)  throws OXException {
+        if (msgUID < 0) {
+            return false;
+        }
+        try {
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            if (0 >= imapFolder.getMessageCount()) {
+                return false;
+            }
+            try {
+                return null != (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+            } catch (final java.lang.NullPointerException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return false;
+            } catch (final java.lang.IndexOutOfBoundsException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return false;
+            } catch (final MessageRemovedException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return false;
+            } catch (final MessagingException e) {
+                final Exception cause = e.getNextException();
+                if (!(cause instanceof BadCommandException)) {
+                    throw e;
+                }
+                // Hm... Something weird with executed "UID FETCH" command; retry manually...
+                final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { msgUID });
+                if ((null == seqNums) || (0 == seqNums.length)) {
+                    LOG.debug("No message with UID '{}' found in folder '{}'", msgUID, fullName, cause);
+                    return false;
+                }
+                final int msgnum = seqNums[0];
+                if (msgnum < 1) {
+                    /*
+                     * message-numbers start at 1
+                     */
+                    LOG.debug("No message with UID '{}' found in folder '{}'", msgUID, fullName, cause);
+                    return false;
+                }
+                return true;
+            }
+        } catch (final MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                return false;
+            }
+            throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         if (msgUID < 0) {
@@ -1207,6 +1280,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 long start = System.currentTimeMillis();
                 msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+                if (null == msg) {
+                    return null;
+                }
                 // Force to pre-load envelope data through touching "Message-ID" header
                 msg.getMessageID();
                 long duration = System.currentTimeMillis() - start;
@@ -1239,7 +1315,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Hm... Something weird with executed "UID FETCH" command; retry manually...
                 final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { msgUID });
                 if ((null == seqNums) || (0 == seqNums.length)) {
-                    LOG.debug("No message with UID '{}' found in folder '{}{}", msgUID, fullName, '\'', cause);
+                    LOG.debug("No message with UID '{}' found in folder '{}'", msgUID, fullName, cause);
                     return null;
                 }
                 final int msgnum = seqNums[0];
@@ -1247,7 +1323,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * message-numbers start at 1
                      */
-                    LOG.debug("No message with UID '{}' found in folder '{}{}", msgUID, fullName, '\'', cause);
+                    LOG.debug("No message with UID '{}' found in folder '{}'", msgUID, fullName, cause);
                     return null;
                 }
                 msg = (IMAPMessage) imapFolder.getMessage(msgnum);
