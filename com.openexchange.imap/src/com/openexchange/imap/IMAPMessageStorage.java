@@ -1222,7 +1222,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return false;
             }
             try {
-                return null != (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+                return null != imapFolder.getMessageByUID(msgUID);
             } catch (final java.lang.NullPointerException e) {
                 /*
                  * Obviously message was removed in the meantime
