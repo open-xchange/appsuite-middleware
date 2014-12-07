@@ -1192,7 +1192,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return <code>true</code> if such a message exists; otherwise <code>false</code> if absent
      * @throws OXException If operation fails
      */
-    public boolean exists(String fullName, long msgUID)  throws OXException {
+    public boolean existsLong(String fullName, long msgUID)  throws OXException {
         if (msgUID < 0) {
             return false;
         }
