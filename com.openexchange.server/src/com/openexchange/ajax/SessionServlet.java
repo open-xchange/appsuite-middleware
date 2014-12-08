@@ -477,7 +477,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param resp The HTTP response
      * @throws IOException If an I/O error occurs
      */
-    protected void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
+    public static void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/html; charset=UTF-8");
         resp.setHeader("Content-Disposition", "inline");
         PrintWriter writer = resp.getWriter();
@@ -503,7 +503,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param desc The optional status description; e.g. <code>"The requested URL was not found on this server."</code>
      * @return A simple error page
      */
-    protected String getErrorPage(int sc, String msg, String desc) {
+    public static String getErrorPage(int sc, String msg, String desc) {
         String msg0 = null == msg ? HttpStatus.getStatusText(sc) : msg;
 
         StringBuilder sb = new StringBuilder(512);

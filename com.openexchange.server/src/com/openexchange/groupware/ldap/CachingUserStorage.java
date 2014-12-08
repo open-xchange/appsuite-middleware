@@ -112,6 +112,22 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
+    public User loadIfAbsent(int userId, Context context, Connection con) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getUser(userId, context);
+        }
+        Cache cache = cacheService.getCache(REGION_NAME);
+        Object object = cache.get(cacheService.newCacheKey(context.getContextId(), userId));
+        if (object instanceof User) {
+            return (User) object;
+        }
+        User user = delegate.getUser(context, userId, con);
+        cache.put(cacheService.newCacheKey(context.getContextId(), userId), user, false);
+        return user;
+    }
+
+    @Override
     public int createUser(final Connection con, final Context context, final User user) throws OXException {
         return delegate.createUser(con, context, user);
     }

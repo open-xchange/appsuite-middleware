@@ -542,14 +542,35 @@ public final class HtmlServiceImpl implements HtmlService {
         }
         try {
             String html = htmlContent;
+
             // Normalize the string
-            html = Normalizer.normalize(html, Form.NFKC);
+            {
+                int length = html.length();
+                StringBuilder tmp = new StringBuilder(length);
+                OneCharSequence helper = null;
+                for (int i = 0; i < length; i++) {
+                    char c = html.charAt(i);
+                    if (c < 128) {
+                        tmp.append(c);
+                    } else {
+                        if (null == helper) {
+                            helper = new OneCharSequence(c);
+                        } else {
+                            helper.setCharacter(c);
+                        }
+                        tmp.append(Normalizer.normalize(helper, Form.NFKC));
+                    }
+                }
+                html = tmp.toString();
+            }
+
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
+
             // CSS- and tag-wise sanitizing
             try {
                 // Determine the definition to use
@@ -578,6 +599,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 // Start sanitizing round
                 html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
+
             // Replace HTML entities
             html = keepUnicodeForEntities(html);
             return html;

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,53 @@
  *
  */
 
-package com.openexchange.tools.servlet;
-
-import com.openexchange.i18n.LocalizableStrings;
+package com.openexchange.html.internal;
 
 
 /**
- * {@link AjaxExceptionMessages}
+ * {@link OneCharSequence}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public final class AjaxExceptionMessages implements LocalizableStrings {
+public class OneCharSequence implements CharSequence {
 
-    public static final String NON_SECURE_DENIED_MSG = "The requested operation is not permitted via a non-secure connection.";
-    public static final String DISABLED_ACTION_MSG = "The requested operation is disabled.";
-    public static final String NO_PERMISSION_FOR_MODULE = "You do not have appropriate permissions for module %1$s.";
-    public static final String CONFLICT = "The object has been changed in the meantime. Please reload the view and try again.";
-    public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
-    public static final String MISSING_COOKIE_MSG = "The requested operation requires a valid session. Please login and try again.";
-    public static final String HTML_TOO_BIG_MSG = "The HTML content is too big and therefore cannot be safely displayed. Please select to download its content if you want to see it.";
+    private char ch;
 
     /**
-     * Initializes a new {@link AjaxExceptionMessages}
+     * Initializes a new {@link OneCharSequence}.
      */
-    private AjaxExceptionMessages() {
+    public OneCharSequence(char ch) {
         super();
+        this.ch = ch;
     }
 
+    /**
+     * Sets the character
+     *
+     * @param ch The character
+     */
+    public void setCharacter(char ch) {
+        this.ch = ch;
+    }
+
+    @Override
+    public int length() {
+        return 1;
+    }
+
+    @Override
+    public char charAt(int index) {
+        return ch;
+    }
+
+    @Override
+    public CharSequence subSequence(int start, int end) {
+        return String.valueOf(ch).subSequence(start, end);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(ch);
+    }
 }
