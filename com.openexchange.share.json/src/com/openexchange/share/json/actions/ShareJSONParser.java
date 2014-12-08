@@ -189,10 +189,10 @@ public class ShareJSONParser {
         case GROUP:
             InternalRecipient internalRecipient = new InternalRecipient();
             internalRecipient.setGroup(RecipientType.GROUP == type);
-            if (false == jsonRecipient.hasAndNotNull("id")) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
+            if (false == jsonRecipient.hasAndNotNull("entity")) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("entity");
             }
-            internalRecipient.setEntity(jsonRecipient.getInt("id"));
+            internalRecipient.setEntity(jsonRecipient.getInt("entity"));
             recipient = internalRecipient;
             break;
         case ANONYMOUS:
