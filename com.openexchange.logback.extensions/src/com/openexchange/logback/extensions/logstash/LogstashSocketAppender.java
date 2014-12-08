@@ -63,11 +63,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.net.SocketFactory;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.encoder.Encoder;
+import ch.qos.logback.core.net.AbstractSocketAppender;
 import ch.qos.logback.core.net.DefaultSocketConnector;
 import ch.qos.logback.core.net.SocketConnector;
 import ch.qos.logback.core.net.SocketConnector.ExceptionHandler;
@@ -82,6 +84,10 @@ import ch.qos.logback.core.util.Duration;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implements Runnable, ExceptionHandler {
+
+    private static final int SOCKET_TIMEOUT = 60;
+
+    private static final float LOAD_FACTOR = 0.67f;
 
     private int port;
 
@@ -109,6 +115,12 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     private Encoder<ILoggingEvent> encoder;
 
+    private int socketTimeout = 10;
+
+    private float loadFactor = 0.67f;
+
+    private Boolean alwaysPersistEvents;
+
     /*
      * (non-Javadoc)
      * @see ch.qos.logback.core.AppenderBase#start()
@@ -128,10 +140,12 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             addError("No remote host was configured for appender" + name + " For more information, please visit http://logback.qos.ch/codes.html#socket_no_host");
         }
 
-        if (queueSize < 0) {
-            errorCount++;
-            addError("Queue size must be non-negative");
+        if (queueSize <= 0) {
+            addWarn("'queueSize' is not defined in configuration file. Falling back to default value of '2048'");
+            queueSize = 2048;
         }
+
+        setOptionalProperties();
 
         if (errorCount == 0) {
             try {
@@ -147,6 +161,38 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             peerId = "remote peer " + remoteHost + ":" + port + ": ";
             task = getContext().getExecutorService().submit(this);
             super.start();
+        }
+    }
+
+    private void setOptionalProperties() {
+        alwaysPersistEvents = Boolean.parseBoolean(context.getProperty("com.openexchange.logback.extensions.logstash.alwaysPersistEvents"));
+        {
+            String value = context.getProperty("com.openexchange.logback.extensions.logstash.socketTimeout");
+            if (value == null || !(value instanceof String)) {
+                addWarn("'com.openexchange.logback.extensions.logstash.socketTimeout' property is not defined in the configuration file. Falling back to default value of '" + SOCKET_TIMEOUT + "'");
+                socketTimeout = SOCKET_TIMEOUT;
+            } else {
+                try {
+                    socketTimeout = Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    addError("The value of 'com.openexchange.logback.extensions.logstash.socketTimeout' is not a parsable int. Falling back to default value of '" + SOCKET_TIMEOUT + "'");
+                    socketTimeout = SOCKET_TIMEOUT;
+                }
+            }
+        }
+        {
+            String value = context.getProperty("com.openexchange.logback.extensions.logstash.loadFactor");
+            if (value == null || !(value instanceof String)) {
+                addWarn("'com.openexchange.logback.extensions.logstash.loadFactor' property is not defined in the configuration file. Falling back to default value of '" + LOAD_FACTOR + "'");
+                loadFactor = LOAD_FACTOR;
+            } else {
+                try {
+                    loadFactor = Float.parseFloat(value);
+                } catch (NumberFormatException e) {
+                    addError("The value of 'com.openexchange.logback.extensions.logstash.loadFactor' is not a parsable float. Falling back to default value of '" + LOAD_FACTOR + "'");
+                    loadFactor = LOAD_FACTOR;
+                }
+            }
         }
     }
 
@@ -191,23 +237,27 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     public final void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-                SocketConnector connector = createConnector(address, port, 0, reconnectionDelay);
+                try {
+                    SocketConnector connector = createConnector(address, port, 0, reconnectionDelay);
 
-                connectorTask = activateConnector(connector);
-                if (connectorTask == null) {
-                    break;
-                }
+                    connectorTask = activateConnector(connector);
+                    if (connectorTask == null) {
+                        continue;
+                    }
+                    socket = waitForConnectorToReturnASocket();
+                    if (socket == null) {
+                        continue;
+                    }
 
-                socket = waitForConnectorToReturnASocket();
-                if (socket == null) {
-                    break;
+                    dispatchEvents();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                dispatchEvents();
             }
-        } catch (InterruptedException ex) {
-            assert true; // ok... we'll exit now
+        } catch (Throwable t) {
+            System.err.println("LogstashSocketAppender is shutting down. Unexpected error:");
+            t.printStackTrace();
         }
-        addInfo("shutting down");
     }
 
     /**
@@ -309,21 +359,48 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         return connector;
     }
 
-    private Future<Socket> activateConnector(SocketConnector connector) {
+    private Future<Socket> activateConnector(SocketConnector connector) throws RejectedExecutionException, InterruptedException {
         try {
             return getContext().getExecutorService().submit(connector);
-        } catch (RejectedExecutionException ex) {
+        } catch (RejectedExecutionException e) {
+            cleanQueueIfNecessary();
+            System.err.println(LogstashSocketAppenderExceptionCodes.ERROR_ACTIVATING_CONNECTOR.create(e).toString());
+            e.printStackTrace();
             return null;
         }
     }
 
-    private Socket waitForConnectorToReturnASocket() throws InterruptedException {
+    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException {
         try {
-            Socket s = connectorTask.get();
+            Socket s = connectorTask.get(socketTimeout, TimeUnit.SECONDS);
             connectorTask = null;
             return s;
-        } catch (ExecutionException e) {
+        } catch (TimeoutException e) {
+            cleanQueueIfNecessary();
+            connectorTask = null;
+            System.err.println(LogstashSocketAppenderExceptionCodes.TIMEOUT_WHILE_CREATING_SOCKET.create(e).toString());
+            e.printStackTrace();
             return null;
+        }
+    }
+
+    /**
+     * Clean up queue and log if necessary
+     * 
+     * @throws InterruptedException
+     */
+    private void cleanQueueIfNecessary() throws InterruptedException {
+        final int qSize = queue.size();
+        if (qSize > (qSize * loadFactor)) {
+            if (alwaysPersistEvents) {
+                ILoggingEvent event = null;
+                do {
+                    event = queue.poll();
+                    System.err.println((event.toString())); //FIXME: write to system.out/system.err? Any special format?
+                } while (event != null);
+            } else {
+                queue.clear();
+            }
         }
     }
 
@@ -399,14 +476,14 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     void setAcceptConnectionTimeout(int acceptConnectionTimeout) {
         this.acceptConnectionTimeout = acceptConnectionTimeout;
     }
-    
+
     /**
      * Returns the number of elements currently in the blocking queue.
      *
      * @return number of elements currently in the queue.
      */
     public int getNumberOfElementsInQueue() {
-      return queue.size();
+        return queue.size();
     }
 
     /**
