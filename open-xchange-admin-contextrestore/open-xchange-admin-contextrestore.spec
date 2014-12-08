@@ -70,6 +70,8 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
+* Thu Dec 04 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2014-12-09
 * Tue Dec 02 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2014-12-03
 * Tue Nov 25 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>

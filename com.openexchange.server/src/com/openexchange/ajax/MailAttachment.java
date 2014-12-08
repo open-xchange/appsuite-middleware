@@ -233,12 +233,7 @@ public class MailAttachment extends AJAXServlet {
                     resp.setContentType(contentType);
                 } else {
                     Session session = SessiondService.SERVICE_REFERENCE.get().getSession(token.getSessionId());
-                    final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(
-                        attachmentInputStream,
-                        fileName,
-                        mailPart.getContentType().toString(),
-                        userAgent,
-                        ServerSessionAdapter.valueOf(session));
+                    final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(attachmentInputStream, fileName, mailPart.getContentType().toString(), userAgent, ServerSessionAdapter.valueOf(session));
                     contentType = checkedDownload.getContentType();
                     resp.setContentType(contentType);
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());

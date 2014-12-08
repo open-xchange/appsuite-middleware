@@ -65,6 +65,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/solr/*
 
 %changelog
+* Thu Dec 04 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2014-12-09
 * Tue Dec 02 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-12-03
 * Tue Nov 25 2014 Steffen Templin <steffen.templin@open-xchange.com>
