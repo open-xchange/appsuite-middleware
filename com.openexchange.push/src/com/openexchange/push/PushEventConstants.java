@@ -125,10 +125,15 @@ public final class PushEventConstants {
     public static final String PROPERTY_IMMEDIATELY = "com.openexchange.push.immediately";
 
     /**
-     * Optional property that specifies the identifiers of those messages that were newly received as a comma-separated string. e.g.
+     * <b>Optional</b> property that specifies the identifiers of those messages that were newly received as a comma-separated string. e.g.
      * <code>"1234, 1235, 1236"</code>.<br>
      * Property value is of type <code>java.lang.String</code>.
      */
     public static final String PROPERTY_IDS = "com.openexchange.push.ids";
+
+    /**
+     * <b>Optional</b> property that signals that messages were deleted. Property value is of type <code>java.lang.Boolean</code>.
+     */
+    public static final String PROPERTY_DELETED = "com.openexchange.push.deleted";
 
 }
