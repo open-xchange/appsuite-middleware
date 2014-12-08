@@ -49,6 +49,8 @@
 
 package com.openexchange.push.imapidle;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +72,7 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
@@ -172,6 +175,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final PushMode pushMode;
     private final AtomicBoolean canceled;
     private volatile IMAPFolder imapFolderInUse;
+    private volatile String identifiers;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
@@ -185,11 +189,22 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.delay = delay <= 0 ? 5000L : delay;
         this.services = services;
         this.pushMode = pushMode;
+        identifiers = null;
     }
 
     @Override
     public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(accountId, fullName), session);
+        Map<String, Object> props;
+        {
+            String identifiers = this.identifiers;
+            if (null == identifiers) {
+                props = null;
+            } else {
+                props = new HashMap<String, Object>(2);
+                props.put(PushEventConstants.PROPERTY_IDS, identifiers);
+            }
+        }
+        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(accountId, fullName), session, props, true, true);
     }
 
     @Override
@@ -200,6 +215,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
         String sContextId = Integer.toString(session.getContextId());
         String sUserId = Integer.toString(session.getUserId());
+        this.identifiers = null;
 
         try {
             boolean error = true;
@@ -220,7 +236,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
                 final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName);
                 this.imapFolderInUse = imapFolder;
+                long uidNext = -1;
                 try {
+                    // The next expected UID
+                    uidNext = getUIDNext(imapFolder);
+
                     imapFolder.open(Folder.READ_WRITE);
                     LOGGER.debug("Starting IMAP-IDLE run for user {} in context {}.", sUserId, sContextId);
 
@@ -268,6 +288,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                             int newMessageCount = imapFolder.getNewMessageCount();
                             if (newMessageCount > 0) {
                                 LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to {} new mail(s)", sUserId, sContextId, Integer.toString(newMessageCount));
+                                determineIdentifiers(uidNext, imapFolder);
                                 notifyNewMail();
                                 notified = true;
                             }
@@ -281,6 +302,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                             int newMessageCount = imapFolder.getNewMessageCount();
                             if (newMessageCount > 0) {
                                 LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to {} new mail(s)", sUserId, sContextId, Integer.toString(newMessageCount));
+                                determineIdentifiers(uidNext, imapFolder);
                                 notifyNewMail();
                                 notified = true;
                                 break;
@@ -292,6 +314,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                             int newDeletedCount = imapFolder.getDeletedMessageCount();
                             if (imapFolder.getDeletedMessageCount() != deletedCount) {
                                 LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current deleted count {} vs. old deleted count {}", sUserId, sContextId, Integer.toString(newDeletedCount), Integer.toString(deletedCount));
+                                determineIdentifiers(uidNext, imapFolder);
                                 notifyNewMail();
                                 notified = true;
                                 break;
@@ -303,6 +326,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                             int newTotalCount = imapFolder.getMessageCount();
                             if (newTotalCount != totalCount) {
                                 LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current total count {} vs. old total count {}", sUserId, sContextId, Integer.toString(newTotalCount), Integer.toString(totalCount));
+                                determineIdentifiers(uidNext, imapFolder);
                                 notifyNewMail();
                                 notified = true;
                                 break;
@@ -374,7 +398,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * @throws InterruptedException If idle'ing thread has been interrupted
      * @throws MessagingException If IMAP-IDLE fails for any reason
      */
-    private boolean doImapIdleTimeoutAware(final IMAPFolder imapFolder) throws InterruptedException, MessagingException {
+    private boolean doImapIdleTimeoutAware(IMAPFolder imapFolder) throws InterruptedException, MessagingException {
         try {
             Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
             f.get(ImapIdleClusterLock.TIMEOUT_MILLIS - 60000, TimeUnit.MILLISECONDS);
@@ -502,6 +526,29 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
         if ("DBP".equals(e.getPrefix())) {
             throw e;
+        }
+    }
+
+    private long getUIDNext(IMAPFolder imapFolder) {
+        try {
+            return imapFolder.getUIDNext();
+        } catch (MessagingException e) {
+            LOGGER.warn("Could not determine UIDNEXT. Assuming -1 instead.", e);
+            return -1L;
+        }
+    }
+
+    private void determineIdentifiers(long uidNext, IMAPFolder imapFolder) {
+        if (uidNext > 0) {
+            long newUidNext = getUIDNext(imapFolder);
+            if (newUidNext > 0 && uidNext != newUidNext) {
+                StringBuilder buf = new StringBuilder(64);
+                buf.append(uidNext);
+                for (long uid = uidNext + 1; uid < newUidNext; uid++) {
+                    buf.append(", ").append(uid);
+                }
+                this.identifiers = buf.toString();
+            }
         }
     }
 
