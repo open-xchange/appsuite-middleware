@@ -2209,8 +2209,23 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         lockManager.commit();
         List<FileRemoveInfo> filesToRemove = fileIdRemoveList.get();
         if (null != filesToRemove && !filesToRemove.isEmpty()) {
-            for (FileRemoveInfo rmInfo : filesToRemove) {
-                getFileStorage(rmInfo.folderAdmin, rmInfo.contextId).deleteFile(rmInfo.fileId);
+            if (1 == filesToRemove.size()) {
+                FileRemoveInfo removeInfo = filesToRemove.get(0);
+                getFileStorage(removeInfo.folderAdmin, removeInfo.contextId).deleteFile(removeInfo.fileId);
+            } else {
+                Map<QuotaFileStorage, List<String>> removalsPerStorage = new HashMap<QuotaFileStorage, List<String>>();
+                for (FileRemoveInfo removeInfo : filesToRemove) {
+                    QuotaFileStorage fileStorage = getFileStorage(removeInfo.folderAdmin, removeInfo.contextId);
+                    List<String> removals = removalsPerStorage.get(fileStorage);
+                    if (null == removals) {
+                        removals = new ArrayList<String>();
+                        removalsPerStorage.put(fileStorage, removals);
+                    }
+                    removals.add(removeInfo.fileId);
+                }
+                for (Map.Entry<QuotaFileStorage, List<String>> entry : removalsPerStorage.entrySet()) {
+                    entry.getKey().deleteFiles(entry.getValue().toArray(new String[entry.getValue().size()]));
+                }
             }
         }
         super.commit();

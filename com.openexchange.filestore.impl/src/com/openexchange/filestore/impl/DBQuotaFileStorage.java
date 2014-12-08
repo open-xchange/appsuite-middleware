@@ -518,4 +518,39 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         }
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + ownerId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof DBQuotaFileStorage)) {
+            return false;
+        }
+        DBQuotaFileStorage other = (DBQuotaFileStorage) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (ownerId != other.ownerId) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DBQuotaFileStorage [contextId=" + contextId + ", quota=" + quota + ", ownerId=" + ownerId + ", uri=" + uri + "]";
+    }
+
 }
