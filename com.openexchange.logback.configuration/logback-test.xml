@@ -37,15 +37,17 @@
     </appender>
     
     <!-- Logstash appender -->
-    <!--
+   	<!--<property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="false" />
+   	<property scope="context" name="com.openexchange.logback.extensions.logstash.socketTimeout" value="60" />
+   	<property scope="context" name="com.openexchange.logback.extensions.logstash.loadFactor" value="0.67" />
     <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
         <remoteHost>localhost</remoteHost>
         <port>31337</port>
         <reconnectionDelay>10000</reconnectionDelay>
         <eventDelayLimit>30000</eventDelayLimit>
         <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder"/>
-    </appender>
-	-->
+        <queueSize>2048</queueSize>
+    </appender>-->
 	
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
