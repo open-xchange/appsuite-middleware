@@ -53,12 +53,12 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.glassfish.grizzly.http.server.Request;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
@@ -79,8 +79,6 @@ import com.openexchange.java.Strings;
 public final class RequestTools {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestTools.class);
-
-    private static final Transformer LOWER_CASER = new StringToLowerCaseTransformer();
 
     /**
      * Initializes a new {@link RequestTools}.
@@ -178,11 +176,12 @@ public final class RequestTools {
      */
     public static boolean isIgnoredEasRequest(HttpServletRequest request, Set<String> ignoredEasCommands) {
         if (isEasRequest(request)) {
-            CollectionUtils.transform(ignoredEasCommands, LOWER_CASER);
+            Set<String> lIgnoredEasCommands = new HashSet<String>(ignoredEasCommands);
+            CollectionUtils.transform(lIgnoredEasCommands, new StringToLowerCaseTransformer());
 
             String cmd = request.getParameter(EAS_CMD);
 
-            if ((cmd != null) && (ignoredEasCommands.contains(cmd.toLowerCase()))) {
+            if ((cmd != null) && (lIgnoredEasCommands.contains(cmd.toLowerCase()))) {
                 return true;
             }
 
@@ -194,7 +193,7 @@ public final class RequestTools {
              */
             byte[] bytes = getBase64Bytes(request.getQueryString());
             if (null != bytes && bytes.length > 2) {
-                Set<EASCommands> set = EASCommands.get(ignoredEasCommands);
+                Set<EASCommands> set = EASCommands.get(lIgnoredEasCommands);
 
                 byte code = bytes[1];
 
@@ -274,10 +273,11 @@ public final class RequestTools {
                 return result.booleanValue();
             }
 
-            CollectionUtils.transform(ignoredUsmCommands, LOWER_CASER);
+            Set<String> lIgnoredUsmCommands = new HashSet<String>(ignoredUsmCommands);
+            CollectionUtils.transform(lIgnoredUsmCommands, new StringToLowerCaseTransformer());
 
             boolean isIgnored = false;
-            if (ignoredUsmCommands.contains(pathInfo)) {
+            if (lIgnoredUsmCommands.contains(pathInfo)) {
                 isIgnored = true;
             }
             USM_PATH_CACHE.put(pathInfo, isIgnored);
