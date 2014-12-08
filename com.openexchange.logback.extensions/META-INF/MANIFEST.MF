@@ -63,6 +63,8 @@ Import-Package: ch.qos.logback.classic,
  ch.qos.logback.core.subst,
  ch.qos.logback.core.util,
  com.fasterxml.jackson.core,
+ com.openexchange.exception,
+ javax.net,
  org.apache.commons.io,
  org.apache.commons.lang.time,
  org.slf4j
