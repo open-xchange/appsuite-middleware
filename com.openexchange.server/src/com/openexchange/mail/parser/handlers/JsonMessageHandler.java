@@ -673,7 +673,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
-        final boolean considerAsInline = isInline || part.containsHeader("Content-Id");
+        // Check for inline image
+        boolean considerAsInline = isInline || (!part.getContentDisposition().isAttachment() && part.containsHeader("Content-Id"));
+
+        // Handle it...
         if (considerAsInline && (DisplayMode.MODIFYABLE.getMode() < displayMode.getMode())) {
             final MultipartInfo mpInfo = multiparts.peek();
             if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
