@@ -1,3 +1,9 @@
+open-xchange-ajp (7.6.1-13) stable; urgency=medium
+
+  * Build for patch 2014-12-15
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 08 Dec 2014 15:12:21 +0000
+
 open-xchange-ajp (7.6.1-12) stable; urgency=medium
 
   * Build for patch 2014-12-03
