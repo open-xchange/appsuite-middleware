@@ -511,14 +511,16 @@ public class DriveServiceImpl implements DriveService {
         DriveStorage storage = new SyncSession(session).getStorage();
         String folderId = null;
         String fileId = null;
+        DriveFileMetadata metadata = null;
         if (null == fileName) {
             folderId = storage.getFolderID(path);
         } else {
             File file = storage.getFileByName(path, fileName);
             folderId = file.getFolderId();
             fileId = file.getId();
+            metadata = getFileMetadata(session, path, null, null).get(0);
         }
-        return new JumpLinkGenerator(session).getJumpLink(folderId, fileId, method);
+        return new JumpLinkGenerator(session).getJumpLink(folderId, fileId, method, metadata);
     }
 
 }

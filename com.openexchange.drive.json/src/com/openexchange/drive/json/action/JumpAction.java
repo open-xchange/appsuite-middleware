@@ -88,7 +88,7 @@ public class JumpAction extends AbstractDriveAction {
             }
             String method = requestData.getParameter("method");
             if (Strings.isEmpty(method)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("method");
+                method = "preview";
             }
             String token = tokenLoginService.acquireToken(session.getServerSession());
             String name = requestData.getParameter("name");
