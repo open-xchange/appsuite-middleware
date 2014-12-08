@@ -93,19 +93,7 @@ public final class PushUtility {
      * @throws OXException If posting event fails
      */
     public static void triggerOSGiEvent(String folder, Session session) throws OXException {
-        triggerOSGiEvent(folder, session, null);
-    }
-
-    /**
-     * Triggers the OSGi event system and posts a new event for new mails in given folder.
-     *
-     * @param folder The folder identifier; including account information
-     * @param session The session providing needed user data
-     * @param props The optional additional properties to put into OSGi event
-     * @throws OXException If posting event fails
-     */
-    public static void triggerOSGiEvent(String folder, Session session, Map<String, Object> props) throws OXException {
-        triggerOSGiEvent(folder, session, props, true, false);
+        triggerOSGiEvent(folder, session, null, true, false);
     }
 
     /**
@@ -117,8 +105,8 @@ public final class PushUtility {
      * @param includeCommonEvent <code>true</code> to add {@link CommonEvent} properties for remote distribution, <code>false</code>, otherwise
      * @throws OXException If posting event fails
      */
-    public static void triggerOSGiEvent(String folder, Session session, Map<String, Object> props, boolean includeCommonEvent) throws OXException {
-        triggerOSGiEvent(folder, session, props, includeCommonEvent, false);
+    public static void triggerOSGiEvent(String folder, Session session, boolean includeCommonEvent) throws OXException {
+        triggerOSGiEvent(folder, session, null, includeCommonEvent, false);
     }
 
     /**
