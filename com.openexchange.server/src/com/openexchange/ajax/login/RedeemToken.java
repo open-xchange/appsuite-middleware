@@ -162,7 +162,8 @@ public class RedeemToken implements LoginRequestHandler {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } else {
-            resp.sendRedirect(redirectUrl);
+            StringBuilder sb = new StringBuilder(redirectUrl).append("&session=").append(session.getSessionID());
+            resp.sendRedirect(sb.toString());
         }
     }
 
