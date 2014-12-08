@@ -72,6 +72,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
+import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
 import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
 import com.openexchange.management.MBeanMethodAnnotation;
 
@@ -170,7 +171,11 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
             if (appender instanceof AsyncAppender) {
                 AsyncAppender asyncAppender = (AsyncAppender) appender;
                 sb.append(" [capacity=").append(asyncAppender.getQueueSize()).append(",size=").append(asyncAppender.getNumberOfElementsInQueue()).append(']');
+            } else if (appender instanceof LogstashSocketAppender) {
+                LogstashSocketAppender socketAppender = (LogstashSocketAppender) appender;
+                sb.append(" [capacity=").append(socketAppender.getQueueSize()).append(",size=").append(socketAppender.getNumberOfElementsInQueue()).append(']');
             }
+
             sb.append(lineSeparator);
         }
         if (sb.length() == 0) {

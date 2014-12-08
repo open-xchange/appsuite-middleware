@@ -399,6 +399,15 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     void setAcceptConnectionTimeout(int acceptConnectionTimeout) {
         this.acceptConnectionTimeout = acceptConnectionTimeout;
     }
+    
+    /**
+     * Returns the number of elements currently in the blocking queue.
+     *
+     * @return number of elements currently in the queue.
+     */
+    public int getNumberOfElementsInQueue() {
+      return queue.size();
+    }
 
     /**
      * Returns the value of the <b>queueSize</b> property.

@@ -39,6 +39,12 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
             print "a$i.warning :$w\n";
             print "a$i.critical :$2\n";
             $i++;
+        } elsif ($line =~ /LogstashSocketAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
+            print "a$i.label $1 (capacity: $2)\n";
+            my $w = int($2 / 2);
+            print "a$i.warning :$w\n";
+            print "a$i.critical :$2\n";
+            $i++;
         }
     }
     exit 0
@@ -49,6 +55,9 @@ my @lines = split('\n', $output);
 my $i = 0;
 foreach my $line (@lines) {
     if ($line =~ /AsyncAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
+        print "a$i.value $3\n";
+        $i++;
+    } elsif ($line =~ /LogstashSocketAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
         print "a$i.value $3\n";
         $i++;
     }
