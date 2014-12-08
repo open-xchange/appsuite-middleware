@@ -132,7 +132,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      */
     NO_SUCH_PROVIDER(MimeMailExceptionCode.NO_SUCH_PROVIDER_MSG, CATEGORY_ERROR, 1007),
     /**
-     * Invalid email address %1$s
+     * Invalid email address: %1$s
      */
     INVALID_EMAIL_ADDRESS(MimeMailExceptionCode.INVALID_EMAIL_ADDRESS_MSG, CATEGORY_USER_INPUT, 1008, MimeMailExceptionMessage.INVALID_EMAIL_ADDRESS_MSG_DISPLAY),
     /**
@@ -399,9 +399,9 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     private final static String NO_SUCH_PROVIDER_MSG = "Session attempts to instantiate a provider that does not exist: %1$s";
 
     /**
-     * Invalid email address %1$s
+     * Invalid email address: %1$s
      */
-    private final static String INVALID_EMAIL_ADDRESS_MSG = "Invalid E-Mail address %1$s";
+    private final static String INVALID_EMAIL_ADDRESS_MSG = "Invalid E-Mail address: %1$s";
 
     /**
      * Wrong message header: %1$s
