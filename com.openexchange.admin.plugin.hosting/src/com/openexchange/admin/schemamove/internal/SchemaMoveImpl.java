@@ -53,6 +53,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -78,6 +80,8 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SchemaMoveImpl implements SchemaMoveService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SchemaMoveImpl.class);
 
     private static final int DEFAULT_REASON = 1431655765;
 
@@ -170,6 +174,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
             int[] contextIdArray = Autoboxing.I2i(contextIds);
             dbService.invalidate(contextIdArray);
             contextService.invalidateContexts(contextIdArray);
+            LOG.info("Invalidated {} cached context objects for schema '{}'", contextIdArray.length, schemaName);
         } catch (OXException e) {
             throw StorageException.wrapForRMI(e);
         }

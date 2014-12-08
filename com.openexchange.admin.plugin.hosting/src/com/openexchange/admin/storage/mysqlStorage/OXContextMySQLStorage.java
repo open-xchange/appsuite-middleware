@@ -424,7 +424,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt.setString(2, schema);
 
             int numDisabled = stmt.executeUpdate();
-            LOG.info("Disabled {} contexts in schema {} with reason {}", numDisabled, schema, reason.getId());
+            LOG.info("Disabled {} contexts in schema '{}' with reason {}", numDisabled, schema, reason.getId());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
@@ -507,7 +507,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             int numEnabled = stmt.executeUpdate();
-            LOG.info("Enabled {} contexts in schema {} for reason {}", numEnabled, schema, reason == null ? "'all'" : reason.getId());
+            LOG.info("Enabled {} contexts in schema '{}' with reason {}", numEnabled, schema, reason == null ? "'all'" : reason.getId());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);

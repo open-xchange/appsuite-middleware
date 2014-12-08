@@ -350,6 +350,8 @@ public final class SessionHandler {
         for (SessionControl control : removeContextSessions) {
             processedContexts.add(control.getSession().getContextId());
         }
+
+        LOG.info("Removed {} sessions for {} contexts", removeContextSessions.size(), processedContexts.size());
         return processedContexts;
     }
 
