@@ -1,3 +1,9 @@
+open-xchange-halo (7.6.0-34) stable; urgency=medium
+
+  * Build for patch 2014-12-10
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 08 Dec 2014 15:13:34 +0000
+
 open-xchange-halo (7.6.0-33) stable; urgency=medium
 
   * Build for patch 2014-12-09
