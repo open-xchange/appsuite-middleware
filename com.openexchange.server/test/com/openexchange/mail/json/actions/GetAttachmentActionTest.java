@@ -68,6 +68,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.strings.BasicTypesStringParser;
