@@ -74,7 +74,6 @@ public class PoolingMailSenderService implements MailSenderService {
 
 	@Override
     public void sendMail(NotificationMail mail, Session session) {
-	    logForBug34955(mail, session);
 		if (!mail.shouldBeSent()) {
 			return;
 		}
@@ -116,32 +115,6 @@ public class PoolingMailSenderService implements MailSenderService {
 	}
 
 	/**
-     * @param mail
-     * @param session
-     */
-    private void logForBug34955(NotificationMail mail, Session session) {
-        try {
-            if (mail == null || mail.getDiff() == null) {
-                return;
-            }
-            if (mail.getDiff().anyFieldChangedOf(CalendarObject.NOTE)) {
-                for (FieldUpdate fu : mail.getDiff().getUpdates()) {
-                    if (fu.getFieldNumber() == CalendarObject.NOTE) {
-                        if (fu.getOriginalValue() == null || fu.getNewValue() == null) {
-                            return;
-                        }
-                        String old = (String) fu.getOriginalValue();
-                        String nw = (String) fu.getNewValue();
-                        LOG.error("BUG34955(ignore me): Description changed, Old: " + Arrays.toString(old.getBytes()) + ", New: " + Arrays.toString(nw.getBytes()) + ", Client: " + session.getClient());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
-    /**
 	 * Sends the mail directly, but makes the aware of this to avoid duplicate Mails.
 	 * @param mail
 	 * @param session
