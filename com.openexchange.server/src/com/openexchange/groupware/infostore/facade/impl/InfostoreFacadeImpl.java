@@ -866,7 +866,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         // Set modified information
         Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
         updatedCols.removeAll(Arrays.asList(Metadata.CREATED_BY_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.ID_LITERAL));
-        if (!updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL)) {
+        if (!updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL) || null == document.getLastModified()) {
             document.setLastModified(new Date());
         }
         document.setModifiedBy(session.getUserId());
