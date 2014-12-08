@@ -170,8 +170,6 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                 /*
                  * extract event properties
                  */
-                String serviceID = FileStorageEventHelper.extractService(event);
-                String accountID = FileStorageEventHelper.extractAccountId(event);
                 String folderID = FileStorageEventHelper.extractFolderId(event);
                 String objectID = FileStorageEventHelper.extractObjectId(event);
                 String fileName = (String)event.getProperty(FILE_NAME);
@@ -182,20 +180,16 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                 /*
                  * enqueue invalidation
                  */
-                invalidationQueue.offer(new DelayedChecksumInvalidation(contextID, topic,
-                    new FolderID(serviceID, accountID, folderID), new FileID(serviceID, accountID, folderID, objectID)));
+                invalidationQueue.offer(new DelayedChecksumInvalidation(contextID, topic, new FolderID(folderID), new FileID(objectID)));
             } else if (DELETE_FOLDER_TOPIC.equals(topic) || UPDATE_FOLDER_TOPIC.equals(topic)) {
                 /*
                  * extract event properties
                  */
-                String serviceID = FileStorageEventHelper.extractService(event);
-                String accountID = FileStorageEventHelper.extractAccountId(event);
                 String folderID = FileStorageEventHelper.extractFolderId(event);
                 /*
                  * enqueue invalidation
                  */
-                invalidationQueue.offer(new DelayedChecksumInvalidation(contextID, topic,
-                    new FolderID(serviceID, accountID, folderID), null));
+                invalidationQueue.offer(new DelayedChecksumInvalidation(contextID, topic, new FolderID(folderID), null));
             }
         } catch (OXException e) {
             LOG.warn("unexpected error during event handling", e);
