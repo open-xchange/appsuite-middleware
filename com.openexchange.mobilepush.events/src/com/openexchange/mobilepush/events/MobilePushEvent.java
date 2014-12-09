@@ -89,13 +89,16 @@ public interface MobilePushEvent {
     List<ContextUsers> getContextUsers();
 
     /**
-     * @return
+     * The context id
+     *
+     * @return the context id
      */
     int getContextId();
 
     /**
+     * The user id
      *
-     * @return
+     * @return the user id
      */
     int getUserId();
 }

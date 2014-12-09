@@ -83,15 +83,15 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushGCMPublisherImpl.class);
 
     @Override
-    public void multiPublish(MobilePushEvent loginEvent) {
+    public void multiPublish(MobilePushEvent event) {
         List<String> subscriptions = null;
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class);
-            subscriptions = mnss.getTokens(loginEvent.getContextUsers(), SERVICE_ID, loginEvent.getProvider());
-        } catch(OXException e) {
+            subscriptions = mnss.getTokens(event.getContextUsers(), SERVICE_ID, event.getProvider());
+        } catch (OXException e) {
             LOG.error("Could not get subscription {}", SERVICE_ID, e);
         }
-        publishByContextUsers(subscriptions, loginEvent);
+        publishByContextUsers(subscriptions, event);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class);
             subscriptions = mnss.getSubscriptions(event.getContextId(), event.getUserId(), SERVICE_ID, event.getProvider());
-        } catch(OXException e) {
+        } catch (OXException e) {
             LOG.error("Could not get subscription {}", SERVICE_ID, e);
         }
         publishBySubscriptions(subscriptions, event);
@@ -109,7 +109,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     private void publishByContextUsers(List<String> subscriptions, MobilePushEvent loginEvent) {
         List<ContextUsers> contextUsers = loginEvent.getContextUsers();
 
-        if(contextUsers != null && contextUsers.size() > 0) {
+        if (contextUsers != null && contextUsers.size() > 0) {
             if (null != contextUsers && 0 < contextUsers.size()) {
                 Sender sender = null;
                 try {
@@ -153,7 +153,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     }
 
     private void publishBySubscriptions(List<Subscription> subscriptions, MobilePushEvent event) {
-        if(subscriptions != null && subscriptions.size() > 0) {
+        if (subscriptions != null && subscriptions.size() > 0) {
             if (null != subscriptions && 0 < subscriptions.size()) {
                 Sender sender = null;
                 try {
@@ -212,7 +212,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
      */
     private void processResult(MobilePushEvent event, List<String> registrationIDs, MulticastResult multicastResult) {
         if (null == registrationIDs || null == multicastResult) {
-            LOG.warn("Unable to process empty results");;
+            LOG.warn("Unable to process empty results");
             return;
         }
         /*
@@ -230,7 +230,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
                 LOG.warn("Number of multicast results different from used regsitrations IDs, unable to process results");
             }
             /*
-             *  ...and do the following for each object in that list:
+             * ...and do the following for each object in that list:
              */
             for (int i = 0; i < results.size(); i++) {
                 Result result = results.get(i);
@@ -281,9 +281,9 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     private static void updateRegistrationIDs(MobilePushEvent event, String oldRegistrationID, String newRegistrationID) {
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
-            if(event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
+            if (event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
                 int contextId = getContextIdForToken(event.getContextUsers(), oldRegistrationID);
-                if(contextId > -1 && true == mnss.updateToken(contextId, oldRegistrationID, SERVICE_ID, newRegistrationID)) {
+                if (contextId > -1 && true == mnss.updateToken(contextId, oldRegistrationID, SERVICE_ID, newRegistrationID)) {
                     LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
                 } else {
                     LOG.warn("Registration ID {} not updated.", oldRegistrationID);
@@ -303,7 +303,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     private static void removeRegistrations(MobilePushEvent event, String registrationID) {
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
-            if(event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
+            if (event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
                 int contextId = getContextIdForToken(event.getContextUsers(), registrationID);
                 if (contextId > -1 && true == mnss.deleteSubscription(contextId, registrationID, SERVICE_ID)) {
                     LOG.info("Successfully removed registration ID {}.", registrationID);
@@ -323,10 +323,10 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     }
 
     private static int getContextIdForToken(List<ContextUsers> contextUsers, String registrationId) {
-        if(contextUsers != null && contextUsers.isEmpty()) {
-            for(ContextUsers cu : contextUsers)  {
-                for(UserToken ut : cu.getUserTokens()) {
-                    if(ut.getToken().equals(registrationId)) {
+        if (contextUsers != null && contextUsers.isEmpty()) {
+            for (ContextUsers cu : contextUsers) {
+                for (UserToken ut : cu.getUserTokens()) {
+                    if (ut.getToken().equals(registrationId)) {
                         return cu.getContextId();
                     }
                 }
