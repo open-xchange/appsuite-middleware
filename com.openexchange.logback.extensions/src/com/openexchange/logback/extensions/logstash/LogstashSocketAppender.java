@@ -75,6 +75,7 @@ import ch.qos.logback.core.net.SocketConnector;
 import ch.qos.logback.core.net.SocketConnector.ExceptionHandler;
 import ch.qos.logback.core.util.CloseUtil;
 import ch.qos.logback.core.util.Duration;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link LogstashSocketAppender}. Replica class of {@link AbstractSocketAppender}. The method {@link #dispatchEvents()} does the actual
@@ -149,12 +150,20 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
         if (errorCount == 0) {
             queue = newBlockingQueue(queueSize);
-            peerId = "remote peer " + remoteHost + ":" + port + ": ";
+            peerId = remoteHost + ":" + port;
             task = getContext().getExecutorService().submit(this);
             super.start();
         }
     }
 
+    /**
+     * Set the optional properties:
+     * <ul>
+     * <li>com.openexchange.logback.extensions.logstash.alwaysPersistEvents</li>
+     * <li>com.openexchange.logback.extensions.logstash.socketTimeout</li>
+     * <li>com.openexchange.logback.extensions.logstash.loadFactor</li>
+     * </ul>
+     */
     private void setOptionalProperties() {
         alwaysPersistEvents = Boolean.parseBoolean(context.getProperty("com.openexchange.logback.extensions.logstash.alwaysPersistEvents"));
         {
@@ -233,6 +242,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
+                    System.err.println(writeCurrentTimestamp() + " - Trying to connect to " + peerId + "...");
                     SocketConnector connector = createConnector(address, port, 0, reconnectionDelay);
 
                     connectorTask = activateConnector(connector);
@@ -246,11 +256,14 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
                     dispatchEvents();
                 } catch (Exception e) {
+                    System.err.print(writeCurrentTimestamp() + " - ");
                     e.printStackTrace();
+                } finally {
+                    cleanQueueIfNecessary();
                 }
             }
         } catch (Throwable t) {
-            System.err.println("LogstashSocketAppender is shutting down. Unexpected error:");
+            System.err.println(writeCurrentTimestamp() + " - LogstashSocketAppender is shutting down. Unexpected error:");
             t.printStackTrace();
         }
     }
@@ -259,14 +272,15 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * Dispatch the events to the remote host
      * 
      * @throws InterruptedException
+     * @throws IOException
      */
-    private void dispatchEvents() throws InterruptedException {
+    private void dispatchEvents() throws InterruptedException, IOException {
         try {
             socket.setSoTimeout(acceptConnectionTimeout);
             OutputStream oos = new BufferedOutputStream(socket.getOutputStream());
             encoder.init(oos);
             socket.setSoTimeout(0);
-            addInfo(peerId + "connection established");
+            System.err.println(writeCurrentTimestamp() + " - Connected established to " + peerId + ". Dispatching events");
             int counter = 0;
             while (true) {
                 ILoggingEvent event = queue.take();
@@ -280,11 +294,13 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                 }
             }
         } catch (IOException ex) {
-            addInfo(peerId + "connection failed: " + ex);
+            System.err.println(writeCurrentTimestamp() + " - Connection to " + peerId + " failed. Reason: " + ex);
+        } catch (InterruptedException ex) {
+            System.err.println(writeCurrentTimestamp() + " - Connection to " + peerId + " interupted. Reason: " + ex);
         } finally {
             CloseUtil.closeQuietly(socket);
             socket = null;
-            addInfo(peerId + "connection closed");
+            System.err.println(writeCurrentTimestamp() + " - Connection to " + peerId + " closed.");
         }
     }
 
@@ -346,6 +362,15 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         return queueSize <= 0 ? new SynchronousQueue<ILoggingEvent>() : new ArrayBlockingQueue<ILoggingEvent>(queueSize);
     }
 
+    /**
+     * Create a {@link SocketConnector}
+     * 
+     * @param address The address of the host
+     * @param port The port
+     * @param initialDelay The initial delay
+     * @param retryDelay The retry delay
+     * @return The {@link SocketConnector}
+     */
     private SocketConnector createConnector(InetAddress address, int port, int initialDelay, int retryDelay) {
         SocketConnector connector = newConnector(address, port, initialDelay, retryDelay);
         connector.setExceptionHandler(this);
@@ -353,28 +378,37 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         return connector;
     }
 
-    private Future<Socket> activateConnector(SocketConnector connector) throws RejectedExecutionException, InterruptedException, IOException {
+    /**
+     * Activate the {@SocketConnector} by submitting it to the executor service. If successful, a connector task will be returned.
+     * 
+     * @param connector The SocketConnector
+     * @return A connector task
+     * @throws OXException
+     */
+    private Future<Socket> activateConnector(SocketConnector connector) throws OXException {
         try {
             return getContext().getExecutorService().submit(connector);
         } catch (RejectedExecutionException e) {
-            System.err.println(writeCurrentTimestamp() + " - " + LogstashSocketAppenderExceptionCodes.ERROR_ACTIVATING_CONNECTOR.create(e.getMessage(), e).toString());
-            e.printStackTrace();
-            cleanQueueIfNecessary();
-            return null;
+            throw LogstashSocketAppenderExceptionCodes.ERROR_ACTIVATING_CONNECTOR.create(e.getMessage(), e);
         }
     }
 
-    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException, IOException {
+    /**
+     * Get a socket from the connector task.
+     * 
+     * @return A socket
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws OXException If timed-out
+     */
+    private Socket waitForConnectorToReturnASocket() throws OXException, InterruptedException, ExecutionException {
         try {
             Socket s = connectorTask.get(socketTimeout, TimeUnit.SECONDS);
             connectorTask = null;
             return s;
         } catch (TimeoutException e) {
-            System.err.println(writeCurrentTimestamp() + " - " + LogstashSocketAppenderExceptionCodes.TIMEOUT_WHILE_CREATING_SOCKET.create(e).toString());
-            e.printStackTrace();
-            cleanQueueIfNecessary();
             connectorTask = null;
-            return null;
+            throw LogstashSocketAppenderExceptionCodes.TIMEOUT_WHILE_CREATING_SOCKET.create(socketTimeout, e);
         }
     }
 
@@ -409,7 +443,12 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             System.err.println(" Not flushing yet. Load threshold of " + loadThreshold + " is not reached.");
         }
     }
-    
+
+    /**
+     * Write the current timestamp by using the {@link LogstashFormatter.LOGSTASH_TIMEFORMAT}
+     * 
+     * @return A formatted timestamp
+     */
     private String writeCurrentTimestamp() {
         return LogstashFormatter.LOGSTASH_TIMEFORMAT.format(System.currentTimeMillis());
     }

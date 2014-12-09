@@ -63,13 +63,15 @@ public enum LogstashSocketAppenderExceptionCodes implements OXExceptionCode {
     /**
      * Error while activating the socket connector: '%1$s'
      */
-    ERROR_ACTIVATING_CONNECTOR("Error while activating the socket connector: '%1$s'", CATEGORY_ERROR, 1),
+    ERROR_ACTIVATING_CONNECTOR("Error while activating the socket connector: '%1$s'", CATEGORY_CONNECTIVITY, 1),
     /**
      * Error while creating socket: '%1$s'
      */
-    ERROR_CREATING_SOCKET("Error while creating socket: '%1$s'", CATEGORY_ERROR, 2),
-    
-    TIMEOUT_WHILE_CREATING_SOCKET("Timed out while creating socket. Logging server down?", CATEGORY_ERROR, 3)
+    ERROR_CREATING_SOCKET("Error while creating socket: '%1$s'", CATEGORY_CONNECTIVITY, 2),
+    /**
+     * Timed out after %1$s seconds while creating socket. Logging server down?
+     */
+    TIMEOUT_WHILE_CREATING_SOCKET("Timed out after %1$s seconds while creating socket. Logging server down?", CATEGORY_CONNECTIVITY, 3)
     ;
 
     private final String PREFIX = "LOGSTASH";
