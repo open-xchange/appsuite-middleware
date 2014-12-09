@@ -184,7 +184,11 @@ public class SchemaMoveImpl implements SchemaMoveService {
              * Kill sessions for the disabled contexts globally
              */
             SessiondService sessiondService = getSessiondService();
-            sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
+            try {
+                sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
+            } catch (OXException e) {
+                throw StorageException.wrapForRMI(e);
+            }
         }
     }
 

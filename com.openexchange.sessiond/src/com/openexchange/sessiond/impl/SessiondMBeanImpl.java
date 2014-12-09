@@ -113,9 +113,13 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
      * {@inheritDoc}
      */
     @Override
-    public void clearContextSessionsGlobal(Set<Integer> contextIds) {
+    public void clearContextSessionsGlobal(Set<Integer> contextIds) throws MBeanException {
         final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
 
-        sessiondService.removeContextSessionsGlobal(contextIds);
+        try {
+            sessiondService.removeContextSessionsGlobal(contextIds);
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
     }
 }

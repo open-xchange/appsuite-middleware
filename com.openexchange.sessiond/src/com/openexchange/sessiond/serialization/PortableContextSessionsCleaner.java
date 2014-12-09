@@ -91,16 +91,16 @@ public class PortableContextSessionsCleaner extends AbstractCustomPortable imple
 
     /**
      * {@inheritDoc}
+     * @throws Exception
      */
     @Override
-    public Set<Integer> call() {
+    public Set<Integer> call() throws Exception {
         try {
             return SessionHandler.removeContextSessions(this.contextIds);
         } catch (Exception exception) {
             LOG.error("Unable to remove sessions for context ids: " + Strings.concat(", ", contextIds));
+            throw exception;
         }
-
-        return null;
     }
 
     /**

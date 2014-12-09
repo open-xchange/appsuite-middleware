@@ -140,7 +140,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
      * {@inheritDoc}
      */
     @Override
-    public void removeContextSessionsGlobal(Set<Integer> contextIds) {
+    public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException {
         SessionHandler.removeContextSessionsGlobal(contextIds);
     }
 

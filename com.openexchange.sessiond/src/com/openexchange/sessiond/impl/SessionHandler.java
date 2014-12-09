@@ -245,8 +245,9 @@ public final class SessionHandler {
      * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
      *
      * @param contextIds - Set with context ids to be removed
+     * @throws OXException
      */
-    public static void removeContextSessionsGlobal(final Set<Integer> contextIds) {
+    public static void removeContextSessionsGlobal(final Set<Integer> contextIds) throws OXException {
         SessionHandler.removeRemoteContextSessions(contextIds);
 
         SessionHandler.removeContextSessions(contextIds);
@@ -257,7 +258,7 @@ public final class SessionHandler {
      *
      * @param contextIds - Set with context ids to be removed
      */
-    private static void removeRemoteContextSessions(final Set<Integer> contextIds) {
+    private static void removeRemoteContextSessions(final Set<Integer> contextIds) throws OXException {
         HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
 
         if (hazelcastInstance != null) {
@@ -272,25 +273,36 @@ public final class SessionHandler {
                 Map<Member, Future<Set<Integer>>> submitToMembers = hazelcastInstance.getExecutorService("default").submitToMembers(new PortableContextSessionsCleaner(contextIds), clusterMembers);
                 for (Member member : submitToMembers.keySet()) {
                     Future<Set<Integer>> future = submitToMembers.get(member);
+                    int hzExecutionTimeout = getRemoteContextSessionsExecutionTimeout();
+
                     try {
-                        Set<Integer> contextIdsSessionsHaveBeenRemovedFor = future.get(10, TimeUnit.SECONDS);
-                        if ((contextIdsSessionsHaveBeenRemovedFor != null) && (future.isDone())) {
-                            LOG.info("Removed sessions for context ids {} on remote node {}", Strings.concat(", ", contextIdsSessionsHaveBeenRemovedFor), member.getSocketAddress());
+                        Set<Integer> contextIdsSessionsHaveBeenRemovedFor = null;
+                        if (hzExecutionTimeout > 0) {
+                            contextIdsSessionsHaveBeenRemovedFor = future.get(hzExecutionTimeout, TimeUnit.SECONDS);
                         } else {
-                            LOG.warn("No sessions for context ids {} removed on node {}.", Strings.concat(", ", contextIds), member.getSocketAddress());
+                            contextIdsSessionsHaveBeenRemovedFor = future.get();
+                        }
+                        if ((contextIdsSessionsHaveBeenRemovedFor != null) && (future.isDone())) {
+                            LOG.info("Removed sessions for context ids {} on remote node {}", Strings.concat(", ", contextIdsSessionsHaveBeenRemovedFor), member.getSocketAddress().toString());
+                        } else {
+                            LOG.warn("No sessions for context ids {} removed on node {}.", Strings.concat(", ", contextIds), member.getSocketAddress().toString());
                         }
                     } catch (TimeoutException e) {
                         // Wait time elapsed; enforce cancelation
                         future.cancel(true);
-                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than 10 seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress(), e);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e);
                     } catch (InterruptedException e) {
                         future.cancel(true);
-                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than 10 seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress(), e);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e);
                     } catch (ExecutionException e) {
                         future.cancel(true);
-                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than 10 seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress(), e.getCause());
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e.getCause());
+                    } catch (RuntimeException e) {
+                        LOG.error("Failed to issue remote session removal for contexts {} on remote node {}.", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
+                        throw e;
                     } catch (Exception e) {
-                        LOG.error("Failed to issue remote session removal for contexts {} on remote node {}.", Strings.concat(", ", contextIds), member.getSocketAddress(), e);
+                        LOG.error("Failed to issue remote session removal for contexts {} on remote node {}.", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
+                        throw SessionExceptionCodes.REMOTE_SESSION_REMOVAL_FAILED.create(Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
                     }
                 }
             } else {
@@ -299,6 +311,20 @@ public final class SessionHandler {
         } else {
             LOG.warn("Cannot find HazelcastInstance for remote execution of session removing for context ids {}. Only local sessions will be removed.", Strings.concat(", ", contextIds));
         }
+    }
+
+    /**
+     * Returns the timeout (in seconds) configured to wait for remote invalidation of context sessions. Default value 0 means "no timeout"
+     *
+     * @return timeout (in seconds) or 0 for no timeout
+     */
+    private static int getRemoteContextSessionsExecutionTimeout() {
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (configurationService == null) {
+            LOG.info("ConfigurationService not available. No execution timeout for remote processing of context sessions invalidation available. Fallback to no timeout.");
+            return 0;
+        }
+        return configurationService.getIntProperty("com.openexchange.remote.context.sessions.invalidation.timeout", 0);
     }
 
     /**
