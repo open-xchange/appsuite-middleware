@@ -207,14 +207,35 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      */
     @Override
     public void connectionFailed(SocketConnector connector, Exception ex) {
+        handleConnectionException(ex);
+    }
+
+    /**
+     * Handle connection exceptions
+     * 
+     * @param ex The exception to handle
+     */
+    private void handleConnectionException(Exception ex) {
         if (ex instanceof InterruptedException) {
             logError("Connection to " + peerId + " interupted.");
         } else if (ex instanceof ConnectException) {
             logError("Connection to " + peerId + " refused.");
+        } else if (ex instanceof IOException) {
+            logError("Connection to " + peerId + " failed. Reason: " + ex);
+        } else if (ex instanceof InterruptedException) {
+            logError("Connection to " + peerId + " interupted. Reason: " + ex);
         } else {
             logError("Connection error to " + peerId + ".");
         }
+
         ex.printStackTrace();
+
+        try {
+            cleanQueueIfNecessary();
+        } catch (IOException e) {
+            logError("Failed while cleaning queue.");
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -241,10 +262,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
                     dispatchEvents();
                 } catch (Exception e) {
-                    System.err.print(writeCurrentTimestamp() + " - ");
-                    e.printStackTrace();
-                } finally {
-                    cleanQueueIfNecessary();
+                    handleConnectionException(e);
                 }
             }
         } catch (Throwable t) {
@@ -279,9 +297,9 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                 }
             }
         } catch (IOException ex) {
-            logError("Connection to " + peerId + " failed. Reason: " + ex);
+            handleConnectionException(ex);
         } catch (InterruptedException ex) {
-            logError("Connection to " + peerId + " interupted. Reason: " + ex);
+            handleConnectionException(ex);
         } finally {
             CloseUtil.closeQuietly(socket);
             socket = null;
@@ -383,11 +401,10 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * Get a socket from the connector task.
      * 
      * @return A socket
-     * @throws InterruptedException
      * @throws ExecutionException
-     * @throws OXException If timed-out
+     * @throws InterruptedException
      */
-    private Socket waitForConnectorToReturnASocket() throws OXException, InterruptedException, ExecutionException {
+    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException {
         Socket s = connectorTask.get();
         connectorTask = null;
         return s;
@@ -399,7 +416,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * @throws InterruptedException
      * @throws IOException
      */
-    private void cleanQueueIfNecessary() throws InterruptedException, IOException {
+    private void cleanQueueIfNecessary() throws IOException {
         final int qSize = queue.size();
         final String message = "Event queue holds " + qSize + " events.";
         if (qSize > loadThreshold) {
@@ -569,5 +586,6 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     private void log(Level level, String message) {
         StringBuilder builder = new StringBuilder();
         builder.append(writeCurrentTimestamp()).append(" ").append(level).append(" ").append(message);
+        System.err.println(builder.toString());
     }
 }
