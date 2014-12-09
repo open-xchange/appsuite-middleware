@@ -357,9 +357,9 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         try {
             return getContext().getExecutorService().submit(connector);
         } catch (RejectedExecutionException e) {
+            System.err.println(writeCurrentTimestamp() + " - " + LogstashSocketAppenderExceptionCodes.ERROR_ACTIVATING_CONNECTOR.create(e.getMessage(), e).toString());
             e.printStackTrace();
             cleanQueueIfNecessary();
-            System.err.println(LogstashSocketAppenderExceptionCodes.ERROR_ACTIVATING_CONNECTOR.create(e.getMessage(), e).toString());
             return null;
         }
     }
@@ -370,10 +370,10 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             connectorTask = null;
             return s;
         } catch (TimeoutException e) {
+            System.err.println(writeCurrentTimestamp() + " - " + LogstashSocketAppenderExceptionCodes.TIMEOUT_WHILE_CREATING_SOCKET.create(e).toString());
             e.printStackTrace();
             cleanQueueIfNecessary();
             connectorTask = null;
-            System.err.println(LogstashSocketAppenderExceptionCodes.TIMEOUT_WHILE_CREATING_SOCKET.create(e).toString());
             return null;
         }
     }
@@ -386,7 +386,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      */
     private void cleanQueueIfNecessary() throws InterruptedException, IOException {
         final int qSize = queue.size();
-        System.err.print("Event queue holds " + qSize + " events.");
+        System.err.print(writeCurrentTimestamp() + " - Event queue holds " + qSize + " events.");
         if (qSize > loadThreshold) {
             if (alwaysPersistEvents) {
                 // Use the LogstashEncoder to write to a different output stream
@@ -400,14 +400,18 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                     enc.doEncode(event);
                     events++;
                 }
-                System.err.println("Successfully flushed " + events + " out of " + qSize + " events.");
+                System.err.println(writeCurrentTimestamp() + " - Successfully flushed " + events + " out of " + qSize + " events.");
             } else {
                 queue.clear();
-                System.err.println(" Event queue is empty.");
+                System.err.println(writeCurrentTimestamp() + " -  Event queue is empty.");
             }
         } else {
             System.err.println(" Not flushing yet. Load threshold of " + loadThreshold + " is not reached.");
         }
+    }
+    
+    private String writeCurrentTimestamp() {
+        return LogstashFormatter.LOGSTASH_TIMEFORMAT.format(System.currentTimeMillis());
     }
 
     /**
