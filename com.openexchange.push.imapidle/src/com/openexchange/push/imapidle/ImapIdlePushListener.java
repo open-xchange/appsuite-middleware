@@ -88,8 +88,10 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * {@link ImapIdlePushListener}
@@ -537,9 +539,26 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
     }
 
+    private long getUIDNextCustom(IMAPFolder imapFolder) {
+        try {
+            final String fullName = imapFolder.getFullName();
+            return ((Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                @Override
+                public Object doCommand(IMAPProtocol p) throws ProtocolException {
+                    String[] item = { "UIDNEXT" };
+                    return Long.valueOf(p.status(fullName, item).uidnext);
+                }
+            })).longValue();
+        } catch (MessagingException e) {
+            LOGGER.warn("Could not determine UIDNEXT. Assuming -1 instead.", e);
+            return -1L;
+        }
+    }
+
     private void setEventProperties(long uidNext, ImapIdleMessageCountListener countListener, Map<String, Object> props, IMAPFolder imapFolder) {
         if (uidNext > 0) {
-            long newUidNext = getUIDNext(imapFolder);
+            long newUidNext = getUIDNextCustom(imapFolder);
             if (newUidNext > 0 && uidNext != newUidNext) {
                 StringBuilder buf = new StringBuilder(64);
                 buf.append(uidNext);
