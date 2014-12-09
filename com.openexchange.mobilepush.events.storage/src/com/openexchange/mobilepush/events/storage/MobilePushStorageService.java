@@ -65,7 +65,7 @@ public interface MobilePushStorageService {
      *
      * @param session - The session
      * @param token - The device token
-     * @param serviceId The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
      * @param provider - The provider
      * @return the subscription
      */
@@ -76,7 +76,7 @@ public interface MobilePushStorageService {
      *
      * @param contextId - The contextId
      * @param token - The old device token
-     * @param serviceId - The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
      * @param newToken - The new device token
      * @return <code>true</true> if the subscriptions could be successfully updated; <code>false</code> if not.
      */
@@ -87,7 +87,7 @@ public interface MobilePushStorageService {
      *
      * @param session - The session
      * @param token - The hardware token provided by the push provider
-     * @param serviceId - The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
      * @param provider - The provider
      * @return <code>true</true> if the subscriptions could be successfully removed; <code>false</code> if not.
      */
@@ -98,7 +98,7 @@ public interface MobilePushStorageService {
      *
      * @param contextId - The context id
      * @param token - The hardware token provided by the push provider
-     * @param serviceId - The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
      * @return <code>true</true> if the subscriptions could be successfully removed; <code>false</code> if not.
      */
     boolean deleteSubscription(int contextId, String token, String serviceId) throws OXException;
@@ -106,13 +106,13 @@ public interface MobilePushStorageService {
     /**
      * Gets subscriptions of the specified contextId, userId, serviceId and provider.
      *
-     * @param userId The userId
      * @param contextId The contextId
-     * @param serviceId The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param userId The userId
+     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
      * @param provider The provider
      * @return a list of subscription
      */
-    List<Subscription> getSubscriptions(int userId, int contextId, String serviceId, MobilePushProviders provider) throws OXException;
+    List<Subscription> getSubscriptions(int contextId, int userId, String serviceId, MobilePushProviders provider) throws OXException;
 
     /**
      * Gets all subscriptions for the specified provider
@@ -130,18 +130,18 @@ public interface MobilePushStorageService {
      *
      * @param contextId the context id
      * @param userId the userId
-     * @param serviceId The serviceId of the push service e.g. gcm, apn, apn.macos
+     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
      * @return <code>true</code> if the timestamp is successfully updated; <code>false</code> if not
-     * @throws OXException
+     * @throws OXException - If an database error occured
      */
     boolean blockLoginPush(List<ContextUsers> contextUser, long blockLoginPushUntil) throws OXException;
 
     /**
      * Gets a list of tokens for the specified list of context users, serviceId an provider
      *
-     * @param contextUser
-     * @param serviceId
-     * @param provider
+     * @param contextUser - The contexts and users for which the tokens will be requested
+     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
+     * @param provider - The provider
      * @return a list of tokens for the specified list of context users.
      * @throws OXException
      */

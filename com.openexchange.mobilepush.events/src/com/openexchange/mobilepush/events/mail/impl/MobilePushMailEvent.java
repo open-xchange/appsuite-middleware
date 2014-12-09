@@ -61,13 +61,14 @@ import com.openexchange.mobilepush.events.storage.ContextUsers;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobilePushMailEvent implements MobilePushEvent {
+
     private int userId;
 
     private int contextId;
 
     private List<ContextUsers> contextUsers;
 
-    private Map<String, String> messageData;
+    private final Map<String, String> messageData;
 
     private final static String COLLAPSE_KEY = "TRIGGER_NEW_MAIL";
 

@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.mobilepush.events.MobilePushEventService;
 import com.openexchange.mobilepush.events.mail.impl.MobilePushMailEventImpl;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
@@ -70,7 +71,7 @@ public class MobilePushEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { MobilePushStorageService.class };
+        return new Class[] { MobilePushStorageService.class, MailService.class };
     }
 
     @Override
@@ -85,6 +86,9 @@ public class MobilePushEventsActivator extends HousekeepingActivator {
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] {
             PushEventConstants.TOPIC,
             PushEventConstants.PROPERTY_IMMEDIATELY,
+            PushEventConstants.PROPERTY_IDS,
+            PushEventConstants.PROPERTY_DELETED,
+            PushEventConstants.PROPERTY_SESSION,
         });
 
         registerService(EventHandler.class, service, serviceProperties);
