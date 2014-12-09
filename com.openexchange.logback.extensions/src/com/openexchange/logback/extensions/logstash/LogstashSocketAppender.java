@@ -584,7 +584,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     private void log(Level level, String message, Exception... e) {
         StringBuilder builder = new StringBuilder();
         builder.append(writeCurrentTimestamp()).append(" ").append(level).append(" ").append(message);
-        if (e.length > 1) {
+        if (e.length >= 1) {
             builder.append(" Reason:");
         }
         System.err.println(builder.toString());
