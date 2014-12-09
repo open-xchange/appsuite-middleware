@@ -1,3 +1,7 @@
+* 2014-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35784: Examine passed "version" parameter if it represents "null"
+
 * 2014-12-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 35746: Only delete referenced original message if a draft-edit operation takes place

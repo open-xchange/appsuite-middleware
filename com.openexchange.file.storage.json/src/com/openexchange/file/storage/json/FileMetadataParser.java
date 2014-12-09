@@ -146,31 +146,32 @@ public class FileMetadataParser implements FileMetadataParserService{
             if (val == JSONObject.NULL) {
                 val = null;
             }
-            switch(field) {
-            case CATEGORIES: {
-                if(String.class.isInstance(val)) {
+            switch (field) {
+                case CATEGORIES: {
+                    if (String.class.isInstance(val)) {
+                        return val;
+                    }
+                    return categories((JSONArray) val);
+                }
+                case META:
+                    if (value == null || value == JSONObject.NULL) {
+                        return null;
+                    }
+                    return JSONCoercion.coerceToNative(value);
+                default:
                     return val;
-                }
-                return categories((JSONArray) val);
-            }
-            case META:
-                if (value == null || value == JSONObject.NULL) {
-                    return null;
-                }
-                return JSONCoercion.coerceToNative(value);
-            default: return val;
             }
         }
 
         private Object categories(final JSONArray value) throws JSONException {
-            if(value.length() == 0) {
+            if (value.length() == 0) {
                 return "";
             }
             final StringBuilder b = new StringBuilder();
-            for(int i = 0, size = value.length(); i < size; i++) {
+            for (int i = 0, size = value.length(); i < size; i++) {
                 b.append(value.getString(i)).append(", ");
             }
-            b.setLength(b.length()-2);
+            b.setLength(b.length() - 2);
             return b.toString();
         }
     }
