@@ -86,38 +86,28 @@ import ch.qos.logback.core.util.Duration;
 public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implements Runnable, ExceptionHandler {
 
     private static final int SOCKET_TIMEOUT = 60;
-
     private static final float LOAD_FACTOR = 0.67f;
 
     private int port;
-
     private String remoteHost;
-
-    private int queueSize;
-
     private InetAddress address;
 
     private BlockingQueue<ILoggingEvent> queue;
+    private int queueSize;
+    private int loadThreshold;
+    private float loadFactor;
 
     private String peerId;
-
     private Future<?> task;
 
     private Future<Socket> connectorTask;
-
     private volatile Socket socket;
-
+    private int socketTimeout;
     private int reconnectionDelay;
-
     private Duration eventDelayLimit;
-
     private int acceptConnectionTimeout;
 
     private Encoder<ILoggingEvent> encoder;
-
-    private int socketTimeout = 10;
-
-    private float loadFactor = 0.67f;
 
     private Boolean alwaysPersistEvents;
 
@@ -194,6 +184,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                     loadFactor = LOAD_FACTOR;
                 }
             }
+            loadThreshold = (int) (loadFactor * queueSize);
         }
     }
 
@@ -366,9 +357,9 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         try {
             return getContext().getExecutorService().submit(connector);
         } catch (RejectedExecutionException e) {
-            cleanQueueIfNecessary();
-            System.err.println(LogstashSocketAppenderExceptionCodes.ERROR_ACTIVATING_CONNECTOR.create(e).toString());
             e.printStackTrace();
+            cleanQueueIfNecessary();
+            System.err.println(LogstashSocketAppenderExceptionCodes.ERROR_ACTIVATING_CONNECTOR.create(e.getMessage(), e).toString());
             return null;
         }
     }
@@ -379,10 +370,10 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             connectorTask = null;
             return s;
         } catch (TimeoutException e) {
+            e.printStackTrace();
             cleanQueueIfNecessary();
             connectorTask = null;
             System.err.println(LogstashSocketAppenderExceptionCodes.TIMEOUT_WHILE_CREATING_SOCKET.create(e).toString());
-            e.printStackTrace();
             return null;
         }
     }
@@ -395,19 +386,27 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      */
     private void cleanQueueIfNecessary() throws InterruptedException, IOException {
         final int qSize = queue.size();
-        if (qSize > (qSize * loadFactor)) {
+        System.err.print("Event queue holds " + qSize + " events.");
+        if (qSize > loadThreshold) {
             if (alwaysPersistEvents) {
                 // Use the LogstashEncoder to write to a different output stream
                 LogstashEncoder enc = new LogstashEncoder();
                 enc.init(System.err);
                 ILoggingEvent event = null;
-                while ((event = queue.poll()) != null) {
+                System.err.println(" Load threshold of " + loadThreshold + " is reached. Flushing...");
+                int events = 0;
+                while (events < qSize) {
                     event = queue.poll();
                     enc.doEncode(event);
+                    events++;
                 }
+                System.err.println("Successfully flushed " + events + " out of " + qSize + " events.");
             } else {
                 queue.clear();
+                System.err.println(" Event queue is empty.");
             }
+        } else {
+            System.err.println(" Not flushing yet. Load threshold of " + loadThreshold + " is not reached.");
         }
     }
 
