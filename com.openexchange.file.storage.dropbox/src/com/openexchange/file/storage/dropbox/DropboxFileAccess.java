@@ -191,9 +191,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             String path = toPath(file.getFolderId(), file.getFileName());
             try {
                 Entry entry = dropboxAPI.putFile(path, Streams.EMPTY_INPUT_STREAM, 0, null, null);
-                file.setId(entry.fileName());
-                file.setVersion(entry.rev);
-                return new IDTuple(toId(entry.path), entry.fileName());
+                DropboxFile savedFile = new DropboxFile(entry, userId);
+                file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                return new IDTuple(savedFile.getFolderId(), savedFile.getId());
             } catch (Exception e) {
                 throw handle(e, path);
             }
@@ -212,9 +212,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                             path = temp.path;
                         }
                         Entry entry = dropboxAPI.move(path, toPath);
-                        file.setId(entry.fileName());
-                        file.setVersion(entry.rev);
-                        return new IDTuple(toId(entry.parentPath()), entry.fileName());
+                        DropboxFile savedFile = new DropboxFile(entry, userId);
+                        file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                        return new IDTuple(savedFile.getFolderId(), savedFile.getId());
                     } catch (Exception e) {
                         throw handle(e, path);
                     }
@@ -227,9 +227,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 if (null != file.getVersion()) {
                     try {
                         Entry entry = dropboxAPI.restore(path, file.getVersion());
-                        file.setId(entry.fileName());
-                        file.setVersion(entry.rev);
-                        return new IDTuple(toId(entry.parentPath()), entry.fileName());
+                        DropboxFile savedFile = new DropboxFile(entry, userId);
+                        file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                        return new IDTuple(savedFile.getFolderId(), savedFile.getId());
                     } catch (Exception e) {
                         throw handle(e, path);
                     }
@@ -321,9 +321,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     length,
                     null,
                     null);
-                file.setId(entry.fileName());
-                file.setVersion(entry.rev);
-                return new IDTuple(toId(entry.path), entry.fileName());
+                DropboxFile savedFile = new DropboxFile(entry, userId);
+                file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                return new IDTuple(savedFile.getFolderId(), savedFile.getId());
             } else {
                 // Update, adjust metadata as needed
                 entry = dropboxAPI.putFileOverwrite(path, data, length, null);
