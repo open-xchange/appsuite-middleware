@@ -54,6 +54,7 @@ import java.security.NoSuchAlgorithmException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -101,6 +102,22 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
             log.error("",e);
             throw new InvalidCredentialsException("authentication failed");
         } catch (UnsupportedEncodingException e) {
+            log.error("",e);
+            throw new InvalidCredentialsException("authentication failed");
+        }
+    }
+
+
+    @Override
+    public boolean isMasterOfContext(Credentials creds, Context ctx) throws InvalidCredentialsException {
+        try {
+            OXResellerStorageInterface oxresell = OXResellerStorageInterface.getInstance();
+            if( ! oxresell.existsAdmin(new ResellerAdmin(creds.getLogin()) ) ) {
+                return false;
+            }
+            ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin())})[0];
+            return oxresell.ownsContext(ctx, adm.getId());
+        } catch (StorageException e) {
             log.error("",e);
             throw new InvalidCredentialsException("authentication failed");
         }

@@ -48,9 +48,12 @@
  */
 package com.openexchange.admin.plugins;
 
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 
 public interface BasicAuthenticatorPluginInterface {
     public void doAuthentication(final Credentials authdata) throws InvalidCredentialsException;
+
+    public boolean isMasterOfContext(final Credentials creds, final Context ctx) throws InvalidCredentialsException;
 }

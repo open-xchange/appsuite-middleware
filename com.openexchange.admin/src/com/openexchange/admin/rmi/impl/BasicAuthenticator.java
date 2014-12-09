@@ -148,6 +148,24 @@ public class BasicAuthenticator extends OXCommonImpl {
        ClientAdminThread.cache.removeAdminCredentials(ctx);
     }
 
+    public boolean isMasterOfContext(final Credentials creds, final Context ctx) throws InvalidCredentialsException {
+        if( ClientAdminThread.cache.isMasterAdmin(creds) ) {
+            return true;
+        }
+        if( this.context != null ) {
+            // Trigger plugin extensions
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final BasicAuthenticatorPluginInterface authplug : pluginInterfaces.getBasicAuthenticatorPlugins().getServiceList()) {
+                    final String bundlename = authplug.getClass().getName();
+                    LOG.debug("Calling isMasterOfContext for plugin: {}", bundlename);
+                    return authplug.isMasterOfContext(creds, ctx);
+                }
+            }
+        }
+        return false;
+    }
+    
     /**
      * Authenticates ONLY the context admin!
      * This method also validates the Context object data!
@@ -174,7 +192,9 @@ public class BasicAuthenticator extends OXCommonImpl {
 
         // first check if whole authentication mechanism is disabled
         if (!cache.contextAuthenticationDisabled()) {
-            if (!sqlAuth.authenticate(authdata, ctx)) {
+            if( isMasterOfContext(authdata, ctx) ) {
+                doAuthentication(authdata);
+            } else if (!sqlAuth.authenticate(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
                 LOG.error("Admin authentication for user {}", authdata.getLogin(),invalidCredentialsException);

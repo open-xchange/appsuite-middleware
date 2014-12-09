@@ -128,7 +128,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         LOGGER.info("Class loaded: {}", this.getClass().getName());
-        basicauth = new BasicAuthenticator();
+        basicauth = new BasicAuthenticator(context);
         try {
             oxu = OXUserStorageInterface.getInstance();
         } catch (final StorageException e) {
@@ -870,17 +870,21 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             userid = usrdata.getId();
 
             if (!ClientAdminThread.cache.contextAuthenticationDisabled()) {
-                final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
-                // check if given user is admin
-                if (tool.isContextAdmin(ctx, auth_user_id)) {
+                if( basicauth.isMasterOfContext(credentials, ctx) ) {
                     basicauth.doAuthentication(auth, ctx);
                 } else {
-                    basicauth.doUserAuthentication(auth, ctx);
-                    // now check if user which authed has the same id as the user he
-                    // wants to change,else fail,
-                    // cause then he/she wants to change not his own data!
-                    if (userid.intValue() != auth_user_id) {
-                        throw new InvalidCredentialsException("Permission denied");
+                    final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+                    // check if given user is admin
+                    if (tool.isContextAdmin(ctx, auth_user_id)) {
+                        basicauth.doAuthentication(auth, ctx);
+                    } else {
+                        basicauth.doUserAuthentication(auth, ctx);
+                        // now check if user which authed has the same id as the user he
+                        // wants to change,else fail,
+                        // cause then he/she wants to change not his own data!
+                        if (userid.intValue() != auth_user_id) {
+                            throw new InvalidCredentialsException("Permission denied");
+                        }
                     }
                 }
             }
@@ -1660,7 +1664,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 // check if given user is not admin, if he is admin, the
                 final User authuser = new User();
                 authuser.setName(auth.getLogin());
-                if (!tool.isContextAdmin(ctx, authuser)) {
+                if( basicauth.isMasterOfContext(auth, ctx) ) {
+                    basicauth.doAuthentication(auth, ctx);
+                } else if (!tool.isContextAdmin(ctx, authuser)) {
                     final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
                     if (users.length == 1) {
                         final int auth_user_id = authuser.getId().intValue();
