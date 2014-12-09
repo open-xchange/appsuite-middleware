@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -183,7 +182,7 @@ public class BasicDriveTest extends AbstractFindTest {
         JSONArray foundFiles = (JSONArray) verificationResponse.getData();
         assertEquals("Wrong number of documents found via conventional search", 1, foundFiles.length());
         JSONArray desiredFile = foundFiles.getJSONArray(0);
-        assertEquals("Wrong id for file found via conventional search", metadata.getId(), Integer.parseInt(desiredFile.get(0).toString()));
+        assertEquals("Wrong id for file found via conventional search", metadata.getId(), desiredFile.get(0).toString());
         assertEquals("Wrong folder for file found via conventional search", testFolder.getObjectID(), Integer.parseInt(desiredFile.get(1).toString()));
         assertEquals("Wrong title for file found via conventional search", metadata.getTitle(), desiredFile.get(2).toString());
     }
@@ -275,7 +274,7 @@ public class BasicDriveTest extends AbstractFindTest {
             Field field = fields[i];
             Object listValue = listDocument[i];
             if (field == Field.META) {
-                Map<String, Object> asMap = ((JSONObject)listValue).asMap();
+                Map<String, Object> asMap = (Map<String, Object>) listValue;
                 assertTrue(asMap.equals(queryDocument.getProps().get(field.getName())));
             } else {
                 assertEquals("Unexpected value for field " + field.getName(), listValue, queryDocument.getProps().get(field.getName()));
