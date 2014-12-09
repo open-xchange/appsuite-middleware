@@ -332,7 +332,8 @@ Import-Package: com.damienmiller,
  org.w3c.dom,
  org.xml.sax,
  org.xmlpull.v1,
- sun.misc
+ sun.misc,
+ sun.nio.ch
 Export-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.customizer.folder,
