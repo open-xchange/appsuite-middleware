@@ -123,6 +123,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.AppenderBase#start()
      */
     public void start() {
@@ -198,6 +199,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.AppenderBase#stop()
      */
     @Override
@@ -215,6 +217,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.net.SocketConnector.ExceptionHandler#connectionFailed(ch.qos.logback.core.net.SocketConnector,
      * java.lang.Exception)
      */
@@ -231,6 +234,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Runnable#run()
      */
     @Override
@@ -295,6 +299,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.AppenderBase#append(java.lang.Object)
      */
     @Override
@@ -315,8 +320,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     /**
      * Creates a new {@link SocketConnector}.
      * <p>
-     * The default implementation creates an instance of {@link DefaultSocketConnector}. A subclass may override to provide a different
-     * {@link SocketConnector} implementation.
+     * The default implementation creates an instance of {@link DefaultSocketConnector}. A subclass may override to provide a different {@link SocketConnector} implementation.
      * 
      * @param address target remote address
      * @param port target remote port
@@ -340,8 +344,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     /**
      * Creates a blocking queue that will be used to hold logging events until they can be delivered to the remote receiver.
      * <p>
-     * The default implementation creates a (bounded) {@link ArrayBlockingQueue} for positive queue sizes. Otherwise it creates a
-     * {@link SynchronousQueue}.
+     * The default implementation creates a (bounded) {@link ArrayBlockingQueue} for positive queue sizes. Otherwise it creates a {@link SynchronousQueue}.
      * <p>
      * This method is exposed primarily to support instrumentation for unit testing.
      * 
@@ -359,7 +362,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         return connector;
     }
 
-    private Future<Socket> activateConnector(SocketConnector connector) throws RejectedExecutionException, InterruptedException {
+    private Future<Socket> activateConnector(SocketConnector connector) throws RejectedExecutionException, InterruptedException, IOException {
         try {
             return getContext().getExecutorService().submit(connector);
         } catch (RejectedExecutionException e) {
@@ -370,7 +373,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         }
     }
 
-    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException {
+    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException, IOException {
         try {
             Socket s = connectorTask.get(socketTimeout, TimeUnit.SECONDS);
             connectorTask = null;
@@ -388,16 +391,20 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * Clean up queue and log if necessary
      * 
      * @throws InterruptedException
+     * @throws IOException
      */
-    private void cleanQueueIfNecessary() throws InterruptedException {
+    private void cleanQueueIfNecessary() throws InterruptedException, IOException {
         final int qSize = queue.size();
         if (qSize > (qSize * loadFactor)) {
             if (alwaysPersistEvents) {
+                // Use the LogstashEncoder to write to a different output stream
+                LogstashEncoder enc = new LogstashEncoder();
+                enc.init(System.err);
                 ILoggingEvent event = null;
-                do {
+                while ((event = queue.poll()) != null) {
                     event = queue.poll();
-                    System.err.println((event.toString())); //FIXME: write to system.out/system.err? Any special format?
-                } while (event != null);
+                    enc.doEncode(event);
+                }
             } else {
                 queue.clear();
             }
