@@ -4,6 +4,12 @@ open-xchange-spamsettings-generic (7.8.0-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 05 Nov 2014 09:41:22 +0100
 
+open-xchange-spamsettings-generic (7.6.2-3) stable; urgency=medium
+
+  * Third candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 05 Dec 2014 13:59:57 +0100
+
 open-xchange-spamsettings-generic (7.6.2-2) stable; urgency=low
 
   * Second candidate for 7.6.2 release
