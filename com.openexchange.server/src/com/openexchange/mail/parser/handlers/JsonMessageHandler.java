@@ -182,6 +182,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     } // End of class PlainTextContent
 
     private static final class MultipartInfo {
+
         final String mpId;
         final ContentType contentType;
 
