@@ -217,23 +217,21 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      */
     private void handleConnectionException(Exception ex) {
         if (ex instanceof InterruptedException) {
-            logError("Connection to " + peerId + " interupted.");
+            logError("Connection to " + peerId + " interrupted.", ex);
         } else if (ex instanceof ConnectException) {
-            logError("Connection to " + peerId + " refused.");
+            logError("Connection to " + peerId + " refused.", ex);
         } else if (ex instanceof IOException) {
-            logError("Connection to " + peerId + " failed. Reason: " + ex);
+            logError("Connection to " + peerId + " failed.", ex);
         } else if (ex instanceof InterruptedException) {
-            logError("Connection to " + peerId + " interupted. Reason: " + ex);
+            logError("Connection to " + peerId + " interupted.", ex);
         } else {
-            logError("Connection error to " + peerId + ".");
+            logError("Connection error to " + peerId + ".", ex);
         }
-
-        ex.printStackTrace();
 
         try {
             cleanQueueIfNecessary();
         } catch (IOException e) {
-            logError("Failed while cleaning queue.");
+            logError("Failed while cleaning queue.", e);
             e.printStackTrace();
         }
     }
@@ -323,7 +321,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                 logError("Dropping event due to timeout limit of [" + eventDelayLimit + "] being exceeded");
             }
         } catch (InterruptedException e) {
-            logError("Interrupted while appending event to SocketAppender");
+            logError("Interrupted while appending event to SocketAppender", e);
             e.printStackTrace();
         }
     }
@@ -571,21 +569,27 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         this.encoder = encoder;
     }
 
-    private void logInfo(String message) {
-        log(Level.INFO, message);
+    private void logInfo(String message, Exception... e) {
+        log(Level.INFO, message, e);
     }
 
-    private void logWarn(String message) {
-        log(Level.WARN, message);
+    private void logWarn(String message, Exception... e) {
+        log(Level.WARN, message, e);
     }
 
-    private void logError(String message) {
-        log(Level.ERROR, message);
+    private void logError(String message, Exception... e) {
+        log(Level.ERROR, message, e);
     }
 
-    private void log(Level level, String message) {
+    private void log(Level level, String message, Exception... e) {
         StringBuilder builder = new StringBuilder();
         builder.append(writeCurrentTimestamp()).append(" ").append(level).append(" ").append(message);
+        if (e.length > 1) {
+            builder.append(" Reason:");
+        }
         System.err.println(builder.toString());
+        for (Exception ex : e) {
+            ex.printStackTrace();
+        }
     }
 }
