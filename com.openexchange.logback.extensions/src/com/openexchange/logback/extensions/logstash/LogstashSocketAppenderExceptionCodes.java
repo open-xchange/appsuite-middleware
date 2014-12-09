@@ -69,7 +69,7 @@ public enum LogstashSocketAppenderExceptionCodes implements OXExceptionCode {
      */
     ERROR_CREATING_SOCKET("Error while creating socket: '%1$s'", CATEGORY_ERROR, 2),
     
-    TIMEOUT_WHILE_CREATING_SOCKET("Timed out while creating socket", CATEGORY_ERROR, 3)
+    TIMEOUT_WHILE_CREATING_SOCKET("Timed out while creating socket. Logging server down?", CATEGORY_ERROR, 3)
     ;
 
     private final String PREFIX = "LOGSTASH";
