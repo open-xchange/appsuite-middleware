@@ -85,7 +85,6 @@ public class JumpLinkGenerator {
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", trimSlashes(DriveConfig.getInstance().getUiWebPath()))
-            .replaceAll("\\[perspective\\]", "perspective=fluid:icon")
             .replaceAll("\\[folder\\]", "folder=" + folderId);
 
         if (null != metadata && null != fileId) {

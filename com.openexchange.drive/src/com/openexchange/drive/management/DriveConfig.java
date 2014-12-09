@@ -446,7 +446,7 @@ public class DriveConfig implements Initialization {
         directLinkFile = configService.getProperty("com.openexchange.drive.directLinkFile",
             "[protocol]://[hostname]/[uiwebpath]#[filefragments]");
         jumpLink = configService.getProperty("com.openexchange.drive.jumpLink",
-            "[protocol]://[hostname]/[uiwebpath]#[app]&[perspective]&[folder]&[id]");
+            "[protocol]://[hostname]/[uiwebpath]#[app]&[folder]&[id]");
         previewImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.previewImageSize", "800x800"));
         thumbnailImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.thumbnailImageSize", "100x100"));
         imageLinkImageFile = configService.getProperty("com.openexchange.drive.imageLinkImageFile",
