@@ -297,9 +297,6 @@ public final class SessionHandler {
                     } catch (ExecutionException e) {
                         future.cancel(true);
                         LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e.getCause());
-                    } catch (RuntimeException e) {
-                        LOG.error("Failed to issue remote session removal for contexts {} on remote node {}.", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
-                        throw e;
                     } catch (Exception e) {
                         LOG.error("Failed to issue remote session removal for contexts {} on remote node {}.", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
                         throw SessionExceptionCodes.REMOTE_SESSION_REMOVAL_FAILED.create(Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
