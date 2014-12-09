@@ -232,7 +232,6 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             cleanQueueIfNecessary();
         } catch (IOException e) {
             logError("Failed while cleaning queue.", e);
-            e.printStackTrace();
         }
     }
 
@@ -322,7 +321,6 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             }
         } catch (InterruptedException e) {
             logError("Interrupted while appending event to SocketAppender", e);
-            e.printStackTrace();
         }
     }
 
