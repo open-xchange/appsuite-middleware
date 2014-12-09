@@ -416,18 +416,8 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         final String message = "Event queue holds " + qSize + " events.";
         if (qSize > loadThreshold) {
             if (alwaysPersistEvents) {
-                // Use the LogstashEncoder to write to a different output stream
-                LogstashEncoder enc = new LogstashEncoder();
-                enc.init(System.err);
-                ILoggingEvent event = null;
                 logInfo(message + " Load threshold of " + loadThreshold + " is reached. Flushing...");
-                int events = 0;
-                while (events < qSize) {
-                    event = queue.poll();
-                    enc.doEncode(event);
-                    events++;
-                }
-                logInfo("Successfully flushed " + events + " out of " + qSize + " events.");
+                flushQueue(qSize);
             } else {
                 queue.clear();
                 logInfo("Event queue is empty.");
@@ -435,6 +425,26 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         } else {
             logInfo(message + " Not flushing yet. Load threshold of " + loadThreshold + " is not reached.");
         }
+    }
+
+    /**
+     * Flush queue
+     * 
+     * @param The amount of elements to flush from the queue
+     * @throws IOException
+     */
+    private void flushQueue(final int qSize) throws IOException {
+        // Use the LogstashEncoder to write to a different output stream
+        LogstashEncoder enc = new LogstashEncoder();
+        enc.init(System.err);
+        ILoggingEvent event = null;
+        int events = 0;
+        while (events < qSize) {
+            event = queue.poll();
+            enc.doEncode(event);
+            events++;
+        }
+        logInfo("Successfully flushed " + events + " out of " + qSize + " events.");
     }
 
     /**
