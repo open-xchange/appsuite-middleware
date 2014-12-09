@@ -569,18 +569,43 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         this.encoder = encoder;
     }
 
+    /**
+     * Log INFO helper
+     * 
+     * @param message The message
+     * @param e The exception(s)
+     */
     private void logInfo(String message, Exception... e) {
         log(Level.INFO, message, e);
     }
 
+    /**
+     * Log WARN helper
+     * 
+     * @param message The message
+     * @param e The exception(s)
+     */
     private void logWarn(String message, Exception... e) {
         log(Level.WARN, message, e);
     }
 
+    /**
+     * Log ERROR helper
+     * 
+     * @param message The message
+     * @param e The exception(s)
+     */
     private void logError(String message, Exception... e) {
         log(Level.ERROR, message, e);
     }
 
+    /**
+     * Log the specified message and the specified exception(s) stacktrace with the specified level to System.err
+     * 
+     * @param level The logging level
+     * @param message The message
+     * @param e The exception(s)
+     */
     private void log(Level level, String message, Exception... e) {
         StringBuilder builder = new StringBuilder();
         builder.append(writeCurrentTimestamp()).append(" ").append(level).append(" ").append(message);
