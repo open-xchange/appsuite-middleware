@@ -2313,11 +2313,16 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private void checkDuplicateTransportAccount(final MailAccountDescription mailAccount, final TIntSet excepts, final int userId, final int contextId, final Connection con) throws OXException {
         final String server = mailAccount.getTransportServer();
         if (isEmpty(server)) {
-            /*
-             * No transport server specified
-             */
+            // No transport server specified
             return;
         }
+
+        String login = mailAccount.getTransportLogin();
+        if (Strings.isEmpty(login) && isMailTransportAuth(mailAccount, userId, contextId, con)) {
+            // Impossible to check as login not given, hence preceding duplicate check for mail account is sufficient here
+            return;
+        }
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -2335,11 +2340,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 LOG.warn("", e);
                 addr = null;
             }
-            final int port = mailAccount.getTransportPort();
-            String login = mailAccount.getTransportLogin();
-            if (null == login) {
-                login = mailAccount.getLogin();
-            }
+            int port = mailAccount.getTransportPort();
             do {
                 final int id = (int) result.getLong(1);
                 if (null == excepts || !excepts.contains(id)) {
@@ -2351,6 +2352,28 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
             } while (result.next());
         } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private boolean isMailTransportAuth(MailAccountDescription mailAccount,  int userId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT value FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, userId);
+            stmt.setInt(3, mailAccount.getId());
+            stmt.setString(4, "transport.auth");
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return true;
+            }
+            String sTransportAuth = result.getString(1);
+            return null == sTransportAuth || TransportAuth.MAIL.getId().equals(sTransportAuth);
+        } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
