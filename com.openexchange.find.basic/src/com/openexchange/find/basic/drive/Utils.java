@@ -68,6 +68,7 @@ import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.infostore.PermissionHelper;
 import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.ComparablePattern;
@@ -394,7 +395,7 @@ public final class Utils {
     public static File documentMetadata2File(final DocumentMetadata doc) {
         File file = new File() {
 
-
+            private String id;
 
             @Override
             public String getProperty(String key) {
@@ -503,12 +504,23 @@ public final class Utils {
 
             @Override
             public String getId() {
-                return String.valueOf(doc.getId());
+                if (id == null) {
+                    FileID fileID = new FileID(String.valueOf(doc.getId()));
+                    String folderId = getFolderId();
+                    if (fileID.getFolderId() == null && folderId != null) {
+                        fileID.setFolderId(folderId);
+                    }
+
+                    id = fileID.toUniqueID();
+                }
+
+                return id;
             }
 
             @Override
             public void setId(String id) {
-                doc.setId(Integer.parseInt(id));
+                FileID fileID = new FileID(id);
+                doc.setId(Integer.parseInt(fileID.getFileId()));
             }
 
             @Override
