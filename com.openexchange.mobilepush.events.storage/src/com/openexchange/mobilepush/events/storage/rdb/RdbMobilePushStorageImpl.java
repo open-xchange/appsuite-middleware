@@ -291,7 +291,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
     public List<Subscription> getSubscriptions(int contextId, int userId, String serviceId, MobilePushProviders provider) throws OXException {
         Connection connection = databaseService.getReadOnly(contextId);
         try {
-            return selectSubscriptions(connection, userId, contextId, serviceId, provider.getProviderName());
+            return selectSubscriptions(connection, contextId, userId, serviceId, provider.getProviderName());
         } catch (SQLException e) {
             throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -299,7 +299,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
         }
     }
 
-    private static List<Subscription> selectSubscriptions(Connection connection, int userId, int contextId, String service, String providerName) throws SQLException {
+    private static List<Subscription> selectSubscriptions(Connection connection, int contextId, int userId, String service, String providerName) throws SQLException {
         List<Subscription> subscriptions = new LinkedList<Subscription>();
         PreparedStatement stmt = null;
         try {

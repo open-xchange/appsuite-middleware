@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mobilepush.templating.utility;
+package com.openexchange.mobilepush;
 
 import java.text.DateFormat;
 import java.util.Date;

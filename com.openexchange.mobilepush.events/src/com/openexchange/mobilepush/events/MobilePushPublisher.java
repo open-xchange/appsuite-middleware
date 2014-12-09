@@ -63,9 +63,9 @@ public interface MobilePushPublisher {
     void publish(MobilePushEvent event);
 
     /**
-     * Publishes a new login event about a necessary re-login.
+     * Publishes an event to context users
      *
-     * @param loginEvent the event which should be published to the subscribers
+     * @param event The event that should be published to the given context users
      */
-    void multiPublish(MobilePushEvent loginEvent);
+    void multiPublish(MobilePushEvent event);
 }
