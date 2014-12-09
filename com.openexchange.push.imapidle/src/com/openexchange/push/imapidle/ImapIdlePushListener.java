@@ -57,10 +57,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.Folder;
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.event.MessageCountEvent;
-import javax.mail.event.MessageCountListener;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
@@ -241,13 +238,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     LOGGER.debug("Starting IMAP-IDLE run for user {} in context {}.", sUserId, sContextId);
 
                     // Acquire folder counts
+                    int totalCount = imapFolder.getMessageCount();
                     int deletedCount = 0;
-                    int totalCount = 0;
                     final PushMode pushMode = this.pushMode;
                     if (PushMode.ALWAYS == pushMode) {
                         // Operations may be expensive, so only do them in always mode.
                         deletedCount = imapFolder.getDeletedMessageCount();
-                        totalCount = imapFolder.getMessageCount();
                     }
 
                     // Check if canceled meanwhile
@@ -258,10 +254,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                     // Refresh lock prior to entering IMAP-IDLE
                     ImapIdlePushManagerService.getInstance().refreshLock(session);
-
-                    // Register listener
-                    ImapIdleMessageCountListener countListener = new ImapIdleMessageCountListener();
-                    imapFolder.addMessageCountListener(countListener);
 
                     // Do the IMAP IDLE connect
                     mailAccess.setWaiting(true);
@@ -288,7 +280,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                             int newMessageCount = imapFolder.getNewMessageCount();
                             if (newMessageCount > 0) {
                                 LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to {} new mail(s)", sUserId, sContextId, Integer.toString(newMessageCount));
-                                setEventProperties(uidNext, countListener, props, imapFolder);
+                                setEventProperties(uidNext, totalCount, props, imapFolder);
                                 notifyNewMail();
                                 notified = true;
                             }
@@ -302,7 +294,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                             int newMessageCount = imapFolder.getNewMessageCount();
                             if (newMessageCount > 0) {
                                 LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to {} new mail(s)", sUserId, sContextId, Integer.toString(newMessageCount));
-                                setEventProperties(uidNext, countListener, props, imapFolder);
+                                setEventProperties(uidNext, totalCount, props, imapFolder);
                                 notifyNewMail();
                                 notified = true;
                                 break;
@@ -314,7 +306,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                             int newDeletedCount = imapFolder.getDeletedMessageCount();
                             if (imapFolder.getDeletedMessageCount() != deletedCount) {
                                 LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current deleted count {} vs. old deleted count {}", sUserId, sContextId, Integer.toString(newDeletedCount), Integer.toString(deletedCount));
-                                setEventProperties(uidNext, countListener, props, imapFolder);
+                                setEventProperties(uidNext, totalCount, props, imapFolder);
                                 notifyNewMail();
                                 notified = true;
                                 break;
@@ -323,10 +315,10 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                         // Compare total message counters
                         {
-                            int newTotalCount = imapFolder.getMessageCount();
+                            int newTotalCount = imapFolder.getRealMessageCount();
                             if (newTotalCount != totalCount) {
                                 LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current total count {} vs. old total count {}", sUserId, sContextId, Integer.toString(newTotalCount), Integer.toString(totalCount));
-                                setEventProperties(uidNext, countListener, props, imapFolder);
+                                setEventProperties(uidNext, totalCount, props, imapFolder);
                                 notifyNewMail();
                                 notified = true;
                                 break;
@@ -556,30 +548,33 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
     }
 
-    private void setEventProperties(long uidNext, ImapIdleMessageCountListener countListener, Map<String, Object> props, IMAPFolder imapFolder) {
-        if (uidNext > 0) {
-            long newUidNext = getUIDNextCustom(imapFolder);
-            if (newUidNext > 0 && uidNext != newUidNext) {
-                StringBuilder buf = new StringBuilder(64);
-                buf.append(uidNext);
-                for (long uid = uidNext + 1; uid < newUidNext; uid++) {
-                    buf.append(", ").append(uid);
-                }
-                props.put(PushEventConstants.PROPERTY_IDS, buf.toString());
-            }
-        }
-        if (null != countListener) {
-            Message[] messages = countListener.getMessages();
-            if (null != messages) {
-                boolean deleted = false;
-                for (int i = messages.length; !deleted && i-- > 0;) {
-                    if (null != messages[i]) {
-                        deleted = true;
+    private void setEventProperties(long uidNext, int totalCount, Map<String, Object> props, IMAPFolder imapFolder) {
+        if (uidNext > 0 && totalCount >= 0) {
+            try {
+                int newTotalCount = imapFolder.getRealMessageCount();
+                if (newTotalCount > 0 && newTotalCount > totalCount) {
+                    long newUidNext = getUIDNextCustom(imapFolder);
+                    if (newUidNext > 0 && uidNext != newUidNext) {
+                        StringBuilder buf = new StringBuilder(64);
+                        buf.append(uidNext);
+                        for (long uid = uidNext + 1; uid < newUidNext; uid++) {
+                            buf.append(", ").append(uid);
+                        }
+                        props.put(PushEventConstants.PROPERTY_IDS, buf.toString());
                     }
                 }
-                if (deleted) {
+            } catch (MessagingException e) {
+                LOGGER.warn("Could not determine new message count.", e);
+            }
+        }
+        if (totalCount > 0) {
+            try {
+                int newTotalCount = imapFolder.getRealMessageCount();
+                if (newTotalCount >= 0 && newTotalCount < totalCount) {
                     props.put(PushEventConstants.PROPERTY_DELETED, Boolean.TRUE);
                 }
+            } catch (MessagingException e) {
+                LOGGER.warn("Could not determine new message count.", e);
             }
         }
     }
@@ -607,37 +602,5 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
         return (IMAPFolderStorage) fstore;
     }
-
-    // -------------------------------------------------------------------------------------------------------------------
-
-    private static final class ImapIdleMessageCountListener implements MessageCountListener {
-
-        private Message[] msgs;
-
-        ImapIdleMessageCountListener() {
-            super();
-        }
-
-        @Override
-        public void messagesAdded(MessageCountEvent e) {
-            // Ignore
-        }
-
-        @Override
-        public void messagesRemoved(MessageCountEvent e) {
-            if (MessageCountEvent.REMOVED == e.getType()) {
-                msgs = e.getMessages();
-            }
-        }
-
-        /**
-         * Gets an array of messages removed.
-         *
-         * @return The removed messages
-         */
-        Message[] getMessages() {
-            return msgs;
-        }
-    } // End of class
 
 }

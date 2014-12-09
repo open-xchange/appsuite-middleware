@@ -1602,6 +1602,47 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
+     * Gets total number of messages on the server
+     *
+     * @return The total number of messages
+     * @throws MessagingException If total number of messages cannot be returned
+     */
+    public int getRealMessageCount() throws MessagingException {
+        if (!opened) {
+            checkExists();
+            // If this folder is not yet open, we use STATUS to
+            // get the total message count
+            try {
+                Status status = getStatus();
+                return status.total;
+            } catch (BadCommandException bex) {
+                // doesn't support STATUS, probably vanilla IMAP4 ..
+                // lets try EXAMINE
+                IMAPProtocol p = null;
+                try {
+                    p = getStoreProtocol(); // XXX
+                    MailboxInfo minfo = p.examine(fullName);
+                    p.close();
+                    return minfo.total;
+                } catch (ProtocolException pex) {
+                    // Give up.
+                    throw new MessagingException(pex.getMessage(), pex);
+                } finally {
+                    releaseStoreProtocol(p);
+                }
+            } catch (ConnectionException cex) {
+                throw new StoreClosedException(store, cex.getMessage());
+            } catch (ProtocolException pex) {
+                throw new MessagingException(pex.getMessage(), pex);
+            }
+        }
+
+        synchronized (messageCacheLock) {
+            return realTotal;
+        }
+    }
+
+    /**
      * Get the total message count.
      */
     @Override
