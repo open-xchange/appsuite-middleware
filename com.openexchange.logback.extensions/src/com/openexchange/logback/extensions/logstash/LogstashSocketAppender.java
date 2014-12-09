@@ -263,8 +263,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                 }
             }
         } catch (Throwable t) {
-            logError("LogstashSocketAppender is shutting down. Unexpected error:");
-            t.printStackTrace();
+            logError("LogstashSocketAppender is shutting down.", t);
         }
     }
 
@@ -571,30 +570,30 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * Log INFO helper
      * 
      * @param message The message
-     * @param e The exception(s)
+     * @param t The exception(s)
      */
-    private void logInfo(String message, Exception... e) {
-        log(Level.INFO, message, e);
+    private void logInfo(String message, Throwable... t) {
+        log(Level.INFO, message, t);
     }
 
     /**
      * Log WARN helper
      * 
      * @param message The message
-     * @param e The exception(s)
+     * @param t The exception(s)
      */
-    private void logWarn(String message, Exception... e) {
-        log(Level.WARN, message, e);
+    private void logWarn(String message, Throwable... t) {
+        log(Level.WARN, message, t);
     }
 
     /**
      * Log ERROR helper
      * 
      * @param message The message
-     * @param e The exception(s)
+     * @param t The exception(s)
      */
-    private void logError(String message, Exception... e) {
-        log(Level.ERROR, message, e);
+    private void logError(String message, Throwable... t) {
+        log(Level.ERROR, message, t);
     }
 
     /**
@@ -602,17 +601,17 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * 
      * @param level The logging level
      * @param message The message
-     * @param e The exception(s)
+     * @param t The exception(s)
      */
-    private void log(Level level, String message, Exception... e) {
+    private void log(Level level, String message, Throwable... t) {
         StringBuilder builder = new StringBuilder();
         builder.append(writeCurrentTimestamp()).append(" ").append(level).append(" ").append(message);
-        if (e.length >= 1) {
+        if (t.length >= 1) {
             builder.append(" Reason:");
         }
         System.err.println(builder.toString());
-        for (Exception ex : e) {
-            ex.printStackTrace();
+        for (Throwable th : t) {
+            th.printStackTrace();
         }
     }
 }
