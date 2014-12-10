@@ -85,6 +85,7 @@ import org.osgi.framework.ServiceException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -92,6 +93,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.caching.Cache;
@@ -598,6 +600,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
             }
+
+            // Change quota size
+            changeQuotaForUser(usrdata, ctx, con);
+
+            // Change storage data
+            changeStorageDataImpl(usrdata, ctx, con);
 
             // update user aliases
             final HashSet<String> alias = usrdata.getAliases();
@@ -1234,6 +1242,67 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final OXException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
+        }
+    }
+
+    private void changeQuotaForUser(final User user, final Context ctx, final Connection con) throws SQLException {
+
+        // check if max quota is set in context
+        if (user.getMaxQuota() != null) {
+
+            long quota_max_temp = user.getMaxQuota().longValue();
+
+            if (quota_max_temp != -1) {
+                quota_max_temp *= Math.pow(2, 20);
+            }
+
+            PreparedStatement prep = null;
+            try {
+
+                prep = con.prepareStatement("UPDATE user SET quota_max=? WHERE cid=? AND id=?");
+                prep.setLong(1, quota_max_temp);
+                prep.setInt(2, ctx.getId().intValue());
+                prep.setInt(3, user.getId().intValue());
+                prep.executeUpdate();
+                prep.close();
+
+            } finally {
+                Databases.closeSQLStuff(prep);
+            }
+        }
+    }
+
+    private void changeStorageDataImpl(final User user, final Context ctx, final Connection con) throws SQLException, StorageException {
+
+        if (user.getFilestoreId() != null) {
+            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            final Filestore filestore = oxutil.getFilestore(user.getFilestoreId().intValue(), false);
+            PreparedStatement prep = null;
+            final int context_id = ctx.getId().intValue();
+            try {
+
+                if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
+                    prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ?");
+                    prep.setInt(1, filestore.getId().intValue());
+                    prep.setInt(2, context_id);
+                    prep.setInt(3, user.getId().intValue());
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+                final String filestore_name = user.getFilestore_name();
+                if (null != filestore_name) {
+                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
+                    prep.setString(1, filestore_name);
+                    prep.setInt(2, context_id);
+                    prep.setInt(3, user.getId().intValue());
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+            } finally {
+                Databases.closeSQLStuff(prep);
+            }
         }
     }
 
