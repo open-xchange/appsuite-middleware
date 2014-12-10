@@ -63,6 +63,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.net.SocketFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -84,7 +85,10 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implements Runnable, ExceptionHandler {
+public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implements Runnable, ExceptionHandler, LogstashSocketAppenderMBean {
+
+    /** Atomic reference for MBean registration */
+    private static final AtomicReference<LogstashSocketAppender> REF = new AtomicReference<LogstashSocketAppender>();
 
     private static final float LOAD_FACTOR = 0.67f;
 
@@ -110,12 +114,30 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     private Boolean alwaysPersistEvents;
 
+    /**
+     * Get the appender's instance
+     * 
+     * @return the appender's instance
+     */
+    public static LogstashSocketAppender getInstance() {
+        return REF.get();
+    }
+
+    /**
+     * Initializes a new {@link LogstashSocketAppender}.
+     */
+    public LogstashSocketAppender() {
+        super();
+    }
+
     /*
      * (non-Javadoc)
      * 
      * @see ch.qos.logback.core.AppenderBase#start()
      */
     public void start() {
+        REF.set(this);
+
         if (isStarted()) {
             return;
         }
@@ -196,6 +218,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         if (connectorTask != null) {
             connectorTask.cancel(true);
         }
+        REF.set(null);
         super.stop();
     }
 
@@ -251,7 +274,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
                     if (connectorTask == null) {
                         continue;
                     }
-                    
+
                     socket = waitForConnectorToReturnASocket();
                     if (socket == null) {
                         continue;
@@ -630,5 +653,10 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         for (Throwable th : t) {
             th.printStackTrace();
         }
+    }
+
+    @Override
+    public int getEventsInQueue() {
+        return queue.size();
     }
 }

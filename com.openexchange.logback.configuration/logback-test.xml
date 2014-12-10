@@ -37,7 +37,8 @@
     </appender>
     
     <!-- Logstash appender -->
-   	<!--<property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="true" />
+    <!--<property scope="context" name="com.openexchange.logback.extensions.logstash.enabled" value="true" />
+   	<property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="true" />
    	<property scope="context" name="com.openexchange.logback.extensions.logstash.loadFactor" value="0.67" />
     <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
         <remoteHost>localhost</remoteHost>
@@ -98,5 +99,6 @@
 
     <!-- Set this to DEBUG to log spreadsheet operations more in detail -->
     <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
+    <!--<logger name="com.openexchange" level="DEBUG"/>-->
 
 </configuration>
