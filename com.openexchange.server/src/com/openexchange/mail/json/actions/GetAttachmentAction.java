@@ -107,7 +107,6 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeStructureFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -136,7 +135,6 @@ import com.openexchange.tools.session.ServerSession;
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final long EXPIRES_MILLIS_YEAR = AJAXRequestResult.YEAR_IN_MILLIS * 50;
-    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
     private static final String PARAMETER_FILTER = Mail.PARAMETER_FILTER;
     private static final String PARAMETER_SAVE = Mail.PARAMETER_SAVE;
     private static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
