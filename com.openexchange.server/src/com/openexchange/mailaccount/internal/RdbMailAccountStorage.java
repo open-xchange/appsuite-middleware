@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.utils.DefaultFolderNamesProvider.extractFullname;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
@@ -2318,7 +2319,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
 
         String login = mailAccount.getTransportLogin();
-        if (Strings.isEmpty(login) && isMailTransportAuth(mailAccount, userId, contextId, con)) {
+        if (isEmpty(login) && isMailTransportAuth(mailAccount, userId, contextId, con)) {
             // Impossible to check as login not given, hence preceding duplicate check for mail account is sufficient here
             return;
         }
@@ -2862,10 +2863,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static String getOptionalString(final String string) {
         return (null == string || 0 == string.length()) ? null : string;
-    }
-
-    private static boolean isEmpty(final String string) {
-        return com.openexchange.java.Strings.isEmpty(string);
     }
 
     /**
