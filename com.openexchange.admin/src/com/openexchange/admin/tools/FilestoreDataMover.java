@@ -61,8 +61,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -70,7 +72,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -86,32 +88,53 @@ public class FilestoreDataMover implements Callable<Void> {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FilestoreDataMover.class);
 
-    private String src = null;
+    public static interface PostProcessTask {
 
-    private String dst = null;
+        /**
+         * Performs the post-process task.
+         *
+         * @throws StorageException If task fails
+         */
+        void perform() throws StorageException;
+    }
 
-    private Context ctx = null;
+    // -------------------------------------------------------------------------------------------------------
 
-    private Filestore dstStore = null;
-
-    private boolean rsyncEnabled = false;
+    private final String src;
+    private final String dst;
+    private final Context ctx;
+    private final Filestore dstStore;
+    private final boolean rsyncEnabled;
+    private final Queue<PostProcessTask> postProcessTasks;
 
     /**
      * @throws IOException
      */
-    public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore) throws IOException {
-        this.src = src;
-        this.dst = dst;
-        this.ctx = ctx;
-        this.dstStore = dstStore;
+    public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore) {
+        this(src, dst, ctx, dstStore, false);
     }
 
-    public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore, boolean rsyncEnabled) throws IOException {
+    public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore, boolean rsyncEnabled) {
+        super();
         this.src = src;
         this.dst = dst;
         this.ctx = ctx;
         this.dstStore = dstStore;
         this.rsyncEnabled = rsyncEnabled;
+        postProcessTasks = new ConcurrentLinkedQueue<PostProcessTask>();
+    }
+
+    /**
+     * Adds given post-process task.
+     *
+     * @param task The task to execute when job is done successfully
+     * @return This instance
+     */
+    public FilestoreDataMover addPostProcessTask(PostProcessTask task) {
+        if (null != task) {
+            postProcessTasks.add(task);
+        }
+        return this;
     }
 
     /**
@@ -130,7 +153,7 @@ public class FilestoreDataMover implements Callable<Void> {
      * @param source
      * @return
      */
-    public ArrayList<String> getFileList(final String source) {
+    public List<String> getFileList(final String source) {
         final Collection<File> listFiles = FileUtils.listFiles(new File(source), null, true);
         final ArrayList<String> retval = new ArrayList<String>();
         for (final File file : listFiles) {
@@ -148,7 +171,7 @@ public class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException
      */
     public void copy() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+        final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
         if (rsyncEnabled) {
             if (new File(this.src).exists()) {
                 final ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", this.src, this.dst + '/' });
@@ -159,14 +182,18 @@ public class FilestoreDataMover implements Callable<Void> {
                 FileUtils.deleteDirectory(new File(this.src));
             }
             ctx.setFilestoreId(dstStore.getId());
-            oxcox.changeStorageData(ctx);
-            oxcox.enable(ctx);
+            oxcox.changeFilestoreDataFor(ctx);
+
+            for (PostProcessTask task : postProcessTasks) {
+                task.perform();
+            }
         } else {
             FileStorage srcStorage = null;
             FileStorage dstStorage = null;
             Set<String> srcFiles = null;
             Map<String, String> fileMapping = null;
             try {
+                String src = this.src;
                 if (!src.endsWith("/")) {
                     src = src + "/";
                 }
@@ -210,13 +237,16 @@ public class FilestoreDataMover implements Callable<Void> {
                     srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
                 }
                 ctx.setFilestoreId(dstStore.getId());
-                oxcox.changeStorageData(ctx);
+                oxcox.changeFilestoreDataFor(ctx);
                 final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 Cache cache = cacheService.getCache("Filestore");
                 cache.clear();
                 Cache contextCache = cacheService.getCache("Context");
                 contextCache.remove(ctx.getId());
-                oxcox.enable(ctx);
+
+                for (PostProcessTask task : postProcessTasks) {
+                    task.perform();
+                }
             } catch (OXException e) {
                 throw new StorageException(e);
             }

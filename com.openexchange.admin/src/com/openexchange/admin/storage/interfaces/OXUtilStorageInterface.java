@@ -51,15 +51,15 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
-
+import java.sql.Connection;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Database;
-
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -155,6 +155,35 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract void changeFilestore(final Filestore fstore) throws StorageException;
+
+    /**
+     * @param ctx Context with Filestore data set!
+     * @throws StorageException
+     */
+    public abstract void changeFilestoreDataFor(Context ctx) throws StorageException;
+
+    /**
+     * @param ctx Context with Filestore data set!
+     * @param configDbCon The connection to use
+     * @throws StorageException
+     */
+    public abstract void changeFilestoreDataFor(Context ctx, Connection configDbCon) throws StorageException;
+
+    /**
+     * @param user The associated user
+     * @param ctx Context with Filestore data set!
+     * @param con The connection to use
+     * @throws StorageException
+     */
+    public abstract void changeFilestoreDataFor(User user, Context ctx) throws StorageException;
+
+    /**
+     * @param user The associated user
+     * @param ctx Context with Filestore data set!
+     * @param con The connection to use
+     * @throws StorageException
+     */
+    public abstract void changeFilestoreDataFor(User user, Context ctx, Connection con) throws StorageException;
 
     /**
      * List all registered file stores.

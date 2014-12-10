@@ -71,15 +71,19 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.apache.commons.collections.keyvalue.MultiKey;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.database.Databases;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -350,6 +354,141 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             prep.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(prep);
+        }
+    }
+
+    @Override
+    public void changeFilestoreDataFor(Context ctx) throws StorageException {
+        Connection configDbCon = null;
+        boolean rollback = false;
+        try {
+            configDbCon = cache.getConnectionForConfigDB();
+            configDbCon.setAutoCommit(false);
+            rollback = true;
+
+            changeFilestoreDataFor(ctx, configDbCon);
+
+            configDbCon.commit();
+            rollback = false;
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != configDbCon) {
+                if (rollback) {
+                    Databases.rollback(configDbCon);
+                }
+                Databases.autocommit(configDbCon);
+                try {
+                    cache.pushConnectionForConfigDB(configDbCon);
+                } catch (PoolException e) {
+                    // Ignroe
+                }
+            }
+        }
+    }
+
+    @Override
+    public void changeFilestoreDataFor(Context ctx, Connection configDbCon) throws StorageException {
+        if (ctx.getFilestoreId() != null) {
+            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            final Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId().intValue(), false);
+            PreparedStatement prep = null;
+            final int context_id = ctx.getId().intValue();
+            try {
+
+                if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
+                    prep = configDbCon.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
+                    prep.setInt(1, filestore.getId().intValue());
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+                final String filestore_name = ctx.getFilestore_name();
+                if (null != filestore_name) {
+                    prep = configDbCon.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
+                    prep.setString(1, filestore_name);
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+            } catch (SQLException exp) {
+                throw new StorageException(exp);
+            } finally {
+                Databases.closeSQLStuff(prep);
+            }
+        }
+    }
+
+    @Override
+    public void changeFilestoreDataFor(User user, Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            con.setAutoCommit(false);
+            rollback = true;
+
+            changeFilestoreDataFor(user, ctx, con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    // Ignroe
+                }
+            }
+        }
+    }
+
+    @Override
+    public void changeFilestoreDataFor(User user, Context ctx, Connection con) throws StorageException {
+        if (user.getFilestoreId() != null) {
+            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            final Filestore filestore = oxutil.getFilestore(user.getFilestoreId().intValue(), false);
+            PreparedStatement prep = null;
+            final int context_id = ctx.getId().intValue();
+            try {
+
+                if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
+                    prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ?");
+                    prep.setInt(1, filestore.getId().intValue());
+                    prep.setInt(2, context_id);
+                    prep.setInt(3, user.getId().intValue());
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+                final String filestore_name = user.getFilestore_name();
+                if (null != filestore_name) {
+                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
+                    prep.setString(1, filestore_name);
+                    prep.setInt(2, context_id);
+                    prep.setInt(3, user.getId().intValue());
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+            } catch (final SQLException exp) {
+                throw new StorageException(exp);
+            } finally {
+                Databases.closeSQLStuff(prep);
+            }
         }
     }
 

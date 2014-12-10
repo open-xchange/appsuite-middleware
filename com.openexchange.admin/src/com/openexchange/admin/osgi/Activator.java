@@ -86,6 +86,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -141,6 +142,8 @@ public class Activator extends HousekeepingActivator {
 
             PluginInterfaces.setInstance(builder.build());
         }
+
+        track(FilestoreLocationUpdater.class, new FilestoreLocationUpdaterCustomizer(context));
 
         // Open trackers
         openTrackers();

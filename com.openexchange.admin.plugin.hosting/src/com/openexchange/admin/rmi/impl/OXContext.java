@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi.impl;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -97,6 +96,7 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
+import com.openexchange.admin.tools.FilestoreDataMover.PostProcessTask;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -1051,17 +1051,27 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     LOGGER.error("dst is null");
                     throw contextException;
                 }
-                FilestoreDataMover fsdm = null;
+
+                // Initialize mover instance
+                FilestoreDataMover fsdm;
                 boolean rsyncEnabled = "file".equalsIgnoreCase(sourceURI.getScheme()) && "file".equalsIgnoreCase(destURI.getScheme());
                 if (rsyncEnabled) {
                     fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore, true);
                 } else {
                     fsdm = new FilestoreDataMover(sourceURI.toString() + "/" + ctxdir, destURI.toString(), ctx, dst_filestore, false);
                 }
+
+                // Enable context after processing
+                fsdm.addPostProcessTask(new PostProcessTask() {
+
+                    @Override
+                    public void perform() throws StorageException {
+                        oxcox.enable(ctx);
+                    }
+                });
+
                 return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId(), ctx.getId());
             } catch (final StorageException e) {
-                throw new OXContextException(e);
-            } catch (final IOException e) {
                 throw new OXContextException(e);
             }
         } catch (final URISyntaxException e) {

@@ -929,54 +929,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public void changeStorageData(final Context ctx) throws StorageException {
-        Connection configdb_write_con = null;
-        final PreparedStatement prep = null;
-        try {
-            configdb_write_con = cache.getConnectionForConfigDB();
-            configdb_write_con.setAutoCommit(false);
-
-            changeStorageDataImpl(ctx, configdb_write_con);
-
-            configdb_write_con.commit();
-        } catch (final DataTruncation dt) {
-            LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException exp) {
-            LOG.error("SQL Error", exp);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of connection!", expd);
-            }
-            throw new StorageException(exp);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of connection!", expd);
-            }
-            throw new StorageException(e);
-        } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException exp) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
-            }
-            try {
-                if (configdb_write_con != null) {
-                    cache.pushConnectionForConfigDB(configdb_write_con);
-                }
-            } catch (final PoolException ecp) {
-                LOG.error("Error pushing configdb connection to pool!", ecp);
-            }
-        }
+        OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
+        oxcox.changeFilestoreDataFor(ctx);
     }
 
     @Override
