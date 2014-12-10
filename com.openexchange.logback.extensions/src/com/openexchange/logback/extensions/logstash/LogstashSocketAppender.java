@@ -245,13 +245,13 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    logInfo("Trying to connect to " + peerId + "...");
                     SocketConnector connector = createConnector(address, port, 0, reconnectionDelay);
 
                     connectorTask = activateConnector(connector);
                     if (connectorTask == null) {
                         continue;
                     }
+                    
                     socket = waitForConnectorToReturnASocket();
                     if (socket == null) {
                         continue;
@@ -279,7 +279,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             OutputStream oos = new BufferedOutputStream(socket.getOutputStream());
             encoder.init(oos);
             socket.setSoTimeout(0);
-            logInfo("Connected established to " + peerId + ". Dispatching events");
+            logInfo("Dispatching events...");
             int counter = 0;
             while (true) {
                 ILoggingEvent event = queue.take();
@@ -371,9 +371,11 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * @return The {@link SocketConnector}
      */
     private SocketConnector createConnector(InetAddress address, int port, int initialDelay, int retryDelay) {
+        logInfo("Creating socket connector for " + peerId + " ...");
         SocketConnector connector = newConnector(address, port, initialDelay, retryDelay);
         connector.setExceptionHandler(this);
         connector.setSocketFactory(getSocketFactory());
+        logInfo("Socket connector for " + peerId + " created.");
         return connector;
     }
 
@@ -386,7 +388,10 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      */
     private Future<Socket> activateConnector(SocketConnector connector) throws OXException {
         try {
-            return getContext().getExecutorService().submit(connector);
+            logInfo("Submitting socket connector to the executor service...");
+            Future<Socket> task = getContext().getExecutorService().submit(connector);
+            logInfo("Connector task returned.");
+            return task;
         } catch (RejectedExecutionException e) {
             throw LogstashSocketAppenderExceptionCodes.ERROR_ACTIVATING_CONNECTOR.create(e.getMessage(), e);
         }
@@ -400,7 +405,9 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * @throws InterruptedException
      */
     private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException {
+        logInfo("Trying to connect to " + peerId + "...");
         Socket s = connectorTask.get();
+        logInfo("Connection established to " + peerId + ".");
         connectorTask = null;
         return s;
     }
