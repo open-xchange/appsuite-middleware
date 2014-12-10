@@ -50,7 +50,6 @@
 package com.openexchange.drive.internal;
 
 import com.openexchange.drive.DriveFileMetadata;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.management.DriveConfig;
 
 
@@ -62,17 +61,24 @@ import com.openexchange.drive.management.DriveConfig;
  */
 public class JumpLinkGenerator {
 
-    private static final String[] OFFICE_TEXT_MIMETYPES = { "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/vnd.oasis.opendocument.text", "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
-        "application/msword", "application/rtf"};
+    private static final String[] OFFICE_TEXT_MIMETYPES = { "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/rtf",
+        "application/vnd.oasis.opendocument.text", "application/vnd.openxmlformats-officedocument.wordprocessingml.template", "application/msword",
+        "application/vnd.oasis.opendocument.text-master", "application/vnd.oasis.opendocument.text-template", "application/vnd.oasis.opendocument.text-web" };
 
-    private static final String[] OFFICE_SPREADSHEET_MIMETYPES = {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    private static final String[] OFFICE_SPREADSHEET_MIMETYPES = { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
-        "application/vnd.ms-excel"};
+        "application/vnd.ms-excel", "application/vnd.oasis.opendocument.spreadsheet-template" };
 
-    private final DriveSession session;
+    private final static String APP_FILES = "app=io.ox/files";
+    private final static String APP_EDITOR = "app=io/ox/editor";
+    private final static String APP_PERMISSIONS = "app=io.ox/files/permissions";
+    private final static String APP_HISTORY = "app=io.ox/files/history";
+    private final static String APP_OFFICE_TEXT = "app=io.ox/office/text";
+    private final static String APP_OFFICE_SPREADSHEET = "app=io.ox/office/spreadsheet";
 
-    public JumpLinkGenerator(DriveSession session) {
+    private final SyncSession session;
+
+    public JumpLinkGenerator(SyncSession session) {
         this.session = session;
     }
 
@@ -91,33 +97,33 @@ public class JumpLinkGenerator {
             String mimeType = metadata.getMimeType();
             switch (method) {
             case "edit":
-                if (inArray(OFFICE_TEXT_MIMETYPES, mimeType)) {
-                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/office/text");
-                } else if (inArray(OFFICE_SPREADSHEET_MIMETYPES, mimeType)) {
-                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/office/spreadsheet");
+                if (inArray(OFFICE_TEXT_MIMETYPES, mimeType) && session.hasCapability("text")) {
+                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_OFFICE_TEXT);
+                } else if (inArray(OFFICE_SPREADSHEET_MIMETYPES, mimeType) && session.hasCapability("spreadsheet")) {
+                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_OFFICE_SPREADSHEET);
                 } else if (mimeType.startsWith("text/")){
-                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/editor");
+                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_EDITOR);
                 } else {
-                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/files");
+                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_FILES);
                 }
                 break;
             case "permissions":
-                redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/files/permissions");
+                redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_PERMISSIONS);
                 break;
             case "version_history":
-                redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/files/history");
+                redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_HISTORY);
                 break;
             case "preview":
             default:
-                redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/files");
+                redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_FILES);
                 break;
             }
             redirectUrl = redirectUrl.replaceAll("\\[id\\]", "id=" + fileId);
         } else {
             if ("permissions".equals(method)) {
-                redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/files/permissions");
+                redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_PERMISSIONS);
             } else {
-                redirectUrl = redirectUrl.replaceAll("\\[app\\]", "app=io.ox/files");
+                redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_FILES);
             }
             redirectUrl = redirectUrl.replaceAll("&\\[id\\]", "");
         }
