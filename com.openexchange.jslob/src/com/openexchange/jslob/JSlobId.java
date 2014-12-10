@@ -165,13 +165,13 @@ public final class JSlobId implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("JSlobId {user=").append(user).append(", context=").append(context).append(", ");
+        final StringBuilder builder = new StringBuilder(96);
+        builder.append("{user=").append(user).append(", context=").append(context);
         if (serviceId != null) {
-            builder.append("serviceId=").append(serviceId).append(", ");
+            builder.append(", serviceId=").append(serviceId);
         }
         if (id != null) {
-            builder.append("id=").append(id).append(", ");
+            builder.append(", id=").append(id);
         }
         builder.append('}');
         return builder.toString();

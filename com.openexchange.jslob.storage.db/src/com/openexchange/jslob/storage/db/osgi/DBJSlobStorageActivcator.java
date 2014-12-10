@@ -49,10 +49,18 @@
 
 package com.openexchange.jslob.storage.db.osgi;
 
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -73,6 +81,8 @@ import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableService;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableTask;
 import com.openexchange.jslob.storage.db.groupware.JSlobDBDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -99,8 +109,9 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
         LOG.info("Starting bundle: com.openexchange.jslob.storage.db");
         try {
             Services.setServices(this);
-            final DBJSlobStorage dbJSlobStorage = new DBJSlobStorage(this);
-            registerService(JSlobStorage.class, CachingJSlobStorage.initialize(dbJSlobStorage));
+            DBJSlobStorage dbJSlobStorage = new DBJSlobStorage(this);
+            final CachingJSlobStorage cachingJSlobStorage = CachingJSlobStorage.initialize(dbJSlobStorage);
+            registerService(JSlobStorage.class, cachingJSlobStorage);
             /*
              * Register services for table creation
              */
@@ -201,6 +212,39 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                 track(JSlobService.class, stc);
             }
             openTrackers();
+
+            {
+
+
+                EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(Event event) {
+                        String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                            Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            Set<UsID> set = new HashSet<UsID>(container.size());
+                            for (Session session : container.values()) {
+                                if (false == session.isTransient()) {
+                                    int contextId = session.getContextId();
+                                    int userId = session.getUserId();
+                                    UsID usid = new UsID(userId, contextId);
+                                    if (set.add(usid)) {
+                                        cachingJSlobStorage.dropAllUserJSlobs(userId, contextId);
+                                    }
+                                }
+                            }
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                            Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                            cachingJSlobStorage.dropAllUserJSlobs(session.getUserId(), session.getContextId());
+                        }
+                    }
+                };
+
+                Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+                props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                registerService(EventHandler.class, eventHandler, props);
+            }
         } catch (final Exception e) {
             LOG.error("Starting bundle \"com.openexchange.jslob.storage.db\" failed", e);
             throw e;
@@ -234,6 +278,50 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ThreadPoolService.class };
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    static final class UsID {
+
+        final int userId;
+        final int contextId;
+        private final int hash;
+
+        UsID(int userId, int contextId) {
+            super();
+            this.userId = userId;
+            this.contextId = contextId;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof UsID)) {
+                return false;
+            }
+            UsID other = (UsID) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
     }
 
 }

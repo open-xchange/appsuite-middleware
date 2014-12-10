@@ -53,6 +53,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
@@ -178,11 +179,12 @@ public final class RequestTools {
      */
     public static boolean isIgnoredEasRequest(HttpServletRequest request, Set<String> ignoredEasCommands) {
         if (isEasRequest(request)) {
-            CollectionUtils.transform(ignoredEasCommands, LOWER_CASER);
+            Set<String> lIgnoredEasCommands = new HashSet<String>(ignoredEasCommands);
+            CollectionUtils.transform(lIgnoredEasCommands, new StringToLowerCaseTransformer());
 
             String cmd = request.getParameter(EAS_CMD);
 
-            if ((cmd != null) && (ignoredEasCommands.contains(cmd.toLowerCase()))) {
+            if ((cmd != null) && (lIgnoredEasCommands.contains(cmd.toLowerCase()))) {
                 return true;
             }
 
@@ -194,7 +196,7 @@ public final class RequestTools {
              */
             byte[] bytes = getBase64Bytes(request.getQueryString());
             if (null != bytes && bytes.length > 2) {
-                Set<EASCommands> set = EASCommands.get(ignoredEasCommands);
+                Set<EASCommands> set = EASCommands.get(lIgnoredEasCommands);
 
                 byte code = bytes[1];
 
@@ -274,10 +276,11 @@ public final class RequestTools {
                 return result.booleanValue();
             }
 
-            CollectionUtils.transform(ignoredUsmCommands, LOWER_CASER);
+            Set<String> lIgnoredUsmCommands = new HashSet<String>(ignoredUsmCommands);
+            CollectionUtils.transform(lIgnoredUsmCommands, new StringToLowerCaseTransformer());
 
             boolean isIgnored = false;
-            if (ignoredUsmCommands.contains(pathInfo)) {
+            if (lIgnoredUsmCommands.contains(pathInfo)) {
                 isIgnored = true;
             }
             USM_PATH_CACHE.put(pathInfo, isIgnored);

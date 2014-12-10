@@ -66,6 +66,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-10
 * Thu Dec 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-09
 * Mon Nov 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
