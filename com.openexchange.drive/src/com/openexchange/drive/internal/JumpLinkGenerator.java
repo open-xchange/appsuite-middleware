@@ -70,7 +70,7 @@ public class JumpLinkGenerator {
         "application/vnd.ms-excel", "application/vnd.oasis.opendocument.spreadsheet-template" };
 
     private final static String APP_FILES = "app=io.ox/files";
-    private final static String APP_EDITOR = "app=io/ox/editor";
+    private final static String APP_EDITOR = "app=io.ox/editor";
     private final static String APP_PERMISSIONS = "app=io.ox/files/permissions";
     private final static String APP_HISTORY = "app=io.ox/files/history";
     private final static String APP_OFFICE_TEXT = "app=io.ox/office/text";
