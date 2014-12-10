@@ -157,7 +157,9 @@ public abstract class OXContextStorageInterface {
     /**
      * @param ctx Context with Filestore data set!
      * @throws StorageException
+     * @deprecated Use {@link OXUtilStorageInterface#changeFilestoreDataFor(Context)}
      */
+    @Deprecated
     public abstract void changeStorageData(final Context ctx) throws StorageException;
 
     /**
