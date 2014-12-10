@@ -1056,9 +1056,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 FilestoreDataMover fsdm;
                 boolean rsyncEnabled = "file".equalsIgnoreCase(sourceURI.getScheme()) && "file".equalsIgnoreCase(destURI.getScheme());
                 if (rsyncEnabled) {
-                    fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore, true);
+                    fsdm = FilestoreDataMover.newContextFilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore, true);
                 } else {
-                    fsdm = new FilestoreDataMover(sourceURI.toString() + "/" + ctxdir, destURI.toString(), ctx, dst_filestore, false);
+                    fsdm = FilestoreDataMover.newContextFilestoreDataMover(sourceURI.toString() + "/" + ctxdir, destURI.toString(), ctx, dst_filestore, false);
                 }
 
                 // Enable context after processing

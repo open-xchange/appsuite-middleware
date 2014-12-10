@@ -69,6 +69,7 @@ import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -78,8 +79,9 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
-import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorages;
 
 /**
  * @author d7
@@ -88,6 +90,12 @@ public class FilestoreDataMover implements Callable<Void> {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FilestoreDataMover.class);
 
+    /**
+     * {@link PostProcessTask} - A task that gets executed after successful completion.
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @since v7.8.0
+     */
     public static interface PostProcessTask {
 
         /**
@@ -100,25 +108,31 @@ public class FilestoreDataMover implements Callable<Void> {
 
     // -------------------------------------------------------------------------------------------------------
 
+
+    public static FilestoreDataMover newContextFilestoreDataMover(String src, String dst, Context ctx, Filestore dstStore, boolean rsyncEnabled) {
+        return new FilestoreDataMover(src, dst, null, ctx, dstStore, rsyncEnabled);
+    }
+
+    public static FilestoreDataMover newUserFilestoreDataMover(String src, String dst, User user, Context ctx, Filestore dstStore, boolean rsyncEnabled) {
+        return new FilestoreDataMover(src, dst, user, ctx, dstStore, rsyncEnabled);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
     private final String src;
     private final String dst;
     private final Context ctx;
+    private final User user;
     private final Filestore dstStore;
     private final boolean rsyncEnabled;
     private final Queue<PostProcessTask> postProcessTasks;
 
-    /**
-     * @throws IOException
-     */
-    public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore) {
-        this(src, dst, ctx, dstStore, false);
-    }
-
-    public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore, boolean rsyncEnabled) {
+    private FilestoreDataMover(String src, String dst, User user, Context ctx, Filestore dstStore, boolean rsyncEnabled) {
         super();
         this.src = src;
         this.dst = dst;
         this.ctx = ctx;
+        this.user = user;
         this.dstStore = dstStore;
         this.rsyncEnabled = rsyncEnabled;
         postProcessTasks = new ConcurrentLinkedQueue<PostProcessTask>();
@@ -163,7 +177,7 @@ public class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * start the copy (rsync)
+     * Start the copy (rsync)
      *
      * @throws StorageException
      * @throws InterruptedException
@@ -171,7 +185,6 @@ public class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException
      */
     public void copy() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
-        final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
         if (rsyncEnabled) {
             if (new File(this.src).exists()) {
                 final ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", this.src, this.dst + '/' });
@@ -181,17 +194,20 @@ public class FilestoreDataMover implements Callable<Void> {
                 }
                 FileUtils.deleteDirectory(new File(this.src));
             }
+
             ctx.setFilestoreId(dstStore.getId());
+
+            OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(ctx);
 
             for (PostProcessTask task : postProcessTasks) {
                 task.perform();
             }
         } else {
-            FileStorage srcStorage = null;
-            FileStorage dstStorage = null;
-            Set<String> srcFiles = null;
-            Map<String, String> fileMapping = null;
+            FileStorage srcStorage;
+            FileStorage dstStorage;
+            Set<String> srcFiles;
+            Map<String, String> fileMapping;
             try {
                 String src = this.src;
                 if (!src.endsWith("/")) {
@@ -199,8 +215,8 @@ public class FilestoreDataMover implements Callable<Void> {
                 }
                 StringBuilder dstUri = new StringBuilder();
                 dstUri.append(dst).append("/").append(ctx.getId()).append("_ctx_store/");
-                srcStorage = FileStorage.getInstance(new URI(src));
-                dstStorage = FileStorage.getInstance(new URI(dstUri.toString()));
+                srcStorage = FileStorages.getFileStorageService().getFileStorage(new URI(src));
+                dstStorage = FileStorages.getFileStorageService().getFileStorage(new URI(dstUri.toString()));
                 srcFiles = srcStorage.getFileList();
                 fileMapping = new HashMap<String, String>(srcFiles.size());
                 for (String file : srcFiles) {
@@ -219,25 +235,27 @@ public class FilestoreDataMover implements Callable<Void> {
 
             Connection con = null;
             try {
-                con = Database.getNoTimeout(ctx.getId(), true);
+                con = Database.getNoTimeout(ctx.getId().intValue(), true);
                 List<FilestoreLocationUpdater> services = FilestoreLocationUpdaterRegistry.getInstance().getServices();
                 for (FilestoreLocationUpdater updater : services) {
-                    updater.updateFilestoreLocation(fileMapping, ctx.getId(), con);
+                    updater.updateFilestoreLocation(fileMapping, ctx.getId().intValue(), con);
                 }
             } catch (OXException e) {
                 throw new StorageException(e);
             } catch (SQLException e) {
                 throw new StorageException(e);
             } finally {
-                Database.backNoTimeout(ctx.getId(), true, con);
+                Database.backNoTimeout(ctx.getId().intValue(), true, con);
             }
 
             try {
-                if (null != srcStorage && null != srcFiles) {
-                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
-                }
+                srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+
                 ctx.setFilestoreId(dstStore.getId());
+
+                OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
                 oxcox.changeFilestoreDataFor(ctx);
+
                 final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 Cache cache = cacheService.getCache("Filestore");
                 cache.clear();

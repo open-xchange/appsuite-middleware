@@ -928,6 +928,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
+    @Deprecated
     public void changeStorageData(final Context ctx) throws StorageException {
         OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
         oxcox.changeFilestoreDataFor(ctx);

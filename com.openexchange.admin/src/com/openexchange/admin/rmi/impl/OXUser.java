@@ -315,6 +315,18 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e1;
         }
 
+        // check if he wants to change the filestore id, if yes, make sure filestore with this id exists in the system
+        {
+            Integer filestoreId = usrdata.getFilestoreId();
+            if (filestoreId != null) {
+                if (!tool.existsStore(filestoreId.intValue())) {
+                    final InvalidDataException inde = new InvalidDataException("No such filestore with id " + ctx.getFilestoreId());
+                    LOGGER.error("", inde);
+                    throw inde;
+                }
+            }
+        }
+
         final boolean isContextAdmin = tool.isContextAdmin(ctx, userid.intValue());
 
         oxu.change(ctx, usrdata);
