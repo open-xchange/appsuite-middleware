@@ -55,6 +55,7 @@ import com.dropbox.client2.DropboxAPI.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.java.Strings;
 import com.openexchange.mime.MimeTypeMap;
 
@@ -97,6 +98,15 @@ public final class DropboxFile extends DefaultFile {
             DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
         setFileName(entry.fileName());
         setTitle(entry.fileName());
+    }
+
+    /**
+     * Gets the file's folder- and object-identifier inside an {@link IDTuple} structure.
+     *
+     * @return The ID tuple
+     */
+    public IDTuple getIDTuple() {
+        return new IDTuple(getFolderId(), getId());
     }
 
     @Override

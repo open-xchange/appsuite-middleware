@@ -193,7 +193,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 Entry entry = dropboxAPI.putFile(path, Streams.EMPTY_INPUT_STREAM, 0, null, null);
                 DropboxFile savedFile = new DropboxFile(entry, userId);
                 file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
-                return new IDTuple(savedFile.getFolderId(), savedFile.getId());
+                return savedFile.getIDTuple();
             } catch (Exception e) {
                 throw handle(e, path);
             }
@@ -214,7 +214,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         Entry entry = dropboxAPI.move(path, toPath);
                         DropboxFile savedFile = new DropboxFile(entry, userId);
                         file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
-                        return new IDTuple(savedFile.getFolderId(), savedFile.getId());
+                        return savedFile.getIDTuple();
                     } catch (Exception e) {
                         throw handle(e, path);
                     }
@@ -229,7 +229,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         Entry entry = dropboxAPI.restore(path, file.getVersion());
                         DropboxFile savedFile = new DropboxFile(entry, userId);
                         file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
-                        return new IDTuple(savedFile.getFolderId(), savedFile.getId());
+                        return savedFile.getIDTuple();
                     } catch (Exception e) {
                         throw handle(e, path);
                     }
@@ -258,7 +258,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
              * perform copy
              */
             Entry entry = dropboxAPI.copy(path, toPath(destFolder, destName));
-            return new IDTuple(entry.parentPath(), entry.fileName());
+            DropboxFile savedFile = new DropboxFile(entry, userId);
+            if (null != update) {
+                update.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+            }
+            return savedFile.getIDTuple();
         } catch (Exception e) {
             throw handle(e, path);
         }
@@ -271,7 +275,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         String destPath = toPath(destFolder, destName);
         try {
             Entry entry = dropboxAPI.move(path, destPath);
-            return new IDTuple(entry.parentPath(), entry.fileName());
+            DropboxFile savedFile = new DropboxFile(entry, userId);
+            if (null != update) {
+                update.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+            }
+            return savedFile.getIDTuple();
         } catch (Exception e) {
             throw handle(e, path);
         }
@@ -323,7 +331,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     null);
                 DropboxFile savedFile = new DropboxFile(entry, userId);
                 file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
-                return new IDTuple(savedFile.getFolderId(), savedFile.getId());
+                return savedFile.getIDTuple();
             } else {
                 // Update, adjust metadata as needed
                 entry = dropboxAPI.putFileOverwrite(path, data, length, null);
@@ -714,7 +722,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         for (int i = 0; i < entry.hash.length(); i++) {
             hash = 31 * hash + entry.hash.charAt(i);
         }
-        return hash;
+        return Math.abs(hash);
     }
 
     /**

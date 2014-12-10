@@ -58,8 +58,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -92,24 +92,23 @@ public class UpdateAction extends AbstractWriteAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
+        String result;
         IDBasedFileAccess fileAccess = request.getFileAccess();
         if (request.hasUploads()) {
-            boolean ignoreVersion = request.getBoolParameter("ignoreVersion");
-            if (ignoreVersion && (fileAccess instanceof IDBasedIgnorableVersionFileAccess)) {
-                IDBasedIgnorableVersionFileAccess ignorableVersionFileAccess = (IDBasedIgnorableVersionFileAccess) fileAccess;
+            if (request.getBoolParameter("ignoreVersion")) {
                 FileID id = new FileID(file.getId());
-                if (ignorableVersionFileAccess.supportsIgnorableVersion(id.getService(), id.getAccountId())) {
-                    ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
+                if (fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION)) {
+                    result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
                 } else {
-                    ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+                    result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
                 }
             } else {
-                fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+                result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
             }
         } else {
-            fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
+            result = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
         }
-        return request.extendedResponse() ? result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
+        return request.extendedResponse() ? result(fileAccess.getFileMetadata(result, FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
     }
 
 }
