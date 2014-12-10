@@ -74,6 +74,7 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.session.Session;
 
 /**
  * {@link DriveUtils}
@@ -312,6 +313,16 @@ public class DriveUtils {
             fileNames.add(normalizedName);
         }
         return fileNames;
+    }
+
+    /**
+     * Gets a value indicating whether the session belongs to a known drive synchronization client or not.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if the session belongs to a known drive client, <code>false</code>, otherwise
+     */
+    public static boolean isDriveSession(Session session) {
+        return null != session && false == DriveClientType.UNKNOWN.equals(DriveClientType.parse(session.getClient()));
     }
 
     private DriveUtils() {

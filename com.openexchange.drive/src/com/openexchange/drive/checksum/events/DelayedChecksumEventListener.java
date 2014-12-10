@@ -58,13 +58,14 @@ import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOP
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.internal.DriveServiceLookup;
@@ -159,7 +160,7 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
     public void handleEvent(final Event event) {
         try {
             Session session = FileStorageEventHelper.extractSession(event);
-            if (null == session || isDriveSession(session)) {
+            if (null == session || DriveUtils.isDriveSession(session)) {
                 // skip
                 return;
             }
@@ -257,9 +258,13 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                     folderIDs.add(invalidation.getFolderID());
                 }
             }
+            /*
+             * trigger invalidations
+             */
+            removeRedundantFiles(fileChecksumsToInvalidate, fileChecksumsInFolderToInvalidate);
             invalidateDirectoryChecksums(directoryChecksumsToInvalidate);
-            invalidateFileChecksums(fileChecksumsToInvalidate);
             invalidateFileChecksumsInFolder(fileChecksumsInFolderToInvalidate);
+            invalidateFileChecksums(fileChecksumsToInvalidate);
         }
     }
 
@@ -308,8 +313,38 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
         }
     }
 
-    private static boolean isDriveSession(Session session) {
-        return null != session && false == DriveClientType.UNKNOWN.equals(DriveClientType.parse(session.getClient()));
+    private static void removeRedundantFiles(Map<Integer, Set<FileID>> fileChecksumsToInvalidate, Map<Integer, Set<FolderID>> fileChecksumsInFolderToInvalidate) {
+        for (Entry<Integer, Set<FolderID>> entry : fileChecksumsInFolderToInvalidate.entrySet()) {
+            Integer contextID = entry.getKey();
+            Set<FileID> fileIDs = fileChecksumsToInvalidate.get(contextID);
+            if (null != fileIDs && 0 < fileIDs.size()) {
+                Iterator<FileID> iterator = fileIDs.iterator();
+                while (iterator.hasNext()) {
+                    FileID fileID = iterator.next();
+                    for (FolderID folderID : entry.getValue()) {
+                        if (matches(folderID, fileID)) {
+                            iterator.remove();
+                            break;
+                        }
+                    }
+                }
+                if (fileIDs.isEmpty()) {
+                    fileChecksumsToInvalidate.remove(contextID);
+                }
+            }
+        }
+    }
+
+    private static boolean matches(FolderID folderID, FileID fileID) {
+        if (null == folderID || null == folderID.getService() || null == folderID.getAccountId() || null == folderID.getFolderId()) {
+            return false;
+        }
+        if (null == fileID || null == fileID.getService() || null == fileID.getAccountId() || null == fileID.getFolderId()) {
+            return false;
+        }
+        return folderID.getService().equals(fileID.getService()) &&
+            folderID.getAccountId().equals(fileID.getAccountId()) &&
+            folderID.getFolderId().equals(fileID.getFolderId());
     }
 
 }

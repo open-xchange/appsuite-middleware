@@ -56,7 +56,7 @@ import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOL
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOPIC;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.drive.DriveClientType;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
@@ -93,7 +93,7 @@ public class ChecksumEventListener implements EventHandler {
     public void handleEvent(final Event event) {
         try {
             Session session = FileStorageEventHelper.extractSession(event);
-            if (null == session || isDriveSession(session)) {
+            if (null == session || DriveUtils.isDriveSession(session)) {
                 // skip
                 return;
             }
@@ -135,10 +135,6 @@ public class ChecksumEventListener implements EventHandler {
         } catch (OXException e) {
             LOG.warn("unexpected error during event handling", e);
         }
-    }
-
-    private static boolean isDriveSession(Session session) {
-        return null != session && false == DriveClientType.UNKNOWN.equals(DriveClientType.parse(session.getClient()));
     }
 
 }
