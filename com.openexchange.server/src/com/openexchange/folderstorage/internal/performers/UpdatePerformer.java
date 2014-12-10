@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.groupware.contexts.Context;
@@ -216,9 +217,15 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 }
             }
-            final boolean changeSubscription;
+            boolean changeSubscription = false;
             {
-                changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
+                if (folder instanceof SetterAwareFolder) {
+                    if (((SetterAwareFolder) folder).containsSubscribed()) {
+                        changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
+                    }
+                } else {
+                    changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
+                }
             }
             final boolean changedMetaInfo;
             {
