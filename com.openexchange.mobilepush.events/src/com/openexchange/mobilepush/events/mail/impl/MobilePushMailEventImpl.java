@@ -67,6 +67,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mobilepush.MobilePushConstants;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushEventService;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
@@ -100,12 +101,16 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         /**
          * Check event
          */
-        if (!isRemoteEvent(event)) {
+        Session session = getSession(event);
+        if (session == null) {
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
-        Session session = getSession(event);
-        if (session == null) {
+        if (isTriggeredByPushClient(session)) {
+            LOG.debug("Ignoring event because it is triggered by the push device. Client Id: {}", session.getClient());
+            return;
+        }
+        if (!isRemoteEvent(event)) {
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
@@ -121,6 +126,16 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         int contextId = session.getContextId();
         Map<String, String> props = handleEvents(event, session);
         notifySubscribers(new MobilePushMailEvent(contextId, userId, props));
+    }
+
+    /**
+     * Checks if the event is triggered by the push device themselfs
+     */
+    private boolean isTriggeredByPushClient(Session session) {
+        if (MobilePushConstants.PUSH_CLIENT_ID.equals(session.getClient())) {
+            return true;
+        }
+        return false;
     }
 
     private boolean hasFolderProperty(Event event) {
