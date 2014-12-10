@@ -55,6 +55,7 @@ import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
+import com.openexchange.drive.metadata.DriveMetadata;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -116,6 +117,12 @@ public class DownloadHelper {
     }
 
     private InputStream getInputStream(File file, long offset, long length) throws OXException {
+        if (3 <= session.getDriveSession().getApiVersion() && DriveMetadata.class.isInstance(file)) {
+            /*
+             * get .drive-meta data
+             */
+            return ((DriveMetadata) file).getDocument(offset, length);
+        }
         IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
         InputStream inputStream = null;
         if (0 < offset || 0 < length) {

@@ -49,10 +49,7 @@
 
 package com.openexchange.drive.internal;
 
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.management.DriveConfig;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.java.Strings;
 
@@ -63,11 +60,7 @@ import com.openexchange.java.Strings;
  */
 public class DirectLinkGenerator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DirectLinkGenerator.class);
-
     private final SyncSession session;
-
-    private Boolean documentPreview;
 
     /**
      * Initializes a new {@link DirectLinkGenerator}.
@@ -216,7 +209,7 @@ public class DirectLinkGenerator {
             }
             if ((mimeType.matches(
                 "(?i)^application\\/.*(ms-word|ms-excel|ms-powerpoint|msword|msexcel|mspowerpoint|openxmlformats|opendocument|pdf|rtf).*$")
-                || mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) && hasDocumentPreview()) {
+                || mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) && session.hasCapability("document_preview")) {
                 return DriveConfig.getInstance().getImageLinkDocumentFile()
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())
@@ -257,24 +250,6 @@ public class DirectLinkGenerator {
             .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[directoryfragments\\]", getDirectoryLinkFragments(folderID))
         ;
-    }
-
-    private boolean hasDocumentPreview() {
-        if (null == documentPreview) {
-            documentPreview = Boolean.FALSE;
-            CapabilityService capabilityService = DriveServiceLookup.getService(CapabilityService.class);
-            if (null != capabilityService) {
-                try {
-                    CapabilitySet capabilities = capabilityService.getCapabilities(session.getServerSession());
-                    if (null != capabilities && capabilities.contains("document_preview")) {
-                        documentPreview = Boolean.TRUE;
-                    }
-                } catch (OXException e) {
-                    LOG.warn("Error determining capabilities", e);
-                }
-            }
-        }
-        return documentPreview.booleanValue();
     }
 
     private String getWebpath() {

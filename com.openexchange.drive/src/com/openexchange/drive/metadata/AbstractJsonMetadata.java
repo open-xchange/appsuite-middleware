@@ -47,29 +47,65 @@
  *
  */
 
-package com.openexchange.drive.storage.execute;
+package com.openexchange.drive.metadata;
 
-import java.util.List;
-import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.actions.AbstractAction;
-import com.openexchange.drive.sync.IntermediateSyncResult;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.drive.internal.DriveServiceLookup;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
+import com.openexchange.user.UserService;
 
 /**
- * {@link ActionExecutor}
+ * {@link AbstractJsonMetadata}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ActionExecutor<T extends DriveVersion> {
+public abstract class AbstractJsonMetadata  {
+
+    protected final SyncSession session;
 
     /**
-     * Executes the server-side actions of the synchronization result.
+     * Initializes a new {@link AbstractJsonMetadata}.
      *
-     * @param syncResult The sync result
-     * @return The list actions the client should execute afterwards
+     * @param session The sync session
      * @throws OXException
      */
-    List<AbstractAction<T>> execute(IntermediateSyncResult<T> syncResult) throws OXException;
+    protected AbstractJsonMetadata(SyncSession session) throws OXException {
+        super();
+        this.session = session;
+    }
+
+    /**
+     * Puts a user- or group entity into the supplied JSON object.
+     *
+     * @param jsonObject The JSON object to put the entity into
+     * @param entity The entity identifier
+     * @param group <code>true</code> if the entity points to a group, <code>false</code>, otherwise
+     * @return The JSON object
+     */
+    protected JSONObject putEntity(JSONObject jsonObject, int entity, boolean group) throws OXException, JSONException {
+        jsonObject.put("group", group);
+        jsonObject.put("entity", entity);
+        Context context = session.getServerSession().getContext();
+        if (group) {
+            Group resolvedGroup = DriveServiceLookup.getService(GroupService.class).getGroup(context, entity);
+            jsonObject.put("display_name", resolvedGroup.getDisplayName());
+            jsonObject.put("guest", false);
+        } else {
+            User user = DriveServiceLookup.getService(UserService.class).getUser(entity, context);
+            jsonObject.put("display_name", user.getDisplayName());
+            if (false == Strings.isEmpty(user.getMail())) {
+                jsonObject.put("email_address", user.getMail());
+            }
+            jsonObject.put("guest", user.isGuest());
+        }
+        return jsonObject;
+    }
 
 }

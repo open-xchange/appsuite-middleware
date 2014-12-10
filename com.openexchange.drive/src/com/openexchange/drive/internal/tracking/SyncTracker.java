@@ -164,14 +164,14 @@ public class SyncTracker {
                      * reset server checksums as well for affected directories to be sure
                      */
                     session.trace("Cycle still detected after first attempt to reset directory checksums " +
-                        "-resetting affected server checksums as well...");
+                        "- resetting affected server checksums as well...");
                     resetServerChecksums(session, affectedDirectoryVersions);
                 } else if (MAX_RESET_ATTEMPTS <= resetAttempts) {
                     /*
                      * gave client enough chances to reset his directory checksums, request client to stop for self protection
                      */
                     session.trace("Already tried to reset checksums " + resetAttempts +
-                        " times - adding 'qurantine' action for affected directories to interrupt further processing.");
+                        " times - adding 'quarantine' action for affected directories to interrupt further processing.");
                     optimizedActionsForClient.clear();
                     for (DirectoryVersion directoryVersion : affectedDirectoryVersions) {
                         OXException e = DriveExceptionCodes.REPEATED_SYNC_PROBLEMS.create(
@@ -192,7 +192,7 @@ public class SyncTracker {
                     new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient));
                 if (1 == resetAttempts) {
                     session.trace("Cycle still detected after first attempt to reset directory checksums " +
-                        "-resetting affected server checksums as well...");
+                        "- resetting affected server checksums as well...");
                     resetServerChecksums(session, affectedDirectoryVersions);
                 }
             }
@@ -449,7 +449,8 @@ public class SyncTracker {
          * ... and execute them
          */
         try {
-            new DirectoryActionExecutor(session, true, true).execute(resetActions);
+            new DirectoryActionExecutor(session, true, true).execute(
+                new IntermediateSyncResult<DirectoryVersion>(resetActions, Collections.<AbstractAction<DirectoryVersion>>emptyList()));
         } catch (OXException e) {
             LOG.warn("Error resetting server checksums", e);
         }

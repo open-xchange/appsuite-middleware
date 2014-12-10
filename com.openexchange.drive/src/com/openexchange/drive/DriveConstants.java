@@ -85,6 +85,11 @@ public class DriveConstants {
     public static final String FILEPART_EXTENSION = ".drivepart";
 
     /**
+     * The filename used for metadata files
+     */
+    public static final String METADATA_FILENAME = ".drive-meta";
+
+    /**
      * The used fields when retrieving file metadata
      */
     public static final List<Field> FILE_FIELDS = Arrays.asList(new Field[] {
@@ -126,8 +131,11 @@ public class DriveConstants {
 
     /**
      * The API version the backend supports currently.
+     * 1: initial api version
+     * 2: client defined exclusion filters
+     * 3: .drive-meta
      */
-    public static int SUPPORTED_API_VERSION = 2;
+    public static int SUPPORTED_API_VERSION = 3;
 
     /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.

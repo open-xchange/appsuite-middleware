@@ -72,12 +72,14 @@ import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link DriveActivator}
@@ -98,7 +100,8 @@ public class DriveActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, DatabaseService.class, CapabilityService.class,
-            IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, TimerService.class };
+            IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, TimerService.class,
+            UserService.class, GroupService.class };
     }
 
     @Override

@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.FileVersion;
@@ -246,6 +247,17 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     result.addActionForClient(uploadAction);
                     return 1;
                 }
+            } else if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
+                /*
+                 * not allowed, let client re-download the file, indicate as error without quarantine flag
+                 */
+                OXException e = DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
+                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
+                    path, e, false));
+                return 2;
             } else if (mayCreate()) {
                 /*
                  * not allowed, keep both client- and server versions, let client first rename it's file...
@@ -349,7 +361,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * name clash for new/modified files, check file equivalence
              */
-            if (Change.NONE.equals(Change.get(comparison.getClientVersion(), comparison.getServerVersion()))) {
+            if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
+                /*
+                 * server's metadata file always wins, let client re-download the file
+                 */
+                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                return 1;
+            } else if (Change.NONE.equals(Change.get(comparison.getClientVersion(), comparison.getServerVersion()))) {
                 /*
                  * same file version, let client update it's metadata
                  */
@@ -422,6 +441,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     private boolean mayDelete(FileVersion version) throws OXException {
+        if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(version.getName())) {
+            return false;
+        }
         int deletePermission = getPermission().getDeletePermission();
         if (FileStoragePermission.DELETE_ALL_OBJECTS <= deletePermission) {
             return true;
@@ -450,6 +472,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     private boolean mayModify(FileVersion version) throws OXException {
+        if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(version.getName())) {
+            return false;
+        }
         int writePermission = getPermission().getWritePermission();
         if (FileStoragePermission.WRITE_ALL_OBJECTS <= writePermission) {
             return true;

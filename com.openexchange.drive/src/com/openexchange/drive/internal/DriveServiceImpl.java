@@ -167,14 +167,13 @@ public class DriveServiceImpl implements DriveService {
             if (0 == retryCount) {
                 syncResult = new SyncTracker(driveSession).trackAndCheck(syncResult);
             }
-            List<AbstractAction<DirectoryVersion>> newActionsForClient = null;
+            List<AbstractAction<DirectoryVersion>> actionsForClient = null;
             try {
                 /*
                  * execute actions on server
                  */
                 DirectoryActionExecutor executor = new DirectoryActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES);
-                executor.execute(syncResult.getActionsForServer());
-                newActionsForClient = executor.getNewActionsForClient();
+                actionsForClient = executor.execute(syncResult);
             } catch (OXException e) {
                 if (0 == retryCount || (tryAgain(e) && retryCount < DriveConstants.MAX_RETRIES)) {
                     retryCount++;
@@ -202,22 +201,15 @@ public class DriveServiceImpl implements DriveService {
                 if (0 > clientVersion.compareTo(softVersionLimit)) {
                     OXException error = DriveExceptionCodes.CLIENT_VERSION_UPDATE_AVAILABLE.create(clientVersion, softVersionLimit);
                     LOG.trace("Client upgrade available for {}", session, error);
-                    syncResult.addActionForClient(new ErrorDirectoryAction(null, null, null, error, false, false));
+                    if (null == actionsForClient) {
+                        actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
+                    }
+                    actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, false));
                 }
             }
             /*
              * return actions for client
              */
-            List<AbstractAction<DirectoryVersion>> actionsForClient;
-            if (null != newActionsForClient) {
-                actionsForClient = newActionsForClient;
-                if (driveSession.isTraceEnabled()) {
-                    driveSession.trace("Execution of server actions resulted in new actions for client. New actions for client:");
-                    driveSession.trace(new DefaultSyncResult<DirectoryVersion>(actionsForClient, ""));
-                }
-            } else {
-                actionsForClient = syncResult.getActionsForClient();
-            }
             if (driveSession.isTraceEnabled()) {
                 driveSession.trace("syncFolders with " + syncResult.length() + " resulting action(s) completed after "
                     + (System.currentTimeMillis() - start) + "ms.");
@@ -246,14 +238,13 @@ public class DriveServiceImpl implements DriveService {
             if (0 == retryCount) {
                 syncResult = new SyncTracker(driveSession).track(syncResult, path);
             }
-            List<AbstractAction<FileVersion>> newActionsForClient = null;
+            List<AbstractAction<FileVersion>> actionsForClient = null;
             try {
                 /*
                  * execute actions on server
                  */
                 FileActionExecutor executor = new FileActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES, path);
-                executor.execute(syncResult.getActionsForServer());
-                newActionsForClient = executor.getNewActionsForClient();
+                actionsForClient = executor.execute(syncResult);
             } catch (OXException e) {
                 if (0 == retryCount || (tryAgain(e) && retryCount < DriveConstants.MAX_RETRIES)) {
                     retryCount++;
@@ -268,16 +259,6 @@ public class DriveServiceImpl implements DriveService {
             /*
              * return actions for client
              */
-            List<AbstractAction<FileVersion>> actionsForClient;
-            if (null != newActionsForClient) {
-                actionsForClient = newActionsForClient;
-                if (driveSession.isTraceEnabled()) {
-                    driveSession.trace("Execution of server actions resulted in new actions for client. New actions for client:");
-                    driveSession.trace(new DefaultSyncResult<FileVersion>(actionsForClient, ""));
-                }
-            } else {
-                actionsForClient = syncResult.getActionsForClient();
-            }
             if (driveSession.isTraceEnabled()) {
                 driveSession.trace("syncFiles with " + syncResult.length() + " resulting action(s) completed after "
                     + (System.currentTimeMillis() - start) + "ms.");

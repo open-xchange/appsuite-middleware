@@ -47,29 +47,53 @@
  *
  */
 
-package com.openexchange.drive.storage.execute;
+package com.openexchange.drive.sync.optimize;
 
+import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DriveConstants;
+import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.comparison.VersionMapper;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.IntermediateSyncResult;
-import com.openexchange.exception.OXException;
 
 
 /**
- * {@link ActionExecutor}
+ * {@link FileDelayMetadataDownloadOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ActionExecutor<T extends DriveVersion> {
+public class FileDelayMetadataDownloadOptimizer extends FileActionOptimizer {
 
-    /**
-     * Executes the server-side actions of the synchronization result.
-     *
-     * @param syncResult The sync result
-     * @return The list actions the client should execute afterwards
-     * @throws OXException
-     */
-    List<AbstractAction<T>> execute(IntermediateSyncResult<T> syncResult) throws OXException;
+    public FileDelayMetadataDownloadOptimizer(VersionMapper<FileVersion> mapper) {
+        super(mapper);
+    }
+
+    @Override
+    public IntermediateSyncResult<FileVersion> optimize(SyncSession session, IntermediateSyncResult<FileVersion> result) {
+        /*
+         * filter out all DOWNLOAD actions for .drive-meta file in case there are outstanding client-side modifications of the directory
+         * contents
+         */
+        AbstractAction<FileVersion> downloadMetadataAction = null;
+        boolean pendingClientChanges = false;
+        for (AbstractAction<FileVersion> action : result.getActionsForClient()) {
+            if (Action.UPLOAD.equals(action.getAction())) {
+                pendingClientChanges = true;
+            } else if (Action.DOWNLOAD.equals(action.getAction()) &&
+                DriveConstants.METADATA_FILENAME.equals(action.getNewVersion().getName())) {
+                downloadMetadataAction = action;
+            }
+        }
+        if (pendingClientChanges && null != downloadMetadataAction) {
+            List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
+            optimizedActionsForClient.remove(downloadMetadataAction);
+            return new IntermediateSyncResult<FileVersion>(result.getActionsForServer(), optimizedActionsForClient);
+        } else {
+            return result;
+        }
+    }
 
 }

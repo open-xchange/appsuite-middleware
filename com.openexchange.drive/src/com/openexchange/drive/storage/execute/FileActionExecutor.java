@@ -51,6 +51,7 @@ package com.openexchange.drive.storage.execute;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -64,11 +65,14 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.ErrorFileAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.drive.metadata.DriveMetadata;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -110,6 +114,39 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
     public FileActionExecutor(SyncSession session, boolean transactional, boolean allowBatches, String path) {
         super(session, transactional, allowBatches);
         this.path = path;
+    }
+
+    @Override
+    protected List<AbstractAction<FileVersion>> getActionsForClient(IntermediateSyncResult<FileVersion> syncResult) throws OXException {
+        List<AbstractAction<FileVersion>> actionsForClient = super.getActionsForClient(syncResult);
+        /*
+         * check for possible changes to .drive-meta files that are going to be downloaded by the client
+         */
+        for (int i = 0; i < actionsForClient.size(); i++) {
+            AbstractAction<FileVersion> actionForClient = actionsForClient.get(i);
+            if (Action.DOWNLOAD.equals(actionForClient.getAction()) &&
+                DriveConstants.METADATA_FILENAME.equals(actionForClient.getNewVersion().getName())) {
+                boolean needsUpdate = false;
+                for (AbstractAction<FileVersion> actionForServer : syncResult.getActionsForServer()) {
+                    Action action = actionForServer.getAction();
+                    if (Action.REMOVE.equals(action) || Action.DOWNLOAD.equals(action) || Action.EDIT.equals(action)) {
+                        needsUpdate = true;
+                        break;
+                    }
+                }
+                if (needsUpdate) {
+                    /*
+                     * previously executed server action influences .drive-meta file, propagate new checksum in client action
+                     */
+                    DriveMetadata metadata = new DriveMetadata(session, session.getStorage().getFolder(path));
+                    FileChecksum checksum = ChecksumProvider.getChecksum(session, metadata);
+                    ServerFileVersion newFileVersion = new ServerFileVersion(metadata, checksum);
+                    actionsForClient.set(i, new DownloadFileAction(
+                        session, actionForClient.getVersion(), newFileVersion, actionForClient.getComparison(), path));
+                }
+            }
+        }
+        return actionsForClient;
     }
 
     @Override
@@ -264,9 +301,9 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                     DriveUtils.getFileID(copiedFile), copiedFile.getVersion(), copiedFile.getSequenceNumber(), sourceVersion.getChecksum()));
                 action.setResultingVersion(new ServerFileVersion(copiedFile, insertedFileChecksum));
             } catch (OXException e) {
-                if ("FLS-0017".equals(e.getErrorCode())) {
+                if ("FLS-0017".equals(e.getErrorCode()) || "DROPBOX-0005".equals(e.getErrorCode())) {
                     // not found
-                    session.getChecksumStore().removeFileChecksums(DriveUtils.getFileID(sourceFile));
+                    session.getChecksumStore().removeFileChecksums(Collections.singletonList(sourceVersion.getFileChecksum()));
                 }
                 throw e;
             }

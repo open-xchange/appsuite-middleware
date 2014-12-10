@@ -55,6 +55,7 @@ import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.StorageOperation;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.OXException;
 
 
@@ -78,33 +79,37 @@ public abstract class BatchActionExecutor<T extends DriveVersion> extends Abstra
     }
 
     @Override
-    public void execute(List<AbstractAction<T>> actions) throws OXException {
-        if (null == actions || 0 == actions.size()) {
-            return; // nothing to do
-        }
+    public List<AbstractAction<T>> execute(IntermediateSyncResult<T> syncResult) throws OXException {
         if (false == allowBatches) {
-            super.execute(actions); // execute each action separately
-            return;
+            return super.execute(syncResult); // execute each action separately
         }
+        List<AbstractAction<T>> actionsForServer = syncResult.getActionsForServer();
+        if (null == actionsForServer || 0 == actionsForServer.size()) {
+            return syncResult.getActionsForClient();
+        }
+        /*
+         * execute server actions in batches
+         */
         int currentBatchStart = 0;
-        Action currentAction = actions.get(0).getAction();
-        for (int i = 1; i < actions.size(); i++) {
-            if (false == currentAction.equals(actions.get(i).getAction())) {
+        Action currentAction = actionsForServer.get(0).getAction();
+        for (int i = 1; i < actionsForServer.size(); i++) {
+            if (false == currentAction.equals(actionsForServer.get(i).getAction())) {
                 /*
                  * execute batch
                  */
-                execute(currentAction, actions.subList(currentBatchStart, i));
+                execute(currentAction, actionsForServer.subList(currentBatchStart, i));
                 /*
                  * prepare next batch
                  */
                 currentBatchStart = i;
-                currentAction = actions.get(i).getAction();
+                currentAction = actionsForServer.get(i).getAction();
             }
         }
         /*
-         * execute remaining batch
+         * execute remaining batch & return resulting client actions
          */
-        execute(currentAction, actions.subList(currentBatchStart, actions.size()));
+        execute(currentAction, actionsForServer.subList(currentBatchStart, actionsForServer.size()));
+        return getActionsForClient(syncResult);
     }
 
     private void execute(final Action action, final List<AbstractAction<T>> actions) throws OXException {

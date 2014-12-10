@@ -56,6 +56,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -93,6 +95,7 @@ public class SyncSession {
     private DriveStorage storage;
     private DirectLinkGenerator linkGenerator;
     private Boolean hasTempFolder;
+    private CapabilitySet capabilities;
 
     /**
      * Initializes a new {@link SyncSession}.
@@ -373,20 +376,44 @@ public class SyncSession {
     /**
      * Calculates a hash code for the (client-side) file- and directory exclusion filters.
      *
-     * @return The hash code for the exclusion filters, or <code>1</code> if no filters are defined
+     * @return The hash code for the exclusion filters, or <code>0</code> if no filters are defined
      */
     public int getExclusionFilterHash() {
         final int prime = 31;
         int result = 1;
         List<DirectoryPattern> directoryExclusions = session.getDirectoryExclusions();
         if (null != directoryExclusions && 0 < directoryExclusions.size()) {
-            result = prime * result + directoryExclusions.hashCode();
+            for (DirectoryPattern directoryPattern : directoryExclusions) {
+                result = prime * result + directoryPattern.hashCode();
+            }
         }
         List<FilePattern> fileExclusions = session.getFileExclusions();
         if (null != fileExclusions && 0 < fileExclusions.size()) {
-            result = prime * result + fileExclusions.hashCode();
+            for (FilePattern filePattern : fileExclusions) {
+                result = prime * result + filePattern.hashCode();
+            }
         }
         return 1 == result ? 0 : result;
+    }
+
+    /**
+     * Gets a value indicating whether the session user has a specific capability or not.
+     *
+     * @param capability The capability to check for, e.g. <code>spreadsheet</code>
+     * @return <code>true</code> if the capability is set and enabled for the user, <code>false</code>, otherwise
+     */
+    public boolean hasCapability(String capability) {
+        if (null == capabilities) {
+            CapabilityService capabilityService = DriveServiceLookup.getService(CapabilityService.class);
+            if (null != capabilityService) {
+                try {
+                    capabilities = capabilityService.getCapabilities(session.getServerSession());
+                } catch (OXException e) {
+                    org.slf4j.LoggerFactory.getLogger(SyncSession.class).warn("Error determining capabilities", e);
+                }
+            }
+        }
+        return null != capabilities && capabilities.contains(capability);
     }
 
     @Override

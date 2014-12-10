@@ -239,27 +239,44 @@ public class ChecksumProvider {
             files.addAll(filesInFolder);
             MD md5 = session.newMD5();
             List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(folderID);
-            List<FileChecksum> calculatedChecksums = new ArrayList<FileChecksum>();
+            List<FileChecksum> newChecksums = new ArrayList<FileChecksum>();
+            List<FileChecksum> updatedChecksums = new ArrayList<FileChecksum>();
             for (File file : files) {
-                FileChecksum fileChecksum = find(knownChecksums, file);
-                if (null == fileChecksum) {
+                FileChecksum fileChecksum = find(knownChecksums, file, false);
+                long sequenceNumber = file.getSequenceNumber();
+                if (null != fileChecksum) {
+                    if (sequenceNumber != fileChecksum.getSequenceNumber()) {
+                        if (null != trace) {
+                            trace.append(" Stored, invalid ( != " + sequenceNumber + " ): ").append(fileChecksum).append('\n');
+                        }
+                        fileChecksum.setChecksum(calculateFileChecksum(session, file).getChecksum());
+                        fileChecksum.setSequenceNumber(sequenceNumber);
+                        updatedChecksums.add(fileChecksum);
+                        if (null != trace) {
+                            trace.append(" Re-calculated: ").append(fileChecksum).append('\n');
+                        }
+                    } else {
+                        if (null != trace) {
+                            trace.append(" Stored, valid: ").append(fileChecksum).append('\n');
+                        }
+                    }
+                } else {
                     fileChecksum = calculateFileChecksum(session, file);
                     if (null != trace) {
-                        trace.append(' ' + file.getFileName()).append(" - Newly calculated: ").append(fileChecksum).append('\n');
+                        trace.append(" Newly calculated: ").append(fileChecksum).append('\n');
                     }
-                    calculatedChecksums.add(fileChecksum);
-                } else {
-                    if (null != trace) {
-                        trace.append(' ' + file.getFileName()).append(" - Stored, valid: ").append(fileChecksum).append('\n');
-                    }
+                    newChecksums.add(fileChecksum);
                 }
                 md5.update(PathNormalizer.normalize(file.getFileName()).getBytes(Charsets.UTF_8));
                 md5.update(fileChecksum.getChecksum().getBytes(Charsets.UTF_8));
             }
-            if (0 < calculatedChecksums.size()) {
-                session.getChecksumStore().insertFileChecksums(calculatedChecksums);
-            }
             checksum = md5.getFormattedValue();
+            if (0 < newChecksums.size()) {
+                session.getChecksumStore().insertFileChecksums(newChecksums);
+            }
+            if (0 < updatedChecksums.size()) {
+                session.getChecksumStore().updateFileChecksums(updatedChecksums);
+            }
         }
         if (null != trace) {
             trace.append("Directory checksum: ").append(checksum).append('\n');
@@ -269,9 +286,12 @@ public class ChecksumProvider {
     }
 
     private static FileChecksum calculateFileChecksum(SyncSession session, File file) throws OXException {
-        String md5 = Strings.isEmpty(file.getFileMD5Sum()) ? calculateMD5(session, file) : file.getFileMD5Sum();
-        if (null == md5) {
-            throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
+        String md5 = file.getFileMD5Sum();
+        if (Strings.isEmpty(md5)) {
+            md5 = calculateMD5(session, file);
+            if (Strings.isEmpty(md5)) {
+                throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
+            }
         }
         FileChecksum fileChecksum = new FileChecksum();
         fileChecksum.setFileID(DriveUtils.getFileID(file));
@@ -311,19 +331,26 @@ public class ChecksumProvider {
     }
 
     private static FileChecksum find(Collection<? extends FileChecksum> checksums, File file) {
+        return find(checksums, file, true);
+    }
+
+    private static FileChecksum find(Collection<? extends FileChecksum> checksums, File file, boolean considerSequenceNumber) {
+        FileChecksum matchingChecksum = null;
         for (FileChecksum checksum : checksums) {
-            // TODO: check
             String fileID = checksum.getFileID().toUniqueID();
             String folderID = new FolderID(
                 checksum.getFileID().getService(), checksum.getFileID().getAccountId(), checksum.getFileID().getFolderId()).toUniqueID();
             if (fileID.equals(file.getId()) && folderID.equals(file.getFolderId()) &&
-//            if (checksum.getFileID().equals(new FileID(file.getId())) &&
-                (null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion())) &&
-                checksum.getSequenceNumber() == file.getSequenceNumber()) {
-                return checksum;
+                (null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion()))) {
+                if (checksum.getSequenceNumber() == file.getSequenceNumber()) {
+                    return checksum; // perfect match
+                }
+                if (false == considerSequenceNumber) {
+                    matchingChecksum = checksum; // match with different sequence number
+                }
             }
         }
-        return null;
+        return matchingChecksum;
     }
 
     /**

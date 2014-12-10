@@ -119,7 +119,7 @@ public interface DirectoryChecksumStore {
      * Removes all directory checksums of multiple folders.
      *
      * @param folderIDs The folder IDs to remove the checksums for
-     * @return <code>true</code> if at least one checksum was removed, <code>false</code>, otherwise
+     * @return The number of affected rows
      * @throws OXException
      */
     int removeDirectoryChecksums(List<FolderID> folderIDs) throws OXException;

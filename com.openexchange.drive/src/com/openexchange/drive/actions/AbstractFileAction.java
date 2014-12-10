@@ -98,8 +98,8 @@ public abstract class AbstractFileAction extends AbstractAction<FileVersion> {
             /*
              * add additional metadata
              */
-            List<DriveFileField> fields = session.getFields();
-            if (null != fields) {
+            if (3 > session.getDriveSession().getApiVersion() && null != session.getFields()) {
+                List<DriveFileField> fields = session.getFields();
                 if (fields.contains(DriveFileField.CONTENT_TYPE)) {
                     String contentType = file.getFileMIMEType();
                     if (null != contentType) {

@@ -76,6 +76,12 @@ public class EmptyDirectoryOptimizer extends DirectoryActionOptimizer {
 
     @Override
     public IntermediateSyncResult<DirectoryVersion> optimize(SyncSession session, IntermediateSyncResult<DirectoryVersion> result) {
+        if (session.getDriveSession().getApiVersion() >= 3) {
+            /*
+             * no optimization when dealing with .drive-meta files
+             */
+            return result;
+        }
         List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
         List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
         /*

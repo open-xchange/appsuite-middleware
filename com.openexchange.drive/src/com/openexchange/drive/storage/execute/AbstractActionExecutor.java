@@ -56,6 +56,8 @@ import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.StorageOperation;
+import com.openexchange.drive.sync.DefaultSyncResult;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.OXException;
 
 /**
@@ -68,7 +70,7 @@ public abstract class AbstractActionExecutor<T extends DriveVersion> implements 
     protected final SyncSession session;
     protected final boolean transactional;
 
-    private List<AbstractAction<T>> newActionsForClient;
+    protected List<AbstractAction<T>> newActionsForClient;
 
     /**
      * Initializes a new {@link AbstractActionExecutor}.
@@ -107,16 +109,15 @@ public abstract class AbstractActionExecutor<T extends DriveVersion> implements 
     }
 
     @Override
-    public List<AbstractAction<T>> getNewActionsForClient() {
-        return newActionsForClient;
-    }
-
-    @Override
-    public void execute(List<AbstractAction<T>> actions) throws OXException {
-        if (null == actions || 0 == actions.size()) {
-            return;
+    public List<AbstractAction<T>> execute(IntermediateSyncResult<T> syncResult) throws OXException {
+        List<AbstractAction<T>> actionsForServer = syncResult.getActionsForServer();
+        if (null == actionsForServer || 0 == actionsForServer.size()) {
+            return syncResult.getActionsForClient();
         }
-        for (final AbstractAction<T> action : actions) {
+        /*
+         * execute each server action & return resulting client actions
+         */
+        for (final AbstractAction<T> action : actionsForServer) {
             if (transactional) {
                 session.getStorage().wrapInTransaction(new StorageOperation<Void>() {
 
@@ -130,6 +131,24 @@ public abstract class AbstractActionExecutor<T extends DriveVersion> implements 
                 execute(action);
             }
         }
+        return getActionsForClient(syncResult);
+    }
+
+    protected List<AbstractAction<T>> getActionsForClient(IntermediateSyncResult<T> syncResult) throws OXException {
+        /*
+         * return new actions for client if set
+         */
+        if (null != newActionsForClient) {
+            if (session.isTraceEnabled()) {
+                session.trace("Execution of server actions resulted in new actions for client. New actions for client:");
+                session.trace(new DefaultSyncResult<T>(newActionsForClient, ""));
+            }
+            return newActionsForClient;
+        }
+        /*
+         * stick to actions from sync result otherwise
+         */
+        return syncResult.getActionsForClient();
     }
 
     protected abstract void execute(AbstractAction<T> action) throws OXException;

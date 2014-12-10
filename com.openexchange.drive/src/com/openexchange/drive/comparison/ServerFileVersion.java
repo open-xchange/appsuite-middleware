@@ -113,7 +113,7 @@ public class ServerFileVersion implements FileVersion {
 
     @Override
     public String toString() {
-        return getName() + " | " + getChecksum() + " [" + file.getFolderId() + '/' + file.getId() + ']';
+        return getName() + " | " + getChecksum() + " [" + file.getId() + ']';
     }
 
     /**

@@ -70,6 +70,7 @@ import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
+import com.openexchange.drive.metadata.DriveMetadata;
 import com.openexchange.drive.storage.filter.FileNameFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -506,11 +507,29 @@ public class DriveStorage {
         if (false == supports(FileStorageCapability.SEQUENCE_NUMBERS)) {
             throw new UnsupportedOperationException("IDBasedSequenceNumberProvider is needed");
         }
-        return getFileAccess().getSequenceNumbers(folderIDs);
+        Map<String, Long> storedSequenceNumbers = getFileAccess().getSequenceNumbers(folderIDs);
+        if (3 <= session.getDriveSession().getApiVersion()) {
+            for (String folderID : folderIDs) {
+                Long storedSequenceNumber = storedSequenceNumbers.get(folderID);
+                String path = getPath(folderID);
+                FileStorageFolder folder = getFolder(path, false);
+                DriveMetadata metadata = new DriveMetadata(
+                    session, folder, null == storedSequenceNumber ? Long.valueOf(0) : storedSequenceNumber);
+                long metadataSequenceNumber = metadata.getSequenceNumber();
+                if (null == storedSequenceNumber || storedSequenceNumber.longValue() < metadataSequenceNumber) {
+                    storedSequenceNumbers.put(folderID, Long.valueOf(metadataSequenceNumber));
+                }
+            }
+        }
+        return storedSequenceNumbers;
     }
 
     public InputStream getDocument(File file) throws OXException {
-        return getFileAccess().getDocument(file.getId(), file.getVersion());
+        if (3 <= session.getDriveSession().getApiVersion() && DriveMetadata.class.isInstance(file)) {
+            return ((DriveMetadata) file).getDocument();
+        } else {
+            return getFileAccess().getDocument(file.getId(), file.getVersion());
+        }
     }
 
     /**
@@ -563,8 +582,12 @@ public class DriveStorage {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderID, rootFolderID.getAccountId(), rootFolderID.getService(),
                 session.getServerSession().getUserId(), session.getServerSession().getContextId());
         }
+        List<File> files = new ArrayList<File>();
+        if (3 <= session.getDriveSession().getApiVersion()) {
+            files.add(new DriveMetadata(session, folder));
+        }
         if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
-            return Collections.emptyList();
+            return files;
         }
         FileNameFilter filter;
         if (all) {
@@ -582,19 +605,8 @@ public class DriveStorage {
                 }
             };
         }
-        return filter.findAll(searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS));
-    }
-
-    /**
-     * Finds a file with a specific name in a path.
-     *
-     * @param path The path of the directory to look for the file
-     * @param name The name of the file
-     * @return The file, or <code>null</code> if not found.
-     * @throws OXException
-     */
-    public File findFileByName(String path, final String name) throws OXException {
-        return findFileByName(path, name, false);
+        files.addAll(filter.findAll(searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS)));
+        return files;
     }
 
     /**
@@ -610,19 +622,6 @@ public class DriveStorage {
     }
 
     /**
-     * Finds a file with a specific name in a path.
-     *
-     * @param path The path of the directory to look for the file
-     * @param name The name of the file
-     * @param normalizeFileNames <code>true</code> to also consider not-normalized filenames, <code>false</code>, otherwise
-     * @return The file, or <code>null</code> if not found.
-     * @throws OXException
-     */
-    public File findFileByName(String path, final String name, boolean normalizeFileNames) throws OXException {
-        return findFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
-    }
-
-    /**
      * Gets a file with a specific name in a path.
      *
      * @param path The path of the directory to look for the file
@@ -635,12 +634,10 @@ public class DriveStorage {
         return getFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
     }
 
-    private File findFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(searchDocuments(getFolderID(path), name, fields));
-        return selectFile(files, name);
-    }
-
     private File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
+        if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(name)) {
+            return new DriveMetadata(session, getFolder(path, false));
+        }
         List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(getDocuments(getFolderID(path), name, fields));
         return selectFile(files, name);
     }
@@ -901,6 +898,9 @@ public class DriveStorage {
         if (TypeAware.class.isInstance(folder) && FileStorageFolderType.TRASH_FOLDER.equals(((TypeAware)folder).getType())) {
             return true;
         }
+        if (TypeAware.class.isInstance(folder)) {
+            return FileStorageFolderType.TRASH_FOLDER.equals(((TypeAware)folder).getType());
+        }
         String trashFolderID = hasTrashFolder() && null != getTrashFolder() ? getTrashFolder().getId() : null;
         if (null != trashFolderID && trashFolderID.equals(folder.getId())) {
             return true;
@@ -982,40 +982,6 @@ public class DriveStorage {
     public boolean supports(FileStorageCapability...capabilities) throws OXException {
         return getFileAccess().supports(rootFolderID.getService(), rootFolderID.getAccountId(), capabilities);
     }
-
-//    /**
-//     * Gets a value indicating if the underlying storage allows to perform random access file operations or not.
-//     *
-//     * @return <code>true</code> if random file access is supported, <code>false</code>, otherwise
-//     * @throws OXException
-//     */
-//    public boolean isRandomFileAccess() throws OXException {
-//        return IDBasedFileAccess.class.isInstance(getFileAccess()) &&
-//            ((IDBasedRandomFileAccess)getFileAccess()).supportsRandomFileAccess(rootFolderID.getService(), rootFolderID.getAccountId());
-//    }
-//
-//    /**
-//     * Gets a value indicating if the underlying storage allows to ignore versions when updating or not.
-//     *
-//     * @return <code>true</code> if ignorable versions are supported, <code>false</code>, otherwise
-//     * @throws OXException
-//     */
-//    public boolean isIgnorableVersionFileAccess() throws OXException {
-//        return IDBasedIgnorableVersionFileAccess.class.isInstance(getFileAccess()) &&
-//            ((IDBasedIgnorableVersionFileAccess)getFileAccess())
-//            .supportsIgnorableVersion(rootFolderID.getService(), rootFolderID.getAccountId());
-//    }
-//
-//    /**
-//     * Gets a value indicating whether folder sequence numbers are supported by the underlying storage or not.
-//     *
-//     * @return <code>true</code> if sequence numbers are supported, <code>false</code>, otherwise
-//     * @throws OXException
-//     */
-//    public boolean supportsFolderSequenceNumbers() throws OXException {
-//        return IDBasedSequenceNumberProvider.class.isInstance(getFileAccess()) &&
-//            ((IDBasedSequenceNumberProvider)getFileAccess()).supportsSequenceNumbers(rootFolderID.toUniqueID());
-//    }
 
     @Override
     public String toString() {
