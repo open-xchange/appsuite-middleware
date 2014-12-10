@@ -84,6 +84,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -543,7 +544,13 @@ public final class FileStorageFolderStorage implements FolderStorage {
             fsFolder.setName(folder.getName());
         }
         // Subscribed
-        fsFolder.setSubscribed(folder.isSubscribed());
+        if (folder instanceof SetterAwareFolder) {
+            if (((SetterAwareFolder) folder).containsSubscribed()) {
+                fsFolder.setSubscribed(folder.isSubscribed());
+            }
+        } else {
+            fsFolder.setSubscribed(folder.isSubscribed());
+        }
         // Permissions
         FileStoragePermission[] fsPermissions = null;
         {
