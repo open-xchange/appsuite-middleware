@@ -8,7 +8,6 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-admin
-<<<<<<< HEAD
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
@@ -23,18 +22,6 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange administrative SOAP interface
-=======
-BuildRequires: java-devel >= 1.6.0
-Version:	@OXVERSION@
-%define		ox_release 34
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        The Open-Xchange administrative SOAP interface
->>>>>>> hotfix-2313
 Autoreqprov:   no
 Requires:      open-xchange-soap-cxf >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
